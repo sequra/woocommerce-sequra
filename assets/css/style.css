@@ -1,0 +1,275 @@
+/******** Más  Información POPUP ***********/
+#sequra_mas_informacion {
+    margin: 10px;
+}
+
+#sequra_mas_informacion h2 {
+    text-transform: uppercase;
+    color: #6b6b6b;
+    text-align: center;
+}
+
+#sequra_process_img {
+    float: left;
+}
+
+#sequra_mas_informacion ul {
+    text-align: left;
+    list-style: none;
+    font-size: 12px;
+    padding-top: 10px;
+}
+
+#sequra_mas_informacion ul li {
+    margin-top: 8px;
+}
+
+#sequra_mas_informacion_footer {
+    font-size: 11px;
+    position: absolute;
+    bottom: 10px;
+}
+
+#sequra_mas_informacion button {
+    float: right;
+    margin: 10px;
+}
+
+/******** ADITIONAL TEXT FOR FORM **********/
+#sequra_text_title {
+    font-size: 25px;
+    margin-bottom: 5%;
+}
+
+#sequra_text_information, .sq_known_customer_data {
+    width: 40%;
+    float: left;
+}
+
+#sequra_more_information2 h4 {
+    color: #71b44b;
+    font-size: 14px;
+    display: block;
+    font-weight: bold;
+    font-style: italic;
+}
+
+#block_sequra h3 {
+    font-size: 13px;
+    margin-bottom: -5px;
+}
+
+#sequra-identification {
+    width: 100%;
+    display: inline-flex;
+    margin-top: 18px;
+}
+
+#sequra_additional_text {
+    margin-bottom: 3%;
+}
+
+p.sq_inline_errors, .general_errors {
+    clear: both;
+    color: #f30;
+}
+
+#sequra-identification p {
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+#sequra-identification .sq_inline_hint {
+    margin-top: 5px;
+    font-size: 11px
+}
+
+#sequra-identification .sq_dob_fragments {
+    line-height: normal;
+}
+
+#sequra-identification .sq_dob_fragments li {
+    margin: 0 4px 0 0;
+    display: inline-block;
+}
+
+#sequra-identification .sq_dob_fragments li label {
+    display: none;
+}
+
+#sequra-identification .sq_dob legend {
+    display: block;
+}
+
+#sequra-identification .sq_dob select {
+    width: 70px;
+}
+
+#sequra-identification label {
+    font-weight: normal;
+    float: none;
+    display: block;
+}
+
+#sequra-identification h3 {
+    font-size: 12px;
+    color: #666;
+}
+
+.sq_slash {
+    padding-bottom: 2px;
+    display: inline-block;
+}
+
+/* Más Información POP-UP*/
+.sequra_black_overlay {
+    display: none;
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    z-index: 1001;
+    -moz-opacity: 0.8;
+    opacity: .80;
+    filter: alpha(opacity=80);
+}
+
+.sequra_white_content {
+    display: none;
+    position: fixed;
+    top: 25%;
+    left: 25%;
+    height: 50%;
+    padding: 2em;
+    border: 5px solid;
+    border-radius: 1em;
+    -moz-border-radius: 1em;
+    -webkit-border-radius: 1em;
+    background-color: white;
+    z-index: 1002;
+    overflow: auto;
+    font-size: 120%;
+    line-height: 1.2em;
+    text-align: left;
+}
+
+.sequra_popup_close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    background: transparent url('../images/Sequra/fancybox.png') -40px 0;
+    cursor: pointer;
+    z-index: 1103;
+}
+
+/******** Confirmation page **********/
+.buttons-set {
+    text-align: left !important;
+}
+
+.sequra_white_content ul {
+    list-style: disc;
+}
+
+.sequra_white_content li {
+    margin: .5em 0;
+}
+
+#payment_form_sequrapayment .sq_submit .confirm {
+    border: 1px solid #de5400;
+    background: #f18200;
+    padding: 2px 8px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+}
+
+.sq_submit {
+    padding-top: 25px;
+    text-align: right;
+}
+
+#payment_form_sequrapayment {
+    border-bottom: 1px solid #e4e4e4;
+}
+
+#payment_form_sequrapayment .sq_submit p.sq_inline_hint {
+    clear: both;
+    text-align: right;
+}
+
+#sequra-identification .sq_dob ol {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+#sequra-identification .sq_dob li {
+    display: inline-block;
+    float: none;
+    width: auto;
+}
+
+#sequra-identification .sq_dob input.input-text,
+#sequra-identification .sq_dob input[type="text"],
+#sequra-identification .sq_dob input[type="password"],
+#sequra-identification .sq_dob input[type="email"] {
+    widht: 120px;
+}
+
+#sequra-identification .sq_dob select {
+    float: none;
+}
+
+#sequra-identification ul,
+#sequra-identification ol {
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+#mobile_phone {
+    width: 127px;
+}
+
+@media (max-width: 680px) {
+    #sequra_text_information, .sq_known_customer_data {
+        width: 100%;
+        float: none
+    }
+
+    #sequra-identification {
+        display: inline;
+    }
+
+    #sequra-identification .formish {
+        margin-top: 1em
+    }
+}
+
+/******** TEASER **********/
+#sequra-teaser-container {
+    display: none;
+}
+
+#sequra-teaser-container {
+    font-size: 200%
+}
+
+#sequra-teaser-container .left {
+    float: left;
+    width: 100px;
+    height: 100px;
+    background-image: url('../images/Sequra/teaserLogo.png');
+    margin: 0px 5px;
+}
+
+#sequra-teaser-container .center {
+}
+
+#sequra-teaser-container .right {
+    float: right;
+}
