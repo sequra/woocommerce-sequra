@@ -20,7 +20,7 @@ abstract class SequraBuilderAbstract
             'customer' => $this->customer(),
             'gui' => $this->gui(),
             'platform' => $this->platform(),
-            'state' => $state
+            'state' => self::notNull($state)
         );
         if ('confirmed' == $state)
             $order['merchant_reference'] = array(

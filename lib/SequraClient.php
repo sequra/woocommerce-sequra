@@ -42,9 +42,12 @@ class SequraClient
         curl_close($this->ch);
     }
 
-    public function getIdentificationForm($uri)
+    public function getIdentificationForm($uri,$ajax=false)
     {
-        $this->initCurl($uri . '/id_form');
+        $uri .= '/id_form';
+		if($ajax)
+			$uri .= '_ajax';
+		$this->initCurl($uri);
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, array('Accept: text/html'));
         $this->sendRequest();

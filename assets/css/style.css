@@ -1,3 +1,6 @@
+/******** Formulario ***********************/
+#sequra-identification  input[type="submit"]{display:none;}
+
 /******** Más  Información POPUP ***********/
 #sequra_mas_informacion {
     margin: 10px;
