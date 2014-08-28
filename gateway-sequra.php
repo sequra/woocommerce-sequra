@@ -27,14 +27,23 @@ function sequra_activation() {
     update_option('woocommerce_gateway_order',$order);
     update_option( 'woocommerce_default_gateway', SEQURA_ID );
     // Schedule a daily event for sending delivery report on plugin activation
-	$random_offset = rand(25200);//60*60*7 seconds from 2AM to 8AM
+	$random_offset = rand(0,25200);//60*60*7 seconds from 2AM to 8AM
 	$tomorrow = date("Y-m-d 02:00",strtotime('tomorrow'));
 	$time = $random_offset + strtotime($tomorrow);
     add_option('woocommerce-sequra-deliveryreport-time',$time);
 	wp_schedule_event( $time, 'daily', 'sequra_send_daily_delivery_report');
+    //Set version as an option get_plugin_data function is not availiable at cron
+    $plugin_data = get_plugin_data(dirname(__FILE__) . '/gateway-sequra.php');
+    update_option('sequra_version',(string)$plugin_data['Version']);
 }
 
-add_action('sequra_send_daily_delivery_report','SequraReporter::sendDailyDeliveryReport');
+add_action('sequra_send_daily_delivery_report','sequra_send_daily_delivery_report');
+
+function sequra_send_daily_delivery_report(){
+    if (!class_exists('SequraReporter'))
+        require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraReporter.php');
+    SequraReporter::sendDailyDeliveryReport();
+}
 
 register_deactivation_hook( __FILE__, 'sequra_deactivation' );
 /**

@@ -42,7 +42,7 @@ abstract class SequraBuilderAbstract
 			'orders' => $this->_orders,
 			'broken_orders' => $this->_broken_orders,
 			'statistics' => array('orders' => $this->getOrderStats()),
-			'platform' => self::platform()
+			'platform' => $this->platform()
 		);
 	}
 

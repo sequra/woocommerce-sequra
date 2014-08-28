@@ -7,7 +7,7 @@ class SequraReporter
 	{
 		$helper = new SequraHelper(new SequraPaymentGateway());
 		$builder = $helper->getBuilder();
-		$builder->buildReport();
+		$builder->buildDeliveryReport();
 		$client = $helper->getClient();
 		$client->sendDeliveryReport($builder->getDeliveryReport());
 		$status= $client->getStatus();
@@ -17,8 +17,7 @@ class SequraReporter
 			return count($shipped_ids);
 		} elseif ($status >= 200 && $status <= 299 || $status == 409) {
 			$x = json_decode($client->result, true); // return array, not object
-			//Mage::log("Delivery ERROR" . $client->status);
-			//Mage::log($x);
+
 		}
 		return false;
 	}

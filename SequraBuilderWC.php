@@ -450,12 +450,11 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$sql = "show variables like 'version';";
 		global $wpdb;
 		$db_version = $wpdb->get_var($sql);
-		$plugin_data = get_plugin_data(dirname(__FILE__) . '/gateway-sequra.php');
 
 		$data = array(
 			'name' => 'WooCommerce',
 			'version' => self::notNull(WOOCOMMERCE_VERSION),
-			'plugin_version' => (string)$plugin_data['Version'],
+			'plugin_version' => get_option('sequra_version'),
 			'php_version' => phpversion(),
 			'php_os' => PHP_OS,
 			'uname' => php_uname(),
