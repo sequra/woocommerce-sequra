@@ -72,4 +72,18 @@ class SequraHelper
 
 		return $this->_builder;
 	}
+
+	public function template_loader($template)
+	{
+		if (file_exists(STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php'))
+			return STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
+		elseif (file_exists(TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php'))
+			return TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
+		elseif (file_exists(STYLESHEETPATH . '/' . $template . '.php'))
+			return STYLESHEETPATH . '/' . $template . '.php';
+		elseif (file_exists(TEMPLATEPATH . '/' . $template . '.php'))
+			return TEMPLATEPATH . '/' . $template . '.php';
+		else
+			return WP_CONTENT_DIR . "/plugins/" . plugin_basename(dirname(__FILE__)) . '/templates/' . $template . '.php';
+	}
 }

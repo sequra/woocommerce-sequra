@@ -7,6 +7,41 @@
   Author: Mikel Martin
   Author URI: http://SeQura.es/
  */
+define('SEQURA_ID','sequra');
+
+register_activation_hook( __FILE__, 'sequra_activation' );
+/**
+ * Run once on plugin activation
+ */
+function sequra_activation() {
+    // Place in first place
+    $gateway_order	= (array) get_option('woocommerce_gateway_order');
+    $order = array(SEQURA_ID=>0);
+    if ( is_array( $gateway_order ) && sizeof( $gateway_order ) > 0 ) {
+        $loop = 1;
+        foreach ( $gateway_order as $gateway_id ) {
+            $order[ esc_attr( $gateway_id ) ] = $loop;
+            $loop++;
+        }
+    }
+    update_option('woocommerce_gateway_order',$order);
+    update_option( 'woocommerce_default_gateway', SEQURA_ID );
+    // Schedule a daily event for sending delivery report on plugin activation
+	$random_offset = rand(25200);//60*60*7 seconds from 2AM to 8AM
+	$tomorrow = date("Y-m-d 02:00",strtotime('tomorrow'));
+	$time = $random_offset + strtotime($tomorrow);
+    add_option('woocommerce-sequra-deliveryreport-time',$time);
+	wp_schedule_event( $time, 'daily', array('SequraReporter','sendDailyDeliveryReport') );
+}
+
+register_deactivation_hook( __FILE__, 'sequra_deactivation' );
+/**
+ * Run once on plugin deactivation
+ */
+function sequra_deactivation() {
+    // Remove daily schedule
+    wp_unschedule_event( get_option('woocommerce-sequra-deliveryreport-time'), array('SequraReporter','sendDailyDeliveryReport'));
+}
 
 add_action('woocommerce_loaded', 'woocommerce_sequra_init', 100);
 
@@ -17,7 +52,7 @@ function woocommerce_sequra_init()
 	if (!class_exists('SequraHelper'))
 		require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraHelper.php');
 
-	if (!class_exists('woocommerce_sequra'))
+	if (!class_exists('SequraPaymentGateway'))
 		require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraPaymentGateway.php');
 
 	/**
@@ -25,7 +60,7 @@ function woocommerce_sequra_init()
 	 * */
 	function add_sequra_gateway($methods)
 	{
-		$methods[] = 'woocommerce_sequra';
+		$methods[] = 'SequraPaymentGateway';
 		return $methods;
 	}
 

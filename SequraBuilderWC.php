@@ -227,21 +227,21 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['logged_in'] = is_user_logged_in();
 		$id = $data['logged_in'] ? get_current_user_id() : -1;
 
-		$data['given_names'] = $this->getCutomerField($id, 'first_name');
-		$data['surnames'] = $this->getCutomerField($id, 'last_name');
-		$data['email'] = $this->getCutomerField($id, 'billing_email');
+		$data['given_names'] = $this->getCustomerField($id, 'first_name');
+		$data['surnames'] = $this->getCustomerField($id, 'last_name');
+		$data['email'] = $this->getCustomerField($id, 'billing_email');
 		// OPTIONAL
-		$data['date_of_birth'] = self::dateOrBlank($this->getCutomerField($id, 'dob'));
-		$data['company'] = $this->getCutomerField($id, 'billing_company');
+		$data['date_of_birth'] = self::dateOrBlank($this->getCustomerField($id, 'dob'));
+		$data['company'] = $this->getCustomerField($id, 'billing_company');
 		if ($id > 0)
 			$data['ref'] = $id;
 		$data['previous_orders'] = self::getPreviousOrders($id);
 		return $data;
 	}
 
-	public function getCutomerField($id, $field_name)
+	public function getCustomerField($id, $field_name)
 	{
-		if (0 < $id && $ret = get_user_meta($id, 'first_name', true))
+		if (0 < $id && $ret = get_user_meta($id, $field_name, true))
 			return $ret;
 
 		$var = 'billing_' . str_replace('billing_', '', $field_name);
@@ -249,6 +249,63 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	}
 
 	public function getPreviousOrders($customer_id)
+	{
+		$args = array(
+			'numberposts' => -1,
+			'meta_key' => '_customer_user',
+			'meta_value' => $customer_id,
+			'post_type' => 'shop_order',
+			'post_status' => 'publish',
+		);
+		$posts = get_posts($args);
+		$order_ids = wp_list_pluck($posts, 'ID');
+		foreach ($order_ids as $id) {
+			$prev_order = new WC_Order($id);
+			$post = get_post($id);
+			$order['amount'] = self::integerPrice($prev_order->get_total());
+			$order['currency'] = $prev_order->get_order_currency();
+			$date = strtotime($post->post_date);
+			$order['created_at'] = date('c', $date);
+			$orders[] = $order;
+		}
+		return $orders;
+	}
+
+	public static function getSentOrderIds()
+	{
+		$args = array(
+			'numberposts' => -1,
+			'meta_query' => array(
+				'relation' => 'AND',
+				array(
+					'key' => '_sent_to_sequra',
+					'compare' => 'NOT EXISTS'
+				),
+				array(
+					'key' => '_payment_method',
+					'compare' => '=',
+					'value' => 'sequra',
+				)
+
+			),
+			'post_type' => 'shop_order',
+			'post_status' => 'publish',
+			/*'tax_query'=>array(
+				array(
+					'taxonomy' =>'shop_order_status',
+					'field' => 'slug',
+					'terms' => 'completed',
+					'operator' => '='
+				)
+			)*/
+		);
+		$results = new WP_Query( $args);
+		$kk = $results->request;
+		$posts = get_posts($args);
+		return wp_list_pluck($posts, 'ID');
+	}
+
+	public function getStats()
 	{
 		$args = array(
 			'numberposts' => -1,
@@ -277,6 +334,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		}
 		return $orders;
 	}
+
 
 	public function platform()
 	{
