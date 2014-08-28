@@ -2,16 +2,17 @@
 
 class SequraBuilderWC extends SequraBuilderAbstract
 {
-	protected $_order;
-	protected $_cart;
+	protected $_current_order = null;
+	protected $_cart = null;
+	protected $_shipped_ids = array();
 
 	public function __construct($merchant_id, $order = null)
 	{
 		$this->merchant_id = $merchant_id;
 		if (!is_null($order))
-			$this->_order = $order;
+			$this->_current_order = $order;
 		else
-			$this->_order = new SequraTempOrder($_POST['post_data']);
+			$this->_current_order = new SequraTempOrder($_POST['post_data']);
 		$this->_cart = WC()->cart;
 	}
 
@@ -19,9 +20,11 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	{
 		$this->_pm = $pm;
 	}
-	public function getOrderRef($num){
-		if(1==$num)
-			return $this->_order->id;
+
+	public function getOrderRef($num)
+	{
+		if (1 == $num)
+			return $this->_current_order->id;
 	}
 
 	public function merchant()
@@ -69,17 +72,22 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 	private function getCartcontents()
 	{
-//		if ($this->_order->id)
-//			return $this->_order->get_items();
+		if ($this->_current_order->status == 'completed')
+			$c = $this->_current_order->get_items(apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item') ) );
+			return $c;
+
+
+		$kk = 'kk';
 		return $this->_cart->cart_contents;
 	}
 
 	public function items()
 	{
 		$items = array();
-		foreach ($this->getCartContents() as $cart_item_key => $cart_item) {
-			$_product_id = $cart_item['product_id'];
-			$_product = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
+		$cart_contents = $this->getCartContents();
+		foreach ($cart_contents as $cart_item_key => $cart_item) {
+			$_product = $this->_current_order->get_product_from_item( $cart_item );
+
 			$item = array();
 			$item["reference"] = self::notNull($_product->get_sku());
 			$name = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key);
@@ -95,9 +103,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$item["downloadable"] = $_product->is_downloadable();
 
 			// OPTIONAL
-			$item["description"] = self::notNull(get_post($_product_id)->post_content);
-			$item["product_id"] = self::notNull($_product_id);
-			$item["url"] = self::notNull(get_permalink($_product_id));
+			$item["description"] = self::notNull(get_post($_product->id)->post_content);
+			$item["product_id"] = self::notNull($_product->id);
+			$item["url"] = self::notNull(get_permalink($_product->id));
 			$item["category"] = self::notNull(strip_tags($_product->get_categories()));
 			/*@TODO: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
 			$items[] = $item;
@@ -160,23 +168,23 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function deliveryAddress()
 	{
 		$data = array();
-		$data['given_names'] = self::notNull($this->_order->shipping_first_name);
-		$data['surnames'] = self::notNull($this->_order->shipping_last_name);
-		$data['company'] = self::notNull($this->_order->shipping_company);
-		$data['address_line_1'] = self::notNull($this->_order->shipping_address_1);
-		$data['address_line_2'] = self::notNull($this->_order->shipping_address_2);
-		$data['postal_code'] = self::notNull($this->_order->shipping_postcode);
-		$data['city'] = self::notNull($this->_order->shipping_city);
+		$data['given_names'] = self::notNull($this->_current_order->shipping_first_name);
+		$data['surnames'] = self::notNull($this->_current_order->shipping_last_name);
+		$data['company'] = self::notNull($this->_current_order->shipping_company);
+		$data['address_line_1'] = self::notNull($this->_current_order->shipping_address_1);
+		$data['address_line_2'] = self::notNull($this->_current_order->shipping_address_2);
+		$data['postal_code'] = self::notNull($this->_current_order->shipping_postcode);
+		$data['city'] = self::notNull($this->_current_order->shipping_city);
 		if ($data['city'] == '')
 			throw new Exception('City is required');
-		$data['country_code'] = self::notNull($this->_order->shipping_country);
+		$data['country_code'] = self::notNull($this->_current_order->shipping_country);
 		// OPTIONAL
-		$data['state'] = self::notNull($this->_order->shipping_state);
-		$data['mobile_phone'] = self::notNull($this->_order->shipping_phone);
+		$data['state'] = self::notNull($this->_current_order->shipping_state);
+		$data['mobile_phone'] = self::notNull($this->_current_order->shipping_phone);
 		/*TODO: Search vat/nif common plugins*/
-		$data['vat_number'] = self::notNull($this->_order->shipping_nif);
+		$data['vat_number'] = self::notNull($this->_current_order->shipping_nif);
 		if ('' == $data['vat_number'])
-			$data['vat_number'] = self::notNull($this->_order->shipping_vat);
+			$data['vat_number'] = self::notNull($this->_current_order->shipping_vat);
 		return $data;
 	}
 
@@ -188,27 +196,27 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function invoiceAddress()
 	{
 		$data = array();
-		$data['given_names'] = self::notNull($this->_order->billing_first_name);
-		$data['surnames'] = self::notNull($this->_order->billing_last_name);
-		$data['company'] = self::notNull($this->_order->billing_company);
-		$data['address_line_1'] = self::notNull($this->_order->billing_address_1);
-		$data['address_line_2'] = self::notNull($this->_order->billing_address_2);
-		$data['postal_code'] = self::notNull($this->_order->billing_postcode);
-		$data['city'] = self::notNull($this->_order->billing_city);
-		$data['country_code'] = self::notNull($this->_order->billing_country);
+		$data['given_names'] = self::notNull($this->_current_order->billing_first_name);
+		$data['surnames'] = self::notNull($this->_current_order->billing_last_name);
+		$data['company'] = self::notNull($this->_current_order->billing_company);
+		$data['address_line_1'] = self::notNull($this->_current_order->billing_address_1);
+		$data['address_line_2'] = self::notNull($this->_current_order->billing_address_2);
+		$data['postal_code'] = self::notNull($this->_current_order->billing_postcode);
+		$data['city'] = self::notNull($this->_current_order->billing_city);
+		$data['country_code'] = self::notNull($this->_current_order->billing_country);
 		// OPTIONAL
-		$data['state'] = self::notNull($this->_order->billing_state);
-		$data['mobile_phone'] = self::notNull($this->_order->billing_phone);
-		$data['vat_number'] = self::notNull($this->_order->billing_nif);
+		$data['state'] = self::notNull($this->_current_order->billing_state);
+		$data['mobile_phone'] = self::notNull($this->_current_order->billing_phone);
+		$data['vat_number'] = self::notNull($this->_current_order->billing_nif);
 		if ('' == $data['vat_number'])
-			$data['vat_number'] = self::notNull($this->_order->billing_vat);
+			$data['vat_number'] = self::notNull($this->_current_order->billing_vat);
 		return $data;
 	}
 
 	/**
 	 * Get SeQura language code
 	 * */
-	static function _getLanguange()
+	static function getCustomerLanguange()
 	{
 		$lng = substr(get_bloginfo('language'), 0, 2);
 		if (function_exists('qtrans_getLanguage'))
@@ -221,7 +229,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function customer()
 	{
 		$data = array();
-		$data['language_code'] = self::notNull(self::_getLanguange());
+		$data['language_code'] = self::notNull(self::getCustomerLanguange());
 		$data['ip_number'] = $_SERVER["REMOTE_ADDR"];
 		$data['user_agent'] = $_SERVER["HTTP_USER_AGENT"];
 		$data['logged_in'] = is_user_logged_in();
@@ -245,7 +253,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			return $ret;
 
 		$var = 'billing_' . str_replace('billing_', '', $field_name);
-		return self::notNull($this->_order->$var);
+		return self::notNull($this->_current_order->$var);
 	}
 
 	public function getPreviousOrders($customer_id)
@@ -271,7 +279,14 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		return $orders;
 	}
 
-	public static function getSentOrderIds()
+	public function getShippedOrderIds()
+	{
+		if (is_null($this->_shipped_ids))
+			$this->getShippedOrderList();
+		return $this->_shipped_ids;
+	}
+
+	public function getShippedOrderList()
 	{
 		$args = array(
 			'numberposts' => -1,
@@ -290,51 +305,145 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			),
 			'post_type' => 'shop_order',
 			'post_status' => 'publish',
-			/*'tax_query'=>array(
+			'tax_query' => array(
 				array(
-					'taxonomy' =>'shop_order_status',
+					'taxonomy' => 'shop_order_status',
 					'field' => 'slug',
 					'terms' => 'completed',
-					'operator' => '='
 				)
-			)*/
+			)
 		);
-		$results = new WP_Query( $args);
-		$kk = $results->request;
 		$posts = get_posts($args);
-		return wp_list_pluck($posts, 'ID');
+		$this->_shipped_ids = wp_list_pluck($posts, 'ID');
+		return $posts;
 	}
 
-	public function getStats()
+	public function buildShippedOrders()
 	{
+		$posts = $this->getShippedOrderList();
+		$this->_orders = array();
+		foreach ($posts as $post) {
+			$data = array();
+			$this->_current_order = new WC_Order($post->ID);
+			$date = strtotime($this->_current_order->completed_date);
+			$data['sent_at'] = self::dateOrBlank(date('c', $date));
+			$data['state'] = 'delivered';
+			$data['delivery_address'] = $this->deliveryAddress();
+			$data['invoice_address'] = $this->invoiceAddress();
+			$data['customer'] = $this->customer();
+			$data['cart'] = $this->shipmentCart();
+			$this->_orders[] = $data;
+		}
+	}
+
+	public function shipmentCart()
+	{
+		$data = array();
+		$data['currency'] = $this->_current_order->get_order_currency();;
+		$data['delivery_method'] = $this->deliveryMethod();
+		$data['gift'] = false;
+		$data['items'] = $this->items();
+
+		if (count($data['items']) > 0) {
+			$totals = self::totals($data);
+			$data['order_total_without_tax'] = $totals['without_tax'];
+			$data['order_total_with_tax'] = $totals['with_tax'];
+		}
+		return $data;
+	}
+
+	public function getOrderStats()
+	{
+		$stats = array();
+		if (false && get_option('sequra_allowstats'))
+			return $stats;
+
 		$args = array(
 			'numberposts' => -1,
-			'meta_key' => '_customer_user',
-			'meta_value' => $customer_id,
 			'post_type' => 'shop_order',
-			'post_status' => 'publish',
-			/*'tax_query'=>array(
+			'date_query' => array(
 				array(
-					'taxonomy' =>'shop_order_status',
-					'field' => 'slug',
-					'terms' =>$status
+					'column' => 'post_date_gmt',
+					'after' => '1 week ago',
 				)
-			)*/
+			)
 		);
 		$posts = get_posts($args);
-		$order_ids = wp_list_pluck($posts, 'ID');
-		foreach ($order_ids as $id) {
-			$prev_order = new WC_Order($id);
-			$post = get_post($id);
-			$order['amount'] = self::integerPrice($prev_order->get_total());
-			$order['currency'] = $prev_order->get_order_currency();
+		foreach ($posts as $post) {
+			$stat_order = new WC_Order($post->ID);
 			$date = strtotime($post->post_date);
-			$order['created_at'] = date('c', $date);
-			$orders[] = $order;
+			$stat = array(
+				'created_at' => date('c', $date),
+				'merchant_reference' => array(
+					'order_ref_1' => $stat_order->id,
+				)
+			);
+			if (true || get_option('sequra_allowstats_amount')) // TODO: Stats config
+			{
+				$stat['amount'] = self::integerPrice($stat_order->get_total());
+				$stat['currency'] = $stat_order->get_order_currency();
+			}
+			if (true || get_option('sequra_allowstats_country')) // TODO: Stats config
+			{
+				$stat['country'] = self::notNull($stat_order->billing_country);
+			}
+			if (true || get_option('sequra_allowstats_payment')) { // TODO: Stats config
+				$stat['payment_method_raw'] = $stat_order->payment_method;
+				$stat['payment_method'] = self::mapPaymentMethod($stat['payment_method_raw']);
+			}
+			if (true || get_option('sequra_allowstats_status')) { // TODO: Stats config
+				$stat['raw_status'] = $stat_order->status;
+				$stat['status'] = self::mapStatus($stat['raw_status']);
+			}
+
+			$stats[] = $stat;
 		}
-		return $orders;
+		return $stats;
 	}
 
+	static function mapPaymentMethod($payment_method_raw)
+	{
+		switch ($payment_method_raw) {
+			case 'ceca':
+			case 'servired':
+			case 'redsys':
+			case 'iupay':
+			case 'univia':
+			case 'banesto':
+			case 'ruralvia':
+			case 'cuatrob':
+			case 'paytpvcom':
+			case 'cc':
+				return 'CC';
+			case 'paypal':
+				return 'PP';
+			case 'cheque':
+			case 'banktransfer':
+			case 'trustly':
+				return 'TR';
+			case 'cashondelivery':
+			case 'cod':
+				return 'COD';
+				break;
+			case 'sequra':
+				return 'SQ';
+			default:
+				return 'O/' . $payment_method_raw;
+		}
+	}
+
+	static function mapStatus($raw_status)
+	{
+		switch ($raw_status) {
+			case 'completed':
+				return 'shipped';
+			case 'cancelled':
+			case 'refunded':
+				return 'cancelled';
+			default:
+				return 'processing';
+		}
+	}
 
 	public function platform()
 	{

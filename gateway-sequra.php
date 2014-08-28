@@ -31,8 +31,10 @@ function sequra_activation() {
 	$tomorrow = date("Y-m-d 02:00",strtotime('tomorrow'));
 	$time = $random_offset + strtotime($tomorrow);
     add_option('woocommerce-sequra-deliveryreport-time',$time);
-	wp_schedule_event( $time, 'daily', array('SequraReporter','sendDailyDeliveryReport') );
+	wp_schedule_event( $time, 'daily', 'sequra_send_daily_delivery_report');
 }
+
+add_action('sequra_send_daily_delivery_report','SequraReporter::sendDailyDeliveryReport');
 
 register_deactivation_hook( __FILE__, 'sequra_deactivation' );
 /**
@@ -40,7 +42,7 @@ register_deactivation_hook( __FILE__, 'sequra_deactivation' );
  */
 function sequra_deactivation() {
     // Remove daily schedule
-    wp_unschedule_event( get_option('woocommerce-sequra-deliveryreport-time'), array('SequraReporter','sendDailyDeliveryReport'));
+    wp_unschedule_event( get_option('woocommerce-sequra-deliveryreport-time'), 'sequra_send_daily_delivery_report');
 }
 
 add_action('woocommerce_loaded', 'woocommerce_sequra_init', 100);
