@@ -4,6 +4,7 @@ abstract class SequraBuilderAbstract
 {
 
 	protected $merchant_id;
+	protected $_current_order = null;
 	protected $_orders = array();
 	protected $_broken_orders = array();
 	protected $_delivery_report = null;
@@ -25,11 +26,31 @@ abstract class SequraBuilderAbstract
 			'platform' => $this->platform(),
 			'state' => self::notNull($state)
 		);
+		$order = $this->fixDiscount($order);
 		if ('confirmed' == $state)
-			$order['merchant_reference'] = array(
-				'order_ref_1' => self::notNull($this->getOrderRef(1)),
-				'order_ref_2' => self::notNull($this->getOrderRef(2))
-			);
+			$order['merchant_reference'] = $this->orderMerchantReference();
+
+		return $order;
+	}
+
+	public function fixDiscount($order)
+	{
+		$totals = self::totals($order['cart']);
+		$diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
+		$diff_with_tax = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
+		$diff_max = abs(max($diff_with_tax, $diff_without_tax));
+		/*Dont correct error bigger than 2 cents*/
+		if ($diff_max == 0 || $diff_max > 3)
+			return $order;
+		$items = array();
+		foreach ($order['cart']['items'] as $item) {
+			if ('discount' == $item['type']) {
+				$item["total_without_tax"] += $diff_without_tax;
+				$item["total_with_tax"] += $diff_with_tax;
+			}
+			$items[] = $item;
+		}
+		$order['cart']['items'] = $items;
 		return $order;
 	}
 
@@ -46,8 +67,9 @@ abstract class SequraBuilderAbstract
 		);
 	}
 
-	public function getDeliveryReport(){
-		if(is_null($this->_delivery_report))
+	public function getDeliveryReport()
+	{
+		if (is_null($this->_delivery_report))
 			$this->buildDeliveryReport();
 		return $this->_delivery_report;
 	}
@@ -69,6 +91,14 @@ abstract class SequraBuilderAbstract
 				unset($this->_orders[$key]);
 			}
 		}
+	}
+
+	public function orderMerchantReference()
+	{
+		return array(
+			'order_ref_1' => self::notNull($this->getOrderRef(1)),
+			'order_ref_2' => self::notNull($this->getOrderRef(2))
+		);
 	}
 
 	public abstract function getOrderStats();
@@ -120,7 +150,7 @@ abstract class SequraBuilderAbstract
 
 	public static function integerPrice($price)
 	{
-		return intval(round(self::$centsPerWhole * $price));
+		return intval(round(self::$centsPerWhole * $price, PHP_ROUND_HALF_DOWN));
 	}
 
 	protected static function notNull($value1)

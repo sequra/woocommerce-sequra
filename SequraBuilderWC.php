@@ -2,7 +2,6 @@
 
 class SequraBuilderWC extends SequraBuilderAbstract
 {
-	protected $_current_order = null;
 	protected $_cart = null;
 	protected $_shipped_ids = array();
 
@@ -45,7 +44,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['updated_at'] = date('c');
 		$data['gift'] = false;
 
-		$data['delivery_method'] = $this->getDeliveryMethod();
+		$data['delivery_method'] = $this->deliveryMethod();
 		$data['order_total_with_tax'] = self::integerPrice($this->_cart->total);
 		$data['order_total_without_tax'] = self::integerPrice($this->_cart->total - $this->_cart->tax_total);
 		$data['items'] = array_merge(
@@ -60,12 +59,12 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 	}
 
-	public function getDeliveryMethod()
+	public function deliveryMethod()
 	{
-		$chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
+		$shipping_methods = WC()->session->get('shipping_methods');
 		return array(
-			'name' => self::notNull($chosen_shipping_methods[0]),
-			'days' => wc_cart_totals_shipping_method_label($chosen_shipping_methods[0]),
+			'name' => self::notNull($shipping_methods[0]),
+			'days' => wc_cart_totals_shipping_method_label($shipping_methods[0]),
 //            'provider' => self::notNull($carrierInfos[0]),
 		);
 	}
@@ -73,12 +72,16 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	private function getCartcontents()
 	{
 		if ($this->_current_order->status == 'completed')
-			$c = $this->_current_order->get_items(apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item') ) );
-			return $c;
+			return $this->_current_order->get_items(apply_filters('woocommerce_admin_order_item_types', array('line_item')));
 
-
-		$kk = 'kk';
 		return $this->_cart->cart_contents;
+	}
+
+	private function getProductFromItem($cart_item, $cart_item_key)
+	{
+		if ($this->_current_order->status == 'completed')
+			return $this->_current_order->get_product_from_item($cart_item);
+		return apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
 	}
 
 	public function items()
@@ -86,7 +89,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$items = array();
 		$cart_contents = $this->getCartContents();
 		foreach ($cart_contents as $cart_item_key => $cart_item) {
-			$_product = $this->_current_order->get_product_from_item( $cart_item );
+			$_product = $this->getProductFromItem($cart_item, $cart_item_key);
 
 			$item = array();
 			$item["reference"] = self::notNull($_product->get_sku());
@@ -94,7 +97,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$item["name"] = $name;
 			$item["price_without_tax"] = self::integerPrice(self::notNull($_product->get_price_excluding_tax()));
 			$item["price_with_tax"] = self::integerPrice(self::notNull($_product->get_price_including_tax()));
-			$item["quantity"] = (int)$cart_item['quantity'];
+			$item["quantity"] = (int)$cart_item['quantity'] + (int)$cart_item['qty'];
 			$item["tax_rate"] = self::integerPrice(self::notNull($cart_item['line_tax'] / $cart_item['line_total']));
 			//self::integerPrice(self::notNull($cart_item['line_total']));
 			$item["total_without_tax"] = $item["quantity"] * $item["price_without_tax"];
@@ -112,10 +115,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		}
 
 		//order discounts
-		if ($this->_cart->discount_total != 0) {
-			$discount = $this->_cart->discount_total;
-			if ($this->_cart->discount_total > 0) {
-				$discount = -1 * $this->_cart->discount_total;
+		$discount = $this->_cart->discount_total +$this->_cart->discount_cart;
+		if ($discount != 0) {
+			if ($discount > 0) {
+				$discount = -1 * $discount;
 			}
 			//$discountExclTax=$discount*1.21; //What kind of tax?
 			$item = array();
@@ -142,9 +145,27 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		return $items;
 	}
 
+	public function fixDiscount($order)
+	{
+		$totals = self::totals($order['cart']);
+		$diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
+		$diff_with_tax = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
+		$diff_max = abs(max($diff_with_tax, $diff_without_tax));
+		$items = array();
+		foreach ($order['cart']['items'] as $item) {
+			if ('discount' == $item['type']) {
+				$item["total_without_tax"] += $diff_without_tax;
+				$item["total_with_tax"] += $diff_with_tax;
+			}
+			$items[] = $item;
+		}
+		$order['cart']['items'] = $items;
+		return $order;
+	}
+
 	public function handlingItems()
 	{
-		$delivery = $this->getDeliveryMethod();
+		$delivery = $this->deliveryMethod();
 		if (!$delivery['name']) {
 			return array();
 		}
@@ -186,11 +207,6 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		if ('' == $data['vat_number'])
 			$data['vat_number'] = self::notNull($this->_current_order->shipping_vat);
 		return $data;
-	}
-
-	public function deliveryMethod()
-	{
-		return;
 	}
 
 	public function invoiceAddress()
@@ -332,7 +348,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$data['invoice_address'] = $this->invoiceAddress();
 			$data['customer'] = $this->customer();
 			$data['cart'] = $this->shipmentCart();
+			$data['merchant_reference'] = $this->orderMerchantReference();
 			$this->_orders[] = $data;
+
 		}
 	}
 
@@ -370,29 +388,29 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		);
 		$posts = get_posts($args);
 		foreach ($posts as $post) {
-			$stat_order = new WC_Order($post->ID);
+			$this->_current_order = new WC_Order($post->ID);
 			$date = strtotime($post->post_date);
+			$completed_date = strtotime(get_post_meta($post->ID, '_completed_date', true));
 			$stat = array(
-				'created_at' => date('c', $date),
-				'merchant_reference' => array(
-					'order_ref_1' => $stat_order->id,
-				)
+				'created_at' => self::dateOrBlank(date('c', $date)),
+				'completed_at' => self::dateOrBlank(date('c', $completed_date)),
+				'merchant_reference' => $this->orderMerchantReference()
 			);
 			if (true || get_option('sequra_allowstats_amount')) // TODO: Stats config
 			{
-				$stat['amount'] = self::integerPrice($stat_order->get_total());
-				$stat['currency'] = $stat_order->get_order_currency();
+				$stat['amount'] = self::integerPrice($this->_current_order->get_total());
+				$stat['currency'] = $this->_current_order->get_order_currency();
 			}
 			if (true || get_option('sequra_allowstats_country')) // TODO: Stats config
 			{
-				$stat['country'] = self::notNull($stat_order->billing_country);
+				$stat['country'] = self::notNull($this->_current_order->billing_country);
 			}
 			if (true || get_option('sequra_allowstats_payment')) { // TODO: Stats config
-				$stat['payment_method_raw'] = $stat_order->payment_method;
+				$stat['payment_method_raw'] = $this->_current_order->payment_method;
 				$stat['payment_method'] = self::mapPaymentMethod($stat['payment_method_raw']);
 			}
 			if (true || get_option('sequra_allowstats_status')) { // TODO: Stats config
-				$stat['raw_status'] = $stat_order->status;
+				$stat['raw_status'] = $this->_current_order->status;
 				$stat['status'] = self::mapStatus($stat['raw_status']);
 			}
 
