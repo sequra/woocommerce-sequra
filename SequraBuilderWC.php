@@ -43,10 +43,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['created_at'] = $sequra_cart_info['created_at'];
 		$data['updated_at'] = date('c');
 		$data['gift'] = false;
-
 		$data['delivery_method'] = $this->deliveryMethod();
 		$data['order_total_with_tax'] = self::integerPrice($this->_cart->total);
-		$data['order_total_without_tax'] = self::integerPrice($this->_cart->total - $this->_cart->tax_total);
+		$data['order_total_without_tax'] = self::integerPrice($this->_cart->total - $this->_cart->tax_total - $this->_cart->shipping_tax_total);
 		$data['items'] = array_merge(
 			$this->items(),
 			$this->handlingItems()
@@ -166,7 +165,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function handlingItems()
 	{
 		$delivery = $this->deliveryMethod();
-		if (!$delivery['name']) {
+		if (!$delivery['name'] && !$delivery['days']) {
 			return array();
 		}
 
