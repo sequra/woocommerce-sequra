@@ -115,19 +115,17 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 		//order discounts
 		$discount = $this->_cart->discount_total +$this->_cart->discount_cart;
-		if ($discount != 0) {
-			if ($discount > 0) {
-				$discount = -1 * $discount;
-			}
-			//$discountExclTax=$discount*1.21; //What kind of tax?
-			$item = array();
-			$item["type"] = "discount";
-			$item["reference"] = self::notNull($this->_cart->applied_coupons[0]);
-			$item["name"] = 'Descuento';
-			$item["total_without_tax"] = self::integerPrice($discount);
-			$item["total_with_tax"] = self::integerPrice($discount);
-			$items[] = $item;
+		if ($discount > 0) {
+			$discount = -1 * $discount;
 		}
+		//$discountExclTax=$discount*1.21; //What kind of tax?
+		$item = array();
+		$item["type"] = "discount";
+		$item["reference"] = self::notNull($this->_cart->applied_coupons[0]);
+		$item["name"] = 'Descuento';
+		$item["total_without_tax"] = self::integerPrice($discount);
+		$item["total_with_tax"] = self::integerPrice($discount);
+		$items[] = $item;
 		//add Customer fee (without tax)
 
 		foreach ($this->_cart->fees as $fee_key => $fee) {
@@ -142,24 +140,6 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		}
 
 		return $items;
-	}
-
-	public function fixDiscount($order)
-	{
-		$totals = self::totals($order['cart']);
-		$diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
-		$diff_with_tax = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
-		$diff_max = abs(max($diff_with_tax, $diff_without_tax));
-		$items = array();
-		foreach ($order['cart']['items'] as $item) {
-			if ('discount' == $item['type']) {
-				$item["total_without_tax"] += $diff_without_tax;
-				$item["total_with_tax"] += $diff_with_tax;
-			}
-			$items[] = $item;
-		}
-		$order['cart']['items'] = $items;
-		return $order;
 	}
 
 	public function handlingItems()

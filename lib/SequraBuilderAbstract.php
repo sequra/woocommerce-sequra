@@ -47,6 +47,7 @@ abstract class SequraBuilderAbstract
 			if ('discount' == $item['type']) {
 				$item["total_without_tax"] += $diff_without_tax;
 				$item["total_with_tax"] += $diff_with_tax;
+				$item["name"] .= (''==$item["name"]?'':' + ') . 'ajuste';
 			}
 			$items[] = $item;
 		}
