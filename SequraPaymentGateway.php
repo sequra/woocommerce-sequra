@@ -26,7 +26,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 		$this->init_settings();
 
 		// Get setting values
-		$this->enabled = $this->settings['enabled'];
+		$this->enabled = 'yes'==$this->settings['enabled'];
 		$this->title = $this->settings['title'];
 		$this->description = $this->settings['description'];
 		$this->merchantref = $this->settings['merchantref'];
@@ -81,7 +81,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 				'title' => __('Title', 'wc_sequra'),
 				'type' => 'text',
 				'description' => __('This controls the title which the user sees during checkout.', 'wc_sequra'),
-				'default' => __('Recibir antes de pagar', 'wc_sequra')
+				'default' => __('Compra ahora, paga después', 'wc_sequra')
 			),
 			'description' => array(
 				'title' => __('Description', 'wc_sequra'),
@@ -169,6 +169,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	 */
 	public function is_available()
 	{
+		if(!$this->enabled)
+			return false;
 		$order = null;
 		if (!$this->enable_for_virtual) {
 			if (WC()->cart && !WC()->cart->needs_shipping()) {
