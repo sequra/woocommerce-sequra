@@ -171,6 +171,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	{
 		if(!$this->enabled)
 			return false;
+
 		$order = null;
 		if (!$this->enable_for_virtual) {
 			if (WC()->cart && !WC()->cart->needs_shipping()) {
@@ -253,6 +254,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 		}
 		if (WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total()) {
 			return false;
+		}
+		if(1==$this->env && ''!=$this->settings['test_ips']){//Sandbox
+			$ips = explode(',',$this->settings['test_ips']);
+			return in_array($_SERVER['REMOTE_ADDR'],$ips);
 		}
 		return true;
 	}
