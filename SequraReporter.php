@@ -24,6 +24,6 @@ class SequraReporter
 
 	static function setOrdersAsSent($ids){
 		foreach ($ids as $id)
-			add_meta($id,'_sent_to_sequra');
+			update_post_meta((int)$id, '_sent_to_sequra', date('c'));
 	}
 }
