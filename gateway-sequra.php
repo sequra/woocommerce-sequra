@@ -33,12 +33,20 @@ function sequra_activation() {
     add_option('woocommerce-sequra-deliveryreport-time',$time);
 	wp_schedule_event( $time, 'daily', 'sequra_send_daily_delivery_report');
     //Set version as an option get_plugin_data function is not availiable at cron
-    $plugin_data = get_plugin_data(dirname(__FILE__) . '/gateway-sequra.php');
-    update_option('sequra_version',(string)$plugin_data['Version']);
+	do_action('sequra_upgrade_if_needed');
+}
+
+add_action('sequra_upgrade_if_needed','sequra_upgrade_if_needed');
+function sequra_upgrade_if_needed(){
+	$current = get_option('sequra_version');
+	$plugin_data = get_plugin_data(dirname(__FILE__) . '/gateway-sequra.php');
+	if(version_compare($current,$plugin_data['Version'],'<')){
+		do_action('sequra_upgrade',array('from'=>$current,'to'=>$plugin_data['Version']));
+		update_option('sequra_version',(string)$plugin_data['Version']);
+	}
 }
 
 add_action('sequra_send_daily_delivery_report','sequra_send_daily_delivery_report');
-
 function sequra_send_daily_delivery_report(){
     if (!class_exists('SequraReporter'))
         require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraReporter.php');
@@ -58,6 +66,7 @@ add_action('woocommerce_loaded', 'woocommerce_sequra_init', 100);
 
 function woocommerce_sequra_init()
 {
+	do_action('sequra_upgrade_if_needed');
 	load_plugin_textdomain('wc_sequra', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
 	if (!class_exists('SequraHelper'))
