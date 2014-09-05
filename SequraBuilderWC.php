@@ -168,43 +168,43 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function deliveryAddress()
 	{
 		$data = array();
-		$data['given_names'] = self::notNull($this->_current_order->shipping_first_name);
-		$data['surnames'] = self::notNull($this->_current_order->shipping_last_name);
-		$data['company'] = self::notNull($this->_current_order->shipping_company);
-		$data['address_line_1'] = self::notNull($this->_current_order->shipping_address_1);
-		$data['address_line_2'] = self::notNull($this->_current_order->shipping_address_2);
-		$data['postal_code'] = self::notNull($this->_current_order->shipping_postcode);
-		$data['city'] = self::notNull($this->_current_order->shipping_city);
+		$data['given_names'] = self::notNull($this->getDeliveryField('shipping_first_name'));
+		$data['surnames'] = self::notNull($this->getDeliveryField('shipping_last_name'));
+		$data['company'] = self::notNull($this->getDeliveryField('shipping_company'));
+		$data['address_line_1'] = self::notNull($this->getDeliveryField('shipping_address_1'));
+		$data['address_line_2'] = self::notNull($this->getDeliveryField('shipping_address_2'));
+		$data['postal_code'] = self::notNull($this->getDeliveryField('shipping_postcode'));
+		$data['city'] = self::notNull($this->getDeliveryField('shipping_city'));
 		if ($data['city'] == '')
 			throw new Exception('City is required');
-		$data['country_code'] = self::notNull($this->_current_order->shipping_country);
+		$data['country_code'] = self::notNull($this->getDeliveryField('shipping_country'));
 		// OPTIONAL
-		$data['state'] = self::notNull($this->_current_order->shipping_state);
-		$data['mobile_phone'] = self::notNull($this->_current_order->shipping_phone);
+		$data['state'] = self::notNull($this->getDeliveryField('shipping_state'));
+		$data['mobile_phone'] = self::notNull($this->getDeliveryField('shipping_phone'));
 		/*TODO: Search vat/nif common plugins*/
-		$data['vat_number'] = self::notNull($this->_current_order->shipping_nif);
+		$data['vat_number'] = self::notNull($this->getDeliveryField('shipping_nif'));
 		if ('' == $data['vat_number'])
-			$data['vat_number'] = self::notNull($this->_current_order->shipping_vat);
+			$data['vat_number'] = self::notNull($this->getDeliveryField('shipping_vat'));
 		return $data;
 	}
 
 	public function invoiceAddress()
 	{
 		$data = array();
-		$data['given_names'] = self::notNull($this->_current_order->billing_first_name);
-		$data['surnames'] = self::notNull($this->_current_order->billing_last_name);
-		$data['company'] = self::notNull($this->_current_order->billing_company);
-		$data['address_line_1'] = self::notNull($this->_current_order->billing_address_1);
-		$data['address_line_2'] = self::notNull($this->_current_order->billing_address_2);
-		$data['postal_code'] = self::notNull($this->_current_order->billing_postcode);
-		$data['city'] = self::notNull($this->_current_order->billing_city);
-		$data['country_code'] = self::notNull($this->_current_order->billing_country);
+		$data['given_names'] = self::notNull($this->getField('billing_first_name'));
+		$data['surnames'] = self::notNull($this->getField('billing_last_name'));
+		$data['company'] = self::notNull($this->getField('billing_company'));
+		$data['address_line_1'] = self::notNull($this->getField('billing_address_1'));
+		$data['address_line_2'] = self::notNull($this->getField('billing_address_2'));
+		$data['postal_code'] = self::notNull($this->getField('billing_postcode'));
+		$data['city'] = self::notNull($this->getField('billing_city'));
+		$data['country_code'] = self::notNull($this->getField('billing_country'));
 		// OPTIONAL
-		$data['state'] = self::notNull($this->_current_order->billing_state);
-		$data['mobile_phone'] = self::notNull($this->_current_order->billing_phone);
-		$data['vat_number'] = self::notNull($this->_current_order->billing_nif);
+		$data['state'] = self::notNull($this->getField('billing_state'));
+		$data['mobile_phone'] = self::notNull($this->getField('billing_phone'));
+		$data['vat_number'] = self::notNull($this->getField('billing_nif'));
 		if ('' == $data['vat_number'])
-			$data['vat_number'] = self::notNull($this->_current_order->billing_vat);
+			$data['vat_number'] = self::notNull($this->getField('billing_vat'));
 		return $data;
 	}
 
@@ -238,7 +238,8 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['company'] = $this->getCustomerField($id, 'billing_company');
 		if ($id > 0)
 			$data['ref'] = $id;
-		$data['previous_orders'] = self::getPreviousOrders($id);
+		if($data['logged_in'])
+			$data['previous_orders'] = self::getPreviousOrders($id);
 		return $data;
 	}
 
@@ -248,9 +249,22 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			return $ret;
 
 		$var = 'billing_' . str_replace('billing_', '', $field_name);
-		return self::notNull($this->_current_order->$var);
+		return self::notNull($this->getField($var));
 	}
-
+	public function getDeliveryField($field_name){
+		$ret = $this->getField($field_name);
+		if(!is_null($ret) && ''!=$ret)
+			return $ret;
+		return $this->getField(str_replace('shipping','billing',$field_name));
+	}
+	public function getField($field_name)
+	{
+		if($this->_current_order instanceof SequraTempOrder){
+			$func = 'get_'.$field_name;
+			return $this->_current_order->$func();
+		}
+		return self::notNull($this->_current_order->$field_name);
+	}
 	public function getPreviousOrders($customer_id)
 	{
 		$args = array(
@@ -261,6 +275,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			'post_status' => 'publish',
 		);
 		$posts = get_posts($args);
+		$orders = array();
 		$order_ids = wp_list_pluck($posts, 'ID');
 		foreach ($order_ids as $id) {
 			$prev_order = new WC_Order($id);
