@@ -120,14 +120,19 @@ function woocommerce_sequra_init()
 
 	function sequra_calculate_order_totals($cart)
 	{
-		(new SequraPaymentGateway())->calculate_order_totals($cart);
+		$sequra = new SequraPaymentGateway();
+		$sequra->calculate_order_totals($cart);
 	}
 
 	add_action('woocommerce_cart_calculate_fees', 'sequra_calculate_order_totals');
 
 	function sequra_enqueue_scripts_frontend()
 	{
-		if (!is_checkout() || !(0<(new SequraPaymentGateway())->fee))
+		if (!is_checkout())
+			return;
+
+		$sequra = new SequraPaymentGateway();
+		if( !(0<$sequra->fee))
 			return;
 
 		$url = WP_PLUGIN_URL . "/" . dirname(plugin_basename(__FILE__)) . '/assets/js/checkout.js';
