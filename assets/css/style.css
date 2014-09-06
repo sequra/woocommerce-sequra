@@ -16,8 +16,11 @@
 /******** Más  Información POPUP ***********/
 #sequra_mas_informacion {
     margin: 10px;
+    background: url(../images/logo.png) no-repeat bottom 2px right 2px;
 }
-
+#sequra_mas_informacion img {
+    widht:80%;
+}
 #sequra_mas_informacion h2 {
     text-transform: uppercase;
     color: #6b6b6b;
@@ -26,22 +29,11 @@
 
 #sequra_mas_informacion ul {
     text-align: left;
-    padding: 10px 110px;
+    padding: 10px 110px 65px;
 }
 
 #sequra_mas_informacion ul li {
     margin-top: 8px;
-}
-
-#sequra_mas_informacion_footer {
-    font-size: 11px;
-    position: absolute;
-    bottom: 10px;
-}
-
-#sequra_mas_informacion button {
-    float: right;
-    margin: 10px;
 }
 
 /******** ADITIONAL TEXT FOR FORM **********/
@@ -121,7 +113,7 @@ p.sq_inline_errors, .general_errors {
 }
 
 /* Más Información POP-UP*/
-.sequra_popup_close {
+#sequra_popup_close {
     position: absolute;
     top: -20px;
     right: -20px;
