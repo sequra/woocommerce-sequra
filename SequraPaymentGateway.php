@@ -7,7 +7,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 {
 	static $endpoints = array(
 		'https://live.sequrapi.com/orders',
-        'https://sandbox.sequrapi.com/orders'
+		'https://sandbox.sequrapi.com/orders'
 	);
 
 	public function __construct()
@@ -26,7 +26,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 		$this->init_settings();
 
 		// Get setting values
-		$this->enabled = 'yes'==$this->settings['enabled'];
+		$this->enabled = 'yes' == $this->settings['enabled'];
 		$this->title = $this->settings['title'];
 		$this->description = $this->settings['description'];
 		$this->merchantref = $this->settings['merchantref'];
@@ -38,6 +38,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 		$this->debug = $this->settings['debug'];
 		$this->max_amount = $this->settings['max_amount'];
 		$this->env = $this->settings['env'];
+		$this->fee = (float)$this->settings['fee'];
+		$this->days_after = (int)$this->settings['days_after'];
 		$this->endpoint = self::$endpoints[$this->env];
 		$this->helper = new SequraHelper($this);
 //            $this->stats = $this->settings['stats'];
@@ -56,6 +58,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 		add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
 		add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 		add_action('woocommerce_api_woocommerce_' . $this->id, array($this, 'check_' . $this->id . '_resquest'));
+		add_action('woocommerce_cart_calculate_fees', array($this, 'calculate_order_totals'), 999);
 		do_action('woocommerce_sequra_loaded', $this);
 	}
 
@@ -132,6 +135,18 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 				'type' => 'checkbox',
 				'default' => 'yes'
 			),
+			'fee' => array(
+				'title' => __('Fee', 'wc_sequra'),
+				'description' => __('fee applied to this payment method'),
+				'type' => 'text',
+				'default' => '0'
+			),
+			'days_after' => array(
+				'title' => __('Payment term', 'wc_sequra'),
+				'type' => 'text',
+				'description' => __('days left after delivery date to make payment'),
+				'default' => '7'
+			),
 			'env' => array(
 				'title' => __('Entorno', 'wc_sequra'),
 				'type' => 'select',
@@ -169,7 +184,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	 */
 	public function is_available()
 	{
-		if(!$this->enabled)
+		if (!$this->enabled)
 			return false;
 
 		$order = null;
@@ -255,9 +270,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 		if (WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total()) {
 			return false;
 		}
-		if(1==$this->env && ''!=$this->settings['test_ips']){//Sandbox
-			$ips = explode(',',$this->settings['test_ips']);
-			return in_array($_SERVER['REMOTE_ADDR'],$ips);
+		if (1 == $this->env && '' != $this->settings['test_ips']) { //Sandbox
+			$ips = explode(',', $this->settings['test_ips']);
+			return in_array($_SERVER['REMOTE_ADDR'], $ips);
 		}
 		return true;
 	}
@@ -324,6 +339,23 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	}
 
 	/**
+	 * Add extra charge to cart totals
+	 *
+	 * @param double $totals
+	 * return double
+	 */
+	public function calculate_order_totals($cart)
+	{
+		if ($_POST['payment_method'] != $this->id ||
+			!defined('WOOCOMMERCE_CHECKOUT') ||
+			!($this->fee > 0)
+		) {
+			return;
+		}
+		$cart->add_fee(__('Recargo "compra ahora, paga después"'), $this->fee, false);
+	}
+
+	/**
 	 * receipt_page
 	 * */
 	function receipt_page($order)
@@ -332,7 +364,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 		echo $this->generate_sequra_form($order);
 	}
 
-	function setEndpoint($url){
+	function setEndpoint($url)
+	{
 		$this->endpoint = $url;
 	}
 }

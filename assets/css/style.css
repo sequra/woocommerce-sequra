@@ -7,7 +7,12 @@
     margin-top: 18px;
     font-size: 85%;
 }
-.sq_dob_fragments select{font-size: 85%;width:50px;}
+.formish ol{
+    list-style: none;
+    margin: 0 0;
+}
+.sq_mobile_phone input{width:9em;}
+.sq_dob_fragments select{font-size: 85%;width:4.5em;}
 /******** Más  Información POPUP ***********/
 #sequra_mas_informacion {
     margin: 10px;
@@ -46,7 +51,7 @@
 }
 
 #sequra_text_information, .sq_known_customer_data {
-    width: 100%;
+    width: 40%;
     float: none
 }
 

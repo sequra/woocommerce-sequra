@@ -129,7 +129,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		//add Customer fee (without tax)
 
 		foreach ($this->_cart->fees as $fee_key => $fee) {
-			$item["type"] = $fee_key;
+			$item["type"] = 'invoice_fee';
 			$item["total_with_tax"] = $item["total_without_tax"] = self::integerPrice($fee->amount);
 			$item["tax_rate"] = 0;
 			if ($fee->tax) {
