@@ -335,13 +335,14 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	{
 		$order = new WC_Order($order_id);
 		do_action('woocommerce_sequra_process_payment', $order, $this);
-		if(''==get_user_meta(get_current_user_id(), 'sequra_dob', true))
+		if(''==get_user_meta(get_current_user_id(), 'sequra_dob', true)){
 			add_user_meta(get_current_user_id(),
 				'sequra_dob',
 					(int)$_POST['dob_year'] . '-' .
 					sprintf('%02d',(int)$_POST['dob_month']) . '-' .
-					sprintf('%02d',(int)$_POST['dob_dayS'] )
+					sprintf('%02d',(int)$_POST['dob_day'] )
 			);
+		}
 		if ($approval = apply_filters('woocommerce_sequra_process_payment', $this->helper->get_approval($order), $order, $this)) {
 			// Payment completed
 			$order->add_order_note(__('Payment accepted by SeQura', 'wc_sequra'));
