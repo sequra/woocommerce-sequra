@@ -286,22 +286,31 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 			$this->identity_form = $this->helper->get_identity_form();
 		$payment_fields = apply_filters('woocommerce_sequra_payment_fields', array(), $this);
 		require($this->helper->template_loader('payment_fields'));
-		?>
-		<script>
-			jQuery('form.checkout')
+		wc_enqueue_js("
+		(function( $ ) {
+			'use strict';
+			$('form.checkout')
 				.off('checkout_place_order_sequra')
 				.on('checkout_place_order_sequra', function () {
 					console.log('checkout_place_order_sequra');
-					sequraButton = jQuery('#sequra-identification .sq_submit input[type=submit]');
+					sequraButton = $('#sequra-identification .sq_submit input[type=submit]');
 					sequraButton.click();
 					return false;
 				});
-
-			function shop_callback_sequra_approved() {
-				console.log(shop_callback_sequra_approved);
-				jQuery('form.checkout').off('checkout_place_order_sequra').submit();
-			}
-		</script><?php
+			$('body').on('change',  'input[name=\"billing_phone\"]', function() { $('body').trigger('update_checkout'); });
+		})(jQuery);
+		function shop_callback_sequra_approved() {
+			console.log(shop_callback_sequra_approved);
+			jQuery('form.checkout').off('checkout_place_order_sequra').submit();
+		}
+		");
+		if($this->fee>0)
+			wc_enqueue_js("
+		(function( $ ) {
+			'use strict';
+			$('body').on('change', 'input[name=\"payment_method\"]', function() { $('body').trigger('update_checkout'); });
+		})(jQuery);"
+			);
 	}
 
 	/**
