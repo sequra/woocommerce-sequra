@@ -17,7 +17,7 @@ foreach ($payment_fields as $key => $field)
 		<ul>
 			<li><b>Recibe y comprueba</b> tus compras antes de pagar</li>
 			<li><b>100% seguro</b>. No compartes los datos de tu tarjeta</li>
-			<li>Paga hasta <b><?php $this->day_after;?> días después de la fecha de envío.</b></li>
+			<li>Paga hasta <b><?php echo $this->days_after;?> días después de la fecha de envío.</b></li>
 			<li>Paga con <b>transferencia bancaria, ingreso en cuenta</b> o <b>tarjeta</b>.</li>
 			<li><b>Lo más sencillo y rápido</b>si navegas deste un <b>tablet</b> o <b>móvil</b>.</li>
 			<li>Servicio ofrecido por nuestro partner <a href="https://SeQura.es/"></a><b>SeQura</b></a>.</li>
