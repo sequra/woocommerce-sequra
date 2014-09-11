@@ -45,13 +45,20 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['gift'] = false;
 		$data['delivery_method'] = $this->deliveryMethod();
 		$data['order_total_with_tax'] = self::integerPrice($this->_cart->total);
-		$data['order_total_tax'] = self::integerPrice($this->_cart->get_cart_tax());
+		$data['order_total_tax'] = self::integerPrice(wc_round_tax_total( $this->_cart->tax_total + $this->_cart->shipping_tax_total ));
 		$data['order_total_without_tax'] = $data['order_total_with_tax']-$data['order_total_tax'];
 		$data['items'] = array_merge(
 			$this->items(),
 			$this->handlingItems()
 		);
 		return $data;
+	}
+
+	public function fixTotals($order)
+	{
+		$totals = self::totals($order['cart']);
+		$order['cart']['order_total_without_tax'] = $totals['without_tax'];
+		return $order;
 	}
 
 	public function getSequraCartInfo()
@@ -62,10 +69,13 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function deliveryMethod()
 	{
 		$shipping_methods = WC()->session->chosen_shipping_methods;
+		$packages = WC()->shipping->get_packages();
+		$package = current($packages);
+		$method = $package['rates'][current($shipping_methods)];
 		return array(
-			'name' => wc_cart_totals_shipping_method_label($shipping_methods[0]),
+			'name' => $method->label,
 //			'days' => wc_cart_totals_shipping_method_label($shipping_methods[0]),
-            'provider' => self::notNull(self::notNull($shipping_methods[0])),
+            'provider' => $method->id,
 		);
 	}
 

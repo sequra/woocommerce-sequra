@@ -26,14 +26,14 @@ abstract class SequraBuilderAbstract
 			'platform' => $this->platform(),
 			'state' => self::notNull($state)
 		);
-		$order = $this->fixDiscount($order);
+		$order = $this->fixTotals($order);
 		if ('confirmed' == $state)
 			$order['merchant_reference'] = $this->orderMerchantReference();
 
 		return $order;
 	}
 
-	public function fixDiscount($order)
+	public function fixTotals($order)
 	{
 		$totals = self::totals($order['cart']);
 		$diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
@@ -45,9 +45,9 @@ abstract class SequraBuilderAbstract
 		$items = array();
 		foreach ($order['cart']['items'] as $item) {
 			if ('discount' == $item['type']) {
-				$item["total_without_tax"] += $diff_without_tax;
-				$item["total_with_tax"] += $diff_with_tax;
-				$item["name"] .= (''==$item["name"]?'':' + ') . 'ajuste';
+				$item['total_without_tax'] += $diff_without_tax;
+				$item['total_with_tax'] += $diff_with_tax;
+				$item['name'] .= (''==$item['name']?'':' + ') . 'ajuste';
 			}
 			$items[] = $item;
 		}
