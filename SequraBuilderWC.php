@@ -68,15 +68,28 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 	public function deliveryMethod()
 	{
+		$method = null;
+		if($this->_current_order instanceof SequraTempOrder){
+			$method = $this->getShippingMethodFromSession();
+			return array(
+				'name' => $method->label,
+//			'days' => wc_cart_totals_shipping_method_label($shipping_methods[0]),
+				'provider' => $method->id,
+			);
+		}
+		$shipping_methods = $this->_current_order->get_shipping_methods();
+		$shipping_method = current($shipping_methods);
+		return array(
+			'name' => $shipping_method['name'],
+			'provider' => $shipping_method['method_id'],
+		);
+	}
+
+	private function getShippingMethodFromSession(){
 		$shipping_methods = WC()->session->chosen_shipping_methods;
 		$packages = WC()->shipping->get_packages();
 		$package = current($packages);
-		$method = $package['rates'][current($shipping_methods)];
-		return array(
-			'name' => $method->label,
-//			'days' => wc_cart_totals_shipping_method_label($shipping_methods[0]),
-            'provider' => $method->id,
-		);
+		return $package['rates'][current($shipping_methods)];
 	}
 
 	private function getCartcontents()
@@ -401,12 +414,12 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$stat = array(
 				'created_at' => self::dateOrBlank(date('c', $date)),
 				'completed_at' => self::dateOrBlank(date('c', $completed_date)),
-				'merchant_reference' => $this->orderMerchantReference()
+				'merchant_reference' => $this->orderMerchantReference(),
+				'currency' => $this->_current_order->get_order_currency()
 			);
 			if (true || get_option('sequra_allowstats_amount')) // TODO: Stats config
 			{
 				$stat['amount'] = self::integerPrice($this->_current_order->get_total());
-				$stat['currency'] = $this->_current_order->get_order_currency();
 			}
 			if (true || get_option('sequra_allowstats_country')) // TODO: Stats config
 			{
