@@ -138,7 +138,11 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		}
 
 		//order discounts
-		$discount = $this->_cart->discount_total +$this->_cart->discount_cart;
+		if($this->_current_order instanceof SequraTempOrder){
+			$discount = $this->_cart->discount_total +$this->_cart->discount_cart;
+		}else{
+			$discount = $this->_current_order->get_total_discount();
+		}
 		if ($discount > 0) {
 			$discount = -1 * $discount;
 		}
@@ -150,15 +154,27 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$item["total_without_tax"] = self::integerPrice($discount);
 		$item["total_with_tax"] = self::integerPrice($discount);
 		$items[] = $item;
-		//add Customer fee (without tax)
 
-		foreach ($this->_cart->fees as $fee_key => $fee) {
+		//add Customer fee (without tax)
+		$item = array();
+		if($this->_current_order instanceof SequraTempOrder){
+			$fees = $this->_cart->fees;
+		}else{
+			$fees = $this->_current_order->get_fees();
+		}
+		foreach ($fees as $fee_key => $fee) {
 			$item["type"] = 'invoice_fee';
-			$item["total_with_tax"] = $item["total_without_tax"] = self::integerPrice($fee->amount);
-			$item["tax_rate"] = 0;
-			if ($fee->tax) {
-				$item["total_with_tax"] += self::integerPrice($fee->tax);
-				$item["tax_rate"] = self::integerPrice($fee->tax / $fee->amount);
+			if($this->_current_order instanceof SequraTempOrder){
+				$item["total_with_tax"] = $item["total_without_tax"] = self::integerPrice($fee->amount);
+				$item["tax_rate"] = 0;
+				if ($fee->tax) {
+					$item["total_with_tax"] += self::integerPrice($fee->tax);
+					$item["tax_rate"] = self::integerPrice($fee->tax / $fee->amount);
+				}
+			}else{
+				$item["total_with_tax"] = self::integerPrice($fee['line_total']);
+				$item["total_without_tax"] = self::integerPrice($fee['line_total']-$fee['line_tax']);
+				$item["tax_rate"] = $fee['line_tax']/$item["total_without_tax"];
 			}
 			$items[] = $item;
 		}
@@ -172,17 +188,24 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		if (!$delivery['name'] && !$delivery['days']) {
 			return array();
 		}
+		if($this->_current_order instanceof SequraTempOrder){
+			$shipping_total = $this->_cart->shipping_total;
+			$shipping_tax_total = $this->_cart->shipping_tax_total;
+		}else{
+			$shipping_total = $this->_current_order->get_total_shipping();
+			$shipping_tax_total = $this->_current_order->get_shipping_tax();
+		}
 
 		$handling = array(
 			'type' => 'handling',
 			'reference' => $delivery['name'],
 			'name' => $delivery['name'],
-			'total_without_tax' => self::integerPrice($this->_cart->shipping_total),
-			'total_with_tax' => self::integerPrice($this->_cart->shipping_total + $this->_cart->shipping_tax_total),
+			'total_without_tax' => self::integerPrice($shipping_total),
+			'total_with_tax' => self::integerPrice($shipping_total + $shipping_tax_total),
 			'tax_rate' => 0,
 		);
-		if (0 < $this->_cart->shipping_total)
-			$handling['tax_rate'] = self::integerPrice($this->_cart->shipping_tax_total / $this->_cart->shipping_total);
+		if (0 < $shipping_total)
+			$handling['tax_rate'] = self::integerPrice($shipping_tax_total / $shipping_total);
 		if ($delivery['days'])
 			$handling['days'] = $delivery['days'];
 
@@ -380,7 +403,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['currency'] = $this->_current_order->get_order_currency();;
 		$data['delivery_method'] = $this->deliveryMethod();
 		$data['gift'] = false;
-		$data['items'] = $this->items();
+		$data['items'] = array_merge(
+			$this->items(),
+			$this->handlingItems()
+		);
 
 		if (count($data['items']) > 0) {
 			$totals = self::totals($data);
