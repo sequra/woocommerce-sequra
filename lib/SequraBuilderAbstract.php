@@ -96,10 +96,14 @@ abstract class SequraBuilderAbstract
 
 	public function orderMerchantReference()
 	{
-		return array(
-			'order_ref_1' => self::notNull($this->getOrderRef(1)),
-			'order_ref_2' => self::notNull($this->getOrderRef(2))
-		);
+		$ret = array();
+		$ref = self::notNull($this->getOrderRef(1));
+		if (''!=$ref)
+			$ret['order_ref_1'] = $ref;
+		$ref = self::notNull($this->getOrderRef(2));
+		if (''!=$ref)
+			$ret['order_ref_2'] = $ref;
+		return $ret;
 	}
 
 	public abstract function getOrderStats();
