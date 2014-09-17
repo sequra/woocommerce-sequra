@@ -37,7 +37,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function cartWithItems()
 	{
 		$data = array();
-		$sequra_cart_info = WC()->session->get('sequra_cart_info');
+		$sequra_cart_info = SequraHelper::get_cart_info_from_session();
 		$data['currency'] = get_woocommerce_currency();
 		$data['cart_ref'] = $sequra_cart_info['ref'];
 		$data['created_at'] = $sequra_cart_info['created_at'];

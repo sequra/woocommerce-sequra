@@ -86,4 +86,10 @@ class SequraHelper
 		else
 			return WP_CONTENT_DIR . "/plugins/" . plugin_basename(dirname(__FILE__)) . '/templates/' . $template . '.php';
 	}
+
+	public static function get_cart_info_from_session()
+	{
+		sequra_add_cart_info_to_session();
+		return WC()->session->get('sequra_cart_info');
+	}
 }

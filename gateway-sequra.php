@@ -107,13 +107,13 @@ function woocommerce_sequra_init()
 	function sequra_add_cart_info_to_session()
 	{
 		$sequra_cart_info = WC()->session->get('sequra_cart_info');
-		if ($sequra_cart_info)
-			return $sequra_cart_info;
-		$sequra_cart_info = array(
-			'ref' => uniqid(),
-			'created_at' => date('c')
-		);
-		WC()->session->set('sequra_cart_info', $sequra_cart_info);
+		if (!$sequra_cart_info){
+			$sequra_cart_info = array(
+				'ref' => uniqid(),
+				'created_at' => date('c')
+			);
+			WC()->session->set('sequra_cart_info', $sequra_cart_info);
+		}
 	}
 
 	add_action('woocommerce_add_to_cart', 'sequra_add_cart_info_to_session');
