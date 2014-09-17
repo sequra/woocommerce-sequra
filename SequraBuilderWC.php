@@ -61,11 +61,6 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		return $order;
 	}
 
-	public function getSequraCartInfo()
-	{
-
-	}
-
 	public function deliveryMethod()
 	{
 		$method = null;
@@ -121,7 +116,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$item["price_without_tax"] = self::integerPrice(self::notNull($_product->get_price_excluding_tax()));
 			$item["price_with_tax"] = self::integerPrice(self::notNull($_product->get_price_including_tax()));
 			$item["quantity"] = (int)$cart_item['quantity'] + (int)$cart_item['qty'];
-			$item["tax_rate"] = self::integerPrice(self::notNull($cart_item['line_tax'] / $cart_item['line_total']));
+			$item["tax_rate"] = self::integerPrice(($cart_item['line_tax'] / $cart_item['line_total'])*100);
 			//self::integerPrice(self::notNull($cart_item['line_total']));
 			$item["total_without_tax"] = $item["quantity"] * $item["price_without_tax"];
 			//self::integerPrice(self::notNull($cart_item['line_total']+$cart_item['line_total_tax']));
@@ -169,12 +164,12 @@ class SequraBuilderWC extends SequraBuilderAbstract
 				$item["tax_rate"] = 0;
 				if ($fee->tax) {
 					$item["total_with_tax"] += self::integerPrice($fee->tax);
-					$item["tax_rate"] = self::integerPrice($fee->tax / $fee->amount);
+					$item["tax_rate"] = self::integerPrice(($fee->tax / $fee->amount)*100);
 				}
 			}else{
 				$item["total_with_tax"] = self::integerPrice($fee['line_total']);
 				$item["total_without_tax"] = self::integerPrice($fee['line_total']-$fee['line_tax']);
-				$item["tax_rate"] = $fee['line_tax']/$item["total_without_tax"];
+				$item["tax_rate"] = self::integerPrice(($fee['line_tax']/$item["total_without_tax"])*100);
 			}
 			$items[] = $item;
 		}
@@ -205,7 +200,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			'tax_rate' => 0,
 		);
 		if (0 < $shipping_total)
-			$handling['tax_rate'] = self::integerPrice($shipping_tax_total / $shipping_total);
+			$handling['tax_rate'] = self::integerPrice(($shipping_tax_total / $shipping_total)*100);
 		if ($delivery['days'])
 			$handling['days'] = $delivery['days'];
 
