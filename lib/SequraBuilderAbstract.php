@@ -155,7 +155,7 @@ abstract class SequraBuilderAbstract
 
 	public static function integerPrice($price)
 	{
-		return intval(round(self::$centsPerWhole * $price, PHP_ROUND_HALF_DOWN));
+		return intval(round(self::$centsPerWhole * $price));
 	}
 
 	protected static function notNull($value1)
