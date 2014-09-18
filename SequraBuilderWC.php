@@ -432,13 +432,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$this->_current_order = new WC_Order($post->ID);
 			$date = strtotime($post->post_date);
 			$stat = array(
-				'created_at' => self::dateOrBlank(date('c', $date)),
+				'completed_at' => self::dateOrBlank(date('c', $date)),
 				'merchant_reference' => $this->orderMerchantReference(),
 				'currency' => $this->_current_order->get_order_currency()
 			);
-			$completed_date = strtotime(get_post_meta($post->ID, '_completed_date', true));
-			if($completed_date)
-				$stat['completed_at'] = self::dateOrBlank(date('c', $completed_date));
 
 			if (true || get_option('sequra_allowstats_amount')) // TODO: Stats config
 			{
