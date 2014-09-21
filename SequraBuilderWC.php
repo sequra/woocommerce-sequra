@@ -45,8 +45,8 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['gift'] = false;
 		$data['delivery_method'] = $this->deliveryMethod();
 		$data['order_total_with_tax'] = self::integerPrice($this->_cart->total);
-		$data['order_total_tax'] = self::integerPrice(wc_round_tax_total( $this->_cart->tax_total + $this->_cart->shipping_tax_total ));
-		$data['order_total_without_tax'] = $data['order_total_with_tax']-$data['order_total_tax'];
+		$data['order_total_tax'] = self::integerPrice(wc_round_tax_total($this->_cart->tax_total + $this->_cart->shipping_tax_total));
+		$data['order_total_without_tax'] = $data['order_total_with_tax'] - $data['order_total_tax'];
 		$data['items'] = array_merge(
 			$this->items(),
 			$this->handlingItems()
@@ -64,7 +64,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	public function deliveryMethod()
 	{
 		$method = null;
-		if($this->_current_order instanceof SequraTempOrder){
+		if ($this->_current_order instanceof SequraTempOrder) {
 			$method = $this->getShippingMethodFromSession();
 			return array(
 				'name' => $method->label,
@@ -80,7 +80,8 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		);
 	}
 
-	private function getShippingMethodFromSession(){
+	private function getShippingMethodFromSession()
+	{
 		$shipping_methods = WC()->session->chosen_shipping_methods;
 		$packages = WC()->shipping->get_packages();
 		$package = current($packages);
@@ -116,7 +117,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$item["price_without_tax"] = self::integerPrice(self::notNull($_product->get_price_excluding_tax()));
 			$item["price_with_tax"] = self::integerPrice(self::notNull($_product->get_price_including_tax()));
 			$item["quantity"] = (int)$cart_item['quantity'] + (int)$cart_item['qty'];
-			$item["tax_rate"] = self::integerPrice(($cart_item['line_tax'] / $cart_item['line_total'])*100);
+			$item["tax_rate"] = self::integerPrice(($cart_item['line_tax'] / $cart_item['line_total']) * 100);
 			//self::integerPrice(self::notNull($cart_item['line_total']));
 			$item["total_without_tax"] = $item["quantity"] * $item["price_without_tax"];
 			//self::integerPrice(self::notNull($cart_item['line_total']+$cart_item['line_total_tax']));
@@ -133,9 +134,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		}
 
 		//order discounts
-		if($this->_current_order instanceof SequraTempOrder){
-			$discount = $this->_cart->discount_total +$this->_cart->discount_cart;
-		}else{
+		if ($this->_current_order instanceof SequraTempOrder) {
+			$discount = $this->_cart->discount_total + $this->_cart->discount_cart;
+		} else {
 			$discount = $this->_current_order->get_total_discount();
 		}
 		if ($discount > 0) {
@@ -152,24 +153,24 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 		//add Customer fee (without tax)
 		$item = array();
-		if($this->_current_order instanceof SequraTempOrder){
+		if ($this->_current_order instanceof SequraTempOrder) {
 			$fees = $this->_cart->fees;
-		}else{
+		} else {
 			$fees = $this->_current_order->get_fees();
 		}
 		foreach ($fees as $fee_key => $fee) {
 			$item["type"] = 'invoice_fee';
-			if($this->_current_order instanceof SequraTempOrder){
+			if ($this->_current_order instanceof SequraTempOrder) {
 				$item["total_with_tax"] = $item["total_without_tax"] = self::integerPrice($fee->amount);
 				$item["tax_rate"] = 0;
 				if ($fee->tax) {
 					$item["total_with_tax"] += self::integerPrice($fee->tax);
-					$item["tax_rate"] = self::integerPrice(($fee->tax / $fee->amount)*100);
+					$item["tax_rate"] = self::integerPrice(($fee->tax / $fee->amount) * 100);
 				}
-			}else{
+			} else {
 				$item["total_with_tax"] = self::integerPrice($fee['line_total']);
-				$item["total_without_tax"] = self::integerPrice($fee['line_total']-$fee['line_tax']);
-				$item["tax_rate"] = self::integerPrice(($fee['line_tax']/$item["total_without_tax"])*100);
+				$item["total_without_tax"] = self::integerPrice($fee['line_total'] - $fee['line_tax']);
+				$item["tax_rate"] = self::integerPrice(($fee['line_tax'] / $item["total_without_tax"]) * 100);
 			}
 			$items[] = $item;
 		}
@@ -183,10 +184,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		if (!$delivery['name'] && !$delivery['days']) {
 			return array();
 		}
-		if($this->_current_order instanceof SequraTempOrder){
+		if ($this->_current_order instanceof SequraTempOrder) {
 			$shipping_total = $this->_cart->shipping_total;
 			$shipping_tax_total = $this->_cart->shipping_tax_total;
-		}else{
+		} else {
 			$shipping_total = $this->_current_order->get_total_shipping();
 			$shipping_tax_total = $this->_current_order->get_shipping_tax();
 		}
@@ -200,7 +201,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			'tax_rate' => 0,
 		);
 		if (0 < $shipping_total)
-			$handling['tax_rate'] = self::integerPrice(($shipping_tax_total / $shipping_total)*100);
+			$handling['tax_rate'] = self::integerPrice(($shipping_tax_total / $shipping_total) * 100);
 		if ($delivery['days'])
 			$handling['days'] = $delivery['days'];
 
@@ -221,7 +222,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			throw new Exception('City is required');
 		$data['country_code'] = self::notNull($this->getDeliveryField('shipping_country'));
 		// OPTIONAL
-		$data['state'] = self::notNull($this->getDeliveryField('shipping_state'));
+		$states = WC()->countries->get_states($data['country_code']);
+		$state_code = self::notNull($this->getDeliveryField('shipping_state'));
+		$data['state'] = $states[$state_code];
 		$data['mobile_phone'] = self::notNull($this->getDeliveryField('shipping_phone'));
 		/*TODO: Search vat/nif common plugins*/
 		$data['vat_number'] = self::notNull($this->getDeliveryField('shipping_nif'));
@@ -242,7 +245,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['city'] = self::notNull($this->getField('billing_city'));
 		$data['country_code'] = self::notNull($this->getField('billing_country'));
 		// OPTIONAL
-		$data['state'] = self::notNull($this->getField('billing_state'));
+		$states = WC()->countries->get_states($data['country_code']);
+		$state_code = self::notNull($this->getDeliveryField('billing_state'));
+		$data['state'] = $states[$state_code];
 		$data['mobile_phone'] = self::notNull($this->getField('billing_phone'));
 		$data['vat_number'] = self::notNull($this->getField('billing_nif'));
 		if ('' == $data['vat_number'])
@@ -277,12 +282,12 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['email'] = $this->getCustomerField($id, 'billing_email');
 		// OPTIONAL
 		$data['date_of_birth'] = get_user_meta($id, 'sequra_dob', true);
-		if('' == $data['date_of_birth'])
+		if ('' == $data['date_of_birth'])
 			$data['date_of_birth'] = self::dateOrBlank($this->getCustomerField($id, 'dob'));
 		$data['company'] = $this->getCustomerField($id, 'billing_company');
 		if ($id > 0)
 			$data['ref'] = $id;
-		if($data['logged_in'])
+		if ($data['logged_in'])
 			$data['previous_orders'] = self::getPreviousOrders($id);
 		return $data;
 	}
@@ -295,20 +300,24 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$var = 'billing_' . str_replace('billing_', '', $field_name);
 		return self::notNull($this->getField($var));
 	}
-	public function getDeliveryField($field_name){
+
+	public function getDeliveryField($field_name)
+	{
 		$ret = $this->getField($field_name);
-		if(!is_null($ret) && ''!=$ret)
+		if (!is_null($ret) && '' != $ret)
 			return $ret;
-		return $this->getField(str_replace('shipping','billing',$field_name));
+		return $this->getField(str_replace('shipping', 'billing', $field_name));
 	}
+
 	public function getField($field_name)
 	{
-		if($this->_current_order instanceof SequraTempOrder){
-			$func = 'get_'.$field_name;
+		if ($this->_current_order instanceof SequraTempOrder) {
+			$func = 'get_' . $field_name;
 			return $this->_current_order->$func();
 		}
 		return self::notNull($this->_current_order->$field_name);
 	}
+
 	public function getPreviousOrders($customer_id)
 	{
 		$args = array(
