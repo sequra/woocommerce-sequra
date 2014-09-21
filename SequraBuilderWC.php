@@ -142,15 +142,15 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		if ($discount > 0) {
 			$discount = -1 * $discount;
 		}
-		//$discountExclTax=$discount*1.21; //What kind of tax?
-		$item = array();
-		$item["type"] = "discount";
-		$item["reference"] = self::notNull($this->_cart->applied_coupons[0]);
-		$item["name"] = 'Descuento';
-		$item["total_without_tax"] = self::integerPrice($discount);
-		$item["total_with_tax"] = self::integerPrice($discount);
-		$items[] = $item;
-
+		if(0 != $discount){
+			$item = array();
+			$item["type"] = "discount";
+			$item["reference"] = self::notNull($this->_cart->applied_coupons[0]);
+			$item["name"] = 'Descuento';
+			$item["total_without_tax"] = self::integerPrice($discount);
+			$item["total_with_tax"] = self::integerPrice($discount);
+			$items[] = $item;
+		}
 		//add Customer fee (without tax)
 		$item = array();
 		if ($this->_current_order instanceof SequraTempOrder) {
@@ -194,7 +194,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 		$handling = array(
 			'type' => 'handling',
-			'reference' => $delivery['name'],
+			'reference' => 'Envío y manipulación',
 			'name' => $delivery['name'],
 			'total_without_tax' => self::integerPrice($shipping_total),
 			'total_with_tax' => self::integerPrice($shipping_total + $shipping_tax_total),
