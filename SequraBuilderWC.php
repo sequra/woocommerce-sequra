@@ -281,9 +281,11 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['surnames'] = $this->getCustomerField($id, 'last_name');
 		$data['email'] = $this->getCustomerField($id, 'billing_email');
 		// OPTIONAL
-		$data['date_of_birth'] = get_user_meta($id, 'sequra_dob', true);
-		if ('' == $data['date_of_birth'])
-			$data['date_of_birth'] = self::dateOrBlank($this->getCustomerField($id, 'dob'));
+		if(is_user_logged_in()){ //Avoid if user is not logged in
+			$data['date_of_birth'] = get_user_meta($id, 'sequra_dob', true);
+			if ('' == $data['date_of_birth'])
+				$data['date_of_birth'] = self::dateOrBlank($this->getCustomerField($id, 'dob'));
+		}
 		$data['company'] = $this->getCustomerField($id, 'billing_company');
 		if ($id > 0)
 			$data['ref'] = $id;

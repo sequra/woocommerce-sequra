@@ -335,7 +335,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	{
 		$order = new WC_Order($order_id);
 		do_action('woocommerce_sequra_process_payment', $order, $this);
-		if(''==get_user_meta(get_current_user_id(), 'sequra_dob', true)){
+		if(is_user_logged_in() && ''==get_user_meta(get_current_user_id(), 'sequra_dob', true)){
 			add_user_meta(get_current_user_id(),
 				'sequra_dob',
 					(int)$_POST['dob_year'] . '-' .
