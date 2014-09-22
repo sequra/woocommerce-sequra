@@ -90,7 +90,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 				'title' => __('Description', 'wc_sequra'),
 				'type' => 'textarea',
 				'description' => __('This controls the description which the user sees during checkout.', 'woothemes'),
-				'default' => 'Paga después de recibir tu pedido con transferencia bancaria o ingreso en cuenta. Tendrás 7 días para pagar cuando tú quieras. La compra online 100% segura y sin gastos adicionales.'
+				'default' => 'Paga después de recibir tu pedido con transferencia bancaria, ingreso en cuenta o tarjeta. Tendrás 7 días para pagar cuando tú quieras. La compra online 100% segura y sin gastos adicionales.'
 			),
 			'merchantref' => array(
 				'title' => __('SeQura Merchant Reference', 'wc_sequra'),
