@@ -223,9 +223,8 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['country_code'] = self::notNull($this->getDeliveryField('shipping_country'));
 		// OPTIONAL
 		$states = WC()->countries->get_states($data['country_code']);
-		$state_code = self::notNull($this->getDeliveryField('shipping_state'));
-		if($states[$state_code])//It is not mandatory, don't send if it is empty
-			$data['state'] = $states[$state_code];
+		if($state_code = self::notNull($this->getDeliveryField('shipping_state')))
+			$data['state'] = self::notNull($states[$state_code]);
 		$data['mobile_phone'] = self::notNull($this->getDeliveryField('shipping_phone'));
 		/*TODO: Search vat/nif common plugins*/
 		$data['vat_number'] = self::notNull($this->getDeliveryField('shipping_nif'));
@@ -247,9 +246,8 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		$data['country_code'] = self::notNull($this->getField('billing_country'));
 		// OPTIONAL
 		$states = WC()->countries->get_states($data['country_code']);
-		$state_code = self::notNull($this->getDeliveryField('billing_state'));
-		if($states[$state_code])//It is not mandatory, don't send if it is empty
-			$data['state'] = $states[$state_code];
+		if($state_code = self::notNull($this->getDeliveryField('billing_state')))
+			$data['state'] = self::notNull($states[$state_code]);
 		$data['mobile_phone'] = self::notNull($this->getField('billing_phone'));
 		$data['vat_number'] = self::notNull($this->getField('billing_nif'));
 		if ('' == $data['vat_number'])
