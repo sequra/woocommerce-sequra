@@ -67,16 +67,16 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		if ($this->_current_order instanceof SequraTempOrder) {
 			$method = $this->getShippingMethodFromSession();
 			return array(
-				'name' => $method->label,
+				'name' => self::notNull($method->label),
 //			'days' => wc_cart_totals_shipping_method_label($shipping_methods[0]),
-				'provider' => $method->id,
+				'provider' => self::notNull($method->id),
 			);
 		}
 		$shipping_methods = $this->_current_order->get_shipping_methods();
 		$shipping_method = current($shipping_methods);
 		return array(
-			'name' => $shipping_method['name'],
-			'provider' => $shipping_method['method_id'],
+			'name' => self::notNull($shipping_method['name']),
+			'provider' => self::notNull($shipping_method['method_id']),
 		);
 	}
 
