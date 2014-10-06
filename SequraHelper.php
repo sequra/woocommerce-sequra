@@ -30,7 +30,7 @@ class SequraHelper
 		if ($client->succeeded()) {
 			$uri = $client->getOrderUri();
 			WC()->session->set('sequraURI',$uri);
-			return $client->getIdentificationForm($uri, true);
+			return $client->getIdentificationForm($uri, '_ajax');
 		}
 	}
 
@@ -62,13 +62,14 @@ class SequraHelper
 
 	public function getBuilder($order=null)
 	{
-		if ($this->_builder instanceof SequraClient)
+		if ($this->_builder instanceof SequraBuilderAbstract)
 			return $this->_builder;
 
 		if (!class_exists('SequraBuilderAbstract')) require_once($this->dir . 'lib/SequraBuilderAbstract.php');
 		if (!class_exists('SequraTempOrder')) require_once($this->dir . 'SequraTempOrder.php');
 		if (!class_exists('SequraBuilderWC')) require_once($this->dir . 'SequraBuilderWC.php');
-		$this->_builder = new SequraBuilderWC($this->_pm->merchantref,$order);
+		$builderClass = apply_filters('sequra_set_builder_class','SequraBuilderWC');
+		$this->_builder = new $builderClass($this->_pm->merchantref,$order);
 
 		return $this->_builder;
 	}

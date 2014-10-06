@@ -88,7 +88,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		return $package['rates'][current($shipping_methods)];
 	}
 
-	private function getCartcontents()
+	protected function getCartcontents()
 	{
 		if ($this->_current_order->status == 'completed')
 			return $this->_current_order->get_items(apply_filters('woocommerce_admin_order_item_types', array('line_item')));
@@ -112,12 +112,15 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 			$item = array();
 			$item["reference"] = self::notNull($_product->get_sku());
+
 			$name = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key);
 			$item["name"] = $name;
 			$item["price_without_tax"] = self::integerPrice(self::notNull($_product->get_price_excluding_tax()));
 			$item["price_with_tax"] = self::integerPrice(self::notNull($_product->get_price_including_tax()));
 			$item["quantity"] = (int)$cart_item['quantity'] + (int)$cart_item['qty'];
-			$item["tax_rate"] = self::integerPrice(($cart_item['line_tax'] / $cart_item['line_total']) * 100);
+			$item["tax_rate"] = 0;
+			if($cart_item['line_total']!=0)
+				$item["tax_rate"] = self::integerPrice(($cart_item['line_tax'] / $cart_item['line_total']) * 100);
 			//self::integerPrice(self::notNull($cart_item['line_total']));
 			$item["total_without_tax"] = $item["quantity"] * $item["price_without_tax"];
 			//self::integerPrice(self::notNull($cart_item['line_total']+$cart_item['line_total_tax']));

@@ -3,7 +3,7 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes de recibir y luego pagar.
-  Version: 1.0.6
+  Version: 1.0.7
   Author: Mikel Martin
   Author URI: http://SeQura.es/
  */
@@ -56,6 +56,13 @@ function sequra_send_daily_delivery_report()
 	if (!class_exists('SequraReporter'))
 		require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraReporter.php');
 	SequraReporter::sendDailyDeliveryReport();
+}
+
+add_action('init','sequra_triggerreport_check');
+function sequra_triggerreport_check(){
+	if($_GET['sequra_triggerreport']!='true')
+		return;
+	do_action('sequra_send_daily_delivery_report');
 }
 
 register_deactivation_hook(__FILE__, 'sequra_deactivation');

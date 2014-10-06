@@ -42,23 +42,20 @@ class SequraClient
         curl_close($this->ch);
     }
 
-    public function getIdentificationForm($uri,$ajax=false)
-    {
-        $uri .= '/id_form';
-		if($ajax)
-			$uri .= '_ajax';
-		$this->initCurl($uri);
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "GET");
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER, array('Accept: text/html'));
-        $this->sendRequest();
+	public function getIdentificationForm($uri, $subtype = '')
+	{
+		$this->initCurl($uri.'/id_form'.$subtype);
+		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "GET");
+		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array('Accept: text/html'));
+		$this->sendRequest();
 
-        if ($this->status >= 200 && $this->status <= 299) {
-            return $this->curl_result;
-        } else {
-            die(curl_error($this->ch));
-        }
-        curl_close($this->ch);
-    }
+		if ($this->status >= 200 && $this->status <= 299) {
+			return $this->curl_result;
+		} else {
+			die(curl_error($this->ch));
+		}
+		curl_close($this->ch);
+	}
 
     public function updateOrder($uri, $order)
     {
