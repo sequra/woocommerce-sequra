@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class SequraBuilderAbstract
+ */
 abstract class SequraBuilderAbstract
 {
 
@@ -112,7 +115,14 @@ abstract class SequraBuilderAbstract
 
 	public abstract function deliveryMethod();
 
-	public abstract function items();
+	public function items()
+	{
+		return array_merge(
+			$this->productItem(),
+			$this->extraItems(),
+			$this->handlingItems()
+		);
+	}
 
 	public abstract function handlingItems();
 
@@ -155,7 +165,7 @@ abstract class SequraBuilderAbstract
 
 	public static function integerPrice($price)
 	{
-		return intval(round(self::$centsPerWhole * $price));
+		return intval(round(self::$centsPerWhole * $price, PHP_ROUND_HALF_DOWN));
 	}
 
 	protected static function notNull($value1)

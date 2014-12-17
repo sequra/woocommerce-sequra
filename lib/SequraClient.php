@@ -76,7 +76,7 @@ class SequraClient
         $this->initCurl($this->_endpoint . '/delivery_reports');
         $this->verbThePayload('POST', array('delivery_report' => $delivery_report));
 
-        if ($this->status == 204) {
+        if ($this->status >= 200 && $this->status <= 299) {
             $this->success = true;
             $this->logToFile("Delivery " . $this->status . ": Ok!");
         } elseif ($this->status >= 200 && $this->status <= 299 || $this->status == 409) {
