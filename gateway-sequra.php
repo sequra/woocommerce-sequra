@@ -88,12 +88,15 @@ function woocommerce_sequra_init()
 	if (!class_exists('SequraPaymentGateway'))
 		require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraPaymentGateway.php');
 
+	if (!class_exists('SequraPartPaymentGateway'))
+		require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraPartPaymentGateway.php');
 	/**
 	 * Add the gateway to woocommerce
 	 * */
 	function add_sequra_gateway($methods)
 	{
 		$methods[] = 'SequraPaymentGateway';
+		$methods[] = 'SequraPartPaymentGateway';
 		return $methods;
 	}
 
@@ -102,14 +105,23 @@ function woocommerce_sequra_init()
 	/**
 	 * Enqueue plugin style-file
 	 */
-	function sequra_add_stylesheet()
+	function sequra_add_stylesheet_adn_js()
 	{
+		/*@TODO: Load only if necessary */
 		// Respects SSL, Style.css is relative to the current file
-		wp_register_style('sequra-style', plugins_url('assets/css/style.css', __FILE__));
+		wp_register_style('sequra-app-style', plugins_url('assets/css/app.css', __FILE__));
+		wp_enqueue_style('sequra-app-style');
+		wp_register_style('sequra-style', plugins_url('assets/css/sequrapayment.css', __FILE__));
 		wp_enqueue_style('sequra-style');
+		wp_register_style('sequra-custom-style', plugins_url('assets/css/style.css', __FILE__));
+		wp_enqueue_style('sequra-custom-style');
+		wp_enqueue_script('dragdealer-js', plugins_url('assets/js/vendor/dragdealer.min.js', __FILE__));
+		wp_enqueue_script('sequracurrency-js', plugins_url('assets/js/sequracurrencyformat.js', __FILE__));
+		wp_enqueue_script('sequrafraction-js', plugins_url('assets/js/sequrafraction.js', __FILE__));
+		wp_enqueue_script('sequra-js', plugins_url('assets/js/sequrapayment.js', __FILE__));
 	}
 
-	add_action('wp_enqueue_scripts', 'sequra_add_stylesheet');
+	add_action('wp_enqueue_scripts', 'sequra_add_stylesheet_adn_js');
 
 	function sequra_add_cart_info_to_session()
 	{

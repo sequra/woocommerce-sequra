@@ -5,7 +5,7 @@
  * */
 class SequraPaymentGateway extends WC_Payment_Gateway
 {
-	static $endpoints = array(
+	public static $endpoints = array(
 		'https://live.sequrapi.com/orders',
 		'https://sandbox.sequrapi.com/orders'
 	);
@@ -355,7 +355,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 				'redirect' => $this->get_return_url($order)
 			);
 		}
-		return apply_filters('woocommerce_sequra_process_ payment_return', $ret, $this);
+		return apply_filters('woocommerce_sequra_process_payment_return', $ret, $this);
 	}
 
 	/**
@@ -387,5 +387,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	function setEndpoint($url)
 	{
 		$this->endpoint = $url;
+	}
+
+	function merchant(){
+		return array ('approved_callback' => 'shop_callback_sequra_approved');
 	}
 }

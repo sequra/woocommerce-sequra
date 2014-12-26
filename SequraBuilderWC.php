@@ -28,9 +28,11 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 	public function merchant()
 	{
-		$ret = array();
-		$ret['id'] = $this->merchant_id;
-		$ret['approved_callback'] = 'shop_callback_sequra_approved';
+		$ret = parent::merchant();
+		$ret['partpayment_details_getter'] = 'SequraFractionInstance.partpayment_details_getter';
+		$ret['options']['accept_terms_explicitly']= true;
+		if(is_object($this->_pm ))
+			return array_merge($ret,$this->_pm->merchant($this->_current_order));
 		return $ret;
 	}
 
@@ -92,14 +94,19 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	{
 		if ($this->_current_order->status == 'completed')
 			return $this->_current_order->get_items(apply_filters('woocommerce_admin_order_item_types', array('line_item')));
-
+		if ('sequra_pp' == $this->_pm->id)
+			return $this->_current_order->get_items();
 		return $this->_cart->cart_contents;
 	}
 
 	private function getProductFromItem($cart_item, $cart_item_key)
 	{
-		if ($this->_current_order->status == 'completed')
+		if (
+			$this->_current_order->status == 'completed' ||
+			'sequra_pp' == $this->_pm->id
+		){
 			return $this->_current_order->get_product_from_item($cart_item);
+		}
 		return apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
 	}
 
@@ -123,8 +130,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 				$item["tax_rate"] = self::integerPrice(($cart_item['line_tax'] / $cart_item['line_total']) * 100);
 			//self::integerPrice(self::notNull($cart_item['line_total']));
 			$item["total_without_tax"] = $item["quantity"] * $item["price_without_tax"];
-			//self::integerPrice(self::notNull($cart_item['line_total']+$cart_item['line_total_tax']));
-			$item["total_with_tax"] = $item["quantity"] * $item["price_with_tax"];
+			$item["total_with_tax"] = self::integerPrice($_product->get_price_including_tax( $item["quantity"] ));
 			$item["downloadable"] = $_product->is_downloadable();
 
 			// OPTIONAL
@@ -366,7 +372,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 				),
 				array(
 					'key' => '_payment_method',
-					'compare' => '=',
+					'compare' => 'LIKE',
 					'value' => 'sequra',
 				)
 

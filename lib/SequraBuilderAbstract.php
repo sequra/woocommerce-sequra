@@ -42,8 +42,7 @@ abstract class SequraBuilderAbstract
 		$diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
 		$diff_with_tax = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
 		$diff_max = abs(max($diff_with_tax, $diff_without_tax));
-		/*Dont correct error bigger than 2 cents*/
-		if ($diff_max == 0 || $diff_max > 3)
+		if ($diff_max == 0 || $diff_max > count($order['cart']['items']))
 			return $order;
 		$items = array();
 		foreach ($order['cart']['items'] as $item) {
@@ -165,7 +164,7 @@ abstract class SequraBuilderAbstract
 
 	public static function integerPrice($price)
 	{
-		return intval(round(self::$centsPerWhole * $price, PHP_ROUND_HALF_DOWN));
+		return intval(round(self::$centsPerWhole * $price));
 	}
 
 	protected static function notNull($value1)

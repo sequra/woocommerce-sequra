@@ -1,0 +1,224 @@
+/* line 1, ../scss/_general.scss */
+.sequra-fraction-wrapper {
+  color: #333333;
+  max-width: 320px;
+}
+/* line 5, ../scss/_general.scss */
+.sequra-fraction-wrapper a {
+  color: #333333;
+}
+/* line 8, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-title {
+  font-size: 20px;
+}
+/* line 12, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-total {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: right;
+}
+/* line 18, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-choose {
+  color: #78be4e;
+  font-size: 14px;
+  line-height: 1.8em;
+  border-bottom: 1px solid #78be4e;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+/* line 28, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer {
+  position: relative;
+  height: 2px;
+  background: #e1e1e1;
+  border-radius: 3px;
+  margin: 37px 42px 35px 42px;
+}
+/* line 34, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer .handle {
+  margin-top: -11px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
+  background: #78be4e;
+  border-radius: 60px;
+  z-index: 100;
+}
+/* line 46, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer .disabled {
+  background: #898989;
+}
+/* line 50, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer .dots-line {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+}
+/* line 55, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer .dots-line td {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+/* line 59, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer .dots-line td.first {
+  text-align: left;
+}
+/* line 62, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer .dots-line td.last {
+  text-align: right;
+}
+/* line 66, ../scss/_general.scss */
+.sequra-fraction-wrapper .dragdealer .dots-line .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 60px;
+  cursor: pointer;
+  background: #e1e1e1;
+  display: inline-block;
+  position: relative;
+  top: -7px;;
+  z-index: 0;
+  vertical-align: middle;
+}
+/* line 82, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas {
+  width: 100%;
+  margin: 0 0 25px 0;
+}
+/* line 86, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item {
+  width: 89px;
+  padding: 8px 0;
+  margin: 0 auto;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  background: #e1e1e1;
+  border-bottom: 2px solid #9f9e9e;
+  border-radius: 5px;
+  position: relative;
+}
+/* line 97, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item .arrow {
+  display: none;
+}
+/* line 100, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item .upper-btn {
+  text-transform: uppercase;
+  border-bottom: 1px solid #d2d2d2;
+  margin: 0 2px;
+}
+/* line 105, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item .lower-btn {
+  text-transform: lowercase;
+}
+/* line 108, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item:hover {
+  background: #CCCCCC;
+}
+/* line 111, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item.selected {
+  background: #78be4e;
+  border-bottom: 2px solid #78be4e;
+  color: white;
+}
+/* line 115, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item.selected .arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid #78be4e;
+  display: block;
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  margin-left: -6px;
+}
+/* line 128, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-fraction-quotas .sequra-fraction-quota-item-wrapper .sequra-fraction-quota-item.selected .upper-btn {
+  border-bottom: 1px solid #ffffff;
+}
+/* line 137, ../scss/_general.scss */
+.sequra-fraction-wrapper .sequra-extra-info {
+  font-size: 12px;
+  line-height: 1.2em;
+}
+
+/* line 147, ../scss/_general.scss */
+#sequra-fraction-popup {
+  background: black;
+  background: rgba(0, 0, 0, 0.8);
+  font-family: 'Lato', Arial, Helvetica, sans-serif;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  position: fixed;
+  overflow: auto;
+  -webkit-backface-visibility: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+/* line 167, ../scss/_general.scss */
+#sequra-fraction-popup .sequra-info-window {
+  box-sizing: border-box;
+  position: relative;
+  background: white;
+  padding: 25px;
+  width: 50%;
+  margin: 10% auto 0 auto;
+}
+/* line 174, ../scss/_general.scss */
+#sequra-fraction-popup .sequra-info-window h3 {
+  font-size: 20px;
+  font-weight: bold;
+}
+/* line 178, ../scss/_general.scss */
+#sequra-fraction-popup .sequra-info-window p {
+  font-size: 16px;
+  line-height: 1.2em;
+}
+
+/* line 185, ../scss/_general.scss */
+#sequra-info-window-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  border-radius: 60px;
+  background: #78be4e;
+  display: block;
+  padding: 3px 6px;
+  color: white;
+  font-size: 18px;
+  line-height: 17px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+#sequra-wrapper table,
+#sequra-wrapper th,
+#sequra-wrapper td {
+    border:0px;
+}
+@media (max-width: 767px) {
+  /* line 207, ../scss/_general.scss */
+  #sequra-fraction-popup .sequra-info-window {
+    margin: 1.4rem auto;
+    width: 85%;
+  }
+  /* line 210, ../scss/_general.scss */
+  #sequra-fraction-popup .sequra-info-window h3 {
+    font-size: 18px;
+  }
+  /* line 213, ../scss/_general.scss */
+  #sequra-fraction-popup .sequra-info-window p {
+    font-size: 14px;
+  }
+}

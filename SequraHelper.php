@@ -14,10 +14,11 @@ class SequraHelper
 		$this->dir = WP_PLUGIN_DIR . "/" . plugin_basename(dirname(__FILE__)) . '/';
 	}
 
-	function get_identity_form()
+	function get_identity_form($mode='_ajax',$order=null)
 	{
 		$client = $this->getClient();
-		$builder = $this->getBuilder();
+		$builder = $this->getBuilder($order);
+		$builder->setPaymentMethod($this->_pm);
 		try {
 			$order = $builder->build();
 		} catch (Exception $e) {
@@ -30,7 +31,7 @@ class SequraHelper
 		if ($client->succeeded()) {
 			$uri = $client->getOrderUri();
 			WC()->session->set('sequraURI',$uri);
-			return $client->getIdentificationForm($uri, '_ajax');
+			return $client->getIdentificationForm($uri, $mode);
 		}
 	}
 
