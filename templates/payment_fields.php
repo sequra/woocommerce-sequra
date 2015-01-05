@@ -10,7 +10,7 @@ foreach ($payment_fields as $key => $field)
 <div class="sequra_popup" id="sequra_factura_popup">
 	<div class="sequra_white_content">
 		<div class="sequra_content_popup">
-			<h4 id="sequra_text_title"><?php $this->title;?></h4>
+			<h4 id="sequra_text_title"><?= $this->title;?></h4>
 			<p>Compra hoy y paga después de recibir tus pedidos. Así de sencillo.</p>
 
 			<div class="sequra_image_wrapper"></div>
