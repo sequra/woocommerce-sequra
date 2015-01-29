@@ -68,18 +68,15 @@
 	</div>
 </div>
 <script type="text/javascript">
-	(function () {
-		new SequraFraction({
-			totalPrice: <?php echo $total_price;?>,
-			element: document.getElementById('sequra-wrapper')
-		});
-	})();
-
 	jQuery( document ).ready(function($) {
 		$('#sequra_partpayments_identity_form_popup').fadeIn();
 		$("#sequra_partpayments_identity_form_popup .sequra_popup_close").on('click', function() {
 			document.location.href = $('#sequra_back').attr('href');
 		});
 		$('#sequra-identification  input[type="submit"]').removeClass().addClass("checkout-button button alt wc-forward");
+		new SequraFraction({
+			totalPrice: <?php echo $total_price;?>,
+			element: document.getElementById('sequra-wrapper')
+		});
 	});
 </script>

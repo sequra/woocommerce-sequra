@@ -209,10 +209,11 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * receipt_page
 	 * */
 	function receipt_page($order) {
+		global $woocommerce;
 		$order = new WC_Order($order);
 		echo '<p>' . __('Thank you for your order, please click the button below to pay with your Credit Card.', 'wc_sequra') . '</p>';
 		$this->identity_form = $this->helper->get_identity_form('_partpayment',$order);
-		$back = $order->get_cancel_order_url();
+		$back = $woocommerce->cart->get_checkout_url();
 		$extra_fields = apply_filters('woocommerce_sequra_payment_extra_fields', array(), $this);
 		$total_price = round($order->get_total() * 100);
 		$instalment_fee = ($total_price < 20000 ? 300 : 500);

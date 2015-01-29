@@ -17,7 +17,7 @@ foreach ($payment_fields as $key => $field)
 					<li>Fácil de usar y sencillo. Tu compra hecha en menos de un minuto.</li>
 					<li>El único coste es de 3€ por cuota o de 5€ si el pedido vale más de 200€. Sin intereses ocultos ni letra pequeña.</li>
 					<li>La aprobación es instantánea, por lo que los productos se envían de forma inmediata.</li>
-					<li>El primer pago se hace con tarjeta, pero los siguientes se pueden hacer con tarjeta o por transferencia bancaria.</li>
+					<li>El primer pago se hace con tarjeta en el momento de la realizaci&oacute;n del pedido. Los pagos siguientes se cargar&aacute;n autom&aacute;ticamente cada mes en la tarjeta.</li>
 					<li>Puedes pagar la totalidad cuando tú quieras.</li>
 					<li>Disponible para compras superiores a 50€.</li>
 					<li>El servicio es ofrecido conjuntamente con <a href="https://sequra.es/es/fraccionados" target="_blank">SeQura</a></li>
@@ -36,5 +36,5 @@ foreach ($payment_fields as $key => $field)
 	</div>
 </div>
 <script>
-	SequraHelper.popupize(jQuery( '#sequra_partpayments_popup' ));
+	SequraHelper.preparePopup();
 </script>
