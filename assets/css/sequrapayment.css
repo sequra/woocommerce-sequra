@@ -66,7 +66,7 @@
 .sequra_popup_trigger:hover{background-color: #00d937 !important;}
 
 /******** Popup system **********/
-.sequra_popup {display: none;min-width: 360px;position: fixed;top: 0%;left: 0%;width: 100%;height: 100%;background: black;background: rgba(0, 0, 0, 0.8);z-index: 9001;overflow:auto;}
+.sequra_popup {display: none;min-width: 320px;position: fixed;top: 0%;left: 0%;width: 100%;height: 100%;background: black;background: rgba(0, 0, 0, 0.8);z-index: 9001;overflow:auto;}
 .sequra_popup ul {list-style: circle;}
 
 .sequra_white_content {min-width: 320px;position: relative;width: 50%;padding: 0;border-radius: 1em;-moz-border-radius: 1em;-webkit-border-radius: 1em;background-color: white;overflow: auto;line-height: 1.2em;margin: 5% auto 0 auto;z-index: 9002;text-align: left;}
