@@ -6,7 +6,7 @@ SequraFraction = function(settings){
         timestamp : new Date().getTime(),
         quotas : [3, 6, 12],
         quotaPrices : [],
-        taxRanges : [ {min: 0, max: 19999, tax: 300}, {min:20000,max:50000, tax: 500}],
+        taxRanges : [ {min: 0, max: 19999, tax: 300}, {min:20000,max:99999999, tax: 500}],
         currentTax : false,
         showExtraText: false,
         element : document.body,
