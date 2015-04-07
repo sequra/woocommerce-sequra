@@ -366,7 +366,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	 */
 	public function calculate_order_totals($cart)
 	{
-		if ($_POST['payment_method'] != $this->id ||
+		if (
+			!isset($_POST['payment_method']) ||
+			$_POST['payment_method'] != $this->id ||
 			!defined('WOOCOMMERCE_CHECKOUT') ||
 			!($this->fee > 0)
 		) {

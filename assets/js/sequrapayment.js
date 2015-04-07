@@ -26,9 +26,9 @@ var SequraHelper = {
         });
 
         /*
-         * Add close button to popups
-         */
-        jQuery('.sequra_popup .sequra_white_content').each(function (){
+        * Add close button to popups
+        */
+        jQuery('.sequra_popup .sequra_white_content.closeable').each(function (){
             jQuery(this).prepend('<a class="sequra_popup_close">close</a>');
         });
 
@@ -36,7 +36,31 @@ var SequraHelper = {
             jQuery(this).parent().parent().fadeOut();
             return false;
         });
+    },
+
+    preparePartPaymentAcordion: function() {
+        function displayFirstStep() {
+            jQuery("#sequra_partpayment_alt_tittle").hide();
+            jQuery("#sequra_partpayment_tittle").show();
+            jQuery("#first_step_content").slideDown()
+            jQuery("#second_step_content").slideUp()
+        };
+        function displaySecondStep() {
+            jQuery("#sequra_partpayment_tittle").hide();
+            jQuery("#first_step_content").slideUp();
+            jQuery("#sequra_partpayment_alt_tittle").show();
+            jQuery("#second_step_content").slideDown()
+        };
+        jQuery(document).delegate("#sequra_partpayment_tittle2, #part_payment_last_step", 'click', function() {
+            displaySecondStep();
+            return false;
+        });
+        jQuery(document).delegate("#sequra_partpayment_alt_tittle,#sequra_partpayment_tittle", 'click', function() {
+            displayFirstStep();
+            return false;
+        })
+        jQuery("#sequra_partpayment_alt_tittle").hide();
     }
 };
 
-(function () { SequraHelper.preparePopup(); });
+(jQuery(function () { SequraHelper.preparePopup(); }));

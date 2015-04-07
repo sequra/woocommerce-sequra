@@ -121,7 +121,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$item["reference"] = self::notNull($_product->get_sku());
 
 			$name = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key);
-			$item["name"] = $name;
+			$item["name"] = strip_tags($name);
 			$item["price_without_tax"] = self::integerPrice(self::notNull($_product->get_price_excluding_tax()));
 			$item["price_with_tax"] = self::integerPrice(self::notNull($_product->get_price_including_tax()));
 			$item["quantity"] = (int)$cart_item['quantity'] + (int)$cart_item['qty'];
@@ -134,7 +134,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$item["downloadable"] = $_product->is_downloadable();
 
 			// OPTIONAL
-			$item["description"] = self::notNull(get_post($_product->id)->post_content);
+			$item["description"] = strip_tags(self::notNull(get_post($_product->id)->post_content));
 			$item["product_id"] = self::notNull($_product->id);
 			$item["url"] = self::notNull(get_permalink($_product->id));
 			$item["category"] = self::notNull(strip_tags($_product->get_categories()));
