@@ -60,7 +60,7 @@ function sequra_send_daily_delivery_report()
 
 add_action('init','sequra_triggerreport_check');
 function sequra_triggerreport_check(){
-	if($_GET['sequra_triggerreport']!='true')
+	if(isset($_GET['sequra_triggerreport']) && $_GET['sequra_triggerreport']!='true')
 		return;
 	do_action('sequra_send_daily_delivery_report');
 }

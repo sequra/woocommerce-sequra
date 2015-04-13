@@ -27,7 +27,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->user = $this->sequra->settings['user'];
 		$this->password = $this->sequra->settings['password'];
 		$this->enable_for_countries = $this->sequra->enable_for_countries;
-		$this->debug = $this->sequra->settings->debug;
+		$this->debug = $this->sequra->settings['debug'];
 		$this->max_amount = $this->settings['max_amount'];
 		$this->min_amount = $this->settings['min_amount'];
 		$this->env = $this->sequra->env;
@@ -196,7 +196,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * return double
 	 */
 	public function calculate_order_totals($cart) {
-		if ($_POST['payment_method'] != $this->id ||
+		if ((isset($_POST['payment_method']) && $_POST['payment_method'] != $this->id) ||
 			!defined('WOOCOMMERCE_CHECKOUT') ||
 			!($this->fee > 0)
 		) {
