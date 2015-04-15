@@ -281,7 +281,13 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	{
 		$data = array();
 		$data['language_code'] = self::notNull(self::getCustomerLanguange());
-		$data['ip_number'] = $_SERVER["REMOTE_ADDR"];
+		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+			$data['ip_number'] = $_SERVER['HTTP_CLIENT_IP'];
+		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$data['ip_number'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		} else {
+			$data['ip_number'] = $_SERVER['REMOTE_ADDR'];
+		}
 		$data['user_agent'] = $_SERVER["HTTP_USER_AGENT"];
 		$data['logged_in'] = is_user_logged_in();
 		$id = $data['logged_in'] ? get_current_user_id() : -1;
