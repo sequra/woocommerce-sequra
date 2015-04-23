@@ -60,7 +60,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 	{
 		$totals = self::totals($order['cart']);
 		$diff = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
-		if($diff != 0 && $diff <= count($order['cart']['items'])){
+		if($diff != 0 && abs($diff) <= count($order['cart']['items'])){
 			$item = array();
 			$item["type"] = "discount";
 			$item["reference"] = 'Redondeo';
@@ -119,6 +119,17 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		return apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
 	}
 
+	protected function discount($ref,$amount){
+		$discount = -1 * $amount;
+		$item = array();
+		$item["type"] = "discount";
+		$item["reference"] = self::notNull($ref);
+		$item["name"] = 'Descuento';
+		$item["total_without_tax"] = self::integerPrice($discount);
+		$item["total_with_tax"] = self::integerPrice($discount);
+		return $item;
+	}
+
 	public function items()
 	{
 		$items = array();
@@ -148,22 +159,15 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 		//order discounts
 		if ($this->_current_order instanceof SequraTempOrder) {
-			$discount = $this->_cart->discount_total + $this->_cart->discount_cart;
+			foreach($this->_cart->coupon_discount_amounts as $key => $val){
+				$items[] = $this->discount($key,$val);
+			}
 		} else {
-			$discount = $this->_current_order->get_total_discount();
+			foreach($this->_current_order->get_items( 'coupon' ) as $key => $val){
+				$items[] = $this->discount($val['name'],$val['discount_amount']);
+			}
 		}
-		if ($discount > 0) {
-			$discount = -1 * $discount;
-		}
-		if(0 != $discount){
-			$item = array();
-			$item["type"] = "discount";
-			$item["reference"] = self::notNull($this->_cart->applied_coupons[0]);
-			$item["name"] = 'Descuento';
-			$item["total_without_tax"] = self::integerPrice($discount);
-			$item["total_with_tax"] = self::integerPrice($discount);
-			$items[] = $item;
-		}
+
 		//add Customer fee (without tax)
 		$item = array();
 		if ($this->_current_order instanceof SequraTempOrder) {
@@ -430,6 +434,12 @@ class SequraBuilderWC extends SequraBuilderAbstract
 			$this->items(),
 			$this->handlingItems()
 		);
+
+		if (count($data['items']) > 0) {
+			$totals = self::totals($data);
+			$data['order_total_without_tax'] = $totals['without_tax'];
+			$data['order_total_with_tax'] = $totals['with_tax'];
+		}
 		return $data;
 	}
 

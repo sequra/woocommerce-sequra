@@ -8,7 +8,7 @@ foreach ($payment_fields as $key => $field)
 <a href="#" class="trigger" rel="sequra_factura_popup">Más información</a>
 <!-- popup content -->
 <div class="sequra_popup" id="sequra_factura_popup">
-	<div class="sequra_white_content">
+	<div class="sequra_white_content closeable">
 		<div class="sequra_content_popup">
 			<h4 id="sequra_text_title"><?php echo $this->title;?></h4>
 			<p>Compra hoy y paga después de recibir tus pedidos. Así de sencillo.</p>
