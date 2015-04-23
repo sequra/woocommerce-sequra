@@ -160,11 +160,13 @@ class SequraBuilderWC extends SequraBuilderAbstract
 		//order discounts
 		if ($this->_current_order instanceof SequraTempOrder) {
 			foreach($this->_cart->coupon_discount_amounts as $key => $val){
-				$items[] = $this->discount($key,$val);
+				$amount = $val + $this->_cart->coupon_discount_tax_amounts[$key];
+				$items[] = $this->discount($key,$amount);
 			}
 		} else {
 			foreach($this->_current_order->get_items( 'coupon' ) as $key => $val){
-				$items[] = $this->discount($val['name'],$val['discount_amount']);
+				$amount = $val['discount_amount'] + $val['discount_amount_tax'];
+				$items[] = $this->discount($val['name'],$amount);
 			}
 		}
 

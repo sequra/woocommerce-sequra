@@ -358,8 +358,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 				'result' => 'success',
 				'redirect' => $this->get_return_url($order)
 			);
+			return apply_filters('woocommerce_sequra_process_payment_return', $ret, $this);
+		}else{
+			wc_add_notice( __( 'Error en el pago, por favor, inténtelo de nuevo o seleccione otro método', 'woocommerce' ) , 'error' );
 		}
-		return apply_filters('woocommerce_sequra_process_payment_return', $ret, $this);
 	}
 
 	/**
