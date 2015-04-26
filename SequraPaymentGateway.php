@@ -27,7 +27,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 
 		// Get setting values
 		$this->enabled = 'yes' == $this->settings['enabled'];
-		if ( ! is_admin() ) {
+		if ( ! is_admin() || basename($_SERVER['SCRIPT_NAME'])=='admin-ajax.php'  ) {
 			$this->title = $this->settings['title'];
 		} else {
 			$this->title = strip_tags($this->settings['title']);
