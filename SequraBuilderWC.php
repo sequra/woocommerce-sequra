@@ -142,10 +142,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
 			$name = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key);
 			$item["name"] = strip_tags($name);
-			$item["price_without_tax"] = $item["price_with_tax"] = self::integerPrice(self::notNull($cart_item['line_subtotal']+$cart_item['line_subtotal_tax']));
 			$item["quantity"] = (int)$cart_item['quantity'] + (int)$cart_item['qty'];
+			$item["price_without_tax"] = $item["price_with_tax"] = self::integerPrice(self::notNull(($cart_item['line_subtotal']+$cart_item['line_subtotal_tax']))/$item['quantity']);
 			$item["tax_rate"] = 0;			//self::integerPrice(self::notNull($cart_item['line_total']));
-			$item["total_without_tax"] = $item["total_with_tax"] = self::integerPrice($cart_item['line_total']+$cart_item['line_tax']);
+			$item["total_without_tax"] = $item["total_with_tax"] = self::integerPrice($cart_item['line_subtotal']+$cart_item['line_subtotal_tax']);
 			$item["downloadable"] = $_product->is_downloadable();
 
 			// OPTIONAL
