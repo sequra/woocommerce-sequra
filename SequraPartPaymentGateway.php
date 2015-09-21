@@ -109,7 +109,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			return false;
 
 		$order = null;
-
+		$sequra_settings = get_option( $this->plugin_id . 'sequra_settings', null );
 		if (
 			$this->enable_for_countries &&
 			!in_array(WC()->customer->get_shipping_country(), $this->enable_for_countries)
@@ -122,8 +122,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		if (WC()->cart && 0 < $this->get_order_total() && $this->min_amount > $this->get_order_total()) {
 			return false;
 		}
-		if (1 == $this->env && '' != $this->settings['test_ips']) { //Sandbox
-			$ips = explode(',', $this->settings['test_ips']);
+		if (1 == $this->env && '' != $sequra_settings['test_ips']) { //Sandbox
+			$ips = explode(',', $sequra_settings['test_ips']);
 			return in_array($_SERVER['REMOTE_ADDR'], $ips);
 		}
 		return true;

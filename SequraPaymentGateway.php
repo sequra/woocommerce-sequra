@@ -286,8 +286,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	 * */
 	function payment_fields()
 	{
-		if ('woocommerce_update_order_review' == $_REQUEST['action'])
-			$this->identity_form = $this->helper->get_identity_form();
+		$this->identity_form = $this->helper->get_identity_form();
 		$payment_fields = apply_filters('woocommerce_sequra_payment_fields', array(), $this);
 		require($this->helper->template_loader('payment_fields'));
 		?>
