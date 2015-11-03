@@ -1,178 +1,230 @@
 <?php
 
-class SequraClient
-{
+class SequraClient {
 
-    public static $endpoint = '';
-    public static $user = '';
-    public static $password = '';
-    public static $user_agent = null;
+	public static $endpoint = '';
+	public static $user = '';
+	public static $password = '';
+	public static $user_agent = null;
 
-    protected $_endpoint;
-    protected $_user;
-    protected $_password;
-    protected $_user_agent;
+	private $_endpoint;
+	private $_user;
+	private $_password;
+	private $_user_agent;
 
-    protected $success;
-    protected $cart_has_changed;
-    protected $status;
-    protected $curl_result = null;
-    protected $json = null;
+	private $success;
+	private $cart_has_changed;
+	private $headers;
+	private $status;
+	private $curl_result = null;
+	private $json = null;
 
-    public function __construct($user = null, $password = null, $endpoint = null)
-    {
-        $this->_user = self::notNull($user, self::$user);
-        $this->_password = self::notNull($password, self::$password);
-        $this->_endpoint = self::notNull($endpoint, self::$endpoint);
-        $this->_user_agent = self::notNull(self::$user_agent, 'cURL php ' . phpversion());
-    }
+	public function __construct($user = null, $password = null, $endpoint = null) {
+		$this->_user = self::notNull($user, self::$user);
+		$this->_password = self::notNull($password, self::$password);
+		$url_parts = parse_url(self::notNull($endpoint, self::$endpoint));
+		if (count($url_parts)>1) {
+			$this->_endpoint = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['port']) ? ':' . $url_parts['port'] : '');
+		}
+		$this->_user_agent = self::notNull(self::$user_agent, 'cURL php ' . phpversion());
+	}
 
-    public function startSolicitation($order)
-    {
-        $this->initCurl($this->_endpoint);
-        $this->verbThePayload('POST', array('order' => $order));
-        if ($this->status == 204) {
-            $this->success = true;
-            $this->logToFile("Start " . $this->status . ": Ok!");
-        } elseif ($this->status >= 200 && $this->status <= 299 || $this->status == 409) {
-            $this->json = json_decode($this->curl_result, true); // return array, not object
-            $this->logToFile("Start " . $this->status . ": " . $this->curl_result);
-        }
+	public function startSolicitation($order) {
+		if (!$this->qualifyForSolicitation($order))
+			return;
 
-        curl_close($this->ch);
-    }
+		$this->initCurl($this->_endpoint . '/orders');
+		$this->verbThePayload('POST', array('order' => $order));
+		if ($this->status == 204) {
+			$this->success = true;
+			$this->logToFile("Start " . $this->status . ": Ok!");
+		} elseif ($this->status >= 200 && $this->status <= 299 || $this->status == 409) {
+			$this->json = json_decode($this->curl_result, true); // return array, not object
+			$this->logToFile("Start " . $this->status . ": " . $this->curl_result);
+		}
+		curl_close($this->ch);
+	}
 
-	public function getIdentificationForm($uri, $subtype = '')
-	{
-		$this->initCurl($uri.'/id_form'.$subtype);
+	public function qualifyForSolicitation($order) {
+		if ($order['cart']['order_total_with_tax'] <= 0)
+			return false;
+		if (!self::isConsistentCart($order['cart']))
+			return false;
+		return true;
+	}
+
+	public function getIdentificationForm($uri, $options = array()) {
+		$product = array_key_exists('product', $options) ? $options["product"] : "i1";
+		$ajax = (isset($options["ajax"]) && $options["ajax"]) ? "true" : "false";
+		$this->initCurl($uri . '/id_form?product='. $product .'&ajax='. $ajax);
 		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "GET");
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array('Accept: text/html'));
 		$this->sendRequest();
 
 		if ($this->status >= 200 && $this->status <= 299) {
+			curl_close($this->ch);
 			return $this->curl_result;
+		} elseif ($this->status >= 400 && $this->status <= 499) {
+			$this->logToFile("Error " . $this->status . ": " . print_r($this->curl_result, true));
 		} else {
-			die(curl_error($this->ch));
+			$this->logToFile("Error " . $this->status . ": " . print_r($this->curl_result, true));
 		}
 		curl_close($this->ch);
 	}
 
-    public function updateOrder($uri, $order)
-    {
-        $this->initCurl($uri);
-        $this->verbThePayload('PUT', array('order' => $order));
+	public function getCreditAgreements($amount, $merchant) {
+		$uri = $this->_endpoint . '/merchants/' . $merchant . '/credit_agreements?total_with_tax=' . $amount . '&currency=EUR&locale=es-ES&country=ES';
+		$this->initCurl($uri);
+		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "GET");
+		$this->sendRequest();
 
-        if ($this->status >= 200 && $this->status <= 299) {
-            $this->success = true;
-        } elseif ($this->status == 409) {
-            $this->cart_has_changed = true;
-            $this->json = json_decode($this->curl_result, true);
-        }
-        curl_close($this->ch);
-    }
+		if ($this->status >= 200 && $this->status <= 299) {
+			curl_close($this->ch);
+			return json_decode($this->curl_result, true);
+		} elseif ($this->status >= 400 && $this->status <= 499) {
+			$this->logToFile("Error " . $this->status . ": " . print_r($this->curl_result, true));
+		} else {
+			$this->logToFile("Error " . $this->status . ": " . print_r($this->curl_result, true));
+		}
+		curl_close($this->ch);
+	}
 
-    public function sendDeliveryReport($delivery_report)
-    {
-        $this->initCurl($this->_endpoint . '/delivery_reports');
-        $this->verbThePayload('POST', array('delivery_report' => $delivery_report));
+	public function updateOrder($uri, $order) {
+		$this->initCurl($uri);
+		$this->verbThePayload('PUT', array('order' => $order));
 
-        if ($this->status >= 200 && $this->status <= 299) {
-            $this->success = true;
-            $this->logToFile("Delivery " . $this->status . ": Ok!");
-        } elseif ($this->status >= 200 && $this->status <= 299 || $this->status == 409) {
-            $this->json = json_decode($this->curl_result, true); // return array, not object
-            $this->logToFile("Delivery " . $this->status . ": " . $this->json);
-        }
-        curl_close($this->ch);
-    }
+		if ($this->status >= 200 && $this->status <= 299) {
+			$this->success = true;
+		} elseif ($this->status == 409) {
+			$this->cart_has_changed = true;
+			$this->json = json_decode($this->curl_result, true);
+		}
+		curl_close($this->ch);
+	}
 
-    public function succeeded()
-    {
-        return $this->success;
-    }
+	public function sendDeliveryReport($delivery_report) {
+		$this->initCurl($this->_endpoint . '/delivery_reports');
+		$this->verbThePayload('POST', array('delivery_report' => $delivery_report));
 
-    public function getJson()
-    {
-        return $this->json;
-    }
+		if ($this->status >= 200 && $this->status <= 299) {
+			$this->success = true;
+			$this->logToFile("Delivery " . $this->status . ": Ok!");
+		} elseif ($this->status >= 200 && $this->status <= 299 || $this->status == 409) {
+			$this->json = json_decode($this->curl_result, true); // return array, not object
+			$this->logToFile("Delivery " . $this->status . ": " . print_r($this->json, true));
+		}
+		curl_close($this->ch);
+	}
 
-    public function getStatus()
-    {
-        return $this->status;
-    }
+	public function callCron($cron_url) {
+		$this->_user_agent = 'sequra-cron';
+		$this->initCurl($cron_url);
+		curl_setopt($this->ch, CURLOPT_HTTPGET, 1);
+		$this->sendRequest();
+		curl_close($this->ch);
+	}
 
-    public function cartHasChanged()
-    {
-        return $this->cart_has_changed;
-    }
+	public function succeeded() {
+		return $this->success;
+	}
 
-    public function getOrderUri()
-    {
-        if (preg_match('/^Location:\s+([^\n\r]+)/mi', $this->headers, $m)) {
-            return $m[1];
-        }
-    }
+	public function getJson() {
+		return $this->json;
+	}
 
-    // protected methods below
+	public function getStatus() {
+		return $this->status;
+	}
 
-    protected function initCurl($url)
-    {
-        $this->success = $this->json = null;
-        $this->ch = curl_init($url);
-        curl_setopt($this->ch, CURLOPT_USERPWD, $this->_user . ':' . $this->_password);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, $this->_user_agent);
-        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($this->ch, CURLOPT_FAILONERROR, false);
-        curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
-        // Some versions of openssl seem to need this
-        // http://www.supermind.org/blog/763/solved-curl-56-received-problem-2-in-the-chunky-parser
-        curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-        // From http://it.toolbox.com/wiki/index.php/Use_curl_from_PHP_-_processing_response_headers
-        curl_setopt($this->ch, CURLOPT_HEADERFUNCTION, array(&$this, 'storeHeaders'));
-        $this->headers = '';
-    }
+	public function cartHasChanged() {
+		return $this->cart_has_changed;
+	}
 
-    protected function storeHeaders($ch, $header)
-    {
-        $this->headers .= $header;
-        return strlen($header);
-    }
+	public function getOrderUri() {
+		if (preg_match('/^Location:\s+([^\n\r]+)/mi', $this->headers, $m)) {
+			return $m[1];
+		}
+	}
 
-    protected function verbThePayload($verb, $payload)
-    {
-        $data_string = json_encode($payload);
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $verb);
-        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
-                'Accept: application/json',
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data_string))
-        );
-        $this->sendRequest();
-    }
+	public static function isConsistentCart($cart) {
+		$totals = self::totals($cart);
+		return $cart['order_total_without_tax'] == $totals['without_tax'] && $cart['order_total_with_tax'] == $totals['with_tax'];
+	}
 
-    protected function sendRequest()
-    {
-        $this->curl_result = curl_exec($this->ch);
-        $this->status = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
-    }
+	public static function totals($cart) {
+		$total_without_tax = $total_with_tax = 0;
+		foreach ($cart['items'] as $item) {
+			$total_without_tax += isset($item['total_without_tax'])?$item['total_without_tax']:0;
+			$total_with_tax += isset($item['total_with_tax'])?$item['total_with_tax']:0;
+		}
+		return array('without_tax' => $total_without_tax, 'with_tax' => $total_with_tax);
+	}
 
-    protected static function notNull($value1, $value2)
-    {
-        return is_null($value1) ? $value2 : $value1;
-    }
+	public static function removeNulls($data) {
+		foreach ($data as $key => $value) {
+			if (is_null($value)) {
+				unset($data[$key]);
+			} else if (is_array($value)) {
+				$data[$key] = self::removeNulls($value);
+			}
+		}
+		return $data;
+	}
 
-    const LOG_FILE = null;
+	// Private methods below
 
-    // const LOG_FILE = 'ROOT/log/sequra.log';
+	private function initCurl($url) {
+		$this->success = $this->json = null;
+		$this->ch = curl_init($url);
+		curl_setopt($this->ch, CURLOPT_USERPWD, $this->_user . ':' . $this->_password);
+		curl_setopt($this->ch, CURLOPT_USERAGENT, $this->_user_agent);
+		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($this->ch, CURLOPT_FAILONERROR, false);
+		curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
+		// Some versions of openssl seem to need this
+		// http://www.supermind.org/blog/763/solved-curl-56-received-problem-2-in-the-chunky-parser
+		curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+		// From http://it.toolbox.com/wiki/index.php/Use_curl_from_PHP_-_processing_response_headers
+		curl_setopt($this->ch, CURLOPT_HEADERFUNCTION, array(&$this, 'storeHeaders'));
+		$this->headers = '';
+	}
 
-    function logToFile($msg)
-    {
-        if (!self::LOG_FILE) return;
-        $path = str_replace('ROOT', $_SERVER['DOCUMENT_ROOT'], self::LOG_FILE);
-        $fd = fopen($path, "a");
-        $str = "[" . date("Y-m-d H:i:s", time()) . "] " . $msg;
-        fwrite($fd, $str . "\n");
-        fclose($fd);
-    }
+	private function storeHeaders($ch, $header) {
+		$this->headers .= $header;
+		return strlen($header);
+	}
+
+	private function verbThePayload($verb, $payload) {
+		$data_string = json_encode(self::removeNulls($payload));
+		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $verb);
+		curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data_string);
+		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
+				'Accept: application/json',
+				'Content-Type: application/json',
+				'Content-Length: ' . strlen($data_string))
+		);
+		$this->sendRequest();
+	}
+
+	private function sendRequest() {
+		$this->curl_result = curl_exec($this->ch);
+		$this->status = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
+	}
+
+	private static function notNull($value1, $value2) {
+		return is_null($value1) ? $value2 : $value1;
+	}
+
+	const LOG_FILE = null;
+
+	// const LOG_FILE = 'ROOT/log/sequra.log';
+
+	function logToFile($msg) {
+		if (!self::LOG_FILE) return;
+		$path = str_replace('ROOT', $_SERVER['DOCUMENT_ROOT'], self::LOG_FILE);
+		$fd = fopen($path, "a");
+		$str = "[" . date("Y-m-d H:i:s", time()) . "] " . $msg;
+		fwrite($fd, $str . "\n");
+		fclose($fd);
+	}
 }

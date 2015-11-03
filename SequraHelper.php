@@ -1,6 +1,6 @@
 <?php
-class SequraHelper
-{
+
+class SequraHelper {
 	/* Payment Method */
 	private $_pm;
 	/* Sequra Client */
@@ -8,15 +8,13 @@ class SequraHelper
 	/* Json builder */
 	private $_builder;
 
-	public function __construct($pm)
-	{
+	public function __construct($pm) {
 		$this->_pm = $pm;
 		$this->dir = WP_PLUGIN_DIR . "/" . plugin_basename(dirname(__FILE__)) . '/';
 	}
 
-	function get_identity_form($mode='_ajax',$order=null)
-	{
-		$client = $this->getClient();
+	function get_identity_form($options, $order = null) {
+		$client  = $this->getClient();
 		$builder = $this->getBuilder($order);
 		$builder->setPaymentMethod($this->_pm);
 		try {
@@ -30,15 +28,22 @@ class SequraHelper
 		$client->startSolicitation($order);
 		if ($client->succeeded()) {
 			$uri = $client->getOrderUri();
-			WC()->session->set('sequraURI',$uri);
-			return $client->getIdentificationForm($uri, $mode);
+			WC()->session->set('sequraURI', $uri);
+			return $client->getIdentificationForm($uri, $options);
 		}
 	}
 
-	function get_approval($order)
-	{
-		$client = $this->getClient();
-		$data = $this->getBuilder($order)->build('confirmed');
+	function get_credit_agreements($amount) {
+		return $this->getClient()->getCreditAgreements(SequraBuilderWC::integerPrice($amount), $this->_pm->merchantref);
+	}
+
+
+	function get_approval($order) {
+		$client  = $this->getClient();
+		$builder = $this->getBuilder($order);
+		$builder->setPaymentMethod($this->_pm);
+		$data = $builder->build('confirmed');
+
 		$uri = WC()->session->get('sequraURI');
 		$client->updateOrder($uri, $data);
 		update_post_meta((int)$order->id, 'Transaction ID', WC()->session->get('sequraURI'));
@@ -47,36 +52,33 @@ class SequraHelper
 		return $client->succeeded();
 	}
 
-	public function getClient()
-	{
+	public function getClient() {
 		if ($this->_client instanceof SequraClient)
 			return $this->_client;
 		if (!class_exists('SequraClient')) require_once($this->dir . 'lib/SequraClient.php');
-		SequraClient::$endpoint = $this->_pm->endpoint;
-		SequraClient::$user = $this->_pm->user;
-		SequraClient::$password = $this->_pm->password;
+		SequraClient::$endpoint   = $this->_pm->endpoint;
+		SequraClient::$user       = $this->_pm->user;
+		SequraClient::$password   = $this->_pm->password;
 		SequraClient::$user_agent = 'cURL WooCommerce ' . WOOCOMMERCE_VERSION . ' php ' . phpversion();
-		$this->_client = new SequraClient();
+		$this->_client            = new SequraClient();
 
 		return $this->_client;
 	}
 
-	public function getBuilder($order=null)
-	{
+	public function getBuilder($order = null) {
 		if ($this->_builder instanceof SequraBuilderAbstract)
 			return $this->_builder;
 
 		if (!class_exists('SequraBuilderAbstract')) require_once($this->dir . 'lib/SequraBuilderAbstract.php');
 		if (!class_exists('SequraTempOrder')) require_once($this->dir . 'SequraTempOrder.php');
 		if (!class_exists('SequraBuilderWC')) require_once($this->dir . 'SequraBuilderWC.php');
-		$builderClass = apply_filters('sequra_set_builder_class','SequraBuilderWC');
-		$this->_builder = new $builderClass($this->_pm->merchantref,$order);
+		$builderClass   = apply_filters('sequra_set_builder_class', 'SequraBuilderWC');
+		$this->_builder = new $builderClass($this->_pm->merchantref, $order);
 
 		return $this->_builder;
 	}
 
-	public function template_loader($template)
-	{
+	public function template_loader($template) {
 		if (file_exists(STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php'))
 			return STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
 		elseif (file_exists(TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php'))
@@ -89,8 +91,7 @@ class SequraHelper
 			return WP_CONTENT_DIR . "/plugins/" . plugin_basename(dirname(__FILE__)) . '/templates/' . $template . '.php';
 	}
 
-	public static function get_cart_info_from_session()
-	{
+	public static function get_cart_info_from_session() {
 		sequra_add_cart_info_to_session();
 		return WC()->session->get('sequra_cart_info');
 	}

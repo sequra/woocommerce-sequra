@@ -20,21 +20,24 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->sequra = new SequraPaymentGateway();
 
 		// Get setting values
-		$this->enabled = 'yes' == $this->settings['enabled'];
-		$this->title = $this->settings['title'];
-		$this->description = $this->settings['description'];
-		$this->merchantref = $this->sequra->settings['merchantref'];
-		$this->user = $this->sequra->settings['user'];
-		$this->password = $this->sequra->settings['password'];
+		$this->enabled              = 'yes' == $this->settings['enabled'];
+		$this->title                = $this->settings['title'];
+		$this->description          = $this->settings['description'];
+		$this->merchantref          = $this->sequra->settings['merchantref'];
+		$this->user                 = $this->sequra->settings['user'];
+		$this->password             = $this->sequra->settings['password'];
 		$this->enable_for_countries = $this->sequra->enable_for_countries;
-		$this->debug = $this->sequra->settings['debug'];
-		$this->max_amount = $this->settings['max_amount'];
-		$this->min_amount = $this->settings['min_amount'];
-		$this->env = $this->sequra->env;
-		$this->fee = $this->sequra->fee;
-		$this->endpoint = $this->sequra->endpoint;
-		$this->helper = new SequraHelper($this);
+		$this->debug                = $this->sequra->settings['debug'];
+		$this->max_amount           = $this->settings['max_amount'];
+		$this->min_amount           = $this->settings['min_amount'];
+		$this->env                  = $this->sequra->env;
+		$this->fee                  = $this->sequra->fee;
+		$this->endpoint             = $this->sequra->endpoint;
+		$this->helper               = new SequraHelper($this);
+		$this->has_fields           = true;
+		$this->pp_product           = 'pp2';//not an option
 //            $this->stats = $this->settings['stats'];
+		$this->helper = new SequraHelper($this);
 
 		// Logs
 		if ($this->debug == 'yes')
@@ -75,13 +78,13 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'title' => __('Title', 'wc_sequra'),
 				'type' => 'text',
 				'description' => __('This controls the title which the user sees during checkout.', 'wc_sequra'),
-				'default' => __('Fraccionar tu pago. Sin intereses y sólo un coste por cuota', 'wc_sequra')
+				'default' => __('Fraccionar tu pago.', 'wc_sequra')
 			),
 			'description' => array(
 				'title' => __('Description', 'wc_sequra'),
 				'type' => 'textarea',
 				'description' => __('This controls the description which the user sees during checkout.', 'woothemes'),
-				'default' => ''
+				'default' => __('Selecciona una de las opciones. Todos los costes incluidos.', 'wc_sequra')
 			),
 			'max_amount' => array(
 				'title' => __('Max order amount', 'wc_sequra'),
@@ -108,8 +111,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		if (!$this->enabled)
 			return false;
 
-		$order = null;
-		$sequra_settings = get_option( $this->plugin_id . 'sequra_settings', null );
+		$order           = null;
+		$sequra_settings = get_option($this->plugin_id . 'sequra_settings', null);
 		if (
 			$this->enable_for_countries &&
 			!in_array(WC()->customer->get_shipping_country(), $this->enable_for_countries)
@@ -130,10 +133,35 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Get radio button with credit agreements options
+	 */
+	public function credit_agreement_field() {
+		$this->credit_agreements = $this->helper->get_credit_agreements($this->get_order_total());
+		$options                 = array();
+		$i                       = 0;
+		$default                 = 0;
+		foreach ($this->credit_agreements[$this->pp_product] as $ca) {
+			$options[] = sprintf(__('<b>%s</b> mensualidades de <b>%s</b>', 'wc_sequra'), $ca['instalment_count'], $ca['instalment_total']['string']);
+			if ($ca['default']) $default = $i;
+			$i++;
+		}
+		return array(
+			'selected_ca' => array(
+				'title' => __('Fracciona tu pago', 'wc_sequra'),
+				'type' => 'radio',
+				'description' => __('This controls the title which the user sees during checkout.', 'wc_sequra'),
+				'default' => $default,
+				'options' => $options
+			)
+		);
+	}
+
+	/**
 	 * There might be payment fields for SeQura, and we want to show the description if set.
 	 * */
 	function payment_fields() {
-		$payment_fields = apply_filters('woocommerce_sequra_pp_payment_fields', array(), $this);
+		$payment_fields = $this->credit_agreement_field();
+		$payment_fields = apply_filters('woocommerce_sequra_pp_payment_fields', $payment_fields, $this);
 		require($this->helper->template_loader('partpayment_fields'));
 		?>
 		<script>
@@ -176,11 +204,14 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><!--/.form-table-->
-	<?php
+		<?php
 	}
 
 	function process_payment($order_id) {
 		$order = new WC_Order($order_id);
+		if (isset($_REQUEST['selected_ca'])) {
+			WC()->session->set('selected_ca', $_REQUEST['selected_ca']);
+		}
 		do_action('woocommerce_sequra_pp_process_payment', $order, $this);
 		return array(
 			'result' => 'success',
@@ -212,31 +243,33 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		global $woocommerce;
 		$order = new WC_Order($order);
 		echo '<p>' . __('Thank you for your order, please click the button below to pay with your Credit Card.', 'wc_sequra') . '</p>';
-		$this->identity_form = $this->helper->get_identity_form('_partpayment',$order);
-		$back = $woocommerce->cart->get_checkout_url();
-		$extra_fields = apply_filters('woocommerce_sequra_payment_extra_fields', array(), $this);
-		$total_price = round($order->get_total() * 100);
-		$instalment_fee = ($total_price < 20000 ? 300 : 500);
-		$symbol_left = '';
-		$symbol_right= '';
-		switch (get_option( 'woocommerce_currency_pos' )){
+		$options             = array('product' => $this->pp_product);
+		$this->identity_form = $this->helper->get_identity_form($options, $order);
+		$back                = $woocommerce->cart->get_checkout_url();
+		$extra_fields        = apply_filters('woocommerce_sequra_payment_extra_fields', array(), $this);
+		$total_price         = round($order->get_total() * 100);
+		$instalment_fee      = ($total_price < 20000 ? 300 : 500);
+		$symbol_left         = '';
+		$symbol_right        = '';
+		$selected_ca         = WC()->session->get('selected_ca');
+		switch (get_option('woocommerce_currency_pos')) {
 			case 'left';
 				$symbol_left = get_woocommerce_currency_symbol();
 				break;
 			case 'left_space';
-				$symbol_left = get_woocommerce_currency_symbol().' ';
-				break;				
+				$symbol_left = get_woocommerce_currency_symbol() . ' ';
+				break;
 			case 'right';
 				$symbol_right = get_woocommerce_currency_symbol();
 				break;
 			case 'right_space';
-				$symbol_right = ' '.get_woocommerce_currency_symbol();
-				break;			
+				$symbol_right = ' ' . get_woocommerce_currency_symbol();
+				break;
 		}
-		$decimal_places = get_option('woocommerce_price_num_decimals');
-		$decimal_point = get_option('woocommerce_price_thousand_sep');
+		$decimal_places  = get_option('woocommerce_price_num_decimals');
+		$decimal_point   = get_option('woocommerce_price_thousand_sep');
 		$thousands_point = get_option('woocommerce_price_decimal_sep');
-		
+
 		require($this->helper->template_loader('partpayment_identification'));
 	}
 
@@ -244,17 +277,16 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->endpoint = $url;
 	}
 
-	function merchant($order){
-		return array (
-			'approved_url' =>  str_replace('https:', 'http:', add_query_arg(array('order' => $order->id, 'wc-api' => 'woocommerce_'.$this->id,'result' => 0), home_url('/'))),
-			'abort_url' =>  $order->get_cancel_order_url()
+	function merchant($order) {
+		return array(
+			'approved_url' => str_replace('https:', 'http:', add_query_arg(array('order' => $order->id, 'wc-api' => 'woocommerce_' . $this->id, 'result' => 0), home_url('/'))),
+			'abort_url' => $order->get_cancel_order_url()
 		);
 	}
 
-	function check_sequra_pp_resquest()
-	{
+	function check_sequra_pp_resquest() {
 		$order = new WC_Order($_REQUEST['order']);
-		$url = $order->get_cancel_order_url();
+		$url   = $order->get_cancel_order_url();
 		do_action('woocommerce_sequra_pp_process_payment', $order, $this);
 		if ($approval = apply_filters('woocommerce_sequra_pp_process_payment', $this->helper->get_approval($order), $order, $this)) {
 			// Payment completed

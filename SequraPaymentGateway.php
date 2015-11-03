@@ -94,7 +94,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 				'title' => __('Description', 'wc_sequra'),
 				'type' => 'textarea',
 				'description' => __('This controls the description which the user sees during checkout.', 'woothemes'),
-				'default' => 'Paga después de recibir tu pedido con transferencia bancaria, ingreso en cuenta o tarjeta. Tendrás 7 días para pagar cuando tú quieras. La compra online 100% segura y sin gastos adicionales.'
+				'default' => 'Paga después de recibir tu pedido con transferencia bancaria, ingreso en cuenta o tarjeta. Tendrás 7 días para pagar cuando tú quieras. La compra online 100% segura.'
 			),
 			'merchantref' => array(
 				'title' => __('SeQura Merchant Reference', 'wc_sequra'),
@@ -286,7 +286,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 	 * */
 	function payment_fields()
 	{
-		$this->identity_form = $this->helper->get_identity_form();
+		$this->identity_form = $this->helper->get_identity_form(array('ajax' => true));
 		$payment_fields = apply_filters('woocommerce_sequra_payment_fields', array(), $this);
 		require($this->helper->template_loader('payment_fields'));
 		?>
