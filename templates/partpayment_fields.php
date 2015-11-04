@@ -1,4 +1,7 @@
-<?php
+<style>
+	#selected_ca_field label.radio {display:inline}
+	#selected_ca_field label.radio::after {content:"\a";white-space:pre;}
+</style><?php
 if ($this->description)
 	echo wpautop(wptexturize($this->description));
 ?>

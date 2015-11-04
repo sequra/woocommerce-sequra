@@ -149,7 +149,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			'selected_ca' => array(
 				'title' => __('Fracciona tu pago', 'wc_sequra'),
 				'type' => 'radio',
-				'description' => __('This controls the title which the user sees during checkout.', 'wc_sequra'),
 				'default' => $default,
 				'options' => $options
 			)

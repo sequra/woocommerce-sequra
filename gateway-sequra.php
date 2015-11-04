@@ -144,4 +144,35 @@ function woocommerce_sequra_init()
 	}
 
 	add_action('woocommerce_cart_calculate_fees', 'sequra_calculate_order_totals');
+
+	/*
+	 * Add instalment simulator in product page
+	 */
+	add_filter( 'woocommerce_get_price_html','woocommerce_sequra_add_simulator_to_product_page',10,2 );
+	function woocommerce_sequra_add_simulator_to_product_page($price, $product){
+		$ret = "<div id='sequra_partpayment_teaser'>Fracciona el pago a partir de 50€</div>";
+		if($product->price > 10){
+			$ret = "<div id='sequra_partpayment_teaser'></div>
+									<script type='text/javascript'>
+									SequraCreditAgreements(
+										{
+											product: 'pp2',
+											//Personalizar si hace falta
+											currency_symbol_l: '',
+											currency_symbol_r: ' €',
+											decimal_separator: ',',
+											thousands_separator: '.'
+										}
+									)
+									SequraPartPaymentTeaser(
+										{
+											container:'#sequra_partpayment_teaser',
+											price_container: '.price'
+										}
+										);
+									</script>
+			";
+		}
+		return $price . $ret;
+	}
 }
