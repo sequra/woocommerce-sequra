@@ -6,7 +6,7 @@ if ($this->description)
 	echo wpautop(wptexturize($this->description));
 ?>
 <b>Todos los costes incluidos</b><br/>
-Paga ahora<?php echo $this->credit_agreements[$this->pp_product][0]['down_payment_amount']['string']; ?>después...
+Paga ahora <?php echo $this->credit_agreements[$this->pp_product][0]['down_payment_amount']['string']; ?> después...
 <?php
 foreach ($payment_fields as $key => $field)
 	woocommerce_form_field($key, $field, null);

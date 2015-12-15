@@ -23,7 +23,6 @@ foreach ($payment_fields as $key => $field)
 		</div>
 	</div>
 </div>
-<?php echo $this->identity_form;?>
 <script>
 	SequraHelper.preparePopup();
 </script>

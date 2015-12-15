@@ -3,8 +3,8 @@
 		<div class="sequra_content_popup">
 			<h1>Fracciona tu pago</h1>
 			<div id="first_step">
-				<h2 id="sequra_partpayment_tittle">1. Elige cómo pagar</h2>
-				<h2 id="sequra_partpayment_alt_tittle">1. Paga <span class="sequra_partpayment_down_payment_amount-js"></span> y
+				<h2 id="sequra_partpayment_tittle">Elige cómo pagar</h2>
+				<h2 id="sequra_partpayment_alt_tittle">Paga <span class="sequra_partpayment_down_payment_amount-js"></span> y
 					<span class="sequra_partpayment_instalment_count-js"></span> cuotas de <span class="sequra_partpayment_instalment_amount-js"></span> después.<small>Editar</small></h2>
 				<div id="first_step_content">
 					<div id="sequra-wrapper"></div>
@@ -17,7 +17,6 @@
 				</div>
 			</div>
 			<div id="second_step">
-				<h2 id="sequra_partpayment_tittle2">2. Finaliza tu compra</h2>
 				<div id="second_step_content" style="display: none;">
 					<ul id="description">
 						<li>El primer pago se hace con tarjeta. Los pagos futuros se cargan automáticamente en la misma tarjeta.</li>
@@ -35,14 +34,13 @@
 		SequraHelper.preparePopup();
 		SequraHelper.preparePartPaymentAcordion(true);
 
-		$('#sequra_identity_partpayment_form_popup').fadeIn();
+		jQuery('#sequra_identity_partpayment_form_popup').fadeIn();
 		jQuery(document).delegate(".sequra_custom_button", 'click', function() {
 			jQuery('div.checker').removeClass('checker');
 		});
 		jQuery(document).delegate("#sequra_identity_partpayment_form_popup .sequra_popup_close", 'click', function() {
 			history.back(1);
 		});
-		jQuery('#sequra_identity_partpayment_form_popup').show();
 		new SequraFraction({
 			element:document.getElementById('sequra-wrapper'),
 			product:"pp2",

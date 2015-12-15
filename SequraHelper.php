@@ -34,7 +34,7 @@ class SequraHelper {
 	}
 
 	function get_credit_agreements($amount) {
-		return $this->getClient()->getCreditAgreements(SequraBuilderWC::integerPrice($amount), $this->_pm->merchantref);
+		return $this->getClient()->getCreditAgreements($this->getBuilder()->integerPrice($amount), $this->_pm->merchantref);
 	}
 
 

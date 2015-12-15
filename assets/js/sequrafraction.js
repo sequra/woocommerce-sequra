@@ -25,7 +25,7 @@ SequraFraction = function(settings){
     var currentCA = options.creditAgreements.length;
     if(0 <= options.preselectedCreditAgreement && options.preselectedCreditAgreement < options.creditAgreements.length){
       options.currentCreditAgreement = options.creditAgreements[options.preselectedCreditAgreement];
-      currentCA = options.preselectedCreditAgreement;
+      currentCA = options.preselectedCreditAgreement+1;
     }else{
       for(i = 0; i < options.creditAgreements.length; i++) {
         if (options.creditAgreements[i]['default']){

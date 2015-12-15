@@ -8,7 +8,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		$this->merchant_id = $merchant_id;
 		if (!is_null($order))
 			$this->_current_order = $order;
-		else
+		else if(isset($_POST['post_data']))
 			$this->_current_order = new SequraTempOrder($_POST['post_data']);
 		$this->_cart = WC()->cart;
 	}
