@@ -32,7 +32,6 @@
 <script type="text/javascript">
 	jQuery(document).ready(function ($) {
 		SequraHelper.preparePopup();
-		SequraHelper.preparePartPaymentAcordion(true);
 
 		jQuery('#sequra_identity_partpayment_form_popup').fadeIn();
 		jQuery(document).delegate(".sequra_custom_button", 'click', function() {
@@ -46,5 +45,6 @@
 			product:"pp2",
 			preselectedCreditAgreement: <?php echo $selected_ca;?>,
 		});
+		SequraHelper.preparePartPaymentAcordion(true);
 	});
 </script>
