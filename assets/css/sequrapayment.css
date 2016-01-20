@@ -1,35 +1,16 @@
-.sequra_popup * {box-sizing: border-box;font-family: Arial, Helvetica, sans-serif;}
+.sequra_popup * {box-sizing: border-box;font-family: Arial, Helvetica, sans-serif;background: transparent;border: 0px;text-shadow: none;}
 .sequra_popup {font-size: 12px;font-style: normal;font-variant: normal;font-weight: 400;}
 .sequra_popup h1, .sequra_popup h2 {color:black;background-image:none;text-transform: none; text-align: center;}
 .sequra_popup h1 {font-size: 22px;}
 .sequra_popup a {color:black;}
 
-/****** payment***.tpl ******/
-#sequra_partpayments,
-#sequra_factura{margin-bottom:0;}
-#sequra_factura[rel]{cursor:pointer;}
-#sequra_factura[rel]:hover{background-color: #f6f6f6;}
 #sequra_text_title {font-size: 1.8em;margin: .7em 0;}
 #sequra_service_costs {padding-left: 5em;font-size: 50%;}
-
 #sequra_additional_text p {max-width: 85ex;line-height: 1.4;margin-bottom: 1em;padding: 0;}
-#sequra_factura ol {margin-left: 15px;list-style-type: decimal;}
-#sequra_factura li {color: #00d937;}
-#sequra_factura li span {color: #000;}
-
-#sequra_factura a.sequra,
-#sequra_partpayments  a.sequra {background:15px no-repeat #fbfbfb;padding: 25px 0 25px 86px;}
-#sequra_factura a.sequra{background-image: url(../img/7dias.png)}
-#sequra_partpayments a.sequra{background-image: url(../img/mrq.png)}
-#sequra_factura div.sequra {background: url(../img/small-logo.png) 15px no-repeat #fbfbfb;}
-#sequra_factura a ol {font-weight: normal; color: #777777;list-style-type:decimal;}
-#sequra_factura .sequra{display: block;padding: 33px 40px 34px 99px;text-decoration: none;}
 #sequra-identification a, #sequra_additional_text a {text-decoration: underline;}
 #sequra_identity_form_popup_trigger {float:right;}
 
 /*** identification form from Sequra */
-#sequra_factura .sq_submit, .sequra-fullpage .sq_submit {float: right;text-align: right;margin-top: 10px;margin-top: 50px;}
-
 #sequra-identification {clear: both;text-align:center}
 #sequra-identification p {margin-bottom: 0;padding-bottom: 0;}
 #sequra-identification h3 {font-size: 120%;margin-bottom: .5em;color: #000;text-transform: uppercase;}
@@ -47,7 +28,7 @@
 #sequra-identification .formish legend {font-family: Arial, Helvetica, sans-serif;font-weight:normal;line-height: 20px;float: left;font-size: 15px;min-width: 64px; padding: 0px;border:0;margin: 0px 0px 0px 5px;}
 #sequra-identification .formish li legend {padding: 0px 5px 0px 0px;width: auto;display:block}
 #sequra-identification .formish input,
-#sequra-identification .formish select {width:156px;height: 23px;margin:0;padding:0}
+#sequra-identification .formish select {width:156px;height: 23px;background: white;}
 #sequra-identification .formish label,
 #sequra-identification .formish p {float:left;}
 #sequra-identification .formish,
@@ -237,11 +218,12 @@
 
 
 /********* PP teaser v2 ***/
-.sequra-pricelike {font-size: 160%;}
-select.sequra-pricelike {max-width: 3em;margin: 0px;padding: 0px;vertical-align: baseline;}
+.sequra-pricelike {font-size: 140%;}
+select.sequra-pricelike {max-width: 3em;margin: 0px;padding: 0px;vertical-align: baseline;min-width: 30px;}
 #sequra_partpayment_teaser{font-size: 80%;}
 #sequra_partpayment_teaser>p {white-space:nowrap}
 #sequra_partpayment_teaser_low{width:166px;height:33px;background:url(../img/teaser_pp_low.png)}
+@media (min-width: 361px) {.sequra-pricelike {font-size: 160%;}}
 
 /********* Invoice teaser ***/
 #sequra_info_widget>a>img{width:100%}
