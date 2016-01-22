@@ -60,8 +60,10 @@ function sequra_send_daily_delivery_report()
 
 add_action('init','sequra_triggerreport_check');
 function sequra_triggerreport_check(){
-	if(isset($_GET['sequra_triggerreport']) && $_GET['sequra_triggerreport']=='true')
+	if(isset($_GET['sequra_triggerreport']) && $_GET['sequra_triggerreport']=='true'){
 		do_action('sequra_send_daily_delivery_report');
+	}
+
 	return;
 }
 
@@ -72,7 +74,8 @@ register_deactivation_hook(__FILE__, 'sequra_deactivation');
 function sequra_deactivation()
 {
 	// Remove daily schedule
-	wp_unschedule_event(get_option('woocommerce-sequra-deliveryreport-time'), 'sequra_send_daily_delivery_report');
+	$timestamp = wp_next_scheduled( 'sequra_send_daily_delivery_report');
+	wp_unschedule_event($timestamp, 'sequra_send_daily_delivery_report');
 }
 
 add_action('woocommerce_loaded', 'woocommerce_sequra_init', 100);
