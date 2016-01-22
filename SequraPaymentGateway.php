@@ -223,57 +223,58 @@ class SequraPaymentGateway extends WC_Payment_Gateway
 				}
 			}
 		}
+		if(!is_admin()  || basename($_SERVER['SCRIPT_NAME'])=='admin-ajax.php'){
+			if (!empty($this->enable_for_methods)) {
 
-		if (!empty($this->enable_for_methods)) {
+				// Only apply if all packages are being shipped via local pickup
+				$chosen_shipping_methods_session = WC()->session->get('chosen_shipping_methods');
 
-			// Only apply if all packages are being shipped via local pickup
-			$chosen_shipping_methods_session = WC()->session->get('chosen_shipping_methods');
-
-			if (isset($chosen_shipping_methods_session)) {
-				$chosen_shipping_methods = array_unique($chosen_shipping_methods_session);
-			} else {
-				$chosen_shipping_methods = array();
-			}
-
-			$check_method = false;
-
-			if (is_object($order)) {
-				if ($order->shipping_method) {
-					$check_method = $order->shipping_method;
+				if (isset($chosen_shipping_methods_session)) {
+					$chosen_shipping_methods = array_unique($chosen_shipping_methods_session);
+				} else {
+					$chosen_shipping_methods = array();
 				}
 
-			} elseif (empty($chosen_shipping_methods) || sizeof($chosen_shipping_methods) > 1) {
 				$check_method = false;
-			} elseif (sizeof($chosen_shipping_methods) == 1) {
-				$check_method = $chosen_shipping_methods[0];
-			}
 
-			if (!$check_method) {
-				return false;
-			}
+				if (is_object($order)) {
+					if ($order->shipping_method) {
+						$check_method = $order->shipping_method;
+					}
 
-			$found = false;
+				} elseif (empty($chosen_shipping_methods) || sizeof($chosen_shipping_methods) > 1) {
+					$check_method = false;
+				} elseif (sizeof($chosen_shipping_methods) == 1) {
+					$check_method = $chosen_shipping_methods[0];
+				}
 
-			foreach ($this->enable_for_methods as $method_id) {
-				if (strpos($check_method, $method_id) === 0) {
-					$found = true;
-					break;
+				if (!$check_method) {
+					return false;
+				}
+
+				$found = false;
+
+				foreach ($this->enable_for_methods as $method_id) {
+					if (strpos($check_method, $method_id) === 0) {
+						$found = true;
+						break;
+					}
+				}
+
+				if (!$found) {
+					return false;
 				}
 			}
 
-			if (!$found) {
+			if (
+				$this->enable_for_countries &&
+				!in_array(WC()->customer->get_shipping_country(), $this->enable_for_countries)
+			) {
 				return false;
 			}
-		}
-
-		if (
-			$this->enable_for_countries &&
-			!in_array(WC()->customer->get_shipping_country(), $this->enable_for_countries)
-		) {
-			return false;
-		}
-		if (WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total()) {
-			return false;
+			if (WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total()) {
+				return false;
+			}
 		}
 		if (1 == $this->env && '' != $this->settings['test_ips']) { //Sandbox
 			$ips = explode(',', $this->settings['test_ips']);
