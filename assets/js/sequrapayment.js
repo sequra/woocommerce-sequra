@@ -281,7 +281,7 @@ SequraCreditAgreements = function (settings) {
   this.apr = function (drawdown_payment, instalment_fee, instalment_count, start_fee) {
     if (!start_fee) start_fee = instalment_fee;
     var instalment_amount = drawdown_payment / instalment_count,
-        apr_approximation_constant = (drawdown_payment - instalment_fee) / (instalment_amount + start_fee),
+        apr_approximation_constant = (drawdown_payment - start_fee) / (instalment_amount + instalment_fee),
         minimum_boundary = 0.0,
         maximum_boundary = 1000.0,
         average_boundary = (minimum_boundary + maximum_boundary) / 2;
@@ -382,12 +382,15 @@ SequraPartPaymentTeaser = function (settings) {
   this.draw_simulator = function () {
     var max = options['creditAgreements'].length,
         html = '<p>Pagar en <select class="sequra-pricelike" id="instalment_count_selector" onchange="SequraPartPaymentTeaserInstance.update()">';
+    html += '<option value="-1">--</option>';
     for (var i = 0; i < max; i++) {
       html += '<option value="' + i + '">' + options['creditAgreements'][i]['instalment_count'] + '</option>';
     }
     html += '</select> mensualidades de ';
     var selected_instalment_count = -1;
-    if (0 < jQuery('#instalment_count_selector').length && 0 <= jQuery('#instalment_count_selector').val()) {
+    if(typeof(jQuery('#instalment_count_selector').val())=='undefined' || jQuery('#instalment_count_selector').val()<0){
+      html += ' -- €';
+    } else {
       selected_instalment_count = jQuery('#instalment_count_selector').val();
       var ca = options['creditAgreements'][selected_instalment_count];
       html += '<b class="sequra-pricelike instalment_total-js">' + ca['instalment_total']['string'] + '</b></p>' +
@@ -401,14 +404,10 @@ SequraPartPaymentTeaser = function (settings) {
         html += '<span class="setup_fee-js">' + ca['setup_fee']['string'] + ' de gastos de gestión incluidos en la entrada más <span class="instalment_fee-js">' + ca['instalment_fee']['string'] + '</span> por cuota. Sin intereses ';
       }
       html += '<a href="#" class="sequra_quotas_info" rel="sequra_partpayments_popup">+info</a>';
-    } else {
-      html += ' -- €';
-    }
+    } 
     jQuery(options['container']).html(html);
     SequraPartPaymentMoreInfo.draw();
-    if (0 > selected_instalment_count)
-      jQuery('#instalment_count_selector').prepend('<option value="-1" selected="true">--</option>');
-    else
+    if (0 <= selected_instalment_count)
       jQuery('#instalment_count_selector').val(selected_instalment_count);
   };
 
