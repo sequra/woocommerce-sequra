@@ -42,14 +42,33 @@ class SequraHelper {
 		$client  = $this->getClient();
 		$builder = $this->getBuilder($order);
 		$builder->setPaymentMethod($this->_pm);
+		if ( $builder->sign( $order->id ) != $_REQUEST['signature'] &&
+		     $this->_pm->ipn
+		) {
+			return false;
+		}
 		$data = $builder->build('confirmed');
-
-		$uri = WC()->session->get('sequraURI');
+		$uri = $this->_pm->ipn?$this->_pm->endpoint.'/'.$_REQUEST['order_ref']:WC()->session->get('sequraURI');
 		$client->updateOrder($uri, $data);
-		update_post_meta((int)$order->id, 'Transaction ID', WC()->session->get('sequraURI'));
+		update_post_meta((int)$order->id, 'Transaction ID', $uri);
 		update_post_meta((int)$order->id, 'Transaction Status', $client->getStatus());
 		/*TODO: Store more information for later use in stats, like browser*/
 		return $client->succeeded();
+	}
+
+	function add_payment_info_to_post_meta($order){
+		if($this->_pm->ipn){
+			$sequra_cart_info = WC()->session->get('sequra_cart_info');
+			update_post_meta((int)$order->id, 'Transaction ID', $_REQUEST['order_ref']);
+			update_post_meta((int)$order->id, '_order_ref', $_REQUEST['order_ref']);
+			update_post_meta((int)$order->id, '_product_code', $_REQUEST['product_code']);
+			//@TODO
+			//update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
+		} else {
+			$sequra_cart_info = WC()->session->get('sequra_cart_info');
+			update_post_meta((int)$order->id, 'Transaction ID', WC()->session->get('sequraURI'));
+			update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
+		}
 	}
 
 	public function getClient() {

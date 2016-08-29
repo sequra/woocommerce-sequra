@@ -1,7 +1,3 @@
-/******** Formulario ***********************/
-.payment_methods #sequra-identification  input[type="submit"]{display:none;}
-#sequra-identification {width: 100%;display: inline-flex;margin-top: 18px;}
-.formish ol{list-style: none;margin: 0 0;}
-.sq_mobile_phone input{width:9em;}
-.sq_dob_fragments select{font-size: 85%;width:5em;}
-#sequra-identification .sq_known_customer_data{display:none}
+#sequra_partpayment_teaser, #sequra_partpayment_teaser {
+    font-size: 80%;
+}

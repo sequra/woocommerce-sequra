@@ -19,7 +19,7 @@ var SequraHelper = {
        * Create relation between link and popup
        */
       popup_identifier = jQuery(this).attr('id');
-      jQuery(document).delegate("*[rel=" + popup_identifier + "]", 'click', function () {
+      jQuery(document).delegate("[rel=" + popup_identifier + "]", 'click', function (event) {
         jQuery('#' + jQuery(this).attr('rel')).fadeIn();
         return false;
       });
@@ -29,13 +29,27 @@ var SequraHelper = {
      * Add close button to popups
      */
     jQuery('.sequra_popup .sequra_white_content.closeable').each(function () {
-      jQuery(this).prepend('<a class="sequra_popup_close">close</a>');
+      if(jQuery(this).children('.sq-modal-head').length>0) return;
+      jQuery(this).prepend(
+        '  <div class="sq-modal-head">' +
+        '   <div class="sq-head-title">' +
+        '     <div class="sq-product-name">'+jQuery(this).attr('title')+'</div>' + 
+        '     <div class="sq-product-logo"><span class="icon-sequra-logo"></span></div>' + 
+        '   </div>' +
+        '  </div>' +
+        '  <a class="sequra_popup_close">cerrar</a>'
+      );
+
     });
 
-    jQuery(document).delegate(".sequra_popup_close", 'click', function () {
+    jQuery(".sequra_popup_close").on('click', function (event) {
       jQuery(this).parent().parent().fadeOut();
       return false;
     });
+    jQuery(".sequra_popup.sequra_popup_prepared").on('click', function (event) {
+      jQuery(this).fadeOut();
+      return false;
+    });    
   },
 
   preparePartPaymentAcordion: function (jump) {
@@ -84,14 +98,13 @@ var SequraHelper = {
     }
   }
 };
-
 var SequraPartPaymentMoreInfo = {
-  draw: function () {
-    ca = SequraCreditAgreementsInstance.creditAgreements;
-    if ('pp1' == ca['product']) {
-      html = this.get_pp1_popup_html(ca);
+  draw: function (generic) {
+    html = null;
+    if(!generic){
+      html = this.get_pp_popup_html(SequraCreditAgreementsInstance.creditAgreements);
     } else {
-      html = this.get_pp2_popup_html(ca);
+      html = this.get_pp_generic_popup_html();
     }
     if (0 < jQuery('#sequra_partpayments_popup').length) {
       jQuery('#sequra_partpayments_popup').html(html);
@@ -102,82 +115,59 @@ var SequraPartPaymentMoreInfo = {
     SequraHelper.preparePopup();
   },
 
-  get_pp1_popup_html: function (ca) {
+  get_pp_popup_html: function (ca) {
     var html = '' +
-        '<div class="sequra_white_content closeable">' +
+        '<div class="sequra_white_content closeable" title="Fracciona tu pago">' +
         '  <div class="sequra_content_popup">' +
-        '    <h4>Elige cuánto quieres pagar cada vez</h4>' +
-        '    <p class="sequra_colored_text">Puedes elegir entre 3, 6 ó 12 cuotas mensuales</p>' +
+        '    <h4>¿En cuántas cuotas puedo fraccionar mi pago?</h4>' +
         '    <div>' +
-        '      <ul>' +
-        '        <li>Fácil de usar y sencillo. Tu compra hecha en menos de un minuto.</li>' +
-        '        <li>El único coste es de 3€ por cuota o de 5€ si el pedido vale más de 200€. Sin intereses ocultos ni letra pequeña.</li>' +
-        '        <li>La aprobación es instantánea, por lo que los productos se envían de forma inmediata.</li>' +
-        '        <li>El primer pago se hace con tarjeta, pero los siguientes se pueden hacer con tarjeta o por transferencia bancaria.</li>' +
-        '        <li>Puedes pagar la totalidad cuando tú quieras.</li>' +
-        '        <li>Disponible para compras superiores a 50€.</li>' +
-        '        <li>El servicio es ofrecido conjuntamente con <a class="sequra_blank_link" href="https://sequra.es/es/fraccionados" target="_blank">SeQura</a></li>' +
-        '      </ul>' +
-        '      <p>¿Tienes alguna pregunta? Habla con nosotros a través del 93 176 00 08 o envíanos un email a clientes@sequra.es.</p>' +
-        '      <a href="https://www.sequra.es/es/fraccionados" target="_blank" class="button">Leer más</a>' +
-        '    </div>' +
-        '  </div>' +
-        '  <div class="sequra_footer_popup">¿Cuánto cuesta? Para un pedido de 500€ el coste sería el siguiente:</br>' +
-        '    <ul>' +
-        '      <li>3 cuotas:&nbsp;&nbsp;&nbsp;Fijo TIN 0%, TAE 43,09%, Coste por cuota: 5€. Coste total del pedido: 515€</li>' +
-        '      <li>6 cuotas:&nbsp;&nbsp;&nbsp;Fijo TIN 0%, TAE 32,79%, Coste por cuota: 5€. Coste total del pedido: 530€</li>' +
-        '      <li>12 cuotas:&nbsp;Fijo TIN 0%, TAE 28,79%, Coste por cuota: 5€. Coste total del pedido: 560€</li>' +
-        '    </ul>' +
+        '      <ul>';
+    var max = ca.length;
+    for (var i = 0; i < max; i++) {
+      html += '  <li><b class="instalment_count-js">' + ca[i]['instalment_count'] + ' cuotas</b> de <b class="instalment_total-js">' + ca[i]['instalment_total']['string'] + '</b>/mes';
+    }
+    html +='   <ul>' +
+        '      <small>* Coste único incluido: <span class="instalment_fee-js">' +  ca[0]['instalment_fee']['string'] + '</span> por cuota</small>';
+    if(ca[0]['down_payment_total']['value']>ca[0]['instalment_total']['value']){
+      html += '<br/><small>* El primer pago será de <span class="down_payment_total-js">' +  ca[0]['down_payment_total']['string'] + '</span> entrada incluida</small>';
+    }        
+    html +=' </div>' +          
+        '    <h4>¿Cómo funciona?</h4>' +
+        '      <div>' +
+        '        <ol>' +
+        '          <li>Elige "Fracciona tu pago" con SeQura al realizar tu pedido y paga sólo la primera cuota.</li>' +
+        '          <li>Recibe tu pedido.</li>' +
+        '          <li>El resto de pagos se cargarán automáticamente a tu tarjeta.</li>' +
+        '        </ol>' +
+        '      <p></p>' +        
+        '     </div>' +
         '  </div>' +
         '</div>';
     return html;
   },
 
-  get_pp2_popup_html: function (ca) {
+  get_pp_generic_popup_html: function () {
     var html = '' +
-        '<div class="sequra_white_content closeable">' +
+        '<div class="sequra_white_content closeable" title="Fracciona tu pago">' +
         '  <div class="sequra_content_popup">' +
-        '    <h4>Fracciona tu pago con SeQura</h4>' +
-        '    <div class="sequra_logo"></div>' +
+        '    <h4>¿Cómo funciona?</h4>' +
         '      <div>' +
-        '        <ul>' +
-        '          <li>Al ir a realizar el pago, selecciona fraccionar tu compra con SeQura.</li>' +
-        '          <li>La aprobación del crédito se hace de manera inmediata sin papeleos.</li>' +
-        '          <li>Pagarás una entrada con tarjeta y el resto en cómodas mensualidades que se cargarán automáticamente en la misma tarjeta.</li>' +
-        '          <li>Para una cantidad de <b class="total_with_tax-js">' + ca[0]['total_with_tax']['string'] + '</b>:' +
-        '            <ul>' +
-        '              <li>pagarás una entrada de <b class="down_payment_total-js">' + ca[0]['down_payment_total']['string'] + '</b> (incluye <span class="down_payment_fees-js">' + ca[0]['down_payment_fees']['string'] + '</span> de comisión) ahora</li>' +
-        '              <li>y después podrás elegir entre:' +
-        '                <ul>';
-    var max = ca.length;
-    for (var i = 0; i < max; i++) {
-      html += '            <li><b class="instalment_count-js">' + ca[i]['instalment_count'] + ' mensualidades</b> de <b class="instalment_total-js">' + ca[i]['instalment_total']['string'] + '</b> (incluye <span class="instalment_fee-js">' + ca[i]['instalment_fee']['string'] + '</span> de comisión)</li>';
-    }
-    html += '            </ul>' +
-        '              </li>' +
-        '              <li>el total que acabarás pagando al final será el siguiente:' +
-        '                <ul>';
-    var max = ca.length;
-    for (var i = 0; i < max; i++) {
-      html += '            <li>si eliges <span class="instalment_count-js">' + ca[i]['instalment_count'] + ' mensualidades</span> pagarás <span class="grand_total-js">' + ca[i]['grand_total']['string'] + '</span> de los cuales <span class="cost_of_credit-js">' + ca[i]['cost_of_credit']['string'] + '</span> son comisión (TIN: <span class="interests-js">' + ca[i]['interests']['string'] + '</span>, TAE: <span class="apr-js">' + ca[i]['apr']['string'] + '</span>)</li>';
-    }
-    html += '            </ul>' +
-        '              </li>' +
-        '              <li>Estas cantidades incluyen todo lo que acabarás pagando y no hay más costes ocultos o letra pequeña.</li>' +
-        '            </ul>' +
-        '          </li>' +
-        '          <li>Podrás pagar la totalidad del crédito en el momento que quieras y no te cobraremos ni costes de cancelación ni las comisiones de las mensualidades futuras que ya no pagarías. Igualmente podrás cambiar el número de mensualidades.</li>' +
-        '          <li>Es un crédito sin intereses (TIN: 0%), aunque no gratis porque tiene unos costes fijos.</li>' +
-        '          <li>La TAE no es el interés sino una medida que se utiliza para comparar créditos. Este número acostumbra a ser más alto cuando el plazo es más corto.</li>' +
-        '          <li>¿Tienes alguna otra pregunta? Llama a SeQura al 93 176 00 08.</li>' +
-        '        </ul>' +
+        '        <ol>' +
+        '          <li>Elige "Fracciona tu pago" con SeQura al realizar tu pedido y paga sólo la primera cuota.</li>' +
+        '          <li>Recibe tu pedido.</li>' +
+        '          <li>El resto de pagos se cargarán automáticamente a tu tarjeta.</li>' +
+        '        </ol>' +
         '     </div>' +
-        '   </div>' +
+        '    <h4>¿Cuánto cuesta?</h4>' +
+        '    <div>' +
+        '      <p>El único coste es de 3 a 12€ por cuota dependiendo del importe total del pedido.</p>' +
+        '      <p></p>' +
+        '    </div>' +      
+        '  </div>' +
         '</div>';
     return html;
-  }
+  }  
 };
-
 
 SequraCreditAgreements = function (settings) {
   var self = this,
@@ -206,12 +196,21 @@ SequraCreditAgreements = function (settings) {
     }
   };
 
+  this.product = function(){
+      return options['product'];
+  };
+
   this.get = function (total_amount) {
     total_amount = parseInt(total_amount);
-    if ('pp2' == options['product']) {
-      this.creditAgreements = this.for_pp2(total_amount);
-    } else {
-      this.creditAgreements = this.for_pp1(total_amount);
+    switch (options['product']) {
+        case 'pp3':
+            this.creditAgreements = this.for_pp3(total_amount);
+            break;
+        case 'pp2':
+            this.creditAgreements = this.for_pp2(total_amount);
+            break;
+        default:
+            this.creditAgreements = this.for_pp1(total_amount);
     }
     return this.creditAgreements;
   };
@@ -219,10 +218,18 @@ SequraCreditAgreements = function (settings) {
   this.for_pp1 = function (total_amount) {
     var ca = [],
         instalment_fee = (total_amount < 20000 ? 300 : 500),
+        down_payment_amount = 0,
+        drawdown_payment_amount = total_amount - down_payment_amount,
+        setup_fee = 0,
+        down_payment_fees = 0,
+        down_payment_total = 0,
         max = options['instalment_counts'].length;
     for (var i = 0; i < max; i++) {
       var instalment_amount = Math.floor(total_amount / options['instalment_counts'][i]),
+          coc_value = instalment_fee * options['instalment_counts'][i] + down_payment_fees,
+          grand_total = total_amount + coc_value,
           apr_value = apr(total_amount - instalment_amount, instalment_fee, options['instalment_counts'][i] - 1);
+
       ca.push({
         'instalment_count': options['instalment_counts'][i],
         'instalment_amount': {'value': instalment_amount, 'string': value_to_currency_string(instalment_amount)},
@@ -232,7 +239,18 @@ SequraCreditAgreements = function (settings) {
           'string': value_to_currency_string(instalment_amount + instalment_fee)
         },
         'product': options['product'],
-        'apr': {'value': apr_value, 'string': value_to_percentage_string(apr_value)}
+        'apr': {'value': apr_value, 'string': value_to_percentage_string(apr_value)},
+        'down_payment_amount': {'value': down_payment_amount, 'string': value_to_currency_string(down_payment_amount)},
+        'down_payment_fees': {'value': down_payment_fees, 'string': value_to_currency_string(down_payment_fees)},
+        'down_payment_total': {'value': down_payment_total, 'string': value_to_currency_string(down_payment_total)},
+        'drawdown_payment_amount': {
+          'value': drawdown_payment_amount,
+          'string': value_to_currency_string(drawdown_payment_amount)
+        },        
+        'interests': {'value': 0, 'string': value_to_percentage_string(0)},
+        'setup_fee': {'value': setup_fee, 'string': value_to_currency_string(setup_fee)},
+        'grand_total': {'value': grand_total, 'string': value_to_currency_string(grand_total)},        
+        'total_with_tax': {'value': total_amount, 'string': value_to_currency_string(total_amount)}
       });
     }
     return ca;
@@ -263,7 +281,7 @@ SequraCreditAgreements = function (settings) {
         'down_payment_total': {'value': down_payment_total, 'string': value_to_currency_string(down_payment_total)},
         'drawdown_payment_amount': {
           'value': drawdown_payment_amount,
-          'string': value_to_percentage_string(drawdown_payment_amount)
+          'string': value_to_currency_string(drawdown_payment_amount)
         },
         'grand_total': {'value': grand_total, 'string': value_to_currency_string(grand_total)},
         'instalment_amount': {'value': instalment_amount, 'string': value_to_currency_string(instalment_amount)},
@@ -277,6 +295,50 @@ SequraCreditAgreements = function (settings) {
     }
     return ca;
   };
+
+  this.for_pp3 = function (total_amount) {
+        var ca = new Array(),
+            instalment_fee = this.pp3_instalment_fee(total_amount),
+            setup_fee = 0,
+            down_payment_fees = setup_fee + instalment_fee,
+            over_max = Math.max(0,total_amount - 120000);
+            max = options['instalment_counts'].length;
+
+        for (var i = 0; i < max; i++) {
+            var instalment_count = options['instalment_counts'][i],
+                down_payment_amount = this.pp3_down_payment(total_amount,instalment_count),
+                drawdown_payment_amount = total_amount - down_payment_amount,
+                down_payment_total = down_payment_amount + down_payment_fees,
+
+                instalment_amount = Math.floor(drawdown_payment_amount / (instalment_count-1)),
+                apr_value = apr(drawdown_payment_amount, instalment_fee, (instalment_count-1), down_payment_fees),
+                coc_value = instalment_fee * (instalment_count-1) + down_payment_fees,
+                grand_total = total_amount + coc_value,
+                instalment_total = instalment_amount + instalment_fee;
+
+            ca.push({
+                'apr': {'value': apr_value, 'string': value_to_percentage_string(apr_value)},
+                'cost_of_credit': {'value': coc_value, 'string': value_to_currency_string(coc_value)},
+                'over_max':  {'value': over_max, 'string': value_to_currency_string(over_max)},
+                'down_payment_amount': {'value': down_payment_amount,'string': value_to_currency_string(down_payment_amount)},
+                'down_payment_fees': {'value': down_payment_fees, 'string': value_to_currency_string(down_payment_fees)},
+                'down_payment_total': {'value': down_payment_total, 'string': value_to_currency_string(down_payment_total)},
+                'drawdown_payment_amount': {
+                    'value': drawdown_payment_amount,
+                    'string': value_to_currency_string(drawdown_payment_amount)
+                },
+                'grand_total': {'value': grand_total, 'string': value_to_currency_string(grand_total)},
+                'instalment_amount': {'value': instalment_amount, 'string': value_to_currency_string(instalment_amount)},
+                'instalment_count': options['instalment_counts'][i],
+                'instalment_fee': {'value': instalment_fee, 'string': value_to_currency_string(instalment_fee)},
+                'instalment_total': {'value': instalment_total, 'string': value_to_currency_string(instalment_total)},
+                'interests': {'value': 0, 'string': value_to_percentage_string(0)},
+                'setup_fee': {'value': setup_fee, 'string': value_to_currency_string(setup_fee)},
+                'total_with_tax': {'value': total_amount, 'string': value_to_currency_string(total_amount)}
+            });
+        }
+        return ca;
+    };
 
   this.apr = function (drawdown_payment, instalment_fee, instalment_count, start_fee) {
     if (!start_fee) start_fee = instalment_fee;
@@ -316,14 +378,28 @@ SequraCreditAgreements = function (settings) {
     return 1200;
   };
 
+  this.pp3_instalment_fee = function (total_amount) {
+    if (total_amount < 20100) return 300;
+    if (total_amount < 40100) return 500;
+    if (total_amount < 60100) return 700;
+    if (total_amount < 80100) return 800;
+    if (total_amount < 100100) return 1000;
+    return 1200;
+  };
+
   this.pp2_down_payment = function (total_amount) {
-    pp2_max_amount = 160000;
-    pp2_down_payment_percent = 25.00;
+      return this.pp_down_payment(total_amount,160000,25);
+  };
 
-    over_max = Math.max(total_amount, pp2_max_amount) - pp2_max_amount;
-    up_to_max = Math.min(total_amount, pp2_max_amount);
+  this.pp3_down_payment = function (total_amount,instalment_count) {
+      return this.pp_down_payment(total_amount,120000,100/instalment_count);
+  };
 
-    return Math.round((over_max + (pp2_down_payment_percent / 100) * up_to_max) * 100) / 100;
+  this.pp_down_payment = function (total_amount,max_amount,down_payment_percent) {
+    over_max = Math.max(total_amount, max_amount) - max_amount;
+    up_to_max = Math.min(total_amount, max_amount);
+
+    return Math.floor((over_max + (down_payment_percent / 100) * up_to_max));
   };
 
   this.set_instalment_count = function (instalment_count) {
@@ -352,10 +428,12 @@ SequraCreditAgreements = function (settings) {
 SequraPartPaymentTeaser = function (settings) {
   var self = this,
       amount_total,
+      selected_instalment_count = -1,
       options = { //Defaults
         container: '',
         price_container: '.sequra-product-price-js',
-        creditAgreements: null
+        creditAgreements: null,
+        min_amount: 50
       };
 
   this.init = function () {
@@ -366,49 +444,68 @@ SequraPartPaymentTeaser = function (settings) {
     update();
   };
 
-  this.draw = function () {
-    if (amount_total / 100 > options['min_amount']) {
-      draw_simulator();
-    } else {
-      draw_teaser();
+  this.preselect = function(value){
+    var i;
+    for (i=2;i>0;i--){
+      if(options['creditAgreements'][i]['instalment_total']['value']>value*100)
+        break;
     }
+    jQuery('#instalment_count_selector').val(i);
+    update();
+  }
+
+  this.draw = function () {
+    html = '<div id="sequra_teaser_wrapper_1">';
+    if (amount_total / 100 > options['min_amount']) {
+      html += draw_simulator();
+    } else {
+      html += draw_teaser();
+    }
+    html += '</div>';
+    html += '<div id="sequra_teaser_wrapper_2"><span class="sequra_more_info" rel="sequra_partpayments_popup" title="Más información"><span class="icon-info"></span></span><div class="sequra_small_logo">&nbsp;</div></div>';
+    jQuery(options['container']).html(html);
+    SequraPartPaymentMoreInfo.draw(true);
   };
 
   this.draw_teaser = function () {
-    html = '<div id="sequra_partpayment_teaser_low" title="Fracciona tu pago sin esperas ni documentación a partir de ' + options['min_amount'] + ' €"></div>';
-    jQuery(options['container']).html(html);
+    return '<span id="sequra_partpayment_teaser_low">* Fracciona tu pago desde ' + options['min_amount'] + ' €</span>';
   };
 
   this.draw_simulator = function () {
-    var max = options['creditAgreements'].length,
-        html = '<p>Pagar en <select class="sequra-pricelike" id="instalment_count_selector" onchange="SequraPartPaymentTeaserInstance.update()">';
+    var product = options['creditAgreements'][0]['product'];
+    var max = options['creditAgreements'].length;
+    var selected_instalment_count = jQuery('#instalment_count_selector').val();
+    var html;
+
+    html = '<select id="instalment_count_selector" onchange="SequraPartPaymentTeaserInstance.update()">';
     html += '<option value="-1">--</option>';
     for (var i = 0; i < max; i++) {
-      html += '<option value="' + i + '">' + options['creditAgreements'][i]['instalment_count'] + '</option>';
+      html += '<option value="'+i+'"'+(i==selected_instalment_count?' selected ':'')+'>' + options['creditAgreements'][i]['instalment_count'] + '</option>';
     }
-    html += '</select> mensualidades de ';
-    var selected_instalment_count = -1;
-    if(typeof(jQuery('#instalment_count_selector').val())=='undefined' || jQuery('#instalment_count_selector').val()<0){
-      html += ' -- €';
-    } else {
-      selected_instalment_count = jQuery('#instalment_count_selector').val();
+    html += '</select> cuotas de ';
+    if (0 < jQuery('#instalment_count_selector').length && 0 <= jQuery('#instalment_count_selector').val()) {
       var ca = options['creditAgreements'][selected_instalment_count];
-      html += '<b class="sequra-pricelike instalment_total-js">' + ca['instalment_total']['string'] + '</b></p>' +
-          '<p>(Entrada <span class="down_payment_total-js">' + ca['down_payment_total']['string'] + '</span>)</p>' +
-          '<div id="partpayment_summary">' +
-          '<b>Resumen del pago</b><br/>' +
-          'Paga ahora <span class="down_payment_total-js">' + ca['down_payment_total']['string'] + '</span> y después <span class="instalment_count-js">' + ca['instalment_count'] + '</span> mensualidades de <span class="instalment_total-js">' + ca['instalment_total']['string'] + '</span><br/>';
-      if (0 == ca['setup_fee']['value']) {
-        html += 'Incluido el coste de <span class="instalment_fee-js">' + ca['instalment_fee']['string'] + '</span> por cuota. Sin intereses';
+      html += '<b class="sequra-pricelike instalment_total-js">' + ca['instalment_total']['string'] + '</b>/mes';
+      if ('pp2' == product) {
+        html += '<p>(Entrada <span class="down_payment_total-js">' +  ca['down_payment_total']['string'] + '</span>)</p>' +
+            '<div id="partpayment_summary">' +
+            '<b>Resumen del pago</b><br/>' +
+            'Paga ahora <span class="down_payment_total-js">' +  ca['down_payment_total']['string'] + '</span> y después <span class="instalment_count-js">' + ca['instalment_count'] + '</span> mensualidades de <span class="instalment_total-js">' + ca['instalment_total']['string'] + '</span><br/>';
+        if (ca['setup_fee'] && 0 == ca['setup_fee']['value']) {
+            html += 'Incluido el coste de <span class="instalment_fee-js">' + ca['instalment_fee']['string'] + '</span> por cuota. Sin intereses';
+        } else {
+            html += '<span class="setup_fee-js">' + ca['setup_fee']['string'] + ' de gastos de gestión incluidos en la entrada más <span class="instalment_fee-js">' + ca['instalment_fee']['string'] + '</span>/cuota. Sin intereses ';
+        }
       } else {
-        html += '<span class="setup_fee-js">' + ca['setup_fee']['string'] + ' de gastos de gestión incluidos en la entrada más <span class="instalment_fee-js">' + ca['instalment_fee']['string'] + '</span> por cuota. Sin intereses ';
+        html += '<br/><small>* Coste único incluido: <span class="instalment_fee-js">' +  ca['instalment_fee']['string'] + '</span> por cuota</small>';
+        if(ca['down_payment_total']['value']>ca['instalment_total']['value']){
+          html += '<br/><small>* El primer pago será de <span class="down_payment_total-js">' +  ca['down_payment_total']['string'] + '</span> entrada incluida</small>';
+        }
       }
-      html += '<a href="#" class="sequra_quotas_info" rel="sequra_partpayments_popup">+info</a>';
-    } 
-    jQuery(options['container']).html(html);
-    SequraPartPaymentMoreInfo.draw();
-    if (0 <= selected_instalment_count)
-      jQuery('#instalment_count_selector').val(selected_instalment_count);
+    } else {
+      html += ' -- €/mes';
+    }
+    return html;
   };
 
   this.update = function () {

@@ -3,7 +3,7 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 2.1.2
+  Version: 3.0.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
@@ -112,15 +112,10 @@ function woocommerce_sequra_init()
 	{
 		/*@TODO: Load only if necessary */
 		// Respects SSL, Style.css is relative to the current file
-		wp_register_style('sequra-app-style', plugins_url('assets/css/app.css', __FILE__));
-		wp_enqueue_style('sequra-app-style');
 		wp_register_style('sequra-style', plugins_url('assets/css/sequrapayment.css', __FILE__));
 		wp_enqueue_style('sequra-style');
 		wp_register_style('sequra-custom-style', plugins_url('assets/css/style.css', __FILE__));
 		wp_enqueue_style('sequra-custom-style');
-		wp_enqueue_script('dragdealer-js', plugins_url('assets/js/vendor/dragdealer.min.js', __FILE__));
-		wp_enqueue_script('sequracurrency-js', plugins_url('assets/js/sequracurrencyformat.js', __FILE__));
-		wp_enqueue_script('sequrafraction-js', plugins_url('assets/js/sequrafraction.js', __FILE__));
 		wp_enqueue_script('sequra-js', plugins_url('assets/js/sequrapayment.js', __FILE__));
 	}
 
@@ -137,7 +132,6 @@ function woocommerce_sequra_init()
 			WC()->session->set('sequra_cart_info', $sequra_cart_info);
 		}
 	}
-
 	add_action('woocommerce_add_to_cart', 'sequra_add_cart_info_to_session');
 
 	function sequra_calculate_order_totals($cart)
@@ -162,10 +156,10 @@ function woocommerce_sequra_init()
 									<script type='text/javascript'>
 									SequraCreditAgreements(
 										{
-											product: 'pp2',
+											product: 'pp3',
 											//Personalizar si hace falta
 											currency_symbol_l: '',
-											currency_symbol_r: ' €',
+											currency_symbol_r: jQuery('.woocommerce-Price-currencySymbol').html(),
 											decimal_separator: '".get_option('woocommerce_price_decimal_sep')."',
 											thousands_separator: '".get_option('woocommerce_price_thousand_sep')."'
 										}
@@ -173,13 +167,52 @@ function woocommerce_sequra_init()
 									SequraPartPaymentTeaser(
 										{
 											container:'#sequra_partpayment_teaser',
-											price_container: '.price',
+											price_container: '.woocommerce-Price-amount',
 											min_amount: ".$sequra_pp->min_amount."
 										}
-										);
+									);
+									SequraPartPaymentTeaserInstance.preselect(20);
 									</script>
 			";
 		}
 		return $price . $ret;
+	}
+
+	/*
+	 * Ivoice teaser in product page
+	 */
+	add_action( 'woocommerce_after_add_to_cart_button','woocommerce_sequra_after_add_to_cart_button',10);
+	function woocommerce_sequra_after_add_to_cart_button(){
+		global $product;
+		$sequra = new SequraPaymentGateway();
+		if($product->price < $sequra->max_amount){ ?>
+			<div id="sequra_payment_teaser">
+				<p>* Recibe primero, paga después <span class="sequra_more_info" rel="sequra_info_widget" title="Más información"><span class="icon-info"></span></span></p>
+			</div>
+
+			<div id="sequra_info_widget" class="sequra_popup">
+				<div class="sequra_white_content closeable" title="Recibe primero, paga después">
+					<div class="sequra_content_popup">
+						<h4>¿Cómo funciona?</h4>
+						<div>
+							<ol>
+								<li>Elige esta opción al realizar tu pedido, no necesitas tarjeta.</li>
+								<li>Recibe tu pedido y comprueba tu compra.</li>
+								<li>Tienes hasta 7 días después del envío para pagar.</li>
+							</ol>
+						</div>
+						<h4>¿Cuánto cuesta?</h4>
+						<div>
+							<p>El único coste es de 1.95€.</p>
+							<p></p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script type="text/javascript">
+				SequraHelper.preparePopup();
+			</script>
+		<?php
+		}
 	}
 }

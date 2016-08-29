@@ -25,7 +25,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		// Get setting values
 		$this->enabled              = 'yes' == $this->settings['enabled'];
 		$this->title                = $this->settings['title'];
-		$this->description          = $this->settings['description'];
 		$this->merchantref          = $sequra_settings['merchantref'];
 		$this->user                 = $sequra_settings['user'];
 		$this->password             = $sequra_settings['password'];
@@ -35,11 +34,11 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->min_amount           = $this->settings['min_amount'];
 		$this->env                  = $sequra_settings['env'];
 		$this->endpoint             = SequraPaymentGateway::$endpoints[$this->env];
-		$this->helper               = new SequraHelper($this);
 		$this->has_fields           = true;
-		$this->pp_product           = 'pp2';//not an option
+		$this->pp_product           = 'pp3';//not an option
+		$this->ipn = 1;
 //            $this->stats = $this->settings['stats'];
-		$this->helper = new SequraHelper($this);
+		$this->helper               = new SequraHelper($this);
 
 		// Logs
 		if ($this->debug == 'yes')
@@ -80,13 +79,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'title' => __('Title', 'wc_sequra'),
 				'type' => 'text',
 				'description' => __('This controls the title which the user sees during checkout.', 'wc_sequra'),
-				'default' => __('Fraccionar tu pago.', 'wc_sequra')
-			),
-			'description' => array(
-				'title' => __('Description', 'wc_sequra'),
-				'type' => 'textarea',
-				'description' => __('This controls the description which the user sees during checkout.', 'woothemes'),
-				'default' => __('Selecciona una de las opciones. Todos los costes incluidos.', 'wc_sequra')
+				'default' => __('Fracciona tu pago.', 'wc_sequra')
 			),
 			'max_amount' => array(
 				'title' => __('Max order amount', 'wc_sequra'),
@@ -246,13 +239,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 
 	function setEndpoint($url) {
 		$this->endpoint = $url;
-	}
-
-	function merchant($order) {
-		return array(
-			'approved_url' => str_replace('https:', 'http:', add_query_arg(array('order' => $order->id, 'wc-api' => 'woocommerce_' . $this->id, 'result' => 0), home_url('/'))),
-			'abort_url' => $order->get_cancel_order_url()
-		);
 	}
 
 	function check_sequra_pp_resquest() {
