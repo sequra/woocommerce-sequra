@@ -85,7 +85,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'title' => __('Max order amount', 'wc_sequra'),
 				'type' => 'number',
 				'description' => __('SeQura payment method will be unavailable for orders beyond this amount', 'wc_sequra'),
-				'default' => '400'
+				'default' => '10000'
 			),
 			'min_amount' => array(
 				'title' => __('Min order amount', 'wc_sequra'),
