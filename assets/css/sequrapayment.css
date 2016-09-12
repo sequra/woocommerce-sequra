@@ -20,6 +20,8 @@
 }
 
 .sequra_popup {display: none;min-width: 320px;position: fixed;top:0;left:0;width: 100%;height: 100%;background: black;background: rgba(0, 0, 0, 0.8);z-index: 99998;overflow:auto;}
+.sequra_popup ul,.sequra_popup ol {margin: 0;margin-bottom: 9px;list-style: none;padding: 0;}
+
 .sequra_white_content {background: #fff;text-align: left;max-width: 320px;margin: 40px auto;position: relative;border-radius: 6px;}
 #sequra_identity_partpayment_form_popup h2 {text-transform: uppercase;font-weight: bold;font-size:16px;}
 #sequra_identity_partpayment_form_popup h2 small {color: #009352;text-decoration: underline;font-size: 90%;margin-left: 5px;}
@@ -662,7 +664,8 @@
   float: left;
 }
 
-#sequra_payment_teaser {
-    clear: both;
-    white-space: nowrap;
-}
+@media (max-width: 960px) {
+    [class^="sequra"] .icon-info:before {
+        font-size: 22px;
+    }
+}    

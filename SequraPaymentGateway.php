@@ -134,7 +134,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'title'       => __( 'Fee', 'wc_sequra' ),
 				'description' => __( 'fee applied to this payment method' ),
 				'type'        => 'text',
-				'default'     => '0'
+				'default'     => '1.95'
 			),
 			'days_after'         => array(
 				'title'       => __( 'Payment term', 'wc_sequra' ),
