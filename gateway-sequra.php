@@ -170,7 +170,7 @@ function woocommerce_sequra_init() {
 									SequraPartPaymentTeaser(
 										{
 											container:'#sequra_partpayment_teaser',
-											price_container: '.product-summary-wrap .woocommerce-Price-amount',
+											price_container: '[class*=summary] .woocommerce-Price-amount',
 											min_amount: " . $sequra_pp->min_amount . "
 										}
 									);
