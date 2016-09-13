@@ -23,6 +23,11 @@ var SequraHelper = {
         jQuery('#' + jQuery(this).attr('rel')).fadeIn();
         return false;
       });
+
+      jQuery(this).on('click', function (event) {
+        jQuery(this).fadeOut();
+        return false;
+      });
     });
 
     /*
@@ -45,57 +50,7 @@ var SequraHelper = {
     jQuery(".sequra_popup_close").on('click', function (event) {
       jQuery(this).parent().parent().fadeOut();
       return false;
-    });
-    jQuery(".sequra_popup.sequra_popup_prepared").on('click', function (event) {
-      jQuery(this).fadeOut();
-      return false;
-    });    
-  },
-
-  preparePartPaymentAcordion: function (jump) {
-    function displayFirstStep() {
-      jQuery("#sequra_partpayment_alt_tittle").hide();
-      jQuery("#sequra_partpayment_tittle").show();
-      jQuery("#first_step_content").slideDown();
-      jQuery("#second_step_content").slideUp();
-    }
-
-    function displaySecondStep() {
-      jQuery("#sequra_partpayment_tittle").hide();
-      jQuery("#first_step_content").slideUp();
-      jQuery("#sequra_partpayment_alt_tittle").show();
-      jQuery("#second_step_content").slideDown();
-    }
-
-    function jumpToSecondStep() {
-      jQuery("#sequra_partpayment_tittle").hide();
-      jQuery("#first_step_content").hide();
-      jQuery("#sequra_partpayment_alt_tittle").show();
-      jQuery("#second_step_content").show();
-    }
-
-    jQuery(document).delegate("#sequra_partpayment_tittle2, #part_payment_last_step", 'click', function () {
-      displaySecondStep();
-      return false;
-    });
-    jQuery(document).delegate("#sequra_partpayment_alt_tittle,#sequra_partpayment_tittle", 'click', function () {
-      displayFirstStep();
-      return false;
-    })
-    jQuery("#sequra_partpayment_alt_tittle").hide();
-
-    jQuery(document).delegate('#sequra_partpayment_tittle2', 'click', function () {
-      displaySecondStep();
-    });
-    jQuery(document).delegate('#part_payment_last_step', 'click', function () {
-      displaySecondStep();
-    });
-    jQuery(document).delegate('#sequra_partpayment_alt_tittle', 'click', function () {
-      displayFirstStep();
-    }).hide();
-    if (jump) {
-      jumpToSecondStep();
-    }
+    });   
   }
 };
 var SequraPartPaymentMoreInfo = {
@@ -119,8 +74,9 @@ var SequraPartPaymentMoreInfo = {
     var html = '' +
         '<div class="sequra_white_content closeable" title="Fracciona tu pago">' +
         '  <div class="sequra_content_popup">' +
-        '    <h4>¿En cuántas cuotas puedo fraccionar mi pago?</h4>' +
+        '    <h4>¿En cuántas cuotas podré fraccionar mi pago?</h4>' +
         '    <div>' +
+        '    Podrás elegir entre:' +
         '      <ul>';
     var max = ca.length;
     for (var i = 0; i < max; i++) {
