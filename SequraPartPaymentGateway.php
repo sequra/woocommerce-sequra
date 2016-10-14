@@ -254,7 +254,9 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			$order->payment_complete();
 			$url = $this->get_return_url($order);
 		}
-		wp_redirect($url, 303);
+		if ( ! $this->ipn ) {
+			wp_redirect( $url, 302 );
+		}
 		exit();
 	}
 }

@@ -41,6 +41,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$this->env                  = $this->settings['env'];
 		$this->fee                  = (float) $this->settings['fee'];
 		$this->days_after           = (int) $this->settings['days_after'];
+		$this->has_fields           = true;		
 		$this->endpoint             = self::$endpoints[ $this->env ];
 		$this->helper               = new SequraHelper( $this );
 		$this->identity_form        = null;
