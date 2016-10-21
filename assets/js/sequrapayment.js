@@ -53,14 +53,16 @@ var SequraHelper = {
     });   
   }
 };
+
 var SequraPartPaymentMoreInfo = {
   draw: function (generic) {
     html = null;
     if(!generic){
+      html = this.get_pp_checkout_popup_html(SequraCreditAgreementsInstance.creditAgreements);
+    }else{
       html = this.get_pp_popup_html(SequraCreditAgreementsInstance.creditAgreements);
-    } else {
-      html = this.get_pp_generic_popup_html();
     }
+
     if (0 < jQuery('#sequra_partpayments_popup').length) {
       jQuery('#sequra_partpayments_popup').html(html);
     } else {
@@ -70,67 +72,100 @@ var SequraPartPaymentMoreInfo = {
     SequraHelper.preparePopup();
   },
 
-  get_pp_popup_html: function (ca) {
+  get_pp_checkout_popup_html: function (ca) {
     var html = '' +
         '<div class="sequra_white_content closeable" title="Fracciona tu pago">' +
         '  <div class="sequra_content_popup">' +
-        '    <h4>¿En cuántas cuotas podré fraccionar mi pago?</h4>' +
-        '    <div>' +
-        '    Podrás elegir entre:' +
+        '    <h4>¿En cuantas cuotas podré fraccionar mi pago?</h4>' +
+        '    <div >' +
+        '      <h5>Podrás elegir entre:</h5>' +
         '      <ul>';
     var max = ca.length;
-    for (var i = 0; i < max; i++) {
-      html += '  <li><b class="instalment_count-js">' + ca[i]['instalment_count'] + ' cuotas</b> de <b class="instalment_total-js">' + ca[i]['instalment_total']['string'] + '</b>/mes';
+    if(ca[0]['down_payment_total'].value>ca[0].instalment_total.value) {
+      for (var i = 0; i < max; i++) {
+        html += '  <li><b class="instalment_count-js">' + ca[i]['instalment_count'] + ' cuotas:</b>'+
+                '    <ul>' +
+                '      <li>· <span class="down_payment_total-js">' +  ca[i].down_payment_total.string + '</span> ahora' +
+                '      <li>· y después ' + (ca[i]['instalment_count']-1) + ' cuotas de <b class="instalment_total-js">' + ca[i]['instalment_total']['string'] + '</b>/mes</li>' +
+                '    </ul>' +
+                '  </li>';
+      }
+      html += '</ul>';
+    } else {
+      for (var i = 0; i < max; i++) {
+        html += '  <li><b class="instalment_count-js">' + ca[i]['instalment_count'] + ' cuotas</b> de <b class="instalment_total-js">' + ca[i]['instalment_total']['string'] + '</b>/mes';
+      }
+      html += '   <ul>';
     }
-    html +='   <ul>' +
-        '      <small>* Coste único incluido: <span class="instalment_fee-js">' +  ca[0]['instalment_fee']['string'] + '</span> por cuota</small>';
-    if(ca[0]['down_payment_total']['value']>ca[0]['instalment_total']['value']){
-      html += '<br/><small>* El primer pago será de <span class="down_payment_total-js">' +  ca[0]['down_payment_total']['string'] + '</span> entrada incluida</small>';
-    }        
-    html +=' </div>' +          
-        '    <h4>¿Cómo funciona?</h4>' +
-        '      <div>' +
-        '        <ol>' +
-        '          <li>Elige "Fracciona tu pago" con SeQura al realizar tu pedido y paga sólo la primera cuota.</li>' +
-        '          <li>Recibe tu pedido.</li>' +
-        '          <li>El resto de pagos se cargarán automáticamente a tu tarjeta.</li>' +
-        '        </ol>' +
-        '      <p></p>' +        
-        '     </div>' +
+    html +=' </div>';
+    if(ca[0].total_with_tax.value>ca[0].min_amount.value){
+      html += '' +
+        '    <div id="sequra_pp_example">' +
+        '      <p>' +
+        '        * Coste único incluido: <span class="instalment_fee-js">' +  ca[0]['instalment_fee']['string'] + '</span> por cuota' +
+        '      </p>';
+      if(ca[0]['down_payment_total'].value>ca[0].instalment_total.value){
+        html += '' +
+        '      <div class="small">' +
+        '        Para este producto fraccionamos hasta <span class="max_amount-js">' +  ca[0].max_amount.string + '</span>' +
+        '        por lo que <span class="over_max-js">' +  ca[0].over_max.string + '</span>' +
+        '        se añaden a la primera cuota.' +
+        '      </div>';
+      }             
+      html += '' + 
+        '    </div>';
+    }
+    html += '' +   
         '  </div>' +
         '</div>';
     return html;
   },
 
-  get_pp_generic_popup_html: function () {
+  get_pp_popup_html: function (ca) {
     var html = '' +
         '<div class="sequra_white_content closeable" title="Fracciona tu pago">' +
         '  <div class="sequra_content_popup">' +
         '    <h4>¿Cómo funciona?</h4>' +
-        '      <div>' +
-        '        <ol>' +
-        '          <li>Elige "Fracciona tu pago" con SeQura al realizar tu pedido y paga sólo la primera cuota.</li>' +
-        '          <li>Recibe tu pedido.</li>' +
-        '          <li>El resto de pagos se cargarán automáticamente a tu tarjeta.</li>' +
-        '        </ol>' +
-        '     </div>' +
-        '    <h4>¿Cuánto cuesta?</h4>' +
         '    <div>' +
-        '      <p>El único coste es de 3 a 12€ por cuota dependiendo del importe total del pedido.</p>' +
-        '      <p></p>' +
-        '    </div>' +      
+        '      <ol>' +
+        '        <li><span>Eliges "Fracciona tu pago" al realizar tu pedido y pagas sólo la primera cuota.</span></li>' +
+        '        <li><span>Recibes tu pedido.</span></li>' +
+        '        <li><span>El resto de pagos se cargarán automáticamente a tu tarjeta.</span></li>' +
+        '      </ol>' +
+        '    </div>';
+    if(ca[0].total_with_tax.value>ca[0].min_amount.value){
+      html += '' +
+          '    <div id="sequra_pp_example">' +
+          '      <p>' +
+          '        Para <span class="total_with_tax-js">' + ca[0].total_with_tax.string + '</span> el coste es de ' +
+          '        <span class="instalment_fee-js">' + ca[0].instalment_fee.string + '</span>/cuota ' +
+          '        con lo que pagarías un total de <span class="grand_total-js">' + ca[0].grand_total.string + '</span>' +
+          '      </p>';
+      if(ca[0]['down_payment_total'].value>ca[0].instalment_total.value){
+        html += '' +
+            '      <div class="small">' +
+            '        Para este producto fraccionamos hasta <span class="max_amount-js">' +  ca[0].max_amount.string + '</span>' +
+            '        por lo que <span class="over_max-js">' +  ca[0].over_max.string + '</span>' +
+            '        se añaden a la primera cuota que es de  <span class="down_payment_total-js">' +  ca[0].down_payment_total.string + '</span>.' +
+            '      </div>';
+      }
+      html += '' +
+          '    </div>';
+    }
+    html += '' +
         '  </div>' +
         '</div>';
     return html;
-  }  
+  }
 };
 
 SequraCreditAgreements = function (settings) {
   var self = this,
       creditAgreements = null,
+      costs = null;
       options = {
-        product: 'pp2',
-        instalment_counts: [3, 6, 12],
+        costs_json: null,
+        product: 'pp3',
         currency_symbol_l: '',
         currency_symbol_r: '€',
         decimal_separator: '.',
@@ -142,6 +177,7 @@ SequraCreditAgreements = function (settings) {
     for (var attrname in settings) {
       options[attrname] = settings[attrname];
     }
+    costs = options['costs_json'][this.product()];
   };
 
   this.get_ca_for = function (instalment_count) {
@@ -158,143 +194,52 @@ SequraCreditAgreements = function (settings) {
 
   this.get = function (total_amount) {
     total_amount = parseInt(total_amount);
-    switch (options['product']) {
-        case 'pp3':
-            this.creditAgreements = this.for_pp3(total_amount);
-            break;
-        case 'pp2':
-            this.creditAgreements = this.for_pp2(total_amount);
-            break;
-        default:
-            this.creditAgreements = this.for_pp1(total_amount);
-    }
+    this.creditAgreements = this.for_pp(total_amount);
     return this.creditAgreements;
   };
 
-  this.for_pp1 = function (total_amount) {
-    var ca = [],
-        instalment_fee = (total_amount < 20000 ? 300 : 500),
-        down_payment_amount = 0,
-        drawdown_payment_amount = total_amount - down_payment_amount,
-        setup_fee = 0,
-        down_payment_fees = 0,
-        down_payment_total = 0,
-        max = options['instalment_counts'].length;
-    for (var i = 0; i < max; i++) {
-      var instalment_amount = Math.floor(total_amount / options['instalment_counts'][i]),
-          coc_value = instalment_fee * options['instalment_counts'][i] + down_payment_fees,
-          grand_total = total_amount + coc_value,
-          apr_value = apr(total_amount - instalment_amount, instalment_fee, options['instalment_counts'][i] - 1);
-
-      ca.push({
-        'instalment_count': options['instalment_counts'][i],
-        'instalment_amount': {'value': instalment_amount, 'string': value_to_currency_string(instalment_amount)},
-        'instalment_fee': {'value': instalment_fee, 'string': value_to_currency_string(instalment_fee)},
-        'instalment_total': {
-          'value': instalment_amount + instalment_fee,
-          'string': value_to_currency_string(instalment_amount + instalment_fee)
-        },
-        'product': options['product'],
-        'apr': {'value': apr_value, 'string': value_to_percentage_string(apr_value)},
-        'down_payment_amount': {'value': down_payment_amount, 'string': value_to_currency_string(down_payment_amount)},
-        'down_payment_fees': {'value': down_payment_fees, 'string': value_to_currency_string(down_payment_fees)},
-        'down_payment_total': {'value': down_payment_total, 'string': value_to_currency_string(down_payment_total)},
-        'drawdown_payment_amount': {
-          'value': drawdown_payment_amount,
-          'string': value_to_currency_string(drawdown_payment_amount)
-        },        
-        'interests': {'value': 0, 'string': value_to_percentage_string(0)},
-        'setup_fee': {'value': setup_fee, 'string': value_to_currency_string(setup_fee)},
-        'grand_total': {'value': grand_total, 'string': value_to_currency_string(grand_total)},        
-        'total_with_tax': {'value': total_amount, 'string': value_to_currency_string(total_amount)}
-      });
-    }
-    return ca;
-  };
-
-  this.for_pp2 = function (total_amount) {
+  this.for_pp = function (total_amount) {
     var ca = new Array(),
-        instalment_fee = this.pp2_instalment_fee(total_amount),
-        down_payment_amount = this.pp2_down_payment(total_amount),
-        drawdown_payment_amount = total_amount - down_payment_amount,
-        setup_fee = (total_amount < 100000 ? 0 : 2000),
+        instalment_fee = this.pp_instalment_fee(total_amount),
+        setup_fee = 0,
         down_payment_fees = setup_fee + instalment_fee,
-        down_payment_total = down_payment_amount + down_payment_fees,
-        max = options['instalment_counts'].length;
+        over_max = Math.max(0,total_amount - costs.max_amount);
+        max = costs.instalment_counts.length;
 
     for (var i = 0; i < max; i++) {
-      var instalment_amount = Math.floor(drawdown_payment_amount / options['instalment_counts'][i]),
-          apr_value = apr(drawdown_payment_amount, instalment_fee, options['instalment_counts'][i], down_payment_fees),
-          coc_value = instalment_fee * options['instalment_counts'][i] + down_payment_fees,
-          grand_total = total_amount + coc_value,
-          instalment_total = instalment_amount + instalment_fee;
+        var instalment_count = costs.instalment_counts[i],
+            down_payment_amount = this.pp_down_payment(total_amount,instalment_count),
+            drawdown_payment_amount = total_amount - down_payment_amount,
+            down_payment_total = down_payment_amount + down_payment_fees,
 
-      ca.push({
-        'apr': {'value': apr_value, 'string': value_to_percentage_string(apr_value)},
-        'cost_of_credit': {'value': coc_value, 'string': value_to_currency_string(coc_value)},
-        'down_payment_amount': {'value': down_payment_amount, 'string': value_to_currency_string(down_payment_amount)},
-        'down_payment_fees': {'value': down_payment_fees, 'string': value_to_currency_string(down_payment_fees)},
-        'down_payment_total': {'value': down_payment_total, 'string': value_to_currency_string(down_payment_total)},
-        'drawdown_payment_amount': {
-          'value': drawdown_payment_amount,
-          'string': value_to_currency_string(drawdown_payment_amount)
-        },
-        'grand_total': {'value': grand_total, 'string': value_to_currency_string(grand_total)},
-        'instalment_amount': {'value': instalment_amount, 'string': value_to_currency_string(instalment_amount)},
-        'instalment_count': options['instalment_counts'][i],
-        'instalment_fee': {'value': instalment_fee, 'string': value_to_currency_string(instalment_fee)},
-        'instalment_total': {'value': instalment_total, 'string': value_to_currency_string(instalment_total)},
-        'interests': {'value': 0, 'string': value_to_percentage_string(0)},
-        'setup_fee': {'value': setup_fee, 'string': value_to_currency_string(setup_fee)},
-        'total_with_tax': {'value': total_amount, 'string': value_to_currency_string(total_amount)}
-      });
+            instalment_amount = Math.floor(drawdown_payment_amount / (instalment_count-1)),
+            apr_value = apr(drawdown_payment_amount, instalment_fee, (instalment_count-1), down_payment_fees),
+            coc_value = instalment_fee * (instalment_count-1) + down_payment_fees,
+            grand_total = total_amount + coc_value,
+            instalment_total = instalment_amount + instalment_fee;
+
+        ca.push({
+            'apr': {'value': apr_value, 'string': value_to_percentage_string(apr_value)},
+            'cost_of_credit': {'value': coc_value, 'string': value_to_currency_string(coc_value)},
+            'min_amount': {'value': costs.min_amount, 'string':value_to_currency_string(costs.min_amount)},
+            'max_amount': {'value': costs.max_amount, 'string':value_to_currency_string(costs.max_amount)},
+            'over_max':  {'value': over_max, 'string': value_to_currency_string(over_max)},
+            'down_payment_amount': {'value': down_payment_amount,'string': value_to_currency_string(down_payment_amount)},
+            'down_payment_fees': {'value': down_payment_fees, 'string': value_to_currency_string(down_payment_fees)},
+            'down_payment_total': {'value': down_payment_total, 'string': value_to_currency_string(down_payment_total)},
+            'drawdown_payment_amount': {'value': drawdown_payment_amount, 'string': value_to_currency_string(drawdown_payment_amount)},
+            'grand_total': {'value': grand_total, 'string': value_to_currency_string(grand_total)},
+            'instalment_amount': {'value': instalment_amount, 'string': value_to_currency_string(instalment_amount)},
+            'instalment_count': costs.instalment_counts[i],
+            'instalment_fee': {'value': instalment_fee, 'string': value_to_currency_string(instalment_fee)},
+            'instalment_total': {'value': instalment_total, 'string': value_to_currency_string(instalment_total)},
+            'interests': {'value': 0, 'string': value_to_percentage_string(0)},
+            'setup_fee': {'value': setup_fee, 'string': value_to_currency_string(setup_fee)},
+            'total_with_tax': {'value': total_amount, 'string': value_to_currency_string(total_amount)}
+        });
     }
     return ca;
   };
-
-  this.for_pp3 = function (total_amount) {
-        var ca = new Array(),
-            instalment_fee = this.pp3_instalment_fee(total_amount),
-            setup_fee = 0,
-            down_payment_fees = setup_fee + instalment_fee,
-            over_max = Math.max(0,total_amount - 120000);
-            max = options['instalment_counts'].length;
-
-        for (var i = 0; i < max; i++) {
-            var instalment_count = options['instalment_counts'][i],
-                down_payment_amount = this.pp3_down_payment(total_amount,instalment_count),
-                drawdown_payment_amount = total_amount - down_payment_amount,
-                down_payment_total = down_payment_amount + down_payment_fees,
-
-                instalment_amount = Math.floor(drawdown_payment_amount / (instalment_count-1)),
-                apr_value = apr(drawdown_payment_amount, instalment_fee, (instalment_count-1), down_payment_fees),
-                coc_value = instalment_fee * (instalment_count-1) + down_payment_fees,
-                grand_total = total_amount + coc_value,
-                instalment_total = instalment_amount + instalment_fee;
-
-            ca.push({
-                'apr': {'value': apr_value, 'string': value_to_percentage_string(apr_value)},
-                'cost_of_credit': {'value': coc_value, 'string': value_to_currency_string(coc_value)},
-                'over_max':  {'value': over_max, 'string': value_to_currency_string(over_max)},
-                'down_payment_amount': {'value': down_payment_amount,'string': value_to_currency_string(down_payment_amount)},
-                'down_payment_fees': {'value': down_payment_fees, 'string': value_to_currency_string(down_payment_fees)},
-                'down_payment_total': {'value': down_payment_total, 'string': value_to_currency_string(down_payment_total)},
-                'drawdown_payment_amount': {
-                    'value': drawdown_payment_amount,
-                    'string': value_to_currency_string(drawdown_payment_amount)
-                },
-                'grand_total': {'value': grand_total, 'string': value_to_currency_string(grand_total)},
-                'instalment_amount': {'value': instalment_amount, 'string': value_to_currency_string(instalment_amount)},
-                'instalment_count': options['instalment_counts'][i],
-                'instalment_fee': {'value': instalment_fee, 'string': value_to_currency_string(instalment_fee)},
-                'instalment_total': {'value': instalment_total, 'string': value_to_currency_string(instalment_total)},
-                'interests': {'value': 0, 'string': value_to_percentage_string(0)},
-                'setup_fee': {'value': setup_fee, 'string': value_to_currency_string(setup_fee)},
-                'total_with_tax': {'value': total_amount, 'string': value_to_currency_string(total_amount)}
-            });
-        }
-        return ca;
-    };
 
   this.apr = function (drawdown_payment, instalment_fee, instalment_count, start_fee) {
     if (!start_fee) start_fee = instalment_fee;
@@ -326,36 +271,17 @@ SequraCreditAgreements = function (settings) {
     return average_boundary * 100;
   };
 
-  this.pp2_instalment_fee = function (total_amount) {
-    if (total_amount < 20000) return 300;
-    if (total_amount < 40000) return 500;
-    if (total_amount < 60000) return 700;
-    if (total_amount < 80000) return 900;
-    return 1200;
+  this.pp_instalment_fee = function (total_amount) {
+    for(i in costs.fees_table)
+      if (total_amount < costs.fees_table[i][0]) return costs.fees_table[i][1];
+    return costs.fees_table[costs.fees_table.length-1][1]
   };
 
-  this.pp3_instalment_fee = function (total_amount) {
-    if (total_amount < 20100) return 300;
-    if (total_amount < 40100) return 500;
-    if (total_amount < 60100) return 700;
-    if (total_amount < 80100) return 800;
-    if (total_amount < 100100) return 1000;
-    return 1200;
-  };
+  this.pp_down_payment = function (total_amount,instalment_count) {
+    over_max = Math.max(total_amount, costs.max_amount) - costs.max_amount;
+    up_to_max = Math.min(total_amount, costs.max_amount);
 
-  this.pp2_down_payment = function (total_amount) {
-      return this.pp_down_payment(total_amount,160000,25);
-  };
-
-  this.pp3_down_payment = function (total_amount,instalment_count) {
-      return this.pp_down_payment(total_amount,120000,100/instalment_count);
-  };
-
-  this.pp_down_payment = function (total_amount,max_amount,down_payment_percent) {
-    over_max = Math.max(total_amount, max_amount) - max_amount;
-    up_to_max = Math.min(total_amount, max_amount);
-
-    return Math.floor((over_max + (down_payment_percent / 100) * up_to_max));
+    return Math.floor((over_max + up_to_max/instalment_count));
   };
 
   this.set_instalment_count = function (instalment_count) {
@@ -384,12 +310,10 @@ SequraCreditAgreements = function (settings) {
 SequraPartPaymentTeaser = function (settings) {
   var self = this,
       amount_total,
-      selected_instalment_count = -1,
       options = { //Defaults
         container: '',
         price_container: '.sequra-product-price-js',
         creditAgreements: null,
-        min_amount: 50
       };
 
   this.init = function () {
@@ -403,7 +327,7 @@ SequraPartPaymentTeaser = function (settings) {
   this.preselect = function(value){
     var i;
     for (i=2;i>0;i--){
-      if(options['creditAgreements'][i]['instalment_total']['value']>value*100)
+      if(options.creditAgreements[i].instalment_total.value>value)
         break;
     }
     jQuery('#instalment_count_selector').val(i);
@@ -411,55 +335,58 @@ SequraPartPaymentTeaser = function (settings) {
   }
 
   this.draw = function () {
-    html = '<div id="sequra_teaser_wrapper_1">';
-    if (amount_total / 100 > options['min_amount']) {
-      html += draw_simulator();
+    info_icon_html = '' +
+           '  <span class="sequra_more_info" rel="sequra_partpayments_popup" title="Más información"> ' +
+           '    <span class="icon-info"></span>' +
+           '  </span>';
+    html = '<fieldset id="sequra_teaser_wrapper">';
+    if (amount_total > options['creditAgreements'][0].min_amount.value) {
+      html += draw_simulator(info_icon_html);
     } else {
-      html += draw_teaser();
+      html += draw_teaser(info_icon_html);
     }
-    html += '</div>';
-    html += '<div id="sequra_teaser_wrapper_2"><span class="sequra_more_info" rel="sequra_partpayments_popup" title="Más información"><span class="icon-info"></span></span><div class="sequra_small_logo">&nbsp;</div></div>';
+    html += '</fieldset>' +
+            '<fieldset><legend class="sequra_small_logo">&nbsp;</legend></fieldset>';
     jQuery(options['container']).html(html);
     SequraPartPaymentMoreInfo.draw(true);
   };
 
-  this.draw_teaser = function () {
-    return '<span id="sequra_partpayment_teaser_low">* Fracciona tu pago desde ' + options['min_amount'] + ' €</span>';
+  this.draw_teaser = function (info_icon_html) {
+    return '<ul id="sequra_partpayment_teaser_low">' +
+           '  <li>' +
+           '    <span>' +
+           '      Fracciona tu pago desde ' + options['creditAgreements'][0].min_amount.string + 
+           '    </span>' + info_icon_html +
+           '  </li>' +
+           '</ul> ';
   };
 
-  this.draw_simulator = function () {
-    var product = options['creditAgreements'][0]['product'];
-    var max = options['creditAgreements'].length;
-    var selected_instalment_count = jQuery('#instalment_count_selector').val();
-    var html;
-
-    html = '<select id="instalment_count_selector" onchange="SequraPartPaymentTeaserInstance.update()">';
-    html += '<option value="-1">--</option>';
+  this.draw_simulator = function (info_icon_html) {
+    var max = options.creditAgreements.length,
+        selected_instalment_count = jQuery('#instalment_count_selector').val(),
+        ca = options.creditAgreements[selected_instalment_count?selected_instalment_count:(max-1)],
+        html,
+        select_html;
+ 
+    select_html = '<select id="instalment_count_selector" onchange="SequraPartPaymentTeaserInstance.update()">';
     for (var i = 0; i < max; i++) {
-      html += '<option value="'+i+'"'+(i==selected_instalment_count?' selected ':'')+'>' + options['creditAgreements'][i]['instalment_count'] + '</option>';
+      select_html += '<option value="'+i+'"'+(i==selected_instalment_count?' selected ':'')+'>' + options.creditAgreements[i].instalment_count + '</option>';
     }
-    html += '</select> cuotas de ';
-    if (0 < jQuery('#instalment_count_selector').length && 0 <= jQuery('#instalment_count_selector').val()) {
-      var ca = options['creditAgreements'][selected_instalment_count];
-      html += '<b class="sequra-pricelike instalment_total-js">' + ca['instalment_total']['string'] + '</b>/mes';
-      if ('pp2' == product) {
-        html += '<p>(Entrada <span class="down_payment_total-js">' +  ca['down_payment_total']['string'] + '</span>)</p>' +
-            '<div id="partpayment_summary">' +
-            '<b>Resumen del pago</b><br/>' +
-            'Paga ahora <span class="down_payment_total-js">' +  ca['down_payment_total']['string'] + '</span> y después <span class="instalment_count-js">' + ca['instalment_count'] + '</span> mensualidades de <span class="instalment_total-js">' + ca['instalment_total']['string'] + '</span><br/>';
-        if (ca['setup_fee'] && 0 == ca['setup_fee']['value']) {
-            html += 'Incluido el coste de <span class="instalment_fee-js">' + ca['instalment_fee']['string'] + '</span> por cuota. Sin intereses';
-        } else {
-            html += '<span class="setup_fee-js">' + ca['setup_fee']['string'] + ' de gastos de gestión incluidos en la entrada más <span class="instalment_fee-js">' + ca['instalment_fee']['string'] + '</span>/cuota. Sin intereses ';
-        }
-      } else {
-        html += '<br/><small>* Coste único incluido: <span class="instalment_fee-js">' +  ca['instalment_fee']['string'] + '</span> por cuota</small>';
-        if(ca['down_payment_total']['value']>ca['instalment_total']['value']){
-          html += '<br/><small>* El primer pago será de <span class="down_payment_total-js">' +  ca['down_payment_total']['string'] + '</span> entrada incluida</small>';
-        }
-      }
+    select_html += '</select>';
+
+    if(ca.down_payment_total.value>ca.instalment_total.value){
+      html = '<legend id="sequra_teaser_head"> o bien </legend>'+
+             'fracciona en ' + select_html + ' cuotas' + info_icon_html +
+             '<ul>'+
+             '  <li><span><span class="down_payment_total-js">' +  ca.down_payment_total.string + '</span> ahora</span></li>' +
+             '  <li><span>Y después ' + (ca.instalment_count-1) + ' cuotas de <span class="instalment_total-js">' +  ca.instalment_total.string + '</span></li>' +
+             '</ul>';
     } else {
-      html += ' -- €/mes';
+      html = '<legend id="sequra_teaser_head"> o solo </legend>'+
+             '<span class="instalment_total-js">' +  ca.instalment_total.string + '</span>/mes en ' + select_html + ' cuotas' + info_icon_html +
+             '<ul>'+
+             '  <li><span>Coste único incluido de <span class="instalment_fee-js">' +  ca.instalment_fee.string + '</span> por cuota</span></li>' +
+             '</ul>';      
     }
     return html;
   };
