@@ -12,6 +12,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	public function __construct() {
 		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
+		$this->method_title       = __( 'Recibe primero, paga después', 'wc_sequra' );
+		$this->method_description = __( 'Allows payments by \'Recibe primero, paga después\', service ofered by SeQura.', 'wc_sequra' );
 		//$this->icon = WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/images/icon.png';
 		$this->supports = array(
 			'products'

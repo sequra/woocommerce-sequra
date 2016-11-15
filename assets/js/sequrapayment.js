@@ -24,7 +24,7 @@ var SequraHelper = {
         return false;
       });
 
-      jQuery(this).on('click', function (event) {
+      jQuery(document).on(this,'click', function (event) {
         jQuery(this).fadeOut();
         return false;
       });
@@ -47,7 +47,7 @@ var SequraHelper = {
 
     });
 
-    jQuery(".sequra_popup_close").on('click', function (event) {
+    jQuery(document).delegate(".sequra_popup_close",'click', function (event) {
       jQuery(this).parent().parent().fadeOut();
       return false;
     });   
@@ -122,6 +122,7 @@ var SequraPartPaymentMoreInfo = {
   },
 
   get_pp_popup_html: function (ca) {
+    var i = jQuery('#instalment_count_selector').val();
     var html = '' +
         '<div class="sequra_white_content closeable" title="Fracciona tu pago">' +
         '  <div class="sequra_content_popup">' +
@@ -139,7 +140,7 @@ var SequraPartPaymentMoreInfo = {
           '      <p>' +
           '        Para <span class="total_with_tax-js">' + ca[0].total_with_tax.string + '</span> el coste es de ' +
           '        <span class="instalment_fee-js">' + ca[0].instalment_fee.string + '</span>/cuota ' +
-          '        con lo que pagarías un total de <span class="grand_total-js">' + ca[0].grand_total.string + '</span>' +
+          '        con lo que en <span class="grand_total-js">' + ca[i].instalment_count + '</span> cuotas pagarías un total de <span class="grand_total-js">' + ca[i].grand_total.string + '</span>' +
           '      </p>';
       if(ca[0]['down_payment_total'].value>ca[0].instalment_total.value){
         html += '' +

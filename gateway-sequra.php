@@ -113,7 +113,7 @@ function woocommerce_sequra_init() {
 		// Respects SSL, Style.css is relative to the current file
 		wp_register_style( 'sequra-style', plugins_url( 'assets/css/sequrapayment.css', __FILE__ ) );
 		wp_enqueue_style( 'sequra-style' );
-		wp_register_style( 'sequra-custom-style', plugins_url( 'assets/css/style.css', __FILE__ ) );
+		wp_register_style( 'sequra-custom-style', plugins_url( 'assets/css/wordpress.css', __FILE__ ) );
 		wp_enqueue_style( 'sequra-custom-style' );
 		wp_enqueue_script( 'sequra-js', plugins_url( 'assets/js/sequrapayment.js', __FILE__ ) );
 	}
@@ -157,24 +157,26 @@ function woocommerce_sequra_init() {
 		if ( $product->price > $sequra_pp->min_amount ) {
 			$ret = "<div id='sequra_partpayment_teaser'></div>
 									<script type='text/javascript'>
-									SequraCreditAgreements(
-										{
-											product: 'pp3',
-											//Personalizar si hace falta
-											currency_symbol_l: '',
-											currency_symbol_r: jQuery('.woocommerce-Price-currencySymbol').html(),
-											decimal_separator: '" . get_option( 'woocommerce_price_decimal_sep' ) . "',
-											thousands_separator: '" . get_option( 'woocommerce_price_thousand_sep' ) . "'
-										}
-									)
-									SequraPartPaymentTeaser(
-										{
-											container:'#sequra_partpayment_teaser',
-											price_container: '[class*=summary] .woocommerce-Price-amount',
-											min_amount: " . $sequra_pp->min_amount . "
-										}
-									);
-									SequraPartPaymentTeaserInstance.preselect(20);
+									jQuery.getJSON('".$sequra_pp->pp_cost_url."',function (json){
+										SequraCreditAgreements(
+											{
+												costs_json: json,
+												product: 'pp3',
+												//Personalizar si hace falta
+												currency_symbol_l: '',
+												currency_symbol_r: jQuery('.woocommerce-Price-currencySymbol').html(),
+												decimal_separator: '" . get_option('woocommerce_price_decimal_sep') . "',
+												thousands_separator: '" . get_option('woocommerce_price_thousand_sep') . "'
+											}
+										);
+										SequraPartPaymentTeaser(
+											{
+												container:'#sequra_partpayment_teaser',
+												price_container: '[class*=summary] .woocommerce-Price-amount'
+											}
+										);
+										SequraPartPaymentTeaserInstance.preselect(20);
+									});
 									</script>
 			";
 		}
@@ -202,15 +204,13 @@ function woocommerce_sequra_init() {
 						<h4>¿Cómo funciona?</h4>
 						<div>
 							<ol>
-								<li>Elige esta opción al realizar tu pedido, no necesitas tarjeta.</li>
-								<li>Recibe tu pedido y comprueba tu compra.</li>
-								<li>Tienes hasta 7 días después del envío para pagar.</li>
+								<li><span>Elige esta opción al realizar tu pedido, no necesitas tarjeta.</span></li>
+								<li><span>Recibe tu pedido y comprueba tu compra.</span></li>
+								<li><span>Tienes hasta 7 días después del envío para pagar.</span></li>
 							</ol>
 						</div>
-						<h4>¿Cuánto cuesta?</h4>
-						<div>
-							<p>El único coste es de 1.95€.</p>
-							<p></p>
+						<div class="sequra_costs">
+							<p>El único coste es de <?php echo $sequra->fee; ?>€.</p>
 						</div>
 					</div>
 				</div>

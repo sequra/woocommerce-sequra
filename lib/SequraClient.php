@@ -54,9 +54,9 @@ class SequraClient {
 	}
 
 	public function getIdentificationForm($uri, $options = array()) {
-		$product = array_key_exists('product', $options) ? $options["product"] : "i1";
-		$ajax = (isset($options["ajax"]) && $options["ajax"]) ? "true" : "false";
-		$this->initCurl($uri . '/pumbaa' . '?product='. $product .'&ajax='. $ajax);
+		$options["product"] = array_key_exists('product', $options) ? $options["product"] : "i1";
+		$options["ajax"] = (isset($options["ajax"]) && $options["ajax"]) ? "true" : "false";
+		$this->initCurl($uri . '/form_v2' . '?'.http_build_query($options));
 		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "GET");
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array('Accept: text/html'));
 		$this->sendRequest();
@@ -150,8 +150,17 @@ class SequraClient {
 	}
 
 	public static function isConsistentCart($cart) {
-		$totals = SequraTools::totals($cart);
+		$totals = self::totals($cart);
 		return $cart['order_total_without_tax'] == $totals['without_tax'] && $cart['order_total_with_tax'] == $totals['with_tax'];
+	}
+
+	public static function totals($cart) {
+		$total_without_tax = $total_with_tax = 0;
+		foreach ($cart['items'] as $item) {
+			$total_without_tax += isset($item['total_without_tax'])?$item['total_without_tax']:0;
+			$total_with_tax += isset($item['total_with_tax'])?$item['total_with_tax']:0;
+		}
+		return array('without_tax' => $total_without_tax, 'with_tax' => $total_with_tax);
 	}
 
 	public static function removeNulls($data) {

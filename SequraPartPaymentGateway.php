@@ -7,6 +7,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	public function __construct() {
 		do_action('woocommerce_sequra_pp_before_load', $this);
 		$this->id = 'sequra_pp';
+		$this->method_title       = __( 'Fraccionar pago', 'wc_sequra' );
+		$this->method_description = __( 'Allows payments part payments, service ofered by SeQura.', 'wc_sequra' );
 		//$this->icon = WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/images/icon.png';
 		$this->supports = array(
 			'products'
@@ -36,6 +38,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->endpoint             = SequraPaymentGateway::$endpoints[$this->env];
 		$this->has_fields           = true;
 		$this->pp_product           = 'pp3';//not an option
+		$this->pp_cost_url          = $this->settings['pp_cost_url'];
 		$this->ipn = 1;
 //            $this->stats = $this->settings['stats'];
 		$this->helper               = new SequraHelper($this);
@@ -80,6 +83,12 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'type' => 'text',
 				'description' => __('This controls the title which the user sees during checkout.', 'wc_sequra'),
 				'default' => __('Fracciona tu pago.', 'wc_sequra')
+			),
+			'pp_cost_url' => array(
+				'title' => __('Url de costes', 'wc_sequra'),
+				'type' => 'text',
+				'description' => __('This is where service costs and conditions are hosted.', 'wc_sequra'),
+				'default' => __('https://.', 'wc_sequra')
 			),
 			'max_amount' => array(
 				'title' => __('Max order amount', 'wc_sequra'),
@@ -165,7 +174,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	public function admin_options() {
 		?>
 		<h3><?php _e('Pasarela SeQura', 'wc_sequra'); ?></h3>
-		<p><?php _e('La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Comprar ahora y pagar después" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.', 'wc_sequra'); ?></p>
+		<p><?php _e('La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Recibe primero, paga después" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.', 'wc_sequra'); ?></p>
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><!--/.form-table-->

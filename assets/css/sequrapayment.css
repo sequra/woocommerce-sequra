@@ -28,7 +28,6 @@
     cursor: pointer;   
 }
 
-.sequra_more_info .icon-info:hover,
 .closeable .sequra_popup_close:hover,
 .closeable .sequra_popup_close_delegatedless:hover{
     background: #dedede;
@@ -123,9 +122,9 @@
 
 /** from pumbaa2 **/
 @font-face {
-  font-family: 'icomoon';
-  src: url(../fonts/icomoon.eot);
-  src: url(../fonts/icomoon.eot#iefix) format("embedded-opentype"), url(../fonts/icomoon.ttf) format("truetype"), url(../fonts/icomoon.woff) format("woff"), url(../fonts/icomoon.svg#icomoon) format("svg");
+  font-family: 'sequra';
+  src: url(../fonts/sequra.eot);
+  src: url(../fonts/sequra.eot#iefix) format("embedded-opentype"), url(../fonts/sequra.ttf) format("truetype"), url(../fonts/sequra.woff) format("woff"), url(../fonts/sequra.svg#sequra) format("svg");
   font-weight: normal;
   font-style: normal;
 }
@@ -144,53 +143,58 @@
 }
 
 [class^="sequra"] [class^="icon-"]:before, [class^="sequra"] [class*=" icon-"]:before {
-    font-family: 'icomoon' !important;
+    font-family: 'sequra' !important;
     width: auto;
 }
 
 /* line 39, ../sass/_fonts.scss */
 [class^="sequra"] .icon-left-arrow:before {
-  content: "\e908" !important;
+  content: "\1f868" !important;
 }
 
 /* line 43, ../sass/_fonts.scss */
 [class^="sequra"] .icon-calendar:before {
-  content: "\e901"!important;
+  content: "\1F4C5"!important;
 }
 
 /* line 46, ../sass/_fonts.scss */
 [class^="sequra"] .icon-check:before {  
-  content: "\e902"!important;
+  content: "\1F5F9"!important;
 }
 
 /* line 49, ../sass/_fonts.scss */
 [class^="sequra"]  .icon-creditcard:before {
-  content: "\e903" !important;
+  content: "\1F4B3" !important;
 }
 
 /* line 52, ../sass/_fonts.scss */
 [class^="sequra"]  .icon-info:before {
-  content: "\e904" !important;
+  content: "\1f6c8" !important;
 }
 
 /* line 55, ../sass/_fonts.scss */
 [class^="sequra"]  .icon-papers:before {
-  content: "\e905" !important;
+  content: "\1F5BA" !important;
 }
 
 /* line 58, ../sass/_fonts.scss */
 [class^="sequra"]  .icon-sms:before {
-  content: "\e906" !important;
+  content: "\1F4F2" !important;
 }
 
 /* line 61, ../sass/_fonts.scss */
 [class^="sequra"]  .icon-timer:before {
-  content: "\e907" !important;;
+  content: "\23F2" !important;;
+}
+
+[class^="sequra"] span[class$="-js"]{
+  white-space: nowrap;
 }
 
 /* line 64, ../sass/_fonts.scss */
 .icon-sequra-logo:before {
-  content: "\e900" !important;;
+  content: "\e900" !important;
+  color: white !important;
 }
 
 .sequra_popup .sq-modal-head .sq-head-title {
@@ -206,6 +210,7 @@
   position: relative;
   top: 2px;
 }
+
 .sequra_popup .sq-modal-head .sq-head-title {
     background: #70ba45;
     color: white;
@@ -223,6 +228,7 @@
   float: left;
   line-height: 25px;
 }
+
 .sequra_popup .sq-modal-head .sq-head-info .sq-info-link {
   width: 50%;
   float: left;
@@ -248,8 +254,10 @@
     padding: initial;
     padding-left:10px;
     margin: initial;
+    border:0px;
     border-top: solid #000 1px!important;
     color:#000;
+    text-align: left;
 }
 
 #sequra_partpayment_teaser fieldset legend {
@@ -305,4 +313,40 @@
     width: 100%;
     text-align: center;
     padding: 8px 0;
+}
+
+.sequra_loading{
+  -webkit-filter: blur(15px);
+  -moz-filter: blur(15px);
+  -o-filter: blur(15px);
+  -ms-filter: blur(15px);
+  filter: blur(15px);
+  opacity:0.6;
+  -webkit-animation: blur 3s linear forwards;
+  -moz-animation: blur 3s linear forwards;
+  -ms-animation: blur 3s linear forwards;
+  -o-animation: blur 3s linear forwards;
+  animation: blur 3s linear forwards;
+}
+@-webkit-keyframes blur {
+  to {
+    -webkit-filter: blur(1px);
+    filter: blur(1px);
+    opacity:.9;
+  }
+}
+@-moz-keyframes blur {
+  to {
+    -moz-filter: blur(1px);
+    filter: blur(1px);
+    opacity:.9;
+  }
+}
+@keyframes blur {
+  to {
+    -webkit-filter: blur(1px);
+    -moz-filter: blur(1px);
+    filter: blur(1px);
+    opacity:.9;
+  }
 }
