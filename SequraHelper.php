@@ -37,6 +37,36 @@ class SequraHelper {
 		return $this->getClient()->getCreditAgreements($this->getBuilder()->integerPrice($amount), $this->_pm->merchantref);
 	}
 
+	function check_response($pm){
+		$order = new WC_Order( $_REQUEST['order'] );
+		if(isset($_REQUEST['signature'])){
+			return $this->check_ipn($pm,$order);
+		}
+		$url = $pm->get_return_url( $order );
+		if(!$order->is_paid()){
+			wc_add_notice( __( 'Ha habido un probelma con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.', 'wc_sequra' ), 'error');
+			//$url = $pm->get_checkout_payment_url();  Notice is not shown in payment page
+			$url = $order->get_cancel_order_url();
+		}
+		wp_redirect( $url, 302 );
+	}
+
+	function check_ipn($pm,$order){
+        $url   = $order->get_cancel_order_url();
+        do_action( 'woocommerce_'.$pm->id.'_process_payment', $order, $pm );
+        if ( $approval = apply_filters( 'woocommerce_'.$pm->id.'_process_payment', $this->get_approval( $order ), $order, $pm ) ) {
+            // Payment completed
+            $order->add_order_note( __( 'Payment accepted by SeQura', 'wc_sequra' ) );
+            $this->add_payment_info_to_post_meta( $order );
+            $order->payment_complete();
+            $url = $pm->get_return_url( $order );
+        }
+        if ( ! $pm->ipn ) {
+            wp_redirect( $url, 303 );
+        }
+        exit();
+    }
+
 
 	function get_approval($order) {
 		$client  = $this->getClient();
@@ -53,12 +83,15 @@ class SequraHelper {
 		update_post_meta((int)$order->id, 'Transaction ID', $uri);
 		update_post_meta((int)$order->id, 'Transaction Status', $client->getStatus());
 		/*TODO: Store more information for later use in stats, like browser*/
-		return $client->succeeded();
+		if(! $client->succeeded()){
+            http_response_code(410);
+			return false;
+        }
+		return true;
 	}
 
 	function add_payment_info_to_post_meta($order){
 		if($this->_pm->ipn){
-			$sequra_cart_info = WC()->session->get('sequra_cart_info');
 			update_post_meta((int)$order->id, 'Transaction ID', $_REQUEST['order_ref']);
 			update_post_meta((int)$order->id, '_order_ref', $_REQUEST['order_ref']);
 			update_post_meta((int)$order->id, '_product_code', $_REQUEST['product_code']);

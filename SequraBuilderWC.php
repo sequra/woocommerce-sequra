@@ -32,12 +32,14 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		$ret['options']['accept_terms_explicitly'] = true;
 		if ( $this->_pm->ipn ) {
 			$ret['notify_url'] = add_query_arg( array(
-				'order'     => $this->_current_order->id,
-				'wc-api'    => 'woocommerce_' . $this->_pm->id,
-				'signature' => $this->sign( $this->_current_order->id ),
-				'result'    => 0
+				'order'     => "".$this->_current_order->id,
+				'wc-api'    => 'woocommerce_' . $this->_pm->id
 			), home_url( '/' ) );
-			$ret['return_url'] = $this->_pm->get_return_url( $this->_current_order );
+            $ret['notification_parameters'] = array(
+                'signature' => self::sign( $this->_current_order->id ),
+                'result'    => "0"
+            );
+			$ret['return_url'] = $ret['notify_url'];
 		} else {
 			$ret['approved_url'] = add_query_arg( array(
 				'order'  => $this->_current_order->id,
@@ -68,23 +70,24 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		return $data;
 	}
 
-	public function fixTotals( $order ) {
-		$totals = self::totals( $order['cart'] );
-		$diff   = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
-		if ( $diff != 0 && abs( $diff ) <= count( $order['cart']['items'] ) ) {
-			$item         = array();
-			$item["type"] = "discount";
-			if ( $diff > 0 ) {
-				$item["type"]     = "invoice_fee";
-				$item["tax_rate"] = 0;
-			}
-			$item["reference"]         = 'Redondeo';
-			$item["name"]              = 'Ajuste';
-			$item["total_without_tax"] = $diff;
-			$item["total_with_tax"]    = $diff;
-			$order['cart']['items'][]  = $item;
-		}
+	public function fixRoundingProblems($order) {
+		$totals           = self::totals($order['cart']);
+		$diff_with_tax    = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
+		$diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
+		/*Don't correct error bigger than 1 cent per line*/
+		if (($diff_with_tax == 0 && $diff_without_tax == 0) || count($order['cart']['items']) < abs($diff_with_tax))
+			return $order;
 
+		$item['type']              = 'discount';
+		$item['reference']         = 'Ajuste';
+		$item['name']              = 'Ajuste';
+		$item['total_without_tax'] = $diff_without_tax;
+		$item['total_with_tax']    = $diff_with_tax;
+		if($diff_with_tax>0){
+			$item['type']          = 'handling';
+			$item['tax_rate']      = $diff_without_tax?round(abs(($diff_with_tax*$diff_without_tax))-1)*100:0;
+		}
+		$order['cart']['items'][]  = $item;
 		return $order;
 	}
 
@@ -129,22 +132,11 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		if ( $this->_current_order->status == 'completed' ) {
 			return $this->_current_order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item' ) ) );
 		}
-		if ( isset( $this->_pm ) && 'sequra_pp' == $this->_pm->id ) {
-			return $this->_current_order->get_items();
-		}
-
-		return $this->_cart->cart_contents;
+		return $this->_current_order->get_items();
 	}
 
 	private function getProductFromItem( $cart_item, $cart_item_key ) {
-		if (
-			$this->_current_order->status == 'completed' ||
-			'sequra_pp' == $this->_pm->id
-		) {
-			return $this->_current_order->get_product_from_item( $cart_item );
-		}
-
-		return apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+		return $this->_current_order->get_product_from_item( $cart_item );
 	}
 
 	protected function discount( $ref, $amount ) {

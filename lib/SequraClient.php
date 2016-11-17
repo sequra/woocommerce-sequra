@@ -199,6 +199,7 @@ class SequraClient {
 
 	private function verbThePayload($verb, $payload) {
 		$data_string = json_encode(self::removeNulls($payload));
+//var_dump($data_string);exit;
 		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $verb);
 		curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data_string);
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(

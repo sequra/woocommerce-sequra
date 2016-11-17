@@ -360,19 +360,6 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	function check_sequra_resquest() {
-		$order = new WC_Order( $_REQUEST['order'] );
-		$url   = $order->get_cancel_order_url();
-		do_action( 'woocommerce_sequra_process_payment', $order, $this );
-		if ( $approval = apply_filters( 'woocommerce_sequra_process_payment', $this->helper->get_approval( $order ), $order, $this ) ) {
-			// Payment completed
-			$order->add_order_note( __( 'Payment accepted by SeQura', 'wc_sequra' ) );
-			$this->helper->add_payment_info_to_post_meta( $order );
-			$order->payment_complete();
-			$url = $this->get_return_url( $order );
-		}
-		if ( ! $this->ipn ) {
-			wp_redirect( $url, 303 );
-		}
-		exit();
+        $this->helper->check_response($this);
 	}
 }

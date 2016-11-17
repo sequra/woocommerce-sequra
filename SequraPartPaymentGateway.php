@@ -56,7 +56,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		}
 		add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
 		add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-		add_action('woocommerce_api_woocommerce_' . $this->id, array($this, 'check_' . $this->id . '_resquest'));
+		add_action('woocommerce_api_woocommerce_' . $this->id, array($this, 'check_' . $this->id . '_resquest' ));
 		add_action('woocommerce_cart_calculate_fees', array($this, 'calculate_order_totals'), 999);
 		do_action('woocommerce_sequra_pp_loaded', $this);
 	}
@@ -251,21 +251,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	function check_sequra_pp_resquest() {
-		$order = new WC_Order($_REQUEST['order']);
-		$url   = $order->get_cancel_order_url();
-		do_action('woocommerce_sequra_pp_process_payment', $order, $this);
-		if ($approval = apply_filters('woocommerce_sequra_pp_process_payment', $this->helper->get_approval($order), $order, $this)) {
-			// Payment completed
-			$order->add_order_note(__('Payment accepted by SeQura', 'wc_sequra'));
-			$sequra_cart_info = WC()->session->get('sequra_cart_info');
-			update_post_meta((int)$order->id, 'Transaction ID', WC()->session->get('sequraURI'));
-			update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
-			$order->payment_complete();
-			$url = $this->get_return_url($order);
-		}
-		if ( ! $this->ipn ) {
-			wp_redirect( $url, 302 );
-		}
-		exit();
+		$this->helper->check_response($this);
 	}
 }
