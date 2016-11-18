@@ -299,6 +299,7 @@
 #sequra_partpayment_teaser select{
     background: #fff;
     border-radius: 3px;
+    width: 3em;
 }
 
 #sequra_partpayment_teaser .sequra_small_logo {
