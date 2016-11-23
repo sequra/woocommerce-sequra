@@ -195,22 +195,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Add extra charge to cart totals
-	 *
-	 * @param double $totals
-	 * return double
-	 */
-	public function calculate_order_totals($cart) {
-		if ((isset($_POST['payment_method']) && $_POST['payment_method'] != $this->id) ||
-			!defined('WOOCOMMERCE_CHECKOUT') ||
-			!($this->fee > 0)
-		) {
-			return;
-		}
-		$cart->add_fee(__('Recargo "compra ahora, paga después"'), $this->fee, false);
-	}
-
-	/**
 	 * receipt_page
 	 * */
 	function receipt_page($order) {
@@ -243,7 +227,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$decimal_point   = get_option('woocommerce_price_thousand_sep');
 		$thousands_point = get_option('woocommerce_price_decimal_sep');
 
-		require($this->helper->template_loader('partpayment_identification'));
+		require($this->helper->template_loader('payment_identification'));
 	}
 
 	function setEndpoint($url) {

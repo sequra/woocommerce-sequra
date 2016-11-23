@@ -6,6 +6,7 @@ if($this->identity_form){
 		document.location.href = history.back(1);
 	});
 	window.SequraFormInstance.show();
+	jQuery('.sq-identification-iframe').appendTo('body');
 </script>
 <?php } else { ?>
 	<script type="text/javascript">
