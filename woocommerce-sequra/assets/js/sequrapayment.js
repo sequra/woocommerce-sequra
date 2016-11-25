@@ -24,7 +24,7 @@ var SequraHelper = {
         return false;
       });
 
-      jQuery(document).on(this,'click', function (event) {
+      jQuery(this).on('click', function (event) {
         jQuery(this).fadeOut();
         return false;
       });
@@ -142,12 +142,12 @@ var SequraPartPaymentMoreInfo = {
           '        <span class="instalment_fee-js">' + ca[0].instalment_fee.string + '</span>/cuota ' +
           '        con lo que en <span class="grand_total-js">' + ca[i].instalment_count + '</span> cuotas pagarías un total de <span class="grand_total-js">' + ca[i].grand_total.string + '</span>' +
           '      </p>';
-      if(ca[0]['down_payment_total'].value>ca[0].instalment_total.value){
+      if(ca[i]['down_payment_total'].value>ca[i].instalment_total.value){
         html += '' +
             '      <div class="small">' +
-            '        Para este producto fraccionamos hasta <span class="max_amount-js">' +  ca[0].max_amount.string + '</span>' +
-            '        por lo que <span class="over_max-js">' +  ca[0].over_max.string + '</span>' +
-            '        se añaden a la primera cuota que es de  <span class="down_payment_total-js">' +  ca[0].down_payment_total.string + '</span>.' +
+            '        Para este producto fraccionamos hasta <span class="max_amount-js">' +  ca[i].max_amount.string + '</span>' +
+            '        por lo que <span class="over_max-js">' +  ca[i].over_max.string + '</span>' +
+            '        se añaden a la primera cuota que es de  <span class="down_payment_total-js">' +  ca[i].down_payment_total.string + '</span>.' +
             '      </div>';
       }
       html += '' +

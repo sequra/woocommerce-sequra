@@ -73,6 +73,7 @@
     padding: 15px 0 !important;
     margin:0 !important;
     color: #64b03c!important;
+    text-transform: none;
 }
 
 .sequra_white_content h5 {
@@ -247,7 +248,8 @@
     font-size: 13px;
     display: block;
     max-width: 300px;
-    clear: both
+    clear: both;
+    white-space: normal;
 }
 
 #sequra_partpayment_teaser fieldset {

@@ -172,7 +172,7 @@ function woocommerce_sequra_init() {
 										SequraPartPaymentTeaser(
 											{
 												container:'#sequra_partpayment_teaser',
-												price_container: '[class*=summary] .woocommerce-Price-amount'
+												price_container: '[class*=summary] ins .woocommerce-Price-amount,[class*=summary] p>.woocommerce-Price-amount'
 											}
 										);
 										SequraPartPaymentTeaserInstance.preselect(20);
