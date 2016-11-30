@@ -26,3 +26,6 @@
 #sequra_partpayment_teaser, #sequra_partpayment_teaser {
     font-size: 80%;
 }
+#sequra_partpayment_teaser ul span {
+    white-space: nowrap;
+}
