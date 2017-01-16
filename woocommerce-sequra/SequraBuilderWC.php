@@ -237,7 +237,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		$handling = array(
 			'type'              => 'handling',
 			'reference'         => 'Envío y manipulación',
-			'name'              => $delivery['name'],
+			'name'              => $delivery['name']?$delivery['name']:'Gastos de envío',
 			'total_without_tax' => self::integerPrice( $shipping_total + $shipping_tax_total ),
 			'total_with_tax'    => self::integerPrice( $shipping_total + $shipping_tax_total ),
 			'tax_rate'          => 0,
