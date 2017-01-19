@@ -261,7 +261,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		if ( $data['city'] == '' ) {
 			throw new Exception( 'City is required' );
 		}
-		$data['country_code'] = self::notNull( $this->getDeliveryField( 'shipping_country' ) );
+		$data['country_code'] = self::notNull( $this->getDeliveryField( 'shipping_country' ),'ES');
 		// OPTIONAL
 		$states = WC()->countries->get_states( $data['country_code'] );
 		if ( $state_code = self::notNull( $this->getDeliveryField( 'shipping_state' ) ) ) {
@@ -286,7 +286,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		$data['address_line_2'] = self::notNull( $this->getField( 'billing_address_2' ) );
 		$data['postal_code']    = self::notNull( $this->getField( 'billing_postcode' ) );
 		$data['city']           = self::notNull( $this->getField( 'billing_city' ) );
-		$data['country_code']   = self::notNull( $this->getField( 'billing_country' ) );
+		$data['country_code']   = self::notNull( $this->getField( 'billing_country' ), 'ES' );
 		// OPTIONAL
 		$states = WC()->countries->get_states( $data['country_code'] );
 		if ( $state_code = self::notNull( $this->getDeliveryField( 'billing_state' ) ) ) {
@@ -522,7 +522,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			}
 			if ( true || get_option( 'sequra_allowstats_country' ) ) // TODO: Stats config
 			{
-				$stat['country'] = self::notNull( $this->_current_order->billing_country );
+				$stat['country'] = self::notNull( $this->_current_order->billing_country,'ES');
 			}
 			if ( true || get_option( 'sequra_allowstats_payment' ) ) { // TODO: Stats config
 				$stat['payment_method_raw'] = $this->_current_order->payment_method;
