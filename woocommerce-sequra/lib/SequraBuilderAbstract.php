@@ -167,9 +167,9 @@ abstract class SequraBuilderAbstract
 		return intval(round(self::$centsPerWhole * $price));
 	}
 
-	protected static function notNull($value1)
+	protected static function notNull($value1, $default = '')
 	{
-		return is_null($value1) ? '' : $value1;
+		return is_null($value1) ? $default : $value1;
 	}
 
 	// TODO: find out were this method was copied from so that we can see when it is updated.
