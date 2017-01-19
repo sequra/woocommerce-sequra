@@ -134,7 +134,7 @@ var SequraPartPaymentMoreInfo = {
         '        <li><span>El resto de pagos se cargarán automáticamente a tu tarjeta.</span></li>' +
         '      </ol>' +
         '    </div>';
-    if(ca[0].total_with_tax.value>ca[0].min_amount.value){
+    if(ca && ca[0].total_with_tax.value>ca[0].min_amount.value){
       html += '' +
           '    <div id="sequra_pp_example">' +
           '      <p>' +
@@ -153,7 +153,57 @@ var SequraPartPaymentMoreInfo = {
       html += '' +
           '    </div>';
     }
+    if(!ca){
+      fees_table = SequraCreditAgreementsInstance.options.costs_json.pp3.fees_table;
+      min_fee = fees_table[0][1]/100;
+      max_fee = fees_table[fees_table.length-1][1]/100;
+      html += '' +
+          '    <div id="sequra_pp_example">' +
+          '      <p>' +
+          '        El único coste es de '+min_fee+' a '+max_fee+'€ por cuota dependiendo del importe del pedido' +
+          '      </p>' +
+          '    </div>';
+    }
     html += '' +
+        '  </div>' +
+        '</div>';
+    return html;
+  }
+};
+
+var SequraPaymentMoreInfo = {
+  draw: function (fee) {
+    html = this.get_popup_html(fee);
+
+    if (0 < jQuery('#sequra_payments_popup').length) {
+      jQuery('#sequra_payments_popup').html(html);
+    } else {
+      html = '<div id="sequra_payments_popup" class="sequra_popup">' + html + '</div>';
+      jQuery('body').append(html);
+    }
+
+    SequraHelper.preparePopup();
+  },
+
+  get_popup_html: function (fee) {
+    var html = '' +
+        '<div class="sequra_white_content closeable" title="Recibe primero, paga después">' +
+        '  <div class="sequra_content_popup">' +
+        '    <h4>¿Cómo funciona?</h4>' +
+        '    <div>' +
+        '      <ol>' +
+        '        <li><span>Elige esta opción al realizar tu pedido, no necesitas tarjeta.</span></li>' +
+        '        <li><span>Recibe tu pedido y comprueba tu compra.</span></li>' +
+        '        <li><span>Tienes hasta 7 días después del envío para pagar.</span></li>' +
+        '      </ol>' +
+        '    </div>'+
+        '    <div class="sequra_costs">';
+    if(fee>0){
+      html += '<p>El único coste es de '+fee +'€.</p>';
+    }else{
+      html += '<p>¡Sin costes adicionale!</p>';
+    }
+    html += '</div>'+
         '  </div>' +
         '</div>';
     return html;

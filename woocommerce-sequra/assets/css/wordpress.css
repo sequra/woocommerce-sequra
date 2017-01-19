@@ -29,3 +29,7 @@
 #sequra_partpayment_teaser ul span {
     white-space: nowrap;
 }
+
+#sequra_partpayment_info_container li {
+    border: 0px !important;
+}

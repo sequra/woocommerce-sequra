@@ -3,7 +3,7 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 3.1.1
+  Version: 3.2.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
@@ -78,6 +78,27 @@ function sequra_deactivation() {
 
 add_action( 'woocommerce_loaded', 'woocommerce_sequra_init', 100 );
 
+// [sequra_banner product='i1' color='#00ff00'] [sequra_banner product='pp3']
+function sequra_banner( $atts ) {
+	wp_enqueue_style( 'sequra-banner' );
+	$product = $atts['product'];
+	$pm = null;
+	if($product == 'i1'){
+		$pm = new SequraPaymentGateway();
+	}
+	elseif($product == 'pp3'){
+		$pm = new SequraPartPaymentGateway();
+	}
+	$pm->is_available();
+	if(!$pm || !$pm->is_available()){
+		return;
+	}
+	ob_start();
+	include ($pm->helper->template_loader( 'banner_'.$product ) );
+	return ob_get_clean();
+}
+add_shortcode( 'sequra_banner', 'sequra_banner' );
+
 function woocommerce_sequra_init() {
 	do_action( 'sequra_upgrade_if_needed' );
 	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
@@ -116,6 +137,7 @@ function woocommerce_sequra_init() {
 		wp_register_style( 'sequra-custom-style', plugins_url( 'assets/css/wordpress.css', __FILE__ ) );
 		wp_enqueue_style( 'sequra-custom-style' );
 		wp_enqueue_script( 'sequra-js', plugins_url( 'assets/js/sequrapayment.js', __FILE__ ) );
+	  wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ) );
 	}
 
 	add_action( 'wp_enqueue_scripts', 'sequra_add_stylesheet_adn_js' );
@@ -193,30 +215,12 @@ function woocommerce_sequra_init() {
 		$sequra = new SequraPaymentGateway();
 		if ( $sequra->is_available() && $product->price < $sequra->max_amount ) { ?>
 			<div id="sequra_payment_teaser">
-				<p>* Recibe primero, paga después <span class="sequra_more_info" rel="sequra_info_widget"
+				<p>* Recibe primero, paga después <span class="sequra_more_info" rel="sequra_payments_popup"
 				                                        title="Más información"><span class="icon-info"></span></span>
 				</p>
 			</div>
-
-			<div id="sequra_info_widget" class="sequra_popup">
-				<div class="sequra_white_content closeable" title="Recibe primero, paga después">
-					<div class="sequra_content_popup">
-						<h4>¿Cómo funciona?</h4>
-						<div>
-							<ol>
-								<li><span>Elige esta opción al realizar tu pedido, no necesitas tarjeta.</span></li>
-								<li><span>Recibe tu pedido y comprueba tu compra.</span></li>
-								<li><span>Tienes hasta 7 días después del envío para pagar.</span></li>
-							</ol>
-						</div>
-						<div class="sequra_costs">
-							<p>El único coste es de <?php echo $sequra->fee; ?>€.</p>
-						</div>
-					</div>
-				</div>
-			</div>
 			<script type="text/javascript">
-				SequraHelper.preparePopup();
+        SequraPaymentMoreInfo.draw(<?php echo $sequra->fee;?>);
 			</script>
 			<?php
 		}
