@@ -11,7 +11,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 
 	public function __construct() {
 		do_action( 'woocommerce_sequra_before_load', $this );
-		$this->id = 'sequra';
+		$this->id                 = 'sequra';
 		$this->method_title       = __( 'Recibe primero, paga después', 'wc_sequra' );
 		$this->method_description = __( 'Allows payments by \'Recibe primero, paga después\', service ofered by SeQura.', 'wc_sequra' );
 		//$this->icon = WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/images/icon.png';
@@ -35,6 +35,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$this->merchantref          = $this->settings['merchantref'];
 		$this->user                 = $this->settings['user'];
 		$this->password             = $this->settings['password'];
+		$this->assets_secret        = $this->settings['assets_secret'];
 		$this->enable_for_virtual   = $this->settings['enable_for_virtual'];
 		$this->enable_for_methods   = $this->settings['enable_for_methods'];
 		$this->enable_for_countries = array( 'ES' );
@@ -43,7 +44,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$this->env                  = $this->settings['env'];
 		$this->fee                  = (float) $this->settings['fee'];
 		$this->days_after           = (int) $this->settings['days_after'];
-		$this->has_fields           = true;		
+		$this->has_fields           = true;
 		$this->endpoint             = self::$endpoints[ $this->env ];
 		$this->helper               = new SequraHelper( $this );
 		$this->identity_form        = null;
@@ -106,6 +107,12 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'title'       => __( 'Password', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'Password proporcionada por SeQura.', 'wc_sequra' ),
+				'default'     => ''
+			),
+			'assets_secret'           => array(
+				'title'       => __( 'Assets secret', 'wc_sequra' ),
+				'type'        => 'text',
+				'description' => __( 'Código proporcionada por SeQura.', 'wc_sequra' ),
 				'default'     => ''
 			),
 			'max_amount'         => array(
@@ -292,11 +299,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * */
 	public function admin_options() {
 		?>
-		<h3><?php _e( 'Pasarela SeQura', 'wc_sequra' ); ?></h3>
-		<p><?php _e( 'La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Comprar ahora y pagar después" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.', 'wc_sequra' ); ?></p>
-		<table class="form-table">
-			<?php $this->generate_settings_html(); ?>
-		</table><!--/.form-table-->
+      <h3><?php _e( 'Pasarela SeQura', 'wc_sequra' ); ?></h3>
+      <p><?php _e( 'La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Comprar ahora y pagar después" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.', 'wc_sequra' ); ?></p>
+      <table class="form-table">
+		  <?php $this->generate_settings_html(); ?>
+      </table><!--/.form-table-->
 		<?php
 	}
 
@@ -360,6 +367,6 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	function check_sequra_resquest() {
-        $this->helper->check_response($this);
+		$this->helper->check_response( $this );
 	}
 }

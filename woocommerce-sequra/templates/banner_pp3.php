@@ -35,24 +35,17 @@
     <div class="sqinner">
             <span class="sqheader">Un coste fijo por cuota</span>
             <span class="sqcontent">
-                <a class="btn btn-sequra" href="#" rel="sequra_partpayments_popup">Más información</a>
+                <a id="sequra_partpayments_popup_trigger" class="btn btn-sequra" href="#" rel="sequra_partpayments_popup">Más información</a>
             </span>
     </div>
     </div>
 </div>
-<script type='text/javascript'>
-  jQuery.getJSON('<?php echo $pm->pp_cost_url;?>',function (json){
-    SequraCreditAgreements(
-        {
-          costs_json: json,
-          product: 'pp3',
-          //Personalizar si hace falta
-          currency_symbol_l: '',
-          currency_symbol_r: ' €',
-          decimal_separator: '<?php echo get_option('woocommerce_price_decimal_sep');?>',
-          thousands_separator: '<?php echo get_option('woocommerce_price_thousand_sep');?>'
-        }
-    );
-    SequraPartPaymentMoreInfo.draw(true);
+ <script type='text/javascript'>
+  jQuery(function(){
+      trigger = jQuery('#sequra_partpayments_popup_trigger');
+      trigger.creditAgreements = Sequra.loan.compute({
+        total_with_tax:   "15000",
+      });
+      SequraPartPaymentMoreInfo.draw(trigger,'pp3',true);
   });
 </script>

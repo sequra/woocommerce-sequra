@@ -3,10 +3,11 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 3.2.0
+  Version: 4.0.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
+define( 'SEQURA_VERSION', '4.0.0' );
 define( 'SEQURA_ID', 'sequra' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
@@ -38,14 +39,13 @@ function sequra_activation() {
 
 add_action( 'sequra_upgrade_if_needed', 'sequra_upgrade_if_needed' );
 function sequra_upgrade_if_needed() {
-	if ( ! function_exists( 'get_plugin_data' ) ) {
-		return;
-	}
-	$current     = get_option( 'sequra_version' );
-	$plugin_data = get_plugin_data( dirname( __FILE__ ) . '/gateway-sequra.php' );
-	if ( version_compare( $current, $plugin_data['Version'], '<' ) ) {
-		do_action( 'sequra_upgrade', array( 'from' => $current, 'to' => $plugin_data['Version'] ) );
-		update_option( 'sequra_version', (string) $plugin_data['Version'] );
+	$current = get_option( 'sequra_version' );
+	if ( version_compare( $current, SEQURA_VERSION, '<' ) ) {
+		foreach ( glob( dirname( __FILE__ ) . '/upgrades/*.php' ) as $filename ) {
+			include $filename;
+		}
+		do_action( 'sequra_upgrade', array( 'from' => $current, 'to' => SEQURA_VERSION ) );
+		update_option( 'sequra_version', (string) SEQURA_VERSION );
 	}
 }
 
@@ -78,25 +78,27 @@ function sequra_deactivation() {
 
 add_action( 'woocommerce_loaded', 'woocommerce_sequra_init', 100 );
 
-// [sequra_banner product='i1' color='#00ff00'] [sequra_banner product='pp3']
+// [sequra_banner product='i1'] [sequra_banner product='pp3']
 function sequra_banner( $atts ) {
-	wp_enqueue_style( 'sequra-banner' );
+	wp_enqueue_style( 'sequra-banner' );	
 	$product = $atts['product'];
-	$pm = null;
-	if($product == 'i1'){
+	$pm      = null;
+	if ( $product == 'i1' ) {
 		$pm = new SequraPaymentGateway();
-	}
-	elseif($product == 'pp3'){
+	} elseif ( $product == 'pp3' ) {		
 		$pm = new SequraPartPaymentGateway();
+		wp_enqueue_script( 'sequra-pp-cost-js', $pm->pp_cost_url );
 	}
 	$pm->is_available();
-	if(!$pm || !$pm->is_available()){
+	if ( ! $pm || ! $pm->is_available() ) {
 		return;
 	}
 	ob_start();
-	include ($pm->helper->template_loader( 'banner_'.$product ) );
+	include( $pm->helper->template_loader( 'banner_' . $product ) );
+
 	return ob_get_clean();
 }
+
 add_shortcode( 'sequra_banner', 'sequra_banner' );
 
 function woocommerce_sequra_init() {
@@ -137,7 +139,7 @@ function woocommerce_sequra_init() {
 		wp_register_style( 'sequra-custom-style', plugins_url( 'assets/css/wordpress.css', __FILE__ ) );
 		wp_enqueue_style( 'sequra-custom-style' );
 		wp_enqueue_script( 'sequra-js', plugins_url( 'assets/js/sequrapayment.js', __FILE__ ) );
-	  wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ) );
+		wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ) );
 	}
 
 	add_action( 'wp_enqueue_scripts', 'sequra_add_stylesheet_adn_js' );
@@ -168,43 +170,40 @@ function woocommerce_sequra_init() {
 	add_filter( 'woocommerce_get_price_html', 'woocommerce_sequra_add_simulator_to_product_page', 10, 2 );
 	function woocommerce_sequra_add_simulator_to_product_page( $price, $product ) {
 		global $wp_query;
-		if ( !is_product() || $wp_query->posts[0]->ID != $product->id) {
+		if ( ! is_product() || $wp_query->posts[0]->ID != $product->id ) {
 			return $price;
 		}
-		$sequra_pp = new SequraPartPaymentGateway();
-		if ( ! $sequra_pp->is_available() ) {
-			return $price;
-		}
-		$ret = "<div id='sequra_partpayment_teaser'>Fracciona el pago a partir de 50€</div>";
-		if ( $product->price > $sequra_pp->min_amount ) {
-			$ret = "<div id='sequra_partpayment_teaser'></div>
-									<script type='text/javascript'>
-									jQuery.getJSON('".$sequra_pp->pp_cost_url."',function (json){
-										SequraCreditAgreements(
-											{
-												costs_json: json,
-												product: 'pp3',
-												//Personalizar si hace falta
-												currency_symbol_l: '',
-												currency_symbol_r: jQuery('.woocommerce-Price-currencySymbol').html(),
-												decimal_separator: '" . get_option('woocommerce_price_decimal_sep') . "',
-												thousands_separator: '" . get_option('woocommerce_price_thousand_sep') . "'
-											}
-										);
-										SequraPartPaymentTeaser(
-											{
-												container:'#sequra_partpayment_teaser',
-												price_container: 'ins .woocommerce-Price-amount,p>.woocommerce-Price-amount'
-											}
-										);
-										SequraPartPaymentTeaserInstance.preselect(20);
-									});
-									</script>
-			";
-		}
+
+		$ret = sequra_pp_simulator( array(
+			'price' => 'ins .woocommerce-Price-amount,p>.woocommerce-Price-amount,.summary .price .amount'
+		) );
 
 		return $price . $ret;
 	}
+
+	//[sequra_pp_simulator price='#product_price']
+	function sequra_pp_simulator( $atts ) {
+		$sequra_pp = new SequraPartPaymentGateway();
+		if ( ! $sequra_pp->is_available() ) {
+			return;
+		}
+		wp_enqueue_script( 'sequra-pp-cost-js', $sequra_pp->pp_cost_url );
+		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
+		return "<div id='sequra_partpayment_teaser'></div>
+				<script type='text/javascript'>
+  					jQuery(function(){
+  						SequraPartPaymentTeaser(
+							{
+								container:'#sequra_partpayment_teaser',
+								price_container: '" . $price_container . "'
+							}
+						).preselect(20);
+					});				
+				</script>
+			";
+	}
+
+	add_shortcode( 'sequra_pp_simulator', 'sequra_pp_simulator' );
 
 	/*
 	 * Ivoice teaser in product page
@@ -214,14 +213,16 @@ function woocommerce_sequra_init() {
 		global $product;
 		$sequra = new SequraPaymentGateway();
 		if ( $sequra->is_available() && $product->price < $sequra->max_amount ) { ?>
-			<div id="sequra_payment_teaser">
-				<p>* Recibe primero, paga después <span class="sequra_more_info" rel="sequra_payments_popup"
-				                                        title="Más información"><span class="icon-info"></span></span>
-				</p>
-			</div>
-			<script type="text/javascript">
-        SequraPaymentMoreInfo.draw(<?php echo $sequra->fee;?>);
-			</script>
+          <div id="sequra_payment_teaser">
+            <p>* Recibe primero, paga después <span class="sequra_more_info" rel="sequra_payments_popup"
+                                                    title="Más información"><span class="icon-info"></span></span>
+            </p>
+          </div>
+          <script type="text/javascript">
+          	(jQuery(function (){
+            	SequraPaymentMoreInfo.draw(<?php echo $sequra->fee;?>);
+            }));
+          </script>
 			<?php
 		}
 	}
