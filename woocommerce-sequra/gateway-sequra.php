@@ -7,7 +7,7 @@
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
-define( 'SEQURA_VERSION', '4.0.0' );
+define( 'SEQURA_VERSION', '4.1.0' );
 define( 'SEQURA_ID', 'sequra' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
