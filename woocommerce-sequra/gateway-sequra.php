@@ -192,12 +192,14 @@ function woocommerce_sequra_init() {
 		return "<div id='sequra_partpayment_teaser'></div>
 				<script type='text/javascript'>
   					jQuery(function(){
-  						SequraPartPaymentTeaser(
+  						partPaymnetTeaser = new SequraPartPaymentTeaser(
 							{
 								container:'#sequra_partpayment_teaser',
 								price_container: '" . $price_container . "'
 							}
-						).preselect(20);
+						)
+						partPaymnetTeaser.draw();
+						partPaymnetTeaser.preselect(20);
 					});				
 				</script>
 			";
@@ -213,17 +215,19 @@ function woocommerce_sequra_init() {
 		global $product;
 		$sequra = new SequraPaymentGateway();
 		if ( $sequra->is_available() && $product->price < $sequra->max_amount ) { ?>
-          <div id="sequra_payment_teaser">
-            <p>* Recibe primero, paga después <span class="sequra_more_info" rel="sequra_payments_popup"
-                                                    title="Más información"><span class="icon-info"></span></span>
-            </p>
-          </div>
+          <div id="sequra_invoice_teaser"></div>
           <script type="text/javascript">
-          	(jQuery(function (){
-            	SequraPaymentMoreInfo.draw(<?php echo $sequra->fee;?>);
-            }));
+			jQuery(function(){
+				invoiceTeaser = new SequraInvoiceTeaser(
+					{
+						container:'#sequra_invoice_teaser',
+						fee: <?php echo $sequra->fee?$sequra->fee:0;?>
+					}
+				);
+				invoiceTeaser.draw();
+			});
           </script>
-			<?php
+		<?php
 		}
 	}
 }

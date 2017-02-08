@@ -173,6 +173,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * There might be payment fields for SeQura, and we want to show the description if set.
 	 * */
 	function payment_fields() {
+		wp_enqueue_script( 'sequra-pp-cost-js', $this->pp_cost_url );
 		$payment_fields = apply_filters( 'woocommerce_sequra_pp_payment_fields', $this->credit_agreement_field(), $this );
 		require( $this->helper->template_loader( 'partpayment_fields' ) );
 	}

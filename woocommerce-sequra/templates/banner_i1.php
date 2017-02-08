@@ -35,13 +35,13 @@
 		<div class="sqinner">
 			<span class="sqheader">3. Paga despúes</span>
 			<span class="sqcontent">
-                    <a class="btn btn-sequra" href="#" rel="sequra_payments_popup">Más información</a>
+                    <a class="btn btn-sequra" href="#" rel="sequra_invoice_popup_home">Más información</a>
                 </span>
 		</div>
 	</div>
 </div>
 <script type="text/javascript">
   (jQuery(function (){
-    SequraPaymentMoreInfo.draw(<?php echo $pm->fee;?>);
+    SequraInvoiceMoreInfo.draw('home',<?php echo $pm->fee;?>);
   }));
 </script>

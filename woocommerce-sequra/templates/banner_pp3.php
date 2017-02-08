@@ -35,17 +35,16 @@
     <div class="sqinner">
             <span class="sqheader">Un coste fijo por cuota</span>
             <span class="sqcontent">
-                <a id="sequra_partpayments_popup_trigger" class="btn btn-sequra" href="#" rel="sequra_partpayments_popup">Más información</a>
+                <a id="sequra_partpayments_popup_trigger" class="btn btn-sequra" href="#" rel="sequra_partpayments_popup_home">Más información</a>
             </span>
     </div>
     </div>
 </div>
  <script type='text/javascript'>
   jQuery(function(){
-      trigger = jQuery('#sequra_partpayments_popup_trigger');
-      trigger.creditAgreements = Sequra.loan.compute({
+      creditAgreements = Sequra.loan.compute({
         total_with_tax:   "15000",
       });
-      SequraPartPaymentMoreInfo.draw(trigger,'pp3',true);
+      SequraPartPaymentMoreInfo.draw(creditAgreements['pp3'],'home','pp3',true);
   });
 </script>

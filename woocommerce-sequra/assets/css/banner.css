@@ -51,12 +51,14 @@
   width: 80%;
 }
 .sqnoc{
-  font-size: 50px;
   color:#45b33d;
   float: left;
   width: 20%;
   padding-top: 15px;
   text-align: center
+}
+.sqnoc::before {
+  font-size: 50px;
 }
 .sequra_banner .col-xs-6{padding:0;}
 .sequra_banner .block3 .btn{
