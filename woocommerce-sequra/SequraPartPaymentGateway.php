@@ -66,7 +66,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			'process_admin_options'
 		) );
 		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_' . $this->id . '_resquest' ) );
-		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_order_totals' ), 999 );
 		do_action( 'woocommerce_sequra_pp_loaded', $this );
 	}
 
