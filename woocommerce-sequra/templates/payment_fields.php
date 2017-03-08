@@ -10,7 +10,11 @@
                 </ol>
             </div>
             <div class="sequra_costs">
+            <?php if ($this->fee>0) {?>
                 <p>El único coste es de <?php echo $this->fee; ?>€.</p>
+            <?php } else { ?>
+                    <p>¡Sin costes adicionales!</p>            
+            <?php } ?>
             </div>
         </div>
     </div>
