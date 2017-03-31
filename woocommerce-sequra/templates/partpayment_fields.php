@@ -2,6 +2,7 @@
 <a href="https://www.sequra.es/preguntas-frecuentes.html" target="_blank">Tengo más preguntas</a>
 <script type="text/javascript">
   jQuery(function(){
+      Sequra.decimal_separator = '<?php echo wc_get_price_decimal_separator();?>';
       creditAgreements = Sequra.loan.compute({
         total_with_tax:   "<?php echo $this->get_order_total()*100;?>",
       });

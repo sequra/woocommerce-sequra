@@ -3,11 +3,11 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 4.1.0
+  Version: 4.1.1
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
-define( 'SEQURA_VERSION', '4.1.0' );
+define( 'SEQURA_VERSION', '4.1.1' );
 define( 'SEQURA_ID', 'sequra' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
@@ -167,15 +167,16 @@ function woocommerce_sequra_init() {
 	/*
 	 * Add instalment simulator in product page
 	 */
+
 	add_filter( 'woocommerce_get_price_html', 'woocommerce_sequra_add_simulator_to_product_page', 10, 2 );
 	function woocommerce_sequra_add_simulator_to_product_page( $price, $product ) {
 		global $wp_query;
 		if ( ! is_product() || $wp_query->posts[0]->ID != $product->id ) {
 			return $price;
 		}
-
+		$sequra_pp = new SequraPartPaymentGateway();
 		$ret = sequra_pp_simulator( array(
-			'price' => 'ins .woocommerce-Price-amount,p>.woocommerce-Price-amount,.summary .price .amount'
+			'price' => $sequra_pp->price_css_sel
 		) );
 
 		return $price . $ret;
@@ -192,6 +193,7 @@ function woocommerce_sequra_init() {
 		return "<div id='sequra_partpayment_teaser'></div>
 				<script type='text/javascript'>
   					jQuery(function(){
+  						Sequra.decimal_separator = '".wc_get_price_decimal_separator()."';
   						partPaymnetTeaser = new SequraPartPaymentTeaser(
 							{
 								container:'#sequra_partpayment_teaser',

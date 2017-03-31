@@ -4,6 +4,7 @@
  * Pasarela SeQura Gateway Class
  * */
 class SequraPartPaymentGateway extends WC_Payment_Gateway {
+
 	public function __construct() {
 		do_action( 'woocommerce_sequra_pp_before_load', $this );
 		$this->id                 = 'sequra_pp';
@@ -21,7 +22,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->init_settings();
 		$sequra_settings = array_map(
 			array( $this, 'format_settings' ),
-			get_option( 'woocommerce_sequra_settings', null )
+			get_option( 'woocommerce_sequra_settings', array() )
 		);
 
 		// Get setting values
@@ -37,6 +38,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->env                  = $sequra_settings['env'];
 		$this->endpoint             = SequraPaymentGateway::$endpoints[ $this->env ];
 		$this->has_fields           = true;
+		$this->price_css_sel		= $this->settings['price_css_sel'];
 		$this->pp_product           = 'pp3';//not an option
 		$this->pp_cost_url          = 'https://' .
 		                              ( $this->env ? 'sandbox' : 'live' ) .
@@ -104,7 +106,14 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'type'        => 'number',
 				'description' => __( 'SeQura PP payment method will be unavailable for orders below this amount', 'wc_sequra' ),
 				'default'     => '50'
+			),
+			'price_css_sel' => array(
+				'title'       => __( 'CSS price selector', 'wc_sequra' ),
+				'type'        => 'text',
+				'description' => __( 'CSS selector to get the price for installment simulator', 'wc_sequra' ),
+				'default'     => 'ins .woocommerce-Price-amount,p>.woocommerce-Price-amount,.summary .price .amount'
 			)
+
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequra_pp_init_form_fields', $this->form_fields, $this );
 	}

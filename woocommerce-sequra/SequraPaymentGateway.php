@@ -43,7 +43,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$this->max_amount           = $this->settings['max_amount'];
 		$this->env                  = $this->settings['env'];
 		$this->fee                  = (float) $this->settings['fee'];
-		$this->days_after           = (int) $this->settings['days_after'];
+		//$this->days_after           = (int) $this->settings['days_after'];
 		$this->has_fields           = true;
 		$this->endpoint             = self::$endpoints[ $this->env ];
 		$this->helper               = new SequraHelper( $this );
@@ -144,14 +144,15 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'title'       => __( 'Fee', 'wc_sequra' ),
 				'description' => __( 'fee applied to this payment method' ),
 				'type'        => 'text',
-				'default'     => '1.95'
+				'default'     => '0'
 			),
+      /*
 			'days_after'         => array(
 				'title'       => __( 'Payment term', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'days left after delivery date to make payment' ),
 				'default'     => '7'
-			),
+			),*/
 			'env'                => array(
 				'title'       => __( 'Entorno', 'wc_sequra' ),
 				'type'        => 'select',
