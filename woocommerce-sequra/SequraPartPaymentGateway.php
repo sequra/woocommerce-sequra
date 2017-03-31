@@ -38,7 +38,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->env                  = $sequra_settings['env'];
 		$this->endpoint             = SequraPaymentGateway::$endpoints[ $this->env ];
 		$this->has_fields           = true;
-		$this->price_css_sel		= $this->settings['price_css_sel'];
+		$this->price_css_sel		= htmlspecialchars_decode ($this->settings['price_css_sel']);
 		$this->pp_product           = 'pp3';//not an option
 		$this->pp_cost_url          = 'https://' .
 		                              ( $this->env ? 'sandbox' : 'live' ) .
