@@ -5,7 +5,7 @@ class SequraReporter
 
 	public static function sendDailyDeliveryReport()
 	{
-		$helper = new SequraHelper(new SequraPaymentGateway());
+		$helper = new SequraHelper(new SequraInvoicePaymentGateway());
 		$builder = $helper->getBuilder();
 		$builder->buildDeliveryReport();
 		$client = $helper->getClient();

@@ -7,7 +7,7 @@
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
-define( 'SEQURA_VERSION', '4.1.1' );
+define( 'SEQURA_VERSION', '4.2.0' );
 define( 'SEQURA_ID', 'sequra' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
@@ -84,7 +84,7 @@ function sequra_banner( $atts ) {
 	$product = $atts['product'];
 	$pm      = null;
 	if ( $product == 'i1' ) {
-		$pm = new SequraPaymentGateway();
+		$pm = new SequraInvoicePaymentGateway();
 	} elseif ( $product == 'pp3' ) {		
 		$pm = new SequraPartPaymentGateway();
 		wp_enqueue_script( 'sequra-pp-cost-js', $pm->pp_cost_url );
@@ -109,24 +109,46 @@ function woocommerce_sequra_init() {
 		require_once( WP_PLUGIN_DIR . "/" . dirname( plugin_basename( __FILE__ ) ) . '/SequraHelper.php' );
 	}
 
-	if ( ! class_exists( 'SequraPaymentGateway' ) ) {
+	if ( ! class_exists('SequraPaymentGateway') ) {
 		require_once( WP_PLUGIN_DIR . "/" . dirname( plugin_basename( __FILE__ ) ) . '/SequraPaymentGateway.php' );
+	}
+
+	if ( ! class_exists('SequraInvoicePaymentGateway') ) {
+		require_once( WP_PLUGIN_DIR . "/" . dirname( plugin_basename( __FILE__ ) ) . '/SequraInvoicePaymentGateway.php' );
 	}
 
 	if ( ! class_exists( 'SequraPartPaymentGateway' ) ) {
 		require_once( WP_PLUGIN_DIR . "/" . dirname( plugin_basename( __FILE__ ) ) . '/SequraPartPaymentGateway.php' );
 	}
+
+
 	/**
 	 * Add the gateway to woocommerce
 	 * */
 	function add_sequra_gateway( $methods ) {
 		$methods[] = 'SequraPaymentGateway';
 		$methods[] = 'SequraPartPaymentGateway';
-
 		return $methods;
 	}
-
 	add_filter( 'woocommerce_payment_gateways', 'add_sequra_gateway' );
+
+	$coresettings = get_option( 'woocommerce_sequra_settings', array() );
+	if($coresettings['enable_for_virtual'] == 'no'){
+		/**
+		 * Add the invoice gateway to woocommerce
+		 * */
+		function add_sequra_invoice_gateway( $methods ) {
+			$methods[] = 'SequraInvoicePaymentGateway';
+			return $methods;
+		}
+		add_filter( 'woocommerce_payment_gateways', 'add_sequra_invoice_gateway' );
+	} else {
+		if ( ! class_exists( 'Sequra_Meta_Box_Service_End_Date' ) ) {
+			require_once( WP_PLUGIN_DIR . "/" . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/Sequra_Meta_Box_Service_End_Date.php' );
+		}
+		add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Service_End_Date::save', 20, 2 );
+		add_action('add_meta_boxes','Sequra_Meta_Box_Service_End_Date::add_meta_box');
+    }
 
 	/**
 	 * Enqueue plugin style-file
@@ -158,7 +180,7 @@ function woocommerce_sequra_init() {
 	add_action( 'woocommerce_add_to_cart', 'sequra_add_cart_info_to_session' );
 
 	function sequra_calculate_order_totals( $cart ) {
-		$sequra = new SequraPaymentGateway();
+		$sequra = new SequraInvoicePaymentGateway();
 		$sequra->calculate_order_totals( $cart );
 	}
 
@@ -215,7 +237,7 @@ function woocommerce_sequra_init() {
 	add_action( 'woocommerce_after_add_to_cart_button', 'woocommerce_sequra_after_add_to_cart_button', 10 );
 	function woocommerce_sequra_after_add_to_cart_button() {
 		global $product;
-		$sequra = new SequraPaymentGateway();
+		$sequra = new SequraInvoicePaymentGateway();
 		if ( $sequra->is_available() && $product->price < $sequra->max_amount ) { ?>
           <div id="sequra_invoice_teaser"></div>
           <script type="text/javascript">

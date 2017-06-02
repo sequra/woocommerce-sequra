@@ -30,23 +30,16 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		$ret                                       = parent::merchant();
 		$ret['partpayment_details_getter']         = 'SequraFractionInstance.partpayment_details_getter';
 		$ret['options']['accept_terms_explicitly'] = true;
-		if ( $this->_pm->ipn ) {
-			$ret['notify_url'] = add_query_arg( array(
-				'order'     => "".$this->_current_order->id,
-				'wc-api'    => 'woocommerce_' . $this->_pm->id
-			), home_url( '/' ) );
-            $ret['notification_parameters'] = array(
-                'signature' => self::sign( $this->_current_order->id ),
-                'result'    => "0"
-            );
-			$ret['return_url'] = $ret['notify_url'];
-		} else {
-			$ret['approved_url'] = add_query_arg( array(
-				'order'  => $this->_current_order->id,
-				'wc-api' => 'woocommerce_' . $this->_pm->id,
-				'result' => 0
-			), home_url( '/' ) );
-		}
+		$ret['notify_url']                         = add_query_arg( array(
+			'order'  => "" . $this->_current_order->id,
+			'wc-api' => 'woocommerce_' . $this->_pm->id
+		), home_url( '/' ) );
+		$ret['notification_parameters']            = array(
+			'signature' => self::sign( $this->_current_order->id ),
+			'result'    => "0"
+		);
+		$ret['return_url']                         = $ret['notify_url'];
+
 		return $ret;
 	}
 
@@ -63,31 +56,34 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			$this->items(),
 			$this->handlingItems()
 		);
-		$total = self::totals($data);
+		$total                           = self::totals( $data );
 		$data['order_total_with_tax']    = $total['with_tax'];
 		$data['order_total_without_tax'] = $total['without_tax'];
 		$data['order_total_tax']         = 0;
+
 		return $data;
 	}
 
-	public function fixRoundingProblems($order) {
-		$totals           = self::totals($order['cart']);
+	public function fixRoundingProblems( $order ) {
+		$totals           = self::totals( $order['cart'] );
 		$diff_with_tax    = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
 		$diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
 		/*Don't correct error bigger than 1 cent per line*/
-		if (($diff_with_tax == 0 && $diff_without_tax == 0) || count($order['cart']['items']) < abs($diff_with_tax))
+		if ( ( $diff_with_tax == 0 && $diff_without_tax == 0 ) || count( $order['cart']['items'] ) < abs( $diff_with_tax ) ) {
 			return $order;
+		}
 
 		$item['type']              = 'discount';
 		$item['reference']         = 'Ajuste';
 		$item['name']              = 'Ajuste';
 		$item['total_without_tax'] = $diff_without_tax;
 		$item['total_with_tax']    = $diff_with_tax;
-		if($diff_with_tax>0){
-			$item['type']          = 'handling';
-			$item['tax_rate']      = $diff_without_tax?round(abs(($diff_with_tax*$diff_without_tax))-1)*100:0;
+		if ( $diff_with_tax > 0 ) {
+			$item['type']     = 'handling';
+			$item['tax_rate'] = $diff_without_tax ? round( abs( ( $diff_with_tax * $diff_without_tax ) ) - 1 ) * 100 : 0;
 		}
-		$order['cart']['items'][]  = $item;
+		$order['cart']['items'][] = $item;
+
 		return $order;
 	}
 
@@ -132,6 +128,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		if ( $this->_current_order->status == 'completed' ) {
 			return $this->_current_order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item' ) ) );
 		}
+
 		return $this->_current_order->get_items();
 	}
 
@@ -156,22 +153,30 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		$cart_contents = $this->getCartContents();
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
 			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
-
-			$item              = array();
+			$item     = array();
+			if ( $_product->is_virtual() ) {
+				$item["type"]     = 'service';
+				$service_end_date = get_post_meta( $_product->id, 'service_end_date', true );
+				if ( is_numeric( $service_end_date ) ) {
+					$item["ends_in"] = 'P' . $service_end_date . 'D';
+				} else {
+					$item["ends_on"] = $service_end_date;
+				}
+			} else {
+				$item["type"] = 'product';
+			}
 			$item["reference"] = self::notNull( $_product->get_sku() );
-
-			$name         = apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key );
-			$item["name"] = strip_tags( $name );
+			$name              = apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key );
+			$item["name"]      = strip_tags( $name );
 			if ( isset( $cart_item['quantity'] ) ) {
 				$item["quantity"] = (int) $cart_item['quantity'];
 			}
 			if ( isset( $cart_item['qty'] ) ) {
 				$item["quantity"] = (int) $cart_item['qty'];
 			}
-			$item["price_without_tax"] = $item["price_with_tax"] = self::integerPrice( self::notNull( ( $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'] ) ) / $item['quantity'] );
-			$item["tax_rate"]          = 0;            //self::integerPrice(self::notNull($cart_item['line_total']));
-			$item["total_without_tax"] = $item["total_with_tax"] = self::integerPrice( $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'] );
-			$item["downloadable"]      = $_product->is_downloadable();
+			$item["price_with_tax"] = self::integerPrice( self::notNull( ( $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'] ) ) / $item['quantity'] );
+			$item["total_with_tax"] = self::integerPrice( $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'] );
+			$item["downloadable"]   = $_product->is_downloadable();
 
 			// OPTIONAL
 			$item["description"] = strip_tags( self::notNull( get_post( $_product->id )->post_content ) );
@@ -227,20 +232,21 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			return array();
 		}
 		if ( $this->_current_order instanceof SequraTempOrder ) {
-			$shipping_total     = $this->_cart->shipping_total;
-			$shipping_tax_total = $this->_cart->shipping_tax_total;
+			$shipping_total = $this->_cart->shipping_total + $this->_cart->shipping_tax_total;
 		} else {
-			$shipping_total     = $this->_current_order->get_total_shipping();
-			$shipping_tax_total = $this->_current_order->get_shipping_tax();
+			$shipping_total = $this->_current_order->get_total_shipping() + $this->_current_order->get_shipping_tax();
+		}
+
+		if ( $shipping_total == 0 ) {
+			return array();
 		}
 
 		$handling = array(
-			'type'              => 'handling',
-			'reference'         => 'Envío y manipulación',
-			'name'              => $delivery['name']?$delivery['name']:'Gastos de envío',
-			'total_without_tax' => self::integerPrice( $shipping_total + $shipping_tax_total ),
-			'total_with_tax'    => self::integerPrice( $shipping_total + $shipping_tax_total ),
-			'tax_rate'          => 0,
+			'type'           => 'handling',
+			'reference'      => 'Envío y manipulación',
+			'name'           => $delivery['name'] ? $delivery['name'] : 'Gastos de envío',
+			'total_with_tax' => self::integerPrice( $shipping_total ),
+			'tax_rate'       => 0,
 		);
 		if ( isset( $delivery['days'] ) && $delivery['days'] ) {
 			$handling['days'] = $delivery['days'];
@@ -261,7 +267,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		if ( $data['city'] == '' ) {
 			throw new Exception( 'City is required' );
 		}
-		$data['country_code'] = self::notNull( $this->getDeliveryField( 'shipping_country' ),'ES');
+		$data['country_code'] = self::notNull( $this->getDeliveryField( 'shipping_country' ), 'ES' );
 		// OPTIONAL
 		$states = WC()->countries->get_states( $data['country_code'] );
 		if ( $state_code = self::notNull( $this->getDeliveryField( 'shipping_state' ) ) ) {
@@ -522,7 +528,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			}
 			if ( true || get_option( 'sequra_allowstats_country' ) ) // TODO: Stats config
 			{
-				$stat['country'] = self::notNull( $this->_current_order->billing_country,'ES');
+				$stat['country'] = self::notNull( $this->_current_order->billing_country, 'ES' );
 			}
 			if ( true || get_option( 'sequra_allowstats_payment' ) ) { // TODO: Stats config
 				$stat['payment_method_raw'] = $this->_current_order->payment_method;
@@ -608,6 +614,6 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 	 * @return string
 	 */
 	public function sign( $message ) {
-		return hash_hmac( self::HASH_ALGO, $message, $this->_pm->password);
+		return hash_hmac( self::HASH_ALGO, $message, $this->_pm->password );
 	}
 }
