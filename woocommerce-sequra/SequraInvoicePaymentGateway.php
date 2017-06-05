@@ -116,19 +116,12 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		$order = null;
-
-		if ( WC()->cart && ! WC()->cart->needs_shipping() ) {
+		if ( is_page( wc_get_page_id( 'checkout' ) ) && ! $this->is_available_in_checkout() ) {
 			return false;
 		}
 
-		if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
-			$order_id = absint( get_query_var( 'order-pay' ) );
-			$order    = new WC_Order( $order_id );
-
-			if(SequraHelper::isFullyVirtual()){
-			    return false;
-            }
+		if ( is_product() && ! $this->is_available_in_product_page() ) {
+			return false;
 		}
 
 		if ( ! is_admin() || basename( $_SERVER['SCRIPT_NAME'] ) == 'admin-ajax.php' ) {
@@ -192,6 +185,19 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 
 		return true;
 	}
+
+	function is_available_in_checkout() {
+		return
+            WC()->cart &&
+            ! WC()->cart->needs_shipping() &&
+            $this->coresettings['enable_for_virtual'] == 'no';
+	}
+
+	function is_available_in_product_page() {
+		global $product;
+		return true;
+	}
+
 
 	/**
 	 * There might be payment fields for SeQura, and we want to show the description if set.

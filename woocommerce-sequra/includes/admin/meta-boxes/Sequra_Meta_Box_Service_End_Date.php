@@ -35,10 +35,11 @@ class Sequra_Meta_Box_Service_End_Date {
 		$service_end_date = $_POST['service_end_date'];
 		if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})/', $service_end_date, $parts ) ) {
 			list( $service_end_date, $year, $month, $day ) = $parts;
-			if ( strtotime( $service_end_date ) < time() ) {
+			$service_end_time = strtotime( $service_end_date );
+			if ( $service_end_time < time() ) {
 				$error = true;
 			}
-			$service_end_date = date( 'Y-m-d', $service_end_date );
+			$service_end_date = date( 'Y-m-d', $service_end_time);
 		} else if ( is_numeric( $service_end_date ) ) {
 			$service_end_date = (int)$service_end_date;
 		}else{

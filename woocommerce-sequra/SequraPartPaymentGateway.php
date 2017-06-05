@@ -114,6 +114,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		if ( ! $this->enabled ) {
 			return false;
 		}
+
 		if ( is_page( wc_get_page_id( 'checkout' ) ) && ! $this->is_available_in_checkout() ) {
 			return false;
 		}
@@ -151,6 +152,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		} else if ( ! WC()->cart->needs_shipping() ) {
 			return false;
 		}
+
+		return true;
 	}
 
 	function is_available_in_product_page() {
@@ -159,10 +162,11 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			if ( $product->needs_shipping() || ! get_post_meta( $product->id, 'service_end_date', true ) ) {
 				return false;
 			}
-		}else if ( !$product->needs_shipping())  {
+		} else if ( ! $product->needs_shipping() ) {
 			return false;
-        }
-        return true;
+		}
+
+		return true;
 	}
 
 
