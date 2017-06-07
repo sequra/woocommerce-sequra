@@ -353,13 +353,11 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			if ( '' == $data['date_of_birth'] ) {
 				$data['date_of_birth'] = self::dateOrBlank( $this->getCustomerField( $id, 'dob' ) );
 			}
+			$data['previous_orders'] = self::getPreviousOrders( $id );
 		}
 		$data['company'] = $this->getCustomerField( $id, 'billing_company' );
 		if ( $id > 0 ) {
 			$data['ref'] = $id;
-		}
-		if ( $data['logged_in'] ) {
-			$data['previous_orders'] = self::getPreviousOrders( $id );
 		}
 
 		return $data;
@@ -396,13 +394,12 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 
 	public function getPreviousOrders( $customer_id ) {
 		$args      = array(
-			'numberposts' => - 1,
-			'meta_key'    => '_customer_user',
-			'meta_value'  => $customer_id,
-			'post_type'   => 'shop_order',
+			'limit'       => - 1,
+			'type'        => 'shop_order',
+			'customer'    => $customer_id,
 			'post_status' => array( 'wc-processing', 'wc-completed' ),
 		);
-		$posts     = get_posts( $args );
+		$posts     = wc_get_orders( $args );
 		$orders    = array();
 		$order_ids = wp_list_pluck( $posts, 'ID' );
 		foreach ( $order_ids as $id ) {
@@ -428,8 +425,8 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 
 	public function getShippedOrderList() {
 		$args               = array(
-			'numberposts' => - 1,
-			'meta_query'  => array(
+			'limit'      => 1,
+			'meta_query' => array(
 				'relation' => 'AND',
 				array(
 					'key'     => '_sent_to_sequra',
@@ -442,17 +439,10 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 				)
 
 			),
-			'post_type'   => 'shop_order',
-			'post_status' => 'publish',
-			'tax_query'   => array(
-				array(
-					'taxonomy' => 'shop_order_status',
-					'field'    => 'slug',
-					'terms'    => 'completed',
-				)
-			)
+			'type'       => 'shop_order',
+			'status'     => array( 'wc-completed' )
 		);
-		$posts              = get_posts( $args );
+		$posts              = wc_get_orders( $args );
 		$this->_shipped_ids = wp_list_pluck( $posts, 'ID' );
 
 		return $posts;
@@ -503,16 +493,16 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		}
 
 		$args  = array(
-			'numberposts' => - 1,
-			'post_type'   => 'shop_order',
-			'date_query'  => array(
+			'limit'      => - 1,
+			'type'       => 'shop_order',
+			'date_query' => array(
 				array(
 					'column' => 'post_date_gmt',
 					'after'  => '1 week ago',
 				)
 			)
 		);
-		$posts = get_posts( $args );
+		$posts = wc_get_orders( $args );
 		foreach ( $posts as $post ) {
 			$this->_current_order = new WC_Order( $post->ID );
 			$date                 = strtotime( $post->post_date );
