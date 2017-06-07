@@ -15,6 +15,12 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		}
 		$this->_cart = WC()->cart;
 	}
+	public function buildDeliveryReport()
+	{
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ),10, 3 );
+		parent::buildDeliveryReport();
+		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ));
+	}
 
 	public function setPaymentMethod( $pm ) {
 		$this->_pm = $pm;
@@ -394,10 +400,10 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 
 	public function getPreviousOrders( $customer_id ) {
 		$args      = array(
-			'limit'       => - 1,
-			'type'        => 'shop_order',
-			'customer'    => $customer_id,
-			'post_status' => array( 'wc-processing', 'wc-completed' ),
+			'limit'    => - 1,
+			'type'     => 'shop_order',
+			'customer' => $customer_id,
+			'status'   => array( 'wc-processing', 'wc-completed' ),
 		);
 		$posts     = wc_get_orders( $args );
 		$orders    = array();
@@ -423,9 +429,15 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		return $this->_shipped_ids;
 	}
 
+	public function setOrdersMetaQuery($wp_query_args, $args, $orderDataStore ){
+		$wp_query_args['meta_query'] = array_merge($wp_query_args['meta_query'],$args['meta_query']);
+		$wp_query_args['date_query'] = array_merge($wp_query_args['date_query'],$args['date_query']);
+		return $wp_query_args;
+	}
+
 	public function getShippedOrderList() {
-		$args               = array(
-			'limit'      => 1,
+		$args = array(
+			'limit'      => -1,
 			'meta_query' => array(
 				'relation' => 'AND',
 				array(
@@ -442,7 +454,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			'type'       => 'shop_order',
 			'status'     => array( 'wc-completed' )
 		);
-		$posts              = wc_get_orders( $args );
+		$posts = wc_get_orders( $args );
 		$this->_shipped_ids = wp_list_pluck( $posts, 'ID' );
 
 		return $posts;
