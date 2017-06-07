@@ -15,11 +15,11 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		}
 		$this->_cart = WC()->cart;
 	}
-	public function buildDeliveryReport()
-	{
-		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ),10, 3 );
+
+	public function buildDeliveryReport() {
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ), 10, 3 );
 		parent::buildDeliveryReport();
-		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ));
+		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ) );
 	}
 
 	public function setPaymentMethod( $pm ) {
@@ -429,15 +429,15 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		return $this->_shipped_ids;
 	}
 
-	public function setOrdersMetaQuery($wp_query_args, $args, $orderDataStore ){
-		$wp_query_args['meta_query'] = array_merge($wp_query_args['meta_query'],$args['meta_query']);
-		$wp_query_args['date_query'] = array_merge($wp_query_args['date_query'],$args['date_query']);
+	public function setOrdersMetaQuery( $wp_query_args, $args, $orderDataStore ) {
+		$wp_query_args['meta_query'] = array_merge( $wp_query_args['meta_query'], $args['meta_query'] );
+
 		return $wp_query_args;
 	}
 
 	public function getShippedOrderList() {
-		$args = array(
-			'limit'      => -1,
+		$args               = array(
+			'limit'      => - 1,
 			'meta_query' => array(
 				'relation' => 'AND',
 				array(
@@ -454,7 +454,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			'type'       => 'shop_order',
 			'status'     => array( 'wc-completed' )
 		);
-		$posts = wc_get_orders( $args );
+		$posts              = wc_get_orders( $args );
 		$this->_shipped_ids = wp_list_pluck( $posts, 'ID' );
 
 		return $posts;
@@ -504,22 +504,16 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			return $stats;
 		}
 
-		$args  = array(
+		$args   = array(
 			'limit'      => - 1,
 			'type'       => 'shop_order',
-			'date_query' => array(
-				array(
-					'column' => 'post_date_gmt',
-					'after'  => '1 week ago',
-				)
-			)
+			'date_after' => '1 week ago'
 		);
-		$posts = wc_get_orders( $args );
-		foreach ( $posts as $post ) {
-			$this->_current_order = new WC_Order( $post->ID );
-			$date                 = strtotime( $post->post_date );
+		$orders = wc_get_orders( $args );
+		foreach ( $orders as $order ) {
+			$this->_current_order = $order;
 			$stat                 = array(
-				'completed_at'       => self::dateOrBlank( date( 'c', $date ) ),
+				'completed_at'       => self::dateOrBlank( "". $order->get_date_created() ),
 				'merchant_reference' => $this->orderMerchantReference(),
 				'currency'           => $this->_current_order->get_order_currency()
 			);
