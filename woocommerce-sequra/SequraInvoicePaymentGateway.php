@@ -45,10 +45,10 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 		$this->max_amount = $this->settings['max_amount'];
 		$this->fee        = (float) $this->settings['fee'];
 		//$this->days_after           = (int) $this->settings['days_after'];
-		$this->has_fields    = true;
+		$this->has_fields           = true;
 		$this->enable_for_countries = array( 'ES' );
-		$this->endpoint      = SequraPaymentGateway::$endpoints[ $this->coresettings['env']];
-		$this->helper        = new SequraHelper( $this );
+		$this->endpoint             = SequraPaymentGateway::$endpoints[ $this->coresettings['env'] ];
+		$this->helper               = new SequraHelper( $this );
 
 		// Logs
 		if ( $this->coresettings['debug'] == 'yes' ) {
@@ -188,13 +188,17 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 
 	function is_available_in_checkout() {
 		return
-            WC()->cart &&
-            ! WC()->cart->needs_shipping() &&
-            $this->coresettings['enable_for_virtual'] == 'no';
+			WC()->cart &&
+			WC()->cart->needs_shipping() &&
+			$this->coresettings['enable_for_virtual'] != 'yes';
 	}
 
 	function is_available_in_product_page() {
 		global $product;
+		if ( ! $product->needs_shipping() ) {
+			return false;
+		}
+
 		return true;
 	}
 
