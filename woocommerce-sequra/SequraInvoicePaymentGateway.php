@@ -274,7 +274,7 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 		require( $this->helper->template_loader( 'payment_identification' ) );
 	}
 
-	function check_sequra_resquest() {
+	function check_sequra_i_resquest() {
 		$this->helper->check_response( $this );
 	}
 }
