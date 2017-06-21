@@ -154,9 +154,13 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
 			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
 			$item     = array();
-			if ( $_product->is_virtual() ) {
-				$item["type"]     = 'service';
-				$service_end_date = get_post_meta( $_product->id, 'service_end_date', true );
+			if (
+				$this->_pm->coresettings['enable_for_virtual'] &&
+				$service_end_date = SequraHelper::validateServiceEndDate(
+					get_post_meta( $_product->id, 'service_end_date', true )
+				)
+			) {
+				$item["type"] = 'service';
 				if ( is_numeric( $service_end_date ) ) {
 					$item["ends_in"] = 'P' . $service_end_date . 'D';
 				} else {
@@ -517,7 +521,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			$this->_current_order = new WC_Order( $post->ID );
 			$date                 = strtotime( $post->post_date );
 			$stat                 = array(
-				'completed_at'       => self::dateOrBlank( date( 'c', $date ) ),
+				'completed_at'       => self::dateOrBlank( "" . $order->get_date_created() ),
 				'merchant_reference' => $this->orderMerchantReference(),
 				'currency'           => $this->_current_order->get_order_currency()
 			);

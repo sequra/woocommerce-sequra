@@ -145,7 +145,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	function is_available_in_checkout() {
-	    WC()->cart->needs_shipping();
 		if ( $this->coresettings['enable_for_virtual'] == 'yes' ) {
 			if ( ! $this->helper->isElegibleForServiceSale() ) {
 				return false;
@@ -160,7 +159,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	function is_available_in_product_page() {
 		global $product;
 		if ( $this->coresettings['enable_for_virtual'] == 'yes' ) {
-			if ( $product->needs_shipping() || ! get_post_meta( $product->id, 'service_end_date', true ) ) {
+			if (! get_post_meta( $product->id, 'service_end_date', true ) ) {
 				return false;
 			}
 		} else if ( ! $product->needs_shipping() ) {

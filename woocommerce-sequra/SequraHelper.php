@@ -182,17 +182,30 @@ class SequraHelper {
 		$elegible       = false;
 		$services_count = 0;
 		foreach ( WC()->cart->cart_contents as $values ) {
-			if ( ! $values['data']->needs_shipping() ) {
-				if ( ! get_post_meta( $values['data']->id, 'service_end_date', true ) ) {
-					$elegible = false;
-					break;
-				} else {
-					$services_count +=$values['quantity'];
-					$elegible       = $services_count == 1;
-				}
+			if ( self::validateServiceEndDate( get_post_meta( $values['data']->id, 'service_end_date', true ) ) ) {
+				$services_count += $values['quantity'];
+				$elegible       = $services_count == 1;
 			}
 		}
 
 		return apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $elegible );
 	}
+
+	public static function validateServiceEndDate( $service_end_date ) {
+		if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})/', $service_end_date, $parts ) ) {
+			list( $service_end_date, $year, $month, $day ) = $parts;
+			$service_end_time = strtotime( $service_end_date );
+			if ( $service_end_time < time() ) {
+				return false;
+			}
+
+			return date( 'Y-m-d', $service_end_time );
+		} else if ( is_numeric( $service_end_date ) ) {
+			return (int) $service_end_date;
+		} else {
+			return false;
+		}
+
+	}
+
 }
