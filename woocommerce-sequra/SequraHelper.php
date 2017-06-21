@@ -171,21 +171,26 @@ class SequraHelper {
 		return ! $cart::needs_shipping();
 	}
 
+
 	/*
-	 * Test if order is virtual.
-	 * One virtual product only with service endate
+	 * Test if order elgible for services
+	 * It must have 1 and no more serivces
 	 *
 	 * @param WC_Order $order
 	 */
 	public function isElegibleForServiceSale() {
-		$elegible = true;
-		if ( sizeof( WC()->cart->cart_contents ) == 1 ) {
-			$values = current(WC()->cart->cart_contents);
-			if ( $values['quantity'] > 1 || $values['data']->needs_shipping() || ! get_post_meta( $values['data']->id, 'service_end_date', true ) ) {
-				$elegible = false;
+		$elegible       = false;
+		$services_count = 0;
+		foreach ( WC()->cart->cart_contents as $values ) {
+			if ( ! $values['data']->needs_shipping() ) {
+				if ( ! get_post_meta( $values['data']->id, 'service_end_date', true ) ) {
+					$elegible = false;
+					break;
+				} else {
+					$services_count +=$values['quantity'];
+					$elegible       = $services_count == 1;
+				}
 			}
-		} else {
-			$elegible = false;
 		}
 
 		return apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $elegible );
