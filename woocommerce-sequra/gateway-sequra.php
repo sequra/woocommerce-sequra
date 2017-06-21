@@ -3,11 +3,11 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 4.2.0
+  Version: 4.3.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
-define( 'SEQURA_VERSION', '4.2.0' );
+define( 'SEQURA_VERSION', '4.3.0' );
 define( 'SEQURA_ID', 'sequra' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );

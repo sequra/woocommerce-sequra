@@ -19,7 +19,8 @@ class Sequra_Meta_Box_Service_End_Date {
             <div id="service_end_date">
                 <div class="service_end_date-edit wcs-date-input">
                     <input name="service_end_date" type="text" value="<?php echo $service_end_date; ?>"
-                           placeholder="<?php echo __( 'yyyy-mm-dd or period in days' ); ?>" pattern="(\d*)|((\d{4})-([0-1]\d)-([0-3]\d))+"/><br/>
+                           placeholder="<?php echo __( 'yyyy-mm-dd or period in days' ); ?>"
+                           pattern="(\d*)|((\d{4})-([0-1]\d)-([0-3]\d))+"/><br/>
                     <small><?php echo __( 'Date i.e: 2018-06-06 or period i.e: 365 for 1 year' ); ?></small>
                 </div>
             </div>
@@ -32,25 +33,13 @@ class Sequra_Meta_Box_Service_End_Date {
 	 */
 	public static function save( $post_id, $post ) {
 		$error            = false;
-		$service_end_date = $_POST['service_end_date'];
-		if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})/', $service_end_date, $parts ) ) {
-			list( $service_end_date, $year, $month, $day ) = $parts;
-			$service_end_time = strtotime( $service_end_date );
-			if ( $service_end_time < time() ) {
-				$error = true;
-			}
-			$service_end_date = date( 'Y-m-d', $service_end_time);
-		} else if ( is_numeric( $service_end_date ) ) {
-			$service_end_date = (int)$service_end_date;
-		}else{
-			$error = true;
-        }
-		if ( $error ) {
+		$service_end_date = SequraHelper::validateServiceEndDate( $_POST['service_end_date'] );
+		if ( ! $service_end_date ) {
 			update_post_meta( $post_id, 'service_end_date', null );
 			add_action( 'admin_notices', 'Sequra_Meta_Box_Service_End_Date::warn' );
-		}else{
+		} else {
 			update_post_meta( $post_id, 'service_end_date', $service_end_date );
-        }
+		}
 	}
 
 	public static function warn() {
