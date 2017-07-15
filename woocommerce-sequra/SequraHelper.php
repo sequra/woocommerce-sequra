@@ -78,7 +78,8 @@ class SequraHelper {
 		if ( $builder->sign( $order->id ) != $_REQUEST['signature'] &&
 		     $this->_pm->ipn
 		) {
-			return false;
+			http_response_code( 498);
+			die('Not valid signature');
 		}
 		$data = $builder->build( 'confirmed' );
 		$uri  = $this->_pm->endpoint . '/' . $_REQUEST['order_ref'];
@@ -87,9 +88,8 @@ class SequraHelper {
 		update_post_meta( (int) $order->id, 'Transaction Status', $client->getStatus() );
 		/*TODO: Store more information for later use in stats, like browser*/
 		if ( ! $client->succeeded() ) {
-			http_response_code( 410 );
-
-			return false;
+			http_response_code( 410);
+			die('Error: ' . $client->getJson());
 		}
 
 		return true;

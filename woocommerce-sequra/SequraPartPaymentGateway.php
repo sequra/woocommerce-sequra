@@ -27,7 +27,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		);
 
 		// Get setting values
-		$this->enabled              = 'yes' == $this->settings['enabled'];
+		$this->enabled              = $this->settings['enabled'];
 		$this->title                = $this->settings['title'];
 		$this->enable_for_countries = array( 'ES' );
 		$this->max_amount           = $this->settings['max_amount'];
@@ -111,8 +111,10 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( ! $this->enabled ) {
+		if ( $this->enabled !== 'yes') {
 			return false;
+		} else if (is_admin()){
+			return true;
 		}
 
 		if ( is_page( wc_get_page_id( 'checkout' ) ) && ! $this->is_available_in_checkout() ) {
