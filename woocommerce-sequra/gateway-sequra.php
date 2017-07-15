@@ -3,12 +3,11 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 4.3.0
+  Version: 4.3.1
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
-define( 'SEQURA_VERSION', '4.3.0' );
-define( 'SEQURA_ID', 'sequra' );
+define( 'SEQURA_VERSION', '4.3.1' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
 /**
@@ -17,16 +16,20 @@ register_activation_hook( __FILE__, 'sequra_activation' );
 function sequra_activation() {
 	// Place in first place
 	$gateway_order = (array) get_option( 'woocommerce_gateway_order' );
-	$order         = array( SEQURA_ID => 0 );
+	$order         = array(
+	        'sequra_i' => 0,
+	        'sequra_pp' => 1,
+	        'sequra' => 2
+	);
 	if ( is_array( $gateway_order ) && sizeof( $gateway_order ) > 0 ) {
-		$loop = 1;
+		$loop = 3;
 		foreach ( $gateway_order as $gateway_id ) {
 			$order[ esc_attr( $gateway_id ) ] = $loop;
 			$loop ++;
 		}
 	}
 	update_option( 'woocommerce_gateway_order', $order );
-	update_option( 'woocommerce_default_gateway', SEQURA_ID );
+	update_option( 'woocommerce_default_gateway', 'sequra_i' );
 	// Schedule a daily event for sending delivery report on plugin activation
 	$random_offset = rand( 0, 25200 ); //60*60*7 seconds from 2AM to 8AM
 	$tomorrow      = date( "Y-m-d 02:00", strtotime( 'tomorrow' ) );
