@@ -175,7 +175,7 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			} else {
 				$item["type"] = 'product';
 			}
-			$item["reference"] = self::notNull( $_product->get_sku() );
+			$item["reference"] = $_product->id;
 			$name              = apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key );
 			$item["name"]      = strip_tags( $name );
 			if ( isset( $cart_item['quantity'] ) ) {
