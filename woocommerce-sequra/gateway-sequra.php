@@ -195,15 +195,15 @@ function woocommerce_sequra_init() {
 
 	add_filter( 'woocommerce_get_price_html', 'woocommerce_sequra_add_simulator_to_product_page', 10, 2 );
 	function woocommerce_sequra_add_simulator_to_product_page( $price, $product ) {
-		global $wp_query;
-		if ( ! is_product() || $wp_query->posts[0]->ID != $product->id ) {
+		global $wp_query,$sequra_simulator_added;
+		if ( ! is_product() || $wp_query->posts[0]->ID != $product->id || $sequra_simulator_added) {
 			return $price;
 		}
 		$sequra_pp = new SequraPartPaymentGateway();
 		$ret = sequra_pp_simulator( array(
 			'price' => $sequra_pp->price_css_sel
 		) );
-
+		$sequra_simulator_added = true;
 		return $price . $ret;
 	}
 
