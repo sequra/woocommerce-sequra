@@ -33,7 +33,7 @@
 	<div id="sequra_i1_block4" class="sequra_block block4">
 		<span class="sqnoc icon-euros"></span>
 		<div class="sqinner">
-			<span class="sqheader">3. Paga despúes</span>
+			<span class="sqheader">3. Paga después</span>
 			<span class="sqcontent">
                     <a class="btn btn-sequra" href="#" rel="sequra_invoice_popup_home">Más información</a>
                 </span>
