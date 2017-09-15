@@ -34,6 +34,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->min_amount           = $this->settings['min_amount'];
 		$this->has_fields           = true;
 		$this->price_css_sel        = htmlspecialchars_decode( $this->settings['price_css_sel'] );
+		$this->dest_css_sel         = htmlspecialchars_decode( $this->settings['dest_css_sel'] );
 		$this->pp_product           = 'pp3';//not an option
 		$this->pp_cost_url          = 'https://' .
 		                              ( $this->coresettings['env'] ? 'sandbox' : 'live' ) .
@@ -99,6 +100,12 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'type'        => 'text',
 				'description' => __( 'CSS selector to get the price for installment simulator', 'wc_sequra' ),
 				'default'     => 'ins .woocommerce-Price-amount,p>.woocommerce-Price-amount,.summary .price .amount'
+			),
+			'dest_css_sel' => array(
+				'title'       => __( 'CSS selector for simulator', 'wc_sequra' ),
+				'type'        => 'text',
+				'description' => __( 'CSS after which the simulator will be draw it just showing it below the prices is not good. Usually empty should be fine', 'wc_sequra' ),
+				'default'     => ''
 			)
 
 		);

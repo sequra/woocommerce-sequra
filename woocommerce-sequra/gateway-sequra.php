@@ -7,7 +7,7 @@
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
-define( 'SEQURA_VERSION', '4.3.2' );
+define( 'SEQURA_VERSION', '4.4.0' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
 /**
@@ -201,7 +201,8 @@ function woocommerce_sequra_init() {
 		}
 		$sequra_pp = new SequraPartPaymentGateway();
 		$ret = sequra_pp_simulator( array(
-			'price' => $sequra_pp->price_css_sel
+			'price' => trim($sequra_pp->price_css_sel),
+			'dest'  => trim($sequra_pp->dest_css_sel)
 		) );
 		$sequra_simulator_added = true;
 		return $price . $ret;
@@ -215,21 +216,9 @@ function woocommerce_sequra_init() {
 		}
 		wp_enqueue_script( 'sequra-pp-cost-js', $sequra_pp->pp_cost_url );
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
-		return "<div id='sequra_partpayment_teaser'></div>
-				<script type='text/javascript'>
-  					jQuery(function(){
-  						Sequra.decimal_separator = '".wc_get_price_decimal_separator()."';
-  						partPaymnetTeaser = new SequraPartPaymentTeaser(
-							{
-								container:'#sequra_partpayment_teaser',
-								price_container: '" . $price_container . "'
-							}
-						)
-						partPaymnetTeaser.draw();
-						partPaymnetTeaser.preselect(20);
-					});				
-				</script>
-			";
+		ob_start();
+		include( $sequra_pp->helper->template_loader( 'partpayment_teaser') );
+		return ob_get_clean();
 	}
 
 	add_shortcode( 'sequra_pp_simulator', 'sequra_pp_simulator' );
@@ -241,20 +230,7 @@ function woocommerce_sequra_init() {
 	function woocommerce_sequra_after_add_to_cart_button() {
 		global $product;
 		$sequra = new SequraInvoicePaymentGateway();
-		if ( $sequra->is_available() && $product->price < $sequra->max_amount ) { ?>
-          <div id="sequra_invoice_teaser"></div>
-          <script type="text/javascript">
-			jQuery(function(){
-				invoiceTeaser = new SequraInvoiceTeaser(
-					{
-						container:'#sequra_invoice_teaser',
-						fee: <?php echo $sequra->fee?$sequra->fee:0;?>
-					}
-				);
-				invoiceTeaser.draw();
-			});
-          </script>
-		<?php
-		}
+		ob_start();
+		include( $sequra->helper->template_loader( 'invoice_teaser') );
 	}
 }
