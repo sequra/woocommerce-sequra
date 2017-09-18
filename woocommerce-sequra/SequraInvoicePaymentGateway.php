@@ -47,20 +47,21 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 		//$this->days_after           = (int) $this->settings['days_after'];
 		$this->has_fields           = true;
 		$this->enable_for_countries = array( 'ES' );
-		$this->endpoint             = SequraPaymentGateway::$endpoints[ $this->coresettings['env'] ];
+		$this->env                  = $this->coresettings['env'];
 		$this->helper               = new SequraHelper( $this );
+		$this->product              = 'i1';//not an option
 
 		// Logs
 		if ( $this->coresettings['debug'] == 'yes' ) {
 			$this->log = new WC_Logger();
 		}
 
-		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
+		add_action( 'woocommerce_receipt_' . $this->id, array( $this->helper, 'receipt_page' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array(
 			$this,
 			'process_admin_options'
 		) );
-		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_' . $this->id . '_resquest' ) );
+		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this->helper, 'check_response' ) );
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_order_totals' ), 999 );
 		do_action( 'woocommerce_sequra_loaded', $this );
 	}
@@ -112,9 +113,9 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( $this->enabled !== 'yes') {
+		if ( $this->enabled !== 'yes' ) {
 			return false;
-		} else if (is_admin()){
+		} else if ( is_admin() ) {
 			return true;
 		}
 
@@ -210,7 +211,7 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 	 * */
 	function payment_fields() {
 		$payment_fields = apply_filters( 'woocommerce_sequra_payment_fields', array(), $this );
-		require( $this->helper->template_loader( 'payment_fields' ) );
+		require( SequraHelper::template_loader( 'payment_fields' ) );
 	}
 
 	/**
@@ -255,28 +256,5 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 			return;
 		}
 		$cart->add_fee( __( 'Recargo "Recibe primero, paga después"' ), $this->fee, false );
-	}
-
-	/**
-	 * receipt_page
-	 * */
-	function receipt_page( $order ) {
-		if ( ! is_null( $this->identity_form ) ) {
-			return;
-		}
-		global $woocommerce;
-		$order = new WC_Order( $order );
-		echo '<p>' . __( 'Thank you for your order, please click the button below to pay with SeQura.',
-				'wc_sequra' ) . '</p>';
-		$options             = array( 'product' => 'i1' );
-		$this->identity_form = $this->helper->get_identity_form( $options, $order );
-		$back                = $woocommerce->cart->get_checkout_url();
-		$extra_fields        = apply_filters( 'woocommerce_sequra_payment_extra_fields', array(), $this );
-		$total_price         = round( $order->get_total() * 100 );
-		require( $this->helper->template_loader( 'payment_identification' ) );
-	}
-
-	function check_sequra_i_resquest() {
-		$this->helper->check_response( $this );
 	}
 }

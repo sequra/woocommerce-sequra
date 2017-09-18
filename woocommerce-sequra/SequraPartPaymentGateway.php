@@ -35,13 +35,14 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->has_fields           = true;
 		$this->price_css_sel        = htmlspecialchars_decode( $this->settings['price_css_sel'] );
 		$this->dest_css_sel         = htmlspecialchars_decode( $this->settings['dest_css_sel'] );
-		$this->pp_product           = 'pp3';//not an option
+		$this->product              = 'pp3';//not an option
 		$this->pp_cost_url          = 'https://' .
 		                              ( $this->coresettings['env'] ? 'sandbox' : 'live' ) .
 		                              '.sequracdn.com/scripts/' .
 		                              $this->coresettings['merchantref'] . '/' .
 		                              $this->coresettings['assets_secret'] .
 		                              '/pp3_pp5_cost.js';
+		$this->env                  = $this->coresettings['env'];
 		$this->helper               = new SequraHelper( $this );
 
 		// Logs
@@ -50,12 +51,12 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		}
 
 		// Hooks
-		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
+		add_action( 'woocommerce_receipt_' . $this->id, array( $this->helper, 'receipt_page' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array(
 			$this,
 			'process_admin_options'
 		) );
-		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_' . $this->id . '_resquest' ) );
+		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this->helper, 'check_response' ) );
 		do_action( 'woocommerce_sequra_pp_loaded', $this );
 	}
 
@@ -101,7 +102,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'description' => __( 'CSS selector to get the price for installment simulator', 'wc_sequra' ),
 				'default'     => 'ins .woocommerce-Price-amount,p>.woocommerce-Price-amount,.summary .price .amount'
 			),
-			'dest_css_sel' => array(
+			'dest_css_sel'  => array(
 				'title'       => __( 'CSS selector for simulator', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'CSS after which the simulator will be draw it just showing it below the prices is not good. Usually empty should be fine', 'wc_sequra' ),
@@ -118,9 +119,9 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( $this->enabled !== 'yes') {
+		if ( $this->enabled !== 'yes' ) {
 			return false;
-		} else if (is_admin()){
+		} else if ( is_admin() ) {
 			return true;
 		}
 
@@ -168,9 +169,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	function is_available_in_product_page() {
 		global $product;
 		if ( $this->coresettings['enable_for_virtual'] == 'yes' ) {
-			if (! get_post_meta( $product->id, 'service_end_date', true ) ) {
-				return false;
-			}
+			//return get_post_meta( $product->id, 'is_sequra_service', true ) != 'no';
+			return true;//Non-services can be purchased too but not alone.
 		} else if ( ! $product->needs_shipping() ) {
 			return false;
 		}
@@ -184,7 +184,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * */
 	function payment_fields() {
 		wp_enqueue_script( 'sequra-pp-cost-js', $this->pp_cost_url );
-		require( $this->helper->template_loader( 'partpayment_fields' ) );
+		require( SequraHelper::template_loader( 'partpayment_fields' ) );
 	}
 
 	/**
@@ -210,21 +210,5 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		);
 
 		return apply_filters( 'woocommerce_sequra_pp_process_payment_return', $ret, $this );
-	}
-
-	/**
-	 * receipt_page
-	 * */
-	function receipt_page( $order ) {
-		global $woocommerce;
-		$order = new WC_Order( $order );
-		echo '<p>' . __( 'Thank you for your order, please click the button below to pay with SeQura.', 'wc_sequra' ) . '</p>';
-		$options             = array( 'product' => $this->pp_product );
-		$this->identity_form = $this->helper->get_identity_form( $options, $order );
-		require( $this->helper->template_loader( 'payment_identification' ) );
-	}
-
-	function check_sequra_pp_resquest() {
-		$this->helper->check_response( $this );
 	}
 }

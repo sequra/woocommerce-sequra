@@ -3,9 +3,26 @@
 class SequraBuilderWC extends SequraBuilderAbstract {
 	const HASH_ALGO = 'sha256';
 
+	/**
+	 * Cart with info to build the order for SeQura
+	 *
+	 * @var null|WC_Cart
+	 */
 	protected $_cart = null;
+
+	/**
+	 * List of shipped order's id tos inform to SeQura with
+	 *
+	 * @var array
+	 */
 	protected $_shipped_ids = array();
 
+	/**
+	 * SequraBuilderWC constructor.
+	 *
+	 * @param string        $merchant_id Merchant ID as provided in credential.
+	 * @param null|WC_Order $order  Order with the info to send to SeQura.
+	 */
 	public function __construct( $merchant_id, $order = null ) {
 		$this->merchant_id = $merchant_id;
 		if ( ! is_null( $order ) ) {
@@ -136,14 +153,22 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		return $this->_current_order->get_product_from_item( $cart_item );
 	}
 
+	/**
+	 * Build discount item
+	 *
+	 * @param string $ref  Discount reference.
+	 * @param int    $amount Discount amount.
+	 *
+	 * @return array
+	 */
 	protected function discount( $ref, $amount ) {
 		$discount                  = - 1 * $amount;
 		$item                      = array();
-		$item["type"]              = "discount";
-		$item["reference"]         = self::notNull( $ref );
-		$item["name"]              = 'Descuento';
-		$item["total_without_tax"] = self::integerPrice( $discount );
-		$item["total_with_tax"]    = self::integerPrice( $discount );
+		$item['type']              = 'discount';
+		$item['reference']         = self::notNull( $ref );
+		$item['name']              = 'Descuento';
+		$item['total_without_tax'] = self::integerPrice( $discount );
+		$item['total_with_tax']    = self::integerPrice( $discount );
 
 		return $item;
 	}
@@ -155,14 +180,16 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
 			$item     = array();
 			if (
-				$this->_pm->coresettings['enable_for_virtual'] &&
-				$service_end_date = SequraHelper::validateServiceEndDate(
-					get_post_meta( $_product->id, 'service_end_date', true )
-				)
+				$this->_pm->coresettings['enable_for_virtual'] == 'yes' &&
+				get_post_meta( $_product->id, 'is_sequra_service', true ) != 'no'
 			) {
+				$service_end_date = get_post_meta( $_product->id, 'sequra_service_end_date', true );
+				if(!SequraHelper::validateServiceEndDate($service_end_date)){
+					$service_end_date = $this->_pm->coresettings['default_service_end_date'];
+				}
 				$item["type"] = 'service';
-				if ( is_numeric( $service_end_date ) ) {
-					$item["ends_in"] = 'P' . $service_end_date . 'D';
+				if ( strpos( $service_end_date, "P" )===0 ) {
+					$item["ends_in"] = $service_end_date;
 				} else {
 					$item["ends_on"] = $service_end_date;
 				}
