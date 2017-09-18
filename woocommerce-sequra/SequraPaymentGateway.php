@@ -11,7 +11,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 
 	public function __construct() {
 		do_action( 'woocommerce_sequra_before_load', $this );
-		$this->id   = 'sequra';
+		$this->id = 'sequra';
 
 		$this->method_title       = __( 'Configuración SeQura', 'wc_sequra' );
 		$this->method_description = __( 'Configurtación para los métodos de pago SeQura', 'wc_sequra' );
@@ -19,13 +19,13 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			'products'
 		);
 
-		// Load the form fields
-		$this->init_form_fields();
-
 		// Load the settings.
 		$this->init_settings();
 
-		$this->title = $this->method_title;
+		// Load the form fields
+		$this->init_form_fields();
+
+		$this->title   = $this->method_title;
 		$this->enabled = false;
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array(
@@ -85,37 +85,54 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				)
 			),
 			'enable_for_virtual' => array(
-				'title'   => __( 'Enable for virtual orders', 'woocommerce' ),
-				'label'   => __( 'Enable SeQura for services', 'wc_sequra' ),
-				'type'    => 'checkbox',
-				'description' => __( 'Your contract must allow selling services, SeQura will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'wc_sequra' ),
-				'default' => 'no'
-			),
-			'env'                => array(
-				'title'       => __( 'Entorno', 'wc_sequra' ),
-				'type'        => 'select',
-				'description' => __( 'While working in Sandbox the methods will only show to the following IP addresses.', 'wc_sequra' ),
-				'default'     => '1',
-				'desc_tip'    => true,
-				'options'     => array(
-					'1' => __( 'Sandbox - Pruebas', 'wc_sequra' ),
-					'0' => __( 'Live - Real', 'wc_sequra' )
-				)
-			),
-			'test_ips'           => array(
-				'title'       => __( 'IPs for testing', 'wc_sequra' ),
-				'label'       => '',
-				'type'        => 'test',
-				'description' => __( 'When working is sandbox mode only these ips addresses will see the plugin', 'wc_sequra' ),
-				'desc_tip'    => true,
-				'default'     => '54.76.175.81,' . $_SERVER['REMOTE_ADDR']
-			),
-			'debug'              => array(
-				'title'       => __( 'Debugging', 'wc_sequra' ),
-				'label'       => __( 'Modo debug', 'wc_sequra' ),
+				'title'       => __( 'Enable for virtual orders', 'wc_sequra' ),
+				'label'       => __( 'Enable SeQura for services', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Sólo para desarrolladores.', 'wc_sequra' ),
+				'description' => __( 'Your contract must allow selling services, SeQura will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'wc_sequra' ),
 				'default'     => 'no'
+			)
+		);
+		if ( $this->settings['enable_for_virtual'] == 'yes' ) {
+			$this->form_fields['default_service_end_date'] = array(
+				'title'             => __( 'Default service end date', 'wc_sequra' ),
+				'desc_tip'          => true,
+				'type'              => 'text',
+				'description'       => __( 'Fecha como 2017-08-31, plazo como P3M15D (3 meses y 15 días). Se aplicará por defecto atodos los productos si no se especifica algo diferente en la ficha de producto.', 'wc_sequra' ),
+				'default'           => 'P1Y',
+				'placeholder'       => __( 'ISO8601 format', 'wc_sequra' ),
+				'custom_attributes' => array(
+					'pattern' => SequraHelper::ISO8601_PATTERN
+				)
+			);
+		}
+		$this->form_fields = array_merge( $this->form_fields,
+			array(
+				'env'                => array(
+					'title'       => __( 'Entorno', 'wc_sequra' ),
+					'type'        => 'select',
+					'description' => __( 'While working in Sandbox the methods will only show to the following IP addresses.', 'wc_sequra' ),
+					'default'     => '1',
+					'desc_tip'    => true,
+					'options'     => array(
+						'1' => __( 'Sandbox - Pruebas', 'wc_sequra' ),
+						'0' => __( 'Live - Real', 'wc_sequra' )
+					)
+				),
+				'test_ips'           => array(
+					'title'       => __( 'IPs for testing', 'wc_sequra' ),
+					'label'       => '',
+					'type'        => 'test',
+					'description' => __( 'When working is sandbox mode only these ips addresses will see the plugin', 'w c_sequra' ),
+					'desc_tip'    => true,
+					'default'     => '54.76.175.81,' . $_SERVER['REMOTE_ADDR']
+				),
+				'debug'              => array(
+					'title'       => __( 'Debugging', 'wc_sequra' ),
+					'label'       => __( 'Modo debug', 'wc_sequra' ),
+					'type'        => 'checkbox',
+					'description' => __( 'Sólo para desarrolladores.', 'wc_sequra' ),
+					'default'     => 'no'
+				)
 			)
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequra_init_form_fields', $this->form_fields, $this );

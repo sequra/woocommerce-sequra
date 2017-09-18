@@ -14,17 +14,38 @@ class Sequra_Meta_Box_Service_End_Date {
 	 */
 	public static function output( $post ) {
 		global $post;
-		$service_end_date = get_post_meta( $post->ID, 'service_end_date', true ); ?>
+		$is_sequra_service = get_post_meta( $post->ID, 'is_sequra_service', true );
+        $sequra_service_end_date = get_post_meta( $post->ID, 'sequra_service_end_date', true );
+        if(!$sequra_service_end_date){
+	        $coresettings = get_option( 'woocommerce_sequra_settings', array() );
+	        $sequra_service_end_date = $coresettings['default_service_end_date'];
+        } ?>
         <div class="wc-metaboxes-wrapper">
-            <div id="service_end_date">
-                <div class="service_end_date-edit wcs-date-input">
-                    <input name="service_end_date" type="text" value="<?php echo $service_end_date; ?>"
-                           placeholder="<?php echo __( 'yyyy-mm-dd or period in days' ); ?>"
-                           pattern="(\d*)|((\d{4})-([0-1]\d)-([0-3]\d))+"/><br/>
-                    <small><?php echo __( 'Date i.e: 2018-06-06 or period i.e: 365 for 1 year' ); ?></small>
+            <div id="sequra_service">
+                <div id="sequra_service_service_end_date" class="service_end_date-edit wcs-date-input">
+                    <input id="sequra_service_end_date" name="sequra_service_end_date" type="text" value="<?php echo $sequra_service_end_date; ?>"
+                           placeholder="<?php echo __( 'date or period in ISO8601 forma', 'wc_sequra' ); ?>"
+                           pattern="<?php echo SequraHelper::ISO8601_PATTERN; ?>"/><br/>
+                    <small><?php echo __( 'Date i.e: 2018-06-06 or period i.e: P1Y for 1 year', 'wc_sequra' ); ?></small>
+                </div>
+                <div id="sequra_service_is_service" class="service-edit wcs">
+                    <input id="is_sequra_service" name="is_sequra_service" type="checkbox" value="no" <?php echo $is_sequra_service=='no'?'checked':''; ?>
+                           onclick="toggleSequraService();"/> <label for="sequra_service_is_service"><?php echo __( 'This is not a service','wc_sequra' ); ?></label>
                 </div>
             </div>
         </div>
+        <script>
+            function toggleSequraService(){
+                if(jQuery('#is_sequra_service').is(':checked')){
+                    jQuery('#sequra_service_end_date').enabled=false;
+                    jQuery('#sequra_service_service_end_date').hide();
+                }else{
+                    jQuery('#sequra_service_end_date').enabled=true;
+                    jQuery('#sequra_service_service_end_date').show();
+                }
+            }
+            toggleSequraService();
+        </script>
 		<?php
 	}
 
@@ -32,13 +53,10 @@ class Sequra_Meta_Box_Service_End_Date {
 	 * Save meta box data
 	 */
 	public static function save( $post_id, $post ) {
-		$error            = false;
-		$service_end_date = SequraHelper::validateServiceEndDate( $_POST['service_end_date'] );
-		if ( ! $service_end_date ) {
-			update_post_meta( $post_id, 'service_end_date', null );
-			add_action( 'admin_notices', 'Sequra_Meta_Box_Service_End_Date::warn' );
-		} else {
-			update_post_meta( $post_id, 'service_end_date', $service_end_date );
+		$is_service = isset($_POST['is_sequra_service']) && $_POST['is_sequra_service']=='no'?'no':'yes';
+        update_post_meta( $post_id, 'is_sequra_service',$is_service);
+		if ( SequraHelper::validateServiceEndDate( $_POST['sequra_service_end_date'] ) ) {
+			update_post_meta( $post_id, 'sequra_service_end_date', $_POST['sequra_service_end_date'] );
 		}
 	}
 

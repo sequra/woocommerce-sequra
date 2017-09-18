@@ -1,6 +1,8 @@
 <?php
 
 class SequraHelper {
+	const ISO8601_PATTERN = '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
+	
 	/* Payment Method */
 	private $_pm;
 	/* Sequra Client */
@@ -10,6 +12,7 @@ class SequraHelper {
 
 	public function __construct( $pm ) {
 		$this->_pm = $pm;
+		$this->identity_form = null;
 		$this->dir = WP_PLUGIN_DIR . "/" . plugin_basename( dirname( __FILE__ ) ) . '/';
 		if ( ! class_exists( 'SequraTempOrder' ) ) {
 			require_once( $this->dir . 'SequraTempOrder.php' );
@@ -17,38 +20,39 @@ class SequraHelper {
 	}
 
 	function get_identity_form( $options, $order = null ) {
-		$client  = $this->getClient();
-		$builder = $this->getBuilder( $order );
-		$builder->setPaymentMethod( $this->_pm );
-		try {
-			$order = $builder->build();
-		} catch ( Exception $e ) {
-			if ( $this->_pm->debug == 'yes' ) {
-				$this->_pm->log->add( 'sequra', $e->getMessage() );
+		if ( is_null( $this->identity_form ) ) {
+			$client  = $this->getClient();
+			$builder = $this->getBuilder( $order );
+			$builder->setPaymentMethod( $this->_pm );
+			try {
+				$order = $builder->build();
+			} catch ( Exception $e ) {
+				if ( $this->_pm->debug == 'yes' ) {
+					$this->_pm->log->add( 'sequra', $e->getMessage() );
+				};
 			}
 
-			return '';
-		}
+			$client->startSolicitation( $order );
+			if ( $client->succeeded() ) {
+				$uri = $client->getOrderUri();
+				WC()->session->set( 'sequraURI', $uri );
 
-		$client->startSolicitation( $order );
-		if ( $client->succeeded() ) {
-			$uri = $client->getOrderUri();
-			WC()->session->set( 'sequraURI', $uri );
-
-			return $client->getIdentificationForm( $uri, $options );
+				$this->identity_form = $client->getIdentificationForm( $uri, $options );
+			}
 		}
+		return $this->identity_form;
 	}
 
 	function get_credit_agreements( $amount ) {
 		return $this->getClient()->getCreditAgreements( $this->getBuilder()->integerPrice( $amount ), $this->_pm->merchantref );
 	}
 
-	function check_response( $pm ) {
+	function check_response() {
 		$order = new WC_Order( $_REQUEST['order'] );
 		if ( isset( $_REQUEST['signature'] ) ) {
-			return $this->check_ipn( $pm, $order );
+			return $this->check_ipn( $order );
 		}
-		$url = $pm->get_return_url( $order );
+		$url = $this->_pm->get_return_url( $order );
 		if ( ! $order->is_paid() ) {
 			wc_add_notice( __( 'Ha habido un probelma con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.', 'wc_sequra' ), 'error' );
 			//$url = $pm->get_checkout_payment_url();  Notice is not shown in payment page
@@ -57,19 +61,26 @@ class SequraHelper {
 		wp_redirect( $url, 302 );
 	}
 
-	function check_ipn( $pm, $order ) {
+	function check_ipn( $order ) {
 		$url = $order->get_cancel_order_url();
-		do_action( 'woocommerce_' . $pm->id . '_process_payment', $order, $pm );
-		if ( $approval = apply_filters( 'woocommerce_' . $pm->id . '_process_payment', $this->get_approval( $order ), $order, $pm ) ) {
+		do_action( 'woocommerce_' . $this->_pm->id . '_process_payment', $order, $this->_pm );
+		if ( $approval = apply_filters( 'woocommerce_' . $this->_pm->id . '_process_payment', $this->get_approval( $order ), $order, $this->_pm ) ) {
 			// Payment completed
 			$order->add_order_note( __( 'Payment accepted by SeQura', 'wc_sequra' ) );
 			$this->add_payment_info_to_post_meta( $order );
 			$order->payment_complete();
-			$url = $pm->get_return_url( $order );
 		}
 		exit();
 	}
 
+	function receipt_page($order){
+		$order = new WC_Order( $order );
+		echo '<p>' . __( 'Thank you for your order, please click the button below to pay with SeQura.',
+				'wc_sequra' ) . '</p>';
+		$options             = array( 'product' => $this->_pm->product );
+		$this->get_identity_form( $options, $order );
+		require( SequraHelper::template_loader( 'payment_identification' ) );
+	}
 
 	function get_approval( $order ) {
 		$client  = $this->getClient();
@@ -142,7 +153,7 @@ class SequraHelper {
 		return $this->_builder;
 	}
 
-	public function template_loader( $template ) {
+	public static function template_loader( $template ) {
 		if ( file_exists( STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php' ) ) {
 			return STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
 		} elseif ( file_exists( TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php' ) ) {
@@ -182,7 +193,7 @@ class SequraHelper {
 		$elegible       = false;
 		$services_count = 0;
 		foreach ( WC()->cart->cart_contents as $values ) {
-			if ( self::validateServiceEndDate( get_post_meta( $values['data']->id, 'service_end_date', true ) ) ) {
+			if ( get_post_meta( $values['product_id'], 'is_sequra_service', true ) != 'no') {
 				$services_count += $values['quantity'];
 				$elegible       = $services_count == 1;
 			}
@@ -192,20 +203,7 @@ class SequraHelper {
 	}
 
 	public static function validateServiceEndDate( $service_end_date ) {
-		if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})/', $service_end_date, $parts ) ) {
-			list( $service_end_date, $year, $month, $day ) = $parts;
-			$service_end_time = strtotime( $service_end_date );
-			if ( $service_end_time < time() ) {
-				return false;
-			}
-
-			return date( 'Y-m-d', $service_end_time );
-		} else if ( is_numeric( $service_end_date ) ) {
-			return (int) $service_end_date;
-		} else {
-			return false;
-		}
-
+		return preg_match( '/'.self::ISO8601_PATTERN.'/', $service_end_date);
 	}
 
 }

@@ -3,7 +3,7 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 4.3.2
+  Version: 4.4.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
@@ -97,7 +97,7 @@ function sequra_banner( $atts ) {
 		return;
 	}
 	ob_start();
-	include( $pm->helper->template_loader( 'banner_' . $product ) );
+	include( SequraHelper::template_loader( 'banner_' . $product ) );
 
 	return ob_get_clean();
 }
@@ -217,7 +217,7 @@ function woocommerce_sequra_init() {
 		wp_enqueue_script( 'sequra-pp-cost-js', $sequra_pp->pp_cost_url );
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
 		ob_start();
-		include( $sequra_pp->helper->template_loader( 'partpayment_teaser') );
+		include( SequraHelper::template_loader( 'partpayment_teaser') );
 		return ob_get_clean();
 	}
 
@@ -230,7 +230,6 @@ function woocommerce_sequra_init() {
 	function woocommerce_sequra_after_add_to_cart_button() {
 		global $product;
 		$sequra = new SequraInvoicePaymentGateway();
-		ob_start();
-		include( $sequra->helper->template_loader( 'invoice_teaser') );
+		include( SequraHelper::template_loader( 'invoice_teaser') );
 	}
 }
