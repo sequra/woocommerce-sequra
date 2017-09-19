@@ -14,7 +14,7 @@
 <?php } ?>
 <div id="sequra_i1_banner" class="sequra_banner">
 	<div id="sequra_i1_block1" class="block1">
-		<div>RECIBE PRIMERO PAGA DESPU&Eacute;S</div>
+		RECIBE PRIMERO PAGA DESPU&Eacute;S
 	</div>
 	<div id="sequra_i1_block2" class="sequra_block block2">
 		<span class="sqnoc icon-cart-screen"></span>
