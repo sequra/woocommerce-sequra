@@ -14,7 +14,7 @@
 <?php } ?>
 <div id="sequra_pp3_banner" class="clearfix sequra_banner">
 	<div id="sequra_pp3_block1" class="block1">
-        <div>FRACCIONA TU PAGO</div>
+        FRACCIONA TU PAGO
     </div>
 	<div id="sequra_pp3_block2" class="sequra_block block2">
         <i class="sqnoc icon-puzzle"></i>
