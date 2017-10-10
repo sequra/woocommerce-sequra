@@ -100,7 +100,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'title'       => __( 'CSS price selector', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'CSS selector to get the price for installment simulator', 'wc_sequra' ),
-				'default'     => 'ins .woocommerce-Price-amount,p>.woocommerce-Price-amount,.summary .price .amount'
+				'default'     => '.summary .price>.amount,.summary .price ins .amount'
 			),
 			'dest_css_sel'  => array(
 				'title'       => __( 'CSS selector for simulator', 'wc_sequra' ),
