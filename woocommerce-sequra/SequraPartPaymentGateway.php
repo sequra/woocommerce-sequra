@@ -105,8 +105,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			'dest_css_sel'  => array(
 				'title'       => __( 'CSS selector for simulator', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'CSS after which the simulator will be draw it just showing it below the prices is not good. Usually empty should be fine', 'wc_sequra' ),
-				'default'     => ''
+				'description' => __( 'CSS after which the simulator will be draw. if just showing it below the prices is not good. Usually empty should be fine', 'wc_sequra' ),
+				'default'     => '.woocommerce-variation-price:last'
 			)
 
 		);
