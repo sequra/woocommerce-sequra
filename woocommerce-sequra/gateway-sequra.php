@@ -204,12 +204,12 @@ function woocommerce_sequra_init() {
 			$sequra_simulator_added) {
 			return $price;
 		}
-		$ret = sequra_pp_simulator( array(
+		echo sequra_pp_simulator( array(
 			'price' => trim($sequra_pp->price_css_sel),
 			'dest'  => trim($sequra_pp->dest_css_sel)
 		) );
 		$sequra_simulator_added = true;
-		return $price . $ret;
+		return $price;
 	}
 
 	//[sequra_pp_simulator price='#product_price']
