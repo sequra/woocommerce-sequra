@@ -149,7 +149,12 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		return $this->_current_order->get_items();
 	}
 
-	private function getProductFromItem( $cart_item, $cart_item_key ) {
+	protected function getProductFromItem( $cart_item, $cart_item_key ) {
+		if ( is_callable( array( $cart_item, 'get_product' ) ) ) {
+			return $cart_item->get_product();
+		} else {
+			die(get_class($cart_item));
+		}
 		return $this->_current_order->get_product_from_item( $cart_item );
 	}
 
