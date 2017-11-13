@@ -3,7 +3,7 @@ if($this->identity_form){
 	echo $this->identity_form; ?>
 <script type="text/javascript">
 	window.SequraFormInstance.setCloseCallback(function (){
-		document.location.href = history.back(1);
+		document.location.href = '<?php echo wc_get_checkout_url(); ?>';
 	});
 	window.SequraFormInstance.show();
 	jQuery('.sq-identification-iframe').appendTo('body');
