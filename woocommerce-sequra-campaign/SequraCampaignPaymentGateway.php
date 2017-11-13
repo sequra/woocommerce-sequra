@@ -11,7 +11,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequracampaign_before_load', $this );
 		$this->id = 'sequracampaign';
 
-        $this->method_title       = __( 'Campaña SeQura', 'wc_sequracampaign' );
+		$this->method_title       = __( 'Campaña SeQura', 'wc_sequracampaign' );
 		$this->method_description = __( 'Allows special campaign, service ofered by SeQura.', 'wc_sequracampaign' );
 		//$this->icon = WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/images/icon.png';
 		$this->supports = array(
@@ -30,7 +30,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway {
 		$this->title    = $this->settings['title'];
 		$this->product  = 'pp5';//not an option
 		$this->campaign = $this->settings['campaign'];
-		$this->icon               = self::$BUCKET.$this->campaign.'/img/small-logo.png';
+		$this->icon     = self::$BUCKET . $this->campaign . '/img/small-logo.png';
 		$json           = get_option( 'sequracampaign_conditions' );
 		$conditions     = json_decode( $json, true );
 		foreach ( $conditions[ $this->product ] as $campaign ) {
@@ -147,7 +147,9 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	function is_available_in_checkout() {
-		if ( $this->coresettings['enable_for_virtual'] == 'yes' ) {
+		if (
+			! $this->isCampaignPeriod() ||
+			$this->coresettings['enable_for_virtual'] == 'yes' ) {
 			return false;
 		}/* else if ( ! WC()->cart->needs_shipping() ) {
 			return false;
@@ -156,13 +158,18 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway {
 		return true;
 	}
 
+	private function isCampaignPeriod() {
+		if ( isset( $_GET['sequra_campaign_preview'] ) && $_GET['sequra_campaign_preview'] == $this->campaign ) {
+			return true;
+		}
+
+		return time() < $this->last_date && time() > $this->first_date;
+	}
+
 	function is_available_in_product_page() {
 		$product = $GLOBALS['product'];
 		if (
-			time() > $this->last_date ||
-			time() < $this->first_date ||
-			( isset( $_GET['sequra_campaign_preview'] ) &&
-			  $_GET['sequra_campaign_preview'] != $this->campaign ) ||
+			! $this->isCampaignPeriod() ||
 			$this->min_amount > $product->price
 		) {
 			return false;
@@ -228,12 +235,12 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	//@todo: decide to move this to SequraHelper
-	function receipt_page($order){
+	function receipt_page( $order ) {
 		$order = new WC_Order( $order );
 		echo '<p>' . __( 'Thank you for your order, please click the button below to pay with SeQura.',
 				'wc_sequra' ) . '</p>';
-		$options             = array( 'product' => $this->product );
-		if($this->campaign){
+		$options = array( 'product' => $this->product );
+		if ( $this->campaign ) {
 			$options['campaign'] = $this->campaign;
 		}
 		$this->helper->get_identity_form( $options, $order );
