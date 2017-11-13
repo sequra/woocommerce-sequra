@@ -21,11 +21,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 
 		// Load the settings.
 		$this->init_settings();
-		$this->coresettings = array_map(
-			array( $this, 'format_settings' ),
-			get_option( 'woocommerce_sequra_settings', array() )
-		);
-
+		$this->coresettings = get_option( 'woocommerce_sequra_settings', array() );
 		// Get setting values
 		$this->enabled              = $this->settings['enabled'];
 		$this->title                = $this->settings['title'];
@@ -107,8 +103,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'type'        => 'text',
 				'description' => __( 'CSS after which the simulator will be draw. if just showing it below the prices is not good. Usually empty should be fine', 'wc_sequra' ),
 				'default'     => '.woocommerce-variation-price:last'
-			)
-
+			),
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequra_pp_init_form_fields', $this->form_fields, $this );
 	}
@@ -183,7 +178,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * There might be payment fields for SeQura, and we want to show the description if set.
 	 * */
 	function payment_fields() {
-		wp_enqueue_script( 'sequra-pp-cost-js', $this->pp_cost_url );
 		require( SequraHelper::template_loader( 'partpayment_fields' ) );
 	}
 

@@ -22,10 +22,7 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 
 		// Load the settings.
 		$this->init_settings();
-		$this->coresettings = array_map(
-			array( $this, 'format_settings' ),
-			get_option( 'woocommerce_sequra_settings', array() )
-		);
+		$this->coresettings = get_option( 'woocommerce_sequra_settings', array() );
 
 		//Not available for services
 		if ( $this->coresettings['enable_for_virtual'] == 'yes' ) {
