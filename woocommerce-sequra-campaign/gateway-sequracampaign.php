@@ -87,15 +87,16 @@ function woocommerce_sequracampaign_init() {
 	}
 
 	add_action( 'wp_enqueue_scripts', 'sequracampaign_add_stylesheet_and_js', 200 ); //Must be after sequra_pp
-
-	/*
-	 * CAmpaign teaser in product page
-	 */
-
-	add_action( 'woocommerce_after_add_to_cart_button', 'woocommerce_sequracampaign_after_add_to_cart_button', 9 );
-	function woocommerce_sequracampaign_after_add_to_cart_button() {
-		global $product;
+	
+	//[sequracampaign_teaser]
+	function sequracampaign_teaser( ) {
 		$sequracampaign = WC_Payment_Gateways::instance()->payment_gateways()['sequracampaign'];
 		include( SequraCampaignPaymentGateway::template_loader( 'campaign_teaser' ) );
 	}
+
+	add_shortcode( 'sequracampaign_teaser', 'sequracampaign_teaser' );
+	/*
+	 * Campaign teaser in product page
+	 */
+	add_action( 'woocommerce_after_add_to_cart_button', 'sequracampaign_teaser', 9 );
 }
