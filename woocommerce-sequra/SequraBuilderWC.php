@@ -460,6 +460,16 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		return $this->_shipped_ids;
 	}
 
+<<<<<<< HEAD
+=======
+	public function setOrdersMetaQuery( $wp_query_args, $args, $orderDataStore ) {
+		if(is_array($args['meta_query'])){
+			$wp_query_args['meta_query'] = array_merge( $wp_query_args['meta_query'], $args['meta_query'] );
+		}
+		return $wp_query_args;
+	}
+
+>>>>>>> d5a27cd... [fix] warning in SequraBuilderWC
 	public function getShippedOrderList() {
 		$args               = array(
 			'numberposts' => - 1,
