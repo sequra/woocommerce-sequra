@@ -18,6 +18,13 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 	protected $_shipped_ids = array();
 
 	/**
+	 * List of shipped order's id tos inform to SeQura with
+	 *
+	 * @var array
+	 */
+	protected $_buildingReport = false;
+
+	/**
 	 * SequraBuilderWC constructor.
 	 *
 	 * @param string        $merchant_id Merchant ID as provided in credential.
@@ -31,6 +38,13 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 			$this->_current_order = new SequraTempOrder( $_POST['post_data'] );
 		}
 		$this->_cart = WC()->cart;
+	}
+
+	public function buildDeliveryReport() {
+		$this->_buildingReport = true; 
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ), 10, 3 );
+		parent::buildDeliveryReport();
+		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ) );
 	}
 
 	public function setPaymentMethod( $pm ) {
@@ -358,18 +372,22 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 
 	public function customer() {
 		$data                  = array();
-		$data['language_code'] = self::notNull( self::getCustomerLanguange() );
-		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			$data['ip_number'] = $_SERVER['HTTP_CLIENT_IP'];
-		} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$data['ip_number'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		} else {
-			$data['ip_number'] = $_SERVER['REMOTE_ADDR'];
-		}
-		$data['user_agent'] = $_SERVER["HTTP_USER_AGENT"];
+		$id                    = -1;
+		if(!$this->_buildingReport){
+			$data['language_code'] = self::notNull( self::getCustomerLanguange() );
+			if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+				$data['ip_number'] = $_SERVER['HTTP_CLIENT_IP'];
+			} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+				$data['ip_number'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+			} else {
+				$data['ip_number'] = $_SERVER['REMOTE_ADDR'];
+			}
+			$data['user_agent'] = $_SERVER["HTTP_USER_AGENT"];
 
-		$data['logged_in'] = is_user_logged_in();
-		$id                = $data['logged_in'] ? get_current_user_id() : - 1;
+			$data['logged_in'] = is_user_logged_in();
+			$id                = $data['logged_in'] ? get_current_user_id():-1;
+		}
+
 
 		$data['given_names'] = $this->getCustomerField( $id, 'first_name' );
 		$data['surnames']    = $this->getCustomerField( $id, 'last_name' );
@@ -460,16 +478,12 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		return $this->_shipped_ids;
 	}
 
-<<<<<<< HEAD
-=======
 	public function setOrdersMetaQuery( $wp_query_args, $args, $orderDataStore ) {
 		if(is_array($args['meta_query'])){
 			$wp_query_args['meta_query'] = array_merge( $wp_query_args['meta_query'], $args['meta_query'] );
 		}
 		return $wp_query_args;
 	}
-
->>>>>>> d5a27cd... [fix] warning in SequraBuilderWC
 	public function getShippedOrderList() {
 		$args               = array(
 			'numberposts' => - 1,
