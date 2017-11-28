@@ -102,7 +102,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'title'       => __( 'CSS selector for simulator', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'CSS after which the simulator will be draw. if just showing it below the prices is not good. Usually empty should be fine', 'wc_sequra' ),
-				'default'     => '.woocommerce-variation-price:last'
+				'default'     => ''
 			),
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequra_pp_init_form_fields', $this->form_fields, $this );

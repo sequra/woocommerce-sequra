@@ -1,11 +1,9 @@
-<div id='sequra_partpayment_teaser_default_container'></div>
 <script type='text/javascript'>
     function displaySequraPatpaymentTeaser() {
         jQuery('#sequra_partpayment_teaser').remove();
         var the_price_container = '<?php echo $price_container; ?>';
         if (jQuery('.woocommerce-variation-price').length) {
-            the_price_container = the_price_container.replace(/\.summary/g, '.woocommerce-variation-price');
-
+            the_price_container = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
         }
         jQuery('#sequra_partpayment_teaser_default_container').append("<div id='sequra_partpayment_teaser'></div>");
 
@@ -16,17 +14,29 @@
             });
         partPaymnetTeaser.draw();
         partPaymnetTeaser.preselect(20);
-		<?php if(isset( $atts['dest'] ) && $atts['dest'] != '') {?>
+        placeSequraPartpaymentTeaser();
+    }
+
+    function placeSequraPartpaymentTeaser(){
+	    <?php if(isset( $atts['dest'] ) && $atts['dest'] != '') {?>
         if (jQuery('<?php echo $atts['dest'];?>').is(':visible')) {
             jQuery('<?php echo $atts['dest'];?>').after(jQuery('#sequra_partpayment_teaser'));
+            return;
         }
-		<?php } ?>
+	    <?php } ?>
+        var dest = '#sequra_partpayment_teaser_default_container';
+        if (jQuery('.woocommerce-variation-price').length) {
+            dest = '.woocommerce-variation-price';
+        }
+        jQuery(dest).append(jQuery('#sequra_partpayment_teaser'));
     }
 
     jQuery(window).on('load', function () {
         Sequra.decimal_separator = '<?php echo wc_get_price_decimal_separator(); ?>';
         displaySequraPatpaymentTeaser();
-        jQuery('.variations_form').on('woocommerce_variation_has_changed', displaySequraPatpaymentTeaser);
+        jQuery('.variations_form')
+            .on('hide_variation', displaySequraPatpaymentTeaser)
+            .on('show_variation', displaySequraPatpaymentTeaser);
     });
 
 </script>

@@ -213,7 +213,8 @@ function woocommerce_sequra_init() {
 			'dest'  => trim($sequra_pp->dest_css_sel)
 		) );
 		$sequra_simulator_added = true;
-		return $price;
+		return $price .
+			"<div id='sequra_partpayment_teaser_default_container'></div>";
 	}
 
 	//[sequra_pp_simulator price='#product_price']
