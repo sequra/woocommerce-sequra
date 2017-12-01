@@ -2,7 +2,7 @@
     function displaySequraPatpaymentTeaser() {
         jQuery('#sequra_partpayment_teaser').remove();
         var the_price_container = '<?php echo $price_container; ?>';
-        if (jQuery('.woocommerce-variation-price').length) {
+        if (jQuery('.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount').length) {
             the_price_container = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
         }
         jQuery('#sequra_partpayment_teaser_default_container').append("<div id='sequra_partpayment_teaser'></div>");
@@ -25,7 +25,7 @@
         }
 	    <?php } ?>
         var dest = '#sequra_partpayment_teaser_default_container';
-        if (jQuery('.woocommerce-variation-price').length) {
+        if (jQuery('.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount').length) {
             dest = '.woocommerce-variation-price';
         }
         jQuery(dest).append(jQuery('#sequra_partpayment_teaser'));
