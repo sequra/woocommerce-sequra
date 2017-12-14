@@ -134,12 +134,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		) {
 			return false;
 		}
-		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
-			return false;
-		}
-		if ( WC()->cart && 0 < $this->get_order_total() && $this->min_amount > $this->get_order_total() ) {
-			return false;
-		}
+
 		if ( 1 == $this->env && '' != $this->coresettings['test_ips'] ) { //Sandbox
 			$ips = explode( ',', $this->coresettings['test_ips'] );
 
@@ -158,6 +153,14 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			return false;
 		}
 
+		if ( 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
+			return false;
+		}
+
+		if ( 0 < $this->get_order_total() && $this->min_amount > $this->get_order_total() ) {
+			return false;
+		}
+		
 		return true;
 	}
 
