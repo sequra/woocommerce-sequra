@@ -25,6 +25,13 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 	protected $_buildingReport = false;
 
 	/**
+	 * SeQura payment module from whiich builder is being used
+	 *
+	 * @var array
+	 */
+	protected $_pm = null;
+
+	/**
 	 * SequraBuilderWC constructor.
 	 *
 	 * @param string        $merchant_id Merchant ID as provided in credential.
@@ -59,18 +66,17 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 
 	public function merchant() {
 		$ret                                       = parent::merchant();
-		$ret['partpayment_details_getter']         = 'SequraFractionInstance.partpayment_details_getter';
-		$ret['options']['accept_terms_explicitly'] = true;
-		$ret['notify_url']                         = add_query_arg( array(
-			'order'  => "" . $this->_current_order->id,
-			'wc-api' => 'woocommerce_' . $this->_pm->id
-		), home_url( '/' ) );
-		$ret['notification_parameters']            = array(
-			'signature' => self::sign( $this->_current_order->id ),
-			'result'    => "0"
-		);
-		$ret['return_url']                         = $ret['notify_url'];
-
+		if(!is_null($this->_pm)){
+			$ret['notify_url']                         = add_query_arg( array(
+				'order'  => "" . $this->_current_order->id,
+				'wc-api' => 'woocommerce_' . $this->_pm->id
+			), home_url( '/' ) );
+			$ret['notification_parameters']            = array(
+				'signature' => self::sign( $this->_current_order->id ),
+				'result'    => "0"
+			);
+			$ret['return_url']                         = $ret['notify_url'];	
+		}
 		return $ret;
 	}
 
@@ -193,16 +199,17 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 	public function items() {
 		$items         = array();
 		$cart_contents = $this->getCartContents();
+		$coresettings = get_option( 'woocommerce_sequra_settings', array() );
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
 			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
 			$item     = array();
 			if (
-				$this->_pm->coresettings['enable_for_virtual'] == 'yes' &&
+				$coresettings['enable_for_virtual'] == 'yes' &&
 				get_post_meta( $_product->id, 'is_sequra_service', true ) != 'no'
 			) {
 				$service_end_date = get_post_meta( $_product->id, 'sequra_service_end_date', true );
 				if(!SequraHelper::validateServiceEndDate($service_end_date)){
-					$service_end_date = $this->_pm->coresettings['default_service_end_date'];
+					$service_end_date = $coresettings['default_service_end_date'];
 				}
 				$item["type"] = 'service';
 				if ( strpos( $service_end_date, "P" )===0 ) {
