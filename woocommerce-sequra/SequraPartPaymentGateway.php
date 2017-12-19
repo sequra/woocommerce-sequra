@@ -119,11 +119,9 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		} else if ( is_admin() ) {
 			return true;
 		}
-
-		if ( is_page( wc_get_page_id( 'checkout' ) ) && ! $this->is_available_in_checkout() ) {
+		if ( !is_product() && ! $this->is_available_in_checkout() ) {
 			return false;
 		}
-
 		if ( is_product() && ! $this->is_available_in_product_page() ) {
 			return false;
 		}
