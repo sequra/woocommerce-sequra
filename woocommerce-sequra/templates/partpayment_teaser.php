@@ -5,7 +5,8 @@
         if (jQuery('.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount').length) {
             the_price_container = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
         }
-        jQuery('#sequra_partpayment_teaser_default_container').append("<div id='sequra_partpayment_teaser'></div>");
+        container = jQuery('.woocommerce-variation-price').length?jQuery('.woocommerce-variation-price'):jQuery('body');
+        container.append("<div id='sequra_partpayment_teaser'></div>");
 
         partPaymnetTeaser = new SequraPartPaymentTeaser(
             {
