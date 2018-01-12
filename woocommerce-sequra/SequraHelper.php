@@ -53,7 +53,8 @@ class SequraHelper {
 			return $this->check_ipn( $order );
 		}
 		$url = $this->_pm->get_return_url( $order );
-		if ( ! $order->is_paid() ) {
+		//if ( ! $order->is_paid() ) {
+		if( ! in_array( $order->get_status(),  array( 'processing', 'completed' ) )){
 			wc_add_notice( __( 'Ha habido un probelma con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.', 'wc_sequra' ), 'error' );
 			//$url = $pm->get_checkout_payment_url();  Notice is not shown in payment page
 			$url = $order->get_cancel_order_url();
