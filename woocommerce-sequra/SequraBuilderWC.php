@@ -580,9 +580,8 @@ class SequraBuilderWC extends SequraBuilderAbstract {
 		$posts = get_posts( $args );
 		foreach ( $posts as $post ) {
 			$this->_current_order = new WC_Order( $post->ID );
-			$date                 = strtotime( $post->post_date );
 			$stat                 = array(
-				'completed_at'       => self::dateOrBlank( $date ),
+				'completed_at'       => self::dateOrBlank( $post->post_date ),
 				'merchant_reference' => $this->orderMerchantReference(),
 				'currency'           => $this->_current_order->get_order_currency()
 			);
