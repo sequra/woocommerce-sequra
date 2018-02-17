@@ -201,10 +201,11 @@ function woocommerce_sequra_init() {
 	function woocommerce_sequra_add_simulator_to_product_page( $price, $product ) {
 		global $wp_query,$sequra_simulator_added;
 		$sequra_pp = new SequraPartPaymentGateway();
-		if ( 
+		if (
+			is_null($product) || 
 			! is_product() ||
+			$wp_query->posts[0]->ID != $product->get_id() || 
 			! $sequra_pp->is_available() ||
-			$wp_query->posts[0]->ID != $product->id || 
 			$sequra_simulator_added) {
 			return $price;
 		}
