@@ -111,6 +111,7 @@ class SequraHelper {
 			update_post_meta( (int) $order->id, 'Transaction ID', $_REQUEST['order_ref'] );
 			update_post_meta( (int) $order->id, '_order_ref', $_REQUEST['order_ref'] );
 			update_post_meta( (int) $order->id, '_product_code', $_REQUEST['product_code'] );
+			update_post_meta( (int) $order->id, '_transaction_id', $_REQUEST['order_ref'] );
 			//@TODO
 			//update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
 		} else {
