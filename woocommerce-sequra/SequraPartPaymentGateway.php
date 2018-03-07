@@ -113,7 +113,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return bool
 	 */
-	public function is_available() {
+	public function is_available($product_id = null) {
 		if ( $this->enabled !== 'yes' ) {
 			return false;
 		} else if ( is_admin() ) {
@@ -122,7 +122,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		if ( get_the_ID() == wc_get_page_id( 'checkout' ) && ! $this->is_available_in_checkout() ){
 			return false;
 		}
-		if ( is_product() && ! $this->is_available_in_product_page() ) {
+		if ( is_product() && $product_id && ! $this->is_available_in_product_page($product_id) ) {
 			return false;
 		}
 
@@ -162,8 +162,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		return true;
 	}
 
-	function is_available_in_product_page() {
-		global $product;
+	function is_available_in_product_page($product_id) {
+		$product = new WC_Product($product_id);
 		if ( $this->coresettings['enable_for_virtual'] == 'yes' ) {
 			//return get_post_meta( $product->id, 'is_sequra_service', true ) != 'no';
 			return true;//Non-services can be purchased too but not alone.

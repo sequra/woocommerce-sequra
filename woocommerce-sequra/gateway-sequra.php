@@ -202,10 +202,10 @@ function woocommerce_sequra_init() {
 		global $wp_query,$sequra_simulator_added;
 		$sequra_pp = new SequraPartPaymentGateway();
 		if (
-			is_null($product) || 
+			! ($product instanceof WC_Product) ||
 			! is_product() ||
 			$wp_query->posts[0]->ID != $product->get_id() || 
-			! $sequra_pp->is_available() ||
+			! $sequra_pp->is_available($product->get_id()) ||
 			$sequra_simulator_added) {
 			return $price;
 		}
@@ -219,9 +219,9 @@ function woocommerce_sequra_init() {
 	}
 
 	//[sequra_pp_simulator price='#product_price']
-	function sequra_pp_simulator( $atts ) {
+	function sequra_pp_simulator( $atts, $product_id = null ) {
 		$sequra_pp = new SequraPartPaymentGateway();
-		if ( ! $sequra_pp->is_available() ) {
+		if ( ! $sequra_pp->is_available($product_id) ) {
 			return;
 		}
 		wp_enqueue_script( 'sequra-pp-cost-js', $sequra_pp->pp_cost_url );

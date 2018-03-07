@@ -1,5 +1,5 @@
 <?php
-if ( $sequra->is_available() && $product->price < $sequra->max_amount ) { ?>
+if ( $sequra->is_available() && $product->get_price() < $sequra->max_amount ) { ?>
       <div id="sequra_invoice_teaser"></div>
       <script type="text/javascript">
   jQuery(function(){
