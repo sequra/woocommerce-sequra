@@ -3,11 +3,12 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 4.4.5
+  Version: 4.5.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
-define( 'SEQURA_VERSION', '4.4.5' );
+define( 'SEQURA_VERSION', '4.5.0' );
+define( 'SEQURA_S3_BUCKET', 'https://s3-eu-west-1.amazonaws.com/shop-assets.sequrapi.com/' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
 /**
@@ -156,14 +157,14 @@ function woocommerce_sequra_init() {
 	/**
 	 * Enqueue plugin style-file
 	 */
-	function sequra_add_stylesheet_adn_js() {
+	function sequra_add_stylesheet_cdn_js() {
 		/*@TODO: Load only if necessary */
 		// Respects SSL, Style.css is relative to the current file
-		wp_register_style( 'sequra-style', plugins_url( 'assets/css/sequrapayment.css', __FILE__ ),SEQURA_VERSION );
+		wp_register_style( 'sequra-style', SEQURA_S3_BUCKET . 'base/css/sequrapayment.css' );
 		wp_enqueue_style( 'sequra-style' );
 		wp_register_style( 'sequra-custom-style', plugins_url( 'assets/css/wordpress.css', __FILE__ ),SEQURA_VERSION );
 		wp_enqueue_style( 'sequra-custom-style' );
-		wp_enqueue_script( 'sequra-js', plugins_url( 'assets/js/sequrapayment.js', __FILE__ ),SEQURA_VERSION );
+		wp_enqueue_script( 'sequra-js', SEQURA_S3_BUCKET . 'base/js/sequrapayment.js' );
 		wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ),SEQURA_VERSION );
 		if ( is_page( wc_get_page_id( 'checkout' ) ) ) {
 			$pm = WC_Payment_Gateways::instance()->payment_gateways()['sequra_pp'];
@@ -171,7 +172,7 @@ function woocommerce_sequra_init() {
 		}
 	}
 
-	add_action( 'wp_enqueue_scripts', 'sequra_add_stylesheet_adn_js' );
+	add_action( 'wp_enqueue_scripts', 'sequra_add_stylesheet_cdn_js' );
 
 	function sequra_add_cart_info_to_session() {
 		$sequra_cart_info = WC()->session->get( 'sequra_cart_info' );
