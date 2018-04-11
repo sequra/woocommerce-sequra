@@ -14,18 +14,16 @@ class SequraBuilderLP extends SequraBuilderWC {
 
 	public function items() {
 		$items         = array();
-		ini_set('display_errors',1);
 		$cart_contents = $this->getCartContents();
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
-			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
 			$item     = array();
 			if (
 				$this->_pm->coresettings['enable_for_virtual'] == 'yes' &&
-				(get_post_meta( $_product->id, 'is_sequra_service', true ) != 'no' ||
+				(get_post_meta( $cart_item->get_id(), 'is_sequra_service', true ) != 'no' ||
 				get_class($_product) == 'LP_Course'
 				)
 			) {
-				$service_end_date = get_post_meta( $_product->id, 'sequra_service_end_date', true );
+				$service_end_date = get_post_meta( $cart_item->get_id(), 'sequra_service_end_date', true );
 				if(!SequraHelper::validateServiceEndDate($service_end_date)){
 					$service_end_date = $this->_pm->coresettings['default_service_end_date'];
 				}
@@ -38,8 +36,8 @@ class SequraBuilderLP extends SequraBuilderWC {
 			} else {
 				$item["type"] = 'product';
 			}
-			$item["reference"] = $_product->id;
-			$name              = apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key );
+			$item["reference"] = $cart_item->get_id();
+			$name              = $cart_item->get_name();
 			$item["name"]      = strip_tags( $name );
 			if ( isset( $cart_item['quantity'] ) ) {
 				$item["quantity"] = (int) $cart_item['quantity'];
@@ -52,9 +50,9 @@ class SequraBuilderLP extends SequraBuilderWC {
 			$item["downloadable"]   = false;//$_product->is_downloadable();
 
 			// OPTIONAL
-			$item["description"] = strip_tags( self::notNull( get_post( $_product->id )->post_content ) );
-			$item["product_id"]  = self::notNull( $_product->id );
-			$item["url"]         = self::notNull( get_permalink( $_product->id ) );
+			$item["description"] = strip_tags( self::notNull( get_post( $cart_item->get_id() )->post_content ) );
+			$item["product_id"]  = self::notNull( $cart_item->get_id() );
+			$item["url"]         = self::notNull( get_permalink( $cart_item->get_id() ) );
 			//$item["category"]    = self::notNull( strip_tags( $_product->get_categories() ) );
 			/*@TODO: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
 			$items[] = $item;
@@ -97,5 +95,20 @@ class SequraBuilderLP extends SequraBuilderWC {
 		}
 
 		return $items;
+	}
+
+	public function merchant() {
+		$ret                                       = parent::merchant();
+		$ret['options']['addresses_may_be_missing'] = true;
+
+		return $ret;
+	}
+
+	public function deliveryAddress() {
+		return null;
+	}
+
+	public function invoiceAddress() {
+		return null;
 	}
 }
