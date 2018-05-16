@@ -84,12 +84,12 @@ add_action( 'woocommerce_loaded', 'woocommerce_sequra_init', 100 );
 
 // [sequra_banner product='i1'] [sequra_banner product='pp3']
 function sequra_banner( $atts ) {
-	wp_enqueue_style( 'sequra-banner' );	
+	wp_enqueue_style( 'sequra-banner' );
 	$product = $atts['product'];
 	$pm      = null;
 	if ( $product == 'i1' ) {
 		$pm = new SequraInvoicePaymentGateway();
-	} elseif ( $product == 'pp3' ) {		
+	} elseif ( $product == 'pp3' ) {
 		$pm = new SequraPartPaymentGateway();
 		wp_enqueue_script( 'sequra-pp-cost-js', $pm->pp_cost_url );
 	}
@@ -199,13 +199,13 @@ function woocommerce_sequra_init() {
 	 */
 
 	add_filter( 'woocommerce_get_price_html', 'woocommerce_sequra_add_simulator_to_product_page', 999, 2 );
-	function woocommerce_sequra_add_simulator_to_product_page( $price, $product ) {
-		global $wp_query,$sequra_simulator_added;
+	function woocommerce_sequra_add_simulator_to_product_page($price) {
+		global $wp_query,$sequra_simulator_added,$product;
 		$sequra_pp = new SequraPartPaymentGateway();
 		if (
 			! ($product instanceof WC_Product) ||
 			! is_product() ||
-			$wp_query->posts[0]->ID != $product->get_id() || 
+			$wp_query->posts[0]->ID != $product->get_id() ||
 			! $sequra_pp->is_available($product->get_id()) ||
 			$sequra_simulator_added) {
 			return $price;
