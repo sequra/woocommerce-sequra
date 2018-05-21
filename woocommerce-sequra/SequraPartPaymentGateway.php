@@ -119,7 +119,10 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		} else if ( is_admin() ) {
 			return true;
 		}
-		if ( get_the_ID() == wc_get_page_id( 'checkout' ) && ! $this->is_available_in_checkout() ){
+		if ((get_the_ID() == wc_get_page_id( 'checkout' ) || $_SERVER['REQUEST_METHOD']=='POST') && !$this->is_available_in_checkout()){
+			return false;
+		}
+		if ($_SERVER['REQUEST_METHOD']=='POST' && !$this->is_available_in_checkout()){
 			return false;
 		}
 		if ( is_product() && $product_id && ! $this->is_available_in_product_page($product_id) ) {
@@ -147,7 +150,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			if ( ! $this->helper->isElegibleForServiceSale() ) {
 				return false;
 			}
-		} else if ( ! WC()->cart->needs_shipping() ) {
+		} else if ( ! $this->helper->isElegibleForProductSale() ) {
 			return false;
 		}
 

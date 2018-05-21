@@ -203,6 +203,18 @@ class SequraHelper {
 		return apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $elegible );
 	}
 
+	public function isElegibleForProductSale() {
+		$elegible       = true;
+		foreach ( WC()->cart->cart_contents as $cart_item_key => $values ) {
+			if ( !$values['data']->needs_shipping() ) {
+				$elegible       = false;
+				break;
+			}
+		}
+
+		return apply_filters( 'woocommerce_cart_is_elegible_for_product_sale', $elegible );
+	}
+
 	public static function validateServiceEndDate( $service_end_date ) {
 		return preg_match( '/'.self::ISO8601_PATTERN.'/', $service_end_date);
 	}

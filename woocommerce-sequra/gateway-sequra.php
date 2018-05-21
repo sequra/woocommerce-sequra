@@ -6,6 +6,7 @@
   Version: 4.5.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
+  WC tested up to: 3.3
  */
 define( 'SEQURA_VERSION', '4.5.0' );
 define( 'SEQURA_S3_BUCKET', 'https://s3-eu-west-1.amazonaws.com/shop-assets.sequrapi.com/' );
