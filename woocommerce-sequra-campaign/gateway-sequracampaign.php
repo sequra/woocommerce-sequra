@@ -66,28 +66,6 @@ function woocommerce_sequracampaign_init() {
 
 	add_filter( 'woocommerce_payment_gateways', 'add_sequracapaign_gateway' );
 
-	/**
-	 * Enqueue plugin style-file
-	 */
-	function sequracampaign_add_stylesheet_and_js() {
-		/*@TODO: Load only if necessary */
-		// Respects SSL, Style.css is relative to the current file
-		$pm = WC_Payment_Gateways::instance()->payment_gateways()['sequracampaign'];
-		if ( $pm->enabled != 'yes' ) {
-			return;
-		}
-		wp_register_style( 'sequracampaign-style', SequraCampaignPaymentGateway::$BUCKET . $pm->campaign . '/css/sequracampaign.css' );
-		wp_enqueue_style( 'sequracampaign-style' );
-		//wp_register_style( 'sequracampaign-wc-style', SequraCampaignPaymentGateway::$BUCKET . $pm->campaign . '/css/woocommerce.css' );
-		//wp_enqueue_style( 'sequracampaign-wc-style' );
-		wp_enqueue_script( 'sequracampaign-js', SequraCampaignPaymentGateway::$BUCKET . $pm->campaign . '/js/sequracampaign.js' );
-		if ( is_page( wc_get_page_id( 'checkout' ) ) ) {
-			wp_enqueue_script( 'sequra-pp-cost-js', $pm->pp_cost_url );
-		}
-	}
-
-	add_action( 'wp_enqueue_scripts', 'sequracampaign_add_stylesheet_and_js', 200 ); //Must be after sequra_pp
-	
 	//[sequracampaign_teaser]
 	function sequracampaign_teaser( ) {
 		$sequracampaign = WC_Payment_Gateways::instance()->payment_gateways()['sequracampaign'];

@@ -8,7 +8,7 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 	public function __construct() {
 		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id   = 'sequra_i';
-		$this->icon = WP_PLUGIN_URL . "/" . plugin_basename( dirname( __FILE__ ) ) . '/assets/img/small-logo.png';
+		$this->icon = sequra_get_script_basesurl() . 'images/small-logo.png';
 
 		$this->method_title       = __( 'Recibe primero, paga después', 'wc_sequra' );
 		$this->method_description = __( 'Allows payments by \'Recibe primero, paga después\', service ofered by SeQura.',
@@ -94,12 +94,12 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 					'wc_sequra' ),
 				'default'     => '400'
 			),
-			'fee'        => array(
-				'title'       => __( 'Fee', 'wc_sequra' ),
-				'description' => __( 'fee applied to this payment method' ),
-				'type'        => 'text',
-				'default'     => '0'
-			)
+            'widget_theme'  => array(
+                'title'       => __('Widget theme', 'wc_sequra'),
+                'type'        => 'text',
+                'description' => __('Widget theme: white, default...', 'wc_sequra'),
+                'default'     => 'white'
+            )
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequra_init_form_fields', $this->form_fields, $this );
 	}
@@ -254,4 +254,10 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 		}
 		$cart->add_fee( __( 'Recargo "Recibe primero, paga después"' ), $this->fee, false );
 	}
+
+	public function available_products($products){
+        $products[]='i1';
+	    return $products;
+    }
 }
+add_filter('sequra_available_products',array( 'SequraInvoicePaymentGateway', 'available_products' ));

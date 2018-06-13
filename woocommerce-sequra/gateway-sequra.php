@@ -3,13 +3,12 @@
   Plugin Name: Pasarela de pago para SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
-  Version: 4.5.0
+  Version: 4.6.0
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
-  WC tested up to: 3.3
+  WC tested up to: 3.4
  */
-define( 'SEQURA_VERSION', '4.5.0' );
-define( 'SEQURA_S3_BUCKET', 'https://s3-eu-west-1.amazonaws.com/shop-assets.sequrapi.com/' );
+define( 'SEQURA_VERSION', '4.6.0' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
 /**
@@ -106,6 +105,23 @@ function sequra_banner( $atts ) {
 
 add_shortcode( 'sequra_banner', 'sequra_banner' );
 
+add_action( 'sequra_upgrade_if_needed', 'sequrapartpayment_upgrade_if_needed' );
+function sequrapartpayment_upgrade_if_needed() {
+    if ( time() > get_option( 'sequrapartpayment_next_update' ) || isset( $_GET['sequra_partpayment_reset_conditions'] ) ) {
+        $coresettings = get_option( 'woocommerce_sequra_settings', array() );
+        $cost_url     = 'https://' .
+                        ( $coresettings['env'] ? 'sandbox' : 'live' ) .
+                        '.sequracdn.com/scripts/' .
+                        $coresettings['merchantref'] . '/' .
+                        $coresettings['assets_secret'] .
+                        '/pp3_cost.json';
+        $json         = file_get_contents( $cost_url );
+        update_option( 'sequrapartpayment_conditions', $json );
+        do_action( 'sequrapartpayment_updateconditions' );
+        update_option( 'sequrapartpayment_next_update', time() + 86400 );
+    }
+}
+
 function woocommerce_sequra_init() {
 	do_action( 'sequra_upgrade_if_needed' );
 	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
@@ -159,21 +175,28 @@ function woocommerce_sequra_init() {
 	 * Enqueue plugin style-file
 	 */
 	function sequra_add_stylesheet_cdn_js() {
-		/*@TODO: Load only if necessary */
 		// Respects SSL, Style.css is relative to the current file
-		wp_register_style( 'sequra-style', SEQURA_S3_BUCKET . 'base/css/sequrapayment.css' );
-		wp_enqueue_style( 'sequra-style' );
-		wp_register_style( 'sequra-custom-style', plugins_url( 'assets/css/wordpress.css', __FILE__ ),SEQURA_VERSION );
-		wp_enqueue_style( 'sequra-custom-style' );
-		wp_enqueue_script( 'sequra-js', SEQURA_S3_BUCKET . 'base/js/sequrapayment.js' );
 		wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ),SEQURA_VERSION );
-		if ( is_page( wc_get_page_id( 'checkout' ) ) ) {
-			$pm = WC_Payment_Gateways::instance()->payment_gateways()['sequra_pp'];
-			wp_enqueue_script( 'sequra-pp-cost-js', $pm->pp_cost_url,SEQURA_VERSION );
-		}
 	}
 
 	add_action( 'wp_enqueue_scripts', 'sequra_add_stylesheet_cdn_js' );
+
+	function sequra_get_script_basesurl(){
+        $coresettings = get_option( 'woocommerce_sequra_settings', array() );
+        return 'https://' . ($coresettings['env']==1?'sandbox':'live') . '.sequracdn.com/assets/';
+    }
+
+    function sequra_head_js() {
+        /*@TODO: Load only if necessary */
+        $available_products = apply_filters('sequra_available_products',array());
+        $coresettings = get_option( 'woocommerce_sequra_settings', array() );
+        $scriptBaseUri = sequra_get_script_basesurl();
+        ob_start();
+        include( SequraHelper::template_loader( 'header_js') );
+        echo ob_get_clean();
+    }
+
+	add_action('wp_head', 'sequra_head_js');
 
 	function sequra_add_cart_info_to_session() {
 		$sequra_cart_info = WC()->session->get( 'sequra_cart_info' );
@@ -228,6 +251,7 @@ function woocommerce_sequra_init() {
 		}
 		wp_enqueue_script( 'sequra-pp-cost-js', $sequra_pp->pp_cost_url );
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
+		$theme = $sequra_pp->settings['widget_theme'];
 		ob_start();
 		include( SequraHelper::template_loader( 'partpayment_teaser') );
 		return ob_get_clean();
@@ -242,6 +266,7 @@ function woocommerce_sequra_init() {
 	function woocommerce_sequra_after_add_to_cart_button() {
 		global $product;
 		$sequra = new SequraInvoicePaymentGateway();
-		include( SequraHelper::template_loader( 'invoice_teaser') );
+        $theme = $sequra->settings['widget_theme'];
+        include( SequraHelper::template_loader( 'invoice_teaser') );
 	}
 }
