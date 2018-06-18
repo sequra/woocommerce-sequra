@@ -1,16 +1,11 @@
 <?php
 if ( $sequra->is_available() && $product->get_price() < $sequra->max_amount ) { ?>
-      <div id="sequra_invoice_teaser"></div>
+    <div id="sequra_invoice_teaser_container" style="clear:both"><div id="sequra_invoice_teaser"></div></div>
       <script type="text/javascript">
-  jQuery(function(){
-    invoiceTeaser = new SequraInvoiceTeaser(
-      {
-        container:'#sequra_invoice_teaser',
-        fee: <?php echo $sequra->fee?$sequra->fee:0;?>
-      }
-    );
-    invoiceTeaser.draw();
-  });
+          Sequra.onLoad(function(){
+              SequraHelper.drawPromotionWidget('<?php echo $price_container; ?>','#sequra_invoice_teaser','i1','<?php echo $theme;?>',0);
+              Sequra.refreshComponents();
+          });
       </script>
 <?php
 }

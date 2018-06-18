@@ -1,22 +1,7 @@
-<div id="sequra_payment_info_container" class="sequra_popup_embedded">
-    <div class="sequra_white_content closeable" title="Recibe primero, paga después">
-        <div class="sequra_content_popup">
-            <h4>¿Cómo funciona?</h4>
-            <div>
-                <ol>
-                    <li><span>Elige esta opción al realizar tu pedido, no necesitas tarjeta.</span></li>
-                    <li><span>Recibe tu pedido y comprueba tu compra.</span></li>
-                    <li><span>Tienes hasta 7 días después del envío para pagar.</span></li>
-                </ol>
-            </div>
-            <div class="sequra_costs">
-            <?php if ($this->fee>0) {?>
-                <p>El único coste es de <?php echo $this->fee; ?>€.</p>
-            <?php } else { ?>
-                    <p>¡Sin costes adicionales!</p>            
-            <?php } ?>
-            </div>
-        </div>
-    </div>
-</div>
-<a href="https://www.sequra.es/preguntas-frecuentes.html" target="_blank">Tengo más preguntas</a>
+<div class="sequra-promotion-widget"
+     data-amount="<?php echo $this->get_order_total()*100;?>"
+     data-product="i1"
+     data-theme="<?php echo $this->settings['widget_theme'];?>"></div>
+<script>
+    Sequra.onLoad( function () {Sequra.refreshComponents();});
+</script>

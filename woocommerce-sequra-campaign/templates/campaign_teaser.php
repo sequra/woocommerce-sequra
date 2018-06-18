@@ -1,16 +1,17 @@
 <?php
 if ( $sequracampaign->is_available() ) { ?>
-    <div id="sequra_campaign_teaser"></div>
+    <div id="sequra_campaign_teaser_container" style="clear:both"><div id="sequra_campaign_teaser"></div></div>
     <script type="text/javascript">
-        jQuery(function () {
-            campaignTeaser = new SequraCampaignTeaser(
-                {
-                    container: '#sequra_campaign_teaser',
-                    product: '<?php echo $sequracampaign->product;?>',
-                    campaign: '<?php echo $sequracampaign->campaign;?>'
-                }
+        Sequra.onLoad(function(){
+            SequraHelper.drawPromotionWidget(
+                '<?php echo $price_container; ?>',
+                '#sequra_campaign_teaser',
+                '<?php echo $sequracampaign->product;?>',
+                '<?php echo $sequracampaign->settings['widget_theme'];?>',
+                0,
+                '<?php echo $sequracampaign->campaign;?>'
             );
-            campaignTeaser.draw();
+            Sequra.refreshComponents();
         });
     </script>
 	<?php

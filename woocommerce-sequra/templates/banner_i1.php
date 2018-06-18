@@ -1,47 +1,40 @@
 <?php if(isset($atts['color'])) {?>
     <style>
-      .sequra_banner .block1{
-        background: <?php echo $atts['color'];?> !important;
-      }
-      .sequra_banner .btn-sequra,
-      .sqnoc {
-        color: <?php echo $atts['color'];?>  !important;
-      }
-      .sequra_banner .btn-sequra{
-        border: 1px solid <?php echo $atts['color'];?>  !important;
-      }
+        #sequra-banner-invoice .sqblock .sqnoc,
+        #sequra-banner-invoice .sequra-educational-popup {
+        color: <?php echo $atts['color'];?>;
+        }
+        #sequra-banner-invoice .sequra-educational-popup {
+        border-color: <?php echo $atts['color'];?>;
+        }
+        #sequra-banner-invoice #block1 {
+        background: <?php echo $atts['color'];?>;
+        }
     </style>
 <?php } ?>
-<div id="sequra_i1_banner" class="sequra_banner">
-	<div id="sequra_i1_block1" class="block1">
-		RECIBE PRIMERO PAGA DESPU&Eacute;S
-	</div>
-	<div id="sequra_i1_block2" class="sequra_block block2">
-		<span class="sqnoc icon-cart-screen"></span>
-		<div class="sqinner">
-			<span class="sqheader">1. Pide sin tarjeta</span>
-			<span class="sqcontent">Haz tu pedido on-line ahora.</span>
-		</div>
-	</div>
-	<div id="sequra_i1_block3" class="sequra_block block3">
-		<span class="sqnoc icon-bag"></span>
-		<div class="sqinner">
-			<span class="sqheader">2. Recibe tu pedido</span>
-			<span class="sqcontent">Recibe tu pedido y compru&eacute;balo</span>
-		</div>
-	</div>
-	<div id="sequra_i1_block4" class="sequra_block block4">
-		<span class="sqnoc icon-euros"></span>
-		<div class="sqinner">
-			<span class="sqheader">3. Paga después</span>
-			<span class="sqcontent">
-                    <a class="btn btn-sequra" href="#" rel="sequra_invoice_popup_home">Más información</a>
-                </span>
-		</div>
-	</div>
+
+<div id="sequra-banner-partpayment" class="sequra-banner">
+    <div id="block1" class="sqblock">
+        <span class="sqheader">FRACCIONA TU COMPRA</span>
+    </div>
+    <div id="block2" class="sqblock">
+        <span class="sqnoc icon-puzzle">&nbsp;</span>
+        <div class="sqinner">
+            <span class="sqheader">Fracciona tu compra</span>
+            <span class="sqcontent">Fracciona tu compra en nuestra tienda.</span>
+        </div>
+    </div>
+    <div id="block3" class="sqblock">
+        <span class="sqnoc icon-check-paiper">&nbsp;</span>
+        <div class="sqinner">
+            <span class="sqheader">Inmediato</span>
+            <span class="sqcontent">Sin papeleo, directamente al finalizar el pedido.</span>
+        </div>
+    </div>
+    <div id="block4" class="sqblock">
+        <div class="sqinner">
+            <span class="sqheader">Un coste fijo por cuota</span>
+            <span class="sqcontent sequra-educational-popup" data-product="i1">Más información</span>
+        </div>
+    </div>
 </div>
-<script type="text/javascript">
-  (jQuery(function (){
-    SequraInvoiceMoreInfo.draw('home',<?php echo $pm->fee;?>);
-  }));
-</script>
