@@ -571,7 +571,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $prev_order          = new WC_Order($id);
             $post                = get_post($id);
             $order['amount']     = self::integerPrice($prev_order->get_total());
-            $order['currency']   = $prev_order->get_order_currency();
+            if($order['amount']<=0){
+                continue;
+            }
+            $order['currency']   = WC_Order::get_currency();
             $date                = strtotime($post->post_date);
             $order['created_at'] = date('c', $date);
             $orders[]            = $order;
