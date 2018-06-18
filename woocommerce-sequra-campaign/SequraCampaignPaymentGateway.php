@@ -90,13 +90,13 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
                 'type'        => 'text',
                 'description' => __('This controls the title which the user sees during checkout.',
                     'wc_sequracampaign'),
-                'default'     => __('Quiero pagarlo en febrero.', 'wc_sequracampaign'),
+                'default'     => __('Quiero pagarlo en octubre.', 'wc_sequracampaign'),
             ),
             'campaign'     => array(
                 'title'       => __('Campaign code', 'wc_sequracampaign'),
                 'type'        => 'text',
                 'description' => __('Campaign code provided by SeQura.', 'wc_sequracampaign'),
-                'default'     => __('xmas2017', 'wc_sequracampaign'),
+                'default'     => __('verano2018', 'wc_sequracampaign'),
             ),
             'widget_theme' => array(
                 'title'       => __('Widget theme', 'wc_sequra'),
