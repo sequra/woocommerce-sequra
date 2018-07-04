@@ -3,7 +3,7 @@
   Plugin Name: Campañas SeQura
   Plugin URI: http://sequra.es/
   Description: Da la opción pago para campañas especiales de SeQura.
-  Version: 1.0.17
+  Version: 1.18.2
   Author: SeQura Engineering
   Author URI: http://SeQura.es/
  */
@@ -46,7 +46,7 @@ function sequracampaign_upgrade_if_needed() {
 	}
 }
 
-add_action( 'woocommerce_loaded', 'woocommerce_sequracampaign_init', 110 );
+add_action( 'woocommerce_sequra_loaded', 'woocommerce_sequracampaign_init', 110 );
 
 function woocommerce_sequracampaign_init() {
 	//@todo langages
