@@ -56,7 +56,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
         $json       = get_option('sequrapartpayment_conditions');
         $conditions = json_decode($json, true);
         if ( ! $conditions) {
-            $this->enabled = false;
+            $this->part_max_amount = 3000;
+            $this->min_amount      = 50;
         } else {
             $this->part_max_amount = $conditions[$this->product]['max_amount'] / 100;
             $this->min_amount      = $conditions[$this->product]['min_amount'] / 100;
@@ -229,6 +230,16 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
         $products[] = 'pp3';
 
         return $products;
+    }
+
+    /**
+     * Save options in admin.
+     */
+    public function process_admin_options() {
+        parent::process_admin_options();
+        //Force update
+        update_option( 'sequrapartpayment_next_update', 0 );
+        sequrapartpayment_upgrade_if_needed();
     }
 }
 
