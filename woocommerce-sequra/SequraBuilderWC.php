@@ -355,6 +355,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     public function getShippedOrderList()
     {
+        global $woocommerce;
+        if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
+            return $this->getShippedOrderList_legacy();
+        }
         $args               = array(
             'limit'      => -1,
             'meta_query' => array(
@@ -376,6 +380,36 @@ class SequraBuilderWC extends SequraBuilderAbstract
         $posts              = wc_get_orders($args);
         $this->_shipped_ids = wp_list_pluck($posts, 'ID');
 
+        return $posts;
+    }
+
+    public function getShippedOrderList_legacy() {
+        $args               = array(
+            'numberposts' => - 1,
+            'meta_query'  => array(
+                'relation' => 'AND',
+                array(
+                    'key'     => '_sent_to_sequra',
+                    'compare' => 'NOT EXISTS'
+                ),
+                array(
+                    'key'     => '_payment_method',
+                    'compare' => 'LIKE',
+                    'value'   => 'sequra',
+                )
+            ),
+            'post_type'   => 'shop_order',
+            'post_status' => 'publish',
+            'tax_query'   => array(
+                array(
+                    'taxonomy' => 'shop_order_status',
+                    'field'    => 'slug',
+                    'terms'    => 'completed',
+                )
+            )
+        );
+        $posts              = get_posts( $args );
+        $this->_shipped_ids = wp_list_pluck( $posts, 'ID' );
         return $posts;
     }
 
@@ -562,7 +596,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
             'limit'    => -1,
             'type'     => 'shop_order',
             'customer' => $customer_id,
-            'status'   => array('wc-processing', 'wc-completed'),
+            'post_status'   => array('wc-processing', 'wc-completed'),
         );
         $posts     = wc_get_orders($args);
         $orders    = array();
@@ -605,6 +639,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     public function getOrderStats()
     {
+        if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
+            return $this->getOrderStats_legacy();
+        }
         $stats = array();
         if (false && get_option('sequra_allowstats')) {
             return $stats;
@@ -644,6 +681,52 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $stats[] = $stat;
         }
 
+        return $stats;
+    }
+
+    public function getOrderStats_legacy() {
+        $stats = array();
+        if ( false && get_option( 'sequra_allowstats' ) ) {
+            return $stats;
+        }
+        $args  = array(
+            'numberposts' => - 1,
+            'post_type'   => 'shop_order',
+            'date_query'  => array(
+                array(
+                    'column' => 'post_date_gmt',
+                    'after'  => '1 week ago',
+                )
+            )
+        );
+        $posts = get_posts( $args );
+        foreach ( $posts as $post ) {
+            $this->_current_order = new WC_Order( $post->ID );
+            var_dump();
+            $date                 = strtotime( $post->post_date );
+            $stat                 = array(
+                'completed_at'       => self::dateOrBlank( date( 'c', $date ) ),
+                'merchant_reference' => $this->orderMerchantReference(),
+                'currency'           => $this->_current_order->get_order_currency()
+            );
+            if ( true || get_option( 'sequra_allowstats_amount' ) ) // TODO: Stats config
+            {
+                $stat['amount'] = self::integerPrice( $this->_current_order->get_total() );
+            }
+            if ( true || get_option( 'sequra_allowstats_country' ) ) // TODO: Stats config
+            {
+                $stat['country'] = self::notNull( $this->_current_order->billing_country, 'ES' );
+            }
+            if ( true || get_option( 'sequra_allowstats_payment' ) ) { // TODO: Stats config
+                $stat['payment_method_raw'] = $this->_current_order->payment_method;
+                $stat['payment_method']     = self::mapPaymentMethod( $stat['payment_method_raw'] );
+            }
+            if ( true || get_option( 'sequra_allowstats_status' ) ) { // TODO: Stats config
+                $stat['raw_status'] = $this->_current_order->status;
+                $stat['status']     = self::mapStatus( $stat['raw_status'] );
+            }
+            $stats[] = $stat;
+        }
         return $stats;
     }
 
