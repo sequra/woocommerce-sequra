@@ -60,7 +60,7 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway {
 		) );
 		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this->helper, 'check_response' ) );
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_order_totals' ), 999 );
-		do_action( 'woocommerce_sequra_loaded', $this );
+		do_action( 'woocommerce_sequra_i_loaded', $this );
 	}
 
 	/**

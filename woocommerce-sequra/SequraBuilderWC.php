@@ -189,8 +189,13 @@ class SequraBuilderWC extends SequraBuilderAbstract
                 $item["type"] = 'product';
             }
             $item["reference"] = $_product->id;
-            $name              = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item,
-                $cart_item_key);
+            
+            //@Todo: research conflict with this and WPML
+            /*$name              = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item,
+                $cart_item_key);*/
+            $name              = $_product->get_title():
+            /*****/
+
             $item["name"]      = strip_tags($name);
             if (isset($cart_item['quantity'])) {
                 $item["quantity"] = (int)$cart_item['quantity'];

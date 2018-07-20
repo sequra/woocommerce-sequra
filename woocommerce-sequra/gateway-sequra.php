@@ -296,5 +296,5 @@ function woocommerce_sequra_init()
         include(SequraHelper::template_loader('invoice_teaser'));
     }
 
-    do_action('woocommerce_sequra_loaded');
+    do_action('woocommerce_sequra_plugin_loaded');
 }

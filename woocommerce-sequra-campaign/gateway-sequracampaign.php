@@ -46,7 +46,7 @@ function sequracampaign_upgrade_if_needed() {
 	}
 }
 
-add_action( 'woocommerce_sequra_loaded', 'woocommerce_sequracampaign_init', 110 );
+add_action( 'woocommerce_sequra_plugin_loaded', 'woocommerce_sequracampaign_init', 110 );
 
 function woocommerce_sequracampaign_init() {
 	//@todo langages
