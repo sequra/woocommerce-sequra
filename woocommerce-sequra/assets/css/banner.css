@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'sequra';
     src: url(https://live.sequracdn.com/assets/fonts/sequra.eot);
-    src: url(https://live.sequracdn.com/assets/fonts/fonts/sequra.eot#iefix) format("embedded-opentype"), url(https://live.sequracdn.com/assets/fonts/fonts/sequra.ttf) format("truetype"), url(https://live.sequracdn.com/assets/fonts/fonts/sequra.woff) format("woff"), url(https://live.sequracdn.com/assets/fonts/fonts/sequra.svg#sequra) format("svg");
+    src: url(https://live.sequracdn.com/assets/fonts/sequra.eot#iefix) format("embedded-opentype"), url(https://live.sequracdn.com/assets/fonts/sequra.ttf) format("truetype"), url(https://live.sequracdn.com/assets/fonts/sequra.woff) format("woff"), url(https://live.sequracdn.com/assets/fonts/sequra.svg#sequra) format("svg");
     font-weight: normal;
     font-style: normal;
 }
