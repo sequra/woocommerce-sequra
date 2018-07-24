@@ -8,7 +8,7 @@
   Author URI: http://SeQura.es/
   WC tested up to: 3.4
  */
-define('SEQURA_VERSION', '4.6.3');
+define('SEQURA_VERSION', '4.6.4');
 
 register_activation_hook(__FILE__, 'sequra_activation');
 /**

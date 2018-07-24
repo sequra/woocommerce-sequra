@@ -193,7 +193,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
             //@Todo: research conflict with this and WPML
             /*$name              = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item,
                 $cart_item_key);*/
-            $name              = $_product->get_title():
+            $name              = $_product->get_title();
             /*****/
 
             $item["name"]      = strip_tags($name);
@@ -613,7 +613,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
             if($order['amount']<=0){
                 continue;
             }
-            $order['currency']   = WC_Order::get_currency();
+            $order['currency']   = $prev_order->get_currency();
             $date                = strtotime($post->post_date);
             $order['created_at'] = date('c', $date);
             $orders[]            = $order;
@@ -707,7 +707,6 @@ class SequraBuilderWC extends SequraBuilderAbstract
         $posts = get_posts( $args );
         foreach ( $posts as $post ) {
             $this->_current_order = new WC_Order( $post->ID );
-            var_dump();
             $date                 = strtotime( $post->post_date );
             $stat                 = array(
                 'completed_at'       => self::dateOrBlank( date( 'c', $date ) ),
