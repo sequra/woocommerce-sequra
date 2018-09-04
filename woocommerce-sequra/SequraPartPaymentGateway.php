@@ -5,7 +5,6 @@
  * */
 class SequraPartPaymentGateway extends WC_Payment_Gateway
 {
-
     public function __construct()
     {
         do_action('woocommerce_sequra_pp_before_load', $this);
@@ -23,7 +22,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
 
         // Load the settings.
         $this->init_settings();
-        $this->coresettings = get_option('woocommerce_sequra_settings', array());
+        $this->coresettings = get_option('woocommerce_sequra_settings', SequraHelper::empty_core_settings);
         // Get setting values
         $this->enabled              = $this->settings['enabled'];
         $this->title                = $this->settings['title'];
@@ -42,7 +41,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
         $this->helper               = new SequraHelper($this);
 
         // Logs
-        if ($this->coresettings['debug'] == 'yes') {
+        if (isset($this->coresettings['debug']) && $this->coresettings['debug'] == 'yes') {
             $this->log = new WC_Logger();
         }
 

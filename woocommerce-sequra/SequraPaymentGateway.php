@@ -92,7 +92,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'default'     => 'no'
 			)
 		);
-		if ( $this->settings['enable_for_virtual'] == 'yes' ) {
+		if ( isset($this->settings['enable_for_virtual']) && $this->settings['enable_for_virtual'] == 'yes' ) {
 			$this->form_fields['default_service_end_date'] = array(
 				'title'             => __( 'Default service end date', 'wc_sequra' ),
 				'desc_tip'          => true,

@@ -116,7 +116,8 @@ function sequrapartpayment_upgrade_if_needed()
 {
     if (time() > get_option('sequrapartpayment_next_update', 0) ||
         isset($_GET['sequra_partpayment_reset_conditions'])) {
-        $coresettings = get_option('woocommerce_sequra_settings', array());
+        $coresettings = get_option('woocommerce_sequra_settings', null);
+        if(is_null($coresettings)) return;
         $cost_url     = 'https://' .
                         ($coresettings['env'] ? 'sandbox' : 'live') .
                         '.sequracdn.com/scripts/' .
@@ -136,19 +137,19 @@ function woocommerce_sequra_init()
     load_plugin_textdomain('wc_sequra', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
     if ( ! class_exists('SequraHelper')) {
-        require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraHelper.php');
+        require_once(dirname(__FILE__) . '/SequraHelper.php');
     }
 
     if ( ! class_exists('SequraPaymentGateway')) {
-        require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraPaymentGateway.php');
+        require_once(dirname(__FILE__)  . '/SequraPaymentGateway.php');
     }
 
     if ( ! class_exists('SequraInvoicePaymentGateway')) {
-        require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraInvoicePaymentGateway.php');
+        require_once(dirname(__FILE__)  . '/SequraInvoicePaymentGateway.php');
     }
 
     if ( ! class_exists('SequraPartPaymentGateway')) {
-        require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraPartPaymentGateway.php');
+        require_once(dirname(__FILE__) . '/SequraPartPaymentGateway.php');
     }
 
 
@@ -199,7 +200,7 @@ function woocommerce_sequra_init()
 
     function sequra_get_script_basesurl()
     {
-        $coresettings = get_option('woocommerce_sequra_settings', array());
+        $coresettings = get_option('woocommerce_sequra_settings', SequraHelper::empty_core_settings);
 
         return 'https://' . ($coresettings['env'] == 1 ? 'sandbox' : 'live') . '.sequracdn.com/assets/';
     }

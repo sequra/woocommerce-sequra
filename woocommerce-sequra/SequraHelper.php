@@ -10,10 +10,18 @@ class SequraHelper {
 	/* Json builder */
 	private $_builder;
 
+	const empty_core_settings = array(
+	    'env' => 1,
+        'merchantref' => '',
+        'assets_secret' => '',
+        'enable_for_virtual' => 'no',
+        'debug' => 'no'
+    );
+
 	public function __construct( $pm ) {
 		$this->_pm = $pm;
 		$this->identity_form = null;
-		$this->dir = WP_PLUGIN_DIR . "/" . plugin_basename( dirname( __FILE__ ) ) . '/';
+		$this->dir = dirname( __FILE__ ) . '/';
 		if ( ! class_exists( 'SequraTempOrder' ) ) {
 			require_once( $this->dir . 'SequraTempOrder.php' );
 		}

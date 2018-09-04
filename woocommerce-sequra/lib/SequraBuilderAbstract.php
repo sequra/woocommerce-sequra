@@ -142,7 +142,6 @@ abstract class SequraBuilderAbstract
 	{
 		$total_without_tax = $total_with_tax = 0;
 		foreach ($cart['items'] as $item) {
-			$total_without_tax += $item['total_without_tax'];
 			$total_with_tax += $item['total_with_tax'];
 		}
 		return array('without_tax' => $total_without_tax, 'with_tax' => $total_with_tax);

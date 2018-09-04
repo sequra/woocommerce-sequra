@@ -65,7 +65,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
     public function getOrderRef($num)
     {
         if (1 == $num) {
-            return $this->_current_order->id;
+            return $this->_current_order->get_id();
         }
     }
 
@@ -74,11 +74,11 @@ class SequraBuilderWC extends SequraBuilderAbstract
         $ret = parent::merchant();
         if ( ! is_null($this->_pm)) {
             $ret['notify_url']              = add_query_arg(array(
-                'order'  => "" . $this->_current_order->id,
+                'order'  => "" . $this->_current_order->get_id(),
                 'wc-api' => 'woocommerce_' . $this->_pm->id
             ), home_url('/'));
             $ret['notification_parameters'] = array(
-                'signature' => self::sign($this->_current_order->id),
+                'signature' => self::sign($this->_current_order->get_id()),
                 'result'    => "0"
             );
             $ret['return_url']              = $ret['notify_url'];
@@ -162,6 +162,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     public function items()
     {
+        global $woocommerce;
         $items         = array();
         $cart_contents = $this->getCartContents();
         $coresettings  = get_option('woocommerce_sequra_settings', array());
@@ -173,9 +174,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $item = array();
             if (
                 $coresettings['enable_for_virtual'] == 'yes' &&
-                get_post_meta($_product->id, 'is_sequra_service', true) != 'no'
+                get_post_meta($_product->get_id(), 'is_sequra_service', true) != 'no'
             ) {
-                $service_end_date = get_post_meta($_product->id, 'sequra_service_end_date', true);
+                $service_end_date = get_post_meta($_product->get_id(), 'sequra_service_end_date', true);
                 if ( ! SequraHelper::validateServiceEndDate($service_end_date)) {
                     $service_end_date = $coresettings['default_service_end_date'];
                 }
@@ -188,8 +189,8 @@ class SequraBuilderWC extends SequraBuilderAbstract
             } else {
                 $item["type"] = 'product';
             }
-            $item["reference"] = $_product->id;
-            
+            $item["reference"] = $_product->get_id();
+
             //@Todo: research conflict with this and WPML
             /*$name              = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item,
                 $cart_item_key);*/
@@ -208,10 +209,14 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $item["downloadable"]   = $_product->is_downloadable();
 
             // OPTIONAL
-            $item["description"] = strip_tags(self::notNull(get_post($_product->id)->post_content));
-            $item["product_id"]  = self::notNull($_product->id);
-            $item["url"]         = self::notNull(get_permalink($_product->id));
-            $item["category"]    = self::notNull(strip_tags($_product->get_categories()));
+            $item["description"] = strip_tags(self::notNull(get_post($_product->get_id())->post_content));
+            $item["product_id"]  = self::notNull($_product->get_id());
+            $item["url"]         = self::notNull(get_permalink($_product->get_id()));
+            if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
+                $item["category"]    = self::notNull(strip_tags($_product->get_categories()));
+            }else{
+                $item["category"]    = self::notNull(wc_get_product_category_list($_product->get_id()));
+            }
             /*@TODO: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
             $items[] = $item;
         }
@@ -257,7 +262,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     protected function getCartcontents()
     {
-        if ($this->_current_order->status == 'completed') {
+        if ($this->_current_order->get_status() == 'completed') {
             return $this->_current_order->get_items(apply_filters('woocommerce_admin_order_item_types',
                 array('line_item')));
         }
@@ -488,13 +493,20 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     public function getField($field_name)
     {
+        global $woocommerce;
         if ($this->_current_order instanceof SequraTempOrder) {
             $func = 'get_' . $field_name;
 
             return $this->_current_order->$func();
         }
+        if(version_compare($woocommerce->version, '3.0.0', "<")){
+            return self::notNull($this->_current_order->$field_name);
+        }
 
-        return self::notNull($this->_current_order->$field_name);
+        $func = 'get_' . $field_name;
+        return method_exists ( get_class($this->_current_order) , $func )?
+            $this->_current_order->$func():
+            null;
     }
 
     public function invoiceAddress()
@@ -644,6 +656,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     public function getOrderStats()
     {
+        global $woocommerce;
         if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
             return $this->getOrderStats_legacy();
         }
@@ -679,7 +692,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
                 $stat['payment_method']     = self::mapPaymentMethod($stat['payment_method_raw']);
             }
             if (true || get_option('sequra_allowstats_status')) { // TODO: Stats config
-                $stat['raw_status'] = $this->_current_order->status;
+                $stat['raw_status'] = $this->_current_order->get_status();
                 $stat['status']     = self::mapStatus($stat['raw_status']);
             }
 
@@ -726,7 +739,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
                 $stat['payment_method']     = self::mapPaymentMethod( $stat['payment_method_raw'] );
             }
             if ( true || get_option( 'sequra_allowstats_status' ) ) { // TODO: Stats config
-                $stat['raw_status'] = $this->_current_order->status;
+                $stat['raw_status'] = $this->_current_order->get_status();
                 $stat['status']     = self::mapStatus( $stat['raw_status'] );
             }
             $stats[] = $stat;
