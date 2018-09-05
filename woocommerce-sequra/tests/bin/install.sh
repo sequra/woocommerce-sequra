@@ -2,7 +2,7 @@
 # See https://raw.githubusercontent.com/wp-cli/scaffold-command/master/templates/install-wp-tests.sh
 
 if [ $# -lt 3 ]; then
-	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]"
+	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation] [wp-version] [wp-version]"
 	exit 1
 fi
 
@@ -14,8 +14,8 @@ WP_VERSION=${5-latest}
 SKIP_DB_CREATE=${6-false}
 WC_VERSION=${7-trunk}
 
-WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wordpress-tests-lib}
-WP_CORE_DIR=${WP_CORE_DIR-/tmp/wordpress/}
+WP_TESTS_DIR=${WP_TESTS_DIR-${TMPDIR}wordpress-tests-lib}
+WP_CORE_DIR=${WP_CORE_DIR-${TMPDIR}tmp/wordpress/}
 WC_DIR=${WP_CORE_DIR}wp-content/plugins/woocommerce
 
 download() {
@@ -102,15 +102,12 @@ install_test_suite() {
 		sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
 	fi
+}
 
-	# get woocommerce
-	if [ -d $WC_DIR ]; then
-		rm -rf $WC_DIR/*
-	else
-		mkdir -p $WC_DIR
-	fi
+install_wc() {
+	rm -rf $WC_DIR/*
+	mkdir -p $WC_DIR
 	svn co --quiet https://plugins.svn.wordpress.org/woocommerce/$WC_TAG $WC_DIR
-
 }
 
 install_db() {
@@ -205,6 +202,7 @@ PHP
 }
 
 install_wp
+install_wc
 install_test_suite
 install_db
 install_e2e_site
