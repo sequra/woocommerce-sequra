@@ -194,10 +194,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
             //@Todo: research conflict with this and WPML
             /*$name              = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item,
                 $cart_item_key);*/
-            $name              = $_product->get_title();
+            $name = $_product->get_title();
             /*****/
 
-            $item["name"]      = strip_tags($name);
+            $item["name"] = strip_tags($name);
             if (isset($cart_item['quantity'])) {
                 $item["quantity"] = (int)$cart_item['quantity'];
             }
@@ -212,10 +212,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $item["description"] = strip_tags(self::notNull(get_post($_product->get_id())->post_content));
             $item["product_id"]  = self::notNull($_product->get_id());
             $item["url"]         = self::notNull(get_permalink($_product->get_id()));
-            if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
-                $item["category"]    = self::notNull(strip_tags($_product->get_categories()));
-            }else{
-                $item["category"]    = self::notNull(wc_get_product_category_list($_product->get_id()));
+            if (version_compare($woocommerce->version, '3.0.0', "<")) {
+                $item["category"] = self::notNull(strip_tags($_product->get_categories()));
+            } else {
+                $item["category"] = self::notNull(wc_get_product_category_list($_product->get_id()));
             }
             /*@TODO: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
             $items[] = $item;
@@ -242,19 +242,17 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $fees = $this->_current_order->get_fees();
         }
         foreach ($fees as $fee_key => $fee) {
-            $item["type"] = 'invoice_fee';
             if ($this->_current_order instanceof SequraTempOrder) {
-                $item["total_with_tax"] = self::integerPrice($fee->amount);
-                $item["tax_rate"]       = 0;
+                $name   = $fee->name;
+                $amount = $fee->amount;
                 if ($fee->tax) {
-                    $item["total_with_tax"] += self::integerPrice($fee->tax);
+                    $amount += self::integerPrice($fee->tax);
                 }
-                $item["total_without_tax"] = $item["total_with_tax"];
             } else {
-                $item["total_without_tax"] = $item["total_with_tax"] = self::integerPrice($fee['line_total']);
-                $item["tax_rate"]          = 0;
+                $name   = $fee['name'];
+                $amount = $fee['line_total'];
             }
-            $items[] = $item;
+            $items[] = $this->feeOrHandling($name, $amount);
         }
 
         return $items;
@@ -296,6 +294,22 @@ class SequraBuilderWC extends SequraBuilderAbstract
         $item['name']              = 'Descuento';
         $item['total_without_tax'] = self::integerPrice($discount);
         $item['total_with_tax']    = self::integerPrice($discount);
+
+        return $item;
+    }
+
+    protected function feeOrHandling($name, $amount)
+    {
+        $item = array();
+        if ($name == 'Recargo "Recibe primero, paga después"') {
+            $item["type"] = 'invoice_fee';
+        } else {
+            $item["type"]      = 'handling';
+            $item["reference"] = $name;
+            $item["name"]      = $name;
+        }
+        $item["tax_rate"]          = 0;
+        $item["total_without_tax"] = $item["total_with_tax"] = self::integerPrice($amount);
 
         return $item;
     }
@@ -366,7 +380,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
     public function getShippedOrderList()
     {
         global $woocommerce;
-        if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
+        if (version_compare($woocommerce->version, '3.0.0', "<")) {
             return $this->getShippedOrderList_legacy();
         }
         $args               = array(
@@ -393,9 +407,10 @@ class SequraBuilderWC extends SequraBuilderAbstract
         return $posts;
     }
 
-    public function getShippedOrderList_legacy() {
+    public function getShippedOrderList_legacy()
+    {
         $args               = array(
-            'numberposts' => - 1,
+            'numberposts' => -1,
             'meta_query'  => array(
                 'relation' => 'AND',
                 array(
@@ -418,8 +433,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
                 )
             )
         );
-        $posts              = get_posts( $args );
-        $this->_shipped_ids = wp_list_pluck( $posts, 'ID' );
+        $posts              = get_posts($args);
+        $this->_shipped_ids = wp_list_pluck($posts, 'ID');
+
         return $posts;
     }
 
@@ -499,13 +515,14 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
             return $this->_current_order->$func();
         }
-        if(version_compare($woocommerce->version, '3.0.0', "<")){
+        if (version_compare($woocommerce->version, '3.0.0', "<")) {
             return self::notNull($this->_current_order->$field_name);
         }
 
         $func = 'get_' . $field_name;
-        return method_exists ( get_class($this->_current_order) , $func )?
-            $this->_current_order->$func():
+
+        return method_exists(get_class($this->_current_order), $func) ?
+            $this->_current_order->$func() :
             null;
     }
 
@@ -610,19 +627,19 @@ class SequraBuilderWC extends SequraBuilderAbstract
     public function getPreviousOrders($customer_id)
     {
         $args      = array(
-            'limit'    => -1,
-            'type'     => 'shop_order',
-            'customer' => $customer_id,
-            'post_status'   => array('wc-processing', 'wc-completed'),
+            'limit'       => -1,
+            'type'        => 'shop_order',
+            'customer'    => $customer_id,
+            'post_status' => array('wc-processing', 'wc-completed'),
         );
         $posts     = wc_get_orders($args);
         $orders    = array();
         $order_ids = wp_list_pluck($posts, 'ID');
         foreach ($order_ids as $id) {
-            $prev_order          = new WC_Order($id);
-            $post                = get_post($id);
-            $order['amount']     = self::integerPrice($prev_order->get_total());
-            if($order['amount']<=0){
+            $prev_order      = new WC_Order($id);
+            $post            = get_post($id);
+            $order['amount'] = self::integerPrice($prev_order->get_total());
+            if ($order['amount'] <= 0) {
                 continue;
             }
             $order['currency']   = $prev_order->get_currency();
@@ -657,7 +674,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
     public function getOrderStats()
     {
         global $woocommerce;
-        if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
+        if (version_compare($woocommerce->version, '3.0.0', "<")) {
             return $this->getOrderStats_legacy();
         }
         $stats = array();
@@ -702,13 +719,14 @@ class SequraBuilderWC extends SequraBuilderAbstract
         return $stats;
     }
 
-    public function getOrderStats_legacy() {
+    public function getOrderStats_legacy()
+    {
         $stats = array();
-        if ( false && get_option( 'sequra_allowstats' ) ) {
+        if (false && get_option('sequra_allowstats')) {
             return $stats;
         }
         $args  = array(
-            'numberposts' => - 1,
+            'numberposts' => -1,
             'post_type'   => 'shop_order',
             'date_query'  => array(
                 array(
@@ -717,33 +735,34 @@ class SequraBuilderWC extends SequraBuilderAbstract
                 )
             )
         );
-        $posts = get_posts( $args );
-        foreach ( $posts as $post ) {
-            $this->_current_order = new WC_Order( $post->ID );
-            $date                 = strtotime( $post->post_date );
+        $posts = get_posts($args);
+        foreach ($posts as $post) {
+            $this->_current_order = new WC_Order($post->ID);
+            $date                 = strtotime($post->post_date);
             $stat                 = array(
-                'completed_at'       => self::dateOrBlank( date( 'c', $date ) ),
+                'completed_at'       => self::dateOrBlank(date('c', $date)),
                 'merchant_reference' => $this->orderMerchantReference(),
                 'currency'           => $this->_current_order->get_order_currency()
             );
-            if ( true || get_option( 'sequra_allowstats_amount' ) ) // TODO: Stats config
+            if (true || get_option('sequra_allowstats_amount')) // TODO: Stats config
             {
-                $stat['amount'] = self::integerPrice( $this->_current_order->get_total() );
+                $stat['amount'] = self::integerPrice($this->_current_order->get_total());
             }
-            if ( true || get_option( 'sequra_allowstats_country' ) ) // TODO: Stats config
+            if (true || get_option('sequra_allowstats_country')) // TODO: Stats config
             {
-                $stat['country'] = self::notNull( $this->_current_order->billing_country, 'ES' );
+                $stat['country'] = self::notNull($this->_current_order->billing_country, 'ES');
             }
-            if ( true || get_option( 'sequra_allowstats_payment' ) ) { // TODO: Stats config
+            if (true || get_option('sequra_allowstats_payment')) { // TODO: Stats config
                 $stat['payment_method_raw'] = $this->_current_order->payment_method;
-                $stat['payment_method']     = self::mapPaymentMethod( $stat['payment_method_raw'] );
+                $stat['payment_method']     = self::mapPaymentMethod($stat['payment_method_raw']);
             }
-            if ( true || get_option( 'sequra_allowstats_status' ) ) { // TODO: Stats config
+            if (true || get_option('sequra_allowstats_status')) { // TODO: Stats config
                 $stat['raw_status'] = $this->_current_order->get_status();
-                $stat['status']     = self::mapStatus( $stat['raw_status'] );
+                $stat['status']     = self::mapStatus($stat['raw_status']);
             }
             $stats[] = $stat;
         }
+
         return $stats;
     }
 
