@@ -183,7 +183,6 @@ class SequraClient {
 		curl_setopt($this->ch, CURLOPT_USERAGENT, $this->_user_agent);
 		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($this->ch, CURLOPT_FAILONERROR, false);
-		curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
 		// Some versions of openssl seem to need this
 		// http://www.supermind.org/blog/763/solved-curl-56-received-problem-2-in-the-chunky-parser
 		curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
