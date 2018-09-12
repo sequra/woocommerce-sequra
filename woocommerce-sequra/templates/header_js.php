@@ -25,7 +25,8 @@ var SequraHelper = {
     textToCents: function (text) {
         return SequraHelper.floatToCents(
           parseFloat(
-              text.replace(sequraConfigParams.thousandSeparator,'')
+              text.replace(/^\D*/,'')
+                  .replace(sequraConfigParams.thousandSeparator,'')
                   .replace(sequraConfigParams.decimalSeparator,'.')
           )
         );
