@@ -1,0 +1,23 @@
+{
+    "name": "sequra/woocommerce-sequra-campaign",
+    "description": "Campaigns for Sequra payment gateway for WooCommerce",
+    "type": "wordpress-plugin",
+    "require-dev": {
+        "phpunit/phpunit": "6.*",
+        "behat/behat": "^3.5@dev"
+    },
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "SeQura Engineering",
+            "email": "dev@sequra.es"
+        }
+    ],
+    "minimum-stability": "dev",
+    "scripts": {
+        "dist": "cd ..;zip -r9 dist/woocommerce-sequra-campaign.zip woocommerce-sequra-campaign -x@woocommerce-sequra-campaign/exclude.lst",
+    },
+    "scripts-descriptions": {
+        "dist": "Create plugin sequra-payment.zip to distribute"
+    }
+}

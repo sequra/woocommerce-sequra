@@ -1,2 +1,4 @@
 */vendor
 woocommerce-sequra/tests/env_vars
+dist
+publish.sh
