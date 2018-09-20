@@ -260,7 +260,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         require(SequraHelper::template_loader('payment_identification'));
     }
 
-    public function available_products($products)
+    static public function available_products($products)
     {
         $products[] = 'pp5';
 

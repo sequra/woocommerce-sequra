@@ -224,7 +224,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
         return apply_filters('woocommerce_sequra_pp_process_payment_return', $ret, $this);
     }
 
-    public function available_products($products)
+    static public function available_products($products)
     {
         $products[] = 'pp3';
 

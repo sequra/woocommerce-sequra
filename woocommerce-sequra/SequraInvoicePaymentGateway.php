@@ -267,7 +267,7 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway
         $cart->add_fee(__('Recargo "Recibe primero, paga después"'), $this->fee, false);
     }
 
-    public function available_products($products)
+    static public function available_products($products)
     {
         $products[] = 'i1';
 
