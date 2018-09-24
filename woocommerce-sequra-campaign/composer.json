@@ -15,7 +15,7 @@
     ],
     "minimum-stability": "dev",
     "scripts": {
-        "dist": "cd ..;zip -r9 dist/woocommerce-sequra-campaign.zip woocommerce-sequra-campaign -x@woocommerce-sequra-campaign/exclude.lst",
+        "dist": "cd ..;zip -r9 dist/woocommerce-sequra-campaign.zip woocommerce-sequra-campaign -x@woocommerce-sequra-campaign/exclude.lst"
     },
     "scripts-descriptions": {
         "dist": "Create plugin sequra-payment.zip to distribute"

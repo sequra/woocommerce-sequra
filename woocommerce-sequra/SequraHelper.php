@@ -1,230 +1,259 @@
 <?php
 
-class SequraHelper {
-	const ISO8601_PATTERN = '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
-	
-	/* Payment Method */
-	private $_pm;
-	/* Sequra Client */
-	private $_client;
-	/* Json builder */
-	private $_builder;
+class SequraHelper
+{
+    const ISO8601_PATTERN = '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
 
-	const empty_core_settings = array(
-	    'env' => 1,
-        'merchantref' => '',
-        'assets_secret' => '',
-        'enable_for_virtual' => 'no',
-        'debug' => 'no'
-    );
+    /* Payment Method */
+    public $empty_core_settings;
+    /* Sequra Client */
+    private $_pm;
+    /* Json builder */
+    private $_client;
+    private $_builder;
 
-	public function __construct( $pm ) {
-		$this->_pm = $pm;
-		$this->identity_form = null;
-		$this->dir = dirname( __FILE__ ) . '/';
-		if ( ! class_exists( 'SequraTempOrder' ) ) {
-			require_once( $this->dir . 'SequraTempOrder.php' );
-		}
-	}
+    public function __construct($pm)
+    {
+        $this->_pm           = $pm;
+        $this->identity_form = null;
+        $this->dir           = dirname(__FILE__) . '/';
+        if ( ! class_exists('SequraTempOrder')) {
+            require_once($this->dir . 'SequraTempOrder.php');
+        }
+    }
 
-	function get_identity_form( $options, $order = null ) {
-		if ( is_null( $this->identity_form ) ) {
-			$client  = $this->getClient();
-			$builder = $this->getBuilder( $order );
-			$builder->setPaymentMethod( $this->_pm );
-			try {
-				$order = $builder->build();
-			} catch ( Exception $e ) {
-				if ( $this->_pm->debug == 'yes' ) {
-					$this->_pm->log->add( 'sequra', $e->getMessage() );
-				};
-			}
+    public static function get_empty_core_settings()
+    {
+        return array(
+            'env'                => 1,
+            'merchantref'        => '',
+            'assets_secret'      => '',
+            'user'               => '',
+            'password'           => '',
+            'enable_for_virtual' => 'no',
+            'debug'              => 'no'
+        );
+    }
 
-			$client->startSolicitation( $order );
-			if ( $client->succeeded() ) {
-				$uri = $client->getOrderUri();
-				WC()->session->set( 'sequraURI', $uri );
+    public static function get_cart_info_from_session()
+    {
+        sequra_add_cart_info_to_session();
 
-				$this->identity_form = $client->getIdentificationForm( $uri, $options );
-			}
-		}
-		return $this->identity_form;
-	}
+        return WC()->session->get('sequra_cart_info');
+    }
 
-	function get_credit_agreements( $amount ) {
-		return $this->getClient()->getCreditAgreements( $this->getBuilder()->integerPrice( $amount ), $this->_pm->merchantref );
-	}
+    public static function isFullyVirtual(WC_Cart $cart)
+    {
+        return ! $cart::needs_shipping();
+    }
 
-	function check_response() {
-		$order = new WC_Order( $_REQUEST['order'] );
-		if ( isset( $_REQUEST['signature'] ) ) {
-			return $this->check_ipn( $order );
-		}
-		$url = $this->_pm->get_return_url( $order );
-		if ( ! $order->is_paid() ) {
-			wc_add_notice( __( 'Ha habido un probelma con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.', 'wc_sequra' ), 'error' );
-			//$url = $pm->get_checkout_payment_url();  Notice is not shown in payment page
-			$url = $order->get_cancel_order_url();
-		}
-		wp_redirect( $url, 302 );
-	}
+    public static function validateServiceEndDate($service_end_date)
+    {
+        return preg_match('/' . self::ISO8601_PATTERN . '/', $service_end_date);
+    }
 
-	function check_ipn( $order ) {
-		$url = $order->get_cancel_order_url();
-		do_action( 'woocommerce_' . $this->_pm->id . '_process_payment', $order, $this->_pm );
-		if ( $approval = apply_filters( 'woocommerce_' . $this->_pm->id . '_process_payment', $this->get_approval( $order ), $order, $this->_pm ) ) {
-			// Payment completed
-			$order->add_order_note( __( 'Payment accepted by SeQura', 'wc_sequra' ) );
-			$this->add_payment_info_to_post_meta( $order );
-			$order->payment_complete();
-		}
-		exit();
-	}
+    function get_credit_agreements($amount)
+    {
+        return $this->getClient()->getCreditAgreements($this->getBuilder()->integerPrice($amount),
+            $this->_pm->merchantref);
+    }
 
-	function receipt_page($order){
-		$order = new WC_Order( $order );
-		echo '<p>' . __( 'Thank you for your order, please click the button below to pay with SeQura.',
-				'wc_sequra' ) . '</p>';
-		$options             = array( 'product' => $this->_pm->product );
-		$this->get_identity_form( $options, $order );
-		require( SequraHelper::template_loader( 'payment_identification' ) );
-	}
+    public function getClient()
+    {
+        if ($this->_client instanceof SequraClient) {
+            return $this->_client;
+        }
+        if ( ! class_exists('SequraClient')) {
+            require_once($this->dir . 'lib/SequraClient.php');
+        }
+        SequraClient::$endpoint   = SequraPaymentGateway::$endpoints[$this->_pm->coresettings['env']];
+        SequraClient::$user       = $this->_pm->coresettings['user'];
+        SequraClient::$password   = $this->_pm->coresettings['password'];
+        SequraClient::$user_agent = 'cURL WooCommerce ' . WOOCOMMERCE_VERSION . ' php ' . phpversion();
+        $this->_client            = new SequraClient();
 
-	function get_approval( $order ) {
-		$client  = $this->getClient();
-		$builder = $this->getBuilder( $order );
-		$builder->setPaymentMethod( $this->_pm );
-		if ( $builder->sign( $order->id ) != $_REQUEST['signature'] &&
-		     $this->_pm->ipn
-		) {
-			http_response_code( 498);
-			die('Not valid signature');
-		}
-		$data = $builder->build( 'confirmed' );
-		$uri  = $this->_pm->endpoint . '/' . $_REQUEST['order_ref'];
-		$client->updateOrder( $uri, $data );
-		update_post_meta( (int) $order->id, 'Transaction ID', $uri );
-		update_post_meta( (int) $order->id, 'Transaction Status', $client->getStatus() );
-		/*TODO: Store more information for later use in stats, like browser*/
-		if ( ! $client->succeeded() ) {
-			http_response_code( 410);
-			die('Error: ' . $client->getJson());
-		}
+        return $this->_client;
+    }
 
-		return true;
-	}
+    public function getBuilder($order = null)
+    {
+        if ($this->_builder instanceof SequraBuilderAbstract) {
+            return $this->_builder;
+        }
 
-	function add_payment_info_to_post_meta( $order ) {
-		if ( $this->_pm->ipn ) {
-			update_post_meta( (int) $order->id, 'Transaction ID', $_REQUEST['order_ref'] );
-			update_post_meta( (int) $order->id, '_order_ref', $_REQUEST['order_ref'] );
-			update_post_meta( (int) $order->id, '_product_code', $_REQUEST['product_code'] );
-			update_post_meta( (int) $order->id, '_transaction_id', $_REQUEST['order_ref'] );
-			//@TODO
-			//update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
-		} else {
-			$sequra_cart_info = WC()->session->get( 'sequra_cart_info' );
-			update_post_meta( (int) $order->id, 'Transaction ID', WC()->session->get( 'sequraURI' ) );
-			update_post_meta( (int) $order->id, '_sequra_cart_ref', $sequra_cart_info['ref'] );
-		}
-	}
+        if ( ! class_exists('SequraBuilderAbstract')) {
+            require_once($this->dir . 'lib/SequraBuilderAbstract.php');
+        }
+        if ( ! class_exists('SequraBuilderWC')) {
+            require_once($this->dir . 'SequraBuilderWC.php');
+        }
+        $builderClass   = apply_filters('sequra_set_builder_class', 'SequraBuilderWC');
+        $this->_builder = new $builderClass($this->_pm->coresettings['merchantref'], $order);
 
-	public function getClient() {
-		if ( $this->_client instanceof SequraClient ) {
-			return $this->_client;
-		}
-		if ( ! class_exists( 'SequraClient' ) ) {
-			require_once( $this->dir . 'lib/SequraClient.php' );
-		}
-		SequraClient::$endpoint   = SequraPaymentGateway::$endpoints[ $this->_pm->coresettings['env'] ];
-		SequraClient::$user       = $this->_pm->coresettings['user'];
-		SequraClient::$password   = $this->_pm->coresettings['password'];
-		SequraClient::$user_agent = 'cURL WooCommerce ' . WOOCOMMERCE_VERSION . ' php ' . phpversion();
-		$this->_client            = new SequraClient();
+        return $this->_builder;
+    }
 
-		return $this->_client;
-	}
+    function check_response()
+    {
+        $order = new WC_Order($_REQUEST['order']);
+        if (isset($_REQUEST['signature'])) {
+            return $this->check_ipn($order);
+        }
+        $url = $this->_pm->get_return_url($order);
+        if ( ! $order->is_paid()) {
+            wc_add_notice(__('Ha habido un probelma con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.',
+                'wc_sequra'), 'error');
+            //$url = $pm->get_checkout_payment_url();  Notice is not shown in payment page
+            $url = $order->get_cancel_order_url();
+        }
+        wp_redirect($url, 302);
+    }
 
-	public function getBuilder( $order = null ) {
-		if ( $this->_builder instanceof SequraBuilderAbstract ) {
-			return $this->_builder;
-		}
+    function check_ipn($order)
+    {
+        $url = $order->get_cancel_order_url();
+        do_action('woocommerce_' . $this->_pm->id . '_process_payment', $order, $this->_pm);
+        if ($approval = apply_filters('woocommerce_' . $this->_pm->id . '_process_payment', $this->get_approval($order),
+            $order, $this->_pm)) {
+            // Payment completed
+            $order->add_order_note(__('Payment accepted by SeQura', 'wc_sequra'));
+            $this->add_payment_info_to_post_meta($order);
+            $order->payment_complete();
+        }
+        exit();
+    }
 
-		if ( ! class_exists( 'SequraBuilderAbstract' ) ) {
-			require_once( $this->dir . 'lib/SequraBuilderAbstract.php' );
-		}
-		if ( ! class_exists( 'SequraBuilderWC' ) ) {
-			require_once( $this->dir . 'SequraBuilderWC.php' );
-		}
-		$builderClass   = apply_filters( 'sequra_set_builder_class', 'SequraBuilderWC' );
-		$this->_builder = new $builderClass( $this->_pm->coresettings['merchantref'], $order );
+    function get_approval($order)
+    {
+        $client  = $this->getClient();
+        $builder = $this->getBuilder($order);
+        $builder->setPaymentMethod($this->_pm);
+        if ($builder->sign($order->id) != $_REQUEST['signature'] &&
+            $this->_pm->ipn
+        ) {
+            http_response_code(498);
+            die('Not valid signature');
+        }
+        $data = $builder->build('confirmed');
+        $uri  = $this->_pm->endpoint . '/' . $_REQUEST['order_ref'];
+        $client->updateOrder($uri, $data);
+        update_post_meta((int)$order->id, 'Transaction ID', $uri);
+        update_post_meta((int)$order->id, 'Transaction Status', $client->getStatus());
+        /*TODO: Store more information for later use in stats, like browser*/
+        if ( ! $client->succeeded()) {
+            http_response_code(410);
+            die('Error: ' . $client->getJson());
+        }
 
-		return $this->_builder;
-	}
+        return true;
+    }
 
-	public static function template_loader( $template ) {
-		if ( file_exists( STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php' ) ) {
-			return STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
-		} elseif ( file_exists( TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php' ) ) {
-			return TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
-		} elseif ( file_exists( STYLESHEETPATH . '/' . $template . '.php' ) ) {
-			return STYLESHEETPATH . '/' . $template . '.php';
-		} elseif ( file_exists( TEMPLATEPATH . '/' . $template . '.php' ) ) {
-			return TEMPLATEPATH . '/' . $template . '.php';
-		} else {
-			return WP_CONTENT_DIR . "/plugins/" . plugin_basename( dirname( __FILE__ ) ) . '/templates/' . $template . '.php';
-		}
-	}
+    function add_payment_info_to_post_meta($order)
+    {
+        if ($this->_pm->ipn) {
+            update_post_meta((int)$order->id, 'Transaction ID', $_REQUEST['order_ref']);
+            update_post_meta((int)$order->id, '_order_ref', $_REQUEST['order_ref']);
+            update_post_meta((int)$order->id, '_product_code', $_REQUEST['product_code']);
+            update_post_meta((int)$order->id, '_transaction_id', $_REQUEST['order_ref']);
+            //@TODO
+            //update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
+        } else {
+            $sequra_cart_info = WC()->session->get('sequra_cart_info');
+            update_post_meta((int)$order->id, 'Transaction ID', WC()->session->get('sequraURI'));
+            update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
+        }
+    }
 
-	public static function get_cart_info_from_session() {
-		sequra_add_cart_info_to_session();
+    function receipt_page($order)
+    {
+        $order = new WC_Order($order);
+        echo '<p>' . __('Thank you for your order, please click the button below to pay with SeQura.',
+                'wc_sequra') . '</p>';
+        $options = array('product' => $this->_pm->product);
+        $this->get_identity_form($options, $order);
+        require(SequraHelper::template_loader('payment_identification'));
+    }
 
-		return WC()->session->get( 'sequra_cart_info' );
-	}
+    /*
+     * Test if order is virtual.
+     *
+     * @param WC_Order $order
+     */
 
-	/*
-	 * Test if order is virtual.
-	 *
-	 * @param WC_Order $order
-	 */
-	public static function isFullyVirtual( WC_Cart $cart ) {
-		return ! $cart::needs_shipping();
-	}
+    function get_identity_form($options, $order = null)
+    {
+        if (is_null($this->identity_form)) {
+            $client  = $this->getClient();
+            $builder = $this->getBuilder($order);
+            $builder->setPaymentMethod($this->_pm);
+            try {
+                $order = $builder->build();
+            } catch (Exception $e) {
+                if ($this->_pm->debug == 'yes') {
+                    $this->_pm->log->add('sequra', $e->getMessage());
+                };
+            }
+
+            $client->startSolicitation($order);
+            if ($client->succeeded()) {
+                $uri = $client->getOrderUri();
+                WC()->session->set('sequraURI', $uri);
+
+                $this->identity_form = $client->getIdentificationForm($uri, $options);
+            }
+        }
+
+        return $this->identity_form;
+    }
 
 
-	/*
-	 * Test if order elgible for services
-	 * It must have 1 and no more serivces
-	 *
-	 * @param WC_Order $order
-	 */
-	public function isElegibleForServiceSale() {
-		$elegible       = false;
-		$services_count = 0;
-		foreach ( WC()->cart->cart_contents as $values ) {
-			if ( get_post_meta( $values['product_id'], 'is_sequra_service', true ) != 'no') {
-				$services_count += $values['quantity'];
-				$elegible       = $services_count == 1;
-			}
-		}
+    /*
+     * Test if order elgible for services
+     * It must have 1 and no more serivces
+     *
+     * @param WC_Order $order
+     */
 
-		return apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $elegible );
-	}
+    public static function template_loader($template)
+    {
+        if (file_exists(STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php')) {
+            return STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
+        } elseif (file_exists(TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php')) {
+            return TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . $template . '.php';
+        } elseif (file_exists(STYLESHEETPATH . '/' . $template . '.php')) {
+            return STYLESHEETPATH . '/' . $template . '.php';
+        } elseif (file_exists(TEMPLATEPATH . '/' . $template . '.php')) {
+            return TEMPLATEPATH . '/' . $template . '.php';
+        } else {
+            return WP_CONTENT_DIR . "/plugins/" . plugin_basename(dirname(__FILE__)) . '/templates/' . $template . '.php';
+        }
+    }
 
-	public function isElegibleForProductSale() {
-		$elegible       = true;
-		foreach ( WC()->cart->cart_contents as $cart_item_key => $values ) {
-			if ( !$values['data']->needs_shipping() ) {
-				$elegible       = false;
-				break;
-			}
-		}
+    public function isElegibleForServiceSale()
+    {
+        $elegible       = false;
+        $services_count = 0;
+        foreach (WC()->cart->cart_contents as $values) {
+            if (get_post_meta($values['product_id'], 'is_sequra_service', true) != 'no') {
+                $services_count += $values['quantity'];
+                $elegible       = $services_count == 1;
+            }
+        }
 
-		return apply_filters( 'woocommerce_cart_is_elegible_for_product_sale', $elegible );
-	}
+        return apply_filters('woocommerce_cart_is_elegible_for_service_sale', $elegible);
+    }
 
-	public static function validateServiceEndDate( $service_end_date ) {
-		return preg_match( '/'.self::ISO8601_PATTERN.'/', $service_end_date);
-	}
+    public function isElegibleForProductSale()
+    {
+        $elegible = true;
+        foreach (WC()->cart->cart_contents as $cart_item_key => $values) {
+            if ( ! $values['data']->needs_shipping()) {
+                $elegible = false;
+                break;
+            }
+        }
+
+        return apply_filters('woocommerce_cart_is_elegible_for_product_sale', $elegible);
+    }
 
 }

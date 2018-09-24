@@ -441,7 +441,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     public function setOrdersMetaQuery($wp_query_args, $args, $orderDataStore)
     {
-        if (is_array($args['meta_query'])) {
+        if (isset($args['meta_query']) && is_array($args['meta_query'])) {
             $wp_query_args['meta_query'] = array_merge($wp_query_args['meta_query'], $args['meta_query']);
         }
 

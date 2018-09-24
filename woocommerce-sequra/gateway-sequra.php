@@ -61,7 +61,10 @@ function sequra_send_daily_delivery_report()
     if ( ! class_exists('SequraReporter')) {
         require_once(WP_PLUGIN_DIR . "/" . dirname(plugin_basename(__FILE__)) . '/SequraReporter.php');
     }
-    SequraReporter::sendDailyDeliveryReport();
+    if(SequraReporter::sendDailyDeliveryReport()===false){
+        die('KO');
+    }
+    die('OK');
 }
 
 add_action('init', 'sequra_triggerreport_check');
@@ -200,7 +203,7 @@ function woocommerce_sequra_init()
 
     function sequra_get_script_basesurl()
     {
-        $coresettings = get_option('woocommerce_sequra_settings', SequraHelper::empty_core_settings);
+        $coresettings = get_option('woocommerce_sequra_settings', SequraHelper::get_empty_core_settings());
 
         return 'https://' . ($coresettings['env'] == 1 ? 'sandbox' : 'live') . '.sequracdn.com/assets/';
     }
