@@ -479,6 +479,9 @@ class SequraBuilderWC extends SequraBuilderAbstract
         $data['postal_code']    = self::notNull($this->getDeliveryField('shipping_postcode'));
         $data['city']           = self::notNull($this->getDeliveryField('shipping_city'));
         if ($data['city'] == '') {
+            $data['city'] = self::notNull($this->getDeliveryField('city'));
+        }
+        if ($data['city'] == '') {
             throw new Exception('City is required');
         }
         $data['country_code'] = self::notNull($this->getDeliveryField('shipping_country'), 'ES');
