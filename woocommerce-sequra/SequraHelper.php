@@ -180,26 +180,30 @@ class SequraHelper
      * @param WC_Order $order
      */
 
-    function get_identity_form($options, $order = null)
+    function get_identity_form($options, $wc_order = null)
     {
         if (is_null($this->identity_form)) {
             $client  = $this->getClient();
-            $builder = $this->getBuilder($order);
+            $builder = $this->getBuilder($wc_order);
             $builder->setPaymentMethod($this->_pm);
             try {
                 $order = $builder->build();
+                $client->startSolicitation($order);
+                if ($client->succeeded()) {
+                    $uri = $client->getOrderUri();
+                    WC()->session->set('sequraURI', $uri);
+
+                    $this->identity_form = $client->getIdentificationForm($uri, $options);
+                }else{
+                    if ($this->_pm->debug == 'yes') {
+                        $this->_pm->log->add('sequra', $client->getJson());
+                        $this->_pm->log->add('sequra', "Invalid payload:".$order);
+                    };
+                }
             } catch (Exception $e) {
                 if ($this->_pm->debug == 'yes') {
                     $this->_pm->log->add('sequra', $e->getMessage());
                 };
-            }
-
-            $client->startSolicitation($order);
-            if ($client->succeeded()) {
-                $uri = $client->getOrderUri();
-                WC()->session->set('sequraURI', $uri);
-
-                $this->identity_form = $client->getIdentificationForm($uri, $options);
             }
         }
 
