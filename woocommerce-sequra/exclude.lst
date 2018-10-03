@@ -1,4 +1,4 @@
-*phpunit
+*phpunit*
 *.json
 *.lock
 *.xml

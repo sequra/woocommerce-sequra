@@ -47,4 +47,9 @@
 	<listeners>
 		<listener class="SpeedTrapListener" file="tests/includes/speed-trap-listener.php" />
 	</listeners>
+	<php>
+		<env name="WP_TESTS_DIR" value="${WP_TESTS_DIR}"/>
+		<env name="WP_CORE_DIR" value="${WP_CORE_DIR}"/>
+		<env name="WC_DIR" value="${WC_DIR}"/>
+	</php>
 </phpunit>

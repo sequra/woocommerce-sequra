@@ -15,8 +15,10 @@ SKIP_DB_CREATE=${6-false}
 WC_VERSION=${7-trunk}
 
 WP_TESTS_DIR=${WP_TESTS_DIR-${TMPDIR}wordpress-tests-lib}
-WP_CORE_DIR=${WP_CORE_DIR-${TMPDIR}tmp/wordpress/}
+WP_CORE_DIR=${WP_CORE_DIR-${TMPDIR}wordpress/}
 WC_DIR=${WP_CORE_DIR}wp-content/plugins/woocommerce
+
+echo "Installing $WP_VERSION to $WP_CORE_DIR and tests in $WP_TESTS_DIR and $WC_VERSION in $WC_DIR"
 
 download() {
     if [ `which curl` ]; then
@@ -201,8 +203,17 @@ PHP
 	fi
 }
 
+prepare_phpunit() {
+	rm -rf phpunit.xml;
+	sed -e "s/\\\"/\\\\\\\\\"/g" phpunit.xml.template >${TMPDIR}phpunit.xml.template.scaped;
+	while read p;
+	 do  eval "echo \"$p\">>phpunit.xml";
+	done < ${TMPDIR}phpunit.xml.template.scaped 
+}
+
 install_wp
 install_wc
 install_test_suite
 install_db
 install_e2e_site
+prepare_phpunit

@@ -1,4 +1,5 @@
 */vendor
 woocommerce-sequra/tests/env_vars
+woocommerce-sequra/phpunit.xml
 dist
 publish.sh
