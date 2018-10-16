@@ -124,7 +124,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					'type'        => 'test',
 					'description' => __( 'When working is sandbox mode only these ips addresses will see the plugin', 'w c_sequra' ),
 					'desc_tip'    => true,
-					'default'     => '54.76.175.81,' . $_SERVER['REMOTE_ADDR']
+					'default'     => gethostbyname('proxy-es.dev.sequra.es').',' . $_SERVER['REMOTE_ADDR']
 				),
 				'debug'              => array(
 					'title'       => __( 'Debugging', 'wc_sequra' ),
