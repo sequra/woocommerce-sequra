@@ -17,8 +17,7 @@
     "scripts": {
         "clean-testenv":"echo",
         "test": [
-            "source tests/env_vars",
-            "tests/bin/install.sh $DB_NAME $DB_USER $DB_PASS $DB_HOST $WP_VERSION $SKIP_DB_CREATE $WC_VERSION",
+            "source tests/env_vars;tests/bin/install.sh $DB_NAME $DB_USER $DB_PASS $DB_HOST $WP_VERSION $SKIP_DB_CREATE $WC_VERSION",
             "./vendor/bin/phpunit"
         ],
         "dist": [
