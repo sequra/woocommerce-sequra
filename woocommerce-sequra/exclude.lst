@@ -3,6 +3,6 @@
 *.lock
 *.xml
 */tests/*
-bin
+*/bin/*
 *.sh
 *.lst
