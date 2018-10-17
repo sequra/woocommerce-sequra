@@ -17,26 +17,19 @@
     "scripts": {
         "clean-testenv":"echo",
         "test": [
-            "source tests/env_vars;tests/bin/install.sh $DB_NAME $DB_USER $DB_PASS $DB_HOST $WP_VERSION $SKIP_DB_CREATE $WC_VERSION",
+            "source tests/env_vars",
+            "tests/bin/install.sh $DB_NAME $DB_USER $DB_PASS $DB_HOST $WP_VERSION $SKIP_DB_CREATE $WC_VERSION",
             "./vendor/bin/phpunit"
         ],
-        "dist": "cd ..;zip -r9 dist/woocommerce-sequra.zip woocommerce-sequra -x@woocommerce-sequra/exclude.lst",
-        "post-package-install": [
-            "MyVendor\\MyClass::postPackageInstall"
-        ],
-        "post-install-cmd": [
-            "MyVendor\\MyClass::warmCache",
-            "phpunit -c app/"
-        ],
-        "post-autoload-dump": [
-            "MyVendor\\MyClass::postAutoloadDump"
-        ],
-        "post-create-project-cmd": [
-            "php -r \"copy('config/local-example.php', 'config/local.php');\""
+        "dist": [
+            "bash bin/build.sh"
         ]
     },
     "scripts-descriptions": {
         "test": "Run all tests!",
         "dist": "Create plugin sequra-payment.zip to distribute"
+    },
+    "require": {
+        "sequra/php-client": "dev-master"
     }
 }

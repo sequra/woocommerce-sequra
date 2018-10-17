@@ -17,6 +17,7 @@ class SequraHelper
         $this->_pm           = $pm;
         $this->identity_form = null;
         $this->dir           = dirname(__FILE__) . '/';
+        require_once($this->dir . 'vendor/autoload.php');
         if ( ! class_exists('SequraTempOrder')) {
             require_once($this->dir . 'SequraTempOrder.php');
         }
@@ -60,29 +61,25 @@ class SequraHelper
 
     public function getClient()
     {
-        if ($this->_client instanceof SequraClient) {
+        if ($this->_client instanceof \Sequra\PhpClient\Client) {
             return $this->_client;
         }
-        if ( ! class_exists('SequraClient')) {
-            require_once($this->dir . 'lib/SequraClient.php');
+        if ( ! class_exists('\Sequra\PhpClient\Client')) {
+            require_once($this->dir . 'lib/\Sequra\PhpClient\Client.php');
         }
-        SequraClient::$endpoint   = SequraPaymentGateway::$endpoints[$this->_pm->coresettings['env']];
-        SequraClient::$user       = $this->_pm->coresettings['user'];
-        SequraClient::$password   = $this->_pm->coresettings['password'];
-        SequraClient::$user_agent = 'cURL WooCommerce ' . WOOCOMMERCE_VERSION . ' php ' . phpversion();
-        $this->_client            = new SequraClient();
+        \Sequra\PhpClient\Client::$endpoint   = SequraPaymentGateway::$endpoints[$this->_pm->coresettings['env']];
+        \Sequra\PhpClient\Client::$user       = $this->_pm->coresettings['user'];
+        \Sequra\PhpClient\Client::$password   = $this->_pm->coresettings['password'];
+        \Sequra\PhpClient\Client::$user_agent = 'cURL WooCommerce ' . WOOCOMMERCE_VERSION . ' php ' . phpversion();
+        $this->_client            = new \Sequra\PhpClient\Client();
 
         return $this->_client;
     }
 
     public function getBuilder($order = null)
     {
-        if ($this->_builder instanceof SequraBuilderAbstract) {
+        if ($this->_builder instanceof \Sequra\PhpClient\BuilderAbstract) {
             return $this->_builder;
-        }
-
-        if ( ! class_exists('SequraBuilderAbstract')) {
-            require_once($this->dir . 'lib/SequraBuilderAbstract.php');
         }
         if ( ! class_exists('SequraBuilderWC')) {
             require_once($this->dir . 'SequraBuilderWC.php');

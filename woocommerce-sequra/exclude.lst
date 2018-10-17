@@ -2,6 +2,7 @@
 *.json
 *.lock
 *.xml
-*/vendor/*
 */tests/*
+bin
+*.sh
 *.lst

@@ -1,6 +1,6 @@
 <?php
 
-class SequraBuilderWC extends SequraBuilderAbstract
+class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
 {
     const HASH_ALGO = 'sha256';
 
@@ -113,7 +113,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $this->items(),
             $this->handlingItems()
         );
-        $total                           = self::totals($data);
+        $total                           = \Sequra\PhpClient\Helper::totals($data);
         $data['order_total_with_tax']    = $total['with_tax'];
         $data['order_total_without_tax'] = $total['without_tax'];
         $data['order_total_tax']         = 0;
@@ -346,7 +346,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
 
     public function fixRoundingProblems($order)
     {
-        $totals           = self::totals($order['cart']);
+        $totals           = \Sequra\PhpClient\Helper::totals($order['cart']);
         $diff_with_tax    = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
         $diff_without_tax = $order['cart']['order_total_without_tax'] - $totals['without_tax'];
         /*Don't correct error bigger than 1 cent per line*/
@@ -462,6 +462,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
             $data['invoice_address']    = $this->invoiceAddress();
             $data['customer']           = $this->customer();
             $data['cart']               = $this->shipmentCart();
+            $data['remaining_cart']     = $this->remainingCart();
             $data['merchant_reference'] = $this->orderMerchantReference();
             $this->_orders[]            = $data;
 
@@ -627,7 +628,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
         return self::notNull($this->getField($var));
     }
 
-    public function getPreviousOrders($customer_id)
+    public static function getPreviousOrders($customer_id)
     {
         $args      = array(
             'limit'       => -1,
@@ -666,12 +667,22 @@ class SequraBuilderWC extends SequraBuilderAbstract
         );
 
         if (count($data['items']) > 0) {
-            $totals                          = self::totals($data);
+            $totals                          = \Sequra\PhpClient\Helper::totals($data);
             $data['order_total_without_tax'] = $totals['without_tax'];
             $data['order_total_with_tax']    = $totals['with_tax'];
         }
 
         return $data;
+    }
+
+    public function remainingCart()
+    {
+        $empty_cart = array(
+            'order_total_without_tax' => 0,
+            'order_total_with_tax' => 0,
+            'items' => array(),
+        );
+        return $empty_cart;
     }
 
     public function getOrderStats()
@@ -813,7 +824,7 @@ class SequraBuilderWC extends SequraBuilderAbstract
         }
     }
 
-    public function platform()
+    public static function platform()
     {
         $sql = "show variables like 'version';";
         global $wpdb;
