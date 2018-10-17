@@ -33,7 +33,7 @@ class WCSQ_Tests_SequraPayment_Gateway_BuilderWC extends WC_Unit_Test_Case {
      * @param bool   $testmode    Whether Paypal sandbox is used or not.
      */
     protected function check_totals( $order) {
-        $totals = SequraBuilderWC::totals($order['cart']);
+        $totals = \Sequra\PhpClient\Helper::totals($order['cart']);
         $this->assertEquals( $totals['with_tax'], $order['cart']['order_total_with_tax'] );
     }
 
