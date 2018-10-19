@@ -144,7 +144,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         if (WC()->cart && 0 < $this->get_order_total() && $this->min_amount > $this->get_order_total()) {
             return false;
         }
-        if (1 == $this->env && '' != $this->coresettings['test_ips']) { //Sandbox
+        if ('' != $this->coresettings['test_ips']) {
             $ips = explode(',', $this->coresettings['test_ips']);
 
             return in_array($_SERVER['REMOTE_ADDR'], $ips);

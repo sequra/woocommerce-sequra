@@ -144,7 +144,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
             return false;
         }
 
-        if (1 == $this->env && '' != $this->coresettings['test_ips']) { //Sandbox
+        if ('' != $this->coresettings['test_ips']) {
             $ips = explode(',', $this->coresettings['test_ips']);
 
             return in_array($_SERVER['REMOTE_ADDR'], $ips);
