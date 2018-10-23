@@ -189,7 +189,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
             } else {
                 $item["type"] = 'product';
             }
-            $item["reference"] = $_product->get_id();
+            $item["reference"] = $_product->get_sku()?$_product->get_sku():$_product->get_id();
 
             //@Todo: research conflict with this and WPML
             /*$name              = apply_filters('woocommerce_cart_item_name', $_product->get_title(), $cart_item,
@@ -209,13 +209,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
             $item["downloadable"]   = $_product->is_downloadable();
 
             // OPTIONAL
-            $item["description"] = strip_tags(self::notNull(get_post($_product->get_id())->post_content));
+            $item["description"] = (string) strip_tags(self::notNull(get_post($_product->get_id())->post_content));
             $item["product_id"]  = self::notNull($_product->get_id());
-            $item["url"]         = self::notNull(get_permalink($_product->get_id()));
+            $item["url"]         = (string) self::notNull(get_permalink($_product->get_id()));
             if (version_compare($woocommerce->version, '3.0.0', "<")) {
-                $item["category"] = self::notNull(strip_tags($_product->get_categories()));
+                $item["category"] = (string) self::notNull(strip_tags($_product->get_categories()));
             } else {
-                $item["category"] = self::notNull(wc_get_product_category_list($_product->get_id()));
+                $item["category"] = (string) self::notNull(wc_get_product_category_list($_product->get_id()));
             }
             /*@TODO: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
             $items[] = $item;
