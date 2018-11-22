@@ -138,9 +138,6 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         ) {
             return false;
         }
-        if (WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total()) {
-            return false;
-        }
         if (WC()->cart && 0 < $this->get_order_total() && $this->min_amount > $this->get_order_total()) {
             return false;
         }
