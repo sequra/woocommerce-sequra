@@ -29,6 +29,22 @@ function sequracampaign_activation() {
 	update_option( 'woocommerce_default_gateway', 'sequracampaign' );
 }
 
+function woocommerce_sequracampaign_curl_get_contents($url){
+    $ch = curl_init();
+    $timeout = 5;
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+
+    $data = curl_exec($ch);
+
+    curl_close($ch);
+
+    return $data;
+}
+
 add_action( 'sequra_upgrade_if_needed', 'sequracampaign_upgrade_if_needed' );
 function sequracampaign_upgrade_if_needed() {
 	if ( time() > get_option( 'sequracampaign_next_update' ) || isset( $_GET['sequra_campaign_reset_conditions'] ) ) {
@@ -39,7 +55,7 @@ function sequracampaign_upgrade_if_needed() {
 		                $coresettings['merchantref'] . '/' .
 		                $coresettings['assets_secret'] .
 		                '/pp5_cost.json';
-		$json         = SequraCampaignPaymentGateway::curl_get_contents( $cost_url );
+		$json         = woocommerce_sequracampaign_curl_get_contents( $cost_url );
 		update_option( 'sequracampaign_conditions', $json );
 		do_action( 'sequracampaign_updateconditions' );
 		update_option( 'sequracampaign_next_update', time() + 86400 );
