@@ -266,6 +266,22 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
 
         return $products;
     }
+
+    static public function curl_get_contents($url){
+        $ch = curl_init();
+        $timeout = 5;
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+
+        return $data;
+    }
 }
 
 add_filter('sequra_available_products', array('SequraCampaignPaymentGateway', 'available_products'));
