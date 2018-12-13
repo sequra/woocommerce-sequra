@@ -14,6 +14,7 @@ var sequraConfigParams = {
 
 //Helper
 var SequraHelper = {
+    drawnWidgets: [],
     getText: function (selector) {
         return  selector && document.querySelector(selector)?document.querySelector(selector).innerText:"0";
     },
@@ -46,6 +47,10 @@ var SequraHelper = {
     },
 
     drawPromotionWidget: function (price_src,dest,product,theme,reverse,campaign) {
+        if(this.drawnWidgets.indexOf(price_src+dest+product+theme+reverse+campaign)>=0){
+              return;
+          }
+        this.drawnWidgets.push(price_src+dest+product+theme+reverse+campaign);
         var promoWidgetNode = document.createElement('div');
         var price_in_cents = 0;
         try{
@@ -78,7 +83,18 @@ var SequraHelper = {
         promoWidgetNode.className = 'sequra-promotion-widget';
         promoWidgetNode.setAttribute('data-amount',price_in_cents);
         promoWidgetNode.setAttribute('data-product',product);
-        promoWidgetNode.setAttribute('data-theme',theme);
+        if(theme){
+            try {
+                attributes = JSON.parse(theme);
+                for (var key in attributes) {
+                    promoWidgetNode.setAttribute('data-'+key,""+attributes[key]);
+                }
+            } catch(e){
+                promoWidgetNode.setAttribute('data-theme',theme);
+            }
+        }else{
+            promoWidgetNode.setAttribute('data-type','text');
+        }
         if(reverse){
             promoWidgetNode.setAttribute('data-reverse',reverse);
         }
