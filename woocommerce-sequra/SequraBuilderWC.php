@@ -65,7 +65,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
     public function getOrderRef($num)
     {
         if (1 == $num) {
-            return $this->_current_order->get_id();
+            return $this->get_order_id();
         }
     }
 
@@ -74,11 +74,11 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
         $ret = parent::merchant();
         if ( ! is_null($this->_pm)) {
             $ret['notify_url']              = add_query_arg(array(
-                'order'  => "" . $this->_current_order->get_id(),
+                'order'  => "" . $this->get_order_id(),
                 'wc-api' => 'woocommerce_' . $this->_pm->id
             ), home_url('/'));
             $ret['notification_parameters'] = array(
-                'signature' => self::sign($this->_current_order->get_id()),
+                'signature' => self::sign($this->get_order_id()),
                 'result'    => "0"
             );
             $ret['return_url']              = $ret['notify_url'];
@@ -527,7 +527,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
 
         return method_exists(get_class($this->_current_order), $func) ?
             $this->_current_order->$func() :
-            null;
+	        $this->_current_order->$field_name;
     }
 
     public function invoiceAddress()
@@ -842,5 +842,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
         );
 
         return $data;
+    }
+    
+    protected function get_order_id(){
+    	global $woocommerce;
+    	if(version_compare($woocommerce->version, '3.0.0', "<")){
+		    return $this->_current_order->id;
+	    }
+	    return $this->_current_order->get_id();
     }
 }

@@ -108,7 +108,6 @@ class SequraHelper
 
     function check_ipn($order)
     {
-        $url = $order->get_cancel_order_url();
         do_action('woocommerce_' . $this->_pm->id . '_process_payment', $order, $this->_pm);
         if ($approval = apply_filters('woocommerce_' . $this->_pm->id . '_process_payment', $this->get_approval($order),
             $order, $this->_pm)) {
