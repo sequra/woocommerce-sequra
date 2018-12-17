@@ -21,6 +21,6 @@ if($this->identity_form){
 <?php } else { ?>
 	<script type="text/javascript">
 		alert("Lo sentimos, ha habido un error.\n Contacte con el comercio, por favor.");
-		document.location.href = history.back(1);
+		document.location.href = '<?php echo wc_get_checkout_url(); ?>';
 	</script>
 <?php } ?>
