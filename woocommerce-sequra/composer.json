@@ -29,6 +29,6 @@
         "dist": "Create plugin sequra-payment.zip to distribute"
     },
     "require": {
-        "sequra/php-client": "dev-master"
+        "sequra/php-client": "^0.0.8"
     }
 }

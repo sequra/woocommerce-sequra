@@ -160,7 +160,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
         return $package['rates'][current($shipping_methods)];
     }
 
-    public function items()
+    public function productItems()
     {
         global $woocommerce;
         $items         = array();
@@ -220,7 +220,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
             /*@TODO: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
             $items[] = $item;
         }
+        return $items;
+    }
 
+    public function discountItems()
+    {
+        global $woocommerce;
+        $items         = array();
         //order discounts
         if ($this->_current_order instanceof SequraTempOrder) {
             foreach ($this->_cart->coupon_discount_amounts as $key => $val) {
@@ -233,7 +239,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
                 $items[] = $this->discount($val['name'], $amount);
             }
         }
+        return $items;
+    }
 
+    public function extraItems()
+    {
+        global $woocommerce;
+        $items         = array();
         //add Customer fee (without tax)
         $item = array();
         if ($this->_current_order instanceof SequraTempOrder) {
@@ -527,7 +539,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
 
         return method_exists(get_class($this->_current_order), $func) ?
             $this->_current_order->$func() :
-	        $this->_current_order->$field_name;
+	        null;
     }
 
     public function invoiceAddress()
