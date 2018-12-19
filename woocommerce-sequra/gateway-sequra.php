@@ -64,6 +64,7 @@ function sequra_send_daily_delivery_report()
     if(SequraReporter::sendDailyDeliveryReport()===false){
         die('KO');
     }
+    http_response_code(599);
     die('OK');
 }
 
