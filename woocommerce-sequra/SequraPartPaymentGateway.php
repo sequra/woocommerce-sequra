@@ -204,7 +204,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
     {
         ?>
         <h3><?php _e('Pasarela SeQura', 'wc_sequra'); ?></h3>
-        <p><?php _e('La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Recibe primero, paga después" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.',
+        <p><?php _e('La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Fraccionar pago" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.',
                 'wc_sequra'); ?></p>
         <table class="form-table">
             <?php $this->generate_settings_html(); ?>
