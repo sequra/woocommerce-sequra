@@ -109,10 +109,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
         $data['updated_at']              = date('c');
         $data['gift']                    = false;
         $data['delivery_method']         = $this->deliveryMethod();
-        $data['items']                   = array_merge(
-            $this->items(),
-            $this->handlingItems()
-        );
+        $data['items']                   = $this->items();
         $total                           = \Sequra\PhpClient\Helper::totals($data);
         $data['order_total_with_tax']    = $total['with_tax'];
         $data['order_total_without_tax'] = $total['without_tax'];
