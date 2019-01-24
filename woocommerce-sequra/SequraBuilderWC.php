@@ -670,10 +670,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract
         $data['currency'] = $this->_current_order->get_order_currency();;
         $data['delivery_method'] = $this->deliveryMethod();
         $data['gift']            = false;
-        $data['items']           = array_merge(
-            $this->items(),
-            $this->handlingItems()
-        );
+        $data['items']           = $this->items();
 
         if (count($data['items']) > 0) {
             $totals                          = \Sequra\PhpClient\Helper::totals($data);
