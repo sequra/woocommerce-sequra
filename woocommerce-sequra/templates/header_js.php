@@ -14,6 +14,9 @@ var sequraConfigParams = {
 
 //Helper
 var SequraHelper = {
+    presets: {
+        legacy: '{"type":"legacy"}'
+    },
     drawnWidgets: [],
     getText: function (selector) {
         return  selector && document.querySelector(selector)?document.querySelector(selector).innerText:"0";
@@ -83,16 +86,15 @@ var SequraHelper = {
         promoWidgetNode.className = 'sequra-promotion-widget';
         promoWidgetNode.setAttribute('data-amount',price_in_cents);
         promoWidgetNode.setAttribute('data-product',product);
-        if(theme){
-            try {
-                attributes = JSON.parse(theme);
-                for (var key in attributes) {
-                    promoWidgetNode.setAttribute('data-'+key,""+attributes[key]);
-                }
-            } catch(e){
-                promoWidgetNode.setAttribute('data-theme',theme);
+        if(this.presets[theme]){
+            theme = this.presets[theme]
+        }
+        try {
+            attributes = JSON.parse(theme);
+            for (var key in attributes) {
+                promoWidgetNode.setAttribute('data-'+key,""+attributes[key]);
             }
-        }else{
+        } catch(e){
             promoWidgetNode.setAttribute('data-type','text');
         }
         if(reverse){
