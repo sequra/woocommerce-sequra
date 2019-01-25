@@ -47,7 +47,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         add_action('woocommerce_api_woocommerce_' . $this->id, array($this->helper, 'check_response'));
         $json       = get_option('sequracampaign_conditions');
         $conditions = json_decode($json, true);
-        if ( ! $conditions) {
+        if (! $conditions) {
             $this->enabled = false;
         } else {
             foreach ($conditions[$this->product] as $campaign) {
@@ -69,7 +69,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
     /**
      * Initialize Gateway Settings Form Fields
      */
-    function init_form_fields()
+    public function init_form_fields()
     {
         $shipping_methods = array();
 
@@ -88,8 +88,10 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
             'title'        => array(
                 'title'       => __('Title', 'wc_sequracampaign'),
                 'type'        => 'text',
-                'description' => __('This controls the title which the user sees during checkout.',
-                    'wc_sequracampaign'),
+                'description' => __(
+                    'This controls the title which the user sees during checkout.',
+                    'wc_sequracampaign'
+                ),
                 'default'     => __('Quiero pagarlo en octubre.', 'wc_sequracampaign'),
             ),
             'campaign'     => array(
@@ -120,11 +122,8 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         } elseif (is_admin()) {
             return true;
         }
-
-        if (
-            ($_SERVER['REQUEST_METHOD'] == 'POST' || is_page(wc_get_page_id('checkout'))) &&
-            ! $this->is_available_in_checkout()
-        ) {
+        if ((get_the_ID() == wc_get_page_id('checkout') || $_SERVER['REQUEST_METHOD'] == 'POST') &&
+            !$this->is_available_in_checkout()) {
             return false;
         }
 
@@ -132,10 +131,8 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
             return false;
         }
 
-        if (
-            $this->enable_for_countries &&
-            ! in_array(WC()->customer->get_shipping_country(), $this->enable_for_countries)
-        ) {
+        if ($this->enable_for_countries &&
+            ! in_array(WC()->customer->get_shipping_country(), $this->enable_for_countries)) {
             return false;
         }
         if (WC()->cart && 0 < $this->get_order_total() && $this->min_amount > $this->get_order_total()) {
@@ -150,17 +147,14 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         return true;
     }
 
-    function is_available_in_checkout()
+    public function is_available_in_checkout()
     {
-        if (
-            ! $this->isCampaignPeriod() ||
-            $this->coresettings['enable_for_virtual'] == 'yes') {
-            return false;
-        }/* else if ( ! WC()->cart->needs_shipping() ) {
-			return false;
-		}*/
-
-        return true;
+        return
+            WC()->cart &&
+            WC()->cart->needs_shipping() &&
+            $this->isCampaignPeriod() &&
+            //Campaign not available for services
+            $this->coresettings['enable_for_virtual']=='no';
     }
 
     private function isCampaignPeriod()
@@ -172,7 +166,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         return time() < $this->last_date && time() > $this->first_date;
     }
 
-    function is_available_in_product_page()
+    public function is_available_in_product_page()
     {
         $product = $GLOBALS['product'];
         if (
@@ -185,7 +179,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         if ($this->coresettings['enable_for_virtual'] == 'yes') {
             //return get_post_meta( $product->id, 'is_sequra_service', true ) != 'no';
             return true;//Non-services can be purchased too but not alone.
-        } elseif ( ! $product->needs_shipping()) {
+        } elseif (! $product->needs_shipping()) {
             return false;
         }
 
@@ -195,7 +189,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
     /**
      * There might be payment fields for SeQura, and we want to show the description if set.
      * */
-    function payment_fields()
+    public function payment_fields()
     {
         require(self::template_loader('campaign_fields'));
     }
@@ -230,7 +224,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         <?php
     }
 
-    function process_payment($order_id)
+    public function process_payment($order_id)
     {
         $order = new WC_Order($order_id);
         do_action('woocommerce_sequracampaign_process_payment', $order, $this);
@@ -243,11 +237,13 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
     }
 
     //@todo: decide to move this to SequraHelper
-    function receipt_page($order)
+    public function receipt_page($order)
     {
         $order = new WC_Order($order);
-        echo '<p>' . __('Thank you for your order, please click the button below to pay with SeQura.',
-                'wc_sequra') . '</p>';
+        echo '<p>' . __(
+            'Thank you for your order, please click the button below to pay with SeQura.',
+                'wc_sequra'
+        ) . '</p>';
         $options = array('product' => $this->product);
         if ($this->campaign) {
             $options['campaign'] = $this->campaign;
@@ -257,7 +253,7 @@ class SequraCampaignPaymentGateway extends WC_Payment_Gateway
         require(SequraHelper::template_loader('payment_identification'));
     }
 
-    static public function available_products($products)
+    public static function available_products($products)
     {
         $products[] = 'pp5';
 
