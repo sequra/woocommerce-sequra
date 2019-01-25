@@ -246,13 +246,10 @@ class SequraHelper
     public function isElegibleForProductSale()
     {
         $elegible = true;
-        foreach (WC()->cart->cart_contents as $cart_item_key => $values) {
-            if ( ! $values['data']->needs_shipping()) {
-                $elegible = false;
-                break;
-            }
+        //Only reject if all products are virtual (don't need shipping)
+        if(!WC()->cart->needs_shipping()){
+            $elegible = false;
         }
-
         return apply_filters('woocommerce_cart_is_elegible_for_product_sale', $elegible);
     }
 

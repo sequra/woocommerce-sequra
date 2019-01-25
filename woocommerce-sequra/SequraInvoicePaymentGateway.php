@@ -121,7 +121,13 @@ class SequraInvoicePaymentGateway extends WC_Payment_Gateway
             return true;
         }
 
-        if (is_page(wc_get_page_id('checkout')) && ! $this->is_available_in_checkout()) {
+        if (
+            (
+                get_the_ID() == wc_get_page_id('checkout') || 
+                $_SERVER['REQUEST_METHOD'] == 'POST'
+            ) && 
+            !$this->is_available_in_checkout()
+        ) {
             return false;
         }
 

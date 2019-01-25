@@ -156,10 +156,10 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway
     function is_available_in_checkout()
     {
         if ($this->coresettings['enable_for_virtual'] == 'yes') {
-            if ( ! $this->helper->isElegibleForServiceSale()) {
+            if (!$this->helper->isElegibleForServiceSale()) {
                 return false;
             }
-        } elseif ( ! $this->helper->isElegibleForProductSale()) {
+        } elseif (!$this->helper->isElegibleForProductSale()) {
             return false;
         }
 
