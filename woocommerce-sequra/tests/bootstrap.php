@@ -36,20 +36,20 @@ class WCSQ_Unit_Tests_Bootstrap {
 		// Ensure server variable is set for WP email functions.
 		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
-			$_SERVER['SERVER_NAME'] = 'localhost';
-            $_SERVER['HTTP_CLIENT_IP'] = '127.0.0.1';
-            $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-            $example_user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36';
-            $_SERVER['HTTP_USER_AGENT'] = $example_user_agent;
-            $_SERVER['HTTP_ACCEPT'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+			$_SERVER['SERVER_NAME']     = 'localhost';
+			$_SERVER['HTTP_CLIENT_IP']  = '127.0.0.1';
+			$_SERVER['REMOTE_ADDR']     = '127.0.0.1';
+			$example_user_agent         = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36';
+			$_SERVER['HTTP_USER_AGENT'] = $example_user_agent;
+			$_SERVER['HTTP_ACCEPT']     = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
 		}
 		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
-		$this->tests_dir    = dirname( __FILE__ );
-		$this->sq_plugin_dir   = dirname( $this->tests_dir );
-		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : '/tmp/wordpress-tests-lib';
+		$this->tests_dir     = dirname( __FILE__ );
+		$this->sq_plugin_dir = dirname( $this->tests_dir );
+		$this->wp_tests_dir  = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : '/tmp/wordpress-tests-lib';
 
-		$this->plugin_dir   = getenv( 'WC_DIR' ) ? getenv( 'WC_DIR' ) : '/tmp/wordpress/wp-content/plugins/woocommerce';
+		$this->plugin_dir = getenv( 'WC_DIR' ) ? getenv( 'WC_DIR' ) : '/tmp/wordpress/wp-content/plugins/woocommerce';
 
 		// load test function so tests_add_filter() is available
 		require_once $this->wp_tests_dir . '/includes/functions.php';
@@ -75,9 +75,9 @@ class WCSQ_Unit_Tests_Bootstrap {
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
-        require_once( $this->sq_plugin_dir . '/gateway-sequra.php' );
-        require_once( $this->plugin_dir . '/woocommerce.php');
-    }
+		require_once $this->sq_plugin_dir . '/gateway-sequra.php';
+		require_once $this->plugin_dir . '/woocommerce.php';
+	}
 
 	/**
 	 * Install WooCommerce after the test environment and WC have been loaded.

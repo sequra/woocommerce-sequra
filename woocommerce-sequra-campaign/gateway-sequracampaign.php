@@ -1,11 +1,14 @@
 <?php
-/*
-  Plugin Name: Campañas SeQura
-  Plugin URI: http://sequra.es/
-  Description: Da la opción pago para campañas especiales de SeQura.
-  Version: 1.18.3
-  Author: SeQura Engineering
-  Author URI: http://SeQura.es/
+/**
+ * Plugin Name: Campañas SeQura
+ * Plugin URI: http://sequra.es/
+ * Description: Da la opción pago para campañas especiales de SeQura.
+ * Version: 4.8.0
+ * Author: SeQura Engineering
+ * Author URI: http://SeQura.es/
+ * WC tested up to: 3.5.4
+ *
+ * @package woocommerce-sequracampaign
  */
 
 register_activation_hook( __FILE__, 'sequracampaign_activation' );
@@ -13,12 +16,12 @@ register_activation_hook( __FILE__, 'sequracampaign_activation' );
  * Run once on plugin activation
  */
 function sequracampaign_activation() {
-	// Place in first place
+	// Place in first place.
 	$gateway_order = (array) get_option( 'woocommerce_gateway_order' );
 	$order         = array(
-		'sequracampaign' => 0
+		'sequracampaign' => 0,
 	);
-	if ( is_array( $gateway_order ) && sizeof( $gateway_order ) > 0 ) {
+	if ( is_array( $gateway_order ) && count( $gateway_order ) > 0 ) {
 		$loop = 1;
 		foreach ( $gateway_order as $gateway_id ) {
 			$order[ esc_attr( $gateway_id ) ] = $loop;
@@ -29,33 +32,20 @@ function sequracampaign_activation() {
 	update_option( 'woocommerce_default_gateway', 'sequracampaign' );
 }
 
-function woocommerce_sequracampaign_curl_get_contents($url){
-    $ch = curl_init();
-    $timeout = 5;
-
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-
-    $data = curl_exec($ch);
-
-    curl_close($ch);
-
-    return $data;
-}
-
 add_action( 'sequra_upgrade_if_needed', 'sequracampaign_upgrade_if_needed' );
+/**
+ * Upgrade campaign plugin and conditions if needed
+ */
 function sequracampaign_upgrade_if_needed() {
 	if ( time() > get_option( 'sequracampaign_next_update' ) || isset( $_GET['sequra_campaign_reset_conditions'] ) ) {
-		$coresettings = get_option( 'woocommerce_sequra_settings', array() );
-		$cost_url     = 'https://' .
-		                ( $coresettings['env'] ? 'sandbox' : 'live' ) .
-		                '.sequracdn.com/scripts/' .
-		                $coresettings['merchantref'] . '/' .
-		                $coresettings['assets_secret'] .
-		                '/pp5_cost.json';
-		$json         = woocommerce_sequracampaign_curl_get_contents( $cost_url );
+		$core_settings = get_option( 'woocommerce_sequra_settings', array() );
+		$cost_url      = 'https://' .
+						( $core_settings['env'] ? 'sandbox' : 'live' ) .
+						'.sequracdn.com/scripts/' .
+						$core_settings['merchantref'] . '/' .
+						$core_settings['assets_secret'] .
+						'/pp5_cost.json';
+		$json          = wp_remote_get( $cost_url );
 		update_option( 'sequracampaign_conditions', $json );
 		do_action( 'sequracampaign_updateconditions' );
 		update_option( 'sequracampaign_next_update', time() + 86400 );
@@ -64,32 +54,40 @@ function sequracampaign_upgrade_if_needed() {
 
 add_action( 'woocommerce_sequra_plugin_loaded', 'woocommerce_sequracampaign_init', 110 );
 
+/**
+ * Init plugin
+ */
 function woocommerce_sequracampaign_init() {
-	//@todo langages
-	//load_plugin_textdomain( 'wc_sequracampaign', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-	if ( ! class_exists( 'SequraCampaignPaymentGateway' ) ) {
-		require_once( WP_PLUGIN_DIR . "/" . dirname( plugin_basename( __FILE__ ) ) . '/SequraCampaignPaymentGateway.php' );
+	load_plugin_textdomain( 'wc_sequracampaign', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	if ( ! class_exists( 'SequraCampaignGateway' ) ) {
+		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/class-sequracampaigngateway.php';
 	}
 
 	/**
 	 * Add the gateway to woocommerce
+	 *
+	 * @param array $methods Available methods.
 	 * */
 	function add_sequracapaign_gateway( $methods ) {
-		$methods[] = 'SequraCampaignPaymentGateway';
+		$methods[] = 'SequraCampaignGateway';
 
 		return $methods;
 	}
 
 	add_filter( 'woocommerce_payment_gateways', 'add_sequracapaign_gateway' );
-
-	//[sequracampaign_teaser]
-	function sequracampaign_teaser( ) {
-		$sequracampaign = WC_Payment_Gateways::instance()->payment_gateways()['sequracampaign'];
-		include( SequraCampaignPaymentGateway::template_loader( 'campaign_teaser' ) );
+	/**
+	 * Short code [sequracampaign_teaser]
+	 *
+	 * @return void
+	 */
+	function sequracampaign_teaser() {
+		$gateways       = WC_Payment_Gateways::instance()->payment_gateways();
+		$sequracampaign = $gateways['sequracampaign'];
+		include SequraCampaignGateway::template_loader( 'campaign_teaser' );
 	}
 
 	add_shortcode( 'sequracampaign_teaser', 'sequracampaign_teaser' );
-	/*
+	/**
 	 * Campaign teaser in product page
 	 */
 	add_action( 'woocommerce_after_add_to_cart_button', 'sequracampaign_teaser', 9 );

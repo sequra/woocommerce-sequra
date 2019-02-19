@@ -27,17 +27,19 @@ class WC_Helper_Product {
 	 */
 	public static function create_simple_product() {
 		$product = new WC_Product_Simple();
-		$product->set_props( array(
-			'name'          => 'Dummy Product',
-			'regular_price' => 10,
-			'sku'           => 'DUMMY SKU',
-			'manage_stock'  => false,
-			'tax_status'    => 'taxable',
-			'downloadable'  => false,
-			'virtual'       => false,
-			'stock_status'  => 'instock',
-			'weight'        => '1.1',
-		) );
+		$product->set_props(
+			array(
+				'name'          => 'Dummy Product',
+				'regular_price' => 10,
+				'sku'           => 'DUMMY SKU',
+				'manage_stock'  => false,
+				'tax_status'    => 'taxable',
+				'downloadable'  => false,
+				'virtual'       => false,
+				'stock_status'  => 'instock',
+				'weight'        => '1.1',
+			)
+		);
 		$product->save();
 
 		return wc_get_product( $product->get_id() );
@@ -51,13 +53,15 @@ class WC_Helper_Product {
 	 */
 	public static function create_external_product() {
 		$product = new WC_Product_External();
-		$product->set_props( array(
-			'name'          => 'Dummy External Product',
-			'regular_price' => 10,
-			'sku'           => 'DUMMY EXTERNAL SKU',
-			'product_url'   => 'http://woocommerce.com',
-			'button_text'   => 'Buy external product',
-		) );
+		$product->set_props(
+			array(
+				'name'          => 'Dummy External Product',
+				'regular_price' => 10,
+				'sku'           => 'DUMMY EXTERNAL SKU',
+				'product_url'   => 'http://woocommerce.com',
+				'button_text'   => 'Buy external product',
+			)
+		);
 		$product->save();
 
 		return wc_get_product( $product->get_id() );
@@ -73,10 +77,12 @@ class WC_Helper_Product {
 		$simple_product_1 = self::create_simple_product();
 		$simple_product_2 = self::create_simple_product();
 		$product          = new WC_Product_Grouped();
-		$product->set_props( array(
-			'name'          => 'Dummy Grouped Product',
-			'sku'           => 'DUMMY GROUPED SKU',
-		) );
+		$product->set_props(
+			array(
+				'name' => 'Dummy Grouped Product',
+				'sku'  => 'DUMMY GROUPED SKU',
+			)
+		);
 		$product->set_children( array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
 		$product->save();
 
@@ -92,10 +98,12 @@ class WC_Helper_Product {
 	 */
 	public static function create_variation_product() {
 		$product = new WC_Product_Variable();
-		$product->set_props( array(
-			'name' => 'Dummy Variable Product',
-			'sku'  => 'DUMMY VARIABLE SKU',
-		) );
+		$product->set_props(
+			array(
+				'name' => 'Dummy Variable Product',
+				'sku'  => 'DUMMY VARIABLE SKU',
+			)
+		);
 
 		$attribute_data = self::create_attribute( 'size', array( 'small', 'large' ) ); // Create all attribute related things.
 		$attributes     = array();
@@ -112,20 +120,24 @@ class WC_Helper_Product {
 		$product->save();
 
 		$variation_1 = new WC_Product_Variation();
-		$variation_1->set_props( array(
-			'parent_id'     => $product->get_id(),
-			'sku'           => 'DUMMY SKU VARIABLE SMALL',
-			'regular_price' => 10,
-		) );
+		$variation_1->set_props(
+			array(
+				'parent_id'     => $product->get_id(),
+				'sku'           => 'DUMMY SKU VARIABLE SMALL',
+				'regular_price' => 10,
+			)
+		);
 		$variation_1->set_attributes( array( 'pa_size' => 'small' ) );
 		$variation_1->save();
 
 		$variation_2 = new WC_Product_Variation();
-		$variation_2->set_props( array(
-			'parent_id'     => $product->get_id(),
-			'sku'           => 'DUMMY SKU VARIABLE LARGE',
-			'regular_price' => 15,
-		) );
+		$variation_2->set_props(
+			array(
+				'parent_id'     => $product->get_id(),
+				'sku'           => 'DUMMY SKU VARIABLE LARGE',
+				'regular_price' => 15,
+			)
+		);
 		$variation_2->set_attributes( array( 'pa_size' => 'large' ) );
 		$variation_2->save();
 
@@ -166,11 +178,15 @@ class WC_Helper_Product {
 
 		delete_transient( 'wc_attribute_taxonomies' );
 
-		register_taxonomy( 'pa_' . $attribute_name, array( 'product' ), array(
-			'labels' => array(
-				'name' => $attribute_name,
-			),
-		) );
+		register_taxonomy(
+			'pa_' . $attribute_name,
+			array( 'product' ),
+			array(
+				'labels' => array(
+					'name' => $attribute_name,
+				),
+			)
+		);
 
 		// Set product attributes global.
 		global $wc_product_attributes;
@@ -186,7 +202,7 @@ class WC_Helper_Product {
 			$result = term_exists( $term, 'pa_' . $attribute_name );
 
 			if ( ! $result ) {
-				$result = wp_insert_term( $term, 'pa_' . $attribute_name );
+				$result               = wp_insert_term( $term, 'pa_' . $attribute_name );
 				$return['term_ids'][] = $result['term_id'];
 			} else {
 				$return['term_ids'][] = $result['term_id'];

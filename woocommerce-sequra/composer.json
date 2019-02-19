@@ -5,7 +5,8 @@
     "require-dev": {
         "behat/behat": "^3.5@dev",
         "phpunit/phpunit": "6.5.13",
-        "woocommerce/woocommerce-sniffs": "0.0.5"
+        "woocommerce/woocommerce-sniffs": "0.0.5",
+        "phpmd/phpmd": "dev-master"
     },
     "license": "GPL-3.0-or-later",
     "authors": [
@@ -23,11 +24,24 @@
         ],
         "dist": [
             "bash bin/build.sh"
+        ],
+        "phpcs": [
+            "phpcs -s -p"
+          ],
+        "phpcs-pre-commit": [
+        "phpcs -s -p -n"
+        ],
+        "phpcbf": [
+        "phpcbf -p"
         ]
     },
-    "scripts-descriptions": {
-        "test": "Run all tests!",
-        "dist": "Create plugin sequra-payment.zip to distribute"
+    "extra": {
+        "scripts-description": {
+            "test": "Run all tests!",
+            "dist": "Create plugin sequra-payment.zip to distribute",
+            "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+            "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+        }
     },
     "require": {
         "sequra/php-client": "^0.0.8"

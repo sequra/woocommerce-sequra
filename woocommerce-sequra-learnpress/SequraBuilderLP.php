@@ -18,14 +18,14 @@ class SequraBuilderLP extends SequraBuilderWC {
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
 			$item     = array();
 			if (
-				$this->_pm->coresettings['enable_for_virtual'] == 'yes' &&
+				$this->_pm->core_settings['enable_for_virtual'] == 'yes' &&
 				(get_post_meta( $cart_item->get_id(), 'is_sequra_service', true ) != 'no' ||
 				get_class($_product) == 'LP_Course'
 				)
 			) {
 				$service_end_date = get_post_meta( $cart_item->get_id(), 'sequra_service_end_date', true );
-				if(!SequraHelper::validateServiceEndDate($service_end_date)){
-					$service_end_date = $this->_pm->coresettings['default_service_end_date'];
+				if(!SequraHelper::validate_service_end_date($service_end_date)){
+					$service_end_date = $this->_pm->core_settings['default_service_end_date'];
 				}
 				$item["type"] = 'service';
 				if ( strpos( $service_end_date, "P" )===0 ) {

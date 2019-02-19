@@ -107,9 +107,10 @@ install_test_suite() {
 }
 
 install_wc() {
-	rm -rf $WC_DIR/*
-	mkdir -p $WC_DIR
-	svn co --quiet http://plugins.svn.wordpress.org/woocommerce/$WC_TAG $WC_DIR
+	if [ ! -d $WC_DIR ]; then
+		mkdir -p $WC_DIR
+		svn co --quiet http://plugins.svn.wordpress.org/woocommerce/$WC_TAG $WC_DIR
+	fi
 }
 
 install_db() {
