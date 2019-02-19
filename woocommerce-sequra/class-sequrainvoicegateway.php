@@ -51,8 +51,8 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		if ( isset( $this->settings['fee'] ) ) {
 			$this->fee = (float) $this->settings['fee'];
 		}
-		// $this->days_after           = (int) $this->settings['days_after'];
 		$this->has_fields            = true;
+		$this->dest_css_sel          = htmlspecialchars_decode( $this->settings['dest_css_sel'] );
 		$this->enable_for_countries  = array( 'ES' );
 		$this->enable_for_currencies = array( 'EUR' );
 		$this->env                   = $this->core_settings['env'];
@@ -115,6 +115,15 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 				'type'        => 'text',
 				'description' => __( 'Widget visualization params', 'wc_sequra' ),
 				'default'     => 'white',
+			),
+			'dest_css_sel'  => array(
+				'title'       => __( 'CSS selector for teaser', 'wc_sequra' ),
+				'type'        => 'text',
+				'description' => __(
+					'CSS after which the teaser will be draw. Leave #sequra_invoice_teaser to show it under add to cart button',
+					'wc_sequra'
+				),
+				'default'     => '#sequra_invoice_teaser',
 			),
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequra_init_form_fields', $this->form_fields, $this );

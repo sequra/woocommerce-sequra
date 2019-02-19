@@ -119,6 +119,15 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 				'description' => __( 'Widget visualization params', 'wc_sequra' ),
 				'default'     => 'white',
 			),
+			'dest_css_sel'  => array(
+				'title'       => __( 'CSS selector for teaser', 'wc_sequra' ),
+				'type'        => 'text',
+				'description' => __(
+					'CSS after which the teaser will be draw. Leave #sequra_campaign_teaser to show it under add to cart button',
+					'wc_sequra'
+				),
+				'default'     => '#sequra_campaign_teaser',
+			),
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequracampaign_init_form_fields', $this->form_fields, $this );
 	}
@@ -203,7 +212,7 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 	 * There might be payment fields for SeQura, and we want to show the description if set.
 	 * */
 	public function payment_fields() {
-		require self::template_loader( 'campaign_fields' );
+		require self::template_loader( 'campaign-fields' );
 	}
 	/**
 	 * Load template file

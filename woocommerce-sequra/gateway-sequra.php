@@ -369,6 +369,7 @@ function woocommerce_sequra_init() {
 		global $product;
 		$sequra = new SequraInvoiceGateway();
 		$theme  = $sequra->settings['widget_theme'];
+		$dest   = $sequra->dest_css_sel ? trim( $sequra->dest_css_sel ) : '#sequra_invoice_teaser';
 		include SequraHelper::template_loader( 'invoice-teaser' );
 	}
 

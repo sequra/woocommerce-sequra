@@ -81,12 +81,13 @@ function woocommerce_sequracampaign_init() {
 	 * @return void
 	 */
 	function sequracampaign_teaser() {
-		$gateways       = WC_Payment_Gateways::instance()->payment_gateways();
-		$sequracampaign = $gateways['sequracampaign'];
-		include SequraCampaignGateway::template_loader( 'campaign_teaser' );
+		$sequracampaign = new SequraCampaignGateway();
+		$theme  = $sequracampaign->settings['widget_theme'];
+		$dest   = $sequracampaign->dest_css_sel ? trim( $sequracampaign->dest_css_sel ) : '#sequra_campaign_teaser';
+		include SequraCampaignGateway::template_loader( 'campaign-teaser' );
 	}
 
-	add_shortcode( 'sequracampaign_teaser', 'sequracampaign_teaser' );
+	add_shortcode( 'sequracampaign_teaser', 'sequracampaign-teaser' );
 	/**
 	 * Campaign teaser in product page
 	 */
