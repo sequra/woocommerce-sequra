@@ -6,7 +6,11 @@
  * Version: 4.8.0
  * Author: SeQura Engineering
  * Author URI: http://SeQura.es/
- * WC tested up to: 3.5.4
+ * WC tested up to: 3.5.5
+ * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
+ * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg
+ * BannerHigh: https://live.sequracdn.com/assets/images/logos/logo.svg
+ * BannerLow: https://live.sequracdn.com/assets/images/logos/logo.svg
  *
  * @package woocommerce-sequra
  */
@@ -14,6 +18,15 @@
 define( 'SEQURA_VERSION', '4.8.0' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
+
+require_once plugin_dir_path( __FILE__ ) . 'lib/wp-package-updater/class-wp-package-updater.php';
+$kk = __FILE__;
+$prefix_updater = new WP_Package_Updater(
+	'https://engineering.sequra.es',
+	wp_normalize_path( __FILE__ ),
+	wp_normalize_path( plugin_dir_path( __FILE__ ) )
+);
+
 /**
  * Run once on plugin activation
  */
