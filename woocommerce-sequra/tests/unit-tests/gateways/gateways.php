@@ -3,7 +3,7 @@
 /**
  * Unit tests for gateways.
  *
- * @package WooCommerceSeQura\Tests\Gateways
+ * @package WooCommerceSequra\Tests\Gateways
  */
 class WCSQ_Tests_Gateways extends WC_Unit_Test_Case {
 
@@ -53,7 +53,7 @@ class WCSQ_Tests_Gateways extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test for SeQura supports() method.
+	 * Test for Sequra supports() method.
 	 */
 	public function test_sequra_can_refund_order() {
 		$order = WC_Helper_Order::create_order();
