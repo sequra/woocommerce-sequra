@@ -10,7 +10,16 @@
  */
 define('SEQURA_VERSION', '4.7.5');
 
-register_activation_hook(__FILE__, 'sequra_activation');
+register_activation_hook( __FILE__, 'sequra_activation' );
+
+require_once plugin_dir_path( __FILE__ ) . 'lib/wp-package-updater/class-wp-package-updater.php';
+$kk = __FILE__;
+$prefix_updater = new WP_Package_Updater(
+	'https://engineering.sequra.es',
+	wp_normalize_path( __FILE__ ),
+	wp_normalize_path( plugin_dir_path( __FILE__ ) )
+);
+
 /**
  * Run once on plugin activation
  */
