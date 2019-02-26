@@ -378,7 +378,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	protected function feeOrHandling( $name, $amount ) {
 		$item = array();
-		if ( 'Recargo "Recibe primero, paga después"' === $name ) {
+		if ( 'Recargo "Compra primero, paga después"' === $name ) {
 			$item['type'] = 'invoice_fee';
 		} else {
 			$item['type']      = 'handling';

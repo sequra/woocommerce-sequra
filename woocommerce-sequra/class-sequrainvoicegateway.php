@@ -17,9 +17,9 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		$this->id   = 'sequra_i';
 		$this->icon = sequra_get_script_basesurl() . 'images/badges/invoicing.svg';
 
-		$this->method_title       = __( 'Recibe primero, paga después', 'wc_sequra' );
+		$this->method_title       = __( 'Compra primero, paga después', 'wc_sequra' );
 		$this->method_description = __(
-			'Allows payments by \'Recibe primero, paga después\', service ofered by Sequra.',
+			'Allows payments by \'Compra primero, paga después\', service ofered by Sequra.',
 			'wc_sequra'
 		);
 		$this->supports           = array(
@@ -241,7 +241,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		<p>
 		<?php
 		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá dar la opción de "Recibe primero, paga después" en su comercio. Para ello necesitará una cuenta de vendedor en Sequra.', 'wc_sequra' ),
+			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá dar la opción de "Compra primero, paga después" en su comercio. Para ello necesitará una cuenta de vendedor en Sequra.', 'wc_sequra' ),
 			array( 'a' => 'href' )
 		);
 		?>
@@ -282,7 +282,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		) {
 			return;
 		}
-		$cart->add_fee( __( 'Recargo "Recibe primero, paga después"', 'wc_sequra' ), $this->fee, false );
+		$cart->add_fee( __( 'Recargo "Compra primero, paga después"', 'wc_sequra' ), $this->fee, false );
 	}
 	/**
 	 * Undocumented function
