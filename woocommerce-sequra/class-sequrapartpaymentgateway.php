@@ -16,7 +16,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	public function __construct() {
 		do_action( 'woocommerce_sequra_pp_before_load', $this );
 		$this->id                 = 'sequra_pp';
-		$this->icon               = sequra_get_script_basesurl() . 'images/badges/part_payment.svg';
+		$this->icon               = sequra_get_script_basesurl() . 'images/badges/part_payment_s.svg';
 		$this->method_title       = __( 'Pago flexible', 'wc_sequra' );
 		$this->method_description = __( 'Allows payments part payments, service ofered by Sequra.', 'wc_sequra' );
 		$this->supports           = array(

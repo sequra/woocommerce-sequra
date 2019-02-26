@@ -34,7 +34,7 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 		$this->title                 = $this->settings['title'];
 		$this->product               = 'pp5';// not an option.
 		$this->campaign              = $this->settings['campaign'];
-		$this->icon                  = sequra_get_script_basesurl() . 'images/badges/campaign.svg';
+		$this->icon                  = sequra_get_script_basesurl() . 'images/badges/campaign_s.svg';
 		$this->enable_for_countries  = array( 'ES' );
 		$this->enable_for_currencies = array( 'EUR' );
 		$this->has_fields            = true;

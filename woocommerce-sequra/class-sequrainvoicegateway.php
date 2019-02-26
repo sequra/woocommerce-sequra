@@ -15,7 +15,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 	public function __construct() {
 		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id   = 'sequra_i';
-		$this->icon = sequra_get_script_basesurl() . 'images/badges/invoicing.svg';
+		$this->icon = sequra_get_script_basesurl() . 'images/badges/invoicing_s.svg';
 
 		$this->method_title       = __( 'Compra primero, paga después', 'wc_sequra' );
 		$this->method_description = __(
