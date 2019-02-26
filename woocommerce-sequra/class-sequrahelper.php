@@ -42,7 +42,7 @@ class SequraHelper {
 	 * @param mixed $pm SequraInvoiceGateway or SequraPartPaymentGateway.
 	 */
 	public function __construct( $pm ) {
-		$this->pm           = $pm;
+		$this->pm            = $pm;
 		$this->identity_form = null;
 		$this->dir           = dirname( __FILE__ ) . '/';
 		require_once $this->dir . 'vendor/autoload.php';
@@ -196,7 +196,7 @@ class SequraHelper {
 		if ( ! class_exists( 'SequraBuilderWC' ) ) {
 			require_once $this->dir . 'class-sequrabuilderwc.php';
 		}
-		$builder_class  = apply_filters( 'sequra_setbuilder_class', 'SequraBuilderWC' );
+		$builder_class = apply_filters( 'sequra_setbuilder_class', 'SequraBuilderWC' );
 		$this->builder = new $builder_class( $this->pm->core_settings['merchantref'], $order );
 
 		return $this->builder;
@@ -328,7 +328,7 @@ class SequraHelper {
 				'wc_sequra'
 			)
 		) . '</p>';
-		$options = array( 'product' => $this->pm->product );
+		$options               = array( 'product' => $this->pm->product );
 		$options['rebranding'] = 'true'; // Temporarly.
 		$this->get_identity_form(
 			apply_filters( 'wc_sequra_pumbaa_options', $options, $order, $this->pm ),

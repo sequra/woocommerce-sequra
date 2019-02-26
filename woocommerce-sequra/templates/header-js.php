@@ -7,9 +7,9 @@
 
 ?>
 <script type="text/javascript">
-// phpcs:disable
+<?php // phpcs:disable ?>
 var sequraProducts = ['<?php echo implode( "','", $available_products ); ?>'];
-// phpcs:enable
+<?php // phpcs:enable ?>
 var sequraConfigParams = {
 	merchant: '<?php echo esc_html( $core_settings['merchantref'] ); ?>',
 	assetKey: '<?php echo esc_html( $core_settings['assets_secret'] ); ?>',

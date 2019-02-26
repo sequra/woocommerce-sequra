@@ -13,9 +13,9 @@
 	/*********************/
 
 	function displaySequraPatpaymentTeaser() {
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+		<?php // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		var the_price_container = '<?php echo $price_container; ?>';
-		// phpcs:enable
+		<?php // phpcs:enable ?>
 		var dest = '#sequra_partpayment_teaser_default_container';
 		if (jQuery('.woocommerce-variation-price').length) {
 			dest = '.woocommerce-variation-price';

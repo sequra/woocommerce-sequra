@@ -116,7 +116,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 				'description' => __( 'Widget visualization params', 'wc_sequra' ),
 				'default'     => 'white',
 			),
-			'dest_css_sel'  => array(
+			'dest_css_sel' => array(
 				'title'       => __( 'CSS selector for teaser', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __(
