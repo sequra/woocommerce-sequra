@@ -19,7 +19,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 
 		$this->method_title       = __( 'Recibe primero, paga después', 'wc_sequra' );
 		$this->method_description = __(
-			'Allows payments by \'Recibe primero, paga después\', service ofered by SeQura.',
+			'Allows payments by \'Recibe primero, paga después\', service ofered by Sequra.',
 			'wc_sequra'
 		);
 		$this->supports           = array(
@@ -92,7 +92,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 			'enabled'      => array(
 				'title'       => __( 'Enable/Disable', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Habilitar pasarela SeQura', 'wc_sequra' ),
+				'description' => __( 'Habilitar pasarela Sequra', 'wc_sequra' ),
 				'default'     => 'no',
 			),
 			'title'        => array(
@@ -105,7 +105,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 				'title'       => __( 'Max order amount', 'wc_sequra' ),
 				'type'        => 'number',
 				'description' => __(
-					'SeQura payment method will be unavailable for orders beyond this amount',
+					'Sequra payment method will be unavailable for orders beyond this amount',
 					'wc_sequra'
 				),
 				'default'     => '400',
@@ -224,7 +224,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 
 
 	/**
-	 * There might be payment fields for SeQura, and we want to show the description if set.
+	 * There might be payment fields for Sequra, and we want to show the description if set.
 	 * */
 	public function payment_fields() {
 		$payment_fields = apply_filters( 'woocommerce_sequra_payment_fields', array(), $this );
@@ -241,7 +241,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		<p>
 		<?php
 		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Recibe primero, paga después" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.', 'wc_sequra' ),
+			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá dar la opción de "Recibe primero, paga después" en su comercio. Para ello necesitará una cuenta de vendedor en Sequra.', 'wc_sequra' ),
 			array( 'a' => 'href' )
 		);
 		?>

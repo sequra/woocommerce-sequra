@@ -1,12 +1,12 @@
 <?php
 /**
- * SeQura Gateway class.
+ * Sequra Gateway class.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * Pasarela SeQura Gateway Class
+ * Pasarela Sequra Gateway Class
  * */
 class SequraPaymentGateway extends WC_Payment_Gateway {
 	/**
@@ -25,8 +25,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
 
-		$this->method_title       = __( 'Configuración SeQura', 'wc_sequra' );
-		$this->method_description = __( 'Configurtación para los métodos de pago SeQura', 'wc_sequra' );
+		$this->method_title       = __( 'Configuración Sequra', 'wc_sequra' );
+		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'wc_sequra' );
 		$this->supports           = array(
 			'products',
 		);
@@ -63,27 +63,27 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		}
 		$this->form_fields = array(
 			'merchantref'        => array(
-				'title'       => __( 'SeQura Merchant Reference', 'wc_sequra' ),
+				'title'       => __( 'Sequra Merchant Reference', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Id de comerciante proporcionado por SeQura.', 'wc_sequra' ),
+				'description' => __( 'Id de comerciante proporcionado por Sequra.', 'wc_sequra' ),
 				'default'     => '',
 			),
 			'user'               => array(
-				'title'       => __( 'SeQura Username', 'wc_sequra' ),
+				'title'       => __( 'Sequra Username', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Usuario proporcionado por SeQura.', 'wc_sequra' ),
+				'description' => __( 'Usuario proporcionado por Sequra.', 'wc_sequra' ),
 				'default'     => '',
 			),
 			'password'           => array(
 				'title'       => __( 'Password', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Password proporcionada por SeQura.', 'wc_sequra' ),
+				'description' => __( 'Password proporcionada por Sequra.', 'wc_sequra' ),
 				'default'     => '',
 			),
 			'assets_secret'      => array(
 				'title'       => __( 'Assets secret', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Código proporcionada por SeQura.', 'wc_sequra' ),
+				'description' => __( 'Código proporcionada por Sequra.', 'wc_sequra' ),
 				'default'     => '',
 			),
 			'enable_for_methods' => array(
@@ -92,7 +92,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'class'             => 'chosen_select',
 				'css'               => 'width: 450px;',
 				'default'           => '',
-				'description'       => __( 'If SeQura is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'wc_sequra' ),
+				'description'       => __( 'If Sequra is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'wc_sequra' ),
 				'options'           => $shipping_methods,
 				'desc_tip'          => true,
 				'custom_attributes' => array(
@@ -101,9 +101,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			),
 			'enable_for_virtual' => array(
 				'title'       => __( 'Enable for virtual orders', 'wc_sequra' ),
-				'label'       => __( 'Enable SeQura for services', 'wc_sequra' ),
+				'label'       => __( 'Enable Sequra for services', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Your contract must allow selling services, SeQura will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'wc_sequra' ),
+				'description' => __( 'Your contract must allow selling services, Sequra will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'wc_sequra' ),
 				'default'     => 'no',
 			),
 		);
@@ -174,11 +174,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * */
 	public function admin_options() {
 		?>
-		<h3><?php esc_html_e( 'Configuración SeQura', 'wc_sequra' ); ?></h3>
+		<h3><?php esc_html_e( 'Configuración Sequra', 'wc_sequra' ); ?></h3>
 		<p>
 		<?php
 		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'wc_sequra' ),
+			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con Sequra.', 'wc_sequra' ),
 			array( 'a' => 'href' )
 		);
 		?>

@@ -6,7 +6,7 @@
  */
 
 /**
- * Pasarela SeQura Gateway Class
+ * Pasarela Sequra Gateway Class
  * */
 class SequraCampaignGateway extends WC_Payment_Gateway {
 	/**
@@ -16,8 +16,8 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequracampaign_before_load', $this );
 		$this->id = 'sequracampaign';
 
-		$this->method_title       = __( 'Campaña SeQura', 'wc_sequracampaign' );
-		$this->method_description = __( 'Allows special campaign, service ofered by SeQura.', 'wc_sequracampaign' );
+		$this->method_title       = __( 'Campaña Sequra', 'wc_sequracampaign' );
+		$this->method_description = __( 'Allows special campaign, service ofered by Sequra.', 'wc_sequracampaign' );
 		$this->supports           = array(
 			'products',
 		);
@@ -110,7 +110,7 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 			'campaign'     => array(
 				'title'       => __( 'Campaign code', 'wc_sequracampaign' ),
 				'type'        => 'text',
-				'description' => __( 'Campaign code provided by SeQura.', 'wc_sequracampaign' ),
+				'description' => __( 'Campaign code provided by Sequra.', 'wc_sequracampaign' ),
 				'default'     => __( 'code', 'wc_sequracampaign' ),
 			),
 			'widget_theme' => array(
@@ -209,7 +209,7 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * There might be payment fields for SeQura, and we want to show the description if set.
+	 * There might be payment fields for Sequra, and we want to show the description if set.
 	 * */
 	public function payment_fields() {
 		require self::template_loader( 'campaign-fields' );
@@ -240,8 +240,8 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 	 * */
 	public function admin_options() {
 		?>
-		<h3><?php esc_html_e( 'Campañas SeQura', 'wc_sequracampaign' ); ?></h3>
-		<p><?php esc_html_e( 'Permite ofrecer campañas especiales de SeQura', 'wc_sequracampaign' ); ?></p>
+		<h3><?php esc_html_e( 'Campañas Sequra', 'wc_sequracampaign' ); ?></h3>
+		<p><?php esc_html_e( 'Permite ofrecer campañas especiales de Sequra', 'wc_sequracampaign' ); ?></p>
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><!--/.form-table-->

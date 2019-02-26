@@ -18,7 +18,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->id                 = 'sequra_pp';
 		$this->icon               = sequra_get_script_basesurl() . 'images/badges/part_payment.svg';
 		$this->method_title       = __( 'Fraccionar pago', 'wc_sequra' );
-		$this->method_description = __( 'Allows payments part payments, service ofered by SeQura.', 'wc_sequra' );
+		$this->method_description = __( 'Allows payments part payments, service ofered by Sequra.', 'wc_sequra' );
 		$this->supports           = array(
 			'products',
 		);
@@ -89,7 +89,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			'enabled'       => array(
 				'title'       => __( 'Enable/Disable', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Habilitar pasarela SeQura', 'wc_sequra' ),
+				'description' => __( 'Habilitar pasarela Sequra', 'wc_sequra' ),
 				'default'     => 'no',
 			),
 			'title'         => array(
@@ -187,7 +187,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * There might be payment fields for SeQura, and we want to show the description if set.
+	 * There might be payment fields for Sequra, and we want to show the description if set.
 	 * */
 	public function payment_fields() {
 		require SequraHelper::template_loader( 'partpayment-fields' );
@@ -199,11 +199,11 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * */
 	public function admin_options() {
 		?>
-		<h3><?php esc_html_e( 'Pasarela SeQura', 'wc_sequra' ); ?></h3>
+		<h3><?php esc_html_e( 'Pasarela Sequra', 'wc_sequra' ); ?></h3>
 		<p>
 		<?php
 		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">SeQura</a> para Woocommerce le permitirá dar la opción de "Fraccionar pago" en su comercio. Para ello necesitará una cuenta de vendedor en SeQura.', 'wc_sequra' ),
+			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá dar la opción de "Fraccionar pago" en su comercio. Para ello necesitará una cuenta de vendedor en Sequra.', 'wc_sequra' ),
 			array( 'a' => 'href' )
 		);
 		?>
@@ -232,7 +232,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Undocumented function
 	 *
-	 * @param array $products SeQura's products.
+	 * @param array $products Sequra's products.
 	 * @return array
 	 */
 	public static function available_products( $products ) {

@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Pasarela de pago para SeQura
+ * Plugin Name: Pasarela de pago para Sequra
  * Plugin URI: http://sequra.es/
- * Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
+ * Description: Da la opción a tus clientes usar los servicios de Sequra para pagar.
  * Version: 4.8.0
- * Author: SeQura Engineering
- * Author URI: http://SeQura.es/
+ * Author: Sequra Engineering
+ * Author URI: http://Sequra.es/
  * WC tested up to: 3.5.5
  * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
  * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg

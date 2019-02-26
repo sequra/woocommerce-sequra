@@ -12,28 +12,28 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	const HASH_ALGO = 'sha256';
 
 	/**
-	 * Cart with info to build the order for SeQura
+	 * Cart with info to build the order for Sequra
 	 *
 	 * @var null|WC_Cart
 	 */
 	protected $_cart = null;
 
 	/**
-	 * List of shipped order's id tos inform to SeQura with
+	 * List of shipped order's id tos inform to Sequra with
 	 *
 	 * @var array
 	 */
 	protected $_shipped_ids = array();
 
 	/**
-	 * List of shipped order's id tos inform to SeQura with
+	 * List of shipped order's id tos inform to Sequra with
 	 *
 	 * @var array
 	 */
 	protected $_building_report = false;
 
 	/**
-	 * SeQura payment module from whiich builder is being used
+	 * Sequra payment module from whiich builder is being used
 	 *
 	 * @var array
 	 */
@@ -43,7 +43,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * SequraBuilderWC constructor.
 	 *
 	 * @param string        $merchant_id Merchant ID as provided in credential.
-	 * @param null|WC_Order $order Order with the info to send to SeQura.
+	 * @param null|WC_Order $order Order with the info to send to Sequra.
 	 */
 	public function __construct( $merchant_id, WC_Order $order = null ) {
 		$this->merchant_id = $merchant_id;
@@ -732,7 +732,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	}
 
 	/**
-	 * Get SeQura language code
+	 * Get Sequra language code
 	 *
 	 * @return string
 	 * */

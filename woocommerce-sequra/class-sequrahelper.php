@@ -245,7 +245,7 @@ class SequraHelper {
 		);
 		if ( $approval ) {
 			// Payment completed.
-			$order->add_order_note( __( 'Payment accepted by SeQura', 'wc_sequra' ) );
+			$order->add_order_note( __( 'Payment accepted by Sequra', 'wc_sequra' ) );
 			$this->add_payment_info_to_post_meta( $order );
 			$order->payment_complete();
 		}
@@ -324,7 +324,7 @@ class SequraHelper {
 		$order = new WC_Order( $order_id );
 		echo '<p>' . wp_kses_post(
 			__(
-				'Thank you for your order, please click the button below to pay with SeQura.',
+				'Thank you for your order, please click the button below to pay with Sequra.',
 				'wc_sequra'
 			)
 		) . '</p>';

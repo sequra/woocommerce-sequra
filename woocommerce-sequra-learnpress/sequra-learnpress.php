@@ -1,11 +1,11 @@
 <?php
 /*
-  Plugin Name: Adaptador módulo SeQura Woocommerce - LearnPress
+  Plugin Name: Adaptador módulo Sequra Woocommerce - LearnPress
   Plugin URI: http://sequra.es/
-  Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
+  Description: Da la opción a tus clientes usar los servicios de Sequra para pagar.
   Version: 1.0.0
-  Author: SeQura Engineering
-  Author URI: http://SeQura.es/
+  Author: Sequra Engineering
+  Author URI: http://Sequra.es/
  */
 
 /**
