@@ -132,5 +132,6 @@ var SequraHelper = {
 .sequra-educational-popup {
 	white-space: nowrap;
 	color: #009C5C;
+	cursor: pointer;
 }
 </style>
