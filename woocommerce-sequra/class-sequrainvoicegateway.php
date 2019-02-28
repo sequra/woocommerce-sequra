@@ -99,7 +99,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 				'title'       => __( 'Title', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'wc_sequra' ),
-				'default'     => __( 'Compra ahora, paga después', 'wc_sequra' ),
+				'default'     => __( 'Paga en 7 días', 'wc_sequra' ),
 			),
 			'max_amount'   => array(
 				'title'       => __( 'Max order amount', 'wc_sequra' ),
