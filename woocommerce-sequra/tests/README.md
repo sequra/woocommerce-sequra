@@ -1,4 +1,4 @@
-# WooCommerce Sequra Unit Tests
+# WooCommerce SeQura Unit Tests
 
 ## Initial Setup
 

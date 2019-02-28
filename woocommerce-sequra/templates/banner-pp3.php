@@ -21,13 +21,13 @@ if ( isset( $atts['color'] ) ) { ?>
 <?php } ?>
 <div id="sequra-banner-partpayment" class="sequra-banner">
 	<div id="block1" class="sqblock">
-		<span class="sqheader">FRACCIONA TU COMPRA</span>
+		<span class="sqheader">PAGO FLEXIBLE</span>
 	</div>
 	<div id="block2" class="sqblock">
 		<span class="sqnoc icon-puzzle">&nbsp;</span>
 		<div class="sqinner">
-			<span class="sqheader">Fracciona tu compra</span>
-			<span class="sqcontent">Fracciona tu compra en nuestra tienda.</span>
+			<span class="sqheader">Fracciona tu pago</span>
+			<span class="sqcontent">Fracciona tu pago en nuestra tienda.</span>
 		</div>
 	</div>
 	<div id="block3" class="sqblock">

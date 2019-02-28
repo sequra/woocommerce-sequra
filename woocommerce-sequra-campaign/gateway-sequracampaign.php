@@ -4,7 +4,7 @@
  * Plugin URI: http://sequra.es/
  * Description: Da la opción pago para campañas especiales de Sequra.
  * Version: 4.8.0
- * Author: Sequra Engineering
+ * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
  * WC tested up to: 3.5.4
  *

@@ -1,12 +1,12 @@
 <?php
 /**
- * Sequra Invoice Gateway.
+ * SeQura Invoice Gateway.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * Sequra Invoice Gateway.
+ * SeQura Invoice Gateway.
  */
 class SequraInvoiceGateway extends WC_Payment_Gateway {
 	/**
@@ -287,7 +287,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 	/**
 	 * Undocumented function
 	 *
-	 * @param array $products Sequra Products.
+	 * @param array $products SeQura Products.
 	 * @return array
 	 */
 	public static function available_products( $products ) {

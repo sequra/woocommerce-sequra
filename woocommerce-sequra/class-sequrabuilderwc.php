@@ -19,21 +19,21 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	protected $_cart = null;
 
 	/**
-	 * List of shipped order's id tos inform to Sequra with
+	 * List of shipped order's id tos inform to SeQura with
 	 *
 	 * @var array
 	 */
 	protected $_shipped_ids = array();
 
 	/**
-	 * List of shipped order's id tos inform to Sequra with
+	 * List of shipped order's id tos inform to SeQura with
 	 *
 	 * @var array
 	 */
 	protected $_building_report = false;
 
 	/**
-	 * Sequra payment module from whiich builder is being used
+	 * SeQura payment module from whiich builder is being used
 	 *
 	 * @var array
 	 */
@@ -732,7 +732,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	}
 
 	/**
-	 * Get Sequra language code
+	 * Get SeQura language code
 	 *
 	 * @return string
 	 * */

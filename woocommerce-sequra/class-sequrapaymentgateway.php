@@ -1,12 +1,12 @@
 <?php
 /**
- * Sequra Gateway class.
+ * SeQura Gateway class.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * Pasarela Sequra Gateway Class
+ * Pasarela SeQura Gateway Class
  * */
 class SequraPaymentGateway extends WC_Payment_Gateway {
 	/**
@@ -92,7 +92,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'class'             => 'chosen_select',
 				'css'               => 'width: 450px;',
 				'default'           => '',
-				'description'       => __( 'If Sequra is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'wc_sequra' ),
+				'description'       => __( 'If SeQura is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'wc_sequra' ),
 				'options'           => $shipping_methods,
 				'desc_tip'          => true,
 				'custom_attributes' => array(
@@ -101,9 +101,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			),
 			'enable_for_virtual' => array(
 				'title'       => __( 'Enable for virtual orders', 'wc_sequra' ),
-				'label'       => __( 'Enable Sequra for services', 'wc_sequra' ),
+				'label'       => __( 'Enable SeQura for services', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Your contract must allow selling services, Sequra will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'wc_sequra' ),
+				'description' => __( 'Your contract must allow selling services, SeQura will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'wc_sequra' ),
 				'default'     => 'no',
 			),
 		);

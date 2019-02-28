@@ -1,6 +1,6 @@
 {
     "name": "sequra/woocommerce-sequra-campaign",
-    "description": "Campaigns for Sequra payment gateway for WooCommerce",
+    "description": "Campaigns for SeQura payment gateway for WooCommerce",
     "type": "wordpress-plugin",
     "require-dev": {
         "phpunit/phpunit": "6.*",

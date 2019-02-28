@@ -1,4 +1,4 @@
-=== Pasarela de pago para Sequra ===
+=== Pasarela de pago para SeQura ===
 Tags: woocommerce, payment, gateway
 Requires at least: 4.0
 Tested up to: 5.1

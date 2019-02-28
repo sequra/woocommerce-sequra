@@ -163,7 +163,7 @@ class SequraHelper {
 	}
 
 	/**
-	 * Get Sequra http client
+	 * Get SeQura http client
 	 *
 	 * @return \Sequra\Client
 	 */
@@ -184,7 +184,7 @@ class SequraHelper {
 	}
 
 	/**
-	 * Get Sequra Builder
+	 * Get SeQura Builder
 	 *
 	 * @param WC_Order $order input order to build data.
 	 * @return SequraBuilderWC

@@ -1,12 +1,12 @@
 <?php
 /**
- * Sequra Reporter class.
+ * SeQura Reporter class.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * Sequra Rrporter Class
+ * SeQura Rrporter Class
  * */
 class SequraReporter {
 	/**

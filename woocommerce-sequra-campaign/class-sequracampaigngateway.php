@@ -1,12 +1,12 @@
 <?php
 /**
- * Sequra Campaign Gateway.
+ * SeQura Campaign Gateway.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * Pasarela Sequra Gateway Class
+ * Pasarela SeQura Gateway Class
  * */
 class SequraCampaignGateway extends WC_Payment_Gateway {
 	/**

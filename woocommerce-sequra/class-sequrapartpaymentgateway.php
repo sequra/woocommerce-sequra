@@ -1,12 +1,12 @@
 <?php
 /**
- * Sequra Part Payment Payment Gateway.
+ * SeQura Part Payment Payment Gateway.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * Sequra Part Payment Payment Gateway.
+ * SeQura Part Payment Payment Gateway.
  */
 class SequraPartPaymentGateway extends WC_Payment_Gateway {
 

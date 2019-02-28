@@ -22,7 +22,7 @@ if ( isset( $atts['color'] ) ) { ?>
 
 <div id="sequra-banner-invoice" class="sequra-banner">
 	<div id="block1" class="sqblock">
-		<span class="sqheader">RECIBE PRIMERO PAGA DESPU&Eacute;S</span>
+		<span class="sqheader">COMPRA AHORA, PAGA DESPU&Eacute;S</span>
 	</div>
 	<div id="block2" class="sqblock">
 		<span class="sqnoc icon-puzzle">&nbsp;</span>

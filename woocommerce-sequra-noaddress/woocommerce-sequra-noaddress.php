@@ -1,10 +1,10 @@
 <?php
 /*
-  Plugin Name: Sequra No Address
+  Plugin Name: SeQura No Address
   Plugin URI: http://sequra.es/
-  Description: Parche para que sea Sequra quien pida las direcciones.
+  Description: Parche para que sea SeQura quien pida las direcciones.
   Version: 1.0.0
-  Author: Sequra Engineering
+  Author: SeQura Engineering
   Author URI: http://Sequra.es/
  */
 

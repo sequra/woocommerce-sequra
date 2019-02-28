@@ -6,12 +6,12 @@
  */
 
 ?>
-<div class="sequra-promotion-widget"
-	data-amount="<?php echo intval( $this->get_order_total() * 100 ); ?>"
-	data-product="i1"
-	data-type="text"
-	data-branding="none"
-	data-alignment="left"></div>
+Compra sin dejar tarjeta ni datos bancarios,
+sin registros, papeleos ni costes adicionales.
+Tienes 7 días desde el envío de tu pedido para pagar. 
+<span id="sequra_invoice_method_link"
+	class="sequra-educational-popup"
+	data-product="i1"> + info</span>
 <script>
 	Sequra.onLoad( function () {Sequra.refreshComponents();});
 </script>
