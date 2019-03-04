@@ -234,7 +234,7 @@ function woocommerce_sequra_init() {
 		add_filter( 'woocommerce_payment_gateways', 'add_sequra_invoice_gateway' );
 	} else {
 		if ( ! class_exists( 'Sequra_Meta_Box_Service_End_Date' ) ) {
-			require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/Sequra_Meta_Box_Service_End_Date.php';
+			require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php';
 		}
 		add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Service_End_Date::save', 20, 2 );
 		add_action( 'add_meta_boxes', 'Sequra_Meta_Box_Service_End_Date::add_meta_box' );
