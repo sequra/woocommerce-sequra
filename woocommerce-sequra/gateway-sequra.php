@@ -3,7 +3,7 @@
  * Plugin Name: Pasarela de pago para Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
- * Version: 4.8.0
+ * Version: 4.8.1
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
  * WC tested up to: 3.5.5
@@ -15,7 +15,7 @@
  * @package woocommerce-sequra
  */
 
-define( 'SEQURA_VERSION', '4.8.0' );
+define( 'SEQURA_VERSION', '4.8.1' );
 
 register_activation_hook( __FILE__, 'sequra_activation' );
 
@@ -89,7 +89,7 @@ add_action( 'sequra_send_daily_delivery_report', 'sequra_send_daily_delivery_rep
  */
 function sequra_send_daily_delivery_report() {
 	if ( ! class_exists( 'SequraReporter' ) ) {
-		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/SequraReporter.php';
+		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/class-sequrareporter.php';
 	}
 	if ( SequraReporter::send_daily_delivery_report() === false ) {
 		die( 'KO' );
