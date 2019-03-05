@@ -10,6 +10,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Acepta pagos con los servicios de Sequra: "Compra ahora, paga después" y "Pago flexible"
 == Description ==
 
+Acepta pagos con los servicios de Sequra: "Compra ahora, paga después" y "Pago flexible"
 
 == Installation ==
 
@@ -24,6 +25,9 @@ In case of any trouble, please, contact sat@sequra.es
 == Screenshots ==
 
 == Changelog ==
+
+= 4.8.2 =
+* FIX partpayment banner template
 
 = 4.8.0 =
 * New branding
