@@ -7,14 +7,16 @@
 
 $data_amount = (string) $this->get_order_total() * 100;
 ?>
-<div id="sequra_partpayment_info_container" class="sequra_popup_embedded">
-</div>
-<b>Finaliza tu compra para poder elegir tu plan de pago 
-	<span id="sequra_partpayment_method_link"
-		class="sequra-educational-popup"
-		data-amount="<?php echo esc_html( $data_amount ); ?>"
-		data-product="pp3"> + info</span>
-
+<p>
+	<div id="sequra_partpayment_info_container" class="sequra_popup_embedded">
+	</div>
+	<b>Finaliza tu compra para poder elegir tu plan de pago 
+		<span id="sequra_partpayment_method_link"
+			class="sequra-educational-popup"
+			data-amount="<?php echo esc_html( $data_amount ); ?>"
+			data-product="pp3"> + info</span>
+	</b>
+</p>
 <script type="text/javascript">
 Sequra.onLoad(function () {
 	var creditAgreements = Sequra.computeCreditAgreements({

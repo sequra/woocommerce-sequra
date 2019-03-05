@@ -134,4 +134,7 @@ var SequraHelper = {
 	color: #009C5C;
 	cursor: pointer;
 }
+.sequra-promotion-widget[data-type="legacy"] {
+	max-width: 320px;
+}
 </style>
