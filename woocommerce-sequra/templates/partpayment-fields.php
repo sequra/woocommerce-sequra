@@ -7,15 +7,9 @@
 
 $data_amount = (string) $this->get_order_total() * 100;
 ?>
-<<<<<<< HEAD
 <div id="sequra_partpayment_info_container" class="sequra_popup_embedded">
 </div>
 <p>
-=======
-<p>
-	<div id="sequra_partpayment_info_container" class="sequra_popup_embedded">
-	</div>
->>>>>>> 19f1694c5d51433e94694f348c9131142255ce35
 	<b>Finaliza tu compra para poder elegir tu plan de pago 
 		<span id="sequra_partpayment_method_link"
 			class="sequra-educational-popup"

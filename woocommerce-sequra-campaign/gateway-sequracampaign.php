@@ -3,7 +3,7 @@
  * Plugin Name: Campañas Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción pago para campañas especiales de Sequra.
- * Version: 4.8.0
+ * Version: 4.8.3
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
  * WC tested up to: 3.5.4
@@ -37,7 +37,7 @@ add_action( 'sequra_upgrade_if_needed', 'sequracampaign_upgrade_if_needed' );
  * Upgrade campaign plugin and conditions if needed
  */
 function sequracampaign_upgrade_if_needed() {
-	if ( time() > get_option( 'sequracampaign_next_update' ) || isset( $_GET['sequra_campaign_reset_conditions'] ) ) {
+	if (time() > get_option( 'sequracampaign_next_update' ) || isset( $_GET['sequra_campaign_reset_conditions'] ) ) {
 		$core_settings = get_option( 'woocommerce_sequra_settings', array() );
 		$cost_url      = 'https://' .
 						( $core_settings['env'] ? 'sandbox' : 'live' ) .
@@ -45,10 +45,13 @@ function sequracampaign_upgrade_if_needed() {
 						$core_settings['merchantref'] . '/' .
 						$core_settings['assets_secret'] .
 						'/pp5_cost.json';
-		$json          = wp_remote_get( $cost_url );
-		update_option( 'sequracampaign_conditions', $json );
-		do_action( 'sequracampaign_updateconditions' );
-		update_option( 'sequracampaign_next_update', time() + 86400 );
+		$response      = wp_remote_get( $cost_url );
+		if ( is_array( $response ) && ! is_wp_error( $response ) ) {
+			update_option( 'sequracampaign_conditions', $response['body'] );
+			do_action( 'sequracampaign_updateconditions' );
+			update_option( 'sequracampaign_next_update', time() + 86400 );
+
+		}
 	}
 }
 
