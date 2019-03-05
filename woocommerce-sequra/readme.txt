@@ -26,6 +26,10 @@ In case of any trouble, please, contact sat@sequra.es
 
 == Changelog ==
 
+= 4.8.3 =
+* Limit legacy widget to 320px width
+* Fix checkout fields templates
+
 = 4.8.2 =
 * FIX partpayment banner template
 
