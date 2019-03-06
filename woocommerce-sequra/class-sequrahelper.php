@@ -143,7 +143,7 @@ class SequraHelper {
 	 */
 	public function is_available_for_ip() {
 		if ( '' !== $this->pm->core_settings['test_ips'] ) {
-			$ips         = explode( ',', $this->core_settings['test_ips'] );
+			$ips         = explode( ',', $this->pm->core_settings['test_ips'] );
 			$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 			return in_array( $remote_addr, $ips, true );
 		}
