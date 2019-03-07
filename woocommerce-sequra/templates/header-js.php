@@ -26,7 +26,14 @@ var sequraConfigParams = {
 //Helper
 var SequraHelper = {
 	presets: {
-		legacy: '{"type":"legacy"}'
+		L:         '{"alignment":"left"}',
+		R:         '{"alignment":"right"}',
+		legacy:    '{"type":"legacy"}',
+		legacyL:  '{"type":"legacy","alignment":"left"}',
+		legacyR:  '{"type":"legacy","alignment":"right"}',
+		minimal:   '{"type":"text","branding":"none","size":"S","starting-text":"as-low-as"}',
+		minimalL: '{"type":"text","branding":"none","size":"S","starting-text":"as-low-as","alignment":"left"}',
+		minimalR: '{"type":"text","branding":"none","size":"S","starting-text":"as-low-as","alignment":"right"}'
 	},
 	drawnWidgets: [],
 	getText: function (selector) {
