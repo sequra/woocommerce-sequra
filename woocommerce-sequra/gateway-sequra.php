@@ -6,7 +6,7 @@
  * Version: 4.8.4
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
- * WC tested up to: 3.5.7
+ * WC tested up to: 3.5.8
  * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
  * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg
  * BannerHigh: https://live.sequracdn.com/assets/images/logos/logo.svg
