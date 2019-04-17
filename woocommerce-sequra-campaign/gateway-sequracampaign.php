@@ -37,7 +37,7 @@ add_action( 'sequra_upgrade_if_needed', 'sequracampaign_upgrade_if_needed' );
  * Upgrade campaign plugin and conditions if needed
  */
 function sequracampaign_upgrade_if_needed() {
-	if (time() > get_option( 'sequracampaign_next_update' ) || isset( $_GET['sequra_campaign_reset_conditions'] ) ) {
+	if ( time() > get_option( 'sequracampaign_next_update' ) || isset( $_GET['sequra_campaign_reset_conditions'] ) ) {
 		$core_settings = get_option( 'woocommerce_sequra_settings', array() );
 		$cost_url      = 'https://' .
 						( $core_settings['env'] ? 'sandbox' : 'live' ) .

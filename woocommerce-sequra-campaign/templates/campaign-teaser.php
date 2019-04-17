@@ -10,10 +10,10 @@ if ( $sequracampaign->is_available() ) { ?>
 	<script type="text/javascript">
 		Sequra.onLoad(function(){
 			SequraHelper.drawPromotionWidget(
-				'<?php echo esc_js( $price_container ); ?>',
-				'<?php echo esc_js( $dest ); ?>',
+				'<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">",
+				'<?php echo esc_js( $dest ); ?>'.replace(/\&gt\;/g, ">",
 				'<?php echo esc_js( $sequracampaign->product ); ?>',
-				'<?php echo esc_js( $sequracampaign->settings['widget_theme'] ); ?>',
+				'<?php echo esc_js( $sequracampaign->settings['widget_theme'] ); ?>'.replace(/\&quot\;/g, "\""),
 				0,
 				'<?php echo esc_js( $sequracampaign->campaign ); ?>'
 			);

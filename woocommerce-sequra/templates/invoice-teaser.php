@@ -10,10 +10,10 @@ if ( $sequra->is_available() && $product->get_price() < $sequra->max_amount ) { 
 	<script type="text/javascript">
 		Sequra.onLoad(function(){
 			SequraHelper.drawPromotionWidget(
-				'<?php echo esc_js( $price_container ); ?>',
-				'<?php echo esc_js( $dest ); ?>',
+				'<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">",
+				'<?php echo esc_js( $dest ); ?>'.replace(/\&gt\;/g, ">",
 				'i1',
-				'<?php echo esc_js( $theme ); ?>',
+				'<?php echo esc_js( $theme ); ?>'.replace(/\&quot\;/g, "\""),
 				0
 			);
 			Sequra.refreshComponents();

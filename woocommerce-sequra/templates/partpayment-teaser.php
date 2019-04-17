@@ -8,31 +8,31 @@
 ?>
 <script type='text/javascript'>
 	/*Customize if needed*/
-	VARIATION_PRICE_SEL = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
+	VARIATION_PRICE_SEL = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount';
 
 	/*********************/
 
 	function displaySequraPatpaymentTeaser() {
-		<?php // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		var the_price_container = '<?php echo $price_container; ?>';
-		<?php // phpcs:enable ?>
+		var the_price_container = '<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">");
 		var dest = '#sequra_partpayment_teaser_default_container';
 		if (jQuery('.woocommerce-variation-price').length) {
 			dest = '.woocommerce-variation-price';
 		}
 		<?php if ( isset( $atts['dest'] ) && '' !== trim( $atts['dest'] ) ) { ?>
-		if (jQuery('<?php echo esc_js( $atts['dest'] ); ?>').is(':visible')) {
-			dest = '<?php echo esc_js( $atts['dest'] ); ?>';
+		var custom_dest = '<?php echo esc_js( $atts['dest'] ); ?>'.replace(/\&gt\;/g, ">");
+		if (jQuery(custom_dest).is(':visible')) {
+			dest = custom_dest;
 		}
 		<?php } ?>
-		SequraHelper.drawPromotionWidget(the_price_container, dest, 'pp3', '<?php echo esc_js( $theme ); ?>', 0);
+		var theme = '<?php echo esc_js( $theme ); ?>'.replace(/\&quot\;/g, "\"");
+		SequraHelper.drawPromotionWidget(the_price_container, dest, 'pp3', theme, 0);
 		Sequra.onLoad(function () {
 			Sequra.refreshComponents();
 		});
 	}
 
 	function updateSequraPatpaymentTeaser(e) {
-		var the_price_container = '<?php echo esc_js( $price_container ); ?>';
+		var the_price_container = '<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">");
 		if (e.type == 'show_variation' && jQuery(VARIATION_PRICE_SEL).length) {
 			the_price_container = VARIATION_PRICE_SEL;
 		}
