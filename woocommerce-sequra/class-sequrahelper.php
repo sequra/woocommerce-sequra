@@ -95,16 +95,6 @@ class SequraHelper {
 	public static function validate_service_end_date( $service_end_date ) {
 		return preg_match( '/' . self::ISO8601_PATTERN . '/', $service_end_date );
 	}
-	/**
-	 * Test if is admin url
-	 *
-	 * @return boolean
-	 */
-	public static function is_admin() {
-		$script_name = isset( $_SERVER['SCRIPT_NAME'] ) ?
-			sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
-		return ! is_admin() || 'admin-ajax.php' === basename( $script_name );
-	}
 
 	/**
 	 * Test if it is checkout url
@@ -112,11 +102,15 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public static function is_checkout() {
-		return get_the_ID() == wc_get_page_id( 'checkout' ) ||
+		$script_name = isset( $_SERVER['SCRIPT_NAME'] ) ? 
+			sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
+		$is_checkout = 'admin-ajax.php' === basename( $script_name ) ||
+			get_the_ID() == wc_get_page_id( 'checkout' ) ||
 			(
 				isset( $_SERVER['REQUEST_METHOD'] ) &&
 				'POST' === $_SERVER['REQUEST_METHOD']
 			);
+		return $is_checkout;
 	}
 	/**
 	 * Test if available for Country

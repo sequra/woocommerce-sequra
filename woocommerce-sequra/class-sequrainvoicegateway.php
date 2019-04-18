@@ -42,7 +42,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		$this->enabled = $this->settings['enabled'];
 
 		// Get setting values.
-		if ( SequraHelper::is_admin() ) {
+		if ( ! is_admin() ) {
 			$this->title = $this->settings['title'];
 		} else {
 			$this->title = wp_strip_all_tags( $this->settings['title'] );
@@ -147,52 +147,6 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		if ( is_product() && ! $this->is_available_in_product_page() ) {
 			return false;
 		}
-
-		if ( SequraHelper::is_admin() ) {
-			if ( ! empty( $this->core_settings['enable_for_methods'] ) ) {
-
-				// Only apply if all packages are being shipped via local pickup.
-				$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
-
-				if ( isset( $chosen_shipping_methods_session ) ) {
-					$chosen_shipping_methods = array_unique( $chosen_shipping_methods_session );
-				} else {
-					$chosen_shipping_methods = array();
-				}
-
-				$check_method = false;
-
-				if ( is_object( $order ) ) {
-					if ( $order->shipping_method ) {
-						$check_method = $order->shipping_method;
-					}
-				} elseif ( empty( $chosen_shipping_methods ) || count( $chosen_shipping_methods ) > 1 ) {
-					$check_method = false;
-				} elseif ( 1 === count( $chosen_shipping_methods ) ) {
-					$check_method = $chosen_shipping_methods[0];
-				}
-
-				if ( ! $check_method ) {
-					return false;
-				}
-
-				$found = false;
-
-				foreach ( $this->core_settings['enable_for_methods'] as $method_id ) {
-					if ( strpos( $check_method, $method_id ) === 0 ) {
-						$found = true;
-						break;
-					}
-				}
-
-				if ( ! $found ) {
-					return false;
-				}
-			}
-			if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
-				return false;
-			}
-		}
 		return $this->helper->is_available_for_country() &&
 				$this->helper->is_available_for_currency() &&
 				$this->helper->is_available_for_ip();
@@ -203,6 +157,48 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 	 * @return boolean
 	 */
 	public function is_available_in_checkout() {
+		if ( ! empty( $this->core_settings['enable_for_methods'] ) ) {
+			// Only apply if all packages are being shipped via local pickup.
+			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
+
+			if ( isset( $chosen_shipping_methods_session ) ) {
+				$chosen_shipping_methods = array_unique( $chosen_shipping_methods_session );
+			} else {
+				$chosen_shipping_methods = array();
+			}
+
+			$check_method = false;
+
+			if ( is_object( $order ) ) {
+				if ( $order->shipping_method ) {
+					$check_method = $order->shipping_method;
+				}
+			} elseif ( empty( $chosen_shipping_methods ) || count( $chosen_shipping_methods ) > 1 ) {
+				$check_method = false;
+			} elseif ( 1 === count( $chosen_shipping_methods ) ) {
+				$check_method = $chosen_shipping_methods[0];
+			}
+
+			if ( ! $check_method ) {
+				return false;
+			}
+
+			$found = false;
+
+			foreach ( $this->core_settings['enable_for_methods'] as $method_id ) {
+				if ( strpos( $check_method, $method_id ) === 0 ) {
+					$found = true;
+					break;
+				}
+			}
+
+			if ( ! $found ) {
+				return false;
+			}
+		}
+		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
+			return false;
+		}
 		return WC()->cart &&
 			WC()->cart->needs_shipping() &&
 			'yes' !== $this->core_settings['enable_for_virtual'];

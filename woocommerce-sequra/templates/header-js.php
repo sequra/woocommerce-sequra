@@ -7,7 +7,10 @@
 
 ?>
 <script type="text/javascript">
-var sequraProducts = ['<?php echo esc_js( implode( "','", $available_products ) ); ?>'];
+var sequraProducts = [];
+<?php foreach ( $available_products as $p ) { ?>
+sequraProducts.push('<?php echo esc_js( $p ); ?>');
+<?php } ?>
 var sequraConfigParams = {
 	merchant: '<?php echo esc_html( $core_settings['merchantref'] ); ?>',
 	assetKey: '<?php echo esc_html( $core_settings['assets_secret'] ); ?>',
