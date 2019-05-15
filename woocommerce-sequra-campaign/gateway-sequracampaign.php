@@ -12,6 +12,15 @@
  */
 
 register_activation_hook( __FILE__, 'sequracampaign_activation' );
+
+require_once plugin_dir_path( __FILE__ ) . 'lib/wp-package-updater/class-wp-package-updater.php';
+
+$prefix_updater = new WP_Package_Updater(
+	get_option( 'sequra_plugin_update_server', SEQURA_PLUGIN_UPDATE_SERVER ),
+	wp_normalize_path( __FILE__ ),
+	wp_normalize_path( plugin_dir_path( __FILE__ ) )
+);
+
 /**
  * Run once on plugin activation
  */
