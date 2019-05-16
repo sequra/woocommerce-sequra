@@ -25,6 +25,9 @@
         "dist": [
             "bash bin/build.sh"
 		],
+		"dist-dev": [
+            "bash bin/build-dev.sh"
+		],
 		"release": [
 			"bash bin/build.sh",
 			"bash bin/release.sh"

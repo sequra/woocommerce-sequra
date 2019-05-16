@@ -13,13 +13,5 @@
             "email": "dev@sequra.es"
         }
     ],
-    "minimum-stability": "dev",
-    "scripts": {
-		"dist": "bash ../woocommerce-sequra/bin/build.sh",
-		"release": "bash ../woocommerce-sequra/bin/release.sh"
-    },
-    "scripts-descriptions": {
-		"dist": "Create plugin sequra-payment.zip to distribute",
-		"release": "Create a release"
-    }
+    "minimum-stability": "dev"
 }

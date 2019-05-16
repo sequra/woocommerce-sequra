@@ -3,7 +3,7 @@
  * Plugin Name: Campañas Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción pago para campañas especiales de Sequra.
- * Version: 4.8.4
+ * Version: 4.8.5
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
  * WC tested up to: 3.5.8
@@ -12,14 +12,6 @@
  */
 
 register_activation_hook( __FILE__, 'sequracampaign_activation' );
-
-require_once plugin_dir_path( __FILE__ ) . 'lib/wp-package-updater/class-wp-package-updater.php';
-
-$prefix_updater = new WP_Package_Updater(
-	get_option( 'sequra_plugin_update_server', SEQURA_PLUGIN_UPDATE_SERVER ),
-	wp_normalize_path( __FILE__ ),
-	wp_normalize_path( plugin_dir_path( __FILE__ ) )
-);
 
 /**
  * Run once on plugin activation
@@ -70,6 +62,14 @@ add_action( 'woocommerce_sequra_plugin_loaded', 'woocommerce_sequracampaign_init
  * Init plugin
  */
 function woocommerce_sequracampaign_init() {
+	require_once WC_SEQURA_PLG_PATH . '/lib/wp-package-updater/class-wp-package-updater.php';
+
+	$campaign_updater = new WP_Package_Updater(
+		get_option( 'sequra_plugin_update_server', SEQURA_PLUGIN_UPDATE_SERVER ),
+		wp_normalize_path( __FILE__ ),
+		wp_normalize_path( plugin_dir_path( __FILE__ ) )
+	);
+
 	load_plugin_textdomain( 'wc_sequracampaign', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	if ( ! class_exists( 'SequraCampaignGateway' ) ) {
 		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/class-sequracampaigngateway.php';
