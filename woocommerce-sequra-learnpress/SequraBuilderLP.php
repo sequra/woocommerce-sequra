@@ -52,7 +52,7 @@ class SequraBuilderLP extends SequraBuilderWC {
 			// OPTIONAL
 			$item["description"] = strip_tags( self::notNull( get_post( $cart_item->get_id() )->post_content ) );
 			$item["product_id"]  = self::notNull( $cart_item->get_id() );
-			$item["url"]         = self::notNull( get_permalink( $cart_item->get_id() ) );
+			$item["url"]         = (string) self::notNull( get_permalink( $cart_item->get_id() ) );
 			//$item["category"]    = self::notNull( strip_tags( $_product->get_categories() ) );
 			/*@TODO: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
 			$items[] = $item;

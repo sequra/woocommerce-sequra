@@ -190,7 +190,7 @@ class SequraHelper {
 		if ( ! class_exists( 'SequraBuilderWC' ) ) {
 			require_once $this->dir . 'class-sequrabuilderwc.php';
 		}
-		$builder_class = apply_filters( 'sequra_setbuilder_class', 'SequraBuilderWC' );
+		$builder_class = apply_filters( 'sequra_set_builder_class', 'SequraBuilderWC' );
 		$this->builder = new $builder_class( $this->pm->core_settings['merchantref'], $order );
 
 		return $this->builder;
