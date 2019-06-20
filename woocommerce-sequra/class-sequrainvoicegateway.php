@@ -132,9 +132,10 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 	/**
 	 * Check If The Gateway Is Available For Use
 	 *
+	 * @param  int|null $product_id produt id if product page.
 	 * @return bool
 	 */
-	public function is_available() {
+	public function is_available( $product_id = null ) {
 		if ( 'yes' !== $this->enabled ) {
 			return false;
 		} elseif ( is_admin() ) {
@@ -143,14 +144,14 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		if ( SequraHelper::is_checkout() && ! $this->is_available_in_checkout() ) {
 			return false;
 		}
-
-		if ( is_product() && ! $this->is_available_in_product_page() ) {
+		if ( is_product() && $product_id && ! $this->is_available_in_product_page( $product_id ) ) {
 			return false;
 		}
 		return $this->helper->is_available_for_country() &&
 				$this->helper->is_available_for_currency() &&
 				$this->helper->is_available_for_ip();
 	}
+
 	/**
 	 * Undocumented function
 	 *
@@ -207,10 +208,11 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 	/**
 	 * Undocumented function
 	 *
+	 * @param int $product_id page's product id.
 	 * @return boolean
 	 */
-	public function is_available_in_product_page() {
-		global $product;
+	public function is_available_in_product_page( $product_id ) {
+		$product = new WC_Product( $product_id );
 		if ( ! $product->needs_shipping() ) {
 			return false;
 		}

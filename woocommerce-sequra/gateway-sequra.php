@@ -338,7 +338,8 @@ function woocommerce_sequra_init() {
 			array(
 				'price' => trim( $sequra_pp->price_css_sel ),
 				'dest'  => trim( $sequra_pp->dest_css_sel ),
-			)
+			),
+			$product->get_id()
 		);
 		// phpcs:enable
 		$sequra_simulator_added = true;
