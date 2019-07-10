@@ -266,14 +266,16 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 	/**
 	 * Undocumented function
 	 *
-	 * @param array $products available products.
+	 * @param array $products Sequra's products.
 	 * @return array
 	 */
 	public static function available_products( $products ) {
-		$products[] = 'pp5';
+		$pm         = new self();
+		$products[] = $pm->product;
 
 		return $products;
 	}
+
 	/**
 	 * Set missing options if needed
 	 *

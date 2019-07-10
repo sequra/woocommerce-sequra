@@ -37,13 +37,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->has_fields            = true;
 		$this->price_css_sel         = htmlspecialchars_decode( $this->settings['price_css_sel'] );
 		$this->dest_css_sel          = htmlspecialchars_decode( $this->settings['dest_css_sel'] );
-		$this->product               = 'pp3';// not an option.
-		$this->pp_cost_url           = 'https://' .
-										( $this->core_settings['env'] ? 'sandbox' : 'live' ) .
-										'.sequracdn.com/scripts/' .
-										$this->core_settings['merchantref'] . '/' .
-										$this->core_settings['assets_secret'] .
-										'/pp3_pp5_cost.js';
+		$this->product               = $this->settings['product'];
 		$this->env                   = $this->core_settings['env'];
 		$this->helper                = new SequraHelper( $this );
 
@@ -78,25 +72,30 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * Initialize Gateway Settings Form Fields
 	 */
 	public function init_form_fields() {
-		$shipping_methods = array();
-
-		if ( is_admin() ) {
-			foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-				$shipping_methods[ $method->id ] = $method->get_title();
-			}
-		}
 		$this->form_fields = array(
 			'enabled'       => array(
 				'title'       => __( 'Enable/Disable', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Habilitar pasarela Sequra', 'wc_sequra' ),
+				'description' => __( 'Habilitar método "Pago flexible"', 'wc_sequra' ),
 				'default'     => 'no',
 			),
 			'title'         => array(
 				'title'       => __( 'Title', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'wc_sequra' ),
-				'default'     => __( 'Fracciona tu pago.', 'wc_sequra' ),
+				'default'     => __( 'Pago flexible', 'wc_sequra' ),
+			),
+			'product' => array(
+				'title'             => __( 'Comisiones', 'wc_sequra' ),
+				'type'              => 'select',
+				'default'           => 'pp3',
+				'description'       => __( 'Determina a cargo de qué parte van las comisiones por el servicio. Por defecto a cargo del comprador para cualquiera de las otras opciones es necesaria aprobación por parte de SeQura', 'wc_sequra' ),
+				'options'           => array(
+					'pp3' => __( 'A cargo del comprador', 'wc_sequra' ),
+					'pp6' => __( 'A cargo del vendedor', 'wc_sequra' ),
+					//'pp9' => __( 'A repartir según acuerdo con SeQura', 'wc_sequra' ),
+				),
+				'desc_tip'          => false
 			),
 			'widget_theme'  => array(
 				'title'       => __( 'Widget theme', 'wc_sequra' ),
@@ -236,7 +235,8 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public static function available_products( $products ) {
-		$products[] = 'pp3';
+		$pm         = new self();
+		$products[] = $pm->product;
 
 		return $products;
 	}

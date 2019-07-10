@@ -14,7 +14,7 @@ $data_amount = (string) $this->get_order_total() * 100;
 		<span id="sequra_partpayment_method_link"
 			class="sequra-educational-popup"
 			data-amount="<?php echo esc_html( $data_amount ); ?>"
-			data-product="pp3"> + info</span>
+			data-product="<?php echo esc_html( $this->product ); ?>"> + info</span>
 	</b>
 </p>
 <script type="text/javascript">
@@ -25,9 +25,9 @@ Sequra.onLoad(function () {
 	}
 	var creditAgreements = Sequra.computeCreditAgreements({
 		amount: "<?php echo esc_html( $data_amount ); ?>",
-		product: "pp3"
+		product: "<?php echo esc_html( $this->product ); ?>"
 	});
-	var ca = creditAgreements["pp3"];
+	var ca = creditAgreements["<?php echo esc_html( $this->product ); ?>"];
 	var instalment_total = ca[ca.length - 1]["instalment_total"]["string"];
 	var method_name = "<?php esc_html_e( 'Desde 00,00€/mes', 'wc_sequra' ); ?>";
 	var el = jQuery("[for=payment_method_sequra_pp]");

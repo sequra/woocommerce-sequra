@@ -3,7 +3,7 @@
  * Plugin Name: Pasarela de pago para Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
- * Version: 4.8.6
+ * Version: 4.9
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
  * WC tested up to: 3.5.8
@@ -15,7 +15,7 @@
  * @package woocommerce-sequra
  */
 
-define( 'SEQURA_VERSION', '4.8.6' );
+define( 'SEQURA_VERSION', '4.9' );
 define( 'WC_SEQURA_PLG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 
@@ -126,7 +126,7 @@ add_action( 'woocommerce_loaded', 'woocommerce_sequra_init', 100 );
 
 /**
  * SeQura banner short code.
- * usage: [sequra_banner product='i1'] [sequra_banner product='pp3'].
+ * usage: [sequra_banner product='i1'] [sequra_banner product='pp3'] [sequra_banner product='pp6'].
  *
  * @param array $atts short code attribute.
  * @return void
@@ -137,7 +137,7 @@ function sequra_banner( $atts ) {
 	$pm      = null;
 	if ( 'i1' === $product ) {
 		$pm = new SequraInvoiceGateway();
-	} elseif ( 'pp3' === $product ) {
+	} elseif ( in_array( $product, array( 'pp3', 'pp6', 'pp9' ), true ) ) {
 		$pm = new SequraPartPaymentGateway();
 	}
 	$pm->is_available();
@@ -170,7 +170,7 @@ function sequrapartpayment_upgrade_if_needed() {
 						'.sequracdn.com/scripts/' .
 						$core_settings['merchantref'] . '/' .
 						$core_settings['assets_secret'] .
-						'/pp3_cost.json';
+						'/pp3_pp6_cost.json';
 		$json_get = wp_remote_get( $cost_url );
 		update_option( 'sequrapartpayment_conditions', $json_get['body'] );
 		do_action( 'sequrapartpayment_updateconditions' );
@@ -360,7 +360,6 @@ function woocommerce_sequra_init() {
 		if ( ! $sequra_pp->is_available( $product_id ) ) {
 			return;
 		}
-		wp_enqueue_script( 'sequra-pp-cost-js', $sequra_pp->pp_cost_url, array(), true, true );
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
 		$theme           = $sequra_pp->settings['widget_theme'];
 		ob_start();

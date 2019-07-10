@@ -285,11 +285,12 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 	/**
 	 * Undocumented function
 	 *
-	 * @param array $products SeQura Products.
+	 * @param array $products Sequra's products.
 	 * @return array
 	 */
 	public static function available_products( $products ) {
-		$products[] = 'i1';
+		$pm         = new self();
+		$products[] = $pm->product;
 
 		return $products;
 	}

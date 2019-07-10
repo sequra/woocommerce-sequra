@@ -25,7 +25,7 @@
 		}
 		<?php } ?>
 		var theme = '<?php echo esc_js( $theme ); ?>'.replace(/\&quot\;/g, "\"");
-		SequraHelper.drawPromotionWidget(the_price_container, dest, 'pp3', theme, 0);
+		SequraHelper.drawPromotionWidget(the_price_container, dest, '<?php echo esc_js( $sequra_pp->product ); ?>', theme, 0);
 		Sequra.onLoad(function () {
 			Sequra.refreshComponents();
 		});
@@ -37,7 +37,7 @@
 			the_price_container = VARIATION_PRICE_SEL;
 		}
 		var price_in_cents = SequraHelper.selectorToCents(the_price_container);
-		jQuery('[data-product=pp3]').attr('data-amount', price_in_cents);
+		jQuery('[data-product=<?php echo esc_js( $sequra_pp->product ); ?>]').attr('data-amount', price_in_cents);
 		Sequra.onLoad(function () {
 			Sequra.refreshComponents();
 		});

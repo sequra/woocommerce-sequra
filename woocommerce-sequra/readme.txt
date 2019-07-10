@@ -2,7 +2,7 @@
 Tags: woocommerce, payment, gateway
 Requires at least: 4.0
 Tested up to: 5.1
-Stable tag: 4.8.4.1
+Stable tag: 4.9
 Requires PHP: 5.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -25,6 +25,9 @@ In case of any trouble, please, contact sat@sequra.es
 == Screenshots ==
 
 == Changelog ==
+
+= 4.9 =
+* Add fee options to Pago flexible
 
 = 4.8.4 =
 * Fix issues with widget visualizations params and css selectors
