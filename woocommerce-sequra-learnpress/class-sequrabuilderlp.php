@@ -1,7 +1,23 @@
 <?php
+/**
+ * SequraBuilderLP
+ *
+ * @package seura-learnpress
+ */
+
+/**
+ * Class
+ *
+ */
 
 class SequraBuilderLP extends SequraBuilderWC {
-	
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $cart_item
+	 * @param [type] $cart_item_key
+	 * @return void
+	 */
 	protected function getProductFromItem( $cart_item, $cart_item_key ) {
 		$product = parent::getProductFromItem( $cart_item, $cart_item_key);
 		if (!$product && $order = learn_press_get_order_by_item_id( $cart_item->get_id() ) ) {
@@ -11,7 +27,11 @@ class SequraBuilderLP extends SequraBuilderWC {
 		return $product;
 	}
 
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
 	public function items() {
 		$items         = array();
 		$cart_contents = $this->getCartContents();
@@ -96,18 +116,30 @@ class SequraBuilderLP extends SequraBuilderWC {
 
 		return $items;
 	}
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function merchant() {
-		$ret                                       = parent::merchant();
+		$ret                                        = parent::merchant();
 		$ret['options']['addresses_may_be_missing'] = true;
 
 		return $ret;
 	}
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return null
+	 */
 	public function deliveryAddress() {
 		return null;
 	}
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return null
+	 */
 	public function invoiceAddress() {
 		return null;
 	}
