@@ -37,7 +37,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->has_fields            = true;
 		$this->price_css_sel         = htmlspecialchars_decode( $this->settings['price_css_sel'] );
 		$this->dest_css_sel          = htmlspecialchars_decode( $this->settings['dest_css_sel'] );
-		$this->product               = $this->settings['product'];
+		$this->product               = $this->settings['product'] ? $this->settings['product'] : 'pp3';
 		$this->env                   = $this->core_settings['env'];
 		$this->helper                = new SequraHelper( $this );
 
