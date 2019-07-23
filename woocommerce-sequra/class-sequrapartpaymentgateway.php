@@ -65,6 +65,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			$this->part_max_amount = $conditions[ $this->product ]['max_amount'] / 100;
 			$this->min_amount      = $conditions[ $this->product ]['min_amount'] / 100;
 		}
+		add_filter( 'woocommerce_sequra_payment_method_by_product', array( $this, 'filer_payment_method' ), 10, 2 );
 		do_action( 'woocommerce_sequra_pp_loaded', $this );
 	}
 
@@ -249,6 +250,21 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		// Force update.
 		update_option( 'sequrapartpayment_next_update', 0 );
 		sequrapartpayment_upgrade_if_needed();
+	}
+
+	/**
+	 * Return current instance payment method if corresponds to product code
+	 *
+	 * @param WC_Payment_Gateway $pm Payment method.
+	 * @param string             $product_code Product code.
+	 *
+	 * @return WC_Payment_Gateway
+	 */
+	public function filer_payment_method( $pm, $product_code ) {
+		if ( $this->product === $product_code ) {
+			$pm = $this;
+		}
+		return $pm;
 	}
 }
 

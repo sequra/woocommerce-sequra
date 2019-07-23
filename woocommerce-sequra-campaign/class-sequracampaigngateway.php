@@ -77,6 +77,7 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 				}
 			}
 		}
+		add_filter( 'woocommerce_sequra_payment_method_by_product', array( $this, 'filer_payment_method' ), 10, 2 );
 		do_action( 'woocommerce_sequracampaign_loaded', $this );
 	}
 
@@ -289,6 +290,21 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 			$options['campaign'] = $this->campaign;
 		}
 		return $options;
+	}
+
+	/**
+	 * Return current instance payment method if corresponds to product code
+	 *
+	 * @param WC_Payment_Gateway $pm Payment method.
+	 * @param string             $product_code Product code.
+	 *
+	 * @return WC_Payment_Gateway
+	 */
+	public function filer_payment_method( $pm, $product_code ) {
+		if ( $this->product === $product_code ) {
+			$pm = $this;
+		}
+		return $pm;
 	}
 }
 

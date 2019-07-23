@@ -74,7 +74,8 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		);
 		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this->helper, 'check_response' ) );
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_order_totals' ), 999 );
-		do_action( 'woocommerce_sequra_i_loaded', $this );
+		add_filter( 'woocommerce_sequra_payment_method_by_product', array( $this, 'filer_payment_method' ), 10, 2 );
+		do_action( 'woocommerce_' . $this->id . '_loaded', $this );
 	}
 
 	/**
@@ -293,6 +294,21 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		$products[] = $pm->product;
 
 		return $products;
+	}
+
+	/**
+	 * Return current instance payment method if corresponds to product code
+	 *
+	 * @param WC_Payment_Gateway $pm Payment method.
+	 * @param string             $product_code Product code.
+	 *
+	 * @return WC_Payment_Gateway
+	 */
+	public function filer_payment_method( $pm, $product_code ) {
+		if ( $this->product === $product_code ) {
+			$pm = $this;
+		}
+		return $pm;
 	}
 }
 

@@ -1,7 +1,7 @@
 === Pasarela de pago para SeQura ===
 Tags: woocommerce, payment, gateway
 Requires at least: 4.0
-Tested up to: 5.1
+Tested up to: 5.2
 Stable tag: 4.9.1
 Requires PHP: 5.4.0
 License: GPLv2 or later

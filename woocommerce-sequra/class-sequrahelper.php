@@ -213,7 +213,7 @@ class SequraHelper {
 		if ( ! $order->is_paid() ) {
 			wc_add_notice(
 				__(
-					'Ha habido un probelma con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.',
+					'Ha habido un problema con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.',
 					'wc_sequra'
 				),
 				'error'
@@ -230,6 +230,8 @@ class SequraHelper {
 	 * @return mixed
 	 */
 	public function check_ipn( WC_Order $order ) {
+		$product_code = isset( $_POST[ 'product_code' ] ) ? wp_unslash( $_POST[ 'product_code' ] ) : '';
+		$pm = apply_filters( 'woocommerce_sequra_payment_method_by_product', $this->pm, $product_code );
 		do_action( 'woocommerce_' . $this->pm->id . '_process_payment', $order, $this->pm );
 		$approval = apply_filters(
 			'woocommerce_' . $this->pm->id . '_process_payment',
