@@ -26,8 +26,8 @@ In case of any trouble, please, contact sat@sequra.es
 
 == Changelog ==
 = 4.9.2 =
-* Make sure payment method set to order correponds with the method used in SeQura
-* Allow free options only if available.
+* Make sure payment method set to order corresponds with the method used in SeQura
+* Allow alternative commission options if available in SeQura.
 
 = 4.9 =
 * Add fee options to Pago flexible

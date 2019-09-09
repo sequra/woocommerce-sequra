@@ -15,7 +15,7 @@
  * @package woocommerce-sequra
  */
 
-define( 'SEQURA_VERSION', '4.9.1' );
+define( 'SEQURA_VERSION', '4.9.2' );
 define( 'WC_SEQURA_PLG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 
@@ -170,7 +170,7 @@ function sequrapartpayment_upgrade_if_needed() {
 						'.sequracdn.com/scripts/' .
 						$core_settings['merchantref'] . '/' .
 						$core_settings['assets_secret'] .
-						'/pp3_pp6_cost.json';
+						'/pp3_pp5_pp6_pp9_cost.json';
 		$json_get = wp_remote_get( $cost_url );
 		update_option( 'sequrapartpayment_conditions', $json_get['body'] );
 		do_action( 'sequrapartpayment_updateconditions' );

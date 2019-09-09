@@ -9,6 +9,12 @@
  * SeQura Part Payment Payment Gateway.
  */
 class SequraPartPaymentGateway extends WC_Payment_Gateway {
+	/**
+	 * AVailable sequra products for part payments
+	 *
+	 * @var array
+	 */
+	protected $available_products = array();
 
 	/**
 	 * Undocumented function
@@ -22,13 +28,15 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->supports           = array(
 			'products',
 		);
-		// Load credit conditions.
-		$this->load_credit_conditions();
-		// Load the form fields.
-		$this->init_form_fields();
+	
 		// Load the settings.
 		$this->init_settings();
 		$this->core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
+		$this->product       = $this->get_configured_product();
+		// Load credit conditions. Needs to know configured product
+		$this->load_credit_conditions();
+		// Load the form fields.
+		$this->init_form_fields();
 		// Get setting values.
 		$this->enabled               = $this->settings['enabled'];
 		$this->title                 = $this->settings['title'];
@@ -37,7 +45,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->has_fields            = true;
 		$this->price_css_sel         = htmlspecialchars_decode( $this->settings['price_css_sel'] );
 		$this->dest_css_sel          = htmlspecialchars_decode( $this->settings['dest_css_sel'] );
-		$this->product               = $this->get_configured_product();
 		$this->env                   = $this->core_settings['env'];
 		$this->helper                = new SequraHelper( $this );
 
@@ -66,18 +73,14 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	private function load_credit_conditions() {
-		$this->elegible_for_pp6 = false;
-		$json                   = get_option( 'sequrapartpayment_conditions' );
-		$conditions             = json_decode( $json, true );
+		$json       = get_option( 'sequrapartpayment_conditions' );
+		$conditions = json_decode( $json, true );
 		if ( ! $conditions ) {
 			$this->part_max_amount = 3000;
 			$this->min_amount      = 50;
 		} else {
-			$this->part_max_amount  = $conditions[ $this->product ]['max_amount'] / 100;
-			$this->min_amount       = $conditions[ $this->product ]['min_amount'] / 100;
-			$this->elegible_for_pp6 = 
-				isset( $conditions[ 'pp6' ][ 'fees_table' ] ) &&
-				count( $conditions[ 'pp6' ][ 'fees_table' ] ) > 0;
+			$this->part_max_amount = $conditions[ $this->product ]['max_amount'] / 100;
+			$this->min_amount      = $conditions[ $this->product ]['min_amount'] / 100;
 		}
 	}
 
@@ -88,7 +91,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 */
 	private function get_configured_product() {
 		$ret = 'pp3';
-		if ( $this->elegible_for_pp6 && $this->settings['product'] ) {
+		if ( $this->settings['product'] ) {
 			$ret = $this->settings['product'];
 		}
 		return $ret;
@@ -133,20 +136,51 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'default'     => '',
 			),
 		);
-		if ( $this->elegible_for_pp6 ) {
+		if ( count( $this->get_available_products() ) > 1 ) {
 			$this->form_fields['product'] = array(
 				'title'             => __( 'Comisiones', 'wc_sequra' ),
 				'type'              => 'select',
 				'default'           => 'pp3',
 				'description'       => __( 'Determina a cargo de qué parte van las comisiones por el servicio. Por defecto a cargo del comprador para cualquiera de las otras opciones es necesaria aprobación por parte de SeQura', 'wc_sequra' ),
-				'options'           => array(
-					'pp3' => __( 'A cargo del comprador', 'wc_sequra' ),
-					'pp6' => __( 'A cargo del vendedor', 'wc_sequra' ),
-				),
+				'options'           => $this->get_available_products(),
 				'desc_tip'    => false,
 			);
 		}
 		$this->form_fields = apply_filters( 'woocommerce_sequra_pp_init_form_fields', $this->form_fields, $this );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	protected function get_available_products() {
+		if ( ! $this->available_products ) {
+			$this->available_products = $this->build_available_prodcts_array();
+		}
+		return $this->available_products;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	protected function build_available_prodcts_array() {
+		$posible_products = array(
+			'pp3' => __('Costes a cargo del comprador', 'wc_sequra'),
+			'pp6' => __('Costes a cargo del vendedor', 'wc_sequra'),
+			'pp9' => __('Reparto de costes según lo contratado con SeQura', 'wc_sequra'),
+		);
+		return array_flip(
+			array_filter(
+				array_flip( $posible_products ),
+				function ( $key ) {
+					$conditions = json_decode( get_option( 'sequrapartpayment_conditions' ), true );
+					return count( $conditions[$key] ) > 0;
+				}
+			)
+		);
 	}
 
 	/**
