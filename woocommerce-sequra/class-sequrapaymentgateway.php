@@ -26,7 +26,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$this->id = 'sequra';
 
 		$this->method_title       = __( 'Configuración Sequra', 'wc_sequra' );
-		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'wc_sequra' );
+		$this->method_description = __( 'Configuración para los métodos de pago Sequra', 'wc_sequra' );
 		$this->supports           = array(
 			'products',
 		);
