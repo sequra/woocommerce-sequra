@@ -203,7 +203,8 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		}
 		return WC()->cart &&
 			WC()->cart->needs_shipping() &&
-			'yes' !== $this->core_settings['enable_for_virtual'];
+			'yes' !== $this->core_settings['enable_for_virtual'] &&
+			$this->helper->is_available_in_checkout();
 	}
 
 	/**
@@ -218,7 +219,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		return true;
+		return is_available_in_checkout()->is_available_in_product_page( $product_id );
 	}
 
 

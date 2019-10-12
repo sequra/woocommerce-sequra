@@ -170,7 +170,9 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 	 * @return boolean
 	 */
 	public function is_available_in_checkout() {
-		return WC()->cart &&
+		return
+			$this->helper->is_available_in_checkout() &&
+			WC()->cart &&
 			WC()->cart->needs_shipping() &&
 			$this->is_campaign_period() &&
 			// Campaign not available for services.
@@ -206,7 +208,7 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 		} elseif ( ! $product->needs_shipping() ) {
 			return false;
 		}
-		return true;
+		return $this->helper->is_available_in_product_page($product->ID);
 	}
 
 	/**

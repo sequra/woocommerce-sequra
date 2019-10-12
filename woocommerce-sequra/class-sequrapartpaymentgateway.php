@@ -227,7 +227,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		return true;
+		return $this->helper->is_available_in_checkout();
 	}
 	/**
 	 * Undocumented function
@@ -243,7 +243,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		return true;
+		return $this->helper->is_available_in_product_page( $product_id );
 	}
 
 	/**
