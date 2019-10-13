@@ -418,6 +418,33 @@ class SequraHelper {
 		}
 		return apply_filters( 'woocommerce_cart_is_elegible_for_product_sale', $elegible );
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return boolean
+	 */
+	public function is_available_in_checkout() {
+		$return       = true;
+		foreach ( WC()->cart->cart_contents as $values ) {
+			if ( get_post_meta( $values['product_id'], 'is_sequra_banned', true ) === 'yes' ) {
+				$return       = false;
+			}
+		}
+
+		return apply_filters( 'woocommerce_cart_sq_is_available_in_checkout', $return );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param int $product_id page's product id.
+	 * @return boolean
+	 */
+	public function is_available_in_product_page( $product_id ) {
+		$return       = get_post_meta( $product_id, 'is_sequra_banned', true ) !== 'yes';
+		return apply_filters( 'woocommerce_sq_is_available_in_product_page', $return );
+	}
 }
 
 // phpcs:disable
@@ -563,33 +590,6 @@ if ( ! function_exists( 'http_response_code' ) ) {
 
 		return $code;
 
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @return boolean
-	 */
-	public function is_available_in_checkout() {
-		$return       = true;
-		foreach ( WC()->cart->cart_contents as $values ) {
-			if ( get_post_meta( $values['product_id'], 'is_sequra_service', true ) !== 'yes' ) {
-				$return       = false;
-			}
-		}
-
-		return apply_filters( 'woocommerce_cart_sq_is_available_in_checkout', $return );
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @param int $product_id page's product id.
-	 * @return boolean
-	 */
-	public function is_available_in_product_page( $product_id ) {
-		$return       = get_post_meta( $product_id, 'is_sequra_service', true ) !== 'yes';
-		return apply_filters( 'woocommerce_sq_is_available_in_product_page', $return );
 	}
 }
 // phpcs:enable

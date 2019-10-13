@@ -208,7 +208,7 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 		} elseif ( ! $product->needs_shipping() ) {
 			return false;
 		}
-		return $this->helper->is_available_in_product_page($product->ID);
+		return $this->helper->is_available_in_product_page( $product->id );
 	}
 
 	/**

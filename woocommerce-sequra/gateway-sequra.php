@@ -3,10 +3,10 @@
  * Plugin Name: Pasarela de pago para Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
- * Version: 4.9.2
+ * Version: 4.9.3
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
- * WC tested up to: 3.6.6
+ * WC tested up to: 3.7.1
  * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
  * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg
  * BannerHigh: https://live.sequracdn.com/assets/images/logos/logo.svg
@@ -15,7 +15,7 @@
  * @package woocommerce-sequra
  */
 
-define( 'SEQURA_VERSION', '4.9.2' );
+define( 'SEQURA_VERSION', '4.9.3' );
 define( 'WC_SEQURA_PLG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 
@@ -217,6 +217,12 @@ function woocommerce_sequra_init() {
 	}
 
 	add_filter( 'woocommerce_payment_gateways', 'add_sequra_gateway' );
+
+	if ( ! class_exists( 'Sequra_Meta_Box_Settings' ) ) {
+		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-settings.php';
+	}
+	add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Settings::save', 20, 2 );
+	add_action( 'add_meta_boxes', 'Sequra_Meta_Box_Settings::add_meta_box' );
 
 	$core_settings = get_option( 'woocommerce_sequra_settings', array() );
 	if ( ! isset( $core_settings['enable_for_virtual'] ) || 'no' === $core_settings['enable_for_virtual'] ) {

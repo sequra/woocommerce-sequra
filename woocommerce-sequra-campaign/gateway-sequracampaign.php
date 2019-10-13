@@ -6,7 +6,7 @@
  * Version: 4.8.5
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
- * WC tested up to: 3.5.8
+ * WC tested up to: 3.7.1
  *
  * @package woocommerce-sequracampaign
  */

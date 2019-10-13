@@ -25,6 +25,9 @@ In case of any trouble, please, contact sat@sequra.es
 == Screenshots ==
 
 == Changelog ==
+= 4.9.3 =
+* Add option in products to flag those which shouldn't be paid with SeQura.
+
 = 4.9.2 =
 * Make sure payment method set to order corresponds with the method used in SeQura
 * Allow alternative commission options if available in SeQura.

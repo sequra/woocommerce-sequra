@@ -219,7 +219,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		return is_available_in_checkout()->is_available_in_product_page( $product_id );
+		return $this->helper->is_available_in_product_page( $product_id );
 	}
 
 
