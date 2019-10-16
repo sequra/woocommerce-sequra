@@ -148,9 +148,10 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 		if ( is_product() && $product_id && ! $this->is_available_in_product_page( $product_id ) ) {
 			return false;
 		}
-		return $this->helper->is_available_for_country() &&
+		$ret = $this->helper->is_available_for_country() &&
 				$this->helper->is_available_for_currency() &&
 				$this->helper->is_available_for_ip();
+		return apply_filters( 'woocommerce_sequra_is_available', $ret );
 	}
 
 	/**

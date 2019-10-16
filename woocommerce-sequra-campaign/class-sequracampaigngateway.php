@@ -160,9 +160,10 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		return $this->helper->is_available_for_country() &&
+		$ret = $this->helper->is_available_for_country() &&
 				$this->helper->is_available_for_currency() &&
 				$this->helper->is_available_for_ip();
+		return apply_filters( 'woocommerce_sequracampaign_is_available', $ret );
 	}
 	/**
 	 * Undocumented function

@@ -443,7 +443,7 @@ class SequraHelper {
 	 */
 	public function is_available_in_product_page( $product_id ) {
 		$return       = get_post_meta( $product_id, 'is_sequra_banned', true ) !== 'yes';
-		return apply_filters( 'woocommerce_sq_is_available_in_product_page', $return );
+		return apply_filters( 'woocommerce_sq_is_available_in_product_page', $return, $product_id );
 	}
 }
 
