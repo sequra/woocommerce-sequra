@@ -25,6 +25,11 @@ In case of any trouble, please, contact sat@sequra.es
 == Screenshots ==
 
 == Changelog ==
+= 4.9.4 =
+* Avoid warnings in DeliveryReport generation
+* FIX error in DeliveryReport when order has no items left
+
+
 = 4.9.3 =
 * Add option in products to flag those which shouldn't be paid with SeQura.
 

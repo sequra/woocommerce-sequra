@@ -144,6 +144,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$data['delivery_method']         = $this->deliveryMethod();
 		$data['items']                   = $this->items();
 		$total                           = \Sequra\PhpClient\Helper::totals( $data );
+
 		$data['order_total_with_tax']    = $total['with_tax'];
 		$data['order_total_without_tax'] = $total['without_tax'];
 		$data['order_total_tax']         = 0;
@@ -497,10 +498,10 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			'status'     => array( 'wc-completed' ),
 		);
 		$posts              = wc_get_orders( $args );
-		$this->_shipped_ids = wp_list_pluck( $posts, 'ID' );
-
+		$this->_shipped_ids = self::get_order_ids_from_array($posts);
 		return $posts;
 	}
+
 	/**
 	 * Undocumented function
 	 *
@@ -532,8 +533,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			),
 		);
 		$posts              = get_posts( $args );
-		$this->_shipped_ids = wp_list_pluck( $posts, 'ID' );
-		return $posts;
+		$this->_shipped_ids = self::get_order_ids_from_array($posts);
+		return array_map(
+			function($post) {
+				return WC_Order($post->ID);
+			},
+			$posts
+		);
 	}
 
 	/**
@@ -558,13 +564,12 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return void
 	 */
 	public function buildShippedOrders() {
-		$posts         = $this->getShippedOrderList();
+		$wc_orders         = $this->getShippedOrderList();
 		$this->_orders = array();
-		foreach ( $posts as $post ) {
+		foreach ( $wc_orders as $wc_order ) {
 			$data                       = array();
-			$this->_current_order       = new WC_Order( $post->ID );
-			$date                       = strtotime( $this->_current_order->completed_date );
-			$data['sent_at']            = self::dateOrBlank( date( 'c', $date ) );
+			$this->_current_order       = $wc_order;
+			$data['sent_at']            = self::dateOrBlank($this->order_sent_at());
 			$data['state']              = 'delivered';
 			$data['delivery_address']   = $this->deliveryAddress();
 			$data['invoice_address']    = $this->invoiceAddress();
@@ -574,6 +579,14 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$data['merchant_reference'] = $this->orderMerchantReference();
 			$this->_orders[]            = $data;
 		}
+	}
+
+	protected function order_sent_at() {
+		global $woocommerce;
+		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
+			return date( 'c', strtotime( $this->_current_order->completed_date ) );
+		}
+		return $this->_current_order->get_date_completed()->date('c');
 	}
 
 	/**
@@ -770,15 +783,14 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	public static function getPreviousOrders( $customer_id ) {
+		$orders    = array();
 		$args      = array(
 			'limit'       => -1,
 			'type'        => 'shop_order',
 			'customer'    => $customer_id,
 			'post_status' => array( 'wc-processing', 'wc-completed' ),
 		);
-		$posts     = wc_get_orders( $args );
-		$orders    = array();
-		$order_ids = wp_list_pluck( $posts, 'ID' );
+		$order_ids = self::get_order_ids_from_array(wc_get_orders( $args ));
 		foreach ( $order_ids as $id ) {
 			$prev_order      = new WC_Order( $id );
 			$post            = get_post( $id );
@@ -794,15 +806,41 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 
 		return $orders;
 	}
+
+	protected static function get_order_ids_from_array($orders) {
+		global $woocommerce;
+		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
+			return wp_list_pluck( $orders, 'ID' );
+		}
+		return array_reduce(
+			$orders ,
+			function ( $carry, $order ) {
+				$carry[] = $order->get_id();
+				return $carry;
+			} ,
+			array()
+		);
+	}
+
+	protected function get_order_currency() {
+		global $woocommerce;
+		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
+			return $this->_current_order->get_order_currency();
+		}
+		return $this->_current_order->get_currency();
+	}
+	
 	/**
 	 * Undocumented function
 	 *
 	 * @return array
 	 */
 	public function shipmentCart() {
-		$data             = array();
-		$data['currency'] = $this->_current_order->get_order_currency();
-
+		$data             = array(
+			'order_total_without_tax' => 0,
+			'order_total_with_tax' => 0,
+		);
+		$data['currency'] = $this->get_order_currency();
 		$data['delivery_method'] = $this->deliveryMethod();
 		$data['gift']            = false;
 		$data['items']           = $this->items();
@@ -854,7 +892,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$stat                 = array(
 				'completed_at'       => self::dateOrBlank( '' . $order->get_date_created() ),
 				'merchant_reference' => $this->orderMerchantReference(),
-				'currency'           => $this->_current_order->get_order_currency(),
+				'currency'           => $this->get_order_currency(),
 			);
 
 			if ( true || get_option( 'sequra_allowstats_amount' ) ) {
@@ -904,7 +942,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$stat                 = array(
 				'completed_at'       => self::dateOrBlank( date( 'c', $date ) ),
 				'merchant_reference' => $this->orderMerchantReference(),
-				'currency'           => $this->_current_order->get_order_currency(),
+				'currency'           => $this->get_order_currency(),
 			);
 			if ( true || get_option( 'sequra_allowstats_amount' ) ) {
 				$stat['amount'] = self::integerPrice( $this->_current_order->get_total() );
