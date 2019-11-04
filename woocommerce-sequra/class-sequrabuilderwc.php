@@ -583,7 +583,10 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 
 	protected function order_sent_at() {
 		global $woocommerce;
-		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
+		if (
+			version_compare( $woocommerce->version, '3.0.0', '<' ) ||
+			is_null($this->_current_order->get_date_completed())
+		) {
 			return date( 'c', strtotime( $this->_current_order->completed_date ) );
 		}
 		return $this->_current_order->get_date_completed()->date('c');
