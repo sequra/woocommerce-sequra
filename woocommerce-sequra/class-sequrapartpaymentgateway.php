@@ -177,7 +177,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				array_flip( $posible_products ),
 				function ( $key ) {
 					$conditions = json_decode( get_option( 'sequrapartpayment_conditions' ), true );
-					return count( $conditions[$key] ) > 0;
+					return is_array( $conditions[ $key ] ) && count( $conditions[ $key ] ) > 0;
 				}
 			)
 		);
