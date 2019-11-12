@@ -11,6 +11,7 @@
 class SequraHelper {
 
 	const ISO8601_PATTERN = '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
+	static $receipt_page_printed = false;
 
 	/**
 	 * Core setting placeholder
@@ -318,6 +319,9 @@ class SequraHelper {
 	 */
 	public function receipt_page( $order_id ) {
 		$order = new WC_Order( $order_id );
+		if( self::$receipt_page_printed ){
+			return;
+		}
 		echo '<p>' . wp_kses_post(
 			__(
 				'Thank you for your order, please click the button below to pay with Sequra.',
