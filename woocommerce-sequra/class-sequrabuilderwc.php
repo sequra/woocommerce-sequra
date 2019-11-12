@@ -125,7 +125,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return string
 	 */
 	public function sign( $message ) {
-		return hash_hmac( self::HASH_ALGO, $message, $this->_pm->password );
+		return hash_hmac( self::HASH_ALGO, $message, $this->_pm->core_settings['password'] );
 	}
 
 	/**
