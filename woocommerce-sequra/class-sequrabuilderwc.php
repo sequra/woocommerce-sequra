@@ -197,7 +197,29 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 
 		return $package['rates'][ current( $shipping_methods ) ];
 	}
-
+	/**
+	 * Undocumented function
+	 *
+	 * @param array      $item    the array with item info.
+	 * @param WC_Product $product the product we are building item info for.
+	 * @return void
+	 */
+	protected function add_service_end_date( &$item, $product ) {
+		$post_id		  = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
+		$service_end_date = apply_filters(
+			'woocommerce_sequra_add_service_end_date',
+			get_post_meta( $post_id, 'sequra_service_end_date', true ),
+			$product
+		);
+		if ( ! SequraHelper::validate_service_end_date( $service_end_date ) ) {
+			$service_end_date = $core_settings['default_service_end_date'];
+		}
+		if ( 0 === strpos( $service_end_date, 'P' ) ) {
+			$item['ends_in'] = $service_end_date;
+		} else {
+			$item['ends_on'] = $service_end_date;
+		}
+	}
 	/**
 	 * Undocumented function
 	 *
@@ -218,16 +240,8 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				'yes' === $core_settings['enable_for_virtual'] &&
 				get_post_meta( $_product->get_id(), 'is_sequra_service', true ) !== 'no'
 			) {
-				$service_end_date = get_post_meta( $_product->get_id(), 'sequra_service_end_date', true );
-				if ( ! SequraHelper::validate_service_end_date( $service_end_date ) ) {
-					$service_end_date = $core_settings['default_service_end_date'];
-				}
 				$item['type'] = 'service';
-				if ( 0 === strpos( $service_end_date, 'P' ) ) {
-					$item['ends_in'] = $service_end_date;
-				} else {
-					$item['ends_on'] = $service_end_date;
-				}
+				$this->add_service_end_date( $item, $_product );
 			} else {
 				$item['type'] = 'product';
 			}
