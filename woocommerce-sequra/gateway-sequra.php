@@ -355,7 +355,7 @@ function woocommerce_sequra_init() {
 	}
 	/**
 	 * SeQura pp simulator short code
-	 * usage: [sequra_pp_simulator price='#product_price']
+	 * usage: [sequra_pp_simulator price='#product_price' dest='.price_container']
 	 *
 	 * @param array    $atts       Attributes.
 	 * @param int|null $product_id Product id.
