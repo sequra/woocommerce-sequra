@@ -1,8 +1,8 @@
 === Pasarela de pago para SeQura ===
 Tags: woocommerce, payment, gateway
 Requires at least: 4.0
-Tested up to: 5.2
-Stable tag: 4.9.1
+Tested up to: 5.3.2
+Stable tag: 4.9.6
 Requires PHP: 5.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -25,6 +25,12 @@ In case of any trouble, please, contact sat@sequra.es
 == Screenshots ==
 
 == Changelog ==
+= 4.9.6 =
+* Add filter to set service_end_date
+
+= 4.9.5 =
+* SeQura php-client upgraded.
+
 = 4.9.4 =
 * Avoid warnings in DeliveryReport generation
 * FIX error in DeliveryReport when order has no items left
