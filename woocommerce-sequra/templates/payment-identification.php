@@ -23,7 +23,7 @@ if ( $this->identity_form ) {
 		}
 	}
 
-	jQuery(function(){
+	document.addEventListener("DOMContentLoaded", function () {
 		tryToOpenPumbaa();
 	});
 </script>
