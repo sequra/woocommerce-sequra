@@ -25,6 +25,9 @@ In case of any trouble, please, contact sat@sequra.es
 == Screenshots ==
 
 == Changelog ==
+= 4.9.7 =
+* Defer jQuery dependency after document load.
+
 = 4.9.6 =
 * Add filter to set service_end_date
 
