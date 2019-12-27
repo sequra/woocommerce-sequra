@@ -43,7 +43,7 @@
 		});
 	}
 
-	jQuery(window).on('load', function () {
+	document.addEventListener("DOMContentLoaded", function () {
 		displaySequraPatpaymentTeaser();
 		jQuery('.variations_form')
 			.on('hide_variation', updateSequraPatpaymentTeaser)
