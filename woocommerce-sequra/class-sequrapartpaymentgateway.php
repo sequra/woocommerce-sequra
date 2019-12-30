@@ -10,6 +10,31 @@
  */
 class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	/**
+	 * SeQura product code for this method
+	 *
+	 * @var string
+	 */
+	public $product;
+	/**
+	 * Css selector for widget destination
+	 *
+	 * @var string
+	 */
+	public $dest_css_sel;
+	/**
+	 * Css selector to read price from
+	 *
+	 * @var string
+	 */
+	public $price_css_sel;
+	/**
+	 * Core configuration
+	 *
+	 * @var array
+	 */
+	public $core_settings;
+
+	/**
 	 * AVailable sequra products for part payments
 	 *
 	 * @var array
@@ -28,7 +53,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->supports           = array(
 			'products',
 		);
-	
+
 		// Load the settings.
 		$this->init_settings();
 		$this->core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
@@ -138,11 +163,11 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		);
 		if ( count( $this->get_available_products() ) > 1 ) {
 			$this->form_fields['product'] = array(
-				'title'             => __( 'Comisiones', 'wc_sequra' ),
-				'type'              => 'select',
-				'default'           => 'pp3',
-				'description'       => __( 'Determina a cargo de qué parte van las comisiones por el servicio. Por defecto a cargo del comprador para cualquiera de las otras opciones es necesaria aprobación por parte de SeQura', 'wc_sequra' ),
-				'options'           => $this->get_available_products(),
+				'title'       => __( 'Comisiones', 'wc_sequra' ),
+				'type'        => 'select',
+				'default'     => 'pp3',
+				'description' => __( 'Determina a cargo de qué parte van las comisiones por el servicio. Por defecto a cargo del comprador para cualquiera de las otras opciones es necesaria aprobación por parte de SeQura', 'wc_sequra' ),
+				'options'     => $this->get_available_products(),
 				'desc_tip'    => false,
 			);
 		}
@@ -168,9 +193,9 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 */
 	protected function build_available_prodcts_array() {
 		$posible_products = array(
-			'pp3' => __('Costes a cargo del comprador', 'wc_sequra'),
-			'pp6' => __('Costes a cargo del vendedor', 'wc_sequra'),
-			'pp9' => __('Reparto de costes según lo contratado con SeQura', 'wc_sequra'),
+			'pp3' => __( 'Costes a cargo del comprador', 'wc_sequra' ),
+			'pp6' => __( 'Costes a cargo del vendedor', 'wc_sequra' ),
+			'pp9' => __( 'Reparto de costes según lo contratado con SeQura', 'wc_sequra' ),
 		);
 		return array_flip(
 			array_filter(

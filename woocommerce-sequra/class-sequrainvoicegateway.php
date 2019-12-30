@@ -10,6 +10,25 @@
  */
 class SequraInvoiceGateway extends WC_Payment_Gateway {
 	/**
+	 * SeQura product code for this method
+	 *
+	 * @var string
+	 */
+	public $product;
+	/**
+	 * Css selector for widget destination
+	 *
+	 * @var string
+	 */
+	public $dest_css_sel;
+	/**
+	 * Css selector to read price from
+	 *
+	 * @var string
+	 */
+	public $price_css_sel;
+
+	/**
 	 * Undocumented function
 	 */
 	public function __construct() {

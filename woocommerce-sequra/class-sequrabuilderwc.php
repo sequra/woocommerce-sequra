@@ -56,6 +56,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		}
 		// phpcs:enable
 		$this->_cart = WC()->cart;
+		$this->core_settings = get_option( 'woocommerce_sequra_settings', array() );
 	}
 
 	/**
@@ -73,11 +74,12 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	/**
 	 * Set payment method
 	 *
-	 * @param mixed $pm SequraInvoiceGateway or SequraPartPaymentGateway.
+	 * @param WC_Payment_Gateway $pm SequraInvoiceGateway or SequraPartPaymentGateway.
 	 * @return void
 	 */
 	public function setPaymentMethod( $pm ) {
-		$this->_pm = $pm;
+		$this->_pm           = $pm;
+		$this->core_settings = $pm->core_settings;
 	}
 
 	/**
@@ -125,7 +127,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return string
 	 */
 	public function sign( $message ) {
-		return hash_hmac( self::HASH_ALGO, $message, $this->_pm->core_settings['password'] );
+		return hash_hmac( self::HASH_ALGO, $message, $this->core_settings['password'] );
 	}
 
 	/**
@@ -212,7 +214,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$product
 		);
 		if ( ! SequraHelper::validate_service_end_date( $service_end_date ) ) {
-			$service_end_date = $core_settings['default_service_end_date'];
+			$service_end_date = $this->core_settings['default_service_end_date'];
 		}
 		if ( 0 === strpos( $service_end_date, 'P' ) ) {
 			$item['ends_in'] = $service_end_date;
@@ -229,7 +231,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		global $woocommerce;
 		$items         = array();
 		$cart_contents = $this->getCartContents();
-		$core_settings = get_option( 'woocommerce_sequra_settings', array() );
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
 			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
 			if ( ! $_product ) {
@@ -237,7 +238,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			}
 			$item = array();
 			if (
-				'yes' === $core_settings['enable_for_virtual'] &&
+				'yes' === $this->core_settings['enable_for_virtual'] &&
 				get_post_meta( $_product->get_id(), 'is_sequra_service', true ) !== 'no'
 			) {
 				$item['type'] = 'service';
