@@ -319,7 +319,7 @@ class SequraHelper {
 	 */
 	public function receipt_page( $order_id ) {
 		$order = new WC_Order( $order_id );
-		if( self::$receipt_page_printed ){
+		if ( self::$receipt_page_printed ) {
 			return;
 		}
 		echo '<p>' . wp_kses_post(
@@ -335,6 +335,7 @@ class SequraHelper {
 			$order
 		);
 		require self::template_loader( 'payment-identification' );
+		self::$receipt_page_printed = true;
 	}
 	/**
 	 * Undocumented function
