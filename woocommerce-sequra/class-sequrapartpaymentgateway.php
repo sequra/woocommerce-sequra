@@ -116,7 +116,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 */
 	private function get_configured_product() {
 		$ret = 'pp3';
-		if ( $this->settings['product'] ) {
+		if ( isset ($this->settings['product']) && $this->settings['product']) {
 			$ret = $this->settings['product'];
 		}
 		return $ret;
