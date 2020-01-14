@@ -27,6 +27,12 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 	 * @var string
 	 */
 	public $price_css_sel;
+	/**
+	 * Core configuration
+	 *
+	 * @var array
+	 */
+	public $core_settings;
 
 	/**
 	 * Undocumented function
