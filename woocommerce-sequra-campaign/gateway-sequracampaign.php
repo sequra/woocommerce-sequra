@@ -3,10 +3,10 @@
  * Plugin Name: Campañas Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción pago para campañas especiales de Sequra.
- * Version: 4.9.0
+ * Version: 4.9.1
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
- * WC tested up to: 3.8.1
+ * WC tested up to: 3.9
  *
  * @package woocommerce-sequracampaign
  */
