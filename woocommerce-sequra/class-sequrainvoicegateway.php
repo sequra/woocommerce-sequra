@@ -98,7 +98,6 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 			)
 		);
 		add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this->helper, 'check_response' ) );
-		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_order_totals' ), 999 );
 		add_filter( 'woocommerce_sequra_payment_method_by_product', array( $this, 'filer_payment_method' ), 10, 2 );
 		do_action( 'woocommerce_' . $this->id . '_loaded', $this );
 	}
@@ -293,23 +292,7 @@ class SequraInvoiceGateway extends WC_Payment_Gateway {
 
 		return apply_filters( 'woocommerce_sequra_process_payment_return', $ret, $this );
 	}
-	/**
-	 * Undocumented function
-	 *
-	 * @param WC_Cart $cart The cart.
-	 * @return void
-	 */
-	public function calculate_order_totals( WC_Cart $cart ) {
-		if (
-			! isset( $_POST['payment_method'] ) ||
-			$_POST['payment_method'] != $this->id ||
-			! defined( 'WOOCOMMERCE_CHECKOUT' ) ||
-			! ( $this->fee > 0 )
-		) {
-			return;
-		}
-		$cart->add_fee( __( 'Recargo "Compra primero, paga después"', 'wc_sequra' ), $this->fee, false );
-	}
+
 	/**
 	 * Undocumented function
 	 *

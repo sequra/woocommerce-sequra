@@ -270,7 +270,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
 				$item['category'] = (string) self::notNull( strip_tags( $_product->get_categories() ) );
 			} else {
-				$item['category'] = (string) self::notNull( wc_get_product_category_list( $_product->get_id() ) );
+				$item['category'] = (string) self::notNull( strip_tags( wc_get_product_category_list( $_product->get_id() ) ) );
 			}
 			/*@todo: $item["manufacturer"] but it is not wooCommerce stantdard attribute*/
 			$items[] = $item;
@@ -831,11 +831,11 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			return wp_list_pluck( $orders, 'ID' );
 		}
 		return array_reduce(
-			$orders ,
+			$orders,
 			function ( $carry, $order ) {
 				$carry[] = $order->get_id();
 				return $carry;
-			} ,
+			},
 			array()
 		);
 	}
@@ -847,7 +847,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		}
 		return $this->_current_order->get_currency();
 	}
-	
+
 	/**
 	 * Undocumented function
 	 *

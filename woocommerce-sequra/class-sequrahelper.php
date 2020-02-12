@@ -260,18 +260,17 @@ class SequraHelper {
 		$builder = $this->get_builder( $order );
 		$builder->setPaymentMethod( $this->pm );
 		if ( isset( $_REQUEST['signature'] ) &&
-			$builder->sign( $order->id ) !== sanitize_text_field( wp_unslash( $_REQUEST['signature'] ) ) &&
-			$this->pm->ipn
+			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_REQUEST['signature'] ) )
 		) {
 			http_response_code( 498 );
 			die( 'Not valid signature' );
 		}
 		$data      = $builder->build( 'confirmed' );
 		$order_ref = isset( $_REQUEST['order_ref'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order_ref'] ) ) : '';
-		$uri       = $this->pm->endpoint . '/' . $order_ref;
+		$uri       = '/' . $order_ref;
 		$client->updateOrder( $uri, $data );
-		update_post_meta( (int) $order->id, 'Transaction ID', $uri );
-		update_post_meta( (int) $order->id, 'Transaction Status', $client->getStatus() );
+		update_post_meta( (int) $order->get_id(), 'Transaction ID', $uri );
+		update_post_meta( (int) $order->get_id(), 'Transaction Status', $client->getStatus() );
 		/*TODO: Store more information for later use in stats, like browser*/
 		if ( ! $client->succeeded() ) {
 			http_response_code( 410 );
@@ -290,25 +289,17 @@ class SequraHelper {
 	 * @return void
 	 */
 	public function add_payment_info_to_post_meta( WC_Order $order ) {
-		if ( $this->pm->ipn ) {
-			// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification,
-			if ( isset( $_REQUEST['order_ref'] ) ) {
-				$order_ref = sanitize_text_field( wp_unslash( $_REQUEST['order_ref'] ) );
-				update_post_meta( (int) $order->id, 'Transaction ID', $order_ref );
-				update_post_meta( (int) $order->id, '_order_ref', $order_ref );
-				update_post_meta( (int) $order->id, '_transaction_id', $order_ref );
-			}
-			if ( isset( $_REQUEST['product_code'] ) ) {
-				update_post_meta( (int) $order->id, '_product_code', sanitize_text_field( wp_unslash( $_REQUEST['product_code'] ) ) );
-			}
-			// phpcs:enable
-			// @todo: .
-			// update_post_meta((int)$order->id, '_sequra_cart_ref', $sequra_cart_info['ref']);
-		} else {
-			$sequra_cart_info = WC()->session->get( 'sequra_cart_info' );
-			update_post_meta( (int) $order->id, 'Transaction ID', WC()->session->get( 'sequraURI' ) );
-			update_post_meta( (int) $order->id, '_sequra_cart_ref', $sequra_cart_info['ref'] );
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification,
+		if ( isset( $_REQUEST['order_ref'] ) ) {
+			$order_ref = sanitize_text_field( wp_unslash( $_REQUEST['order_ref'] ) );
+			update_post_meta( (int) $order->get_id(), 'Transaction ID', $order_ref );
+			update_post_meta( (int) $order->get_id(), '_order_ref', $order_ref );
+			update_post_meta( (int) $order->get_id(), '_transaction_id', $order_ref );
 		}
+		if ( isset( $_REQUEST['product_code'] ) ) {
+			update_post_meta( (int) $order->get_id(), '_product_code', sanitize_text_field( wp_unslash( $_REQUEST['product_code'] ) ) );
+		}
+		// phpcs:enable
 	}
 
 	/**

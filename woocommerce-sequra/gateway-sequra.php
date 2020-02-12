@@ -302,18 +302,6 @@ function woocommerce_sequra_init() {
 	}
 
 	add_action( 'woocommerce_add_to_cart', 'sequra_add_cart_info_to_session' );
-	/**
-	 * Undocumented function
-	 *
-	 * @param WC_Cart $cart The cart.
-	 * @return void
-	 */
-	function sequra_calculate_order_totals( WC_Cart $cart ) {
-		$sequra = new SequraInvoiceGateway();
-		$sequra->calculate_order_totals( $cart );
-	}
-
-	add_action( 'woocommerce_cart_calculate_fees', 'sequra_calculate_order_totals' );
 
 	/*
 	 * Add instalment simulator in product page
