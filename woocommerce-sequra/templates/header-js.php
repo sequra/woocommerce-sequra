@@ -46,16 +46,20 @@ var SequraHelper = {
 	},
 
 	textToCents: function (text) {
+		text = text.replace(/^\D*/,'').replace(/\D*$/,'');
+		if(text.indexOf(sequraConfigParams.decimalSeparator)<0){
+			text += sequraConfigParams.decimalSeparator + '00';
+		}
 		return SequraHelper.floatToCents(
 			parseFloat(
-				text.replace(/^\D*/,'')
-					.replace(sequraConfigParams.thousandSeparator,'')
-					.replace(sequraConfigParams.decimalSeparator,'.')
+				text
+				.replace(sequraConfigParams.thousandSeparator,'')
+				.replace(sequraConfigParams.decimalSeparator,'.')
 			)
 		);
 	},
 
-	floatToCents: function (value) { 
+	floatToCents: function (value) {
 		return parseInt(value.toFixed(2).replace('.', ''), 10);
 	},
 
