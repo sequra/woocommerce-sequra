@@ -15,7 +15,7 @@
  * @package woocommerce-sequra
  */
 
-define( 'SEQURA_VERSION', '4.9.7.2' );
+define( 'SEQURA_VERSION', '4.9.7.3' );
 define( 'WC_SEQURA_PLG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 
