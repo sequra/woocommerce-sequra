@@ -48,7 +48,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequra_pp_before_load', $this );
 		$this->id                 = 'sequra_pp';
 		$this->icon               = sequra_get_script_basesurl() . 'images/badges/part_payment_s.svg';
-		$this->method_title       = __( 'Pago flexible', 'wc_sequra' );
+		$this->method_title       = __( 'Fraccionar pago', 'wc_sequra' );
 		$this->method_description = __( 'Allows payments part payments, service ofered by Sequra.', 'wc_sequra' );
 		$this->supports           = array(
 			'products',
@@ -130,14 +130,14 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 			'enabled'       => array(
 				'title'       => __( 'Enable/Disable', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Habilitar método "Pago flexible"', 'wc_sequra' ),
+				'description' => __( 'Habilitar método "Fraccionar pago"', 'wc_sequra' ),
 				'default'     => 'no',
 			),
 			'title'         => array(
 				'title'       => __( 'Title', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'wc_sequra' ),
-				'default'     => __( 'Pago flexible', 'wc_sequra' ),
+				'default'     => __( 'Fraccionar pago', 'wc_sequra' ),
 			),
 			'widget_theme'  => array(
 				'title'       => __( 'Widget theme', 'wc_sequra' ),
@@ -289,7 +289,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		<p>
 		<?php
 		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá dar la opción de "Pago flexible" en su comercio. Para ello necesitará una cuenta de vendedor en Sequra.', 'wc_sequra' ),
+			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá dar la opción de "Fraccionar pago" en su comercio. Para ello necesitará una cuenta de vendedor en Sequra.', 'wc_sequra' ),
 			array( 'a' => 'href' )
 		);
 		?>

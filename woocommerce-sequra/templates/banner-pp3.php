@@ -21,7 +21,7 @@ if ( isset( $atts['color'] ) ) { ?>
 <?php } ?>
 <div id="sequra-banner-partpayment" class="sequra-banner">
 	<div id="block1" class="sqblock">
-		<span class="sqheader">PAGO FLEXIBLE</span>
+		<span class="sqheader">FRACCIONAR PAGO</span>
 	</div>
 	<div id="block2" class="sqblock">
 		<span class="sqnoc icon-puzzle">&nbsp;</span>

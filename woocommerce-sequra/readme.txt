@@ -7,10 +7,10 @@ Requires PHP: 5.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Acepta pagos con los servicios de Sequra: "Compra ahora, paga después" y "Pago flexible"
+Acepta pagos con los servicios de Sequra: "Compra ahora, paga después" y "Fraccionar pago"
 == Description ==
 
-Acepta pagos con los servicios de Sequra: "Compra ahora, paga después" y "Pago flexible"
+Acepta pagos con los servicios de Sequra: "Compra ahora, paga después" y "Fraccionar pago"
 
 == Installation ==
 
@@ -47,7 +47,7 @@ In case of any trouble, please, contact sat@sequra.es
 * Allow alternative commission options if available in SeQura.
 
 = 4.9 =
-* Add fee options to Pago flexible
+* Add fee options to Fraccionar pago
 
 = 4.8.4 =
 * Fix issues with widget visualizations params and css selectors

@@ -642,7 +642,9 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		if ( ! $data['vat_number'] ) {
 			$data['vat_number'] = self::notNull( $this->getDeliveryField( 'shipping_vat' ) );
 		}
-
+		if ( ! $data['vat_number'] ) {
+			$data['vat_number'] = self::notNull( $this->getDeliveryField( 'nif' ) );
+		}
 		return $data;
 	}
 	/**
@@ -708,7 +710,9 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		if ( '' === $data['vat_number'] ) {
 			$data['vat_number'] = self::notNull( $this->getField( 'billing_vat' ) );
 		}
-
+		if ( ! $data['vat_number'] ) {
+			$data['vat_number'] = self::notNull( $this->getField( 'nif' ) );
+		}
 		return $data;
 	}
 	/**
@@ -739,13 +743,14 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$data['given_names'] = $this->getCustomerField( $id, 'first_name' );
 		$data['surnames']    = $this->getCustomerField( $id, 'last_name' );
 		$data['email']       = $this->getCustomerField( $id, 'billing_email' );
-		$data['vat_number']  = self::notNull( $this->getField( 'billing_nif' ) );
-		if ( '' == $data['vat_number'] ) {
-			$data['vat_number'] = self::notNull( $this->getField( 'billing_vat' ) );
+		$data['nin']  = self::notNull( $this->getField( 'nif' ) );
+		if ( '' == $data['nin'] ) {
+			$data['nin'] = self::notNull( $this->getField( 'billing_nif' ) );
 		}
-		if ( '' != $data['vat_number'] ) {
-			$data['nin'] = $data['vat_number'];
+		if ( '' == $data['nin'] ) {
+			$data['nin'] = self::notNull( $this->getField( 'billing_vat' ) );
 		}
+
 		// OPTIONAL.
 		if ( is_user_logged_in() ) { // Avoid if user is not logged in.
 			$data['date_of_birth'] = get_user_meta( $id, 'sequra_dob', true );
