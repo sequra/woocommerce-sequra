@@ -3,7 +3,7 @@
  * Plugin Name: Pasarela de pago para Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
- * Version: 4.9.7.4
+ * Version: 4.9.7.5
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
  * WC tested up to: 3.9.2
@@ -15,7 +15,7 @@
  * @package woocommerce-sequra
  */
 
-define( 'SEQURA_VERSION', '4.9.7.4' );
+define( 'SEQURA_VERSION', '4.9.7.5' );
 define( 'WC_SEQURA_PLG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 
@@ -316,14 +316,13 @@ function woocommerce_sequra_init() {
 	 * @return string
 	 */
 	function woocommerce_sequra_add_simulator_to_product_page( $price, WC_Product $product ) {
-		global $wp_query, $sequra_simulator_added;
+		global $wp_query;
 		$sequra_pp = new SequraPartPaymentGateway();
 		if (
 			! ( $product instanceof WC_Product ) ||
 			! is_product() ||
 			$wp_query->posts[0]->ID !== $product->get_id() ||
-			! $sequra_pp->is_available( $product->get_id() ) ||
-			$sequra_simulator_added ) {
+			! $sequra_pp->is_available( $product->get_id() ) ) {
 			return $price;
 		}
 		// Could have any html disable phpcs.
@@ -336,10 +335,8 @@ function woocommerce_sequra_init() {
 			$product->get_id()
 		);
 		// phpcs:enable
-		$sequra_simulator_added = true;
 
-		return $price .
-			"<div id='sequra_partpayment_teaser_default_container'></div>";
+		return $price;
 	}
 	/**
 	 * SeQura pp simulator short code

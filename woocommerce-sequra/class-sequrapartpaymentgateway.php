@@ -69,7 +69,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 		$this->enable_for_currencies = array( 'EUR' );
 		$this->has_fields            = true;
 		$this->price_css_sel         = htmlspecialchars_decode( $this->settings['price_css_sel'] );
-		$this->dest_css_sel          = htmlspecialchars_decode( $this->settings['dest_css_sel'] );
+		$this->dest_css_sel          = htmlspecialchars_decode( $this->settings['dest_css_sel'] != '' ? $this->settings['dest_css_sel'] : '.summary .price' );
 		$this->env                   = $this->core_settings['env'];
 		$this->helper                = new SequraHelper( $this );
 
@@ -155,10 +155,10 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'title'       => __( 'CSS selector for simulator', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __(
-					'CSS after which the simulator will be draw. if just showing it below the prices is not good. Usually empty should be fine',
+					'CSS after which the simulator will be draw.',
 					'wc_sequra'
 				),
-				'default'     => '',
+				'default'     => '.summary .price',
 			),
 		);
 		if ( count( $this->get_available_products() ) > 1 ) {
