@@ -263,9 +263,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	 */
 	public function is_available_in_product_page( $product_id ) {
 		$product = new WC_Product( $product_id );
-		if ( 'yes' === $this->core_settings['enable_for_virtual'] ) {
-			return true;// Non-services can be purchased too but not alone.
-		} elseif ( ! $product->needs_shipping() ) {
+		if ( 'yes' !== $this->core_settings['enable_for_virtual'] && ! $product->needs_shipping() ) {
 			return false;
 		}
 
