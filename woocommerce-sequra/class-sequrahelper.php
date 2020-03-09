@@ -349,13 +349,13 @@ class SequraHelper {
 
 					$this->identity_form = $client->getIdentificationForm( $uri, $options );
 				} else {
-					if ( 'yes' === $this->pm->debug ) {
+					if ( 'yes' === $this->pm->core_settings['debug'] ) {
 						$this->pm->log->add( 'sequra', $client->getJson() );
 						$this->pm->log->add( 'sequra', 'Invalid payload:' . $order );
 					};
 				}
 			} catch ( Exception $e ) {
-				if ( 'yes' === $this->pm->debug ) {
+				if ( 'yes' === $this->pm->core_settings['debug'] ) {
 					$this->pm->log->add( 'sequra', $e->getMessage() );
 				};
 			}
@@ -394,7 +394,7 @@ class SequraHelper {
 		foreach ( WC()->cart->cart_contents as $values ) {
 			if ( get_post_meta( $values['product_id'], 'is_sequra_service', true ) != 'no' ) {
 				$services_count += $values['quantity'];
-				$elegible        = 1 === $services_count;
+				$elegible        = (1 == $services_count);
 			}
 		}
 

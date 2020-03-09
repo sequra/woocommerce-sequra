@@ -206,12 +206,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @param WC_Product $product the product we are building item info for.
 	 * @return void
 	 */
-	protected function add_service_end_date( &$item, $product ) {
+	protected function add_service_end_date( &$item, $product, $cart_item ) {
 		$post_id		  = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
 		$service_end_date = apply_filters(
 			'woocommerce_sequra_add_service_end_date',
 			get_post_meta( $post_id, 'sequra_service_end_date', true ),
-			$product
+			$product,
+			$cart_item
 		);
 		if ( ! SequraHelper::validate_service_end_date( $service_end_date ) ) {
 			$service_end_date = $this->core_settings['default_service_end_date'];
@@ -232,7 +233,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$items         = array();
 		$cart_contents = $this->getCartContents();
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
-			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
+			$_product = $this->getProductFromItem( $cart_item, $cart_item_key, $cart_item );
 			if ( ! $_product ) {
 				continue;
 			}

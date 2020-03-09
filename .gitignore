@@ -6,3 +6,4 @@ publish.sh
 .history
 .DS_Store
 .vscode
+woocommerce-sequra/composer.lock
