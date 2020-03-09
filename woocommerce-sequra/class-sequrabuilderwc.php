@@ -233,7 +233,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$items         = array();
 		$cart_contents = $this->getCartContents();
 		foreach ( $cart_contents as $cart_item_key => $cart_item ) {
-			$_product = $this->getProductFromItem( $cart_item, $cart_item_key, $cart_item );
+			$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
 			if ( ! $_product ) {
 				continue;
 			}
@@ -243,7 +243,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				get_post_meta( $_product->get_id(), 'is_sequra_service', true ) !== 'no'
 			) {
 				$item['type'] = 'service';
-				$this->add_service_end_date( $item, $_product );
+				$this->add_service_end_date( $item, $_product, $cart_item );
 			} else {
 				$item['type'] = 'product';
 			}
