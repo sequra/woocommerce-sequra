@@ -15,3 +15,6 @@
     ```
 ___
 * Based on https://github.com/woocommerce/woocommerce/tree/master/tests
+
+## caveats
+On Mac you need gnu-sed `brew install gnu-sed` 

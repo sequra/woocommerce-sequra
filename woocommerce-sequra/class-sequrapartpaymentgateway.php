@@ -209,29 +209,6 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check If The Gateway Is Available For Use
-	 *
-	 * @param  int|null $product_id produt id if product page.
-	 * @return boolean
-	 */
-	public function is_available( $product_id = null ) {
-		if ( 'yes' !== $this->enabled ) {
-			return false;
-		} elseif ( is_admin() ) {
-			return true;
-		}
-		if ( SequraHelper::is_checkout() && ! $this->is_available_in_checkout() ) {
-			return false;
-		}
-		if ( is_product() && $product_id && ! $this->is_available_in_product_page( $product_id ) ) {
-			return false;
-		}
-		$ret = $this->helper->is_available_for_country() &&
-				$this->helper->is_available_for_currency() &&
-				$this->helper->is_available_for_ip();
-		return apply_filters( 'woocommerce_sequra_pp_is_available', $ret );
-	}
-	/**
 	 * Undocumented function
 	 *
 	 * @return boolean

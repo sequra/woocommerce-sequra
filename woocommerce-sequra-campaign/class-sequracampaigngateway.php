@@ -164,11 +164,6 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( 'yes' !== $this->enabled ) {
-			return false;
-		} elseif ( is_admin() ) {
-			return true;
-		}
 		if ( (
 				get_the_ID() === wc_get_page_id( 'checkout' ) ||
 				( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
@@ -176,20 +171,9 @@ class SequraCampaignGateway extends WC_Payment_Gateway {
 			! $this->is_available_in_checkout() ) {
 			return false;
 		}
-
-		if ( is_product() && ! $this->is_available_in_product_page() ) {
-			return false;
-		}
-
-		if ( WC()->cart && 0 < $this->get_order_total() && $this->min_amount > $this->get_order_total() ) {
-			return false;
-		}
-
-		$ret = $this->helper->is_available_for_country() &&
-				$this->helper->is_available_for_currency() &&
-				$this->helper->is_available_for_ip();
-		return apply_filters( 'woocommerce_sequracampaign_is_available', $ret );
+		return $this->helper->is_available();
 	}
+
 	/**
 	 * Undocumented function
 	 *

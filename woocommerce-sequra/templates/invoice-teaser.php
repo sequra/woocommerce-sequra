@@ -5,7 +5,7 @@
  * @package woocommerce-sequra
  */
 
-if ( $sequra->is_available( $product->get_id() ) && $product->get_price() < $sequra->max_amount ) { ?>
+if ( $sequra->helper->is_available( $product->get_id() ) && $product->get_price() < $sequra->max_amount ) { ?>
 <div id="sequra_invoice_teaser_container" style="clear:both"><div id="sequra_invoice_teaser"></div></div>
 	<script type="text/javascript">
 		Sequra.onLoad(function(){

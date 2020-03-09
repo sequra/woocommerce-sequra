@@ -380,9 +380,10 @@ class SequraHelper {
 		} elseif ( file_exists( get_template_directory() . '/' . $template . '.php' ) ) {
 			return get_template_directory() . '/' . $template . '.php';
 		} else {
-			return WP_CONTENT_DIR . '/plugins/' . plugin_basename( dirname( __FILE__ ) ) . '/templates/' . $template . '.php';
+			return WC_SEQURA_PLG_PATH . '/templates/' . $template . '.php';
 		}
 	}
+
 	/**
 	 * Undocumented function
 	 *
@@ -440,6 +441,30 @@ class SequraHelper {
 	public function is_available_in_product_page( $product_id ) {
 		$return       = get_post_meta( $product_id, 'is_sequra_banned', true ) !== 'yes';
 		return apply_filters( 'woocommerce_sq_is_available_in_product_page', $return, $product_id );
+	}
+
+	/**
+	 * Check If The Gateway Is Available For Use
+	 *
+	 * @param  int|null $product_id produt id if product page.
+	 * @return boolean
+	 */
+	public function is_available( $product_id = null ) {
+		if ( 'yes' !== $this->pm->enabled ) {
+			return false;
+		} elseif ( is_admin() ) {
+			return true;
+		}
+		if ( self::is_checkout() && ! $this->pm->is_available_in_checkout() ) {
+			return false;
+		}
+		if ( is_product() && $product_id && ! $this->pm->is_available_in_product_page( $product_id ) ) {
+			return false;
+		}
+		$ret = $this->is_available_for_country() &&
+				$this->is_available_for_currency() &&
+				$this->is_available_for_ip();
+		return apply_filters( 'woocommerce_' . $this->pm->id . '_is_available', $ret );
 	}
 }
 

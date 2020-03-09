@@ -80,11 +80,11 @@ install_wp() {
 
 install_test_suite() {
 	# portable in-place argument for both GNU sed and Mac OSX sed
-	if [[ $(uname -s) == 'Darwin' ]]; then
-		local ioption='-i .bak'
-	else
+	#if [[ $(uname -s) == 'Darwin' ]]; then
+	#	local ioption='-i .bak'
+	#else
 		local ioption='-i'
-	fi
+	#fi
 
 	# set up testing suite if it doesn't yet exist
 	if [ ! -d $WP_TESTS_DIR ]; then
@@ -209,7 +209,7 @@ prepare_phpunit() {
 	sed -e "s/\\\"/\\\\\\\\\"/g" phpunit.xml.template >${TMPDIR}phpunit.xml.template.scaped;
 	while read p;
 	 do  eval "echo \"$p\">>phpunit.xml";
-	done < ${TMPDIR}phpunit.xml.template.scaped 
+	done < ${TMPDIR}phpunit.xml.template.scaped
 }
 
 install_wp

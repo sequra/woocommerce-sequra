@@ -6,7 +6,7 @@
  */
 
 /**
- * Upgrade from versions lowed than 4.4.0 function
+ * Upgrade from versions lower than 4.4.0 function
  *
  * @param mixed $version the current version.
  * @return void

@@ -19,6 +19,7 @@ if ( isset( $atts['color'] ) ) { ?>
 		}
 	</style>
 <?php } ?>
+<!-- //BOF banner-pp6 -->
 <div id="sequra-banner-partpayment" class="sequra-banner">
 	<div id="block1" class="sqblock">
 		<span class="sqheader">FRACCIONAR PAGO</span>
@@ -44,3 +45,4 @@ if ( isset( $atts['color'] ) ) { ?>
 		</div>
 	</div>
 </div>
+<!-- //EOF banner-pp6 -->

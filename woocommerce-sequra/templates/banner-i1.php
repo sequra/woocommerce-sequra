@@ -19,7 +19,7 @@ if ( isset( $atts['color'] ) ) { ?>
 		}
 	</style>
 <?php } ?>
-
+<!-- //BOF banner-i1 -->
 <div id="sequra-banner-invoice" class="sequra-banner">
 	<div id="block1" class="sqblock">
 		<span class="sqheader">COMPRA AHORA, PAGA DESPU&Eacute;S</span>
@@ -45,3 +45,4 @@ if ( isset( $atts['color'] ) ) { ?>
 	  </div>
 	</div>
 </div>
+<!-- //EOF banner-i1 -->

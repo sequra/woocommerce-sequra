@@ -4,25 +4,14 @@
  *
  * @package WooCommerceSQ\Tests\Gateways\Sequra
  */
-class WCSQ_Tests_SequraPayment_Gateway_BuilderWC extends WC_Unit_Test_Case {
+class WCSQ_Tests_SequraBuilderWC extends SQ_Unit_Test_Case {
 
 	/**
-	 * Initialize the Paypal gateway and Request objects.
+	 * Initialize the SeQura gateway and Request objects.
 	 */
 	public function setUp() {
 		parent::setUp();
-		// Add API credentials.
-		$settings = array(
-			'merchantref'        => 'wcsq_tests',
-			'user'               => 'wcsq_tests',
-			'password'           => 'dHvxbkpZcNnX6uk36XOf4P51lnkSE4',
-			'assets_secret'      => 'i_S5YcXdxZ',
-			'enable_for_virtual' => 'no',
-			'env'                => 1,
-			'debug'              => 'yes',
-		);
-		update_option( 'woocommerce_sequra_settings ', $settings );
-		$pm                 = new SequraInvoiceGateway();
+		$pm                  = new SequraInvoiceGateway();
 		$this->sequra_helper = new SequraHelper( $pm );
 	}
 

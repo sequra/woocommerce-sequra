@@ -22,12 +22,13 @@ define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 register_activation_hook( __FILE__, 'sequra_activation' );
 
 require_once WC_SEQURA_PLG_PATH . 'lib/wp-package-updater/class-wp-package-updater.php';
-
-$prefix_updater = new WP_Package_Updater(
-	get_option( 'sequra_plugin_update_server', SEQURA_PLUGIN_UPDATE_SERVER ),
-	wp_normalize_path( __FILE__ ),
-	wp_normalize_path( WC_SEQURA_PLG_PATH )
-);
+if ( !defined('STDIN') ) {
+	$prefix_updater = new WP_Package_Updater(
+		get_option( 'sequra_plugin_update_server', SEQURA_PLUGIN_UPDATE_SERVER ),
+		wp_normalize_path( __FILE__ ),
+		wp_normalize_path( WC_SEQURA_PLG_PATH )
+	);
+}
 
 /**
  * Run once on plugin activation
@@ -91,7 +92,7 @@ add_action( 'sequra_send_daily_delivery_report', 'sequra_send_daily_delivery_rep
  */
 function sequra_send_daily_delivery_report() {
 	if ( ! class_exists( 'SequraReporter' ) ) {
-		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/class-sequrareporter.php';
+		require_once WC_SEQURA_PLG_PATH . '/class-sequrareporter.php';
 	}
 	if ( SequraReporter::send_daily_delivery_report() === false ) {
 		die( 'KO' );
@@ -140,8 +141,7 @@ function sequra_banner( $atts ) {
 	} elseif ( in_array( $product, array( 'pp3', 'pp6', 'pp9' ), true ) ) {
 		$pm = new SequraPartPaymentGateway();
 	}
-	$pm->is_available();
-	if ( ! $pm || ! $pm->is_available() ) {
+	if ( ! $pm || ! $pm->helper->is_available() ) {
 		return;
 	}
 	ob_start();
@@ -185,7 +185,7 @@ function sequrapartpayment_upgrade_if_needed() {
  */
 function woocommerce_sequra_init() {
 	do_action( 'sequra_upgrade_if_needed' );
-	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'wc_sequra', false, WC_SEQURA_PLG_PATH . '/languages' );
 
 	if ( ! class_exists( 'SequraHelper' ) ) {
 		require_once dirname( __FILE__ ) . '/class-sequrahelper.php';
@@ -219,7 +219,7 @@ function woocommerce_sequra_init() {
 	add_filter( 'woocommerce_payment_gateways', 'add_sequra_gateway' );
 
 	if ( ! class_exists( 'Sequra_Meta_Box_Settings' ) ) {
-		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-settings.php';
+		require_once WC_SEQURA_PLG_PATH. '/includes/admin/meta-boxes/class-sequra-meta-box-settings.php';
 	}
 	add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Settings::save', 20, 2 );
 	add_action( 'add_meta_boxes', 'Sequra_Meta_Box_Settings::add_meta_box' );
@@ -241,7 +241,7 @@ function woocommerce_sequra_init() {
 		add_filter( 'woocommerce_payment_gateways', 'add_sequra_invoice_gateway' );
 	} else {
 		if ( ! class_exists( 'Sequra_Meta_Box_Service_End_Date' ) ) {
-			require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php';
+			require_once WC_SEQURA_PLG_PATH . '/includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php';
 		}
 		add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Service_End_Date::save', 20, 2 );
 		add_action( 'add_meta_boxes', 'Sequra_Meta_Box_Service_End_Date::add_meta_box' );
@@ -322,7 +322,7 @@ function woocommerce_sequra_init() {
 			! ( $product instanceof WC_Product ) ||
 			! is_product() ||
 			$wp_query->posts[0]->ID !== $product->get_id() ||
-			! $sequra_pp->is_available( $product->get_id() ) ) {
+			! $sequra_pp->helper->is_available( $product->get_id() ) ) {
 			return $price;
 		}
 		// Could have any html disable phpcs.
@@ -348,7 +348,7 @@ function woocommerce_sequra_init() {
 	 */
 	function sequra_pp_simulator( $atts, $product_id = null ) {
 		$sequra_pp = new SequraPartPaymentGateway();
-		if ( ! $sequra_pp->is_available( $product_id ) ) {
+		if ( ! $sequra_pp->helper->is_available( $product_id ) ) {
 			return;
 		}
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
