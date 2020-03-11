@@ -923,10 +923,10 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				$stat['amount'] = self::integerPrice( $this->_current_order->get_total() );
 			}
 			if ( true || get_option( 'sequra_allowstats_country' ) ) {
-				$stat['country'] = self::notNull( $this->_current_order->billing_country, 'ES' );
+				$stat['country'] = self::notNull( $this->_current_order->get_billing_country(), 'ES' );
 			}
 			if ( true || get_option( 'sequra_allowstats_payment' ) ) { // todo: Stats config.
-				$stat['payment_method_raw'] = $this->_current_order->payment_method;
+				$stat['payment_method_raw'] = $this->_current_order->get_payment_method();
 				$stat['payment_method']     = self::mapPaymentMethod( $stat['payment_method_raw'] );
 			}
 			if ( true || get_option( 'sequra_allowstats_status' ) ) { // todo: Stats config.
