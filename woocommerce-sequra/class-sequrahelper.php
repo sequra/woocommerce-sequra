@@ -85,7 +85,7 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public static function is_fully_virtual( WC_Cart $cart ) {
-		return ! $cart::needs_shipping();
+		return ! $cart->needs_shipping();
 	}
 	/**
 	 * Undocumented function

@@ -4,7 +4,7 @@
     "type": "wordpress-plugin",
     "require-dev": {
         "behat/behat": "^3.5@dev",
-        "phpunit/phpunit": "6.5.13",
+        "phpunit/phpunit": "7.5.20",
         "woocommerce/woocommerce-sniffs": "0.0.5",
         "phpmd/phpmd": "dev-master"
     },

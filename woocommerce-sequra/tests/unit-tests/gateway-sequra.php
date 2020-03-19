@@ -52,13 +52,13 @@ class WCSQ_Tests_GatewaySequra extends SQ_Unit_Test_Case {
 	 * Test for sequra_activation() method.
 	 */
 	public function test_sequra_banner() {
-		//No banner if not spain, euro and IP
+		// No banner if not spain, euro and IP.
 		$this->assertTrue( ! sequra_banner( [ 'product' => 'i1' ] ) );
 
-		//Force availability
+		// Force availability.
 		add_filter( 'woocommerce_sequra_i_is_available', [ $this , 'forceTrue' ] );
 		add_filter( 'woocommerce_sequra_pp_is_available', [ $this , 'forceTrue' ] );
-		//Clear overrides
+		// Clear overrides.
 		$this->clear_overrides( 'banner-pp3.php' );
 		foreach ( [ 'i1', 'pp3', 'pp6', 'pp9' ] as $sq_prod ) {
 			$this->assertRegExp( '<!-- //BOF banner-' . $sq_prod . ' -->', sequra_banner( [ 'product' => $sq_prod ] ) );
@@ -88,11 +88,11 @@ class WCSQ_Tests_GatewaySequra extends SQ_Unit_Test_Case {
 	 * @param string $filename
 	 * @return void
 	 */
-	private function clear_overrides ( $filename ) {
+	private function clear_overrides( $filename ) {
 		foreach ( $this->override_paths as $path ){
 			$full_path = $path . $filename;
 			if ( file_exists( $full_path ) ) {
-				unlink($full_path);
+				unlink( $full_path );
 			}
 		}
 	}

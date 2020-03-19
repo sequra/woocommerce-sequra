@@ -138,6 +138,8 @@ class WCSQ_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php';
 
 		require_once $this->tests_dir . '/framework/class-sq-unit-test-case.php';
+		require_once $this->tests_dir . '/framework/helpers/class-sq-helper-product.php';
+
 	}
 
 	/**
