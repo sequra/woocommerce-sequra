@@ -90,11 +90,11 @@ class SequraHelper {
 	/**
 	 * Undocumented function
 	 *
-	 * @param string $service_end_date Service end date.
+	 * @param string $service_date Service date.
 	 * @return boolean
 	 */
-	public static function validate_service_end_date( $service_end_date ) {
-		return preg_match( '/' . self::ISO8601_PATTERN . '/', $service_end_date );
+	public static function validate_service_date( $service_date ) {
+		return preg_match( '/' . self::ISO8601_PATTERN . '/', $service_date );
 	}
 
 	/**

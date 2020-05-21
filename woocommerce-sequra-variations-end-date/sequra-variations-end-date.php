@@ -3,10 +3,10 @@
  * Plugin Name: SeQura Add on Service en date per variantion
  * Plugin URI: http://sequra.es/
  * Description: SeQura Add on to allow defining service en date per variantion.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
- * WC tested up to: 3.9.3
+ * WC tested up to: 4.1.0
  *
  * @package woocommerce-sequra
  */
@@ -71,7 +71,7 @@ function woocommerce_sequra_variations_end_date_init() {
 
 		if ( $variation_id ) {
 			$service_end_date = get_post_meta( $variation_id, 'sequra_service_end_date', true );
-			if ( SequraHelper::validate_service_end_date( $service_end_date ) ) {
+			if ( SequraHelper::validate_service_date( $service_end_date ) ) {
 				$end_date = $service_end_date;
 			}
         }

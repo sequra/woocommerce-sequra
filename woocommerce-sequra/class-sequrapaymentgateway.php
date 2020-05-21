@@ -106,9 +106,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'description' => __( 'Your contract must allow selling services, SeQura will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'wc_sequra' ),
 				'default'     => 'no',
 			),
-		);
-		if ( isset( $this->settings['enable_for_virtual'] ) && 'yes' === $this->settings['enable_for_virtual'] ) {
-			$this->form_fields['default_service_end_date'] = array(
+			'default_service_end_date' => array(
 				'title'             => __( 'Default service end date', 'wc_sequra' ),
 				'desc_tip'          => true,
 				'type'              => 'text',
@@ -117,48 +115,64 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'placeholder'       => __( 'ISO8601 format', 'wc_sequra' ),
 				'custom_attributes' => array(
 					'pattern' => SequraHelper::ISO8601_PATTERN,
+					'dependson' => 'enable_for_virtual'
 				),
-			);
-		}
-		$this->form_fields = array_merge(
-			$this->form_fields,
-			array(
-				'env'      => array(
-					'title'       => __( 'Entorno', 'wc_sequra' ),
-					'type'        => 'select',
-					'description' => __( 'While working in Sandbox the methods will only show to the following IP addresses.', 'wc_sequra' ),
-					'default'     => '1',
-					'desc_tip'    => true,
-					'options'     => array(
-						'1' => __( 'Sandbox - Pruebas', 'wc_sequra' ),
-						'0' => __( 'Live - Real', 'wc_sequra' ),
+			),
+			'allow_payment_delay' => array(
+				'title'             => __( 'Allow first payment delay', 'wc_sequra' ),
+				'desc_tip'          => true,
+				'type'       		=> 'checkbox',
+				'description'       => __('Pago primera cuota diferido. No habilitar si no está indicado por SeQura', 'wc_sequra' ),
+				'default'           => 'no',
+				'custom_attributes' => array(
+					'dependson' => 'enable_for_virtual'
+				),
+			),
+			'allow_registration_items' => array(
+				'title'             => __( 'Allow registration items', 'wc_sequra' ),
+				'desc_tip'          => true,
+				'type'       		=> 'checkbox',
+				'description'       => __('Permitir configurar parte del pago por adelantado. No habilitar si no está indicado por SeQura', 'wc_sequra' ),
+				'default'           => 'no',
+				'custom_attributes' => array(
+					'dependson' => 'enable_for_virtual'
+				),
+			),
+			'env'      => array(
+				'title'       => __( 'Entorno', 'wc_sequra' ),
+				'type'        => 'select',
+				'description' => __( 'While working in Sandbox the methods will only show to the following IP addresses.', 'wc_sequra' ),
+				'default'     => '1',
+				'desc_tip'    => true,
+				'options'     => array(
+					'1' => __( 'Sandbox - Pruebas', 'wc_sequra' ),
+					'0' => __( 'Live - Real', 'wc_sequra' ),
+				),
+			),
+			'test_ips' => array(
+				'title'       => __( 'IPs for testing', 'wc_sequra' ),
+				'label'       => '',
+				'type'        => 'test',
+				'description' => sprintf(
+					__( 'When working is sandbox mode only these ips addresses will see the plugin. Current IP: %s', 'wc_sequra' ),						isset( $_SERVER['REMOTE_ADDR'] ) ?
+					esc_html( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) ) :
+					''
+				),
+				'desc_tip'    => false,
+				'default'     => gethostbyname( 'proxy-es.dev.sequra.es' ) .
+					(
+						isset( $_SERVER['REMOTE_ADDR'] ) ?
+							',' . sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) :
+							''
 					),
-				),
-				'test_ips' => array(
-					'title'       => __( 'IPs for testing', 'wc_sequra' ),
-					'label'       => '',
-					'type'        => 'test',
-					'description' => sprintf(
-						__( 'When working is sandbox mode only these ips addresses will see the plugin. Current IP: %s', 'wc_sequra' ),						isset( $_SERVER['REMOTE_ADDR'] ) ?
-						esc_html( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) ) :
-						''
-					),
-					'desc_tip'    => false,
-					'default'     => gethostbyname( 'proxy-es.dev.sequra.es' ) .
-						(
-							isset( $_SERVER['REMOTE_ADDR'] ) ?
-								',' . sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) :
-								''
-						),
-				),
-				'debug'    => array(
-					'title'       => __( 'Debugging', 'wc_sequra' ),
-					'label'       => __( 'Modo debug', 'wc_sequra' ),
-					'type'        => 'checkbox',
-					'description' => __( 'Sólo para desarrolladores.', 'wc_sequra' ),
-					'default'     => 'no',
-				),
-			)
+			),
+			'debug'    => array(
+				'title'       => __( 'Debugging', 'wc_sequra' ),
+				'label'       => __( 'Modo debug', 'wc_sequra' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Sólo para desarrolladores.', 'wc_sequra' ),
+				'default'     => 'no',
+			),
 		);
 		$this->form_fields = apply_filters( 'woocommerce_sequra_init_form_fields', $this->form_fields, $this );
 	}

@@ -3,19 +3,22 @@
  * Plugin Name: Pasarela de pago para Sequra
  * Plugin URI: http://sequra.es/
  * Description: Da la opción a tus clientes usar los servicios de SeQura para pagar.
- * Version: 4.9.8.2
+ * Version: 5.0.0
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
- * WC tested up to: 4.0.1
+ * WC requires at least: 3.0
+ * WC tested up to: 4.1
  * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
  * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg
  * BannerHigh: https://live.sequracdn.com/assets/images/logos/logo.svg
  * BannerLow: https://live.sequracdn.com/assets/images/logos/logo.svg
+ * Text Domain: wc_sequra
+ * Domain Path: /i18n/languages/
  *
  * @package woocommerce-sequra
  */
 
-define( 'SEQURA_VERSION', '4.9.8.2' );
+define( 'SEQURA_VERSION', '5.0.0' );
 define( 'WC_SEQURA_PLG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 
@@ -154,7 +157,6 @@ function sequra_banner( $atts ) {
 
 add_shortcode( 'sequra_banner', 'sequra_banner' );
 
-add_action( 'sequra_upgrade_if_needed', 'sequrapartpayment_upgrade_if_needed' );
 /**
  * Check if it needs aupgrade
  *
@@ -180,6 +182,52 @@ function sequrapartpayment_upgrade_if_needed() {
 	}
 }
 
+add_action( 'sequra_upgrade_if_needed', 'sequrapartpayment_upgrade_if_needed' );
+
+add_action(
+	'admin_enqueue_scripts',
+	function() {
+		wp_enqueue_script( 'sequra_configuration_script', plugin_dir_url( __FILE__ ) . 'assets/js/sequra_config.js' );
+	}
+);
+
+/**
+ * Show row meta on the plugin screen.
+ *
+ * @param mixed $links Plugin Row Meta.
+ * @param mixed $file  Plugin Base file.
+ *
+ * @return array
+ */
+function sequrapartpayment_plugin_row_meta( $links, $file ) {
+	if ( plugin_basename( __FILE__ ) === $file ) {
+		$row_meta = array(
+			'docs'    => '<a href="' . esc_url( apply_filters( 'sequrapartpayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'wc_sequra' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+			'apidocs' => '<a href="' . esc_url( apply_filters( 'sequrapartpayment_apidocs_url', 'https://docs.sequrapi.com/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'wc_sequra' ) . '">' . esc_html__( 'API docs', 'wc_sequra' ) . '</a>',
+			'support' => '<a href="' . esc_url( apply_filters( 'sequrapartpayment_support_url', 'mailto:sat@sequra.es' ) ) . '" aria-label="' . esc_attr__( 'Soporte', 'woocommerce' ) . '">' . esc_html__( 'Soporte', 'wc_sequra' ) . '</a>',
+		);
+
+		return array_merge( $links, $row_meta );
+	}
+
+	return (array) $links;
+}
+/**
+ * Add links to plugin in installed plugin list
+ *
+ * @param array $links
+ * @return array
+ */
+function sequrapartpayment_action_links( $links ) {
+	return array_merge(
+		array(
+			'comf'    => '<a href="' . esc_url( apply_filters( 'sequrapartpayment_conf_url', admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sequra' ) ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'wc_sequra' ) . '">' . esc_html__( 'Settings', 'woocommerce' ) . '</a>',
+		)
+		,
+		$links
+	);
+}
+
 /**
  * Init
  *
@@ -188,7 +236,8 @@ function sequrapartpayment_upgrade_if_needed() {
 function woocommerce_sequra_init() {
 	do_action( 'sequra_upgrade_if_needed' );
 	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
+	add_filter( 'plugin_row_meta', 'sequrapartpayment_plugin_row_meta', 10, 2 );
+	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'sequrapartpayment_action_links' );
 	if ( ! class_exists( 'SequraHelper' ) ) {
 		require_once dirname( __FILE__ ) . '/class-sequrahelper.php';
 	}
@@ -242,11 +291,11 @@ function woocommerce_sequra_init() {
 
 		add_filter( 'woocommerce_payment_gateways', 'add_sequra_invoice_gateway' );
 	} else {
-		if ( ! class_exists( 'Sequra_Meta_Box_Service_End_Date' ) ) {
-			require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php';
+		if ( ! class_exists( 'Sequra_Meta_Box_Service_Options' ) ) {
+			require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-service-options.php';
 		}
-		add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Service_End_Date::save', 20, 2 );
-		add_action( 'add_meta_boxes', 'Sequra_Meta_Box_Service_End_Date::add_meta_box' );
+		add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Service_Options::save', 20, 2 );
+		add_action( 'add_meta_boxes', 'Sequra_Meta_Box_Service_Options::add_meta_box' );
 	}
 
 	/**

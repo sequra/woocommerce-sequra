@@ -102,7 +102,8 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	public function merchant() {
 		$ret = parent::merchant();
 		if ( ! is_null( $this->_pm ) ) {
-			$ret['notify_url']              = add_query_arg(
+			$ret['options']    = $this->options();
+			$ret['notify_url'] = add_query_arg(
 				array(
 					'order'  => '' . $this->get_order_id(),
 					'wc-api' => 'woocommerce_' . $this->_pm->id,
@@ -129,6 +130,45 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	public function sign( $message ) {
 		return hash_hmac( self::HASH_ALGO, $message, $this->core_settings['password'] );
 	}
+	/**
+	 * Get options for order
+	 *
+	 * @return null|array
+	 */
+	protected function options() {
+		$data = null;
+		if ( $this->core_settings['allow_payment_delay'] ) {
+			$cart_contents = $this->getCartContents();
+			$first_charge_on = false;
+			foreach ( $cart_contents as $cart_item_key => $cart_item ) {
+				$_product = $this->getProductFromItem( $cart_item, $cart_item_key );
+				if ( ! $_product ) {
+					continue;
+				}
+				$raw_date = get_post_meta( $_product->get_id(), 'sequra_desired_first_charge_date', true );
+				if ( ! $raw_date ) {
+					continue;
+				}
+				if ( substr( $raw_date, 0, 1 ) == 'P' ) {
+					$date = ( new DateTime())->add( new DateInterval( $raw_date ) );
+				} else {
+					$date = new DateTime( $raw_date );
+				}
+				if ( ! $first_charge_on ) {
+					$first_charge_on = $date->format( DateTime::ATOM );
+				} else {
+					$first_charge_on = min(
+						$first_charge_on,
+						$date->format( DateTime::ATOM )
+					);
+				}
+			}
+			if( $first_charge_on ) {
+				$data['desired_first_charge_on'] = $first_charge_on;
+			}
+		}
+		return $data;
+	}
 
 	/**
 	 * Undocumented function
@@ -150,8 +190,45 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$data['order_total_with_tax']    = $total['with_tax'];
 		$data['order_total_without_tax'] = $total['without_tax'];
 		$data['order_total_tax']         = 0;
-
+		if ( $this->core_settings['allow_registration_items'] ) {
+			$this->registrationItems( $data );
+		}
 		return $data;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param array $data reference to built cartwithitem.
+	 * @return void
+	 */
+	protected function registrationItems( &$data ) {
+		$items = $data['items'];
+		foreach ( $items as $key => $item ) {
+			if ( ! isset( $item['product_id'] ) || ! $item['product_id'] ) {
+				continue;
+			}
+			$registration_amount = self::integerPrice(
+				get_post_meta( $item['product_id'], 'sequra_registration_amount', true )
+			);
+			if ( $registration_amount > 0 ) {
+				$data['items'][] = array(
+					'type' => 'registration',
+					'reference'=> $item['reference'] . '-reg',
+					'name'=>'Reg. ' . $item['name'],
+					'total_with_tax' => $item['quantity'] * $registration_amount,
+				);
+				//Fix orginal item
+				$data['items'][ $key ]['total_with_tax'] = max(
+					0,
+					$data['items'][ $key ]['total_with_tax'] - $item['quantity'] * $registration_amount
+				);
+				$data['items'][ $key ]['price_with_tax'] = max(
+					0,
+					$data['items'][ $key ]['price_with_tax'] - $registration_amount
+				);
+			}
+		}
 	}
 
 	/**
@@ -214,7 +291,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$product,
 			$cart_item
 		);
-		if ( ! SequraHelper::validate_service_end_date( $service_end_date ) ) {
+		if ( ! SequraHelper::validate_service_date( $service_end_date ) ) {
 			$service_end_date = $this->core_settings['default_service_end_date'];
 		}
 		if ( 0 === strpos( $service_end_date, 'P' ) ) {
