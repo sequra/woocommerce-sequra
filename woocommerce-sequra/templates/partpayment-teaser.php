@@ -25,7 +25,7 @@
 		}
 		<?php } ?>
 		var theme = '<?php echo esc_js( $theme ); ?>'.replace(/\&quot\;/g, "\"");
-		SequraHelper.drawPromotionWidget(the_price_container, dest, '<?php echo esc_js( $sequra_pp->product ); ?>', theme, 0);
+		SequraHelper.drawPromotionWidget(the_price_container, dest, '<?php echo esc_js( $sequra_pp->product ); ?>', theme, 0, '', <?php echo esc_js( $registration_amount ); ?>);
 		Sequra.onLoad(function () {
 			Sequra.refreshComponents();
 		});

@@ -402,6 +402,12 @@ function woocommerce_sequra_init() {
 		if ( ! $sequra_pp->is_available( $product_id ) ) {
 			return;
 		}
+		$registration_amount = 0;
+		if ( ! is_null( $product_id ) && get_post_meta( $product_id, 'sequra_registration_amount', true )){
+			$registration_amount = $sequra_pp->helper->get_builder()->integerPrice(
+				get_post_meta( $product_id, 'sequra_registration_amount', true )
+			);
+		}
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
 		$theme           = $sequra_pp->settings['widget_theme'];
 		ob_start();

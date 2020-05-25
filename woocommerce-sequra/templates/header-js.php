@@ -72,11 +72,11 @@ var SequraHelper = {
 		Sequra.refreshComponents();
 	},
 
-	drawPromotionWidget: function (price_src,dest,product,theme,reverse,campaign) {
+	drawPromotionWidget: function (price_src,dest,product,theme,reverse,campaign,registration_amount) {
 		if(this.drawnWidgets.indexOf(price_src+dest+product+theme+reverse+campaign)>=0){
 			return;
 		}
-		this.drawnWidgets.push(price_src+dest+product+theme+reverse+campaign);
+		this.drawnWidgets.push(price_src+dest+product+theme+reverse+campaign+registration_amount);
 		var promoWidgetNode = document.createElement('div');
 		var price_in_cents = 0;
 		try{
@@ -125,6 +125,9 @@ var SequraHelper = {
 		}
 		if(campaign){
 			promoWidgetNode.setAttribute('data-campaign',campaign);
+		}
+		if(registration_amount){
+			promoWidgetNode.setAttribute('data-registration-amount',registration_amount);
 		}
 		if (destNode.nextSibling) {//Insert after
 			destNode.parentNode.insertBefore(promoWidgetNode, destNode.nextSibling);
