@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: SeQura Add on Service en date per variantion
+ * Plugin Name: SeQura Add on Service end date per variation
  * Plugin URI: http://sequra.es/
- * Description: SeQura Add on to allow defining service en date per variantion.
+ * Description: SeQura Add on to allow defining service end date per variation.
  * Version: 1.1.0
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/

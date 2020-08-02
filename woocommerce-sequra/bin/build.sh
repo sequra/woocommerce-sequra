@@ -9,6 +9,8 @@ if [ "$1" != "" ]; then
 	EXT="-$1"
 fi
 composer install --no-ansi --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader
+cd ../woocommerce-sequrachcekout
+composer install --no-ansi --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader
 cd ..
 rm -rf $CURDIR/../dist/woocommerce-sequra$EXT.zip
 zip -r9 $CURDIR/../dist/woocommerce-sequra$EXT.zip woocommerce-sequra -x@woocommerce-sequra/exclude.lst
