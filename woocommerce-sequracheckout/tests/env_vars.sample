@@ -1,0 +1,8 @@
+#Fill and rename to env_vars
+DB_NAME=wptest
+DB_USER=root
+DB_PASS=pass
+DB_HOST=localhost
+WP_VERSION=latest		#If changed run: $ rm -rf ${TMPDIR}wordpress-tests-lib
+SKIP_DB_CREATE=false
+WC_VERSION=trunk		#If changed run: $ rm -rf ${TMPDIR}wordpress/wp-content/plugins/woocommerce

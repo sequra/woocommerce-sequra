@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /Users/mikel/proyectos/SeQura/woocommerce-sequra/woocommerce-sequra</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href=".css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  <link href=".css/nv.d3.min.css" rel="stylesheet" type="text/css">
+  <link href=".css/style.css" rel="stylesheet" type="text/css">
+  <link href=".css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="index.html">/Users/mikel/proyectos/SeQura/woocommerce-sequra/woocommerce-sequra</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="class-sequratemporder.php.html#12">SequraTempOrder</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrareporter.php.html#11">SequraReporter</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#15">Sequra_Meta_Box_Service_End_Date</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-settings.php.html#15">Sequra_Meta_Box_Settings</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#11">SequraHelper</a></td><td class="text-right">23%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#11">SequraBuilderWC</a></td><td class="text-right">39%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#11">SequraInvoiceGateway</a></td><td class="text-right">52%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#11">SequraPartPaymentGateway</a></td><td class="text-right">62%</td></tr>
+       <tr><td><a href="class-sequrapaymentgateway.php.html#11">SequraPaymentGateway</a></td><td class="text-right">82%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="class-sequrabuilderwc.php.html#11">SequraBuilderWC</a></td><td class="text-right">6427</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#11">SequraHelper</a></td><td class="text-right">2374</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#11">SequraInvoiceGateway</a></td><td class="text-right">175</td></tr>
+       <tr><td><a href="class-sequratemporder.php.html#12">SequraTempOrder</a></td><td class="text-right">156</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#15">Sequra_Meta_Box_Service_End_Date</a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#11">SequraPartPaymentGateway</a></td><td class="text-right">93</td></tr>
+       <tr><td><a href="class-sequrareporter.php.html#11">SequraReporter</a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-settings.php.html#15">Sequra_Meta_Box_Settings</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="class-sequrapaymentgateway.php.html#11">SequraPaymentGateway</a></td><td class="text-right">10</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-settings.php.html#63"><abbr title="Sequra_Meta_Box_Settings::add_meta_box">add_meta_box</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#441"><abbr title="SequraHelper::is_available_in_product_page">is_available_in_product_page</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#293"><abbr title="SequraInvoiceGateway::filer_payment_method">filer_payment_method</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#278"><abbr title="SequraInvoiceGateway::available_products">available_products</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#261"><abbr title="SequraInvoiceGateway::process_payment">process_payment</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#239"><abbr title="SequraInvoiceGateway::admin_options">admin_options</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#230"><abbr title="SequraInvoiceGateway::payment_fields">payment_fields</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#217"><abbr title="SequraInvoiceGateway::is_available_in_product_page">is_available_in_product_page</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#162"><abbr title="SequraInvoiceGateway::is_available_in_checkout">is_available_in_checkout</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#424"><abbr title="SequraHelper::is_available_in_checkout">is_available_in_checkout</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#241"><abbr title="SequraPartPaymentGateway::is_available_in_product_page">is_available_in_product_page</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#410"><abbr title="SequraHelper::is_elegible_for_product_sale">is_elegible_for_product_sale</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#392"><abbr title="SequraHelper::is_elegible_for_service_sale">is_elegible_for_service_sale</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#338"><abbr title="SequraHelper::get_identity_form">get_identity_form</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#311"><abbr title="SequraHelper::receipt_page">receipt_page</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#291"><abbr title="SequraHelper::add_payment_info_to_post_meta">add_payment_info_to_post_meta</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#258"><abbr title="SequraHelper::get_approval">get_approval</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#67"><abbr title="SequraBuilderWC::buildDeliveryReport">buildDeliveryReport</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#216"><abbr title="SequraPartPaymentGateway::is_available_in_checkout">is_available_in_checkout</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#253"><abbr title="SequraPartPaymentGateway::payment_fields">payment_fields</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#165"><abbr title="SequraHelper::get_client">get_client</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequratemporder.php.html#24"><abbr title="SequraTempOrder::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-settings.php.html#51"><abbr title="Sequra_Meta_Box_Settings::save">save</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-settings.php.html#22"><abbr title="Sequra_Meta_Box_Settings::output">output</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#107"><abbr title="Sequra_Meta_Box_Service_End_Date::add_meta_box">add_meta_box</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#94"><abbr title="Sequra_Meta_Box_Service_End_Date::warn">warn</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#77"><abbr title="Sequra_Meta_Box_Service_End_Date::save">save</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#22"><abbr title="Sequra_Meta_Box_Service_End_Date::output">output</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequratemporder.php.html#44"><abbr title="SequraTempOrder::__call">__call</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrareporter.php.html#39"><abbr title="SequraReporter::set_orders_as_sent">set_orders_as_sent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#261"><abbr title="SequraPartPaymentGateway::admin_options">admin_options</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrareporter.php.html#17"><abbr title="SequraReporter::send_daily_delivery_report">send_daily_delivery_report</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapaymentgateway.php.html#179"><abbr title="SequraPaymentGateway::admin_options">admin_options</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapaymentgateway.php.html#171"><abbr title="SequraPaymentGateway::is_available">is_available</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#324"><abbr title="SequraPartPaymentGateway::filer_payment_method">filer_payment_method</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#309"><abbr title="SequraPartPaymentGateway::process_admin_options">process_admin_options</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#299"><abbr title="SequraPartPaymentGateway::available_products">available_products</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#283"><abbr title="SequraPartPaymentGateway::process_payment">process_payment</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#205"><abbr title="SequraHelper::check_response">check_response</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#233"><abbr title="SequraHelper::check_ipn">check_ipn</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#153"><abbr title="SequraHelper::get_credit_agreements">get_credit_agreements</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#834"><abbr title="SequraBuilderWC::get_order_ids_from_array">get_order_ids_from_array</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#396"><abbr title="SequraBuilderWC::feeOrHandling">feeOrHandling</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#452"><abbr title="SequraBuilderWC::fixRoundingProblems">fixRoundingProblems</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#480"><abbr title="SequraBuilderWC::getShippedOrderIds">getShippedOrderIds</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#493"><abbr title="SequraBuilderWC::getShippedOrderList">getShippedOrderList</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#526"><abbr title="SequraBuilderWC::getShippedOrderList_legacy">getShippedOrderList_legacy</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#569"><abbr title="SequraBuilderWC::setOrdersMetaQuery">setOrdersMetaQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#582"><abbr title="SequraBuilderWC::buildShippedOrders">buildShippedOrders</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#139"><abbr title="SequraHelper::is_available_for_ip">is_available_for_ip</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#209"><abbr title="SequraBuilderWC::add_service_end_date">add_service_end_date</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#600"><abbr title="SequraBuilderWC::order_sent_at">order_sent_at</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#809"><abbr title="SequraBuilderWC::getPreviousOrders">getPreviousOrders</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#192"><abbr title="SequraBuilderWC::getShippingMethodFromSession">getShippingMethodFromSession</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#377"><abbr title="SequraBuilderWC::discount">discount</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#96"><abbr title="SequraHelper::validate_service_end_date">validate_service_end_date</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#849"><abbr title="SequraBuilderWC::get_order_currency">get_order_currency</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#862"><abbr title="SequraBuilderWC::shipmentCart">shipmentCart</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#80"><abbr title="SequraBuilderWC::setPaymentMethod">setPaymentMethod</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#130"><abbr title="SequraHelper::is_available_for_currency">is_available_for_currency</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#885"><abbr title="SequraBuilderWC::remainingCart">remainingCart</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#898"><abbr title="SequraBuilderWC::getOrderStats">getOrderStats</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#129"><abbr title="SequraBuilderWC::sign">sign</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#947"><abbr title="SequraBuilderWC::getOrderStats_legacy">getOrderStats_legacy</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#997"><abbr title="SequraBuilderWC::mapPaymentMethod">mapPaymentMethod</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#1033"><abbr title="SequraBuilderWC::mapStatus">mapStatus</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#102"><abbr title="SequraBuilderWC::merchant">merchant</abbr></a></td><td class="text-right">27%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#341"><abbr title="SequraBuilderWC::getCartcontents">getCartcontents</abbr></a></td><td class="text-right">33%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#162"><abbr title="SequraBuilderWC::deliveryMethod">deliveryMethod</abbr></a></td><td class="text-right">40%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#310"><abbr title="SequraBuilderWC::extraItems">extraItems</abbr></a></td><td class="text-right">43%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#287"><abbr title="SequraBuilderWC::discountItems">discountItems</abbr></a></td><td class="text-right">50%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#672"><abbr title="SequraBuilderWC::getField">getField</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#776"><abbr title="SequraBuilderWC::getCustomerLanguage">getCustomerLanguage</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#361"><abbr title="SequraBuilderWC::getProductFromItem">getProductFromItem</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#452"><abbr title="SequraHelper::is_available">is_available</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#724"><abbr title="SequraBuilderWC::customer">customer</abbr></a></td><td class="text-right">70%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#117"><abbr title="SequraPartPaymentGateway::get_configured_product">get_configured_product</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#417"><abbr title="SequraBuilderWC::handlingItems">handlingItems</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#100"><abbr title="SequraPartPaymentGateway::load_credit_conditions">load_credit_conditions</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#794"><abbr title="SequraBuilderWC::getCustomerField">getCustomerField</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#1075"><abbr title="SequraBuilderWC::get_order_id">get_order_id</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#48"><abbr title="SequraBuilderWC::__construct">__construct</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#373"><abbr title="SequraHelper::template_loader">template_loader</abbr></a></td><td class="text-right">77%</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#128"><abbr title="SequraPartPaymentGateway::init_form_fields">init_form_fields</abbr></a></td><td class="text-right">81%</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#187"><abbr title="SequraHelper::get_builder">get_builder</abbr></a></td><td class="text-right">85%</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#231"><abbr title="SequraBuilderWC::productItems">productItems</abbr></a></td><td class="text-right">87%</td></tr>
+       <tr><td><a href="class-sequrapaymentgateway.php.html#56"><abbr title="SequraPaymentGateway::init_form_fields">init_form_fields</abbr></a></td><td class="text-right">87%</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#40"><abbr title="SequraInvoiceGateway::__construct">__construct</abbr></a></td><td class="text-right">89%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#162"><abbr title="SequraInvoiceGateway::is_available_in_checkout">is_available_in_checkout</abbr></a></td><td class="text-right">380</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#997"><abbr title="SequraBuilderWC::mapPaymentMethod">mapPaymentMethod</abbr></a></td><td class="text-right">342</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#898"><abbr title="SequraBuilderWC::getOrderStats">getOrderStats</abbr></a></td><td class="text-right">182</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#947"><abbr title="SequraBuilderWC::getOrderStats_legacy">getOrderStats_legacy</abbr></a></td><td class="text-right">156</td></tr>
+       <tr><td><a href="class-sequratemporder.php.html#24"><abbr title="SequraTempOrder::__construct">__construct</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#216"><abbr title="SequraPartPaymentGateway::is_available_in_checkout">is_available_in_checkout</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#338"><abbr title="SequraHelper::get_identity_form">get_identity_form</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#452"><abbr title="SequraBuilderWC::fixRoundingProblems">fixRoundingProblems</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#258"><abbr title="SequraHelper::get_approval">get_approval</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="class-sequrareporter.php.html#17"><abbr title="SequraReporter::send_daily_delivery_report">send_daily_delivery_report</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#77"><abbr title="Sequra_Meta_Box_Service_End_Date::save">save</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#209"><abbr title="SequraBuilderWC::add_service_end_date">add_service_end_date</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#205"><abbr title="SequraHelper::check_response">check_response</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#1033"><abbr title="SequraBuilderWC::mapStatus">mapStatus</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#724"><abbr title="SequraBuilderWC::customer">customer</abbr></a></td><td class="text-right">15</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#452"><abbr title="SequraHelper::is_available">is_available</abbr></a></td><td class="text-right">13</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#241"><abbr title="SequraPartPaymentGateway::is_available_in_product_page">is_available_in_product_page</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#424"><abbr title="SequraHelper::is_available_in_checkout">is_available_in_checkout</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#392"><abbr title="SequraHelper::is_elegible_for_service_sale">is_elegible_for_service_sale</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php.html#22"><abbr title="Sequra_Meta_Box_Service_End_Date::output">output</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#291"><abbr title="SequraHelper::add_payment_info_to_post_meta">add_payment_info_to_post_meta</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#233"><abbr title="SequraHelper::check_ipn">check_ipn</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#165"><abbr title="SequraHelper::get_client">get_client</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-settings.php.html#51"><abbr title="Sequra_Meta_Box_Settings::save">save</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#139"><abbr title="SequraHelper::is_available_for_ip">is_available_for_ip</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#600"><abbr title="SequraBuilderWC::order_sent_at">order_sent_at</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#809"><abbr title="SequraBuilderWC::getPreviousOrders">getPreviousOrders</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#569"><abbr title="SequraBuilderWC::setOrdersMetaQuery">setOrdersMetaQuery</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#310"><abbr title="SequraBuilderWC::extraItems">extraItems</abbr></a></td><td class="text-right">9</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#231"><abbr title="SequraBuilderWC::productItems">productItems</abbr></a></td><td class="text-right">9</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#417"><abbr title="SequraBuilderWC::handlingItems">handlingItems</abbr></a></td><td class="text-right">9</td></tr>
+       <tr><td><a href="class-sequrapaymentgateway.php.html#56"><abbr title="SequraPaymentGateway::init_form_fields">init_form_fields</abbr></a></td><td class="text-right">7</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#40"><abbr title="SequraInvoiceGateway::__construct">__construct</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#217"><abbr title="SequraInvoiceGateway::is_available_in_product_page">is_available_in_product_page</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrainvoicegateway.php.html#293"><abbr title="SequraInvoiceGateway::filer_payment_method">filer_payment_method</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#862"><abbr title="SequraBuilderWC::shipmentCart">shipmentCart</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#324"><abbr title="SequraPartPaymentGateway::filer_payment_method">filer_payment_method</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#287"><abbr title="SequraBuilderWC::discountItems">discountItems</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrareporter.php.html#39"><abbr title="SequraReporter::set_orders_as_sent">set_orders_as_sent</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequratemporder.php.html#44"><abbr title="SequraTempOrder::__call">__call</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#192"><abbr title="SequraBuilderWC::getShippingMethodFromSession">getShippingMethodFromSession</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="includes/admin/meta-boxes/class-sequra-meta-box-settings.php.html#22"><abbr title="Sequra_Meta_Box_Settings::output">output</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#849"><abbr title="SequraBuilderWC::get_order_currency">get_order_currency</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#396"><abbr title="SequraBuilderWC::feeOrHandling">feeOrHandling</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#410"><abbr title="SequraHelper::is_elegible_for_product_sale">is_elegible_for_product_sale</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#480"><abbr title="SequraBuilderWC::getShippedOrderIds">getShippedOrderIds</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#834"><abbr title="SequraBuilderWC::get_order_ids_from_array">get_order_ids_from_array</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#130"><abbr title="SequraHelper::is_available_for_currency">is_available_for_currency</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#582"><abbr title="SequraBuilderWC::buildShippedOrders">buildShippedOrders</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#311"><abbr title="SequraHelper::receipt_page">receipt_page</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#493"><abbr title="SequraBuilderWC::getShippedOrderList">getShippedOrderList</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#373"><abbr title="SequraHelper::template_loader">template_loader</abbr></a></td><td class="text-right">5</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#162"><abbr title="SequraBuilderWC::deliveryMethod">deliveryMethod</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#672"><abbr title="SequraBuilderWC::getField">getField</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#102"><abbr title="SequraBuilderWC::merchant">merchant</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#776"><abbr title="SequraBuilderWC::getCustomerLanguage">getCustomerLanguage</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#341"><abbr title="SequraBuilderWC::getCartcontents">getCartcontents</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#117"><abbr title="SequraPartPaymentGateway::get_configured_product">get_configured_product</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#794"><abbr title="SequraBuilderWC::getCustomerField">getCustomerField</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#48"><abbr title="SequraBuilderWC::__construct">__construct</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="class-sequrahelper.php.html#187"><abbr title="SequraHelper::get_builder">get_builder</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#361"><abbr title="SequraBuilderWC::getProductFromItem">getProductFromItem</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#100"><abbr title="SequraPartPaymentGateway::load_credit_conditions">load_credit_conditions</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="class-sequrabuilderwc.php.html#1075"><abbr title="SequraBuilderWC::get_order_id">get_order_id</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="class-sequrapartpaymentgateway.php.html#128"><abbr title="SequraPartPaymentGateway::init_form_fields">init_form_fields</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 6.1.4</a> using <a href="https://secure.php.net/" target="_top">PHP 7.1.33</a> with <a href="https://xdebug.org/">Xdebug 2.7.2</a> and <a href="https://phpunit.de/">PHPUnit 7.5.20</a> at Fri Mar 20 7:41:06 UTC 2020.</small>
+    </p>
+   </footer>
+  </div>
+  <script src=".js/jquery.min.js" type="text/javascript"></script>
+  <script src=".js/d3.min.js" type="text/javascript"></script>
+  <script src=".js/nv.d3.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([4,0,0,1,1,0,1,1,0,1,0,1], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([66,0,0,1,1,2,1,4,8,5,2,15], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[39.224137931034484,167,"<a href=\"class-sequrabuilderwc.php.html#11\">SequraBuilderWC<\/a>"],[23.699421965317917,72,"<a href=\"class-sequrahelper.php.html#11\">SequraHelper<\/a>"],[52.459016393442624,36,"<a href=\"class-sequrainvoicegateway.php.html#11\">SequraInvoiceGateway<\/a>"],[62.903225806451616,34,"<a href=\"class-sequrapartpaymentgateway.php.html#11\">SequraPartPaymentGateway<\/a>"],[82.6086956521739,10,"<a href=\"class-sequrapaymentgateway.php.html#11\">SequraPaymentGateway<\/a>"],[0,7,"<a href=\"class-sequrareporter.php.html#11\">SequraReporter<\/a>"],[0,12,"<a href=\"class-sequratemporder.php.html#12\">SequraTempOrder<\/a>"],[0,10,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-service-end-date.php.html#15\">Sequra_Meta_Box_Service_End_Date<\/a>"],[0,6,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-settings.php.html#15\">Sequra_Meta_Box_Settings<\/a>"],[100,0,"<a href=\"interface-sequrapaymentmethod.php.html#11\">SequraPaymentMethod<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[75,3,"<a href=\"class-sequrabuilderwc.php.html#48\">SequraBuilderWC::__construct<\/a>"],[0,1,"<a href=\"class-sequrabuilderwc.php.html#67\">SequraBuilderWC::buildDeliveryReport<\/a>"],[0,1,"<a href=\"class-sequrabuilderwc.php.html#80\">SequraBuilderWC::setPaymentMethod<\/a>"],[100,2,"<a href=\"class-sequrabuilderwc.php.html#91\">SequraBuilderWC::getOrderRef<\/a>"],[27.27272727272727,2,"<a href=\"class-sequrabuilderwc.php.html#102\">SequraBuilderWC::merchant<\/a>"],[0,1,"<a href=\"class-sequrabuilderwc.php.html#129\">SequraBuilderWC::sign<\/a>"],[100,1,"<a href=\"class-sequrabuilderwc.php.html#138\">SequraBuilderWC::cartWithItems<\/a>"],[40,3,"<a href=\"class-sequrabuilderwc.php.html#162\">SequraBuilderWC::deliveryMethod<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#192\">SequraBuilderWC::getShippingMethodFromSession<\/a>"],[0,4,"<a href=\"class-sequrabuilderwc.php.html#209\">SequraBuilderWC::add_service_end_date<\/a>"],[87.09677419354838,9,"<a href=\"class-sequrabuilderwc.php.html#231\">SequraBuilderWC::productItems<\/a>"],[50,4,"<a href=\"class-sequrabuilderwc.php.html#287\">SequraBuilderWC::discountItems<\/a>"],[43.75,5,"<a href=\"class-sequrabuilderwc.php.html#310\">SequraBuilderWC::extraItems<\/a>"],[33.33333333333333,2,"<a href=\"class-sequrabuilderwc.php.html#341\">SequraBuilderWC::getCartcontents<\/a>"],[66.66666666666666,2,"<a href=\"class-sequrabuilderwc.php.html#361\">SequraBuilderWC::getProductFromItem<\/a>"],[0,1,"<a href=\"class-sequrabuilderwc.php.html#377\">SequraBuilderWC::discount<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#396\">SequraBuilderWC::feeOrHandling<\/a>"],[75,8,"<a href=\"class-sequrabuilderwc.php.html#417\">SequraBuilderWC::handlingItems<\/a>"],[0,6,"<a href=\"class-sequrabuilderwc.php.html#452\">SequraBuilderWC::fixRoundingProblems<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#480\">SequraBuilderWC::getShippedOrderIds<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#493\">SequraBuilderWC::getShippedOrderList<\/a>"],[0,1,"<a href=\"class-sequrabuilderwc.php.html#526\">SequraBuilderWC::getShippedOrderList_legacy<\/a>"],[0,3,"<a href=\"class-sequrabuilderwc.php.html#569\">SequraBuilderWC::setOrdersMetaQuery<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#582\">SequraBuilderWC::buildShippedOrders<\/a>"],[0,3,"<a href=\"class-sequrabuilderwc.php.html#600\">SequraBuilderWC::order_sent_at<\/a>"],[91.66666666666666,6,"<a href=\"class-sequrabuilderwc.php.html#618\">SequraBuilderWC::deliveryAddress<\/a>"],[100,3,"<a href=\"class-sequrabuilderwc.php.html#657\">SequraBuilderWC::getDeliveryField<\/a>"],[66.66666666666666,4,"<a href=\"class-sequrabuilderwc.php.html#672\">SequraBuilderWC::getField<\/a>"],[100,4,"<a href=\"class-sequrabuilderwc.php.html#693\">SequraBuilderWC::invoiceAddress<\/a>"],[70.96774193548387,12,"<a href=\"class-sequrabuilderwc.php.html#724\">SequraBuilderWC::customer<\/a>"],[66.66666666666666,3,"<a href=\"class-sequrabuilderwc.php.html#776\">SequraBuilderWC::getCustomerLanguage<\/a>"],[75,3,"<a href=\"class-sequrabuilderwc.php.html#794\">SequraBuilderWC::getCustomerField<\/a>"],[0,3,"<a href=\"class-sequrabuilderwc.php.html#809\">SequraBuilderWC::getPreviousOrders<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#834\">SequraBuilderWC::get_order_ids_from_array<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#849\">SequraBuilderWC::get_order_currency<\/a>"],[0,2,"<a href=\"class-sequrabuilderwc.php.html#862\">SequraBuilderWC::shipmentCart<\/a>"],[0,1,"<a href=\"class-sequrabuilderwc.php.html#885\">SequraBuilderWC::remainingCart<\/a>"],[0,13,"<a href=\"class-sequrabuilderwc.php.html#898\">SequraBuilderWC::getOrderStats<\/a>"],[0,12,"<a href=\"class-sequrabuilderwc.php.html#947\">SequraBuilderWC::getOrderStats_legacy<\/a>"],[0,18,"<a href=\"class-sequrabuilderwc.php.html#997\">SequraBuilderWC::mapPaymentMethod<\/a>"],[0,4,"<a href=\"class-sequrabuilderwc.php.html#1033\">SequraBuilderWC::mapStatus<\/a>"],[100,1,"<a href=\"class-sequrabuilderwc.php.html#1050\">SequraBuilderWC::platform<\/a>"],[75,2,"<a href=\"class-sequrabuilderwc.php.html#1075\">SequraBuilderWC::get_order_id<\/a>"],[100,2,"<a href=\"class-sequrahelper.php.html#45\">SequraHelper::__construct<\/a>"],[100,1,"<a href=\"class-sequrahelper.php.html#60\">SequraHelper::get_empty_core_settings<\/a>"],[100,1,"<a href=\"class-sequrahelper.php.html#76\">SequraHelper::get_cart_info_from_session<\/a>"],[100,1,"<a href=\"class-sequrahelper.php.html#87\">SequraHelper::is_fully_virtual<\/a>"],[0,1,"<a href=\"class-sequrahelper.php.html#96\">SequraHelper::validate_service_end_date<\/a>"],[100,5,"<a href=\"class-sequrahelper.php.html#105\">SequraHelper::is_checkout<\/a>"],[100,2,"<a href=\"class-sequrahelper.php.html#121\">SequraHelper::is_available_for_country<\/a>"],[0,2,"<a href=\"class-sequrahelper.php.html#130\">SequraHelper::is_available_for_currency<\/a>"],[0,3,"<a href=\"class-sequrahelper.php.html#139\">SequraHelper::is_available_for_ip<\/a>"],[0,1,"<a href=\"class-sequrahelper.php.html#153\">SequraHelper::get_credit_agreements<\/a>"],[0,3,"<a href=\"class-sequrahelper.php.html#165\">SequraHelper::get_client<\/a>"],[85.71428571428571,3,"<a href=\"class-sequrahelper.php.html#187\">SequraHelper::get_builder<\/a>"],[0,4,"<a href=\"class-sequrahelper.php.html#205\">SequraHelper::check_response<\/a>"],[0,3,"<a href=\"class-sequrahelper.php.html#233\">SequraHelper::check_ipn<\/a>"],[0,5,"<a href=\"class-sequrahelper.php.html#258\">SequraHelper::get_approval<\/a>"],[0,3,"<a href=\"class-sequrahelper.php.html#291\">SequraHelper::add_payment_info_to_post_meta<\/a>"],[0,2,"<a href=\"class-sequrahelper.php.html#311\">SequraHelper::receipt_page<\/a>"],[0,6,"<a href=\"class-sequrahelper.php.html#338\">SequraHelper::get_identity_form<\/a>"],[77.77777777777779,5,"<a href=\"class-sequrahelper.php.html#373\">SequraHelper::template_loader<\/a>"],[0,3,"<a href=\"class-sequrahelper.php.html#392\">SequraHelper::is_elegible_for_service_sale<\/a>"],[0,2,"<a href=\"class-sequrahelper.php.html#410\">SequraHelper::is_elegible_for_product_sale<\/a>"],[0,3,"<a href=\"class-sequrahelper.php.html#424\">SequraHelper::is_available_in_checkout<\/a>"],[0,1,"<a href=\"class-sequrahelper.php.html#441\">SequraHelper::is_available_in_product_page<\/a>"],[66.66666666666666,10,"<a href=\"class-sequrahelper.php.html#452\">SequraHelper::is_available<\/a>"],[89.74358974358975,6,"<a href=\"class-sequrainvoicegateway.php.html#40\">SequraInvoiceGateway::__construct<\/a>"],[93.54838709677419,3,"<a href=\"class-sequrainvoicegateway.php.html#108\">SequraInvoiceGateway::init_form_fields<\/a>"],[0,19,"<a href=\"class-sequrainvoicegateway.php.html#162\">SequraInvoiceGateway::is_available_in_checkout<\/a>"],[0,2,"<a href=\"class-sequrainvoicegateway.php.html#217\">SequraInvoiceGateway::is_available_in_product_page<\/a>"],[0,1,"<a href=\"class-sequrainvoicegateway.php.html#230\">SequraInvoiceGateway::payment_fields<\/a>"],[0,1,"<a href=\"class-sequrainvoicegateway.php.html#239\">SequraInvoiceGateway::admin_options<\/a>"],[0,1,"<a href=\"class-sequrainvoicegateway.php.html#261\">SequraInvoiceGateway::process_payment<\/a>"],[0,1,"<a href=\"class-sequrainvoicegateway.php.html#278\">SequraInvoiceGateway::available_products<\/a>"],[0,2,"<a href=\"class-sequrainvoicegateway.php.html#293\">SequraInvoiceGateway::filer_payment_method<\/a>"],[100,4,"<a href=\"class-sequrapartpaymentgateway.php.html#47\">SequraPartPaymentGateway::__construct<\/a>"],[75,2,"<a href=\"class-sequrapartpaymentgateway.php.html#100\">SequraPartPaymentGateway::load_credit_conditions<\/a>"],[75,3,"<a href=\"class-sequrapartpaymentgateway.php.html#117\">SequraPartPaymentGateway::get_configured_product<\/a>"],[81.25,2,"<a href=\"class-sequrapartpaymentgateway.php.html#128\">SequraPartPaymentGateway::init_form_fields<\/a>"],[100,2,"<a href=\"class-sequrapartpaymentgateway.php.html#182\">SequraPartPaymentGateway::get_available_products<\/a>"],[100,2,"<a href=\"class-sequrapartpaymentgateway.php.html#194\">SequraPartPaymentGateway::build_available_prodcts_array<\/a>"],[0,9,"<a href=\"class-sequrapartpaymentgateway.php.html#216\">SequraPartPaymentGateway::is_available_in_checkout<\/a>"],[0,3,"<a href=\"class-sequrapartpaymentgateway.php.html#241\">SequraPartPaymentGateway::is_available_in_product_page<\/a>"],[0,1,"<a href=\"class-sequrapartpaymentgateway.php.html#253\">SequraPartPaymentGateway::payment_fields<\/a>"],[0,1,"<a href=\"class-sequrapartpaymentgateway.php.html#261\">SequraPartPaymentGateway::admin_options<\/a>"],[0,1,"<a href=\"class-sequrapartpaymentgateway.php.html#283\">SequraPartPaymentGateway::process_payment<\/a>"],[0,1,"<a href=\"class-sequrapartpaymentgateway.php.html#299\">SequraPartPaymentGateway::available_products<\/a>"],[0,1,"<a href=\"class-sequrapartpaymentgateway.php.html#309\">SequraPartPaymentGateway::process_admin_options<\/a>"],[0,2,"<a href=\"class-sequrapartpaymentgateway.php.html#324\">SequraPartPaymentGateway::filer_payment_method<\/a>"],[100,1,"<a href=\"class-sequrapaymentgateway.php.html#24\">SequraPaymentGateway::__construct<\/a>"],[87.14285714285714,7,"<a href=\"class-sequrapaymentgateway.php.html#56\">SequraPaymentGateway::init_form_fields<\/a>"],[0,1,"<a href=\"class-sequrapaymentgateway.php.html#171\">SequraPaymentGateway::is_available<\/a>"],[0,1,"<a href=\"class-sequrapaymentgateway.php.html#179\">SequraPaymentGateway::admin_options<\/a>"],[0,5,"<a href=\"class-sequrareporter.php.html#17\">SequraReporter::send_daily_delivery_report<\/a>"],[0,2,"<a href=\"class-sequrareporter.php.html#39\">SequraReporter::set_orders_as_sent<\/a>"],[0,10,"<a href=\"class-sequratemporder.php.html#24\">SequraTempOrder::__construct<\/a>"],[0,2,"<a href=\"class-sequratemporder.php.html#44\">SequraTempOrder::__call<\/a>"],[0,3,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-service-end-date.php.html#22\">Sequra_Meta_Box_Service_End_Date::output<\/a>"],[0,5,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-service-end-date.php.html#77\">Sequra_Meta_Box_Service_End_Date::save<\/a>"],[0,1,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-service-end-date.php.html#94\">Sequra_Meta_Box_Service_End_Date::warn<\/a>"],[0,1,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-service-end-date.php.html#107\">Sequra_Meta_Box_Service_End_Date::add_meta_box<\/a>"],[0,2,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-settings.php.html#22\">Sequra_Meta_Box_Settings::output<\/a>"],[0,3,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-settings.php.html#51\">Sequra_Meta_Box_Settings::save<\/a>"],[0,1,"<a href=\"includes\/admin\/meta-boxes\/class-sequra-meta-box-settings.php.html#63\">Sequra_Meta_Box_Settings::add_meta_box<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

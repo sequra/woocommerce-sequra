@@ -1,0 +1,214 @@
+@font-face {
+	font-family: 'sequra';
+	src: url(https://live.sequracdn.com/assets/fonts/sequra.eot);
+	src: url(https://live.sequracdn.com/assets/fonts/sequra.eot#iefix) format("embedded-opentype"), url(https://live.sequracdn.com/assets/fonts/sequra.ttf) format("truetype"), url(https://live.sequracdn.com/assets/fonts/sequra.woff) format("woff"), url(https://live.sequracdn.com/assets/fonts/sequra.svg#sequra) format("svg");
+	font-weight: normal;
+	font-style: normal;
+}
+/* Color scheme */
+
+/*ICONS*/
+.sequra-banner .sqblock .sqnoc,
+.sequra-banner .sequra-educational-popup {
+	color: #00cc7a;
+}
+.sequra-banner .sequra-educational-popup {
+	border-color: #00cc7a;
+}
+
+/*HEADER*/
+.sequra-banner #block1 {
+	background: #00cc7a;
+}
+.sequra-banner #block1 .sqheader {
+	color: #fff;
+}
+
+
+/*          HOME            */
+.sequra-banner {
+	margin-bottom: 15px;
+	margin-top: 15px;
+	display: inline-flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: space-evenly;
+}
+
+.sequra-banner * {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	font-family: Montserrat, "Open Sans", sans-serif;
+}
+
+.sequra-banner .sqblock {
+	background: #f5f5f5;
+	overflow: hidden;
+	min-height: 86px;
+	max-height: 100px;
+	width: 33.33333333%;
+	flex-grow: 1;
+	display: flex;
+	justify-content: center;
+}
+
+.sequra-banner .sqinner {
+	color: #b5b5b4;
+}
+
+.sequra-banner .sqcontent {
+	display: block;
+	line-height: 13px;
+	font-style: italic;
+	font-size: 13px;
+}
+
+.sequra-banner .sqinner {
+	padding-top: 20px;
+	min-height: 85px;
+}
+
+.sequra-banner .sqblock .sqnoc {
+	float: left;
+	width: 20%;
+	text-align: center;
+	font-family: sequra;
+	line-height: 86px;
+	margin:0 20px;
+}
+
+.sequra-banner .sqheader {
+	font-size: 17px;
+	display: block;
+	color: #949494;
+	font-style: italic;
+	letter-spacing: 0.04em;
+	margin-bottom: 6px;
+	line-height: 18px;
+	font-weight: bold;
+}
+
+.sequra-banner .sequra-educational-popup {
+	border: 1px solid;
+	padding: 4px 8px 4px 8px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	display: block;
+	margin-top: 4px;
+	max-width: 150px;
+	font-size: 12px;
+	text-align: center;
+}
+
+.sequra-banner .sequra-educational-popup:hover {
+	background: #d2d2d2;
+}
+
+.sqnoc::before {
+	font-size: 50px;
+}
+
+.sequra-banner #block1 {
+	width: 100%;
+	min-height: 0px;
+	padding: 0px;
+}
+
+.sequra-banner #block1 {
+	text-align: center;
+	margin: 0px;
+}
+
+.sequra-banner #block1 .sqheader {
+	margin: 6px;
+}
+
+.sequra-banner #block2 {
+	background: #f5f5f5;
+	border-bottom: 8px solid #e4e4e4;
+}
+
+.sequra-banner #block3 {
+	background: #f9f9f9;
+	border-bottom: 8px solid #efeeee;
+}
+
+.sequra-banner #block4 {
+	background: #fdfdfd;
+	border-bottom: 8px solid #f5f5f5;
+}
+
+@media only screen and (max-width: 992px) {
+	.sequra-banner .sqblock {
+		width: 50%;
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.sequra-banner .sqblock {
+		width: 100%;
+	}
+}
+
+/*          END HOME            */
+.sequra-banner .icon-euros:before {
+	content: "\e90b";
+}
+
+.sequra-banner .icon-euro-one:before {
+	content: "\e90e";
+}
+
+.sequra-banner .icon-sequra-logo:before {
+	content: "\e900";
+}
+
+.sequra-banner .icon-calendar:before {
+	content: "\e901";
+}
+
+.sequra-banner .icon-check:before {
+	content: "\e902";
+}
+
+.sequra-banner .icon-creditcard:before {
+	content: "\e903";
+}
+
+.sequra-banner .icon-info:before {
+	content: "\e904";
+}
+
+.sequra-banner .icon-papers:before {
+	content: "\e905";
+}
+
+.sequra-banner .icon-sms:before {
+	content: "\e906";
+}
+
+.sequra-banner .icon-timer:before {
+	content: "\e907";
+}
+
+.sequra-banner .icon-left-arrow:before {
+	content: "\e908";
+}
+
+.sequra-banner .icon-check-paiper:before {
+	content: "\e909";
+}
+
+.sequra-banner .icon-puzzle:before {
+	content: "\e90a";
+}
+
+.sequra-banner .icon-cart-screen:before {
+	content: "\e90c";
+}
+
+.sequra-banner .icon-bag:before {
+	content: "\e90d";
+}
