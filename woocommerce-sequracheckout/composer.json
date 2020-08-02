@@ -52,6 +52,6 @@
         }
     },
     "require": {
-        "sequra/php-client": "*"
+        "sequra/php-client": "^0.1.1"
     }
 }
