@@ -15,7 +15,7 @@
             "email": "dev@sequra.es"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "scripts": {
         "clean-testenv": "echo",
         "test": [
