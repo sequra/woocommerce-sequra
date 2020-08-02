@@ -16,4 +16,6 @@ rm -rf $CURDIR/../dist/woocommerce-sequra$EXT.zip
 zip -r9 $CURDIR/../dist/woocommerce-sequra$EXT.zip woocommerce-sequra -x@woocommerce-sequra/exclude.lst
 rm rf $CURDIR/../dist/woocommerce-sequra-campaign$EXT.zip
 zip -r9 $CURDIR/../dist/woocommerce-sequra-campaign$EXT.zip woocommerce-sequra-campaign -x@woocommerce-sequra-campaign/exclude.lst
+rm rf $CURDIR/../dist/woocommerce-sequracheckout$EXT.zip
+zip -r9 $CURDIR/../dist/woocommerce-sequracheckout$EXT.zip woocommerce-sequracheckout -x@woocommerce-sequra-campaign/exclude.lst
 cd $CURDIR
