@@ -253,7 +253,7 @@ class SequraConfigFromFields {
 			'title'       => __( 'Simulator params', 'wc_sequra' ),
 			'type'        => 'text',
 			'description' => __( 'Widget visualization params', 'wc_sequra' ),
-			'default'     => '',
+			'default'     => 'L',
 		);
 	}
 	/**
@@ -293,7 +293,7 @@ class SequraConfigFromFields {
 			'title'       => __( 'Teaser params', 'wc_sequra' ),
 			'type'        => 'text',
 			'description' => __( 'Teaser visualization params', 'wc_sequra' ),
-			'default'     => '',
+			'default'     => 'L',
 		);
 	}
 }

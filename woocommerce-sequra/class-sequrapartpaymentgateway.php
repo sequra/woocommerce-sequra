@@ -143,7 +143,7 @@ class SequraPartPaymentGateway extends WC_Payment_Gateway {
 				'title'       => __( 'Widget theme', 'wc_sequra' ),
 				'type'        => 'text',
 				'description' => __( 'Widget visualization params', 'wc_sequra' ),
-				'default'     => 'white',
+				'default'     => 'L',
 			),
 			'price_css_sel' => array(
 				'title'       => __( 'CSS price selector', 'wc_sequra' ),

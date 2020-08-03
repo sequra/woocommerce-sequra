@@ -4,13 +4,15 @@
     padding:15px;
     border-radius: 3px;
     border: lightgray solid 1px;
-    background-color: white;
+	background-color: white;
+	align-items: center;
 }
 .payment_method_sequra div.sq_payment_method input {
     margin: auto 0.5em auto 0px;
 }
 label.sq_payment_method {
-    display: flex;
+	display: flex;
+	align-items: center;
 }
 label.sq_payment_method img {
     margin-right: 10px;
