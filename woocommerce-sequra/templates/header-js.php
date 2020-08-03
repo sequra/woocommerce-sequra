@@ -18,7 +18,6 @@ var sequraConfigParams = {
 	scriptUri: '<?php echo esc_html( $script_base_uri ); ?>sequra-checkout.min.js',
 	decimalSeparator: '<?php echo esc_html( wc_get_price_decimal_separator() ); ?>',
 	thousandSeparator: '<?php echo esc_html( wc_get_price_thousand_separator() ); ?>',
-	rebranding: true,
 };
 
 (function (i, s, o, g, r, a, m) {i['SequraConfiguration'] = g;i['SequraOnLoad'] = [];i[r] = {};i[r][a] = function (callback) {i['SequraOnLoad'].push(callback);};(a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);a.async = 1;a.src = g.scriptUri;m.parentNode.insertBefore(a, m);})(window, document, 'script', sequraConfigParams, 'Sequra', 'onLoad');
@@ -73,10 +72,10 @@ var SequraHelper = {
 	},
 
 	drawPromotionWidget: function (price_src,dest,product,theme,reverse,campaign,registration_amount) {
-		if(this.drawnWidgets.indexOf(price_src+dest+product+theme+reverse+campaign)>=0){
+		if(SequraHelper.drawnWidgets[price_src+dest+product+theme+reverse+campaign]){
 			return;
 		}
-		this.drawnWidgets.push(price_src+dest+product+theme+reverse+campaign+registration_amount);
+		SequraHelper.drawnWidgets[price_src+dest+product+theme+reverse+campaign] = true;
 		var promoWidgetNode = document.createElement('div');
 		var price_in_cents = 0;
 		try{
