@@ -354,7 +354,8 @@ function woocommerce_sequra_init() {
 		$dest            = $atts['dest'];
 		$campaign        = isset( $atts['campaign'] ) ? $atts['campaign'] : '';
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
-		$theme           = isset( $sequra->settings['widget_theme'] ) ? $sequra->settings['widget_theme'] : '';
+		$sq_product      = $sequra->remote_config->build_unique_product_code( $atts );
+		$theme           = isset( $sequra->settings[ 'widget_theme_'.$sq_product ] ) ? $sequra->settings[ 'widget_theme_'.$sq_product ] : '';
 		ob_start();
 		if ( SequraRemoteConfig::get_family_for( $atts ) == 'PARTPAYMENT' ) {
 			include SequraHelper::template_loader( 'partpayment-teaser' );

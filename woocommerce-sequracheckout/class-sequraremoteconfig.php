@@ -77,7 +77,7 @@ class SequraRemoteConfig {
 	 * @return string
 	 */
 	public static function build_unique_product_code( $method ) {
-		return $method['product'] . ( isset( $method['campaign'] ) ? '_' . $method['campaign'] : '' );
+		return $method['product'] . ( ( isset( $method['campaign'] ) && $method['campaign'] ) ? '_' . $method['campaign'] : '' );
 	}
 
 	public function get_title_from_unique_product_code( $product_campaign ) {

@@ -18,6 +18,7 @@
 		if (jQuery('.woocommerce-variation-price').length) {
 			dest = '.woocommerce-variation-price';
 		}
+		
 		<?php if ( isset( $atts['dest'] ) && '' !== trim( $atts['dest'] ) ) { ?>
 		var custom_dest = '<?php echo esc_js( $atts['dest'] ); ?>'.replace(/\&gt\;/g, ">");
 		if (jQuery(custom_dest).is(':visible')) {

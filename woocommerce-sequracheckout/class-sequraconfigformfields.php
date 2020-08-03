@@ -249,6 +249,12 @@ class SequraConfigFromFields {
 				'dependson' => 'enabled_in_product_' . $product,
 			),
 		);
+		$this->pm->form_fields[ 'widget_theme_' . $product ]       = array(
+			'title'       => __( 'Simulator params', 'wc_sequra' ),
+			'type'        => 'text',
+			'description' => __( 'Widget visualization params', 'wc_sequra' ),
+			'default'     => '',
+		);
 	}
 	/**
 	 * Initialize Gateway Settings Form Fields for each method
@@ -278,10 +284,16 @@ class SequraConfigFromFields {
 				'CSS after which the simulator will be drawn.',
 				'wc_sequra'
 			),
-			'default'     => '.summary .price',
+			'default'     => '.single_add_to_cart_button, .woocommerce-variation-add-to-cart',
 			'custom_attributes' => array(
 				'dependson' => 'enabled_in_product_' . $product,
 			),
+		);
+		$this->pm->form_fields[ 'widget_theme_' . $product ]       = array(
+			'title'       => __( 'Teaser params', 'wc_sequra' ),
+			'type'        => 'text',
+			'description' => __( 'Teaser visualization params', 'wc_sequra' ),
+			'default'     => '',
 		);
 	}
 }
