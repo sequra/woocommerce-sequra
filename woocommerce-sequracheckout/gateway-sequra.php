@@ -232,6 +232,7 @@ function woocommerce_sequra_init() {
 	function sequra_add_stylesheet_cdn_js() {
 		// Respects SSL, Style.css is relative to the current file.
 		wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ), array(), SEQURACHECKOUT_VERSION );
+		wp_register_style( 'sequra-widget', plugins_url( 'assets/css/widget.css', __FILE__ ), array(), SEQURACHECKOUT_VERSION );
 		wp_register_style( 'sequracheckout', plugins_url( 'assets/css/sequracheckout.css', __FILE__ ), array(), SEQURACHECKOUT_VERSION );
 	}
 
@@ -243,7 +244,6 @@ function woocommerce_sequra_init() {
 	 */
 	function sequra_get_script_basesurl() {
 		$core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
-
 		return 'https://' . ( 1 === (int) $core_settings['env'] ? 'sandbox' : 'live' ) . '.sequracdn.com/assets/';
 	}
 	/**
@@ -356,6 +356,7 @@ function woocommerce_sequra_init() {
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
 		$sq_product      = $sequra->remote_config->build_unique_product_code( $atts );
 		$theme           = isset( $sequra->settings[ 'widget_theme_'.$sq_product ] ) ? $sequra->settings[ 'widget_theme_'.$sq_product ] : '';
+		wp_enqueue_style( 'sequra-widget' );
 		ob_start();
 		if ( SequraRemoteConfig::get_family_for( $atts ) == 'PARTPAYMENT' ) {
 			include SequraHelper::template_loader( 'partpayment-teaser' );
