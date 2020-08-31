@@ -30,6 +30,12 @@ class SequraRemoteConfig {
 	 * @var array
 	 */
 	private static $merchant_payment_methods = null;
+	/**
+	 * Undocumented variable
+	 *
+	 * @var string
+	 */
+	private static $raw_merchant_payment_methods = null;
 
 	/**
 	 * Undocumented variable
@@ -79,13 +85,28 @@ class SequraRemoteConfig {
 	public static function build_unique_product_code( $method ) {
 		return $method['product'] . ( ( isset( $method['campaign'] ) && $method['campaign'] ) ? '_' . $method['campaign'] : '' );
 	}
-
+	/**
+	 * Get method title from unique product code
+	 *
+	 * @param string $product_campaign unique product code.
+	 * @return string
+	 */
 	public function get_title_from_unique_product_code( $product_campaign ) {
-		list($product, $campaign) = explode( '_', $product_campaign);
+		list($product, $campaign) = explode( '_', $product_campaign );
+		return $this->get_title_from_product_campaign( $product, $campaign );
+	}
+	/**
+	 *  Get method title from unique product and campaign
+	 *
+	 * @param string $product product.
+	 * @param string $campaign campaign.
+	 * @return string
+	 */
+	public function get_title_from_product_campaign( $product, $campaign ) {
 		foreach ( $this->get_merchant_payment_methods() as $method ) {
 			if (
 				$method['product'] == $product &&
-				( ! $campaign || $method['product'] == $campaign)
+				( ! $campaign || $method['product'] == $campaign )
 			) {
 				return $method['title'];
 			}
@@ -136,30 +157,29 @@ class SequraRemoteConfig {
 	 * @return array
 	 */
 	public function get_merchant_payment_methods( $force_refresh = false ) {
-		if ( $force_refresh || ! get_option( 'SEQURA_PAYMENT_METHODS' ) ) {
+		if ( $force_refresh || ! self::get_stored_payment_methods() ) {
 			$client = $this->helper->get_client();
 			$client->getMerchantPaymentMethods( $this->settings['merchantref'] );
 			if ( $client->succeeded() ) {
-				self::$merchant_payment_methods = ( $client->getJson() )['payment_options'];
-				update_option(
-					'SEQURA_PAYMENT_METHODS',
-					$client->getRawResult()
-				);
+				self::$raw_merchant_payment_methods = $client->getRawResult();
+				$this->update_stored_payment_methods();
+				$json = $client->getJson();
+				self::$merchant_payment_methods = $json['payment_options'];
 			}
 		}
 		if ( ! self::$merchant_payment_methods ) {
-			self::$merchant_payment_methods = (
-				json_decode(
-					get_option( 'SEQURA_PAYMENT_METHODS' ),
-					true
-				)
-			)['payment_options'];
+			$json                           = self::get_stored_payment_methods();
+			self::$merchant_payment_methods = $json['payment_options'];
 		}
 		return $this->flatten_payment_options(
 			self::$merchant_payment_methods
 		);
 	}
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function get_available_payment_methods() {
 		$ret = array();
 		$client = $this->helper->get_client();
@@ -180,14 +200,18 @@ class SequraRemoteConfig {
 		$client->getPaymentMethods( $uri );
 		if ( $client->succeeded() ) {
 			$merchant_payment_methods = ( $client->getJson() )['payment_options'];
-			return $this->flatten_payment_options($merchant_payment_methods);
+			return $this->flatten_payment_options( $merchant_payment_methods );
 		}
 	}
-
-	private function flatten_payment_options($options) {
+	/**
+	 * Create a flat array with all methods in all options.
+	 *
+	 * @param array $options Payment options to faltten.
+	 * @return array
+	 */
+	private function flatten_payment_options( $options ) {
 		return array_reduce(
-			$options
-			,
+			$options,
 			function ( $methods, $family ) {
 				return array_merge(
 					$methods,
@@ -195,6 +219,36 @@ class SequraRemoteConfig {
 				);
 			},
 			[]
+		);
+	}
+	/**
+	 * Recover the payment methods either in db or file.
+	 *
+	 * @return array
+	 */
+	private static function get_stored_payment_methods() {
+		if ( ! self::$raw_merchant_payment_methods ) {
+			self::$raw_merchant_payment_methods = get_option( 'SEQURA_PAYMENT_METHODS' );
+			if ( mb_strlen( self::$raw_merchant_payment_methods, '8bit' ) < 4096 && file_exists( self::$raw_merchant_payment_methods ) ) {
+				self::$raw_merchant_payment_methods = file_get_contents( self::$raw_merchant_payment_methods );
+			}
+		}
+		return json_decode( self::$raw_merchant_payment_methods, true );
+	}
+	/**
+	 * Store the payment methods either in db or file.
+	 *
+	 * @return void
+	 */
+	private static function update_stored_payment_methods() {
+		if ( mb_strlen( self::$raw_merchant_payment_methods, '8bit' ) > 64000 ) {
+			$tmp_file = tempnam( sys_get_temp_dir(), 'sq_pms' );
+			file_put_contents( $tmp_file, self::$raw_merchant_payment_methods );
+			self::$raw_merchant_payment_methods = $tmp_file;
+		}
+		update_option(
+			'SEQURA_PAYMENT_METHODS',
+			self::$raw_merchant_payment_methods
 		);
 	}
 }
