@@ -90,11 +90,23 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			);
 			add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_response' ) );
 			add_filter( 'woocommerce_thankyou_order_received_text' , array( $this, 'order_received_text' ), 10, 2 );
+			add_filter( 'woocommerce_order_get_payment_method_title', array( $this, 'order_get_payment_method_title' ), 10, 2 );
 			add_action( 'woocommerce_after_checkout_form', array( $this, 'jscript_checkout' ) );
 			do_action( 'woocommerce_sequra_loaded', $this );
 			self::$initialized = true;
 		}
 
+	}
+	/**
+	 * Set the proper payment method description
+	 */
+	public function order_get_payment_method_title( $value, $data ) {
+		if ( $data->get_payment_method() !== $this->id ) {
+			return $value;
+		}
+		$product = isset( $_GET['sq_product'] ) ?  $_GET['sq_product'] : null;
+		$campaign = isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : null;
+		return $this->remote_config->get_title_from_product_campaign( $product, $campaign );
 	}
 
 	/**
@@ -128,7 +140,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		<?php
 	}
 
-		/**
+	/**
 	 * Check If The Gateway Is Available For Use
 	 *
 	 * @param  int|null $product_id produt id if product page.
@@ -195,7 +207,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		}
 		$this->jscript_checkout();
 	}
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
 	public function jscript_checkout() {
 		?>
 		<script>
