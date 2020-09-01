@@ -217,13 +217,13 @@ class SequraHelper {
 		if ( ! $order->is_paid() ) {
 			wc_add_notice(
 				__(
-					'Ha habido un problema con el pago. Por favor, inténtelo de nuevo o escoja otro método de pago.',
+					'<p>SeQura está procesando tu solicitud.</p>' .
+					'<p>En unos minutos <b>recibirás un email con respuesta a tu solicitud</b>. Es posible que SeQura contacte contigo antes para validar algunos datos.</p>' .
+					'<p><b>Gracias por comprar con SeQura</b>',
 					'wc_sequra'
 				),
-				'error'
+				'notice'
 			);
-			// $url = $pm->get_checkout_payment_url();  Notice is not shown in payment page
-			$url = $order->get_cancel_order_url();
 		}
 		wp_safe_redirect( $url, 302 );
 	}
