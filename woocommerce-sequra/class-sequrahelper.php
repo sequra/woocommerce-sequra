@@ -207,6 +207,9 @@ class SequraHelper {
 			return;
 		}
 		$order = new WC_Order( sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) );
+		if ( isset( $_POST['event'] ) ) {
+			return $this->check_webhook( $order );
+		}
 		if ( isset( $_REQUEST['signature'] ) ) {
 			return $this->check_ipn( $order );
 		}
@@ -246,6 +249,44 @@ class SequraHelper {
 			$this->add_payment_info_to_post_meta( $order );
 			$order->payment_complete();
 		}
+		exit();
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param WC_Order $order check if ipn is correct.
+	 * @return mixed
+	 */
+	protected function check_webhook( WC_Order $order ) {
+		$builder = $this->get_builder( $order );
+		if ( isset( $_POST['m_signature'] ) &&
+			$builder->sign( 'webhook' . $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['m_signature'] ) )
+		) {
+			http_response_code( 498 );
+			die( 'Not valid signature' );
+		}
+
+		$event = isset( $_POST['event'] )? $_POST['event'] : 'approved' ;
+		$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
+		switch ($event) {
+			case 'cancelled':
+				$order->add_order_note( sprintf(
+					__( 'The payment was NOT approved (%s)', 'wc_sequra' ),
+					$title
+				));
+				$order->set_status( 'failed' );
+				$order->save();
+				break;
+			case 'risk_assessment':
+				$this->setRiskLevel( $order );
+				break;
+			default:
+				//No implemented should cancel the order in sequra and then if not sent
+				http_response_code( 409 );
+				die( 'Not implemented' );
+		}
+		do_action( 'woocommerce_' . $this->id . '_process_webhook', $order, $this );
 		exit();
 	}
 

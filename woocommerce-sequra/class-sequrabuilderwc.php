@@ -114,7 +114,17 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				'signature' => self::sign( $this->get_order_id() ),
 				'result'    => '0',
 			);
-			$ret['return_url']              = $ret['notify_url'];
+			$ret['return_url']              = add_query_arg(
+				['sq_product'=>'SQ_PRODUCT_CODE'],
+				$ret['notify_url']
+			);
+			$ret['events_webhook'] = array(
+				'url' => $ret['notify_url'],
+				'parameters' => array(
+					'signature' => self::sign( 'webhook' . $this->get_order_id() ),
+					'order'  => '' . $this->get_order_id(),
+				)
+			);
 		}
 
 		return $ret;
