@@ -85,6 +85,7 @@ class SequraRemoteConfig {
 	public static function build_unique_product_code( $method ) {
 		return $method['product'] . ( ( isset( $method['campaign'] ) && $method['campaign'] ) ? '_' . $method['campaign'] : '' );
 	}
+
 	/**
 	 * Get method title from unique product code
 	 *
@@ -106,7 +107,7 @@ class SequraRemoteConfig {
 		foreach ( $this->get_merchant_payment_methods() as $method ) {
 			if (
 				$method['product'] == $product &&
-				( ! $campaign || $method['product'] == $campaign )
+				( ! $campaign || !isset($method['campaign']) || $method['campaign'] == $campaign )
 			) {
 				return $method['title'];
 			}

@@ -100,13 +100,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Set the proper payment method description
 	 */
-	public function order_get_payment_method_title( $value, $data ) {
-		if ( $data->get_payment_method() !== $this->id ) {
+	public function order_get_payment_method_title( $value, $order ) {
+		if ( $order->get_payment_method() !== $this->id ) {
 			return $value;
 		}
-		$product = isset( $_GET['sq_product'] ) ?  $_GET['sq_product'] : null;
-		$campaign = isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : null;
-		return $this->remote_config->get_title_from_product_campaign( $product, $campaign );
+		return get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
 	}
 
 	/**
