@@ -30,7 +30,7 @@ if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/wooco
 		wp_normalize_path( __FILE__ ),
 		wp_normalize_path( WC_SEQURA_PLG_PATH )
 	);
-
+	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'sequrapayment_action_links' );
 	require_once WC_SEQURA_PLG_PATH . 'gateway-sequra.php';
 } else {
 	add_action( 'admin_notices',

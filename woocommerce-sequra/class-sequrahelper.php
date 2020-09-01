@@ -237,17 +237,35 @@ class SequraHelper {
 		$product_code = isset( $_POST[ 'product_code' ] ) ? wp_unslash( $_POST[ 'product_code' ] ) : '';
 		$pm = apply_filters( 'woocommerce_sequra_payment_method_by_product', $this->pm, $product_code );
 		do_action( 'woocommerce_' . $this->pm->id . '_process_payment', $order, $this->pm );
-		$approval = apply_filters(
-			'woocommerce_' . $this->pm->id . '_process_payment',
-			$this->get_approval( $order ),
-			$order,
-			$this->pm
-		);
-		if ( $approval ) {
-			// Payment completed.
-			$order->add_order_note( __( 'Payment accepted by Sequra', 'wc_sequra' ) );
-			$this->add_payment_info_to_post_meta( $order );
-			$order->payment_complete();
+		$sq_state = isset( $_POST['sq_state'] )? $_POST['sq_state'] : 'approved' ;
+		switch ($sq_state) {
+			case 'needs_review':
+				$hold = apply_filters(
+					'woocommerce_' . $this->pm->id . '_hold_payment',
+					$this->set_on_hold( $order ),
+					$order,
+					$this
+				);
+				if ( $hold ) {
+					// Payment pedimd.
+					$order->add_order_note(
+						__( 'Payment is in review by Sequra', 'wc_sequra' )
+					);
+				}
+			break;
+			case 'approved':
+				$approval = apply_filters(
+					'woocommerce_' . $this->pm->id . '_process_payment',
+					$this->get_approval( $order ),
+					$order,
+					$this->pm
+				);
+				if ( $approval ) {
+					// Payment completed.
+					$order->add_order_note( __( 'Payment accepted by Sequra', 'wc_sequra' ) );
+					$this->add_payment_info_to_post_meta( $order );
+					$order->payment_complete();
+				}
 		}
 		exit();
 	}
@@ -323,6 +341,40 @@ class SequraHelper {
 
 		return true;
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  WC_Order $order Approved order.
+	 * @return boolean
+	 */
+	public function set_on_hold( $order ) {
+		$client  = $this->get_client();
+		$builder = $this->get_builder( $order );
+		if ( isset( $_POST['signature'] ) &&
+			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )
+		) {
+			http_response_code( 498 );
+			die( 'Not valid signature' );
+		}
+		$data      = $builder->build( 'on_hold' );
+		$order_ref = isset( $_POST['order_ref'] ) ? sanitize_text_field( wp_unslash( $_POST['order_ref'] ) ) : '';
+		$uri       = '/' . $order_ref;
+		$client->updateOrder( $uri, $data );
+		update_post_meta( (int) $order->get_id(), 'Transaction ID', $uri );
+		update_post_meta( (int) $order->get_id(), 'Transaction Status', 'in review' );
+		/*TODO: Store more information for later use in stats, like browser*/
+		if ( ! $client->succeeded() ) {
+			http_response_code( 410 );
+			die(
+				'Error: ' .
+				json_encode( $client->getJson() )
+			);
+		}
+
+		return true;
+	}
+
 	/**
 	 * Undocumented function
 	 *

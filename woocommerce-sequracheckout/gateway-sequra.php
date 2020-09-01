@@ -198,7 +198,6 @@ function woocommerce_sequra_init() {
 	do_action( 'sequra_upgrade_if_needed' );
 	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	add_filter( 'plugin_row_meta', 'sequrapayment_plugin_row_meta', 10, 2 );
-	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'sequrapayment_action_links' );
 	/**
 	 * Add the gateway to woocommerce
 	 *
