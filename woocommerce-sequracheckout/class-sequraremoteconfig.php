@@ -50,6 +50,7 @@ class SequraRemoteConfig {
 		'pp3'  => 'PARTPAYMENT', // Paga fraccionado
 		'pp6'  => 'PARTPAYMENT',
 		'pp9'  => 'PARTPAYMENT',
+		'sp1'  => 'PARTPAYMENT',
 	);
 
 	/**
