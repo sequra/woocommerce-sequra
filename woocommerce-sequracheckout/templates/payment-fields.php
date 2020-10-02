@@ -35,3 +35,6 @@
 		<?php } ?>
 	</div>
 </div>
+<script>
+	jQuery('.payment_method_sequra').show();
+</script>
