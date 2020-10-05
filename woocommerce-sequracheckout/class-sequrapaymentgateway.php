@@ -277,15 +277,39 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'wc_sequra'
 			)
 		) . '</p>';
-		$options = array(
-			'product' =>  isset( $_GET['sq_product'] ) ?  $_GET['sq_product'] : '',
-			'campaign' =>  isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : '',
-		);
+		$options       = $this->get_valid_product_campaign();
 		$identity_form = $this->helper->get_identity_form(
 			apply_filters( 'wc_sequra_pumbaa_options', $options, $order, $this->settings ),
 			$order
 		);
 		require SequraHelper::template_loader( 'payment-identification' );
+	}
+
+	/**
+	 * Get a valid product campaign combo from request
+	 *
+	 * @return array
+	 */
+	public function get_valid_product_campaign() {
+		$product  = isset( $_GET['sq_product'] ) ? $_GET['sq_product'] : '';
+		$campaign = isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : '';
+		return array_reduce(
+			$this->remote_config->get_merchant_payment_methods(),
+			function ( $ret, $method ) use ( $product, $campaign ) {
+				if ( $ret['product'] == '' || $method['product'] === $product ) {
+					$ret['product'] = $method['product'];
+					$ret['campaign'] = (
+						$method['campaign'] === $campaign ?
+						$method['campaign'] : $ret['campaign']
+					);
+				}
+				return $ret;
+			},
+			array(
+				'product'  => '',
+				'campaign' => '',
+			)
+		);
 	}
 
 	/**
