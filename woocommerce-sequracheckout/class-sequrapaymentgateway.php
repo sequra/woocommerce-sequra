@@ -214,7 +214,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		?>
 		<script>
 			jQuery('.payment_method_sequra').show();
-			jQuery('#payment_method_sequra').click().removeClass( 'input-radio' ).hide();
+			jQuery('input[name=sq_product_campaign]:first').prop('checked', true);
+			jQuery('#payment_method_sequra').removeClass( 'input-radio' ).hide();
 			jQuery('label[for=payment_method_sequra').hide();
 			jQuery('div.payment_method_sequra').removeClass( 'payment_box' );
 			jQuery('input[name=sq_product_campaign]').on('click', function () {
@@ -225,7 +226,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			});
 			jQuery(document.body).on('update_checkout', function(e){
 				jQuery('.payment_method_sequra').show();
-				jQuery('#payment_method_sequra').click().removeClass( 'input-radio' ).hide();
+				jQuery('#payment_method_sequra').removeClass( 'input-radio' ).hide();
 			});
 			Sequra.onLoad(function(){Sequra.refreshComponents();});
 		</script>

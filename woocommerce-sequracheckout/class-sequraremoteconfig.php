@@ -153,7 +153,7 @@ class SequraRemoteConfig {
 	}
 
 	/**
-	 * Undocumented function
+	 * Active payment methods for merchant
 	 *
 	 * @param boolean $force_refresh force reload config from sequra server.
 	 * @return array
@@ -177,8 +177,9 @@ class SequraRemoteConfig {
 			self::$merchant_payment_methods
 		);
 	}
+
 	/**
-	 * Undocumented function
+	 * Active payment methods for order
 	 *
 	 * @return array
 	 */
@@ -205,6 +206,7 @@ class SequraRemoteConfig {
 			return $this->flatten_payment_options( $merchant_payment_methods );
 		}
 	}
+
 	/**
 	 * Create a flat array with all methods in all options.
 	 *
