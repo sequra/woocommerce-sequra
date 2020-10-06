@@ -3,7 +3,7 @@
  * Plugin Name: Checkout con SeQura
  * Plugin URI: http://sequra.es/
  * Description: Ofrece las opciones de pago de SeQura
- * Version: 1.0.9
+ * Version: 1.0.10
  * Author: SeQura Engineering
  * Author URI: http://Sequra.es/
  * WC requires at least: 3.0
