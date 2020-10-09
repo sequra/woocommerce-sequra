@@ -12,7 +12,7 @@
 
 	/*********************/
 
-	function displaySequraPatpaymentTeaser(the_price_container, sq_product, campaign, theme) {
+	function displaySequra<?php echo esc_js( $product ); ?>Teaser(the_price_container, sq_product, campaign, theme) {
 		var dest = '#sequra_partpayment_teaser_default_container';
 		if (jQuery('.woocommerce-variation-price').length) {
 			dest = '.woocommerce-variation-price';
@@ -30,7 +30,7 @@
 		});
 	}
 
-	function updateSequraPatpaymentTeaser(e) {
+	function updateSequra<?php echo esc_js( $product ); ?>Teaser(e) {
 		var the_price_container = '<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">");
 		if (e.type == 'show_variation' && jQuery(VARIATION_PRICE_SEL).length) {
 			the_price_container = VARIATION_PRICE_SEL;
@@ -43,15 +43,15 @@
 	}
 
 	document.addEventListener("DOMContentLoaded", function () {
-		displaySequraPatpaymentTeaser(
+		displaySequra<?php echo esc_js( $product ); ?>Teaser(
 			'<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">"),
 			'<?php echo esc_js( $product ); ?>',
 			'<?php echo esc_js( $campaign ); ?>',
 			'<?php echo esc_js( $theme ); ?>'.replace(/\&quot\;/g, "\"")
 		);
 		jQuery('.variations_form')
-			.on('hide_variation', updateSequraPatpaymentTeaser)
-			.on('show_variation', updateSequraPatpaymentTeaser);
+			.on('hide_variation', updateSequra<?php echo esc_js( $product ); ?>Teaser)
+			.on('show_variation', updateSequra<?php echo esc_js( $product ); ?>Teaser);
 	});
 
 </script>
