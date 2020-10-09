@@ -25,11 +25,19 @@ class SequraRemoteConfig {
 	private $helper;
 
 	/**
-	 * Undocumented variable
+	 * Payment methods available for merchant
 	 *
 	 * @var array
 	 */
 	private static $merchant_payment_methods = null;
+
+	/**
+	 * Payment methosds avilable for order
+	 *
+	 * @var array
+	 */
+	private static $order_payment_methods = null;
+
 	/**
 	 * Undocumented variable
 	 *
@@ -153,7 +161,7 @@ class SequraRemoteConfig {
 	}
 
 	/**
-	 * Active payment methods for merchant
+	 * Undocumented function
 	 *
 	 * @param boolean $force_refresh force reload config from sequra server.
 	 * @return array
@@ -177,19 +185,22 @@ class SequraRemoteConfig {
 			self::$merchant_payment_methods
 		);
 	}
-
 	/**
-	 * Active payment methods for order
+	 * Undocumented function
 	 *
 	 * @return array
 	 */
 	public function get_available_payment_methods() {
-		$ret = array();
-		$client = $this->helper->get_client();
-		if ( $this->helper->start_solicitation() ) {
-			$ret = $this->get_order_payment_methods( $client->getOrderUri() );
+		if ( ! self::$order_payment_methods ) {
+			$client = $this->helper->get_client();
+			if ( $this->helper->start_solicitation() ) {
+				self::$order_payment_methods = $this->get_order_payment_methods( $client->getOrderUri() );
+			} else {
+				return array();
+			}
 		}
-		return $ret;
+
+		return self::$order_payment_methods;
 	}
 
 	/**
@@ -206,7 +217,6 @@ class SequraRemoteConfig {
 			return $this->flatten_payment_options( $merchant_payment_methods );
 		}
 	}
-
 	/**
 	 * Create a flat array with all methods in all options.
 	 *

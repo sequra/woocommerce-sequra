@@ -99,22 +99,6 @@ class SequraHelper {
 	}
 
 	/**
-	 * Test if it is checkout url
-	 *
-	 * @return boolean
-	 */
-	public static function is_checkout() {
-		$script_name = isset( $_SERVER['SCRIPT_NAME'] ) ?
-			sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
-		$is_checkout = 'admin-ajax.php' === basename( $script_name ) ||
-			get_the_ID() == wc_get_page_id( 'checkout' ) ||
-			(
-				isset( $_SERVER['REQUEST_METHOD'] ) &&
-				'POST' === $_SERVER['REQUEST_METHOD']
-			);
-		return $is_checkout;
-	}
-	/**
 	 * Test if available for IP address
 	 *
 	 * @return boolean
