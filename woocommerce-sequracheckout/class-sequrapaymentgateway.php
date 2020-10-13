@@ -5,8 +5,6 @@
  * @package woocommerce-sequra
  */
 
-use function PHPSTORM_META\map;
-
 /**
  * Pasarela SeQura Gateway Class
  * */
@@ -150,7 +148,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		} elseif ( is_admin() ) {
 			return true;
 		}
-		if ( is_ajax() && ! $this->is_available_in_checkout() ) {
+		if ( SequraHelper::is_order_review() && count( $this->remote_config->get_available_payment_methods() ) < 1 ) {
+			return false;
+		}
+		if ( SequraHelper::is_checkout() && ! $this->is_available_in_checkout() ) {
 			return false;
 		}
 		if ( is_product() && $product_id && ! $this->is_available_in_product_page( $product_id ) ) {
@@ -165,9 +166,6 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return boolean
 	 */
 	public function is_available_in_checkout() {
-		if ( count( $this->remote_config->get_available_payment_methods() ) < 1 ) {
-			return false;
-		}
 		if ( 'yes' === $this->settings['enable_for_virtual'] ) {
 			if ( ! $this->helper->is_elegible_for_service_sale() ) {
 				return false;

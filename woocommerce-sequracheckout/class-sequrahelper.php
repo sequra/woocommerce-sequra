@@ -97,7 +97,31 @@ class SequraHelper {
 	public static function validate_service_date( $service_date ) {
 		return preg_match( '/' . self::ISO8601_PATTERN . '/', $service_date );
 	}
+	/**
+	 * Test if it is order_review ajax call
+	 *
+	 * @return boolean
+	 */
+	public static function is_order_review() {
+		return is_ajax() && $_REQUEST['wc-ajax'] === "update_order_review";
+	}
 
+	/**
+	 * Test if it is checkout url
+	 *
+	 * @return boolean
+	 */
+	public static function is_checkout() {
+		$script_name = isset( $_SERVER['SCRIPT_NAME'] ) ?
+			sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
+		$is_checkout = 'admin-ajax.php' === basename( $script_name ) ||
+			get_the_ID() == wc_get_page_id( 'checkout' ) ||
+			(
+				isset( $_SERVER['REQUEST_METHOD'] ) &&
+				'POST' === $_SERVER['REQUEST_METHOD']
+			);
+		return $is_checkout;
+	}
 	/**
 	 * Test if available for IP address
 	 *
