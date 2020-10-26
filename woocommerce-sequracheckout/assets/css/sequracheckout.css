@@ -15,7 +15,9 @@ label.sq_payment_method {
 	display: flex;
 	align-items: center;
 }
-label.sq_payment_method img {
+#payment ul.payment_methods li label.sq_payment_method img,
+label.sq_payment_method img
+{
     margin-right: 10px;
 }
 .sq_payment_method_title {

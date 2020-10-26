@@ -8,3 +8,4 @@ publish.sh
 .vscode
 woocommerce-sequra/composer.lock
 woocommerce-sequracheckout/composer.lock
+node-modules
