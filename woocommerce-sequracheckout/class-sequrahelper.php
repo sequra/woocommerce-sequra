@@ -348,10 +348,12 @@ class SequraHelper {
 	public function is_elegible_for_service_sale() {
 		$elegible       = false;
 		$services_count = 0;
-		foreach ( WC()->cart->cart_contents as $values ) {
-			if ( get_post_meta( $values['product_id'], 'is_sequra_service', true ) != 'no' ) {
-				$services_count += $values['quantity'];
-				$elegible        = ( 1 == $services_count );
+		if ( is_array( WC()->cart->cart_contents ) ){
+			foreach ( WC()->cart->cart_contents as $values ) {
+				if ( get_post_meta( $values['product_id'], 'is_sequra_service', true ) != 'no' ) {
+					$services_count += $values['quantity'];
+					$elegible        = (1 == $services_count);
+				}
 			}
 		}
 
