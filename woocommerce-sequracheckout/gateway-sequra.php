@@ -305,7 +305,10 @@ function woocommerce_sequra_init() {
 		}
 		// Could have any html disable phpcs.
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-		foreach ( $sequra->remote_config->get_merchant_payment_methods() as $method ) {
+		$methods = array_reverse(//So that the expected order is mantained if different widgets are chained to the same selector
+			$sequra->remote_config->get_merchant_payment_methods()
+		);
+		foreach ( $methods as $method ) {
 			$sq_product = $sequra->remote_config->build_unique_product_code( $method );
 			//$too_low = isset( $method['min_amount'] ) && $method['min_amount'] > $product->get_price() * 100;
 			$too_high= isset( $method['max_amount'] ) && $method['max_amount'] < $product->get_price() * 100;
