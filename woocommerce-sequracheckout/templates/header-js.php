@@ -139,6 +139,31 @@ var SequraHelper = {
 				Sequra.refreshComponents();
 			}
 		);
+	},
+	waitForElememt: function (selector) {
+		return new Promise( function(resolve) {
+			if (document.querySelector(selector)) {
+				return resolve();
+			}
+			const observer = new MutationObserver(function(mutations) {
+				mutations.forEach(function(mutation) {
+					if (!mutation.addedNodes)
+						return;
+					var found = false;
+					mutation.addedNodes.forEach(function(node){
+							found = found || (node.matches && node.matches(selector));
+					});
+					if(found) {
+						resolve();
+						observer.disconnect();
+					}
+				});
+			});
+			observer.observe(document.body, {
+				childList: true,
+				subtree: true
+			});
+		});
 	}
 }
 </script>
