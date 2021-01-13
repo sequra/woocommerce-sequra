@@ -235,7 +235,7 @@ class SequraConfigFromFields {
 			'title'       => __( 'Show in product page', 'wc_sequra' ),
 			'type'        => 'checkbox',
 			'description' => __( 'Mostrar widget en la página del producto', 'wc_sequra' ),
-			'default'     => 'no',
+			'default'     => 'yes',
 		);
 		$this->pm->form_fields[ 'dest_css_sel_' . $product ]       = array(
 			'title'       => __( 'CSS selector for widget in product page', 'wc_sequra' ),
@@ -275,7 +275,7 @@ class SequraConfigFromFields {
 			'title'       => __( 'Show in product page', 'wc_sequra' ),
 			'type'        => 'checkbox',
 			'description' => __( 'Mostrar widget en la página del producto', 'wc_sequra' ),
-			'default'     => 'no',
+			'default'     => 'yes',
 		);
 		$this->pm->form_fields[ 'dest_css_sel_' . $product ] = array(
 			'title'       => __( 'CSS selector for widget in product page', 'wc_sequra' ),
