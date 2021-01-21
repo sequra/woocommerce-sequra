@@ -286,7 +286,9 @@ function woocommerce_sequra_init() {
 	 * Add widgets product page
 	 */
 
-	add_filter( 'woocommerce_after_main_content', 'woocommerce_sequra_add_widget_to_product_page', 999, 2 );
+	add_action( 'woocommerce_after_main_content', 'woocommerce_sequra_add_widget_to_product_page', 999 );
+	add_action( 'wp_footer', 'woocommerce_sequra_add_widget_to_product_page', 999 );
+
 	/**
 	 * Undocumented function
 	 *
@@ -329,6 +331,9 @@ function woocommerce_sequra_init() {
 			}
 		}
 		// phpcs:enable
+		// Once executed make sure it is not executed again
+		remove_action( 'woocommerce_after_main_content', 'woocommerce_sequra_add_widget_to_product_page');
+		remove_action( 'wp_footer', 'woocommerce_sequra_add_widget_to_product_page');
 	}
 	/**
 	 * SeQura pp simulator short code
