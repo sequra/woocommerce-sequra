@@ -406,13 +406,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				$name   = $fee->name;
 				$amount = $fee->amount;
 				if ( $fee->tax ) {
-					$amount += self::integerPrice( $fee->tax );
+					$amount += $fee->tax;
 				}
 			} else {
 				$name   = $fee['name'];
 				$amount = $fee['line_total'];
 			}
-			$items[] = $this->feeOrHandling( $name, $amount );
+			$items[] = $this->feeHandlingOrDiscount( $name, $amount );
 		}
 
 		return $items;
@@ -484,9 +484,9 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @param float  $amount Amount.
 	 * @return array
 	 */
-	protected function feeOrHandling( $name, $amount ) {
+	protected function feeHandlingOrDiscount( $name, $amount ) {
 		$item = array();
-		$item['type']      = 'handling';
+		$item['type']      = $amount>0?'handling':'discount';
 		$item['reference'] = $name;
 		$item['name']      = $name;
 		$item['tax_rate']          = 0;
