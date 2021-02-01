@@ -411,6 +411,9 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			} else {
 				$name   = $fee['name'];
 				$amount = $fee['line_total'];
+				if ( isset($fee['total_tax']) && $fee['total_tax'] ) {
+					$amount += $fee['total_tax'];
+				}
 			}
 			$items[] = $this->feeHandlingOrDiscount( $name, $amount );
 		}
