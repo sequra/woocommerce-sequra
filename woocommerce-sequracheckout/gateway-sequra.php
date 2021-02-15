@@ -310,10 +310,11 @@ function woocommerce_sequra_init() {
 		$methods = array_reverse(//So that the expected order is mantained if different widgets are chained to the same selector
 			$sequra->remote_config->get_merchant_payment_methods()
 		);
+		$price = is_numeric( $product->get_price() ) ? $product->get_price() : 0;
 		foreach ( $methods as $method ) {
 			$sq_product = $sequra->remote_config->build_unique_product_code( $method );
 			//$too_low = isset( $method['min_amount'] ) && $method['min_amount'] > $product->get_price() * 100;
-			$too_high= isset( $method['max_amount'] ) && $method['max_amount'] < $product->get_price() * 100;
+			$too_high= isset( $method['max_amount'] ) && $method['max_amount'] < $price * 100;
 			if( /*( ! $too_low && ! $too_high ) &&*/
 				! $too_high &&
 				isset( $sequra->settings['enabled_in_product_' . $sq_product ] ) &&
