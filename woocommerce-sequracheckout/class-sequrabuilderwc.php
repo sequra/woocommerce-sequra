@@ -440,7 +440,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		) {
 			return $this->_current_order->get_items();
 		}
-		return WC()->cart->get_cart_contents();
+		return ! is_null( WC()->cart ) ? WC()->cart->get_cart_contents() : [];
 	}
 
 	/**
