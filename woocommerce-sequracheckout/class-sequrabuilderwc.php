@@ -53,7 +53,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$this->_current_order = new SequraTempOrder('');
 		}
 		// phpcs:enable
-		$this->_cart         = WC()->cart;
+		$this->_cart    = WC()->cart;
 		$this->_pm		= SequraPaymentGateway::get_instance();
 	}
 

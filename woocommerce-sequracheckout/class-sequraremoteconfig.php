@@ -213,19 +213,20 @@ class SequraRemoteConfig {
 		$client = $this->helper->get_client();
 		$client->getPaymentMethods( $uri );
 		if ( $client->succeeded() ) {
-			$merchant_payment_methods = ( $client->getJson() )['payment_options'];
+			$json = $client->getJson();
+			$merchant_payment_methods = $json['payment_options'];
 			return $this->flatten_payment_options( $merchant_payment_methods );
 		}
 	}
 	/**
 	 * Create a flat array with all methods in all options.
 	 *
-	 * @param array $options Payment options to faltten.
+	 * @param array|null $options Payment options to faltten.
 	 * @return array
 	 */
 	private function flatten_payment_options( $options ) {
 		return array_reduce(
-			$options,
+			$options?:[],
 			function ( $methods, $family ) {
 				return array_merge(
 					$methods,

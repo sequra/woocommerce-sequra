@@ -253,7 +253,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'_sq_method_title',
 				$this->remote_config->get_title_from_unique_product_code( $_POST['sq_product_campaign'] )
 			);
-			list( $product, $campaign ) = explode( '_', $_POST['sq_product_campaign'] );
+			$tmp = explode( '_', $_POST['sq_product_campaign'] );
+			$product = $tmp[0];
+			$campaign = isset($tmp[1])?$tmp[1]:'';
 		}
 		do_action( 'woocommerce_sequracheckout_process_payment', $order, $this );
 		$ret = array(

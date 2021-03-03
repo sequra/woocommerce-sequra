@@ -924,7 +924,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			return wp_list_pluck( $orders, 'ID' );
 		}
 		return array_reduce(
-			$orders,
+			$orders?:[],
 			function ( $carry, $order ) {
 				$carry[] = $order->get_id();
 				return $carry;
