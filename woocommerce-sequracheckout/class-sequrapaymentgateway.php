@@ -55,7 +55,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
 
-		$this->method_title       = __( 'Sequra Checkout', 'wc_sequra' );
+		$this->method_title       = __( 'SeQura Checkout', 'wc_sequra' );
 		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'wc_sequra' );
 		$this->supports           = array(
 			'products',
@@ -63,13 +63,16 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 
 		// Load the settings.
 		$this->init_settings();
-		$this->remote_config = new SequraRemoteConfig( $this->settings );
 		$this->helper        = new SequraHelper( $this->settings );
 
-		// Load the form fields.
-		$this->init_form_fields();
-		$this->enabled    = $this->settings['enabled'];
-		$this->title      = $this->settings['title'];
+		if( is_admin() && ! defined( 'DOING_AJAX' ) ){
+			// Load the form fields.
+			$this->is_valid_auth = $this->helper->is_valid_auth();
+			$this->remote_config = new SequraRemoteConfig( $this->settings );
+			$this->init_form_fields();
+		}
+		$this->enabled    = isset($this->settings['enabled'])?$this->settings['enabled']:'';
+		$this->title      = isset($this->settings['title'])?$this->settings['title']:'';
 		$this->has_fields = true;
 
 		// Logs.
@@ -95,6 +98,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		}
 
 	}
+
 	/**
 	 * Set the proper payment method description
 	 */
@@ -123,10 +127,15 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	public function admin_options() {
 		?>
 		<h3><?php esc_html_e( 'Configuración Sequra', 'wc_sequra' ); ?></h3>
+		<?php if( !$this->is_valid_auth ) { ?>
+			<div class="error error-warning is-dismissible">
+				<p><?php _e('Provided SeQura credentials are not valid for the selected environment', 'wc_sequra') ?></p>
+			</div>
+		<?php } ?>
 		<p>
 		<?php
 		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con Sequra.', 'wc_sequra' ),
+			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'wc_sequra' ),
 			array( 'a' => 'href' )
 		);
 		?>
@@ -282,7 +291,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$order = new WC_Order( $order_id );
 		echo '<p>' . wp_kses_post(
 			__(
-				'Thank you for your order, please click the button below to pay with Sequra.',
+				'Thank you for your order, please click the button below to pay with SeQura.',
 				'wc_sequra'
 			)
 		) . '</p>';
@@ -303,7 +312,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$product  = isset( $_GET['sq_product'] ) ? $_GET['sq_product'] : '';
 		$campaign = isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : '';
 		return array_reduce(
-			$this->remote_config->get_merchant_payment_methods(),
+			$this->remote_config->get_merchant_payment_methods()?:[],
 			function ( $ret, $method ) use ( $product, $campaign ) {
 				if ( $ret['product'] == '' || $method['product'] === $product ) {
 					$ret['product'] = $method['product'];
@@ -380,7 +389,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					// Payment pedimd.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
 					$order->add_order_note(
-						sprintf( __( 'Payment is in review by Sequra (%s)', 'wc_sequra' ), $title )
+						sprintf( __( 'Payment is in review by SeQura.(%s)', 'wc_sequra' ), $title )
 					);
 				}
 			break;
@@ -394,7 +403,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				if ( $approval ) {
 					// Payment completed.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
-					$order->add_order_note( sprintf( __( 'Payment accepted by Sequra (%s)', 'wc_sequra' ), $title ) );
+					$order->add_order_note( sprintf( __( 'Payment accepted by SeQura.(%s)', 'wc_sequra' ), $title ) );
 					$this->helper->add_payment_info_to_post_meta( $order );
 					$order->payment_complete();
 				}

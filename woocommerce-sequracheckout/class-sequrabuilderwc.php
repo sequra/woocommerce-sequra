@@ -36,7 +36,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * SequraBuilderWC constructor.
 	 *
 	 * @param string        $merchant_id Merchant ID as provided in credential.
-	 * @param null|WC_Order $order Order with the info to send to Sequra.
+	 * @param null|WC_Order $order Order with the info to send to SeQura.
 	 */
 	public function __construct( $merchant_id, WC_Order $order = null ) {
 		global $wp;
@@ -924,7 +924,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			return wp_list_pluck( $orders, 'ID' );
 		}
 		return array_reduce(
-			$orders,
+			$orders?:[],
 			function ( $carry, $order ) {
 				$carry[] = $order->get_id();
 				return $carry;

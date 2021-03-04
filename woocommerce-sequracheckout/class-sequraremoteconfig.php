@@ -167,9 +167,12 @@ class SequraRemoteConfig {
 	 * @return array
 	 */
 	public function get_merchant_payment_methods( $force_refresh = false ) {
+		if ( ! $this->helper->is_valid_auth() ) {
+			return [];
+		}
 		if ( $force_refresh || ! self::get_stored_payment_methods() ) {
 			$client = $this->helper->get_client();
-			$client->getMerchantPaymentMethods( $this->settings['merchantref'] );
+			$client->getMerchantPaymentMethods( isset( $this->settings['merchantref'] ) ? $this->settings['merchantref'] : '' );
 			if ( $client->succeeded() ) {
 				self::$raw_merchant_payment_methods = $client->getRawResult();
 				$this->update_stored_payment_methods();

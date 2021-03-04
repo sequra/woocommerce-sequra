@@ -24,13 +24,15 @@ class SequraConfigFromFields {
 	public function __construct( &$pm ) {
 		$this->pm = $pm;
 	}
+	
+	/**
+	 * Add form fields
+	 * @return void 
+	 */
 	public function add_form_fields() {
 		$shipping_methods = array();
-
-		if ( is_admin() ) {
-			foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-				$shipping_methods[ $method->id ] = $method->get_title();
-			}
+		foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+			$shipping_methods[ $method->id ] = $method->get_title();
 		}
 		$this->pm->form_fields = array(
 			'enabled'                  => array(
@@ -46,27 +48,28 @@ class SequraConfigFromFields {
 				'default'     => __( 'Fraccionar pago', 'wc_sequra' ),
 			),
 			'merchantref'              => array(
-				'title'       => __( 'Sequra Merchant Reference', 'wc_sequra' ),
+				'title'       => __( 'SeQura Merchant Reference', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Id de comerciante proporcionado por Sequra.', 'wc_sequra' ),
+				'description' => __( 'Id de comerciante proporcionado por SeQura.', 'wc_sequra' ),
 				'default'     => '',
 			),
 			'user'                     => array(
-				'title'       => __( 'Sequra Username', 'wc_sequra' ),
+				'title'       => __( 'SeQura Username', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Usuario proporcionado por Sequra.', 'wc_sequra' ),
+				'description' => __( 'Usuario proporcionado por SeQura.', 'wc_sequra' ),
 				'default'     => '',
+				'css'		  => 'color:' . $this->pm->is_valid_auth?'green':'red'. ';width: 450px;',
 			),
 			'password'                 => array(
 				'title'       => __( 'Password', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Password proporcionada por Sequra.', 'wc_sequra' ),
+				'description' => __( 'Password proporcionada por SeQura.', 'wc_sequra' ),
 				'default'     => '',
 			),
 			'assets_secret'            => array(
 				'title'       => __( 'Assets secret', 'wc_sequra' ),
 				'type'        => 'text',
-				'description' => __( 'Código proporcionada por Sequra.', 'wc_sequra' ),
+				'description' => __( 'Código proporcionada por SeQura.', 'wc_sequra' ),
 				'default'     => '',
 			),
 			'enable_for_methods'       => array(
@@ -93,7 +96,7 @@ class SequraConfigFromFields {
 				'title'             => __( 'Default service end date', 'wc_sequra' ),
 				'desc_tip'          => true,
 				'type'              => 'text',
-				'description'       => __( 'Fecha como 2017-08-31, plazo como P3M15D (3 meses y 15 días). Se aplicará por defecto atodos los productos si no se especifica algo diferente en la ficha de producto.', 'wc_sequra' ),
+				'description'       => __( 'Fecha como 2017-08-31, plazo como P3M15D (3 meses y 15 días). Se aplicará por defecto a todos los productos si no se especifica algo diferente en la ficha de producto.', 'wc_sequra' ),
 				'default'           => 'P1Y',
 				'placeholder'       => __( 'ISO8601 format', 'wc_sequra' ),
 				'custom_attributes' => array(
@@ -122,14 +125,14 @@ class SequraConfigFromFields {
 				),
 			),
 			'env'                      => array(
-				'title'       => __( 'Entorno', 'wc_sequra' ),
+				'title'       => __( 'Environment', 'wc_sequra' ),
 				'type'        => 'select',
 				'description' => __( 'While working in Sandbox the methods will only show to the following IP addresses.', 'wc_sequra' ),
 				'default'     => '1',
 				'desc_tip'    => true,
 				'options'     => array(
-					'1' => __( 'Sandbox - Pruebas', 'wc_sequra' ),
-					'0' => __( 'Live - Real', 'wc_sequra' ),
+					'1' => __( 'Sandbox', 'wc_sequra' ),
+					'0' => __( 'Live', 'wc_sequra' ),
 				),
 			),
 			'test_ips'                 => array(
@@ -171,12 +174,15 @@ class SequraConfigFromFields {
 			'title'       => __( 'Active payent methods', 'wc_sequra' ),
 			'type'        => 'title',
 			/* translators: %s: URL */
-			'description' =>
+			'description' => __( 'Information will be available once the credentials are set and correct', 'wc_sequra' ),
+		);
+		if( $this->pm->is_valid_auth ) {
+			$this->pm->form_fields['active_methods_info']['description'] =
 				'<ul><li>' . implode(
 					'</li><li>',
 					$this->pm->remote_config->get_merchant_active_payment_products( 'title' )
-				) . '</li></ul>',
-		);
+				) . '</li></ul>';
+		}
 	}
 	/**
 	 * Initialize Gateway Settings Form Fields

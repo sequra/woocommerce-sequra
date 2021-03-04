@@ -196,7 +196,7 @@ function woocommerce_sequra_init() {
 		require_once WC_SEQURA_PLG_PATH . 'class-sequrapaymentgateway.php';
 	}
 	do_action( 'sequra_upgrade_if_needed' );
-	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/i18n/languages' );
 	add_filter( 'plugin_row_meta', 'sequrapayment_plugin_row_meta', 10, 2 );
 	/**
 	 * Add the gateway to woocommerce

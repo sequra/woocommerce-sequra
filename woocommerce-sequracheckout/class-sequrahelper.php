@@ -122,6 +122,16 @@ class SequraHelper {
 			);
 		return $is_checkout;
 	}
+
+	/**
+	 * Test if credentials are valid
+	 *
+	 * @return boolean
+	 */
+	public function is_valid_auth(){
+		return $this->get_client()->isValidAuth();
+	}
+
 	/**
 	 * Test if available for IP address
 	 *
@@ -160,9 +170,9 @@ class SequraHelper {
 		if ( ! class_exists( '\Sequra\PhpClient\Client' ) ) {
 			require_once $this->dir . 'lib/\Sequra\PhpClient\Client.php';
 		}
-		\Sequra\PhpClient\Client::$endpoint   = SequraPaymentGateway::$endpoints[ $this->settings['env'] ];
-		\Sequra\PhpClient\Client::$user       = $this->settings['user'];
-		\Sequra\PhpClient\Client::$password   = $this->settings['password'];
+		\Sequra\PhpClient\Client::$endpoint   = SequraPaymentGateway::$endpoints[ isset($this->settings['env'])?$this->settings['env']:1 ];
+		\Sequra\PhpClient\Client::$user       = isset($this->settings['user'])?$this->settings['user']:'';
+		\Sequra\PhpClient\Client::$password   = isset($this->settings['password'])?$this->settings['password']:'';
 		\Sequra\PhpClient\Client::$user_agent = 'cURL WooCommerce ' . WOOCOMMERCE_VERSION . ' php ' . phpversion();
 		$this->client                         = new \Sequra\PhpClient\Client();
 
