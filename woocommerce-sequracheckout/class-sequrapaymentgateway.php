@@ -23,7 +23,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @var SequraRemoteConfig
 	 */
-	public $remote_config = null;
+	private $remote_config = null;
 
 	/**
 	 * Remote configuration
@@ -68,9 +68,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		if( is_admin() && ! defined( 'DOING_AJAX' ) ){
 			// Load the form fields.
 			$this->is_valid_auth = $this->helper->is_valid_auth();
-			$this->remote_config = new SequraRemoteConfig( $this->settings );
 			$this->init_form_fields();
 		}
+
 		$this->enabled    = isset($this->settings['enabled'])?$this->settings['enabled']:'';
 		$this->title      = isset($this->settings['title'])?$this->settings['title']:'';
 		$this->has_fields = true;
@@ -98,7 +98,17 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		}
 
 	}
-
+	/**
+	 * Get remote config object
+	 * 
+	 * @return 
+	 */
+	public function get_remote_config() {
+		if( is_null( $this->remote_config ) ) {
+			$this->remote_config = new SequraRemoteConfig( $this->settings );
+		}
+		return $this->remote_config;
+	}
 	/**
 	 * Set the proper payment method description
 	 */
@@ -157,7 +167,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		} elseif ( is_admin() ) {
 			return true;
 		}
-		if ( SequraHelper::is_order_review() && count( $this->remote_config->get_available_payment_methods() ) < 1 ) {
+		if ( SequraHelper::is_order_review() && count( $this->get_remote_config()->get_available_payment_methods() ) < 1 ) {
 			return false;
 		}
 		if ( SequraHelper::is_checkout() && ! $this->is_available_in_checkout() ) {
@@ -207,10 +217,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		if( $_SERVER['REQUEST_METHOD'] != 'POST' ) {
 			return;
 		}
-		$payment_methods = $this->remote_config->get_available_payment_methods();
+		$payment_methods = $this->get_remote_config()->get_available_payment_methods();
 		$payment_fields = apply_filters('woocommerce_sequra_payment_fields', array(), $this);
 		foreach ( $payment_methods as $method ) {
-			$sq_product_campaign = $this->remote_config->build_unique_product_code( $method ); //Used in the template.
+			$sq_product_campaign = $this->get_remote_config()->build_unique_product_code( $method ); //Used in the template.
 			require( $this->helper->template_loader( 'payment-fields' ));
 		}
 		$this->jscript_checkout();
@@ -260,7 +270,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			update_post_meta(
 				(int) $order->get_id(),
 				'_sq_method_title',
-				$this->remote_config->get_title_from_unique_product_code( $_POST['sq_product_campaign'] )
+				$this->get_remote_config()->get_title_from_unique_product_code( $_POST['sq_product_campaign'] )
 			);
 			$tmp = explode( '_', $_POST['sq_product_campaign'] );
 			$product = $tmp[0];
@@ -312,7 +322,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$product  = isset( $_GET['sq_product'] ) ? $_GET['sq_product'] : '';
 		$campaign = isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : '';
 		return array_reduce(
-			$this->remote_config->get_merchant_payment_methods()?:[],
+			$this->get_remote_config()->get_merchant_payment_methods()?:[],
 			function ( $ret, $method ) use ( $product, $campaign ) {
 				if ( $ret['product'] == '' || $method['product'] === $product ) {
 					$ret['product'] = $method['product'];

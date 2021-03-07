@@ -180,7 +180,7 @@ class SequraConfigFromFields {
 			$this->pm->form_fields['active_methods_info']['description'] =
 				'<ul><li>' . implode(
 					'</li><li>',
-					$this->pm->remote_config->get_merchant_active_payment_products( 'title' )
+					$this->pm->get_remote_config()->get_merchant_active_payment_products( 'title' )
 				) . '</li></ul>';
 		}
 	}
@@ -200,7 +200,7 @@ class SequraConfigFromFields {
 			'description' => __( 'CSS selector to get the price for widgets in products', 'wc_sequra' ),
 			'default'     => '.summary .price>.amount,.summary .price ins .amount',
 		);
-		$methods                                       = $this->pm->remote_config->get_merchant_payment_methods();
+		$methods                                       = $this->pm->get_remote_config()->get_merchant_payment_methods();
 		array_walk(
 			$methods,
 			array( $this, 'init_communication_form_fields_for_method' )
@@ -229,7 +229,7 @@ class SequraConfigFromFields {
 	 * @param array $method payment method.
 	 */
 	private function fields_for_partpayment( $method ) {
-		$product = $this->pm->remote_config->build_unique_product_code( $method );
+		$product = $this->pm->get_remote_config()->build_unique_product_code( $method );
 		$this->pm->form_fields[ 'partpayment_config_' . $product ] = array(
 			'title' => sprintf(
 				__( 'Simulator config for %s' , 'wc_sequra' ),
@@ -268,7 +268,7 @@ class SequraConfigFromFields {
 	 * @param array $method payment method.
 	 */
 	private function fields_for_invoice( $method ) {
-		$product = $this->pm->remote_config->build_unique_product_code($method);
+		$product = $this->pm->get_remote_config()->build_unique_product_code($method);
 
 		$this->pm->form_fields[ 'invoice_config_' . $product ] = array(
 			'title' => sprintf(
