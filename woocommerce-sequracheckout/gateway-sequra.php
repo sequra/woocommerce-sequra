@@ -128,7 +128,7 @@ function sequrapayment_upgrade_if_needed() {
 	if ( time() > get_option( 'sequrapayment_next_update', 0 ) ||
 		isset( $_GET['RESET_SEQURA_ACTIVE_PAYMENTS'] ) ) {
 		$pm = SequraPaymentGateway::get_instance();
-		$pm->remote_config->update_active_payment_methods();
+		$pm->get_remote_config()->update_active_payment_methods();
 		do_action( 'sequrapayment_updateconditions' );
 		update_option( 'sequrapayment_next_update', time() + 86400 );
 	}
@@ -308,11 +308,11 @@ function woocommerce_sequra_init() {
 		// Could have any html disable phpcs.
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		$methods = array_reverse(//So that the expected order is mantained if different widgets are chained to the same selector
-			$sequra->remote_config->get_merchant_payment_methods()
+			$sequra->get_remote_config()->get_merchant_payment_methods()
 		);
 		$price = is_numeric( $product->get_price() ) ? $product->get_price() : 0;
 		foreach ( $methods as $method ) {
-			$sq_product = $sequra->remote_config->build_unique_product_code( $method );
+			$sq_product = $sequra->get_remote_config()->build_unique_product_code( $method );
 			//$too_low = isset( $method['min_amount'] ) && $method['min_amount'] > $product->get_price() * 100;
 			$too_high= isset( $method['max_amount'] ) && $method['max_amount'] < $price * 100;
 			if( /*( ! $too_low && ! $too_high ) &&*/
@@ -362,7 +362,7 @@ function woocommerce_sequra_init() {
 		$dest            = $atts['dest'];
 		$campaign        = isset( $atts['campaign'] ) ? $atts['campaign'] : '';
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
-		$sq_product      = $sequra->remote_config->build_unique_product_code( $atts );
+		$sq_product      = $sequra->get_remote_config()->build_unique_product_code( $atts );
 		$theme           = isset( $sequra->settings[ 'widget_theme_'.$sq_product ] ) ? $sequra->settings[ 'widget_theme_'.$sq_product ] : '';
 		wp_enqueue_style( 'sequra-widget' );
 		ob_start();
