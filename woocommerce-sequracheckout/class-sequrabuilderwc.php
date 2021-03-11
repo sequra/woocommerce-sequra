@@ -108,6 +108,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				home_url( '/' )
 			);
 			$ret['notification_parameters'] = array(
+				'order' => "".$this->get_order_id(),
 				'signature' => self::sign( $this->get_order_id() ),
 				'result'    => '0',
 			);

@@ -346,7 +346,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return mixed
 	 */
 	public function check_response() {
-		if ( ! isset( $_GET['order'] ) ) {
+		if ( ! isset( $_REQUEST['order'] ) ) {
 			return;
 		}
 		$order = new WC_Order( sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) );
