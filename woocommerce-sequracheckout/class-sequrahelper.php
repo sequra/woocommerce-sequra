@@ -303,13 +303,13 @@ class SequraHelper {
 				WC()->session->set( 'sequraURI', $uri );
 				return $uri;
 			} else {
-				if ( 'yes' === $this->settings['debug'] ) {
+				if ( 'yes' === $this->settings['debug'] && $this->pm ) {
 					$this->pm->log->add( 'sequra', $client->getJson() );
 					$this->pm->log->add( 'sequra', 'Invalid payload:' . $order );
 				};
 			}
 		} catch ( Exception $e ) {
-			if ( 'yes' === $this->settings['debug'] ) {
+			if ( 'yes' === $this->settings['debug'] && $this->pm ) {
 				$this->pm->log->add( 'sequra', $e->getMessage() );
 			};
 		}
