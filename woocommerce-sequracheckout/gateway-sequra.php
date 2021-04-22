@@ -125,8 +125,13 @@ add_shortcode( 'sequra_banner', 'sequra_banner' );
  * @return void
  */
 function sequrapayment_upgrade_if_needed() {
-	if ( time() > get_option( 'sequrapayment_next_update', 0 ) ||
-		isset( $_GET['RESET_SEQURA_ACTIVE_PAYMENTS'] ) ) {
+	if (
+		time() > get_option( 'sequrapayment_next_update', 0 ) ||
+		isset( $_GET['RESET_SEQURA_ACTIVE_PAYMENTS'] )
+	) {
+		if ( ! class_exists( 'SequraPaymentGateway' ) ) {
+			require_once WC_SEQURA_PLG_PATH . 'class-sequrapaymentgateway.php';
+		}
 		$pm = SequraPaymentGateway::get_instance();
 		$pm->get_remote_config()->update_active_payment_methods();
 		do_action( 'sequrapayment_updateconditions' );
