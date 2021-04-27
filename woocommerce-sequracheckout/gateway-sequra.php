@@ -29,8 +29,6 @@ function sequra_activation() {
 	$time          = $random_offset + strtotime( $tomorrow );
 	add_option( 'woocommerce-sequra-deliveryreport-time', $time );
 	wp_schedule_event( $time, 'daily', 'sequra_send_daily_delivery_report' );
-	// Set version as an option get_plugin_data function is not availiable at cron.
-	do_action( 'sequra_upgrade_if_needed' );
 }
 
 add_action( 'sequra_upgrade_if_needed', 'sequra_upgrade_if_needed' );
@@ -129,9 +127,6 @@ function sequrapayment_upgrade_if_needed() {
 		time() > get_option( 'sequrapayment_next_update', 0 ) ||
 		isset( $_GET['RESET_SEQURA_ACTIVE_PAYMENTS'] )
 	) {
-		if ( ! class_exists( 'SequraPaymentGateway' ) ) {
-			require_once WC_SEQURA_PLG_PATH . 'class-sequrapaymentgateway.php';
-		}
 		$pm = SequraPaymentGateway::get_instance();
 		$pm->get_remote_config()->update_active_payment_methods();
 		do_action( 'sequrapayment_updateconditions' );
