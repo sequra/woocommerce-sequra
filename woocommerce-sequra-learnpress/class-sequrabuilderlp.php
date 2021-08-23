@@ -44,7 +44,7 @@ class SequraBuilderLP extends SequraBuilderWC {
 				)
 			) {
 				$service_end_date = get_post_meta( $cart_item->get_id(), 'sequra_service_end_date', true );
-				if(!SequraHelper::validate_service_end_date($service_end_date)){
+				if(!SequraHelper::validate_service_date($service_end_date)){
 					$service_end_date = $this->_pm->core_settings['default_service_end_date'];
 				}
 				$item["type"] = 'service';

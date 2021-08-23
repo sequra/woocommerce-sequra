@@ -81,7 +81,7 @@ class Sequra_Meta_Box_Service_End_Date {
 		$service_end_date = isset( $_POST['sequra_service_end_date'] ) ?
 			sanitize_text_field( wp_unslash( $_POST['sequra_service_end_date'] ) ) :
 			'';
-		if ( SequraHelper::validate_service_end_date( $service_end_date ) ) {
+		if ( SequraHelper::validate_service_date( $service_end_date ) ) {
 			update_post_meta( $post_id, 'sequra_service_end_date', $service_end_date );
 		}
 		// phpcs:enable
