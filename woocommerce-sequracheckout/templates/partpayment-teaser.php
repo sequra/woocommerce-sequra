@@ -16,6 +16,7 @@
 		var dest = '#sequra_partpayment_teaser_default_container';
 		if (jQuery('.woocommerce-variation-price').length) {
 			dest = '.woocommerce-variation-price';
+			the_price_container = VARIATION_PRICE_SEL;
 		}
 
 		<?php if ( isset( $atts['dest'] ) && '' !== trim( $atts['dest'] ) ) { ?>
