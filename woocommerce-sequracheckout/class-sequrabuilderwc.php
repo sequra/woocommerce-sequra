@@ -602,7 +602,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 
 			),
 			'type'       => 'shop_order',
-			'status'     => array( 'wc-completed' ),
+			'status'     => apply_filters( 'woocommerce_sequracheckout_sent_statuses', array( 'wc-completed' ) ),
 		);
 		$posts              = wc_get_orders( $args );
 		$this->_shipped_ids = self::get_order_ids_from_array( $posts );

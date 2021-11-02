@@ -10,6 +10,8 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Ofrece las opciones de pago con SeQura en el checkout
 
 == Changelog ==
+= 1.1.2 =
+[add] woocommerce_sequracheckout_sent_statuses filter to add customs statuses that should be treated as sent
 = 1.0.11 =
 [FIX] Divide en 3 and Pago fraccioado widgets not showing at the same time
 = 1.0.9 =
