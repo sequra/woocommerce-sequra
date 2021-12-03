@@ -177,7 +177,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			return false;
 		}
 		$ret = $this->helper->is_available_for_ip();
-		return apply_filters( 'woocommerce_sequra_pp_is_available', $ret );
+		return apply_filters( 'woocommerce_sequra_is_available', $ret );
 	}
 	/**
 	 * Undocumented function

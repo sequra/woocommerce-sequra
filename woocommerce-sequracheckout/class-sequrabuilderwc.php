@@ -217,7 +217,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				continue;
 			}
 			$registration_amount = self::integerPrice(
-				get_post_meta( $item['product_id'], 'sequra_registration_amount', true )
+				(float) get_post_meta( $item['product_id'], 'sequra_registration_amount', true )
 			);
 			if ( $registration_amount > 0 ) {
 				$data['items'][] = array(
