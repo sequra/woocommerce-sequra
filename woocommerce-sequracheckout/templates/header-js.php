@@ -140,7 +140,7 @@ var SequraHelper = {
 			}
 		);
 	},
-	waitForElememt: function (selector) {
+	waitForElement: function (selector) {
 		return new Promise( function(resolve) {
 			if (document.querySelector(selector)) {
 				return resolve();
