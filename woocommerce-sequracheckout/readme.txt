@@ -10,6 +10,8 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Ofrece las opciones de pago con SeQura en el checkout
 
 == Changelog ==
+= 1.1.3 =
+[add] template for chekout-script so that it can be overriden 
 = 1.1.2 =
 [add] woocommerce_sequracheckout_sent_statuses filter to add customs statuses that should be treated as sent
 = 1.0.11 =
