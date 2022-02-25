@@ -30,10 +30,6 @@ class SequraConfigFromFields {
 	 * @return void 
 	 */
 	public function add_form_fields() {
-		$shipping_methods = array();
-		foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-			$shipping_methods[ $method->id ] = $method->get_title();
-		}
 		$this->pm->form_fields = array(
 			'enabled'                  => array(
 				'title'       => __( 'Enable/Disable', 'wc_sequra' ),
@@ -71,19 +67,6 @@ class SequraConfigFromFields {
 				'type'        => 'text',
 				'description' => __( 'Código proporcionada por SeQura.', 'wc_sequra' ),
 				'default'     => '',
-			),
-			'enable_for_methods'       => array(
-				'title'             => __( 'Enable for shipping methods', 'wc_sequra' ),
-				'type'              => 'multiselect',
-				'class'             => 'chosen_select',
-				'css'               => 'width: 450px;',
-				'default'           => '',
-				'description'       => __( 'If SeQura is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'wc_sequra' ),
-				'options'           => $shipping_methods,
-				'desc_tip'          => true,
-				'custom_attributes' => array(
-					'data-placeholder' => __( 'Select shipping methods', 'wc_sequra' ),
-				),
 			),
 			'enable_for_virtual'       => array(
 				'title'       => __( 'Enable for virtual orders', 'wc_sequra' ),
