@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Checkout con SeQura\n"
-"POT-Creation-Date: 2021-03-04 01:45+0100\n"
-"PO-Revision-Date: 2021-03-04 01:55+0100\n"
+"POT-Creation-Date: 2022-02-25 11:58+0100\n"
+"PO-Revision-Date: 2022-02-25 12:01+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_ES\n"
@@ -83,7 +83,7 @@ msgstr "Código proporcionada por Sequra."
 
 #: class-sequraconfigformfields.php:76
 msgid "Enable for shipping methods"
-msgstr "Habilitar para ciertos métodos de pago"
+msgstr "Habilitar para ciertos métodos de envío"
 
 #: class-sequraconfigformfields.php:81
 msgid ""
@@ -278,18 +278,18 @@ msgstr "SeQura Checkout"
 msgid "Configurtación para los métodos de pago Sequra"
 msgstr "Configuración para los métodos de pago SeQura"
 
-#: class-sequrapaymentgateway.php:74
+#: class-sequrapaymentgateway.php:139
+#, fuzzy
+msgid "Configuración Sequra"
+msgstr "Configuración Sequra"
+
+#: class-sequrapaymentgateway.php:142
 msgid "Provided SeQura credentials are not valid for the selected environment"
 msgstr ""
 "Las credenciales de SeQura configuradas no son válidas para el entorno "
 "seleccionado"
 
-#: class-sequrapaymentgateway.php:136
-#, fuzzy
-msgid "Configuración Sequra"
-msgstr "Configuración Sequra"
-
-#: class-sequrapaymentgateway.php:140
+#: class-sequrapaymentgateway.php:148
 #, fuzzy
 msgid ""
 "La pasarela <a href=\"https://sequra.es/\">Sequra</a> para Woocommerce le "
@@ -298,14 +298,14 @@ msgstr ""
 "La pasarela <a href=\"https://sequra.es/\">Sequra</a> para Woocommerce le "
 "permitirá configurar los métodos de pago disponibles con Sequra."
 
-#: class-sequrapaymentgateway.php:296
+#: class-sequrapaymentgateway.php:280
 msgid ""
 "Thank you for your order, please click the button below to pay with SeQura."
 msgstr ""
 "Gracias por su pedido, por favor haga clic en el botón de abajo para pagar "
 "con Sequra."
 
-#: class-sequrapaymentgateway.php:355
+#: class-sequrapaymentgateway.php:339
 #, fuzzy
 msgid ""
 "<p>SeQura está procesando tu solicitud.</p><p>En unos minutos <b>recibirás "
@@ -318,55 +318,55 @@ msgstr ""
 "contacte contigo antes de validar algunos datos.</p><p><b>Gracias por "
 "comprar con SeQura</b>"
 
-#: class-sequrapaymentgateway.php:394
+#: class-sequrapaymentgateway.php:378
 #, php-format
 msgid "Payment is in review by SeQura.(%s)"
 msgstr "El pago está en revisión por Parte de Sequra (%s)"
 
-#: class-sequrapaymentgateway.php:408
+#: class-sequrapaymentgateway.php:392
 #, php-format
 msgid "Payment accepted by SeQura.(%s)"
 msgstr "Pago aceptado por Sequra (%s)"
 
-#: class-sequrapaymentgateway.php:437
+#: class-sequrapaymentgateway.php:421
 #, php-format
 msgid "The payment was NOT approved (%s)"
 msgstr "El pago NO fue aprobado (%s)"
 
-#: class-sequrapaymentgateway.php:460
+#: class-sequrapaymentgateway.php:444
 msgid "The risk assesment for this order is low"
 msgstr "El riesgo de este pedido es bajo"
 
-#: class-sequrapaymentgateway.php:463
+#: class-sequrapaymentgateway.php:447
 msgid "The risk assesment for this order is HIGH!!"
 msgstr "La evaluación de riesgo para este pedido es ALTA!!"
 
-#: class-sequrapaymentgateway.php:466
+#: class-sequrapaymentgateway.php:450
 msgid "The risk assesment for this order in progress"
 msgstr "La evaluación del riesgo para esta orden en curso"
 
-#: gateway-sequra.php:157 gateway-sequra.php:176
+#: gateway-sequra.php:158 gateway-sequra.php:177
 msgid "View WooCommerce documentation"
 msgstr "Ver la documentación de WooCommerce"
 
-#: gateway-sequra.php:157
+#: gateway-sequra.php:158
 msgid "Docs"
 msgstr "Documentos"
 
-#: gateway-sequra.php:158
+#: gateway-sequra.php:159
 msgid "View WooCommerce API docs"
 msgstr "Ver la documentación de la API de WooCommerce"
 
-#: gateway-sequra.php:158
+#: gateway-sequra.php:159
 msgid "API docs"
 msgstr "Documentos de la API"
 
-#: gateway-sequra.php:159
+#: gateway-sequra.php:160
 #, fuzzy
 msgid "Soporte"
 msgstr "Soporte"
 
-#: gateway-sequra.php:176
+#: gateway-sequra.php:177
 msgid "Settings"
 msgstr "Ajustes"
 
@@ -464,7 +464,7 @@ msgstr "Lo siento, no tienes permiso para acceder a esta página."
 
 #: lib/wp-package-updater/class-wp-package-updater.php:251
 msgid "Theme License - "
-msgstr "Licencia temática -"
+msgstr "Licencia temática - "
 
 #: lib/wp-package-updater/class-wp-package-updater.php:406
 msgid ""
@@ -574,7 +574,7 @@ msgstr "Clave de licencia para cambiar:"
 msgid "Proceed to PayPal"
 msgstr "Proceder a PayPal"
 
-#: woocommerce-sequracheckout.php:38
+#: woocommerce-sequracheckout.php:39
 #, fuzzy
 msgid ""
 "Por favor, desinstale y elimine primero el plugin \"Pasarela de pago para "
@@ -584,9 +584,8 @@ msgstr ""
 "Sequra\" para poder usar el nuevo \"Checkout con SeQura\""
 
 #. Plugin Name of the plugin/theme
-#, fuzzy
 msgid "Checkout con SeQura"
-msgstr "Caja con SeQura"
+msgstr "Checkout con SeQura"
 
 #. Plugin URI of the plugin/theme
 #, fuzzy
@@ -599,11 +598,9 @@ msgid "Ofrece las opciones de pago de SeQura"
 msgstr "Ofrece las opciones de pago de SeQura"
 
 #. Author of the plugin/theme
-#, fuzzy
 msgid "SeQura Engineering"
-msgstr "Ingeniería SeQura"
+msgstr "SeQura Engineering"
 
 #. Author URI of the plugin/theme
-#, fuzzy
 msgid "http://SeQura es/"
-msgstr "http://Sequra.es/"
+msgstr "http://SeQura es/"
