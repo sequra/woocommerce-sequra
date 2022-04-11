@@ -146,7 +146,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		<?php
 		echo wp_kses(
 			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'wc_sequra' ),
-			array( 'a' => 'href' )
+			array( 'a' => array( 'href' ) )
 		);
 		?>
 		<table class="form-table">

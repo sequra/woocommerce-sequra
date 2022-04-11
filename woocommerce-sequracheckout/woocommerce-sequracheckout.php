@@ -3,11 +3,11 @@
  * Plugin Name: Checkout con SeQura
  * Plugin URI: http://sequra.es/
  * Description: Ofrece las opciones de pago de SeQura
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: SeQura Engineering
  * Author URI: http://SeQura es/
  * WC requires at least: 4.0
- * WC tested up to: 5.2
+ * WC tested up to: 6.3.1
  * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
  * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg
  * BannerHigh: https://live.sequracdn.com/assets/images/logos/logo.svg
@@ -20,7 +20,7 @@
 
 //Make sure old WooCommerce SeQura is not installed
 if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequra' ) ) {
-	define( 'SEQURACHECKOUT_VERSION', '1.1.3' );
+	define( 'SEQURACHECKOUT_VERSION', '1.1.4' );
 	define( 'WC_SEQURA_PLG_PATH', WP_PLUGIN_DIR . '/' . basename( plugin_dir_path( __FILE__ ) ) . '/' );
 	define( 'SEQURA_PLUGIN_UPDATE_SERVER', 'https://engineering.sequra.es' );
 	require_once WC_SEQURA_PLG_PATH . 'lib/wp-package-updater/class-wp-package-updater.php';
