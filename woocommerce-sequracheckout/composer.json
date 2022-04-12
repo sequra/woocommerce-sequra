@@ -3,8 +3,8 @@
     "description": "SeQura Checkout for WooCommerce",
     "type": "wordpress-plugin",
     "require-dev": {
-        "behat/behat": "^3.5@dev",
-        "phpunit/phpunit": "6.5.13",
+        "behat/behat": "*",
+        "phpunit/phpunit": "*",
         "woocommerce/woocommerce-sniffs": "*",
         "phpmd/phpmd": "dev-master"
     },
