@@ -603,10 +603,10 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			),
 			'type'       => 'shop_order',
 			'status'     => apply_filters( 'woocommerce_sequracheckout_sent_statuses', array( 'wc-completed' ) ),
+			'return'     => 'ids',
 		);
-		$posts              = wc_get_orders( $args );
-		$this->_shipped_ids = self::get_order_ids_from_array( $posts );
-		return $posts;
+		$this->_shipped_ids = wc_get_orders( $args );
+		return $this->_shipped_ids;
 	}
 
 	/**
@@ -638,15 +638,10 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 					'terms'    => 'completed',
 				),
 			),
+			'return'      => 'ids',
 		);
-		$posts              = get_posts( $args );
-		$this->_shipped_ids = self::get_order_ids_from_array( $posts );
-		return array_map(
-			function( $post ) {
-				return WC_Order( $post->ID );
-			},
-			$posts
-		);
+		$this->_shipped_ids = get_posts( $args );
+		return $this->_shipped_ids;
 	}
 
 	/**
@@ -901,8 +896,9 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			'type'        => 'shop_order',
 			'customer'    => $customer_id,
 			'post_status' => array( 'wc-processing', 'wc-completed' ),
+			'return'      => 'ids',
 		);
-		$order_ids = self::get_order_ids_from_array( wc_get_orders( $args ) );
+		$order_ids = wc_get_orders( $args );
 		foreach ( $order_ids as $id ) {
 			$prev_order      = new WC_Order( $id );
 			$post            = get_post( $id );
@@ -917,21 +913,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		}
 
 		return $orders;
-	}
-
-	protected static function get_order_ids_from_array( $orders ) {
-		global $woocommerce;
-		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
-			return wp_list_pluck( $orders, 'ID' );
-		}
-		return array_reduce(
-			$orders?:[],
-			function ( $carry, $order ) {
-				$carry[] = $order->get_id();
-				return $carry;
-			},
-			array()
-		);
 	}
 
 	protected function get_order_currency() {
