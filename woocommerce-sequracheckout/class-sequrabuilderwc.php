@@ -776,14 +776,11 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 
 			return $this->_current_order->$func();
 		}
-		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
-			return self::notNull( $this->_current_order->$field_name );
-		}
 
 		$func = 'get_' . $field_name;
 
 		return method_exists( get_class( $this->_current_order ), $func ) ?
-			$this->_current_order->$func() : null;
+			$this->_current_order->$func() : self::notNull( $this->_current_order->$field_name );
 	}
 	/**
 	 * Undocumented function
