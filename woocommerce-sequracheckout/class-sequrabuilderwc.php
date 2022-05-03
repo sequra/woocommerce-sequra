@@ -58,6 +58,19 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	}
 
 	/**
+	 * Build the order for Sequra
+	 * @param mixed $state
+	 * @return mixed
+	 */
+	public function build( $state = null ) {
+		return apply_filters(
+			'woocommerce_sequra_builderwc_build',
+			parent::build(),
+			$this
+		);
+	}
+
+	/**
 	 * Undocumented function
 	 *
 	 * @return void
@@ -87,7 +100,11 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	public function getOrderRef( $num ) {
 		if ( 1 === $num ) {
-			return $this->get_order_id();
+			return apply_filters(
+				'woocommerce_sequra_get_order_ref_1',
+				$this->get_order_id(),
+				$this->_current_order
+			);
 		}
 	}
 
