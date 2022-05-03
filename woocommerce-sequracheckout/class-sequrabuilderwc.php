@@ -683,11 +683,11 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return void
 	 */
 	public function buildShippedOrders() {
-		$wc_orders     = $this->getShippedOrderList();
+		$order_ids     = $this->getShippedOrderList();
 		$this->_orders = array();
-		foreach ( $wc_orders as $wc_order ) {
+		foreach ( $order_ids as $order_id ) {
 			$data                       = array();
-			$this->_current_order       = $wc_order;
+			$this->_current_order       = new WC_Order( $order_id );
 			$data['sent_at']            = self::dateOrBlank( $this->order_sent_at() );
 			$data['state']              = 'delivered';
 			$data['delivery_address']   = $this->deliveryAddress();
