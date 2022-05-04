@@ -65,7 +65,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	public function build( $state = null ) {
 		return apply_filters(
 			'woocommerce_sequra_builderwc_build',
-			parent::build(),
+			parent::build( $state ),
 			$this
 		);
 	}
