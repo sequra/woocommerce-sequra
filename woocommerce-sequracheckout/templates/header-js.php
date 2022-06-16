@@ -146,18 +146,10 @@ var SequraHelper = {
 				return resolve();
 			}
 			const observer = new MutationObserver(function(mutations) {
-				mutations.forEach(function(mutation) {
-					if (!mutation.addedNodes)
-						return;
-					var found = false;
-					mutation.addedNodes.forEach(function(node){
-							found = found || (node.matches && node.matches(selector));
-					});
-					if(found) {
-						resolve();
-						observer.disconnect();
-					}
-				});
+				if (document.querySelector(selector)) {
+					resolve();
+					observer.disconnect();
+				}
 			});
 			observer.observe(document.body, {
 				childList: true,
