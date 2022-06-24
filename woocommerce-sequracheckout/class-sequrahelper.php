@@ -356,6 +356,9 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function is_elegible_for_service_sale() {
+		if( ! WC()->cart ) {
+			return false;
+		}
 		$elegible       = false;
 		$services_count = 0;
 		foreach ( WC()->cart->cart_contents as $values ) {
@@ -375,6 +378,9 @@ class SequraHelper {
 	 */
 	public function is_elegible_for_product_sale() {
 		global $wp;
+		if( ! WC()->cart ) {
+			return false;
+		}
 		$elegible = true;
 		// Only reject if all products are virtual (don't need shipping).
 		if( isset( $wp->query_vars['order-pay'] ) ) { //if paying an order
@@ -394,6 +400,9 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function is_available_in_checkout() {
+		if( ! WC()->cart ) {
+			return false;
+		}
 		$return = true;
 		foreach ( WC()->cart->cart_contents as $values ) {
 			if ( get_post_meta( $values['product_id'], 'is_sequra_banned', true ) === 'yes' ) {

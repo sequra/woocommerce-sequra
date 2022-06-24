@@ -8,7 +8,7 @@
  // class-sequrapaymentgateway.php
 ?>
 <div id="sq_pm_<?php echo esc_html( $sq_product_campaign );?>" class="sq_payment_method <?php echo esc_html( $sq_product_campaign );?>">
-	<input type="radio" name="sq_product_campaign" value="<?php echo esc_html( $sq_product_campaign );?>" id="sq_product_campaign_<?php echo esc_html( $sq_product_campaign );?>"/>
+	<input type="radio" name="sq_product_campaign" value="<?php echo esc_html( $sq_product_campaign );?>" id="sq_product_campaign_<?php echo esc_html( $sq_product_campaign );?>" class="input-radio"/>
 	<label for="sq_product_campaign_<?php echo esc_html( $sq_product_campaign );?>" class="sq_payment_method">
 		<img src="data:image/svg+xml;base64,<?php echo base64_encode($method['icon']);?>"/>
 		<div class="sq_payment_method_title_claim">
