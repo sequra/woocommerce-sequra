@@ -39,12 +39,26 @@ class SequraHelper {
 	private $identity_form = array();
 
 	/**
+	 * Instance
+	 *
+	 * @var SequraHelper
+	 */
+	public static $instance = null;
+
+	public static function get_instance($settings = null) {
+		if ( ! self::$instance ) {
+			self::$instance = new SequraHelper($settings);
+		}
+		return self::$instance;
+	}
+
+	/**
 	 * Constructor for payment module
 	 *
 	 * @param array $settings Payment method settings.
 	 */
 	public function __construct( $settings = null ) {
-		$this->settings      = $settings ? $settings : get_option( 'woocommerce_sequra_settings', array() );
+		$this->settings      = $settings ? $settings : get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 		$this->identity_form = null;
 		$this->dir           = dirname( __FILE__ ) . '/';
 		require_once $this->dir . 'vendor/autoload.php';
@@ -97,6 +111,16 @@ class SequraHelper {
 	public static function validate_service_date( $service_date ) {
 		return preg_match( '/' . self::ISO8601_PATTERN . '/', $service_date );
 	}
+
+	/**
+	 * Test if it is an ajax or REST api Request
+	 *
+	 * @return boolean
+	 */
+	public static function is_ajax_request() {
+		return is_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+	}
+
 	/**
 	 * Test if it is order_review ajax call
 	 *
@@ -129,7 +153,14 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function is_valid_auth(){
-		return $this->get_client()->isValidAuth();
+		if( is_null($this->valid_auth) && ! $this->is_ajax_request() && is_admin() ){
+			$this->valid_auth = $this->get_client()->isValidAuth();
+			update_option(
+				'SEQURA_VALID_AUTH',
+				$this->valid_auth
+			);
+		}
+		return !!get_option('SEQURA_VALID_AUTH');
 	}
 
 	/**

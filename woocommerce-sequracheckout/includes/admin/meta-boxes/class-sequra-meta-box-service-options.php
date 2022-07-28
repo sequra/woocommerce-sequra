@@ -21,7 +21,7 @@ class Sequra_Meta_Box_Service_Options {
 	 */
 	public static function output( $post ) {
 		global $post;
-		$core_settings           = get_option( 'woocommerce_sequra_settings', array() );
+		$core_settings           = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 		$is_sequra_service       = get_post_meta( $post->ID, 'is_sequra_service', true );
 		$sequra_service_end_date = get_post_meta( $post->ID, 'sequra_service_end_date', true );
 		$sequra_desired_first_charge_date = get_post_meta( $post->ID, 'sequra_desired_first_charge_date', true );

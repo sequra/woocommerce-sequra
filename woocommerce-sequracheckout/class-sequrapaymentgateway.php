@@ -63,14 +63,12 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 
 		// Load the settings.
 		$this->init_settings();
-		$this->helper        = new SequraHelper( $this->settings );
-
-		if( is_admin() && ! defined( 'DOING_AJAX' ) ){
+		$this->helper        = SequraHelper::get_instance( $this->settings );
+		if( is_admin() && ! $this->helper->is_ajax_request()  && $_GET['section'] == 'sequra' ){
 			// Load the form fields.
 			$this->is_valid_auth = $this->helper->is_valid_auth();
 			$this->init_form_fields();
 		}
-
 		$this->enabled    = isset($this->settings['enabled'])?$this->settings['enabled']:'';
 		$this->title      = isset($this->settings['title'])?$this->settings['title']:'';
 		$this->has_fields = true;

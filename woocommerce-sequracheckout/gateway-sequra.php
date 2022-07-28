@@ -217,7 +217,7 @@ function woocommerce_sequra_init() {
 	add_action( 'woocommerce_process_product_meta', 'Sequra_Meta_Box_Settings::save', 20, 2 );
 	add_action( 'add_meta_boxes', 'Sequra_Meta_Box_Settings::add_meta_box' );
 
-	$core_settings = get_option( 'woocommerce_sequra_settings', array() );
+	$core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 	if ( isset( $core_settings['enable_for_virtual'] ) && 'yes' === $core_settings['enable_for_virtual'] ) {
 		if ( ! class_exists( 'Sequra_Meta_Box_Service_Options' ) ) {
 			require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-service-options.php';
@@ -254,7 +254,7 @@ function woocommerce_sequra_init() {
 	function sequra_head_js() {
 		/* @todo: Load only if necessary */
 		$available_products = unserialize( get_option( 'SEQURA_ACTIVE_METHODS' ) );
-		$core_settings      = get_option( 'woocommerce_sequra_settings', array() );
+		$core_settings      = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 		$script_base_uri    = sequra_get_script_basesurl();
 		ob_start();
 		include SequraHelper::template_loader( 'header-js' );

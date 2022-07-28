@@ -22,8 +22,8 @@ class WCSQ_Tests_SequraPayment_Gateway_BuilderWC extends WC_Unit_Test_Case {
 			'debug'              => 'yes',
 		);
 		update_option( 'woocommerce_sequra_settings ', $settings );
-		$pm                 = new SequraInvoiceGateway();
-		$this->sequra_helper = new SequraHelper( $pm );
+		$this->sequra_helper = SequraHelper::get_instance($settings);
+		;
 	}
 
 	/**

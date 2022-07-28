@@ -24,7 +24,7 @@ class Sequra_Meta_Box_Service_End_Date {
 		$is_sequra_service       = get_post_meta( $post->ID, 'is_sequra_service', true );
 		$sequra_service_end_date = get_post_meta( $post->ID, 'sequra_service_end_date', true );
 		if ( ! $sequra_service_end_date ) {
-			$core_settings           = get_option( 'woocommerce_sequra_settings', array() );
+			$core_settings           = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 			$sequra_service_end_date = $core_settings['default_service_end_date'];
 		} ?>
 		<div class="wc-metaboxes-wrapper">

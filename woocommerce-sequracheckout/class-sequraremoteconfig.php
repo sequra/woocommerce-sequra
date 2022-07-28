@@ -68,7 +68,7 @@ class SequraRemoteConfig {
 	 */
 	public function __construct( $settings ) {
 		$this->settings = $settings;
-		$this->helper   = new SequraHelper( $settings );
+		$this->helper   = SequraHelper::get_instance();
 	}
 
 	/**
