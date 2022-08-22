@@ -7,7 +7,7 @@
  * Author: SeQura Engineering
  * Author URI: http://SeQura es/
  * WC requires at least: 4.0
- * WC tested up to: 6.6.0
+ * WC tested up to: 6.8.0
  * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
  * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg
  * BannerHigh: https://live.sequracdn.com/assets/images/logos/logo.svg
