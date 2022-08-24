@@ -12,7 +12,7 @@
 				window.sq_product_campaign = jQuery( this ).val();
 				jQuery('input[name="payment_method"]').trigger('change');
 			});
-			jQuery('input.input-radio').on('click', function () {
+			jQuery('input.input-radio:not(.sq-input-radio)').on('click', function () {
 				jQuery('input[name=sq_product_campaign]').prop('checked', false);
 			});
 			jQuery(document.body).on('update_checkout', function(e){
