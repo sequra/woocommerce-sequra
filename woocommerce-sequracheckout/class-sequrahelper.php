@@ -160,7 +160,7 @@ class SequraHelper {
 				$this->valid_auth
 			);
 		}
-		return !!get_option('SEQURA_VALID_AUTH');
+		return !!get_option('SEQURA_VALID_AUTH',true);
 	}
 
 	/**
