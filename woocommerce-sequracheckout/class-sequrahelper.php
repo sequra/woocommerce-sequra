@@ -20,6 +20,13 @@ class SequraHelper {
 	private $settings;
 
 	/**
+	 * Are valid creadentials set?.
+	 *
+	 * @var bool
+	 */
+	private $valid_auth;
+
+	/**
 	 * Http client.
 	 *
 	 * @var \Sequra\Client

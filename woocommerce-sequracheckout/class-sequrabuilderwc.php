@@ -298,8 +298,9 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		}
 		$packages = WC()->shipping->get_packages();
 		$package  = current( $packages );
-
-		return $package['rates'][ current( $shipping_methods ) ];
+		if($package && isset($package['rates']) && isset($package['rates'][ current( $shipping_methods ) ])){
+			return $package['rates'][ current( $shipping_methods ) ];
+		}
 	}
 	/**
 	 * Undocumented function
