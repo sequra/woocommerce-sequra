@@ -170,9 +170,9 @@ class SequraRemoteConfig {
 		if ( ! $this->helper->is_valid_auth() ) {
 			return [];
 		}
-		if ( $force_refresh || ! self::get_stored_payment_methods() ) {
+		if ( $force_refresh || ! $this->get_stored_payment_methods() ) {
 			$client = $this->helper->get_client();
-			$client->getMerchantPaymentMethods( isset( $this->settings['merchantref'] ) ? $this->settings['merchantref'] : '' );
+			$client->getMerchantPaymentMethods( $this->helper->getMerchantRef() );
 			if ( $client->succeeded() ) {
 				self::$raw_merchant_payment_methods = $client->getRawResult();
 				$this->update_stored_payment_methods();
@@ -181,7 +181,7 @@ class SequraRemoteConfig {
 			}
 		}
 		if ( ! self::$merchant_payment_methods ) {
-			$json                           = self::get_stored_payment_methods();
+			$json                           = $this->get_stored_payment_methods();
 			self::$merchant_payment_methods = $json['payment_options'];
 		}
 		return $this->flatten_payment_options(
@@ -244,9 +244,12 @@ class SequraRemoteConfig {
 	 *
 	 * @return array
 	 */
-	private static function get_stored_payment_methods() {
+	private function get_stored_payment_methods() {
 		if ( ! self::$raw_merchant_payment_methods ) {
-			self::$raw_merchant_payment_methods = get_option( 'SEQURA_PAYMENT_METHODS' );
+			self::$raw_merchant_payment_methods = get_option(
+				'SEQURA_PAYMENT_METHODS_'.$this->helper->getMerchantRef(),
+				get_option( 'SEQURA_PAYMENT_METHODS')
+			);
 			if ( mb_strlen( self::$raw_merchant_payment_methods, '8bit' ) < 4096 && file_exists( self::$raw_merchant_payment_methods ) ) {
 				self::$raw_merchant_payment_methods = file_get_contents( self::$raw_merchant_payment_methods );
 			}
@@ -258,14 +261,14 @@ class SequraRemoteConfig {
 	 *
 	 * @return void
 	 */
-	private static function update_stored_payment_methods() {
+	private function update_stored_payment_methods() {
 		if ( mb_strlen( self::$raw_merchant_payment_methods, '8bit' ) > 64000 ) {
 			$tmp_file = tempnam( sys_get_temp_dir(), 'sq_pms' );
 			file_put_contents( $tmp_file, self::$raw_merchant_payment_methods );
 			self::$raw_merchant_payment_methods = $tmp_file;
 		}
 		update_option(
-			'SEQURA_PAYMENT_METHODS',
+			'SEQURA_PAYMENT_METHODS_'.$this->helper->getMerchantRef(),
 			self::$raw_merchant_payment_methods
 		);
 	}

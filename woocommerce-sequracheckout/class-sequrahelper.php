@@ -74,6 +74,14 @@ class SequraHelper {
 		}
 	}
 
+	public function getMerchantRef(){
+		return apply_filters(
+			'woocommerce_sequra_get_merchant_ref',
+			isset( $this->settings['merchantref'] ) ? $this->settings['merchantref'] : '',
+			$this
+		);
+	}
+
 	/**
 	 * Undocumented function
 	 *
@@ -192,7 +200,7 @@ class SequraHelper {
 	public function get_credit_agreements( $amount ) {
 		return $this->get_client()->getCreditAgreements(
 			$this->get_builder()->integerPrice( $amount ),
-			$this->settings['merchantref']
+			$this->getMerchantRef()
 		);
 	}
 
@@ -231,7 +239,7 @@ class SequraHelper {
 			require_once $this->dir . 'class-sequrabuilderwc.php';
 		}
 		$builder_class = apply_filters( 'sequra_set_builder_class', 'SequraBuilderWC' );
-		$this->builder = new $builder_class( $this->settings['merchantref'], $order );
+		$this->builder = new $builder_class( $this->getMerchantRef(), $order );
 
 		return $this->builder;
 	}

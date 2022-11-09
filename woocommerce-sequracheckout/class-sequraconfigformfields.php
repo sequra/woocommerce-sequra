@@ -34,7 +34,7 @@ class SequraConfigFromFields {
 			'enabled'                  => array(
 				'title'       => __( 'Enable/Disable', 'wc_sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Habilitar pagos con SeQura', 'wc_sequra' ),
+				'description' => __( 'Enable SeQura payments', 'wc_sequra' ),
 				'default'     => 'no',
 			),
 			'title'                    => array(
