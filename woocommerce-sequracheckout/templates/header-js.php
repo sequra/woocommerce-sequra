@@ -18,6 +18,7 @@ var sequraConfigParams = {
 	scriptUri: '<?php echo esc_html( $script_base_uri ); ?>sequra-checkout.min.js',
 	decimalSeparator: '<?php echo esc_html( wc_get_price_decimal_separator() ); ?>',
 	thousandSeparator: '<?php echo esc_html( wc_get_price_thousand_separator() ); ?>',
+	locale: '<?php echo str_replace('_','-',get_locale());?>',
 };
 
 (function (i, s, o, g, r, a, m) {i['SequraConfiguration'] = g;i['SequraOnLoad'] = [];i[r] = {};i[r][a] = function (callback) {i['SequraOnLoad'].push(callback);};(a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);a.async = 1;a.src = g.scriptUri;m.parentNode.insertBefore(a, m);})(window, document, 'script', sequraConfigParams, 'Sequra', 'onLoad');
