@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Checkout con SeQura
- * Plugin URI: http://sequra.es/
- * Description: Ofrece las opciones de pago de SeQura
+ * Plugin Name: SeQura on your checkout
+ * Plugin URI: https://sequra.es/
+ * Description: Ofrece las opciones de pago con SeQura
  * Version: 2.0.0
- * Author: SeQura Engineering
- * Author URI: http://SeQura es/
+ * Author: "SeQura Tech" <dev+wordpress@sequra.es>
+ * Author URI: https://engineering.sequra.es/
  * WC requires at least: 4.0
  * WC tested up to: 7.4.1
  * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
@@ -15,6 +15,23 @@
  * Text Domain: wc_sequra
  * Domain Path: /i18n/languages/
  *
+ * Copyright (C) 2023 SeQura Tech
+ * 
+ * License: GPL v3
+ * 
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * 
  * @package woocommerce-sequraacheckout
  */
 
