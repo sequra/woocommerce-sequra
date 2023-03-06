@@ -1,20 +1,16 @@
 === Pasarela de pago para SeQura ===
-Tags: woocommerce, payment, gateway
+Tags: woocommerce, payment, gateway, BNPL
 Requires at least: 4.0
-Tested up to: 5.3.2
-Stable tag: 1.0.11
+Tested up to: 7.4.1
+Stable tag: 2.0.0
 Requires PHP: 5.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Ofrece las opciones de pago con SeQura en el checkout
+== Description ==
+WooCommerce plugin that allows you to make payments with [SeQura](https://sequra.es).
+
+Plugin de pago para WooCommerce que permite realizar pagos con [SeQura](https://sequra.es).
 
 == Changelog ==
-= 1.1.3 =
-[add] template for chekout-script so that it can be overriden 
-= 1.1.2 =
-[add] woocommerce_sequracheckout_sent_statuses filter to add customs statuses that should be treated as sent
-= 1.0.11 =
-[FIX] Divide en 3 and Pago fraccioado widgets not showing at the same time
-= 1.0.9 =
-[FIX] Compatibility with woocommerce pay for payment
+= 2.0.0 =
