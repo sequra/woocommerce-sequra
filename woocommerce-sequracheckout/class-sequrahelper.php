@@ -163,6 +163,16 @@ class SequraHelper {
 	}
 
 	/**
+	 * Use to prevent css attribute removal
+	 *
+	 * @param array $allowed_css
+	 * @return null
+	 */
+	public static function allow_css_attributes( $allowed_css ) {
+		return;
+	}
+
+	/**
 	 * Test if credentials are valid
 	 *
 	 * @return boolean

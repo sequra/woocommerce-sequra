@@ -54,7 +54,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		}
 		// phpcs:enable
 		$this->_cart    = WC()->cart;
-		$this->_pm		= SequraPaymentGateway::get_instance();
+		$this->_pm      = SequraPaymentGateway::get_instance();
 	}
 
 	/**

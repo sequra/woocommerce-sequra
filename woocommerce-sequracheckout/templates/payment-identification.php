@@ -6,16 +6,27 @@
  */
 
 if ( $identity_form ) {
-	// phpcs:disable
+	add_filter('safe_style_css', 'SequraHelper::allow_css_attributes');
 	echo wp_kses(
 		$identity_form,
-		[
-			'iframe',
-			'script',
-		],
-		['https']
+		array(
+			'iframe' => array(
+				'id'=>array(),
+				'name'=>array(),
+				'class'=>array(),
+				'src'=>array(),
+				'frameborder'=>array(),
+				'style'=>array(),
+				'type'=>array()
+			),
+			'script' => array(
+				'type'=>array(),
+				'src'=>array(),
+			),
+		),
+		array('https')
 	);
-	// phpcs:enable
+	remove_filter('safe_style_css', 'SequraHelper::allow_css_attributes');
 	?>
 <script type="text/javascript">
 	function tryToOpenPumbaa(){
@@ -36,7 +47,7 @@ if ( $identity_form ) {
 </script>
 <?php } else { ?>
 	<script type="text/javascript">
-		alert("Lo sentimos, ha habido un error.\n Contacte con el comercio, por favor.");
+		alert(<?php _e( 'Sorry, something went wrong.\n Please contact the merchant.' ); ?>;
 		document.location.href = '<?php echo esc_js( wc_get_checkout_url() ); ?>';
 	</script>
 <?php } ?>

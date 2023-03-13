@@ -54,7 +54,7 @@ class SequraConfigFormFields {
 				'type'        => 'text',
 				'description' => __( 'Usuario proporcionado por SeQura.', 'wc_sequra' ),
 				'default'     => '',
-				'css'		  => 'color:' . $this->pm->is_valid_auth?'green':'red'. ';width: 450px;',
+				'css'         => 'color:' . $this->pm->is_valid_auth?'green':'red'. ';width: 450px;',
 			),
 			'password'                 => array(
 				'title'       => __( 'Password', 'wc_sequra' ),
