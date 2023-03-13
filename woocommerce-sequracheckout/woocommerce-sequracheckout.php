@@ -8,12 +8,10 @@
  * Author URI: https://engineering.sequra.es/
  * WC requires at least: 4.0
  * WC tested up to: 7.4.1
- * Icon1x: https://live.sequracdn.com/assets/images/badges/invoicing.svg
- * Icon2x: https://live.sequracdn.com/assets/images/badges/invoicing_l.svg
- * BannerHigh: https://live.sequracdn.com/assets/images/logos/logo.svg
- * BannerLow: https://live.sequracdn.com/assets/images/logos/logo.svg
  * Text Domain: wc_sequra
  * Domain Path: /i18n/languages/
+ * Requires at least: 5.9
+ * Requires PHP: 7.2
  *
  * Copyright (C) 2023 SeQura Tech
  * 

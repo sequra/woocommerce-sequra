@@ -12,10 +12,10 @@
 	<label for="sq_product_campaign_<?php echo esc_html( $sq_product_campaign );?>" class="sq_payment_method">
 		<img src="data:image/svg+xml;base64,<?php echo base64_encode($method['icon']);?>"/>
 		<div class="sq_payment_method_title_claim">
-			<span class="sq_payment_method_title"><?php echo $method['long_title']; ?></span>
+			<span class="sq_payment_method_title"><?php echo wp_kses($method['long_title']); ?></span>
 			<?php if (isset($method['claim']) && $method['claim']) {?>
 			<br/>
-				<?php echo $method['claim'];?>
+				<?php echo wp_kses($method['claim'],['br','p','b','div','ol','ul','li','span']);?>
 			<?php } ?>
 			<?php if ( !in_array($method['product'],['fp1']) ) { ?>
 				<span id="sequra_info_link" class="sequra-educational-popup sequra_more_info"

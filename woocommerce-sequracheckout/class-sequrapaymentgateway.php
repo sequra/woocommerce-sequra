@@ -296,8 +296,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function get_valid_product_campaign() {
-		$product  = isset( $_GET['sq_product'] ) ? $_GET['sq_product'] : '';
-		$campaign = isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : '';
+		$product  = isset( $_GET['sq_product'] ) ? sanitize_key($_GET['sq_product']): '';
+		$campaign = isset( $_GET['sq_campaign'] )? sanitize_key($_GET['sq_campaign']) : '';
 		return array_reduce(
 			$this->get_remote_config()->get_merchant_payment_methods()?:[],
 			function ( $ret, $method ) use ( $product, $campaign ) {
@@ -414,7 +414,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			die( 'Not valid signature' );
 		}
 
-		$event = isset( $_POST['event'] )? $_POST['event'] : 'approved' ;
+		$event = isset( $_POST['event'] )? sanitize_key($_POST['event']) : 'approved' ;
 		$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
 		switch ($event) {
 			case 'cancelled':
@@ -439,7 +439,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 
 	private function setRiskLevel( $order )
 	{
-		$risk_level = isset( $_POST['risk_level'] )? $_POST['risk_level'] : '' ;
+		$risk_level = isset( $_POST['risk_level'] )? sanitize_key($_POST['risk_level']) : '' ;
 		switch ($risk_level) {
 			case 'low_risk':
 				$order->add_order_note( __( 'The risk assesment for this order is low', 'wc_sequra' ) );

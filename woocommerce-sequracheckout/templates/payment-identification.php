@@ -7,7 +7,14 @@
 
 if ( $identity_form ) {
 	// phpcs:disable
-	echo $identity_form;
+	echo wp_kses(
+		$identity_form,
+		[
+			'iframe',
+			'script',
+		],
+		['https']
+	);
 	// phpcs:enable
 	?>
 <script type="text/javascript">
