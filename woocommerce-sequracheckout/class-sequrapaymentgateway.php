@@ -121,10 +121,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Initialize Gateway Settings Form Fields
 	 */
 	public function init_form_fields() {
-		if ( ! class_exists( 'SequraConfigFromFields' ) ) {
+		if ( ! class_exists( 'SequraConfigFormFields' ) ) {
 			require_once WC_SEQURA_PLG_PATH . 'class-sequraconfigformfields.php';
 		}
-		$sequraconfigfields = new SequraConfigFromFields( $this );
+		$sequraconfigfields = new SequraConfigFormFields( $this );
 		$sequraconfigfields->add_form_fields();
 	}
 
@@ -353,7 +353,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		return $ret.$str;
 	}
 
-//PRIVATE METHODS.
+	//PRIVATE METHODS.
 	/**
 	 * Undocumented function
 	 *

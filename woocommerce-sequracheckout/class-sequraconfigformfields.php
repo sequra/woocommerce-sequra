@@ -6,9 +6,9 @@
  */
 
 /**
- * SequraConfigFromFields class
+ * SequraConfigFormFields class
  */
-class SequraConfigFromFields {
+class SequraConfigFormFields {
 	/**
 	 * SequraPaymentGateway variable
 	 *
