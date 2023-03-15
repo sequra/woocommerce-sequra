@@ -34,7 +34,7 @@ class Sequra_Meta_Box_Settings {
 						<?php echo 'yes' === $is_sequra_banned ? 'checked' : ''; ?>
 						onclick="toggleSequraService();"/>
 					<label for="sequra_settings_is_banned">
-						<?php esc_html_e( 'Do not offer SeQura for this product', 'wc_sequra' ); ?>
+						<?php esc_html_e( 'Do not offer SeQura for this product', 'sequra' ); ?>
 					</label>
 				</div>
 			</div>

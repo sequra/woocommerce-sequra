@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: SeQura on your checkout
+ * Plugin Name: SeQura
  * Plugin URI: https://sequra.es/
  * Description: Ofrece las opciones de pago con SeQura
  * Version: 2.0.0
@@ -43,7 +43,7 @@ if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/wooco
 } else {
 	add_action( 'admin_notices',
 		function() {
-			echo '<div id="message" class="error"><p>' . __('Por favor, desinstale y elimine primero el plugin "Pasarela de pago para Sequra" para poder usar el nuevo "Checkout con SeQura"', 'wc_sequra' ) . '</p></div>';
+			echo '<div id="message" class="error"><p>' . __('Por favor, desinstale y elimine primero el plugin "Pasarela de pago para Sequra" para poder usar el nuevo "Checkout con SeQura"', 'sequra' ) . '</p></div>';
 		}
 	);
 }

@@ -155,9 +155,9 @@ add_action(
 function sequrapayment_plugin_row_meta( $links, $file ) {
 	if ( plugin_basename( __FILE__ ) === $file ) {
 		$row_meta = array(
-			'docs'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'wc_sequra' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
-			'apidocs' => '<a href="' . esc_url( apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'wc_sequra' ) . '">' . esc_html__( 'API docs', 'wc_sequra' ) . '</a>',
-			'support' => '<a href="' . esc_url( apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' ) ) . '" aria-label="' . esc_attr__( 'Soporte', 'woocommerce' ) . '">' . esc_html__( 'Soporte', 'wc_sequra' ) . '</a>',
+			'docs'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'sequra' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+			'apidocs' => '<a href="' . esc_url( apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'sequra' ) . '">' . esc_html__( 'API docs', 'sequra' ) . '</a>',
+			'support' => '<a href="' . esc_url( apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' ) ) . '" aria-label="' . esc_attr__( 'Soporte', 'woocommerce' ) . '">' . esc_html__( 'Soporte', 'sequra' ) . '</a>',
 		);
 
 		return array_merge( $links, $row_meta );
@@ -174,7 +174,7 @@ function sequrapayment_plugin_row_meta( $links, $file ) {
 function sequrapayment_action_links( $links ) {
 	return array_merge(
 		array(
-			'comf'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_conf_url', admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sequra' ) ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'wc_sequra' ) . '">' . esc_html__( 'Settings', 'woocommerce' ) . '</a>',
+			'comf'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_conf_url', admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sequra' ) ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'sequra' ) . '">' . esc_html__( 'Settings', 'woocommerce' ) . '</a>',
 		),
 		$links
 	);
@@ -197,7 +197,7 @@ function woocommerce_sequra_init() {
 		require_once WC_SEQURA_PLG_PATH . 'class-sequrapaymentgateway.php';
 	}
 	do_action( 'sequra_upgrade_if_needed' );
-	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/i18n/languages' );
+	load_plugin_textdomain( 'sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/i18n/languages' );
 	add_filter( 'plugin_row_meta', 'sequrapayment_plugin_row_meta', 10, 2 );
 	/**
 	 * Add the gateway to woocommerce

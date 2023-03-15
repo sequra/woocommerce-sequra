@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-"Project-Id-Version: Checkout con SeQura\n"
+"Project-Id-Version: SeQura\n"
 "POT-Creation-Date: 2021-03-04 01:30+0100\n"
 "PO-Revision-Date: 2021-03-04 01:30+0100\n"
 "Last-Translator: \n"

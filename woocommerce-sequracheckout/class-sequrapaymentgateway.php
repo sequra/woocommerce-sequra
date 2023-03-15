@@ -55,8 +55,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
 
-		$this->method_title       = __( 'SeQura Checkout', 'wc_sequra' );
-		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'wc_sequra' );
+		$this->method_title       = __( 'SeQura Checkout', 'sequra' );
+		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'sequra' );
 		$this->supports           = array(
 			'products',
 		);
@@ -134,16 +134,16 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * */
 	public function admin_options() {
 		?>
-		<h3><?php esc_html_e( 'Configuración Sequra', 'wc_sequra' ); ?></h3>
+		<h3><?php esc_html_e( 'Configuración Sequra', 'sequra' ); ?></h3>
 		<?php if( !$this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
-				<p><?php _e('Provided SeQura credentials are not valid for the selected environment', 'wc_sequra') ?></p>
+				<p><?php _e('Provided SeQura credentials are not valid for the selected environment', 'sequra') ?></p>
 			</div>
 		<?php } ?>
 		<p>
 		<?php
 		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'wc_sequra' ),
+			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'sequra' ),
 			array( 'a' => array( 'href' ) )
 		);
 		?>
@@ -279,7 +279,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		echo '<p>' . wp_kses_post(
 			__(
 				'Thank you for your order, please click the button below to pay with SeQura.',
-				'wc_sequra'
+				'sequra'
 			)
 		) . '</p>';
 		$options       = $this->get_valid_product_campaign();
@@ -340,7 +340,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					'<p>SeQura está procesando tu solicitud.</p>' .
 					'<p>En unos minutos <b>recibirás un email con respuesta a tu solicitud</b>. Es posible que SeQura contacte contigo antes para validar algunos datos.</p>' .
 					'<p><b>Gracias por comprar con SeQura</b>',
-					'wc_sequra'
+					'sequra'
 				),
 				'notice'
 			);
@@ -376,7 +376,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					// Payment pedimd.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
 					$order->add_order_note(
-						sprintf( __( 'Payment is in review by SeQura.(%s)', 'wc_sequra' ), $title )
+						sprintf( __( 'Payment is in review by SeQura.(%s)', 'sequra' ), $title )
 					);
 				}
 			break;
@@ -390,7 +390,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				if ( $approval ) {
 					// Payment completed.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
-					$order->add_order_note( sprintf( __( 'Payment accepted by SeQura.(%s)', 'wc_sequra' ), $title ) );
+					$order->add_order_note( sprintf( __( 'Payment accepted by SeQura.(%s)', 'sequra' ), $title ) );
 					$this->helper->add_payment_info_to_post_meta( $order );
 					$order->payment_complete();
 				}
@@ -419,7 +419,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		switch ($event) {
 			case 'cancelled':
 				$order->add_order_note( sprintf(
-					__( 'The payment was NOT approved (%s)', 'wc_sequra' ),
+					__( 'The payment was NOT approved (%s)', 'sequra' ),
 					$title
 				));
 				$order->set_status( 'failed' );
@@ -442,13 +442,13 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$risk_level = isset( $_POST['risk_level'] )? sanitize_key($_POST['risk_level']) : '' ;
 		switch ($risk_level) {
 			case 'low_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is low', 'wc_sequra' ) );
+				$order->add_order_note( __( 'The risk assesment for this order is low', 'sequra' ) );
 				break;
 			case 'high_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is HIGH!!', 'wc_sequra' ) );
+				$order->add_order_note( __( 'The risk assesment for this order is HIGH!!', 'sequra' ) );
 				break;
 			case 'unknown_risk':
-				$order->add_order_note( __( 'The risk assesment for this order in progress', 'wc_sequra' ) );
+				$order->add_order_note( __( 'The risk assesment for this order in progress', 'sequra' ) );
 				break;
 		}
 	}

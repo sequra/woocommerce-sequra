@@ -33,39 +33,39 @@ class Sequra_Meta_Box_Service_Options {
 			<div id="sequra_service">
 				<div id="sequra_service_service_options" class="service_end_date-edit wcs-date-input">
 					<div>
-						<label for="sequra_service_end_date"><?php esc_html_e( 'Service end date', 'wc_sequra' ); ?></label>
+						<label for="sequra_service_end_date"><?php esc_html_e( 'Service end date', 'sequra' ); ?></label>
 						<input
 							id="sequra_service_end_date"
 							name="sequra_service_end_date"
 							type="text"
 							value="<?php echo esc_html( $sequra_service_end_date ); ?>"
-							placeholder="<?php esc_html_e( 'date or period in ISO8601 format', 'wc_sequra' ); ?>"
+							placeholder="<?php esc_html_e( 'date or period in ISO8601 format', 'sequra' ); ?>"
 							pattern="<?php echo esc_html( SequraHelper::ISO8601_PATTERN ); ?>"/><br/>
-						<small><?php esc_html_e( 'Date i.e: 2021-06-06 or period i.e: P1Y for 1 year', 'wc_sequra' ); ?></small>
+						<small><?php esc_html_e( 'Date i.e: 2021-06-06 or period i.e: P1Y for 1 year', 'sequra' ); ?></small>
 					</div>
 					<?php if ( $core_settings['allow_payment_delay'] ) { ?>
 						<div>
-							<label for="sequra_desired_first_charge_date"><?php esc_html_e( 'First instalment delay or date', 'wc_sequra' ); ?></label>
+							<label for="sequra_desired_first_charge_date"><?php esc_html_e( 'First instalment delay or date', 'sequra' ); ?></label>
 							<input
 							id="sequra_desired_first_charge_date"
 							name="sequra_desired_first_charge_date"
 							type="text"
 							value="<?php echo esc_html( $sequra_desired_first_charge_date ); ?>"
-							placeholder="<?php esc_html_e( 'date or period in ISO8601 format', 'wc_sequra' ); ?>"
+							placeholder="<?php esc_html_e( 'date or period in ISO8601 format', 'sequra' ); ?>"
 							pattern="<?php echo esc_html( SequraHelper::ISO8601_PATTERN ); ?>"/><br/>
-							<small><?php esc_html_e( 'Date i.e: 2021-01-01 or period i.e: P1M for 1 month', 'wc_sequra' ); ?></small>
+							<small><?php esc_html_e( 'Date i.e: 2021-01-01 or period i.e: P1M for 1 month', 'sequra' ); ?></small>
 						</div>
 					<?php } ?>
 					<?php if ( $core_settings['allow_registration_items'] ) { ?>
 						<div>
-						<label for="sequra_registration_amount"><?php esc_html_e( 'Registration amount', 'wc_sequra' ); ?></label>
+						<label for="sequra_registration_amount"><?php esc_html_e( 'Registration amount', 'sequra' ); ?></label>
 							<input
 							id="sequra_registration_amount"
 							name="sequra_registration_amount"
 							type="number"
 							value="<?php echo esc_html( $sequra_registration_amount ); ?>"
 							step="0.01"/> &euro;<br/>
-							<small><?php esc_html_e( 'Part of the price that will be paid as registration fee', 'wc_sequra' ); ?></small>
+							<small><?php esc_html_e( 'Part of the price that will be paid as registration fee', 'sequra' ); ?></small>
 						</div>
 					<?php } ?>
 				</div>
@@ -78,7 +78,7 @@ class Sequra_Meta_Box_Service_Options {
 						<?php echo 'no' === $is_sequra_service ? 'checked' : ''; ?>
 						onclick="toggleSequraService();"/>
 					<label for="sequra_service_is_service">
-						<?php esc_html_e( 'This is not a service', 'wc_sequra' ); ?>
+						<?php esc_html_e( 'This is not a service', 'sequra' ); ?>
 					</label>
 				</div>
 			</div>
@@ -138,7 +138,7 @@ class Sequra_Meta_Box_Service_Options {
 	public static function warn() {
 		?>
 		<div class="notice error sequra_meta_box_service_en_date is-dismissible">
-			<p><?php esc_html_e( 'Invalid service end date, please enter a valid one', 'wc_sequra' ); ?></p>
+			<p><?php esc_html_e( 'Invalid service end date, please enter a valid one', 'sequra' ); ?></p>
 		</div>
 		<?php
 	}

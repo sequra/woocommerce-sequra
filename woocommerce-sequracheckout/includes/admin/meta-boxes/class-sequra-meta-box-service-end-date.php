@@ -35,9 +35,9 @@ class Sequra_Meta_Box_Service_End_Date {
 						name="sequra_service_end_date"
 						type="text"
 						value="<?php echo esc_html( $sequra_service_end_date ); ?>"
-						placeholder="<?php esc_html_e( 'date or period in ISO8601 format', 'wc_sequra' ); ?>"
+						placeholder="<?php esc_html_e( 'date or period in ISO8601 format', 'sequra' ); ?>"
 						pattern="<?php echo esc_html( SequraHelper::ISO8601_PATTERN ); ?>"/><br/>
-					<small><?php esc_html_e( 'Date i.e: 2018-06-06 or period i.e: P1Y for 1 year', 'wc_sequra' ); ?></small>
+					<small><?php esc_html_e( 'Date i.e: 2018-06-06 or period i.e: P1Y for 1 year', 'sequra' ); ?></small>
 				</div>
 				<div id="sequra_service_is_service" class="service-edit wcs">
 					<input
@@ -48,7 +48,7 @@ class Sequra_Meta_Box_Service_End_Date {
 						<?php echo 'no' === $is_sequra_service ? 'checked' : ''; ?>
 						onclick="toggleSequraService();"/>
 					<label for="sequra_service_is_service">
-						<?php esc_html_e( 'This is not a service', 'wc_sequra' ); ?>
+						<?php esc_html_e( 'This is not a service', 'sequra' ); ?>
 					</label>
 				</div>
 			</div>
@@ -94,7 +94,7 @@ class Sequra_Meta_Box_Service_End_Date {
 	public static function warn() {
 		?>
 		<div class="notice error sequra_meta_box_service_en_date is-dismissible">
-			<p><?php esc_html_e( 'Invalid service end date, please enter a valid one', 'wc_sequra' ); ?></p>
+			<p><?php esc_html_e( 'Invalid service end date, please enter a valid one', 'sequra' ); ?></p>
 		</div>
 		<?php
 	}
