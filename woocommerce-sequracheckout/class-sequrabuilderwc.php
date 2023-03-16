@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Builder class.
  *
@@ -9,6 +10,7 @@
  * SequraBuilderWC class
  */
 class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
+
 	const HASH_ALGO = 'sha256';
 
 	/**
@@ -43,22 +45,23 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$this->merchant_id = $merchant_id;
 		// phpcs:disable
 		// @todo add nonce
-		if ( ! is_null( $order ) ) {
+		if (!is_null($order)) {
 			$this->_current_order = $order;
-		} elseif ( isset( $_POST['post_data'] ) ) {
-			$this->_current_order = new SequraTempOrder( $_POST['post_data'] );
-		} elseif ( isset( $wp->query_vars['order-pay'] ) ) { //if paying an order
-			$this->_current_order = wc_get_order( $wp->query_vars['order-pay'] );
+		} elseif (isset($_POST['post_data'])) {
+			$this->_current_order = new SequraTempOrder($_POST['post_data']);
+		} elseif (isset($wp->query_vars['order-pay'])) { //if paying an order
+			$this->_current_order = wc_get_order($wp->query_vars['order-pay']);
 		} else {
 			$this->_current_order = new SequraTempOrder('');
 		}
 		// phpcs:enable
-		$this->_cart    = WC()->cart;
-		$this->_pm      = SequraPaymentGateway::get_instance();
+		$this->_cart = WC()->cart;
+		$this->_pm   = SequraPaymentGateway::get_instance();
 	}
 
 	/**
 	 * Build the order for Sequra
+	 *
 	 * @param mixed $state
 	 * @return mixed
 	 */
@@ -76,7 +79,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return void
 	 */
 	public function buildDeliveryReport() {
-		$this->_building_report = true;
+		 $this->_building_report = true;
 		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ), 10, 3 );
 		parent::buildDeliveryReport();
 		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'setOrdersMetaQuery' ) );
@@ -89,7 +92,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return void
 	 */
 	public function setPaymentMethod( $pm ) {
-		$this->_pm           = $pm;
+		$this->_pm = $pm;
 	}
 
 	/**
@@ -125,20 +128,20 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				home_url( '/' )
 			);
 			$ret['notification_parameters'] = array(
-				'order' => "".$this->get_order_id(),
+				'order'     => '' . $this->get_order_id(),
 				'signature' => self::sign( $this->get_order_id() ),
 				'result'    => '0',
 			);
 			$ret['return_url']              = add_query_arg(
-				['sq_product'=>'SQ_PRODUCT_CODE'],
+				array( 'sq_product' => 'SQ_PRODUCT_CODE' ),
 				$ret['notify_url']
 			);
-			$ret['events_webhook'] = array(
-				'url' => $ret['notify_url'],
+			$ret['events_webhook']          = array(
+				'url'        => $ret['notify_url'],
 				'parameters' => array(
 					'signature' => self::sign( 'webhook' . $this->get_order_id() ),
-					'order'  => '' . $this->get_order_id(),
-				)
+					'order'     => '' . $this->get_order_id(),
+				),
 			);
 		}
 
@@ -206,7 +209,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$data['currency']        = get_woocommerce_currency();
 		$data['cart_ref']        = $sequra_cart_info['ref'];
 		$data['created_at']      = $sequra_cart_info['created_at'];
-		$data['updated_at']      = date( 'c' );
+		$data['updated_at']      = gmdate( 'c' );
 		$data['gift']            = false;
 		$data['delivery_method'] = $this->deliveryMethod();
 		$data['items']           = $this->items();
@@ -298,7 +301,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		}
 		$packages = WC()->shipping->get_packages();
 		$package  = current( $packages );
-		if($package && isset($package['rates']) && isset($package['rates'][ current( $shipping_methods ) ])){
+		if ( $package && isset( $package['rates'] ) && isset( $package['rates'][ current( $shipping_methods ) ] ) ) {
 			return $package['rates'][ current( $shipping_methods ) ];
 		}
 	}
@@ -430,7 +433,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			} else {
 				$name   = $fee['name'];
 				$amount = $fee['line_total'];
-				if ( isset($fee['total_tax']) && $fee['total_tax'] ) {
+				if ( isset( $fee['total_tax'] ) && $fee['total_tax'] ) {
 					$amount += $fee['total_tax'];
 				}
 			}
@@ -453,13 +456,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				)
 			);
 		}
-		if(
+		if (
 			is_array( $this->_current_order->get_items() ) &&
 			count( $this->_current_order->get_items() )
 		) {
 			return $this->_current_order->get_items();
 		}
-		return ! is_null( WC()->cart ) ? WC()->cart->get_cart_contents() : [];
+		return ! is_null( WC()->cart ) ? WC()->cart->get_cart_contents() : array();
 	}
 
 	/**
@@ -473,7 +476,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		if ( is_callable( array( $cart_item, 'get_product' ) ) ) {
 			return $cart_item->get_product();
 		}
-		if ( isset( $cart_item['product_id'] ) && (int)$cart_item['product_id'] > 0 ) {
+		if ( isset( $cart_item['product_id'] ) && (int) $cart_item['product_id'] > 0 ) {
 			return new WC_Product( $cart_item['product_id'] );
 		}
 		return $this->_current_order->get_product_from_item( $cart_item );
@@ -507,10 +510,10 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	protected function feeHandlingOrDiscount( $name, $amount ) {
-		$item = array();
-		$item['type']      = $amount>0?'handling':'discount';
-		$item['reference'] = $name;
-		$item['name']      = $name;
+		$item                      = array();
+		$item['type']              = $amount > 0 ? 'handling' : 'discount';
+		$item['reference']         = $name;
+		$item['name']              = $name;
 		$item['tax_rate']          = 0;
 		$item['total_with_tax']    = self::integerPrice( $amount );
 		$item['total_without_tax'] = $item['total_with_tax'];
@@ -600,7 +603,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	public function getShippedOrderList() {
-		global $woocommerce;
+		 global $woocommerce;
 		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
 			return $this->getShippedOrderList_legacy();
 		}
@@ -707,7 +710,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			version_compare( $woocommerce->version, '3.0.0', '<' ) ||
 			is_null( $this->_current_order->get_date_completed() )
 		) {
-			return date( 'c', strtotime( $this->_current_order->completed_date ) );
+			return gmdate( 'c', strtotime( $this->_current_order->completed_date ) );
 		}
 		return $this->_current_order->get_date_completed()->date( 'c' );
 	}
@@ -720,7 +723,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @throws Exception When no city found.
 	 */
 	public function deliveryAddress() {
-		$data                   = array();
+		 $data                  = array();
 		$data['given_names']    = self::notNull( $this->getDeliveryField( 'shipping_first_name' ) );
 		$data['surnames']       = self::notNull( $this->getDeliveryField( 'shipping_last_name' ) );
 		$data['company']        = self::notNull( $this->getDeliveryField( 'shipping_company' ) );
@@ -824,6 +827,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$id   = -1;
 		if ( ! $this->_building_report ) {
 			$data['language_code'] = self::notNull( self::getCustomerLanguage() );
+			// phpcs:disable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders
 			if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 				$data['ip_number'] = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
 			} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
@@ -834,7 +838,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			if ( ! empty( $_SERVER['HTTP_USER_AGENT'] ) ) {
 				$data['user_agent'] = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
 			}
-
+			// phpcs:enable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders
 			$data['logged_in'] = is_user_logged_in();
 			$id                = $data['logged_in'] ? get_current_user_id() : -1;
 		}
@@ -923,7 +927,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			}
 			$order['currency']   = $prev_order->get_currency();
 			$date                = strtotime( $post->post_date );
-			$order['created_at'] = date( 'c', $date );
+			$order['created_at'] = gmdate( 'c', $date );
 			$orders[]            = $order;
 		}
 
@@ -1048,7 +1052,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$this->_current_order = new WC_Order( $post->ID );
 			$date                 = strtotime( $post->post_date );
 			$stat                 = array(
-				'completed_at'       => self::dateOrBlank( date( 'c', $date ) ),
+				'completed_at'       => self::dateOrBlank( gmdate( 'c', $date ) ),
 				'merchant_reference' => $this->orderMerchantReference(),
 				'currency'           => $this->get_order_currency(),
 			);
@@ -1132,15 +1136,15 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	public static function platform() {
-		$sql = "show variables like 'version';";
+		 $sql = "show variables like 'version';";
 		global $wpdb;
 		// phpcs:disable
-		$db_version = $wpdb->get_var( $sql );
+		$db_version = $wpdb->get_var($sql);
 		// phpcs:enable
 		$data = array(
 			'name'           => 'WooCommerce',
 			'version'        => self::notNull( WOOCOMMERCE_VERSION ),
-			'plugin_version' => 'fc'.get_option( 'sequracheckout_version' ),
+			'plugin_version' => 'fc' . get_option( 'sequracheckout_version' ),
 			'php_version'    => phpversion(),
 			'php_os'         => PHP_OS,
 			'uname'          => php_uname(),
@@ -1157,7 +1161,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return int
 	 */
 	protected function get_order_id() {
-		global $woocommerce;
+		 global $woocommerce;
 		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
 			return $this->_current_order->id;
 		}

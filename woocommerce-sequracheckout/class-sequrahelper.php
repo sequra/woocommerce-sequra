@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Helper class.
  *
@@ -9,6 +10,7 @@
  * SequraHelper class
  */
 class SequraHelper {
+
 
 	const ISO8601_PATTERN = '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
 
@@ -52,9 +54,9 @@ class SequraHelper {
 	 */
 	public static $instance = null;
 
-	public static function get_instance($settings = null) {
+	public static function get_instance( $settings = null ) {
 		if ( ! self::$instance ) {
-			self::$instance = new SequraHelper($settings);
+			self::$instance = new SequraHelper( $settings );
 		}
 		return self::$instance;
 	}
@@ -65,7 +67,7 @@ class SequraHelper {
 	 * @param array $settings Payment method settings.
 	 */
 	public function __construct( $settings = null ) {
-		$this->settings      = $settings ? $settings : get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
+		$this->settings      = $settings ? $settings : get_option( 'woocommerce_sequra_settings', self::get_empty_core_settings() );
 		$this->identity_form = null;
 		$this->dir           = dirname( __FILE__ ) . '/';
 		require_once $this->dir . 'vendor/autoload.php';
@@ -74,7 +76,7 @@ class SequraHelper {
 		}
 	}
 
-	public function getMerchantRef(){
+	public function get_merchant_ref() {
 		return apply_filters(
 			'woocommerce_sequra_get_merchant_ref',
 			isset( $this->settings['merchantref'] ) ? $this->settings['merchantref'] : '',
@@ -142,7 +144,7 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public static function is_order_review() {
-		return is_ajax() && $_REQUEST['wc-ajax'] === "update_order_review";
+		return is_ajax() && isset( $_REQUEST['wc-ajax'] ) && $_REQUEST['wc-ajax'] === 'update_order_review';
 	}
 
 	/**
@@ -155,8 +157,7 @@ class SequraHelper {
 			sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
 		$is_checkout = 'admin-ajax.php' === basename( $script_name ) ||
 			get_the_ID() == wc_get_page_id( 'checkout' ) ||
-			(
-				isset( $_SERVER['REQUEST_METHOD'] ) &&
+			( isset( $_SERVER['REQUEST_METHOD'] ) &&
 				'POST' === $_SERVER['REQUEST_METHOD']
 			);
 		return $is_checkout;
@@ -177,15 +178,15 @@ class SequraHelper {
 	 *
 	 * @return boolean
 	 */
-	public function is_valid_auth(){
-		if( is_null($this->valid_auth) && ! $this->is_ajax_request() && is_admin() ){
+	public function is_valid_auth() {
+		if ( is_null( $this->valid_auth ) && ! $this->is_ajax_request() && is_admin() ) {
 			$this->valid_auth = $this->get_client()->isValidAuth();
 			update_option(
 				'SEQURA_VALID_AUTH',
 				$this->valid_auth
 			);
 		}
-		return !!get_option('SEQURA_VALID_AUTH',true);
+		return ! ! get_option( 'SEQURA_VALID_AUTH', true );
 	}
 
 	/**
@@ -210,7 +211,7 @@ class SequraHelper {
 	public function get_credit_agreements( $amount ) {
 		return $this->get_client()->getCreditAgreements(
 			$this->get_builder()->integerPrice( $amount ),
-			$this->getMerchantRef()
+			$this->get_merchant_ref()
 		);
 	}
 
@@ -226,9 +227,9 @@ class SequraHelper {
 		if ( ! class_exists( '\Sequra\PhpClient\Client' ) ) {
 			require_once $this->dir . 'lib/\Sequra\PhpClient\Client.php';
 		}
-		\Sequra\PhpClient\Client::$endpoint   = SequraPaymentGateway::$endpoints[ isset($this->settings['env'])?$this->settings['env']:1 ];
-		\Sequra\PhpClient\Client::$user       = isset($this->settings['user'])?$this->settings['user']:'';
-		\Sequra\PhpClient\Client::$password   = isset($this->settings['password'])?$this->settings['password']:'';
+		\Sequra\PhpClient\Client::$endpoint   = SequraPaymentGateway::$endpoints[ isset( $this->settings['env'] ) ? $this->settings['env'] : 1 ];
+		\Sequra\PhpClient\Client::$user       = isset( $this->settings['user'] ) ? $this->settings['user'] : '';
+		\Sequra\PhpClient\Client::$password   = isset( $this->settings['password'] ) ? $this->settings['password'] : '';
 		\Sequra\PhpClient\Client::$user_agent = 'cURL WooCommerce ' . WOOCOMMERCE_VERSION . ' php ' . phpversion();
 		$this->client                         = new \Sequra\PhpClient\Client();
 
@@ -249,7 +250,7 @@ class SequraHelper {
 			require_once $this->dir . 'class-sequrabuilderwc.php';
 		}
 		$builder_class = apply_filters( 'sequra_set_builder_class', 'SequraBuilderWC' );
-		$this->builder = new $builder_class( $this->getMerchantRef(), $order );
+		$this->builder = new $builder_class( $this->get_merchant_ref(), $order );
 
 		return $this->builder;
 	}
@@ -261,21 +262,23 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function get_approval( $order ) {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		$client  = $this->get_client();
 		$builder = $this->get_builder( $order );
-		if ( isset( $_POST['signature'] ) &&
+		if (
+			isset( $_POST['signature'] ) &&
 			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )
 		) {
 			http_response_code( 498 );
 			die( 'Not valid signature' );
 		}
-		$sq_state = isset( $_POST['sq_state'] )? $_POST['sq_state'] : 'approved' ;
 		$data      = $builder->build( 'confirmed' );
 		$order_ref = isset( $_POST['order_ref'] ) ? sanitize_text_field( wp_unslash( $_POST['order_ref'] ) ) : '';
 		$uri       = '/' . $order_ref;
 		$client->updateOrder( $uri, $data );
 		update_post_meta( (int) $order->get_id(), 'Transaction ID', $uri );
 		update_post_meta( (int) $order->get_id(), 'Transaction Status', $client->getStatus() );
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		/*TODO: Store more information for later use in stats, like browser*/
 		if ( ! $client->succeeded() ) {
 			http_response_code( 410 );
@@ -297,7 +300,9 @@ class SequraHelper {
 	public function set_on_hold( $order ) {
 		$client  = $this->get_client();
 		$builder = $this->get_builder( $order );
-		if ( isset( $_POST['signature'] ) &&
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		if (
+			isset( $_POST['signature'] ) &&
 			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )
 		) {
 			http_response_code( 498 );
@@ -309,6 +314,7 @@ class SequraHelper {
 		$client->updateOrder( $uri, $data );
 		update_post_meta( (int) $order->get_id(), 'Transaction ID', $uri );
 		update_post_meta( (int) $order->get_id(), 'Transaction Status', 'in review' );
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		/*TODO: Store more information for later use in stats, like browser*/
 		if ( ! $client->succeeded() ) {
 			http_response_code( 410 );
@@ -380,12 +386,13 @@ class SequraHelper {
 	 * @return string
 	 */
 	public function get_identity_form( array $options, WC_Order $wc_order = null ) {
-		if ( is_null( $this->identity_form[$options[ 'product' ].'_'.$options[ 'campaign' ]] ) && $this->start_solicitation( $wc_order )) {
-			$this->identity_form[$options[ 'product' ].'_'.$options[ 'campaign' ]] = $this->get_client()->getIdentificationForm(
-				$this->get_client()->getOrderUri(), $options
+		if ( is_null( $this->identity_form[ $options['product'] . '_' . $options['campaign'] ] ) && $this->start_solicitation( $wc_order ) ) {
+			$this->identity_form[ $options['product'] . '_' . $options['campaign'] ] = $this->get_client()->getIdentificationForm(
+				$this->get_client()->getOrderUri(),
+				$options
 			);
 		}
-		return $this->identity_form[$options[ 'product' ].'_'.$options[ 'campaign' ]];
+		return $this->identity_form[ $options['product'] . '_' . $options['campaign'] ];
 	}
 	/**
 	 * Template loader function
@@ -412,7 +419,7 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function is_elegible_for_service_sale() {
-		if( ! WC()->cart ) {
+		if ( ! WC()->cart ) {
 			return false;
 		}
 		$elegible       = false;
@@ -434,17 +441,17 @@ class SequraHelper {
 	 */
 	public function is_elegible_for_product_sale() {
 		global $wp;
-		if( ! WC()->cart ) {
+		if ( ! WC()->cart ) {
 			return false;
 		}
 		$elegible = true;
 		// Only reject if all products are virtual (don't need shipping).
-		if( isset( $wp->query_vars['order-pay'] ) ) { //if paying an order
-			$order     = wc_get_order( $wp->query_vars['order-pay'] );
+		if ( isset( $wp->query_vars['order-pay'] ) ) { // if paying an order
+			$order = wc_get_order( $wp->query_vars['order-pay'] );
 			if ( ! $order->needs_shipping_address() ) {
 				$elegible = false;
 			}
-		} elseif ( ! WC()->cart->needs_shipping() ) { //If paying cart
+		} elseif ( ! WC()->cart->needs_shipping() ) { // If paying cart
 			$elegible = false;
 		}
 		return apply_filters( 'woocommerce_cart_is_elegible_for_product_sale', $elegible );
@@ -456,7 +463,7 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function is_available_in_checkout() {
-		if( ! WC()->cart ) {
+		if ( ! WC()->cart ) {
 			return false;
 		}
 		$return = true;

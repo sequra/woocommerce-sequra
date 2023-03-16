@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Part payment teaser template.
  *
@@ -20,10 +21,10 @@
 		}
 
 		<?php if ( isset( $atts['dest'] ) && '' !== trim( $atts['dest'] ) ) { ?>
-		var custom_dest = '<?php echo esc_js( $atts['dest'] ); ?>'.replace(/\&gt\;/g, ">");
-		if (jQuery(custom_dest).is(':visible')) {
-			dest = custom_dest;
-		}
+			var custom_dest = '<?php echo esc_js( $atts['dest'] ); ?>'.replace(/\&gt\;/g, ">");
+			if (jQuery(custom_dest).is(':visible')) {
+				dest = custom_dest;
+			}
 		<?php } ?>
 		SequraHelper.waitForElement(the_price_container).then(function() {
 			SequraHelper.waitForElement(dest).then(function() {
@@ -43,7 +44,7 @@
 		Sequra.onLoad(Sequra.refreshComponents);
 	}
 
-	document.addEventListener("DOMContentLoaded", function () {
+	document.addEventListener("DOMContentLoaded", function() {
 		displaySequra<?php echo esc_js( $product ); ?>Teaser(
 			'<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">"),
 			'<?php echo esc_js( $product ); ?>',
@@ -54,5 +55,4 @@
 			.on('hide_variation', updateSequra<?php echo esc_js( $product ); ?>Teaser)
 			.on('show_variation', updateSequra<?php echo esc_js( $product ); ?>Teaser);
 	});
-
 </script>

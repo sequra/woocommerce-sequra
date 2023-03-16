@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SeQura Reporter class.
  *
@@ -9,6 +10,7 @@
  * SeQura Rrporter Class
  * */
 class SequraReporter {
+
 	/**
 	 * Send delivery report, retunr number of orders added in the report or false.
 	 *
@@ -38,7 +40,7 @@ class SequraReporter {
 	 */
 	public static function set_orders_as_sent( $ids ) {
 		foreach ( $ids as $id ) {
-			update_post_meta( (int) $id, '_sent_to_sequra', date( 'c' ) );
+			update_post_meta( (int) $id, '_sent_to_sequra', gmdate( 'c' ) );
 		}
 	}
 }
