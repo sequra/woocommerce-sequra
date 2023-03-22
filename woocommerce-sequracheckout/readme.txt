@@ -1,6 +1,6 @@
-=== Pasarela de pago para SeQura ===
+=== Pasarela de pago para seQura ===
 Contributors: sequradev
-Tags: woocommerce, payment, gateway, BNPL
+Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
 Requires at least: 4.0
 Tested up to: 6.1
 Stable tag: 2.0.0
@@ -9,7 +9,76 @@ License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
-WooCommerce plugin that allows you to make payments with [SeQura](https://sequra.es).
+WooCommerce plugin that allows you to make payments with [seQura](https://sequra.es).
+
+seQura is the flexible payment platform that will help your business improve conversion and recurrence. 
+The easiest, safest, and quickest way for your customers to pay on installments.
+
++6.000 e-commerce and +1.5 million delight shoppers already use seQura. Are you still thinking about it?
+
+> Flexible payment solutions adapted to your business.
+
+= FEATURES =
+
+Widest flexible payment solutions in the market:
+* Buy now pay later 
+* Pay in 3, no interest
+* Installments, up to 24 months
+* Flexi, combine interest-free bnpl with long-term financing in a single purchase experience
+
+Your customers in good hands:
+* Cost transparency and clarity
+* Local support teams to deliver the best shopper experience
+* Secure data, we don’t share your data with anyone or use your information to sell our own or third-party products 
+
+
+Obsessed with conversion and recurrence
+* We adapt to your business, solutions for every sector and buyer profile
+* The highest acceptance rate in Southern Europe thanks to our own risk algorithm, created and optimized for the local market
+* Instant approval. A frictionless credit-purchase experience, buy in seconds without document uploads
+* In-App recommendations to increase shopper conversion in your store
+* seQura marketing collateral to support your campaigns
+
+= Benefits for customers =
+
+* Widest range of flexible payment solutions available on the market, up to 4 different solutions to pay as you want.
+
+* Access to credit with no paperwork, just complete 5 fields to be instantly approved
+
+* Security and privacy, we do not sell your personal data to third parties nor share with other companies
+
+
+
+== Installation ==
+
+= Minimum Requirements =
+
+* PHP version 5.9 or greater
+* PHP extensions enabled: cURL, JSON
+* WordPress 4.0 or greater
+* WooCommerce 3.0 or greater
+* Merchant account at seQura, [sign up here](https://en.sequra.com/en/contact)
+
+= Automatic installation =
+
+1. Install the plugin via Plugins -> New plugin. Search for 'seQura'.
+2. Activate the 'seQura' plugin through the 'Plugins' menu in WordPress
+3. Set your seQura credentials at WooCommerce -> Settings -> payments -> seQura
+4. You're done, the seQura payment methods should be visible in the checkout of your WooCommerce.
+
+= Manual installation =
+
+1. Unpack the download package
+2. Upload the directory 'woocommerce-sequracheckout' to the `/wp-content/plugins/` directory
+3. Activate the 'seQura' plugin through the 'Plugins' menu in WordPress
+4. Set your seQura credentials at WooCommerce -> Settings -> payments -> seQura
+5. You're done, the seQura payment methods should be visible in the checkout of your WooCommerce.
+
+Please contact sat@sequra.com if you need help installing the seQura WooCommerce plugin.
+
+= Updating =
+
+Automatic updates should work like a charm; as always though, ensure you backup your site just in case.
 
 Contributors:
 == Changelog ==
