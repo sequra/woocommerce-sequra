@@ -138,7 +138,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
 				<p><?php echo wp_kses(
-					__( 'Provided SeQura credentials are not valid for the selected environment', 'sequra' )
+					__( 'Provided SeQura credentials are not valid for the selected environment', 'sequra' ), array()
 				); ?></p>
 			</div>
 		<?php } ?>

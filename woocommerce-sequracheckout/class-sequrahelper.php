@@ -179,14 +179,14 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function is_valid_auth() {
-		if ( is_null( $this->valid_auth ) && ! $this->is_ajax_request() && is_admin() ) {
+		if ( (is_null( $this->valid_auth ) || ! $this->valid_auth) && ! $this->is_ajax_request() && is_admin() ) {
 			$this->valid_auth = $this->get_client()->isValidAuth();
 			update_option(
 				'SEQURA_VALID_AUTH',
 				$this->valid_auth
 			);
 		}
-		return ! ! get_option( 'SEQURA_VALID_AUTH', true );
+		return ! ! get_option( 'SEQURA_VALID_AUTH' );
 	}
 
 	/**
