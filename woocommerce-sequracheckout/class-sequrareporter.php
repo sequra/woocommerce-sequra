@@ -7,12 +7,12 @@
  */
 
 /**
- * SeQura Rrporter Class
+ * SeQura Reporter Class
  * */
 class SequraReporter {
 
 	/**
-	 * Send delivery report, retunr number of orders added in the report or false.
+	 * Send delivery report, return number of orders added in the report or false.
 	 *
 	 * @return bool|int
 	 */

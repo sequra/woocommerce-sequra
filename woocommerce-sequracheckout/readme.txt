@@ -9,22 +9,25 @@ License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
-WooCommerce plugin that allows you to make payments with [seQura](https://sequra.es).
 
 seQura is the flexible payment platform that will help your business improve conversion and recurrence. 
 The easiest, safest, and quickest way for your customers to pay on installments.
 
 +6.000 e-commerce and +1.5 million delight shoppers already use seQura. Are you still thinking about it?
 
-> Flexible payment solutions adapted to your business.
+This WooCommerce plugin allows you to make payments with [seQura](https://sequra.es).
 
-= FEATURES =
+
+
+= Benefits for merchants =
+
+> Flexible payment solutions adapted to your business.
 
 Widest flexible payment solutions in the market:
 * Buy now pay later 
 * Pay in 3, no interest
 * Installments, up to 24 months
-* Flexi, combine interest-free bnpl with long-term financing in a single purchase experience
+* Flexi, combines interest-free bnpl with long-term financing in a single purchase experience
 
 Your customers in good hands:
 * Cost transparency and clarity
@@ -33,9 +36,9 @@ Your customers in good hands:
 
 
 Obsessed with conversion and recurrence
-* We adapt to your business, solutions for every sector and buyer profile
+* We adapt to your business, solutions for every sector, and buyer profile
 * The highest acceptance rate in Southern Europe thanks to our own risk algorithm, created and optimized for the local market
-* Instant approval. A frictionless credit-purchase experience, buy in seconds without document uploads
+* Instant approval. A frictionless credit-purchase experience, buy-in seconds without document uploads
 * In-App recommendations to increase shopper conversion in your store
 * seQura marketing collateral to support your campaigns
 
@@ -48,6 +51,23 @@ Obsessed with conversion and recurrence
 * Security and privacy, we do not sell your personal data to third parties nor share with other companies
 
 
+== Frequently Asked Questions ==
+
+= I can't install the plugin, the plugin is displayed incorrectly =
+
+Please temporarily enable the [WordPress Debug Mode](https://codex.wordpress.org/Debugging_in_WordPress). Edit your `wp-config.php` and set the constants `WP_DEBUG` and `WP_DEBUG_LOG` to `true` and try
+it again. When the plugin triggers an error, WordPress will log the error to the log file `/wp-content/debug.log`. Please check this file for errors. When done, don't forget to turn off
+the WordPress debug mode by setting the two constants `WP_DEBUG` and `WP_DEBUG_LOG` back to `false`.
+
+= I get a white screen when opening ... =
+
+Most of the time a white screen means a PHP error. Because PHP won't show error messages on default for security reasons, the page is white. Please turn on the WordPress Debug Mode to turn on PHP error messages (see the previous answer).
+
+== Screenshots ==
+1. Líder en pagos flexibles para la conversión y recurrencia
+2. Ofrece a tus clientes 4 métodos de pago flexibles
+3. Impulsa la rentabilidad de tu e-commerce
+4. seQura
 
 == Installation ==
 
