@@ -1,0 +1,44 @@
+{
+	"name": "WordPress",
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "web",
+	"workspaceFolder": "/var/www/html/",
+
+	// Features to add to the dev container. More info: https://containers.dev/implementors/features.
+	"features": {
+	},
+
+	"customizations": {
+		"vscode": {		
+			"extensions": [
+				"xdebug.php-pack",
+				"yogensia.searchwpdocs",
+				"valeryanm.vscode-phpsab",
+				"johnbillion.vscode-wordpress-hooks",
+				"dbaeumer.vscode-eslint",
+				"neilbrayfield.php-docblocker",
+				"shevaua.phpcs",
+				"ms-vscode.makefile-tools"
+			]
+		}
+	},
+
+	// For use with PHP or Apache (e.g.php -S localhost:8080 or apache2ctl start)
+	"forwardPorts": [
+		80,
+		3306
+	],
+	"postCreateCommand": "/tmp/setup_woocommerce.sh > /tmp/setup_woocommerce.log",
+	
+	"portsAttributes": {
+		"3306": {
+			"label": "Database (internal)"
+		},
+		"80": {
+			"label": "WordPress"
+		}
+	},
+	// "postStartCommand": "service apache2 start"
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
