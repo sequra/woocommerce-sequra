@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SeQura Gateway class.
  *
@@ -9,6 +10,7 @@
  * Pasarela SeQura Gateway Class
  * */
 class SequraPaymentGateway extends WC_Payment_Gateway {
+
 	/**
 	 * Endpoints
 	 *
@@ -52,25 +54,25 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		do_action( 'woocommerce_sequra_before_load', $this );
+		 do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
 
-		$this->method_title       = __( 'SeQura Checkout', 'wc_sequra' );
-		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'wc_sequra' );
+		$this->method_title       = __( 'SeQura Checkout', 'sequra' );
+		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'sequra' );
 		$this->supports           = array(
 			'products',
 		);
 
 		// Load the settings.
 		$this->init_settings();
-		$this->helper        = SequraHelper::get_instance( $this->settings );
-		if( is_admin() && ! $this->helper->is_ajax_request()  && isset($_GET['section']) && $_GET['section'] == 'sequra' ){
+		$this->helper = SequraHelper::get_instance( $this->settings );
+		if ( is_admin() && ! $this->helper->is_ajax_request() && isset( $_GET['section'] ) && $_GET['section'] == 'sequra' ) {
 			// Load the form fields.
 			$this->is_valid_auth = $this->helper->is_valid_auth();
 			$this->init_form_fields();
 		}
-		$this->enabled    = isset($this->settings['enabled'])?$this->settings['enabled']:'';
-		$this->title      = isset($this->settings['title'])?$this->settings['title']:'';
+		$this->enabled    = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : '';
+		$this->title      = isset( $this->settings['title'] ) ? $this->settings['title'] : '';
 		$this->has_fields = true;
 
 		// Logs.
@@ -88,13 +90,12 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				)
 			);
 			add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_response' ) );
-			add_filter( 'woocommerce_thankyou_order_received_text' , array( $this, 'order_received_text' ), 10, 2 );
+			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
 			add_filter( 'woocommerce_order_get_payment_method_title', array( $this, 'order_get_payment_method_title' ), 10, 2 );
 			add_action( 'woocommerce_after_checkout_form', array( $this, 'jscript_checkout' ) );
 			do_action( 'woocommerce_sequra_loaded', $this );
 			self::$initialized = true;
 		}
-
 	}
 	/**
 	 * Get remote config object
@@ -102,7 +103,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return 
 	 */
 	public function get_remote_config() {
-		if( is_null( $this->remote_config ) ) {
+		if ( is_null( $this->remote_config ) ) {
 			$this->remote_config = new SequraRemoteConfig( $this->settings );
 		}
 		return $this->remote_config;
@@ -121,10 +122,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Initialize Gateway Settings Form Fields
 	 */
 	public function init_form_fields() {
-		if ( ! class_exists( 'SequraConfigFromFields' ) ) {
+		if ( ! class_exists( 'SequraConfigFormFields' ) ) {
 			require_once WC_SEQURA_PLG_PATH . 'class-sequraconfigformfields.php';
 		}
-		$sequraconfigfields = new SequraConfigFromFields( $this );
+		$sequraconfigfields = new SequraConfigFormFields( $this );
 		$sequraconfigfields->add_form_fields();
 	}
 
@@ -132,21 +133,22 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Admin Panel Options
 	 * - Options for bits like 'title' and availability on a country-by-country basis
 	 * */
-	public function admin_options() {
-		?>
-		<h3><?php esc_html_e( 'Configuración Sequra', 'wc_sequra' ); ?></h3>
-		<?php if( !$this->is_valid_auth ) { ?>
+	public function admin_options() {       ?>
+		<h3><?php esc_html_e( 'Configuración Sequra', 'sequra' ); ?></h3>
+		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
-				<p><?php _e('Provided SeQura credentials are not valid for the selected environment', 'wc_sequra') ?></p>
+				<p><?php echo wp_kses(
+					__( 'Provided SeQura credentials are not valid for the selected environment', 'sequra' ), array()
+				); ?></p>
 			</div>
 		<?php } ?>
 		<p>
-		<?php
-		echo wp_kses(
-			__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'wc_sequra' ),
-			array( 'a' => array( 'href' ) )
-		);
-		?>
+			<?php
+			echo wp_kses(
+				__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'sequra' ),
+				array( 'a' => array( 'href' ) )
+			);
+			?>
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><!--/.form-table-->
@@ -183,7 +185,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return boolean
 	 */
 	public function is_available_in_checkout() {
-		if( ! WC()->cart ) {
+		if ( ! WC()->cart ) {
 			return false;
 		}
 		if ( 'yes' === $this->settings['enable_for_virtual'] ) {
@@ -215,14 +217,14 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * */
 	public function payment_fields() {
 		wp_enqueue_style( 'sequracheckout' );
-		if( $_SERVER['REQUEST_METHOD'] != 'POST' ) {
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] != 'POST' ) {
 			return;
 		}
 		$payment_methods = $this->get_remote_config()->get_available_payment_methods();
-		$payment_fields = apply_filters('woocommerce_sequra_payment_fields', array(), $this);
+		$payment_fields  = apply_filters( 'woocommerce_sequra_payment_fields', array(), $this );
 		foreach ( $payment_methods as $method ) {
-			$sq_product_campaign = $this->get_remote_config()->build_unique_product_code( $method ); //Used in the template.
-			require( $this->helper->template_loader( 'payment-fields' ));
+			$sq_product_campaign = $this->get_remote_config()->build_unique_product_code( $method ); // Used in the template.
+			require $this->helper->template_loader( 'payment-fields' );
 		}
 		$this->jscript_checkout();
 	}
@@ -232,7 +234,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function jscript_checkout() {
-		require( $this->helper->template_loader( 'checkout-script' ));
+		require $this->helper->template_loader( 'checkout-script' );
 	}
 	/**
 	 * Undocumented function
@@ -241,25 +243,27 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		$order = new WC_Order( $order_id );
+		$order   = new WC_Order( $order_id );
 		$product = $campaign = null;
-		if( isset( $_POST['sq_product_campaign'] ) ){
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['sq_product_campaign'] ) ) {
 			update_post_meta(
 				(int) $order->get_id(),
 				'_sq_method_title',
-				$this->get_remote_config()->get_title_from_unique_product_code( $_POST['sq_product_campaign'] )
+				$this->get_remote_config()->get_title_from_unique_product_code( sanitize_text_field( $_POST['sq_product_campaign'] ) )
 			);
-			$tmp = explode( '_', $_POST['sq_product_campaign'] );
-			$product = $tmp[0];
-			$campaign = isset($tmp[1])?$tmp[1]:'';
+			$tmp      = explode( '_', sanitize_text_field( $_POST['sq_product_campaign'] ) );
+			$product  = $tmp[0];
+			$campaign = isset( $tmp[1] ) ? $tmp[1] : '';
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		do_action( 'woocommerce_sequracheckout_process_payment', $order, $this );
 		$ret = array(
 			'result'   => 'success',
 			'redirect' => add_query_arg(
 				array(
 					'sq_product'  => $product,
-					'sq_campaign' => $campaign
+					'sq_campaign' => $campaign,
 				),
 				$order->get_checkout_payment_url( true )
 			),
@@ -279,7 +283,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		echo '<p>' . wp_kses_post(
 			__(
 				'Thank you for your order, please click the button below to pay with SeQura.',
-				'wc_sequra'
+				'sequra'
 			)
 		) . '</p>';
 		$options       = $this->get_valid_product_campaign();
@@ -296,15 +300,14 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function get_valid_product_campaign() {
-		$product  = isset( $_GET['sq_product'] ) ? $_GET['sq_product'] : '';
-		$campaign = isset( $_GET['sq_campaign'] )? $_GET['sq_campaign'] : '';
+		$product  = isset( $_GET['sq_product'] ) ? sanitize_key( $_GET['sq_product'] ) : '';
+		$campaign = isset( $_GET['sq_campaign'] ) ? sanitize_key( $_GET['sq_campaign'] ) : '';
 		return array_reduce(
-			$this->get_remote_config()->get_merchant_payment_methods()?:[],
+			$this->get_remote_config()->get_merchant_payment_methods() ?: array(),
 			function ( $ret, $method ) use ( $product, $campaign ) {
 				if ( $ret['product'] == '' || $method['product'] === $product ) {
-					$ret['product'] = $method['product'];
-					$ret['campaign'] = (
-						$method['campaign'] === $campaign ?
+					$ret['product']  = $method['product'];
+					$ret['campaign'] = ( $method['campaign'] === $campaign ?
 						$method['campaign'] : $ret['campaign']
 					);
 				}
@@ -323,6 +326,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return mixed
 	 */
 	public function check_response() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_REQUEST['order'] ) ) {
 			return;
 		}
@@ -333,6 +337,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		if ( isset( $_REQUEST['signature'] ) ) {
 			return $this->check_ipn( $order );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		$url = $this->get_return_url( $order );
 		if ( ! $order->is_paid() ) {
 			wc_add_notice(
@@ -340,20 +345,21 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					'<p>SeQura está procesando tu solicitud.</p>' .
 					'<p>En unos minutos <b>recibirás un email con respuesta a tu solicitud</b>. Es posible que SeQura contacte contigo antes para validar algunos datos.</p>' .
 					'<p><b>Gracias por comprar con SeQura</b>',
-					'wc_sequra'
+					'sequra'
 				),
 				'notice'
 			);
 		}
 		wp_safe_redirect( $url, 302 );
+		exit;
 	}
 
 	function order_received_text( $str, $order ) {
-		$ret = wc_print_notices(true);
-		return $ret.$str;
+		$ret = wc_print_notices( true );
+		return $ret . $str;
 	}
 
-//PRIVATE METHODS.
+	// PRIVATE METHODS.
 	/**
 	 * Undocumented function
 	 *
@@ -361,10 +367,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return mixed
 	 */
 	protected function check_ipn( WC_Order $order ) {
-		$product_code = isset( $_POST['product_code'] ) ? wp_unslash( $_POST['product_code'] ) : '';
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		do_action( 'woocommerce_' . $this->id . '_process_payment', $order, $this );
-		$sq_state = isset( $_POST['sq_state'] )? $_POST['sq_state'] : 'approved' ;
-		switch ($sq_state) {
+		$sq_state = isset( $_POST['sq_state'] ) ? sanitize_text_field($_POST['sq_state']) : 'approved';
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		switch ( $sq_state ) {
 			case 'needs_review':
 				$hold = apply_filters(
 					'woocommerce_' . $this->id . '_hold_payment',
@@ -376,10 +383,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					// Payment pedimd.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
 					$order->add_order_note(
-						sprintf( __( 'Payment is in review by SeQura.(%s)', 'wc_sequra' ), $title )
+						sprintf( __( 'Payment is in review by SeQura.(%s)', 'sequra' ), $title )
 					);
 				}
-			break;
+				break;
 			case 'approved':
 				$approval = apply_filters(
 					'woocommerce_' . $this->id . '_process_payment',
@@ -390,7 +397,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				if ( $approval ) {
 					// Payment completed.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
-					$order->add_order_note( sprintf( __( 'Payment accepted by SeQura.(%s)', 'wc_sequra' ), $title ) );
+					$order->add_order_note( sprintf( __( 'Payment accepted by SeQura.(%s)', 'sequra' ), $title ) );
 					$this->helper->add_payment_info_to_post_meta( $order );
 					$order->payment_complete();
 				}
@@ -407,29 +414,37 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 */
 	protected function check_webhook( WC_Order $order ) {
 		$builder = $this->helper->get_builder( $order );
-		if ( isset( $_POST['m_signature'] ) &&
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		if (
+			isset( $_POST['m_signature'] ) &&
 			$builder->sign( 'webhook' . $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['m_signature'] ) )
 		) {
 			http_response_code( 498 );
 			die( 'Not valid signature' );
 		}
 
-		$event = isset( $_POST['event'] )? $_POST['event'] : 'approved' ;
+		$event = isset( $_POST['event'] ) ? sanitize_key( $_POST['event'] ) : 'approved';
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
-		switch ($event) {
+		switch ( $event ) {
 			case 'cancelled':
-				$order->add_order_note( sprintf(
-					__( 'The payment was NOT approved (%s)', 'wc_sequra' ),
-					$title
-				));
-				$order->set_status( 'failed' );
+				$order->add_order_note(
+					sprintf(
+						__( 'The payment was NOT approved (%s)', 'sequra' ),
+						$title
+					)
+				);
+				$order->update_status(
+					'cancelled',
+					__( 'Order cancelled payment could not be approved.', 'sequra' )
+				);
 				$order->save();
 				break;
 			case 'risk_assessment':
 				$this->setRiskLevel( $order );
 				break;
 			default:
-				//No implemented should cancel the order in sequra and then if not sent
+				// No implemented should cancel the order in sequra and then if not sent
 				http_response_code( 409 );
 				die( 'Not implemented' );
 		}
@@ -437,18 +452,19 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		exit();
 	}
 
-	private function setRiskLevel( $order )
-	{
-		$risk_level = isset( $_POST['risk_level'] )? $_POST['risk_level'] : '' ;
-		switch ($risk_level) {
+	private function setRiskLevel( $order ) {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		$risk_level = isset( $_POST['risk_level'] ) ? sanitize_key( $_POST['risk_level'] ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		switch ( $risk_level ) {
 			case 'low_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is low', 'wc_sequra' ) );
+				$order->add_order_note( __( 'The risk assesment for this order is low', 'sequra' ) );
 				break;
 			case 'high_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is HIGH!!', 'wc_sequra' ) );
+				$order->add_order_note( __( 'The risk assesment for this order is HIGH!!', 'sequra' ) );
 				break;
 			case 'unknown_risk':
-				$order->add_order_note( __( 'The risk assesment for this order in progress', 'wc_sequra' ) );
+				$order->add_order_note( __( 'The risk assesment for this order in progress', 'sequra' ) );
 				break;
 		}
 	}
@@ -457,8 +473,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return float
 	 */
-	protected function get_order_total() {
-
+	protected function get_order_total() { 
 		$total    = 0;
 		$order_id = absint( get_query_var( 'order-pay' ) );
 

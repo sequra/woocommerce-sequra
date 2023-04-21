@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SeQura gateway file.
  *
@@ -9,10 +10,10 @@
  * Run once on plugin activation
  */
 function sequra_activation() {
-	//Place in first place.
+	// Place in first place.
 	$gateway_order = (array) get_option( 'woocommerce_gateway_order' );
 	$order         = array(
-		'sequracheckout'  => 0,
+		'sequracheckout' => 0,
 	);
 	if ( is_array( $gateway_order ) && count( $gateway_order ) > 0 ) {
 		$loop = 3;
@@ -24,8 +25,8 @@ function sequra_activation() {
 	update_option( 'woocommerce_gateway_order', $order );
 	update_option( 'woocommerce_default_gateway', 'sequra_i' );
 	// Schedule a daily event for sending delivery report on plugin activation.
-	$random_offset = rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
-	$tomorrow      = date( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
+	$random_offset = wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
+	$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
 	$time          = $random_offset + strtotime( $tomorrow );
 	add_option( 'woocommerce-sequra-deliveryreport-time', $time );
 	wp_schedule_event( $time, 'daily', 'sequra_send_daily_delivery_report' );
@@ -41,9 +42,11 @@ add_action( 'sequra_upgrade_if_needed', 'sequra_upgrade_if_needed' );
 function sequra_upgrade_if_needed() {
 	$current = get_option( 'sequracheckout_version' );
 	if ( version_compare( $current, SEQURACHECKOUT_VERSION, '<' ) ) {
+		// phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
 		foreach ( glob( dirname( __FILE__ ) . '/upgrades/*.php' ) as $filename ) {
 			include $filename;
 		}
+		// phpcs:enable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
 		do_action(
 			'sequracheckout_upgrade',
 			array(
@@ -139,7 +142,7 @@ add_action( 'sequra_upgrade_if_needed', 'sequrapayment_upgrade_if_needed' );
 
 add_action(
 	'admin_enqueue_scripts',
-	function() {
+	function () {
 		wp_enqueue_script( 'sequra_configuration_script', plugin_dir_url( __FILE__ ) . 'assets/js/sequra_config.js' );
 	}
 );
@@ -155,9 +158,9 @@ add_action(
 function sequrapayment_plugin_row_meta( $links, $file ) {
 	if ( plugin_basename( __FILE__ ) === $file ) {
 		$row_meta = array(
-			'docs'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'wc_sequra' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
-			'apidocs' => '<a href="' . esc_url( apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'wc_sequra' ) . '">' . esc_html__( 'API docs', 'wc_sequra' ) . '</a>',
-			'support' => '<a href="' . esc_url( apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' ) ) . '" aria-label="' . esc_attr__( 'Soporte', 'woocommerce' ) . '">' . esc_html__( 'Soporte', 'wc_sequra' ) . '</a>',
+			'docs'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'sequra' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+			'apidocs' => '<a href="' . esc_url( apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'sequra' ) . '">' . esc_html__( 'API docs', 'sequra' ) . '</a>',
+			'support' => '<a href="' . esc_url( apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' ) ) . '" aria-label="' . esc_attr__( 'Soporte', 'woocommerce' ) . '">' . esc_html__( 'Soporte', 'sequra' ) . '</a>',
 		);
 
 		return array_merge( $links, $row_meta );
@@ -174,7 +177,7 @@ function sequrapayment_plugin_row_meta( $links, $file ) {
 function sequrapayment_action_links( $links ) {
 	return array_merge(
 		array(
-			'comf'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_conf_url', admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sequra' ) ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'wc_sequra' ) . '">' . esc_html__( 'Settings', 'woocommerce' ) . '</a>',
+			'comf' => '<a href="' . esc_url( apply_filters( 'sequrapayment_conf_url', admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sequra' ) ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'sequra' ) . '">' . esc_html__( 'Settings', 'woocommerce' ) . '</a>',
 		),
 		$links
 	);
@@ -197,7 +200,7 @@ function woocommerce_sequra_init() {
 		require_once WC_SEQURA_PLG_PATH . 'class-sequrapaymentgateway.php';
 	}
 	do_action( 'sequra_upgrade_if_needed' );
-	load_plugin_textdomain( 'wc_sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/i18n/languages' );
+	load_plugin_textdomain( 'sequra', false, dirname( plugin_basename( __FILE__ ) ) . '/i18n/languages' );
 	add_filter( 'plugin_row_meta', 'sequrapayment_plugin_row_meta', 10, 2 );
 	/**
 	 * Add the gateway to woocommerce
@@ -230,7 +233,7 @@ function woocommerce_sequra_init() {
 	 * Enqueue plugin style-file
 	 */
 	function sequra_add_stylesheet_cdn_js() {
-		// Respects SSL, Style.css is relative to the current file.
+		   // Respects SSL, Style.css is relative to the current file.
 		wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ), array(), SEQURACHECKOUT_VERSION );
 		wp_register_style( 'sequra-widget', plugins_url( 'assets/css/widget.css', __FILE__ ), array(), SEQURACHECKOUT_VERSION );
 		wp_register_style( 'sequracheckout', plugins_url( 'assets/css/sequracheckout.css', __FILE__ ), array(), SEQURACHECKOUT_VERSION );
@@ -243,7 +246,7 @@ function woocommerce_sequra_init() {
 	 * @return string
 	 */
 	function sequra_get_script_basesurl() {
-		$core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
+		 $core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 		return 'https://' . ( 1 === (int) $core_settings['env'] ? 'sandbox' : 'live' ) . '.sequracdn.com/assets/';
 	}
 	/**
@@ -252,7 +255,7 @@ function woocommerce_sequra_init() {
 	 * @return void
 	 */
 	function sequra_head_js() {
-		/* @todo: Load only if necessary */
+		 /* @todo: Load only if necessary */
 		$available_products = unserialize( get_option( 'SEQURA_ACTIVE_METHODS' ) );
 		$core_settings      = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 		$script_base_uri    = sequra_get_script_basesurl();
@@ -275,7 +278,7 @@ function woocommerce_sequra_init() {
 		if ( ! $sequra_cart_info ) {
 			$sequra_cart_info = array(
 				'ref'        => uniqid(),
-				'created_at' => date( 'c' ),
+				'created_at' => gmdate( 'c' ),
 			);
 			WC()->session->set( 'sequra_cart_info', $sequra_cart_info );
 		}
@@ -298,7 +301,7 @@ function woocommerce_sequra_init() {
 	 * @return string
 	 */
 	function woocommerce_sequra_add_widget_to_product_page() {
-		global $product;
+		  global $product;
 		if ( ! is_product() ) {
 			return;
 		}
@@ -307,21 +310,20 @@ function woocommerce_sequra_init() {
 			return;
 		}
 		// Could have any html disable phpcs.
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-		$methods = array_reverse(//So that the expected order is mantained if different widgets are chained to the same selector
+		$methods = array_reverse( // So that the expected order is mantained if different widgets are chained to the same selector
 			$sequra->get_remote_config()->get_merchant_payment_methods()
 		);
-		$price = is_numeric( $product->get_price() ) ? $product->get_price() : 0;
+		$price   = is_numeric( $product->get_price() ) ? $product->get_price() : 0;
 		foreach ( $methods as $method ) {
 			$sq_product = $sequra->get_remote_config()->build_unique_product_code( $method );
-			//$too_low = isset( $method['min_amount'] ) && $method['min_amount'] > $product->get_price() * 100;
-			$too_high= isset( $method['max_amount'] ) && $method['max_amount'] < $price * 100;
-			if( /*( ! $too_low && ! $too_high ) &&*/
+			// $too_low = isset( $method['min_amount'] ) && $method['min_amount'] > $product->get_price() * 100;
+			$too_high = isset( $method['max_amount'] ) && $method['max_amount'] < $price * 100;
+			if ( /*( ! $too_low && ! $too_high ) &&*/
 				! $too_high &&
-				isset( $sequra->settings['enabled_in_product_' . $sq_product ] ) &&
-				$sequra->settings['enabled_in_product_' . $sq_product ] == 'yes'
+				isset( $sequra->settings[ 'enabled_in_product_' . $sq_product ] ) &&
+				$sequra->settings[ 'enabled_in_product_' . $sq_product ] == 'yes'
 			) {
-				echo sequra_widget(
+				sequra_widget(
 					array(
 						'product'  => isset( $method['product'] ) ? $method['product'] : '',
 						'campaign' => isset( $method['campaign'] ) ? $method['campaign'] : '',
@@ -332,10 +334,9 @@ function woocommerce_sequra_init() {
 				);
 			}
 		}
-		// phpcs:enable
 		// Once executed make sure it is not executed again
-		remove_action( 'woocommerce_after_main_content', 'woocommerce_sequra_add_widget_to_product_page');
-		remove_action( 'wp_footer', 'woocommerce_sequra_add_widget_to_product_page');
+		remove_action( 'woocommerce_after_main_content', 'woocommerce_sequra_add_widget_to_product_page' );
+		remove_action( 'wp_footer', 'woocommerce_sequra_add_widget_to_product_page' );
 	}
 	/**
 	 * SeQura pp simulator short code
@@ -354,7 +355,7 @@ function woocommerce_sequra_init() {
 			return;
 		}
 		$registration_amount = 0;
-		if ( ! is_null( $product_id ) && get_post_meta( $product_id, 'sequra_registration_amount', true )){
+		if ( ! is_null( $product_id ) && get_post_meta( $product_id, 'sequra_registration_amount', true ) ) {
 			$registration_amount = $sequra->helper->get_builder()->integerPrice(
 				get_post_meta( $product_id, 'sequra_registration_amount', true )
 			);
@@ -364,15 +365,13 @@ function woocommerce_sequra_init() {
 		$campaign        = isset( $atts['campaign'] ) ? $atts['campaign'] : '';
 		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
 		$sq_product      = $sequra->get_remote_config()->build_unique_product_code( $atts );
-		$theme           = isset( $sequra->settings[ 'widget_theme_'.$sq_product ] ) ? $sequra->settings[ 'widget_theme_'.$sq_product ] : '';
+		$theme           = isset( $sequra->settings[ 'widget_theme_' . $sq_product ] ) ? $sequra->settings[ 'widget_theme_' . $sq_product ] : '';
 		wp_enqueue_style( 'sequra-widget' );
-		ob_start();
 		if ( SequraRemoteConfig::get_family_for( $atts ) == 'PARTPAYMENT' ) {
 			include SequraHelper::template_loader( 'partpayment-teaser' );
 		} else {
 			include SequraHelper::template_loader( 'invoice-teaser' );
 		}
-		return ob_get_clean();
 	}
 
 	add_shortcode( 'sequra_widget', 'sequra_widget' );

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Metabox to set service end date.
  *
@@ -14,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Sequra_Meta_Box_Settings {
 
+
 	/**
 	 * Output the metabox
 	 *
@@ -21,20 +23,14 @@ class Sequra_Meta_Box_Settings {
 	 */
 	public static function output( $post ) {
 		global $post;
-		$is_sequra_banned       = get_post_meta( $post->ID, 'is_sequra_banned', true );
+		$is_sequra_banned = get_post_meta( $post->ID, 'is_sequra_banned', true );
 		?>
 		<div class="wc-metaboxes-wrapper">
 			<div id="sequra_settings">
 				<div id="sequra_settings_is_banned" class="service-edit wcs">
-					<input
-						id="is_sequra_banned"
-						name="is_sequra_banned"
-						type="checkbox"
-						value="yes"
-						<?php echo 'yes' === $is_sequra_banned ? 'checked' : ''; ?>
-						onclick="toggleSequraService();"/>
+					<input id="is_sequra_banned" name="is_sequra_banned" type="checkbox" value="yes" <?php echo 'yes' === $is_sequra_banned ? 'checked' : ''; ?> onclick="toggleSequraService();" />
 					<label for="sequra_settings_is_banned">
-						<?php esc_html_e( 'Do not offer SeQura for this product', 'wc_sequra' ); ?>
+						<?php esc_html_e( 'Do not offer SeQura for this product', 'sequra' ); ?>
 					</label>
 				</div>
 			</div>
@@ -49,7 +45,7 @@ class Sequra_Meta_Box_Settings {
 	 * @param WP_Post $post the post.
 	 */
 	public static function save( $post_id, $post ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		$is_banned = isset( $_POST['is_sequra_banned'] ) && 'yes' === $_POST['is_sequra_banned'] ? 'yes' : 'no';
 		update_post_meta( $post_id, 'is_sequra_banned', $is_banned );
 		// phpcs:enable
@@ -61,6 +57,6 @@ class Sequra_Meta_Box_Settings {
 	 * @return void
 	 */
 	public static function add_meta_box() {
-		add_meta_box( 'sequra_settings', 'SeQura settings', 'Sequra_Meta_Box_Settings::output', 'product', 'side', 'default' );
+		 add_meta_box( 'sequra_settings', 'SeQura settings', 'Sequra_Meta_Box_Settings::output', 'product', 'side', 'default' );
 	}
 }

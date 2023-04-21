@@ -1,0 +1,61 @@
+x-wp-env: &wp-env
+  WORDPRESS_DB_HOST: db
+  WORDPRESS_DB_USER: exampleuser
+  WORDPRESS_DB_PASSWORD: examplepass
+  WORDPRESS_DB_NAME: exampledb
+  WORDPRESS_DEBUG: 1
+  WORDPRESS_CONFIG_EXTRA: |
+    define( 'WP_LOCALE', 'es_ES' );
+  WP_ADMIN_USER: admin
+  WP_ADMIN_PASSWORD: admin
+  WP_ADMIN_EMAIL: admin@admin.com
+  WP_URL: http://localhost.sequrapi.com:8000/
+  WP_TITLE: "SeQura plugin test WP"
+
+x-wp-volumes: &wp-volumes
+  volumes:
+    - "sq_wordpress:/var/www/html:rw"
+    - ./.devcontainer/wp-config.php:/var/www/html/wp-config.php
+    #- ../..:/workspaces
+    #- "./woocommerce-sequra:/var/www/html/wp-content/plugins/woocommerce-sequra:ro"
+    - ./woocommerce-sequracheckout:/var/www/html/wp-content/plugins/woocommerce-sequracheckout
+
+x-wp-networks: &wp-networks
+  networks:
+    - sq_wp
+
+services:
+  web:
+    build:
+      dockerfile: Dockerfile
+      context: ./.devcontainer
+      args:
+        WORDPRESS_VERSION: ${SQ_WORDPRESS_VERSION:-latest}
+    depends_on:
+      - db
+    ports:
+      - 8000:80
+    environment:
+      <<: *wp-env
+    <<: *wp-volumes
+    <<: *wp-networks
+
+  db:
+    image: mariadb:10.8.2
+    ports:
+      - 3326:3306
+    environment:
+      MARIADB_DATABASE: exampledb
+      MARIADB_USER: exampleuser
+      MARIADB_PASSWORD: examplepass
+      MARIADB_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - sq_db:/var/lib/mysql
+    <<: *wp-networks
+ 
+networks:
+  sq_wp:
+  
+volumes:
+  sq_wordpress:
+  sq_db:
