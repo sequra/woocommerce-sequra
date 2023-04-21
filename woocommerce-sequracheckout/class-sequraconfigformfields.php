@@ -44,7 +44,7 @@ class SequraConfigFormFields {
 				 'title'       => __( 'Title', 'sequra' ),
 				 'type'        => 'text',
 				 'description' => __( 'This controls the title which the user sees during checkout.', 'sequra' ),
-				 'default'     => __( 'Fraccionar pago', 'sequra' ),
+				 'default'     => __( 'Paga a tu rítmo con SeQura', 'sequra' ),
 			 ),
 			 'merchantref'                              => array(
 				 'title'       => __( 'SeQura Merchant Reference', 'sequra' ),

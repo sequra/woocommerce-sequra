@@ -77,7 +77,7 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 * PHP extensions enabled: cURL, JSON
 * WordPress 4.0 or greater
 * WooCommerce 3.0 or greater
-* Merchant account at seQura, [sign up here](https://en.sequra.com/en/contact)
+* Merchant account at seQura, [sign up here](https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg)
 
 = Automatic installation =
 
