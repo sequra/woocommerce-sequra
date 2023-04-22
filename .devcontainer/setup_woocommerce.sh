@@ -9,7 +9,7 @@ wp --path=/var/www/html --allow-root core install --url="${WP_URL}" --title="${W
 wp --path=/var/www/html --allow-root plugin install wordpress-importer --activate
 wp --path=/var/www/html --allow-root plugin install woocommerce --activate
 wp --path=/var/www/html --allow-root import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=create
-wp --path=/var/www/html --allow-root plugin activate woocommerce-sequracheckout
+wp --path=/var/www/html --allow-root plugin activate sequra
 
 wp --path=/var/www/html --allow-root option update woocommerce_store_address 'No enviar'
 wp --path=/var/www/html --allow-root option update woocommerce_store_address_2 'No enviar'

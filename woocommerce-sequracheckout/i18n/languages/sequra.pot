@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: SeQura\n"
-"POT-Creation-Date: 2023-03-16 18:45+0100\n"
+"POT-Creation-Date: 2023-04-22 13:05+0200\n"
 "PO-Revision-Date: 2021-03-04 01:30+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -10,14 +10,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.2.2\n"
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
-"X-Poedit-WPHeader: woocommerce-sequracheckout.php\n"
+"X-Poedit-WPHeader: sequra.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
-"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
+"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
@@ -27,7 +27,7 @@ msgid "Enable/Disable"
 msgstr ""
 
 #: class-sequraconfigformfields.php:40
-msgid "Enable SeQura payments"
+msgid "Enable seQura payments"
 msgstr ""
 
 #: class-sequraconfigformfields.php:44
@@ -39,200 +39,195 @@ msgid "This controls the title which the user sees during checkout."
 msgstr ""
 
 #: class-sequraconfigformfields.php:47
-msgid "Fraccionar pago"
+msgid "Flexible payment with seQura"
 msgstr ""
 
 #: class-sequraconfigformfields.php:50
-msgid "SeQura Merchant Reference"
+msgid "Credentials:"
 msgstr ""
 
-#: class-sequraconfigformfields.php:52
-msgid "Id de comerciante proporcionado por SeQura."
+#: class-sequraconfigformfields.php:54
+#, php-format
+msgid ""
+"Following information should be provided by seQura, you can sign-up <a "
+"href=\"%s\">here</a> to get it."
 msgstr ""
 
-#: class-sequraconfigformfields.php:56
-msgid "SeQura Username"
+#: class-sequraconfigformfields.php:59
+msgid "seQura Merchant Reference"
 msgstr ""
 
-#: class-sequraconfigformfields.php:58
-msgid "Usuario proporcionado por SeQura."
+#: class-sequraconfigformfields.php:64
+msgid "seQura Username"
 msgstr ""
 
-#: class-sequraconfigformfields.php:63
+#: class-sequraconfigformfields.php:70
 msgid "Password"
 msgstr ""
 
-#: class-sequraconfigformfields.php:65
-msgid "Password proporcionada por SeQura."
-msgstr ""
-
-#: class-sequraconfigformfields.php:69
+#: class-sequraconfigformfields.php:75
 msgid "Assets secret"
 msgstr ""
 
-#: class-sequraconfigformfields.php:71
-msgid "Código proporcionada por SeQura."
-msgstr ""
-
-#: class-sequraconfigformfields.php:75
+#: class-sequraconfigformfields.php:80
 msgid "Enable for virtual orders"
 msgstr ""
 
-#: class-sequraconfigformfields.php:76
-msgid "Enable SeQura for services"
+#: class-sequraconfigformfields.php:81
+msgid "Enable seQura for services"
 msgstr ""
 
-#: class-sequraconfigformfields.php:78
+#: class-sequraconfigformfields.php:83
 msgid ""
-"Your contract must allow selling services, SeQura will be enabled only for "
+"Your contract must allow selling services, seQura will be enabled only for "
 "virtual products that have a \"Service end date\" specified. Only one "
 "product can be purchased at a time"
 msgstr ""
 
-#: class-sequraconfigformfields.php:82
+#: class-sequraconfigformfields.php:87
 msgid "Default service end date"
 msgstr ""
 
-#: class-sequraconfigformfields.php:85
+#: class-sequraconfigformfields.php:90
 msgid ""
-"Fecha como 2017-08-31, plazo como P3M15D (3 meses y 15 días). Se aplicará "
-"por defecto a todos los productos si no se especifica algo diferente en la "
-"ficha de producto."
+"Dates as 2017-08-31, time ranges as P3M15D (3 months and 15 days). It "
+"applies by default to all product unless a different value is set at the "
+"product settings page."
 msgstr ""
 
-#: class-sequraconfigformfields.php:87
+#: class-sequraconfigformfields.php:92
 msgid "ISO8601 format"
 msgstr ""
 
-#: class-sequraconfigformfields.php:94
+#: class-sequraconfigformfields.php:99
 msgid "Allow first payment delay"
 msgstr ""
 
-#: class-sequraconfigformfields.php:97
-msgid ""
-"Pago primera cuota diferido. No habilitar si no está indicado por SeQura"
+#: class-sequraconfigformfields.php:102 class-sequraconfigformfields.php:112
+msgid "Do not enable except by indication of seQura."
 msgstr ""
 
-#: class-sequraconfigformfields.php:104
+#: class-sequraconfigformfields.php:109
 msgid "Allow registration items"
 msgstr ""
 
-#: class-sequraconfigformfields.php:107
+#: class-sequraconfigformfields.php:112
 msgid ""
-"Permitir configurar parte del pago por adelantado. No habilitar si no está "
-"indicado por SeQura"
+"Allows configuring part of the product price to be paid in advance as "
+"registration"
 msgstr ""
 
-#: class-sequraconfigformfields.php:114
+#: class-sequraconfigformfields.php:119
 msgid "Environment"
 msgstr ""
 
-#: class-sequraconfigformfields.php:116
+#: class-sequraconfigformfields.php:121
 msgid ""
 "While working in Sandbox the methods will only show to the following IP "
 "addresses."
 msgstr ""
 
-#: class-sequraconfigformfields.php:120
+#: class-sequraconfigformfields.php:125
 msgid "Sandbox"
 msgstr ""
 
-#: class-sequraconfigformfields.php:121
+#: class-sequraconfigformfields.php:126
 msgid "Live"
 msgstr ""
 
-#: class-sequraconfigformfields.php:126
+#: class-sequraconfigformfields.php:131
 msgid "IPs for testing"
 msgstr ""
 
-#: class-sequraconfigformfields.php:130
+#: class-sequraconfigformfields.php:135
 #, php-format
 msgid ""
 "When working is sandbox mode only these ips addresses will see the plugin. "
 "Current IP: %s"
 msgstr ""
 
-#: class-sequraconfigformfields.php:144
+#: class-sequraconfigformfields.php:149
 msgid "Debugging"
 msgstr ""
 
-#: class-sequraconfigformfields.php:145
-msgid "Modo debug"
+#: class-sequraconfigformfields.php:150
+msgid "Debug mode"
 msgstr ""
 
-#: class-sequraconfigformfields.php:147
-msgid "Sólo para desarrolladores."
+#: class-sequraconfigformfields.php:152
+msgid "Onl for developers."
 msgstr ""
 
-#: class-sequraconfigformfields.php:161
+#: class-sequraconfigformfields.php:166
 msgid "Active payent methods"
 msgstr ""
 
 #. translators: %s: URL
-#: class-sequraconfigformfields.php:164
+#: class-sequraconfigformfields.php:169
 msgid "Information will be available once the credentials are set and correct"
 msgstr ""
 
-#: class-sequraconfigformfields.php:179
+#: class-sequraconfigformfields.php:184
 msgid "Comunication configuration"
 msgstr ""
 
-#: class-sequraconfigformfields.php:185
+#: class-sequraconfigformfields.php:190
 msgid "CSS price selector"
 msgstr ""
 
-#: class-sequraconfigformfields.php:187
+#: class-sequraconfigformfields.php:192
 msgid "CSS selector to get the price for widgets in products"
 msgstr ""
 
-#: class-sequraconfigformfields.php:222
+#: class-sequraconfigformfields.php:227
 #, php-format
 msgid "Simulator config for %s"
 msgstr ""
 
-#: class-sequraconfigformfields.php:228 class-sequraconfigformfields.php:268
+#: class-sequraconfigformfields.php:233 class-sequraconfigformfields.php:273
 msgid "Show in product page"
 msgstr ""
 
-#: class-sequraconfigformfields.php:230 class-sequraconfigformfields.php:270
+#: class-sequraconfigformfields.php:235 class-sequraconfigformfields.php:275
 msgid "Mostrar widget en la página del producto"
 msgstr ""
 
-#: class-sequraconfigformfields.php:234 class-sequraconfigformfields.php:274
+#: class-sequraconfigformfields.php:239 class-sequraconfigformfields.php:279
 msgid "CSS selector for widget in product page"
 msgstr ""
 
-#: class-sequraconfigformfields.php:237 class-sequraconfigformfields.php:277
+#: class-sequraconfigformfields.php:242 class-sequraconfigformfields.php:282
 msgid "CSS after which the simulator will be drawn."
 msgstr ""
 
-#: class-sequraconfigformfields.php:246
+#: class-sequraconfigformfields.php:251
 msgid "Simulator params"
 msgstr ""
 
-#: class-sequraconfigformfields.php:248
+#: class-sequraconfigformfields.php:253
 msgid "Widget visualization params"
 msgstr ""
 
-#: class-sequraconfigformfields.php:262
+#: class-sequraconfigformfields.php:267
 #, php-format
 msgid "Teaser config for %s"
 msgstr ""
 
-#: class-sequraconfigformfields.php:286
+#: class-sequraconfigformfields.php:291
 msgid "Teaser params"
 msgstr ""
 
-#: class-sequraconfigformfields.php:288
+#: class-sequraconfigformfields.php:293
 msgid "Teaser visualization params"
 msgstr ""
 
+#. Plugin Name of the plugin/theme
 #: class-sequrapaymentgateway.php:60
-msgid "SeQura Checkout"
+msgid "seQura"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:61
-msgid "Configurtación para los métodos de pago Sequra"
+msgid "seQura payment method's configuration"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:137
@@ -240,36 +235,35 @@ msgid "Configuración Sequra"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:141
-msgid "Provided SeQura credentials are not valid for the selected environment"
+msgid "Provided seQura credentials are not valid for the selected environment"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:148
 msgid ""
-"La pasarela <a href=\"https://sequra.es/\">Sequra</a> para Woocommerce le "
-"permitirá configurar los métodos de pago disponibles con SeQura."
+"<a href=\"https://sequra.es/\">seQura</a> payment gateway for WooCommerce "
+"allows you to configure available payment methods as seQura."
 msgstr ""
 
 #: class-sequrapaymentgateway.php:285
 msgid ""
-"Thank you for your order, please click the button below to pay with SeQura."
+"Thank you for your order, please click the button below to pay with seQura."
 msgstr ""
 
 #: class-sequrapaymentgateway.php:345
 msgid ""
-"<p>SeQura está procesando tu solicitud.</p><p>En unos minutos <b>recibirás "
-"un email con respuesta a tu solicitud</b>. Es posible que SeQura contacte "
-"contigo antes para validar algunos datos.</p><p><b>Gracias por comprar con "
-"SeQura</b>"
+"<p>seQura is processing your request.</p><p>After a few minutes <b>you will "
+"get an email with your request result</b>. seQura might contact you to get "
+"some more information.</p><p><b>Thanks for choosing seQura!</b>"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:386
 #, php-format
-msgid "Payment is in review by SeQura.(%s)"
+msgid "Payment is in review by seQura.(%s)"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:400
 #, php-format
-msgid "Payment accepted by SeQura.(%s)"
+msgid "Payment accepted by seQura.(%s)"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:433
@@ -310,7 +304,11 @@ msgid "API docs"
 msgstr ""
 
 #: gateway-sequra.php:163
-msgid "Soporte"
+msgid "Sopport"
+msgstr ""
+
+#: gateway-sequra.php:163
+msgid "Support"
 msgstr ""
 
 #: gateway-sequra.php:180
@@ -362,7 +360,12 @@ msgid "Part of the price that will be paid as registration fee"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-sequra-meta-box-settings.php:33
-msgid "Do not offer SeQura for this product"
+msgid "Do not offer seQura for this product"
+msgstr ""
+
+#: sequra.php:49
+msgid ""
+"Please, remove any previously installed seQura plugins form WooCommerce"
 msgstr ""
 
 #: templates/payment-identification.php:51
@@ -373,26 +376,16 @@ msgstr ""
 msgid "Proceed to PayPal"
 msgstr ""
 
-#: woocommerce-sequracheckout.php:48
-msgid ""
-"Por favor, desinstale y elimine primero el plugin \"Pasarela de pago para "
-"Sequra\" para poder usar el nuevo \"Checkout con SeQura\""
-msgstr ""
-
-#. Plugin Name of the plugin/theme
-msgid "SeQura"
-msgstr ""
-
 #. Plugin URI of the plugin/theme
 msgid "https://sequra.es/"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "Ofrece las opciones de pago con SeQura"
+msgid "Ofrece las opciones de pago con seQura"
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "\"SeQura Tech\" <dev+wordpress@sequra.es>"
+msgid "\"seQura Tech\" <dev+wordpress@sequra.es>"
 msgstr ""
 
 #. Author URI of the plugin/theme

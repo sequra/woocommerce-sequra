@@ -128,6 +128,6 @@ class Sequra_Meta_Box_Service_Options {
 	 * @return void
 	 */
 	public static function add_meta_box() {
-		 add_meta_box( 'service_end_date', 'SeQura Service options', 'Sequra_Meta_Box_Service_Options::output', 'product', 'side', 'default' );
+		 add_meta_box( 'service_end_date', 'seQura Service options', 'Sequra_Meta_Box_Service_Options::output', 'product', 'side', 'default' );
 	}
 }

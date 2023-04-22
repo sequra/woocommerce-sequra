@@ -21,14 +21,14 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	protected $_cart = null;
 
 	/**
-	 * List of shipped order's id tos inform to SeQura with
+	 * List of shipped order's id tos inform to seQura with
 	 *
 	 * @var array
 	 */
 	protected $_shipped_ids = array();
 
 	/**
-	 * List of shipped order's id tos inform to SeQura with
+	 * List of shipped order's id tos inform to seQura with
 	 *
 	 * @var array
 	 */
@@ -38,7 +38,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * SequraBuilderWC constructor.
 	 *
 	 * @param string        $merchant_id Merchant ID as provided in credential.
-	 * @param null|WC_Order $order Order with the info to send to SeQura.
+	 * @param null|WC_Order $order Order with the info to send to seQura.
 	 */
 	public function __construct( $merchant_id, WC_Order $order = null ) {
 		global $wp;
@@ -871,7 +871,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	}
 
 	/**
-	 * Get SeQura language code
+	 * Get seQura language code
 	 *
 	 * @return string
 	 * */

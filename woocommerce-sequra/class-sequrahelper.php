@@ -217,10 +217,10 @@ class SequraHelper {
 		if ( ! $order->is_paid() ) {
 			wc_add_notice(
 				__(
-					'<p>SeQura está procesando tu solicitud.</p>' .
-					'<p>En unos minutos <b>recibirás un email con respuesta a tu solicitud</b>. Es posible que SeQura contacte contigo antes para validar algunos datos.</p>' .
-					'<p><b>Gracias por comprar con SeQura</b>',
-					'wc_sequra'
+					'<p>seQura is processing your request.</p>' .
+					'<p>Ater a few minutes <b>you will get an email with your request result</b>. seQura might contact you to get some more information.</p>' .
+					'<p><b>Thanks for choosing seQura!</b>',
+					'sequra'
 				),
 				'notice'
 			);

@@ -30,7 +30,7 @@ class Sequra_Meta_Box_Settings {
 				<div id="sequra_settings_is_banned" class="service-edit wcs">
 					<input id="is_sequra_banned" name="is_sequra_banned" type="checkbox" value="yes" <?php echo 'yes' === $is_sequra_banned ? 'checked' : ''; ?> onclick="toggleSequraService();" />
 					<label for="sequra_settings_is_banned">
-						<?php esc_html_e( 'Do not offer SeQura for this product', 'sequra' ); ?>
+						<?php esc_html_e( 'Do not offer seQura for this product', 'sequra' ); ?>
 					</label>
 				</div>
 			</div>
@@ -57,6 +57,6 @@ class Sequra_Meta_Box_Settings {
 	 * @return void
 	 */
 	public static function add_meta_box() {
-		 add_meta_box( 'sequra_settings', 'SeQura settings', 'Sequra_Meta_Box_Settings::output', 'product', 'side', 'default' );
+		 add_meta_box( 'sequra_settings', 'seQura settings', 'Sequra_Meta_Box_Settings::output', 'product', 'side', 'default' );
 	}
 }

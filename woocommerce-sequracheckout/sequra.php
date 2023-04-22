@@ -1,20 +1,20 @@
 <?php
 
 /**
- * Plugin Name: SeQura
+ * Plugin Name: seQura
  * Plugin URI: https://sequra.es/
- * Description: Ofrece las opciones de pago con SeQura
+ * Description: Ofrece las opciones de pago con seQura
  * Version: 2.0.0
- * Author: "SeQura Tech" <dev+wordpress@sequra.es>
+ * Author: "seQura Tech" <dev+wordpress@sequra.es>
  * Author URI: https://engineering.sequra.es/
  * WC requires at least: 4.0
- * WC tested up to: 7.4.1
- * Text Domain: wc_sequra
+ * WC tested up to: 7.6
+ * Text Domain: sequra
  * Domain Path: /i18n/languages/
  * Requires at least: 5.9
  * Requires PHP: 7.2
  *
- * Copyright (C) 2023 SeQura Tech
+ * Copyright (C) 2023 seQura Tech
  *
  * License: GPL v3
  *
@@ -31,13 +31,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>
  *
- * @package woocommerce-sequraacheckout
+ * @package sequra
  */
 
-// Make sure old WooCommerce SeQura is not installed.
-if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequra' ) ) {
+// Make sure old WooCommerce seQura is not installed.
+if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequra' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequracheckout' ) ) {
 	define( 'SEQURACHECKOUT_VERSION', '2.0.0' );
 	define( 'WC_SEQURA_PLG_PATH', WP_PLUGIN_DIR . '/' . basename( plugin_dir_path( __FILE__ ) ) . '/' );
+	define( 'SEQURA_SIGNUP_URL', 'https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg' );
 	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'sequrapayment_action_links' );
 	register_activation_hook( __FILE__, 'sequra_activation' );
 	require_once WC_SEQURA_PLG_PATH . 'gateway-sequra.php';
@@ -45,7 +46,7 @@ if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/wooco
 	add_action(
 		'admin_notices',
 		function () {
-			echo '<div id="message" class="error"><p>' . esc_html( __( 'Por favor, desinstale y elimine primero el plugin "Pasarela de pago para Sequra" para poder usar el nuevo "Checkout con SeQura"', 'sequra' ) ) . '</p></div>';
+			echo '<div id="message" class="error"><p>' . esc_html( __( 'Please, remove any previously installed seQura plugins form WooCommerce', 'sequra' ) ) . '</p></div>';
 		}
 	);
 }

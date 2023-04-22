@@ -1,12 +1,12 @@
 <?php
 /**
- * SeQura Temp Order class.
+ * seQura Temp Order class.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * SeQura Temp Order Class
+ * seQura Temp Order Class
  * Stores the checkout information temporarily in a format similar to WC_Order.
  * */
 class SequraTempOrder {

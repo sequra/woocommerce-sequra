@@ -1,13 +1,13 @@
 <?php
 
 /**
- * SeQura Gateway class.
+ * seQura Gateway class.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * Pasarela SeQura Gateway Class
+ * Pasarela seQura Gateway Class
  * */
 class SequraPaymentGateway extends WC_Payment_Gateway {
 
@@ -57,8 +57,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		 do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
 
-		$this->method_title       = __( 'SeQura Checkout', 'sequra' );
-		$this->method_description = __( 'Configurtación para los métodos de pago Sequra', 'sequra' );
+		$this->method_title       = __( 'seQura', 'sequra' );
+		$this->method_description = __( 'seQura payment method\'s configuration', 'sequra' );
 		$this->supports           = array(
 			'products',
 		);
@@ -138,14 +138,14 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
 				<p><?php echo wp_kses(
-					__( 'Provided SeQura credentials are not valid for the selected environment', 'sequra' ), array()
+					__( 'Provided seQura credentials are not valid for the selected environment', 'sequra' ), array()
 				); ?></p>
 			</div>
 		<?php } ?>
 		<p>
 			<?php
 			echo wp_kses(
-				__( 'La pasarela <a href="https://sequra.es/">Sequra</a> para Woocommerce le permitirá configurar los métodos de pago disponibles con SeQura.', 'sequra' ),
+				__( '<a href="https://sequra.es/">seQura</a> payment gateway for WooCommerce allows you to configure available payment methods as seQura.', 'sequra' ),
 				array( 'a' => array( 'href' ) )
 			);
 			?>
@@ -282,7 +282,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$order = new WC_Order( $order_id );
 		echo '<p>' . wp_kses_post(
 			__(
-				'Thank you for your order, please click the button below to pay with SeQura.',
+				'Thank you for your order, please click the button below to pay with seQura.',
 				'sequra'
 			)
 		) . '</p>';
@@ -342,9 +342,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		if ( ! $order->is_paid() ) {
 			wc_add_notice(
 				__(
-					'<p>SeQura está procesando tu solicitud.</p>' .
-					'<p>En unos minutos <b>recibirás un email con respuesta a tu solicitud</b>. Es posible que SeQura contacte contigo antes para validar algunos datos.</p>' .
-					'<p><b>Gracias por comprar con SeQura</b>',
+					'<p>seQura is processing your request.</p>' .
+					'<p>After a few minutes <b>you will get an email with your request result</b>. seQura might contact you to get some more information.</p>' .
+					'<p><b>Thanks for choosing seQura!</b>',
 					'sequra'
 				),
 				'notice'
@@ -383,7 +383,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					// Payment pedimd.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
 					$order->add_order_note(
-						sprintf( __( 'Payment is in review by SeQura.(%s)', 'sequra' ), $title )
+						sprintf( __( 'Payment is in review by seQura.(%s)', 'sequra' ), $title )
 					);
 				}
 				break;
@@ -397,7 +397,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				if ( $approval ) {
 					// Payment completed.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
-					$order->add_order_note( sprintf( __( 'Payment accepted by SeQura.(%s)', 'sequra' ), $title ) );
+					$order->add_order_note( sprintf( __( 'Payment accepted by seQura.(%s)', 'sequra' ), $title ) );
 					$this->helper->add_payment_info_to_post_meta( $order );
 					$order->payment_complete();
 				}

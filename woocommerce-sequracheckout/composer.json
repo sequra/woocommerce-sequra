@@ -1,6 +1,6 @@
 {
     "name": "sequra/woocommerce-sequracheckout",
-    "description": "SeQura Checkout for WooCommerce",
+    "description": "seQura Checkout for WooCommerce",
     "type": "wordpress-plugin",
     "require-dev": {
         "behat/behat": "*",
@@ -11,7 +11,7 @@
     "license": "GPL-3.0-or-later",
     "authors": [
         {
-            "name": "SeQura Engineering",
+            "name": "seQura Engineering",
             "email": "dev@sequra.es"
         }
     ],

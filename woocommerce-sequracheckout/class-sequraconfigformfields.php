@@ -37,52 +37,57 @@ class SequraConfigFormFields {
 			 'enabled'                                  => array(
 				 'title'       => __( 'Enable/Disable', 'sequra' ),
 				 'type'        => 'checkbox',
-				 'description' => __( 'Enable SeQura payments', 'sequra' ),
+				 'description' => __( 'Enable seQura payments', 'sequra' ),
 				 'default'     => 'no',
 			 ),
 			 'title'                                    => array(
 				 'title'       => __( 'Title', 'sequra' ),
 				 'type'        => 'text',
 				 'description' => __( 'This controls the title which the user sees during checkout.', 'sequra' ),
-				 'default'     => __( 'Paga a tu rítmo con SeQura', 'sequra' ),
+				 'default'     => __( 'Flexible payment with seQura', 'sequra' ),
+			 ),
+			 'sign-up-info'						=> array(
+				'title'       => __( 'Credentials:', 'sequra' ),
+				'type'        => 'title',
+				/* translators: %s: URL */
+				'description' => sprintf(
+					__( 'Following information should be provided by seQura, you can sign-up <a href="%s">here</a> to get it.', 'sequra' ),
+					SEQURA_SIGNUP_URL
+				),
 			 ),
 			 'merchantref'                              => array(
-				 'title'       => __( 'SeQura Merchant Reference', 'sequra' ),
+				 'title'       => __( 'seQura Merchant Reference', 'sequra' ),
 				 'type'        => 'text',
-				 'description' => __( 'Id de comerciante proporcionado por SeQura.', 'sequra' ),
 				 'default'     => '',
 			 ),
 			 'user'                                     => array(
-				 'title'       => __( 'SeQura Username', 'sequra' ),
+				 'title'       => __( 'seQura Username', 'sequra' ),
 				 'type'        => 'text',
-				 'description' => __( 'Usuario proporcionado por SeQura.', 'sequra' ),
 				 'default'     => '',
 				 'css'         => 'color:' . $this->pm->is_valid_auth ? 'green' : 'red' . ';width: 450px;',
 			 ),
 			 'password'                                 => array(
 				 'title'       => __( 'Password', 'sequra' ),
 				 'type'        => 'text',
-				 'description' => __( 'Password proporcionada por SeQura.', 'sequra' ),
 				 'default'     => '',
 			 ),
 			 'assets_secret'                            => array(
 				 'title'       => __( 'Assets secret', 'sequra' ),
 				 'type'        => 'text',
-				 'description' => __( 'Código proporcionada por SeQura.', 'sequra' ),
 				 'default'     => '',
 			 ),
 			 'enable_for_virtual'                       => array(
 				 'title'       => __( 'Enable for virtual orders', 'sequra' ),
-				 'label'       => __( 'Enable SeQura for services', 'sequra' ),
+				 'label'       => __( 'Enable seQura for services', 'sequra' ),
 				 'type'        => 'checkbox',
-				 'description' => __( 'Your contract must allow selling services, SeQura will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'sequra' ),
+				 'description' => __( 'Your contract must allow selling services, seQura will be enabled only for virtual products that have a "Service end date" specified. Only one product can be purchased at a time', 'sequra' ),
 				 'default'     => 'no',
 			 ),
 			 'default_service_end_date'                 => array(
 				 'title'             => __( 'Default service end date', 'sequra' ),
 				 'desc_tip'          => true,
 				 'type'              => 'text',
-				 'description'       => __( 'Fecha como 2017-08-31, plazo como P3M15D (3 meses y 15 días). Se aplicará por defecto a todos los productos si no se especifica algo diferente en la ficha de producto.', 'sequra' ),
+				 'description'       => __( 'Dates as 2017-08-31, time ranges as P3M15D (3 months and 15 days). It applies by default to all product unless a different value is set at the product settings page.', 'sequra' ),
 				 'default'           => 'P1Y',
 				 'placeholder'       => __( 'ISO8601 format', 'sequra' ),
 				 'custom_attributes' => array(
@@ -94,7 +99,7 @@ class SequraConfigFormFields {
 				 'title'             => __( 'Allow first payment delay', 'sequra' ),
 				 'desc_tip'          => true,
 				 'type'              => 'checkbox',
-				 'description'       => __( 'Pago primera cuota diferido. No habilitar si no está indicado por SeQura', 'sequra' ),
+				 'description'       => __( 'Do not enable except by indication of seQura.', 'sequra' ),
 				 'default'           => 'no',
 				 'custom_attributes' => array(
 					 'dependson' => 'enable_for_virtual',
@@ -104,7 +109,7 @@ class SequraConfigFormFields {
 				 'title'             => __( 'Allow registration items', 'sequra' ),
 				 'desc_tip'          => true,
 				 'type'              => 'checkbox',
-				 'description'       => __( 'Permitir configurar parte del pago por adelantado. No habilitar si no está indicado por SeQura', 'sequra' ),
+				 'description'       => __( 'Allows configuring part of the product price to be paid in advance as registration', 'sequra' ) . __( 'Do not enable except by indication of seQura.', 'sequra' ),
 				 'default'           => 'no',
 				 'custom_attributes' => array(
 					 'dependson' => 'enable_for_virtual',
@@ -142,9 +147,9 @@ class SequraConfigFormFields {
 			// phpcs:enable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
 											  'debug'    => array(
 												 'title'   => __( 'Debugging', 'sequra' ),
-												 'label'   => __( 'Modo debug', 'sequra' ),
+												 'label'   => __( 'Debug mode', 'sequra' ),
 												 'type'    => 'checkbox',
-												 'description' => __( 'Sólo para desarrolladores.', 'sequra' ),
+												 'description' => __( 'Only for developers.', 'sequra' ),
 												 'default' => 'no',
 											  ),
 		 );

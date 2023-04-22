@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SeQura gateway file.
+ * seQura gateway file.
  *
  * @package woocommerce-sequra
  */
@@ -98,7 +98,7 @@ function sequra_deactivation() {
 }
 
 /**
- * SeQura banner short code.
+ * seQura banner short code.
  * usage: [sequra_banner product='i1'] [sequra_banner product='pp3'] [sequra_banner product='pp6'].
  *
  * @param array $atts short code attribute.
@@ -160,7 +160,7 @@ function sequrapayment_plugin_row_meta( $links, $file ) {
 		$row_meta = array(
 			'docs'    => '<a href="' . esc_url( apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'sequra' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
 			'apidocs' => '<a href="' . esc_url( apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'sequra' ) . '">' . esc_html__( 'API docs', 'sequra' ) . '</a>',
-			'support' => '<a href="' . esc_url( apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' ) ) . '" aria-label="' . esc_attr__( 'Soporte', 'woocommerce' ) . '">' . esc_html__( 'Soporte', 'sequra' ) . '</a>',
+			'support' => '<a href="' . esc_url( apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' ) ) . '" aria-label="' . esc_attr__( 'Sopport', 'woocommerce' ) . '">' . esc_html__( 'Support', 'sequra' ) . '</a>',
 		);
 
 		return array_merge( $links, $row_meta );
@@ -339,7 +339,7 @@ function woocommerce_sequra_init() {
 		remove_action( 'wp_footer', 'woocommerce_sequra_add_widget_to_product_page' );
 	}
 	/**
-	 * SeQura pp simulator short code
+	 * seQura pp simulator short code
 	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' dest='.price_container']
 	 *
 	 * @param array    $atts       Attributes.
