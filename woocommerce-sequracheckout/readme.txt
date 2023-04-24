@@ -1,10 +1,10 @@
 === Pasarela de pago para seQura ===
 Contributors: sequradev
 Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
-Requires at least: 4.0
+Requires at least: 5.9
 Tested up to: 6.1
 Stable tag: 2.0.1
-Requires PHP: 5.6.0
+Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,10 +72,10 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 
 = Minimum Requirements =
 
-* PHP version 5.6 or greater
+* PHP version 7.2 or greater
 * PHP extensions enabled: cURL, JSON
-* WordPress 4.0 or greater
-* WooCommerce 3.0 or greater
+* WordPress 5.9 or greater
+* WooCommerce 4.0 or greater
 * Merchant account at seQura, [sign up here](https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg)
 
 = Automatic installation =
