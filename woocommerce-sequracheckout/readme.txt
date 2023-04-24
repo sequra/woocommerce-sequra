@@ -3,8 +3,8 @@ Contributors: sequradev
 Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
 Requires at least: 4.0
 Tested up to: 6.1
-Stable tag: 2.0.0
-Requires PHP: 5.9.0
+Stable tag: 2.0.1
+Requires PHP: 5.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,7 +39,6 @@ Obsessed with conversion and recurrence
 * We adapt to your business, solutions for every sector, and buyer profile
 * The highest acceptance rate in Southern Europe thanks to our own risk algorithm, created and optimized for the local market
 * Instant approval. A frictionless credit-purchase experience, buy-in seconds without document uploads
-* In-App recommendations to increase shopper conversion in your store
 * seQura marketing collateral to support your campaigns
 
 = Benefits for customers =
@@ -55,7 +54,7 @@ Obsessed with conversion and recurrence
 
 = I can't install the plugin, the plugin is displayed incorrectly =
 
-Please temporarily enable the [WordPress Debug Mode](https://codex.wordpress.org/Debugging_in_WordPress). Edit your `wp-config.php` and set the constants `WP_DEBUG` and `WP_DEBUG_LOG` to `true` and try
+Please temporarily enable the [WordPress Debug Mode](https://wordpress.org/documentation/article/debugging-in-wordpress/). Edit your `wp-config.php` and set the constants `WP_DEBUG` and `WP_DEBUG_LOG` to `true` and try
 it again. When the plugin triggers an error, WordPress will log the error to the log file `/wp-content/debug.log`. Please check this file for errors. When done, don't forget to turn off
 the WordPress debug mode by setting the two constants `WP_DEBUG` and `WP_DEBUG_LOG` back to `false`.
 
@@ -73,7 +72,7 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 
 = Minimum Requirements =
 
-* PHP version 5.9 or greater
+* PHP version 5.6 or greater
 * PHP extensions enabled: cURL, JSON
 * WordPress 4.0 or greater
 * WooCommerce 3.0 or greater
@@ -89,7 +88,7 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 = Manual installation =
 
 1. Unpack the download package
-2. Upload the directory 'woocommerce-sequracheckout' to the `/wp-content/plugins/` directory
+2. Upload the directory `sequra` to the `/wp-content/plugins/` directory
 3. Activate the 'seQura' plugin through the 'Plugins' menu in WordPress
 4. Set your seQura credentials at WooCommerce -> Settings -> payments -> seQura
 5. You're done, the seQura payment methods should be visible in the checkout of your WooCommerce.
@@ -102,4 +101,6 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.1 =
+* Update: Information in readme.txt
 = 2.0.0 =
