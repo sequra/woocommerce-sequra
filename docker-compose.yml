@@ -17,7 +17,7 @@ x-wp-volumes: &wp-volumes
     - "sq_wordpress:/var/www/html:rw"
     - ./.devcontainer/wp-config.php:/var/www/html/wp-config.php
     #- ../..:/workspaces
-    - ./woocommerce-sequracheckout:/var/www/html/wp-content/plugins/sequra:ro
+    - ./sequra:/var/www/html/wp-content/plugins/sequra:ro
 
 x-wp-networks: &wp-networks
   networks:

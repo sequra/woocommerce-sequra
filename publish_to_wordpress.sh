@@ -10,7 +10,7 @@ GITHUB_REPO_OWNER="sequra"
 # GITHUB Repository name
 GITHUB_REPO_NAME="woocommerce-sequra"
 
-PLUGIN_FORDER_IN_REPO="/woocommerce-sequracheckout"
+PLUGIN_FORDER_IN_REPO="/sequra"
 # ----- STOP EDITING HERE -----
 
 set -e
@@ -118,6 +118,7 @@ svn update || { echo "Unable to update SVN."; exit 1; }
 
 # DELETE TRUNK
 echo "Replacing trunk"
+rm -rf tags/${VERSION}
 rm -Rf trunk/
 
 # COPY GIT DIR TO TRUNK

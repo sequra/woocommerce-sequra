@@ -7,5 +7,5 @@ publish.sh
 .DS_Store
 .vscode
 woocommerce-sequra/composer.lock
-woocommerce-sequracheckout/composer.lock
+sequra/composer.lock
 node-modules
