@@ -23,7 +23,6 @@ function sequra_activation() {
 		}
 	}
 	update_option( 'woocommerce_gateway_order', $order );
-	update_option( 'woocommerce_default_gateway', 'sequra_i' );
 	// Schedule a daily event for sending delivery report on plugin activation.
 	$random_offset = wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
 	$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );

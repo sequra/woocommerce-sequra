@@ -52,7 +52,9 @@
         }
     },
     "require": {
-        "sequra/php-client": "~0.3"
+        "sequra/php-client": "~0.3",
+		"psr/log": "^1.1",
+        "monolog/monolog": "^2.3"
     },
     "config": {
         "allow-plugins": {

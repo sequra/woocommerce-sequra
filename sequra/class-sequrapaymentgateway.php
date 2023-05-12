@@ -168,6 +168,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			return true;
 		}
 		if ( SequraHelper::is_order_review() && count( $this->get_remote_config()->get_available_payment_methods() ) < 1 ) {
+			$this->helper->get_logger()->debug( 'No sequra payment method available' );
 			return false;
 		}
 		if ( SequraHelper::is_checkout() && WC()->cart && ! $this->is_available_in_checkout() ) {
@@ -190,9 +191,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		}
 		if ( 'yes' === $this->settings['enable_for_virtual'] ) {
 			if ( ! $this->helper->is_elegible_for_service_sale() ) {
+				$this->helper->get_logger()->debug( 'Order is not elegible for service sale.' );
 				return false;
 			}
 		} elseif ( ! $this->helper->is_elegible_for_product_sale() ) {
+			$this->helper->get_logger()->debug( 'Order is not elegible for product sale.' );
 			return false;
 		}
 		return $this->helper->is_available_in_checkout();
@@ -206,6 +209,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	public function is_available_in_product_page( $product_id ) {
 		$product = new WC_Product( $product_id );
 		if ( 'yes' !== $this->settings['enable_for_virtual'] && ! $product->needs_shipping() ) {
+			$this->helper->get_logger()->debug( 'Widget is not available in product page . Product id:' . $product_id );
 			return false;
 		}
 
