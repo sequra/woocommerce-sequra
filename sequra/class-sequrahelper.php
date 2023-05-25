@@ -280,7 +280,7 @@ class SequraHelper {
 			isset( $_POST['signature'] ) &&
 			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )
 		) {
-			$this->logger->error( 'Error: Not valid signature' .  $_POST['signature'] . '!=' . $builder->sign( $order->get_id() ) );
+			$this->logger->error( 'Error: Not valid signature' . sanitize_text_field( wp_unslash( $_POST['signature'] ) ) . '!=' . $builder->sign( $order->get_id() ) );
 			http_response_code( 498 );
 			die( 'Not valid signature' );
 		}

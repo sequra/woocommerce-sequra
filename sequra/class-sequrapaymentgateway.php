@@ -1,7 +1,6 @@
 <?php
-
 /**
- * seQura Gateway class.
+ * SeQura Gateway class.
  *
  * @package woocommerce-sequra
  */
@@ -34,6 +33,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 */
 	public $helper = null;
 
+	/**
+	 * Is initialized
+	 */
 	private static $initialized = false;
 
 	/**
@@ -54,7 +56,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		 do_action( 'woocommerce_sequra_before_load', $this );
+		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
 
 		$this->method_title       = __( 'seQura', 'sequra' );
@@ -137,9 +139,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		<h3><?php esc_html_e( 'Configuración Sequra', 'sequra' ); ?></h3>
 		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
-				<p><?php echo wp_kses(
-					__( 'Provided seQura credentials are not valid for the selected environment', 'sequra' ), array()
-				); ?></p>
+				<p>
+					<?php echo wp_kses(
+						__( 'Provided seQura credentials are not valid for the selected environment', 'sequra' ), array()
+					); ?>
+				</p>
 			</div>
 		<?php } ?>
 		<p>
@@ -387,11 +391,17 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					// Payment pedimd.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
 					$order->add_order_note(
+						// translators: %s is the payment method title.
 						sprintf( __( 'Payment is in review by seQura.(%s)', 'sequra' ), $title )
 					);
 				}
 				break;
 			case 'approved':
+				/**
+				 * Filter approval result from seQura if needed.
+				 * 
+				 * @since 2.0.0
+				 */
 				$approval = apply_filters(
 					'woocommerce_' . $this->id . '_process_payment',
 					$this->helper->get_approval( $order ),
@@ -401,6 +411,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				if ( $approval ) {
 					// Payment completed.
 					$title = get_post_meta( (int) $order->get_id(), '_sq_method_title', true );
+					// translators: %s is the payment method title.
 					$order->add_order_note( sprintf( __( 'Payment accepted by seQura.(%s)', 'sequra' ), $title ) );
 					$this->helper->add_payment_info_to_post_meta( $order );
 					$order->payment_complete();
@@ -434,6 +445,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			case 'cancelled':
 				$order->add_order_note(
 					sprintf(
+						// translators: %s is the payment method title.
 						__( 'The payment was NOT approved (%s)', 'sequra' ),
 						$title
 					)
@@ -448,14 +460,24 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				$this->setRiskLevel( $order );
 				break;
 			default:
-				// No implemented should cancel the order in sequra and then if not sent
+				// No implemented should cancel the order in sequra and then if not sent.
 				http_response_code( 409 );
 				die( 'Not implemented' );
 		}
+		/**
+		 * Action hook fired when a webhook is processed.
+		 * 
+		 * @since 2.0.0
+		 */
 		do_action( 'woocommerce_' . $this->id . '_process_webhook', $order, $this );
 		exit();
 	}
 
+	/**
+	 * Set the risk level for the order
+	 * 
+	 * @param WC_Order $order The order to set the risk level.
+	 */
 	private function setRiskLevel( $order ) {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		$risk_level = isset( $_POST['risk_level'] ) ? sanitize_key( $_POST['risk_level'] ) : '';
