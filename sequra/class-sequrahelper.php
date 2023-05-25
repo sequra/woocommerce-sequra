@@ -16,6 +16,7 @@ class SequraHelper {
 	const ISO8601_PATTERN = '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
 	/**
 	 * The Monolog Logger
+	 *
 	 * @var Logger $logger
 	 */
 	protected $logger;
@@ -80,8 +81,8 @@ class SequraHelper {
 		if ( ! class_exists( 'SequraTempOrder' ) ) {
 			require_once $this->dir . 'class-sequratemporder.php';
 		}
-		$this->logger = new Logger('SEQURA-LOGGER');
-		$this->logger->pushHandler( new StreamHandler( PLUGIN_ROOT_PATH . 'plugin.log', $this->settings['debug']? Logger::INFO : Logger::DEBUG ) );
+		$this->logger = new Logger( 'SEQURA-LOGGER' );
+		$this->logger->pushHandler( new StreamHandler( PLUGIN_ROOT_PATH . 'plugin.log', $this->settings['debug'] ? Logger::INFO : Logger::DEBUG ) );
 	}
 	public function get_logger() {
 		return $this->logger;
@@ -190,7 +191,7 @@ class SequraHelper {
 	 * @return boolean
 	 */
 	public function is_valid_auth() {
-		if ( (is_null( $this->valid_auth ) || ! $this->valid_auth) && ! $this->is_ajax_request() && is_admin() ) {
+		if ( ( is_null( $this->valid_auth ) || ! $this->valid_auth ) && ! $this->is_ajax_request() && is_admin() ) {
 			$this->valid_auth = $this->get_client()->isValidAuth();
 			update_option(
 				'SEQURA_VALID_AUTH',
@@ -317,7 +318,7 @@ class SequraHelper {
 			isset( $_POST['signature'] ) &&
 			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )
 		) {
-			$this->logger->error( 'Error: Not valid signature' .  $_POST['signature'] . '!=' . $builder->sign( $order->get_id() ) );
+			$this->logger->error( 'Error: Not valid signature' . $_POST['signature'] . '!=' . $builder->sign( $order->get_id() ) );
 			http_response_code( 498 );
 			die( 'Not valid signature' );
 		}

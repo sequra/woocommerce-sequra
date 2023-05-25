@@ -35,6 +35,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 
 	/**
 	 * Is initialized
+	 * @var boolean
 	 */
 	private static $initialized = false;
 
@@ -44,7 +45,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @var SequraPaymentGateway
 	 */
 	public static $instance = null;
-
+	/**
+	 * Get instance
+	 */
 	public static function get_instance() {
 		if ( ! self::$instance ) {
 			self::$instance = new SequraPaymentGateway();
@@ -140,9 +143,12 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
 				<p>
-					<?php echo wp_kses(
-						__( 'Provided seQura credentials are not valid for the selected environment', 'sequra' ), array()
-					); ?>
+					<?php 
+					echo wp_kses(
+						__( 'Provided seQura credentials are not valid for the selected environment', 'sequra' ),
+						array()
+					); 
+					?>
 				</p>
 			</div>
 		<?php } ?>
@@ -377,7 +383,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	protected function check_ipn( WC_Order $order ) {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		do_action( 'woocommerce_' . $this->id . '_process_payment', $order, $this );
-		$sq_state = isset( $_POST['sq_state'] ) ? sanitize_text_field($_POST['sq_state']) : 'approved';
+		$sq_state = isset( $_POST['sq_state'] ) ? sanitize_text_field( $_POST['sq_state'] ) : 'approved';
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		switch ( $sq_state ) {
 			case 'needs_review':

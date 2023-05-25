@@ -6,7 +6,8 @@
         "behat/behat": "*",
         "phpunit/phpunit": "*",
         "woocommerce/woocommerce-sniffs": "*",
-        "phpmd/phpmd": "dev-master"
+        "phpmd/phpmd": "dev-master",
+        "automattic/vipwpcs": "^2.3"
     },
     "license": "GPL-3.0-or-later",
     "authors": [
@@ -52,7 +53,7 @@
         }
     },
     "require": {
-        "sequra/php-client": "~0.3",
+        "sequra/php-client": "*",
 		"psr/log": "^1.1",
         "monolog/monolog": "^2.3"
     },

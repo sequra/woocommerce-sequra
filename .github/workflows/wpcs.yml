@@ -17,13 +17,15 @@ jobs:
             tools: composer, cs2pr
 
         - name: Install Composer dependencies
+          working-directory: ./sequra
           run: composer install --prefer-dist --no-progress --no-interaction
         
         - name: Run PHP Code Sniffer
-          #run: vendor/bin/phpcs --standard=phpcs.xml --extensions=php --ignore=vendor --report-json=./phpcs.json ./sequra
-          run: vendor/bin/phpcs -q --standard=./phpcs.xml --report-json=./phpcs.json --report=checkstyle ./sequra --ignore=vendor| cs2pr --graceful-warnings
+          working-directory: ./sequra
+          run: vendor/bin/phpcs -q --standard=./phpcs.xml --report-json=./phpcs.json --report=checkstyle ./ --ignore=vendor| cs2pr --graceful-warnings
 
         - name: Update summary
+          working-directory: ./sequra
           run: |
             npm i -g github:10up/phpcs-json-to-md
             phpcs-json-to-md --path ./phpcs.json --output ./phpcs.md

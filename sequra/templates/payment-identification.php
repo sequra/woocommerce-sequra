@@ -48,7 +48,7 @@ if ( $identity_form ) {
 	</script>
 <?php } else { ?>
 	<script type="text/javascript">
-		alert("<?php echo esc_js( __( 'Sorry, something went wrong.\n Please contact the merchant.', 'sequra') ); ?>");
+		alert("<?php echo esc_js( __( 'Sorry, something went wrong.\n Please contact the merchant.', 'sequra' ) ); ?>");
 		document.location.href = '<?php echo esc_js( wc_get_checkout_url() ); ?>';
 	</script>
 <?php } ?>
