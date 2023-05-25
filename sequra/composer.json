@@ -7,7 +7,8 @@
         "phpunit/phpunit": "*",
         "woocommerce/woocommerce-sniffs": "*",
         "phpmd/phpmd": "dev-master",
-        "automattic/vipwpcs": "^2.3"
+        "automattic/vipwpcs": "^2.3",
+        "staabm/annotate-pull-request-from-checkstyle": "^1.8"
     },
     "license": "GPL-3.0-or-later",
     "authors": [
