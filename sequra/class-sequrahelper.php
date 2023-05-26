@@ -82,7 +82,7 @@ class SequraHelper {
 			require_once $this->dir . 'class-sequratemporder.php';
 		}
 		$this->logger = new Logger( 'SEQURA-LOGGER' );
-		$this->logger->pushHandler( new StreamHandler( PLUGIN_ROOT_PATH . 'plugin.log', $this->settings['debug'] ? Logger::INFO : Logger::DEBUG ) );
+		$this->logger->pushHandler( new StreamHandler( wp_upload_dir()['basedir'] . '/wc-logs/sequra.log', $this->settings['debug'] ? Logger::DEBUG : Logger::INFO ) );
 	}
 	public function get_logger() {
 		return $this->logger;
