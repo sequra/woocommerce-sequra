@@ -1,5 +1,4 @@
 <?php
-
 /**
  * A test case parent for testing HTTP requests.
  *

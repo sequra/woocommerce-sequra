@@ -62,9 +62,9 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequra_before_load', $this );
 		$this->id = 'sequra';
 
-		$this->method_title       = __( 'seQura', 'sequra' );
+		$this->method_title = __( 'seQura', 'sequra' );
 		$this->method_description = __( 'seQura payment method\'s configuration', 'sequra' );
-		$this->supports           = array(
+		$this->supports = array(
 			'products',
 		);
 
@@ -76,8 +76,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			$this->is_valid_auth = $this->helper->is_valid_auth();
 			$this->init_form_fields();
 		}
-		$this->enabled    = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : '';
-		$this->title      = isset( $this->settings['title'] ) ? $this->settings['title'] : '';
+		$this->enabled = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : '';
+		$this->title = isset( $this->settings['title'] ) ? $this->settings['title'] : '';
 		$this->has_fields = true;
 
 		// Logs.
@@ -138,16 +138,18 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Admin Panel Options
 	 * - Options for bits like 'title' and availability on a country-by-country basis
 	 * */
-	public function admin_options() {       ?>
-		<h3><?php esc_html_e( 'Configuración Sequra', 'sequra' ); ?></h3>
+	public function admin_options() { ?>
+		<h3>
+			<?php esc_html_e( 'Configuración Sequra', 'sequra' ); ?>
+		</h3>
 		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
 				<p>
-					<?php 
+					<?php
 					echo wp_kses(
 						__( 'Provided seQura credentials are not valid for the selected environment', 'sequra' ),
 						array()
-					); 
+					);
 					?>
 				</p>
 			</div>
@@ -235,7 +237,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			return;
 		}
 		$payment_methods = $this->get_remote_config()->get_available_payment_methods();
-		$payment_fields  = apply_filters( 'woocommerce_sequra_payment_fields', array(), $this );
+		$payment_fields = apply_filters( 'woocommerce_sequra_payment_fields', array(), $this );
 		foreach ( $payment_methods as $method ) {
 			$sq_product_campaign = $this->get_remote_config()->build_unique_product_code( $method ); // Used in the template.
 			require $this->helper->template_loader( 'payment-fields' );
@@ -257,7 +259,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		$order   = new WC_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		$product = $campaign = null;
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['sq_product_campaign'] ) ) {
@@ -266,17 +268,17 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'_sq_method_title',
 				$this->get_remote_config()->get_title_from_unique_product_code( sanitize_text_field( $_POST['sq_product_campaign'] ) )
 			);
-			$tmp      = explode( '_', sanitize_text_field( $_POST['sq_product_campaign'] ) );
-			$product  = $tmp[0];
+			$tmp = explode( '_', sanitize_text_field( $_POST['sq_product_campaign'] ) );
+			$product = $tmp[0];
 			$campaign = isset( $tmp[1] ) ? $tmp[1] : '';
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		do_action( 'woocommerce_sequracheckout_process_payment', $order, $this );
 		$ret = array(
-			'result'   => 'success',
+			'result' => 'success',
 			'redirect' => add_query_arg(
 				array(
-					'sq_product'  => $product,
+					'sq_product' => $product,
 					'sq_campaign' => $campaign,
 				),
 				$order->get_checkout_payment_url( true )
@@ -300,7 +302,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				'sequra'
 			)
 		) . '</p>';
-		$options       = $this->get_valid_product_campaign();
+		$options = $this->get_valid_product_campaign();
 		$identity_form = $this->helper->get_identity_form(
 			apply_filters( 'wc_sequra_pumbaa_options', $options, $order, $this->settings ),
 			$order
@@ -314,13 +316,13 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function get_valid_product_campaign() {
-		$product  = isset( $_GET['sq_product'] ) ? sanitize_key( $_GET['sq_product'] ) : '';
+		$product = isset( $_GET['sq_product'] ) ? sanitize_key( $_GET['sq_product'] ) : '';
 		$campaign = isset( $_GET['sq_campaign'] ) ? sanitize_key( $_GET['sq_campaign'] ) : '';
 		return array_reduce(
 			$this->get_remote_config()->get_merchant_payment_methods() ?: array(),
-			function ( $ret, $method ) use ( $product, $campaign ) {
+			function ($ret, $method) use ($product, $campaign) {
 				if ( $ret['product'] == '' || $method['product'] === $product ) {
-					$ret['product']  = $method['product'];
+					$ret['product'] = $method['product'];
 					$ret['campaign'] = ( $method['campaign'] === $campaign ?
 						$method['campaign'] : $ret['campaign']
 					);
@@ -328,7 +330,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				return $ret;
 			},
 			array(
-				'product'  => '',
+				'product' => '',
 				'campaign' => '',
 			)
 		);
@@ -505,8 +507,8 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return float
 	 */
-	protected function get_order_total() { 
-		$total    = 0;
+	protected function get_order_total() {
+		$total = 0;
 		$order_id = absint( get_query_var( 'order-pay' ) );
 
 		// Gets order total from "pay for order" page.

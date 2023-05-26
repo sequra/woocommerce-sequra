@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Unit tests for gateways.
  *

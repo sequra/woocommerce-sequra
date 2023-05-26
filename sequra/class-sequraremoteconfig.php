@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Proxy to remote configuration.
  *

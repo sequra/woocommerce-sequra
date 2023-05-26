@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Metabox to set service end date.
  *
@@ -22,7 +21,6 @@ class Sequra_Meta_Box_Settings {
 	 * @param WP_Post $post the post.
 	 */
 	public static function output( $post ) {
-		global $post;
 		$is_sequra_banned = get_post_meta( $post->ID, 'is_sequra_banned', true );
 		?>
 		<div class="wc-metaboxes-wrapper">
@@ -57,6 +55,6 @@ class Sequra_Meta_Box_Settings {
 	 * @return void
 	 */
 	public static function add_meta_box() {
-		 add_meta_box( 'sequra_settings', 'seQura settings', 'Sequra_Meta_Box_Settings::output', 'product', 'side', 'default' );
+		add_meta_box( 'sequra_settings', 'seQura settings', 'Sequra_Meta_Box_Settings::output', 'product', 'side', 'default' );
 	}
 }

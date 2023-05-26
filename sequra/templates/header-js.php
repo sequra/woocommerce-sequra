@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Header script for widgets
  *

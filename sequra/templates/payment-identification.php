@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Identification page template.
  *
@@ -12,17 +11,17 @@ if ( $identity_form ) {
 		$identity_form,
 		array(
 			'iframe' => array(
-				'id'          => array(),
-				'name'        => array(),
-				'class'       => array(),
-				'src'         => array(),
+				'id' => array(),
+				'name' => array(),
+				'class' => array(),
+				'src' => array(),
 				'frameborder' => array(),
-				'style'       => array(),
-				'type'        => array(),
+				'style' => array(),
+				'type' => array(),
 			),
 			'script' => array(
 				'type' => array(),
-				'src'  => array(),
+				'src' => array(),
 			),
 		),
 		array( 'https' )
@@ -32,7 +31,7 @@ if ( $identity_form ) {
 	<script type="text/javascript">
 		function tryToOpenPumbaa() {
 			try {
-				window.SequraFormInstance.setCloseCallback(function() {
+				window.SequraFormInstance.setCloseCallback(function () {
 					document.location.href = '<?php echo esc_js( wc_get_checkout_url() ); ?>';
 				});
 				window.SequraFormInstance.show();
@@ -42,7 +41,7 @@ if ( $identity_form ) {
 			}
 		}
 
-		document.addEventListener("DOMContentLoaded", function() {
+		document.addEventListener("DOMContentLoaded", function () {
 			tryToOpenPumbaa();
 		});
 	</script>
