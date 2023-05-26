@@ -276,7 +276,7 @@ class SequraHelper {
 	public function get_approval( $order ) {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		$client  = $this->get_client();
-		 $builder = $this->get_builder( $order );
+		$builder = $this->get_builder( $order );
 		if (
 			isset( $_POST['signature'] ) &&
 			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: seQura
  * Plugin URI: https://sequra.es/
