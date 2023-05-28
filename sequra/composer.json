@@ -35,13 +35,13 @@
             "bash bin/release.sh"
         ],
         "phpcs": [
-            "phpcs -s -p"
+            "./vendor/bin/phpcs -d error_reporting=\"E_ALL&~E_DEPRECATED\" -s --colors -p"
         ],
         "phpcs-pre-commit": [
-            "phpcs -s -p -n"
+            "./vendor/bin/phpcs -d error_reporting=\"E_ALL&~E_DEPRECATED\" -s --colors -p -n"
         ],
         "phpcbf": [
-            "phpcbf -p"
+            "./vendor/bin/phpcbf -d error_reporting=\"E_ALL&~E_DEPRECATED\" -p"
         ]
     },
     "extra": {

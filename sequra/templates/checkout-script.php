@@ -1,3 +1,12 @@
+<?php
+/**
+ * Script for the checkout page.
+ *
+ * @package woocommerce-sequra
+ */
+
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
+?>
 <script>
 	jQuery('.payment_method_sequra').show();
 	if (typeof window.sq_product_campaign === 'undefined') {

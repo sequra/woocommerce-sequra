@@ -35,7 +35,7 @@ class Sequra_Meta_Box_Settings {
 		</div>
 		<?php
 	}
-
+	// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 	/**
 	 * Save meta box data
 	 *
@@ -43,11 +43,12 @@ class Sequra_Meta_Box_Settings {
 	 * @param WP_Post $post the post.
 	 */
 	public static function save( $post_id, $post ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification,WordPress.Security.NonceVerification.Missing
 		$is_banned = isset( $_POST['is_sequra_banned'] ) && 'yes' === $_POST['is_sequra_banned'] ? 'yes' : 'no';
 		update_post_meta( $post_id, 'is_sequra_banned', $is_banned );
-		// phpcs:enable
 	}
+	// phpcs:enable
+
 
 	/**
 	 * Undocumented function

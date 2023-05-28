@@ -22,7 +22,7 @@ jobs:
         
         - name: Run PHP Code Sniffer
           working-directory: ./sequra
-          run: vendor/bin/phpcs -q --standard=./phpcs.xml --report-json=./phpcs.json --report=checkstyle --ignore=vendor --extensions=php ./
+          run: vendor/bin/phpcs -d error_reporting="E_ALL&~E_DEPRECATED" -q --standard=./phpcs.xml --report-json=./phpcs.json --report=checkstyle --ignore=vendor,tests --extensions=php ./
 
         - name: Update summary
           working-directory: ./sequra

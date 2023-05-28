@@ -1,12 +1,12 @@
 <?php
 /**
- * seQura Reporter class.
+ * SeQura Reporter class.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * seQura Reporter Class
+ * SeQura Reporter Class
  * */
 class SequraReporter {
 
@@ -28,6 +28,7 @@ class SequraReporter {
 			return count( $shipped_ids );
 		} elseif ( 200 <= $status && 299 >= $status || 409 === (int) $status ) {
 			$x = json_decode( $client->result, true ); // return array, not object.
+			return $x;
 		}
 		return false;
 	}

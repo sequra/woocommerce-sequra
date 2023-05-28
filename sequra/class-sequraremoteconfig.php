@@ -11,6 +11,7 @@
 class SequraRemoteConfig {
 
 
+
 	/**
 	 * Seqtttings.
 	 *
@@ -52,11 +53,11 @@ class SequraRemoteConfig {
 	 * @var array
 	 */
 	private static $product_family_keys = array(
-		'pp10' => 'CARD',       // Paga Ahora
+		'pp10' => 'CARD',       // Paga Ahora.
 		'fp1'  => 'CARD',
-		'i1'   => 'INVOICE',     // Paga después
+		'i1'   => 'INVOICE',     // Paga después.
 		'pp5'  => 'INVOICE',
-		'pp3'  => 'PARTPAYMENT', // Paga fraccionado
+		'pp3'  => 'PARTPAYMENT', // Paga fraccionado.
 		'pp6'  => 'PARTPAYMENT',
 		'pp9'  => 'PARTPAYMENT',
 		'sp1'  => 'PARTPAYMENT',
@@ -75,6 +76,7 @@ class SequraRemoteConfig {
 	/**
 	 * Undocumented function
 	 *
+	 * @param string $field the field to return.
 	 * @return array
 	 */
 	public function get_merchant_active_payment_products( $field = 'product' ) {
@@ -116,8 +118,8 @@ class SequraRemoteConfig {
 	public function get_title_from_product_campaign( $product, $campaign ) {
 		foreach ( $this->get_merchant_payment_methods() as $method ) {
 			if (
-				$method['product'] == $product &&
-				( ! $campaign || ! isset( $method['campaign'] ) || $method['campaign'] == $campaign )
+				$method['product'] === $product &&
+				( ! $campaign || ! isset( $method['campaign'] ) || $method['campaign'] === $campaign )
 			) {
 				return $method['title'];
 			}
@@ -144,19 +146,21 @@ class SequraRemoteConfig {
 		$sq_products = self::get_merchant_active_payment_products();
 		update_option(
 			'SEQURA_ACTIVE_METHODS',
+			// phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 			serialize( $sq_products )
+			// phpcs:enable
 		);
-		if ( in_array( 'i1', $sq_products ) ) {
+		if ( in_array( 'i1', $sq_products, true ) ) {
 			update_option( 'SEQURA_INVOICE_PRODUCT', 'i1' );
 		}
-		if ( in_array( 'pp5', $sq_products ) ) {
+		if ( in_array( 'pp5', $sq_products, true ) ) {
 			update_option( 'SEQURA_CAMPAIGN_PRODUCT', 'pp5' );
 		}
-		if ( in_array( 'pp3', $sq_products ) ) {
+		if ( in_array( 'pp3', $sq_products, true ) ) {
 			update_option( 'SEQURA_PARTPAYMENT_PRODUCT', 'pp3' );
-		} elseif ( in_array( 'pp6', $sq_products ) ) {
+		} elseif ( in_array( 'pp6', $sq_products, true ) ) {
 			update_option( 'SEQURA_PARTPAYMENT_PRODUCT', 'pp6' );
-		} elseif ( in_array( 'pp9', $sq_products ) ) {
+		} elseif ( in_array( 'pp9', $sq_products, true ) ) {
 			update_option( 'SEQURA_PARTPAYMENT_PRODUCT', 'pp9' );
 		}
 	}
@@ -230,7 +234,7 @@ class SequraRemoteConfig {
 	 */
 	private function flatten_payment_options( $options ) {
 		return array_reduce(
-			$options ?: array(),
+			$options ? $options : array(),
 			function ( $methods, $family ) {
 				return array_merge(
 					$methods,
@@ -252,7 +256,9 @@ class SequraRemoteConfig {
 				get_option( 'SEQURA_PAYMENT_METHODS' )
 			);
 			if ( mb_strlen( self::$raw_merchant_payment_methods, '8bit' ) < 4096 && file_exists( self::$raw_merchant_payment_methods ) ) {
+				// phpcs:disable WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
 				self::$raw_merchant_payment_methods = file_get_contents( self::$raw_merchant_payment_methods );
+				// phpcs:enable
 			}
 		}
 		return json_decode( self::$raw_merchant_payment_methods, true );

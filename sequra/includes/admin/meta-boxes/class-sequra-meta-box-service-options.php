@@ -15,17 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sequra_Meta_Box_Service_Options {
 
 
+
 	/**
 	 * Output the metabox
 	 *
 	 * @param WP_Post $post the post.
 	 */
 	public static function output( $post ) {
-		$core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
-		$is_sequra_service = get_post_meta( $post->ID, 'is_sequra_service', true );
-		$sequra_service_end_date = get_post_meta( $post->ID, 'sequra_service_end_date', true );
+		$core_settings                    = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
+		$is_sequra_service                = get_post_meta( $post->ID, 'is_sequra_service', true );
+		$sequra_service_end_date          = get_post_meta( $post->ID, 'sequra_service_end_date', true );
 		$sequra_desired_first_charge_date = get_post_meta( $post->ID, 'sequra_desired_first_charge_date', true );
-		$sequra_registration_amount = get_post_meta( $post->ID, 'sequra_registration_amount', true );
+		$sequra_registration_amount       = get_post_meta( $post->ID, 'sequra_registration_amount', true );
 		if ( ! $sequra_service_end_date ) {
 			$sequra_service_end_date = $core_settings['default_service_end_date'];
 		} ?>
@@ -36,10 +37,7 @@ class Sequra_Meta_Box_Service_Options {
 						<label for="sequra_service_end_date">
 							<?php esc_html_e( 'Service end date', 'sequra' ); ?>
 						</label>
-						<input id="sequra_service_end_date" name="sequra_service_end_date" type="text"
-							value="<?php echo esc_attr( $sequra_service_end_date ); ?>"
-							placeholder="<?php esc_attr_e( 'date or period in ISO8601 format', 'sequra' ); ?>"
-							pattern="<?php echo esc_attr( SequraHelper::ISO8601_PATTERN ); ?>" /><br />
+						<input id="sequra_service_end_date" name="sequra_service_end_date" type="text" value="<?php echo esc_attr( $sequra_service_end_date ); ?>" placeholder="<?php esc_attr_e( 'date or period in ISO8601 format', 'sequra' ); ?>" pattern="<?php echo esc_attr( SequraHelper::ISO8601_PATTERN ); ?>" /><br />
 						<small>
 							<?php esc_html_e( 'Date i.e: 2021-06-06 or period i.e: P1Y for 1 year', 'sequra' ); ?>
 						</small>
@@ -49,10 +47,7 @@ class Sequra_Meta_Box_Service_Options {
 							<label for="sequra_desired_first_charge_date">
 								<?php esc_html_e( 'First instalment delay or date', 'sequra' ); ?>
 							</label>
-							<input id="sequra_desired_first_charge_date" name="sequra_desired_first_charge_date" type="text"
-								value="<?php echo esc_attr( $sequra_desired_first_charge_date ); ?>"
-								placeholder="<?php esc_attr_e( 'date or period in ISO8601 format', 'sequra' ); ?>"
-								pattern="<?php echo esc_attr( SequraHelper::ISO8601_PATTERN ); ?>" /><br />
+							<input id="sequra_desired_first_charge_date" name="sequra_desired_first_charge_date" type="text" value="<?php echo esc_attr( $sequra_desired_first_charge_date ); ?>" placeholder="<?php esc_attr_e( 'date or period in ISO8601 format', 'sequra' ); ?>" pattern="<?php echo esc_attr( SequraHelper::ISO8601_PATTERN ); ?>" /><br />
 							<small>
 								<?php esc_html_e( 'Date i.e: 2021-01-01 or period i.e: P1M for 1 month', 'sequra' ); ?>
 							</small>
@@ -63,8 +58,7 @@ class Sequra_Meta_Box_Service_Options {
 							<label for="sequra_registration_amount">
 								<?php esc_html_e( 'Registration amount', 'sequra' ); ?>
 							</label>
-							<input id="sequra_registration_amount" name="sequra_registration_amount" type="number"
-								value="<?php echo esc_attr( $sequra_registration_amount ); ?>" step="0.01" /> &euro;<br />
+							<input id="sequra_registration_amount" name="sequra_registration_amount" type="number" value="<?php echo esc_attr( $sequra_registration_amount ); ?>" step="0.01" /> &euro;<br />
 							<small>
 								<?php esc_html_e( 'Part of the price that will be paid as registration fee', 'sequra' ); ?>
 							</small>
@@ -98,6 +92,7 @@ class Sequra_Meta_Box_Service_Options {
 		<?php
 	}
 
+	// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 	/**
 	 * Save meta box data
 	 *
@@ -105,7 +100,6 @@ class Sequra_Meta_Box_Service_Options {
 	 * @param WP_Post $post the post.
 	 */
 	public static function save( $post_id, $post ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		$is_service = isset( $_POST['is_sequra_service'] ) && 'no' === $_POST['is_sequra_service'] ? 'no' : 'yes';
 		update_post_meta( $post_id, 'is_sequra_service', $is_service );
 		$service_end_date = isset( $_POST['sequra_service_end_date'] ) ?
@@ -124,14 +118,15 @@ class Sequra_Meta_Box_Service_Options {
 			sanitize_text_field( wp_unslash( $_POST['sequra_registration_amount'] ) ) :
 			'';
 		update_post_meta( $post_id, 'sequra_registration_amount', $registration_amount );
-		// phpcs:enable
 	}
+	// phpcs:enable
+
 	/**
 	 * Show warning
 	 *
 	 * @return void
 	 */
-	public static function warn() {
+	public static function warn() {         
 		?>
 		<div class="notice error sequra_meta_box_service_en_date is-dismissible">
 			<p>

@@ -4,6 +4,8 @@
  *
  * @package woocommerce-sequra
  */
+
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 ?>
 <div id="sequra_invoice_teaser_container" style="clear:both"><div id="sequra_invoice_teaser"></div></div>
 <script type="text/javascript">

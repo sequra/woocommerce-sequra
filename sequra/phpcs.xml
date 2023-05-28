@@ -21,7 +21,7 @@
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="sequra" />
+			<property name="text_domain" type="array" value="sequra,woocommerce" />
 		</properties>
 	</rule>
 

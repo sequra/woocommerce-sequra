@@ -5,6 +5,7 @@
  * @package woocommerce-sequra
  */
 
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 if ( isset( $atts['color'] ) ) { ?>
 	<style>
 		#sequra-banner-invoice .sqblock .sqnoc,

@@ -5,6 +5,7 @@
  * @package woocommerce-sequra
  */
 
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 ?>
 <script type='text/javascript'>
 	/*Customize if needed*/

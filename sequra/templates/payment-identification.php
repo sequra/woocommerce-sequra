@@ -5,23 +5,24 @@
  * @package woocommerce-sequra
  */
 
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 if ( $identity_form ) {
 	add_filter( 'safe_style_css', 'SequraHelper::allow_css_attributes' );
 	echo wp_kses(
 		$identity_form,
 		array(
 			'iframe' => array(
-				'id' => array(),
-				'name' => array(),
-				'class' => array(),
-				'src' => array(),
+				'id'          => array(),
+				'name'        => array(),
+				'class'       => array(),
+				'src'         => array(),
 				'frameborder' => array(),
-				'style' => array(),
-				'type' => array(),
+				'style'       => array(),
+				'type'        => array(),
 			),
 			'script' => array(
 				'type' => array(),
-				'src' => array(),
+				'src'  => array(),
 			),
 		),
 		array( 'https' )
