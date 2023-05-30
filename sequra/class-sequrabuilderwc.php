@@ -834,7 +834,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$func = 'get_' . $field_name;
 
 		return method_exists( get_class( $this->current_order ), $func ) ?
-			$this->current_order->$func() : self::notNull( $this->current_order->$field_name );
+			$this->current_order->$func() : null;
 	}
 	/**
 	 * Undocumented function

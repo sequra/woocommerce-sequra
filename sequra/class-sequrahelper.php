@@ -441,7 +441,10 @@ class SequraHelper {
 	 * @return string
 	 */
 	public function get_identity_form( array $options, WC_Order $wc_order = null ) {
-		if ( is_null( $this->identity_form[ $options['product'] . '_' . $options['campaign'] ] ) && $this->start_solicitation( $wc_order ) ) {
+		if (
+			( is_null( $this->identity_form ) || is_null( $this->identity_form[ $options['product'] . '_' . $options['campaign'] ] ) )
+			&& $this->start_solicitation( $wc_order )
+		) {
 			$this->identity_form[ $options['product'] . '_' . $options['campaign'] ] = $this->get_client()->getIdentificationForm(
 				$this->get_client()->getOrderUri(),
 				$options

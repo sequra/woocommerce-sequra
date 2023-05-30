@@ -389,7 +389,7 @@ function woocommerce_sequra_init() {
 		remove_action( 'wp_footer', 'woocommerce_sequra_add_widget_to_product_page' );
 	}
 	/**
-	 * SeQura pp simulator short code
+	 * SeQura widget short code
 	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' dest='.price_container']
 	 *
 	 * @param array    $atts       Attributes.
