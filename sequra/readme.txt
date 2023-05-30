@@ -49,7 +49,7 @@ Obsessed with conversion and recurrence
 
 * Security and privacy, we do not sell your personal data to third parties nor share with other companies
 
-
+ads
 == Frequently Asked Questions ==
 
 = I can't install the plugin, the plugin is displayed incorrectly =
