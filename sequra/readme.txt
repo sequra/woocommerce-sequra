@@ -24,18 +24,21 @@ This WooCommerce plugin allows you to make payments with [seQura](https://sequra
 > Flexible payment solutions adapted to your business.
 
 Widest flexible payment solutions in the market:
+
 * Buy now pay later 
 * Pay in 3, no interest
 * Installments, up to 24 months
 * Flexi, combines interest-free bnpl with long-term financing in a single purchase experience
 
 Your customers in good hands:
+
 * Cost transparency and clarity
 * Local support teams to deliver the best shopper experience
 * Secure data, we don’t share your data with anyone or use your information to sell our own or third-party products 
 
 
 Obsessed with conversion and recurrence
+
 * We adapt to your business, solutions for every sector, and buyer profile
 * The highest acceptance rate in Southern Europe thanks to our own risk algorithm, created and optimized for the local market
 * Instant approval. A frictionless credit-purchase experience, buy-in seconds without document uploads
@@ -44,9 +47,7 @@ Obsessed with conversion and recurrence
 = Benefits for customers =
 
 * Widest range of flexible payment solutions available on the market, up to 4 different solutions to pay as you want.
-
 * Access to credit with no paperwork, just complete 5 fields to be instantly approved
-
 * Security and privacy, we do not sell your personal data to third parties nor share with other companies
 
 
