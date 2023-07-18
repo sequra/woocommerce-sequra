@@ -1188,7 +1188,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$data = array(
 			'name'           => 'WooCommerce',
 			'version'        => self::notNull( WOOCOMMERCE_VERSION ),
-			'plugin_version' => 'fc' . get_option( 'SEQURA_VERSION' ),
+			'plugin_version' => self::notNull( SEQURA_VERSION ),
 			'php_version'    => phpversion(),
 			'php_os'         => PHP_OS,
 			'uname'          => php_uname(),
