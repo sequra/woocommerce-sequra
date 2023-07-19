@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class WC_Helper_Order.
  *

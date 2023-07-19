@@ -1,11 +1,11 @@
 <?php
-
 /**
  * Part payment teaser template.
  *
  * @package woocommerce-sequra
  */
 
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 ?>
 <script type='text/javascript'>
 	/*Customize if needed*/
@@ -26,8 +26,8 @@
 				dest = custom_dest;
 			}
 		<?php } ?>
-		SequraHelper.waitForElement(the_price_container).then(function() {
-			SequraHelper.waitForElement(dest).then(function() {
+		SequraHelper.waitForElement(the_price_container).then(function () {
+			SequraHelper.waitForElement(dest).then(function () {
 				SequraHelper.drawPromotionWidget(the_price_container, dest, sq_product, theme, 0, campaign, <?php echo esc_js( $registration_amount ); ?>);
 				Sequra.onLoad(Sequra.refreshComponents);
 			});
@@ -44,13 +44,13 @@
 		Sequra.onLoad(Sequra.refreshComponents);
 	}
 
-	document.addEventListener("DOMContentLoaded", function() {
+	document.addEventListener("DOMContentLoaded", function () {
 		displaySequra<?php echo esc_js( $product ); ?>Teaser(
-			'<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">"),
-			'<?php echo esc_js( $product ); ?>',
-			'<?php echo esc_js( $campaign ); ?>',
-			'<?php echo esc_js( $theme ); ?>'.replace(/\&quot\;/g, "\"")
-		);
+		'<?php echo esc_js( $price_container ); ?>'.replace(/\&gt\;/g, ">"),
+		'<?php echo esc_js( $product ); ?>',
+		'<?php echo esc_js( $campaign ); ?>',
+		'<?php echo esc_js( $theme ); ?>'.replace(/\&quot\;/g, "\"")
+	);
 		jQuery('.variations_form')
 			.on('hide_variation', updateSequra<?php echo esc_js( $product ); ?>Teaser)
 			.on('show_variation', updateSequra<?php echo esc_js( $product ); ?>Teaser);

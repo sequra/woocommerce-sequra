@@ -5,17 +5,26 @@
  * @package woocommerce-sequra
  */
 
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 if ( isset( $atts['color'] ) ) { ?>
 	<style>
 		#sequra-banner-partpayment .sqblock .sqnoc,
 		#sequra-banner-partpayment .sequra-educational-popup {
-			color: <?php echo esc_html( $atts['color'] ); ?>;
+			color:
+				<?php echo esc_html( $atts['color'] ); ?>
+			;
 		}
+
 		#sequra-banner-partpayment .sequra-educational-popup {
-			border-color: <?php echo esc_html( $atts['color'] ); ?>;
+			border-color:
+				<?php echo esc_html( $atts['color'] ); ?>
+			;
 		}
+
 		#sequra-banner-partpayment #block1 {
-			background: <?php echo esc_html( $atts['color'] ); ?>;
+			background:
+				<?php echo esc_html( $atts['color'] ); ?>
+			;
 		}
 	</style>
 <?php } ?>

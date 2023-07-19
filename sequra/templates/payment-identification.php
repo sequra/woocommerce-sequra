@@ -1,11 +1,11 @@
 <?php
-
 /**
  * Identification page template.
  *
  * @package woocommerce-sequra
  */
 
+// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 if ( $identity_form ) {
 	add_filter( 'safe_style_css', 'SequraHelper::allow_css_attributes' );
 	echo wp_kses(
@@ -32,7 +32,7 @@ if ( $identity_form ) {
 	<script type="text/javascript">
 		function tryToOpenPumbaa() {
 			try {
-				window.SequraFormInstance.setCloseCallback(function() {
+				window.SequraFormInstance.setCloseCallback(function () {
 					document.location.href = '<?php echo esc_js( wc_get_checkout_url() ); ?>';
 				});
 				window.SequraFormInstance.show();
@@ -42,13 +42,13 @@ if ( $identity_form ) {
 			}
 		}
 
-		document.addEventListener("DOMContentLoaded", function() {
+		document.addEventListener("DOMContentLoaded", function () {
 			tryToOpenPumbaa();
 		});
 	</script>
 <?php } else { ?>
 	<script type="text/javascript">
-		alert("<?php echo esc_js( __( 'Sorry, something went wrong.\n Please contact the merchant.', 'sequra') ); ?>");
+		alert("<?php echo esc_js( __( 'Sorry, something went wrong.\n Please contact the merchant.', 'sequra' ) ); ?>");
 		document.location.href = '<?php echo esc_js( wc_get_checkout_url() ); ?>';
 	</script>
 <?php } ?>

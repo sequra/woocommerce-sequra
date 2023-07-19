@@ -1,0 +1,33 @@
+name: WPCS check
+
+on: pull_request
+
+jobs:
+  phpcs:
+      name: VIPCS
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@master
+
+        - name: Setup PHP
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: '7.4'
+            coverage: none
+            tools: composer, cs2pr
+
+        - name: Install Composer dependencies
+          working-directory: ./sequra
+          run: composer install --prefer-dist --no-progress --no-interaction
+        
+        - name: Run PHP Code Sniffer
+          working-directory: ./sequra
+          run: vendor/bin/phpcs -d error_reporting="E_ALL&~E_DEPRECATED" -q --standard=./phpcs.xml --report-json=./phpcs.json --report=checkstyle --ignore=vendor,tests --extensions=php ./
+
+        - name: Update summary
+          working-directory: ./sequra
+          run: |
+            npm i -g github:10up/phpcs-json-to-md
+            phpcs-json-to-md --path ./phpcs.json --output ./phpcs.md
+            cat phpcs.md >> $GITHUB_STEP_SUMMARY
+          if: always()

@@ -1,12 +1,12 @@
 <?php
 /**
- * seQura Temp Order class.
+ * SeQura Temp Order class.
  *
  * @package woocommerce-sequra
  */
 
 /**
- * seQura Temp Order Class
+ * SeQura Temp Order Class
  * Stores the checkout information temporarily in a format similar to WC_Order.
  * */
 class SequraTempOrder {
@@ -34,6 +34,7 @@ class SequraTempOrder {
 		$this->shipping_country    = isset( $this->data['shipping_country'] ) ? $this->data['shipping_country'] : '';
 		$this->status              = null;
 	}
+	// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 	/**
 	 * Magic function
 	 *
@@ -46,4 +47,5 @@ class SequraTempOrder {
 			return $this->data[ substr( $name, 4 ) ];
 		}
 	}
+	// phpcs:enable
 }

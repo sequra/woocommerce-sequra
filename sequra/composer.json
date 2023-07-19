@@ -6,7 +6,9 @@
         "behat/behat": "*",
         "phpunit/phpunit": "*",
         "woocommerce/woocommerce-sniffs": "*",
-        "phpmd/phpmd": "dev-master"
+        "phpmd/phpmd": "dev-master",
+        "automattic/vipwpcs": "^2.3",
+        "staabm/annotate-pull-request-from-checkstyle": "^1.8"
     },
     "license": "GPL-3.0-or-later",
     "authors": [
@@ -33,13 +35,13 @@
             "bash bin/release.sh"
         ],
         "phpcs": [
-            "phpcs -s -p"
+            "./vendor/bin/phpcs -d error_reporting=\"E_ALL&~E_DEPRECATED\" -s --colors -p"
         ],
         "phpcs-pre-commit": [
-            "phpcs -s -p -n"
+            "./vendor/bin/phpcs -d error_reporting=\"E_ALL&~E_DEPRECATED\" -s --colors -p -n"
         ],
         "phpcbf": [
-            "phpcbf -p"
+            "./vendor/bin/phpcbf -d error_reporting=\"E_ALL&~E_DEPRECATED\" -p"
         ]
     },
     "extra": {
@@ -52,7 +54,9 @@
         }
     },
     "require": {
-        "sequra/php-client": "~0.3"
+        "sequra/php-client": "*",
+		"psr/log": "^1.1",
+        "monolog/monolog": "^2.3"
     },
     "config": {
         "allow-plugins": {

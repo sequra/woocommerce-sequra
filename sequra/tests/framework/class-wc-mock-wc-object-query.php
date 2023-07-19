@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Mock of WC_Object_Query for testing WC_Object_Query in isolation.
  */
