@@ -102,6 +102,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.3 =
+* Fix: Delivery report generation when order had multiple discounts
+= 2.0.2 =
+* Update: Information in readme.txt
+* Update: Compatibility with WooCommerce 7.9
+* Added: Log to file when debug mode is activated. 
 = 2.0.1 =
 * Update: Information in readme.txt
 = 2.0.0 =
