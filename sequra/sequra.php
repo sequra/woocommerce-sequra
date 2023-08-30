@@ -3,15 +3,15 @@
  * Plugin Name: seQura
  * Plugin URI: https://sequra.es/
  * Description: Ofrece las opciones de pago con seQura
- * Version: 2.0.3
+ * Version: 2.0.4
  * Author: "seQura Tech" <dev+wordpress@sequra.es>
  * Author URI: https://engineering.sequra.es/
  * WC requires at least: 4.0
- * WC tested up to: 7.9
+ * WC tested up to: 8.0
  * Text Domain: sequra
  * Domain Path: /i18n/languages/
  * Requires at least: 5.9
- * Requires PHP: 7.2
+ * Requires PHP: 7.3
  *
  * Copyright (C) 2023 seQura Tech
  *
@@ -49,3 +49,14 @@ if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/wooco
 		}
 	);
 }
+
+/**
+ * Declare compatibility with WC HPOS.
+ *
+ * @return void
+ */
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+	}
+} );
