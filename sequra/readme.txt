@@ -2,9 +2,9 @@
 Contributors: sequradev
 Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.2
-Stable tag: 2.0.3
-Requires PHP: 7.2
+Tested up to: 6.3
+Stable tag: 2.0.4
+Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.4 =
+* Added: HPOS Compatibility declaration
+* Update: Compatibility with WooCommerce 8.0
 = 2.0.3 =
 * Fix: Delivery report generation when order had multiple discounts
 = 2.0.2 =
