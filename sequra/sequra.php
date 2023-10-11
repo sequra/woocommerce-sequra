@@ -3,11 +3,11 @@
  * Plugin Name: seQura
  * Plugin URI: https://sequra.es/
  * Description: Ofrece las opciones de pago con seQura
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: "seQura Tech" <dev+wordpress@sequra.es>
  * Author URI: https://engineering.sequra.es/
  * WC requires at least: 4.0
- * WC tested up to: 8.0
+ * WC tested up to: 8.2
  * Text Domain: sequra
  * Domain Path: /i18n/languages/
  * Requires at least: 5.9
@@ -35,7 +35,7 @@
 
 // Make sure old WooCommerce seQura is not installed.
 if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequra' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequracheckout' ) ) {
-	define( 'SEQURA_VERSION', '2.0.3' );
+	define( 'SEQURA_VERSION', '2.0.5' );
 	define( 'WC_SEQURA_PLG_PATH', WP_PLUGIN_DIR . '/' . basename( plugin_dir_path( __FILE__ ) ) . '/' );
 	define( 'SEQURA_SIGNUP_URL', 'https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg' );
 	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'sequrapayment_action_links' );
