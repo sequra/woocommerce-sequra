@@ -2,8 +2,8 @@
 Contributors: sequradev
 Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.3
-Stable tag: 2.0.4
+Tested up to: 6.3.2
+Stable tag: 2.0.5
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -76,7 +76,7 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 * PHP version 7.2 or greater
 * PHP extensions enabled: cURL, JSON
 * WordPress 5.9 or greater
-* WooCommerce 4.0 or greater
+* WooCommerce 6.0 or greater
 * Merchant account at seQura, [sign up here](https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg)
 
 = Automatic installation =
@@ -102,6 +102,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.5 =
+* FIX: Copy billing address to shiping address when ship_to_different_address is not set
+* Update: compatibility till WooCommerce 8.2
 = 2.0.4 =
 * Added: HPOS Compatibility declaration
 * Update: Compatibility with WooCommerce 8.0
