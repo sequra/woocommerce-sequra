@@ -29,7 +29,9 @@
 		SequraHelper.waitForElement(the_price_container).then(function () {
 			SequraHelper.waitForElement(dest).then(function () {
 				SequraHelper.drawPromotionWidget(the_price_container, dest, sq_product, theme, 0, campaign, <?php echo esc_js( $registration_amount ); ?>);
-				Sequra.onLoad(Sequra.refreshComponents);
+				Sequra.onLoad(function () {
+					Sequra.refreshComponents();
+				});
 			});
 		});
 	}
@@ -41,7 +43,9 @@
 		}
 		var price_in_cents = SequraHelper.selectorToCents(the_price_container);
 		jQuery('[data-product=<?php echo esc_js( $product ); ?>]').attr('data-amount', price_in_cents);
-		Sequra.onLoad(Sequra.refreshComponents);
+		Sequra.onLoad(function () {
+			Sequra.refreshComponents();
+		});
 	}
 
 	document.addEventListener("DOMContentLoaded", function () {
