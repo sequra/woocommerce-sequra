@@ -407,11 +407,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$item['description'] = (string) wp_strip_all_tags( self::notNull( get_post( $_product->get_id() )->post_content ) );
 			$item['product_id']  = self::notNull( $_product->get_id() );
 			$item['url']         = (string) self::notNull( get_permalink( $_product->get_id() ) );
-			if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
-				$item['category'] = (string) self::notNull( wp_strip_all_tags( $_product->get_categories() ) );
-			} else {
-				$item['category'] = (string) self::notNull( wp_strip_all_tags( wc_get_product_category_list( $_product->get_id() ) ) );
-			}
+			$item['category'] = (string) self::notNull( wp_strip_all_tags( wc_get_product_category_list( $_product->get_id() ) ) );
 			$items[] = $item;
 		}
 		return $items;
@@ -633,9 +629,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	public function getShippedOrderList() {
 		global $woocommerce;
-		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
-			return $this->getShippedOrderList_legacy();
-		}
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		$args = array(
 			'limit'      => -1,
@@ -666,44 +659,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		return $this->shipped_ids;
 	}
 
-	/**
-	 * Undocumented function
-	 *
-	 * @return array
-	 */
-	public function getShippedOrderList_legacy() {
-		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query, WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-		$args = array(
-			'numberposts' => -1,
-			'meta_query'  => array(
-				'relation' => 'AND',
-				array(
-					'key'     => '_sent_to_sequra',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'     => '_payment_method',
-					'compare' => 'LIKE',
-					'value'   => 'sequra',
-				),
-			),
-			'post_type'   => 'shop_order',
-			'post_status' => 'publish',
-			'tax_query'   => array(
-				array(
-					'taxonomy' => 'shop_order_status',
-					'field'    => 'slug',
-					'terms'    => 'completed',
-				),
-			),
-			'return'      => 'ids',
-		);
-		// phpcs:enable
-		// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.get_posts_get_posts
-		$this->shipped_ids = get_posts( $args );
-		// phpcs:enable
-		return $this->shipped_ids;
-	}
 	// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 	/**
 	 * Undocumented function
@@ -752,10 +707,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	protected function order_sent_at() {
 		global $woocommerce;
-		if (
-			version_compare( $woocommerce->version, '3.0.0', '<' ) ||
-			is_null( $this->current_order->get_date_completed() )
-		) {
+		if ( is_null( $this->current_order->get_date_completed() ) ) {
 			return gmdate( 'c', strtotime( $this->current_order->completed_date ) );
 		}
 		return $this->current_order->get_date_completed()->date( 'c' );
@@ -1019,9 +971,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	public function getOrderStats() {
 		global $woocommerce;
-		if ( version_compare( $woocommerce->version, '3.0.0', '<' ) ) {
-			return $this->getOrderStats_legacy();
-		}
 		$stats = array();
 		if ( false && get_option( 'sequra_allowstats' ) ) {
 			return $stats;
@@ -1056,56 +1005,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 				$stat['status']     = self::mapStatus( $stat['raw_status'] );
 			}
 
-			$stats[] = $stat;
-		}
-
-		return $stats;
-	}
-	/**
-	 * Undocumented function
-	 *
-	 * @return array
-	 */
-	public function getOrderStats_legacy() {
-		$stats = array();
-		if ( false && get_option( 'sequra_allowstats' ) ) {
-			return $stats;
-		}
-		$args = array(
-			'numberposts' => -1,
-			'post_type'   => 'shop_order',
-			'date_query'  => array(
-				array(
-					'column' => 'post_date_gmt',
-					'after'  => '1 week ago',
-				),
-			),
-		);
-		// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.get_posts_get_posts
-		$posts = get_posts( $args );
-		// phpcs:enable
-		foreach ( $posts as $post ) {
-			$this->current_order = new WC_Order( $post->ID );
-			$date                = strtotime( $post->post_date );
-			$stat                = array(
-				'completed_at'       => self::dateOrBlank( gmdate( 'c', $date ) ),
-				'merchant_reference' => $this->orderMerchantReference(),
-				'currency'           => $this->current_order->get_currency(),
-			);
-			if ( true || get_option( 'sequra_allowstats_amount' ) ) {
-				$stat['amount'] = self::integerPrice( $this->current_order->get_total() );
-			}
-			if ( true || get_option( 'sequra_allowstats_country' ) ) {
-				$stat['country'] = self::notNull( $this->current_order->billing_country, 'ES' );
-			}
-			if ( true || get_option( 'sequra_allowstats_payment' ) ) {
-				$stat['payment_method_raw'] = $this->current_order->payment_method;
-				$stat['payment_method']     = self::mapPaymentMethod( $stat['payment_method_raw'] );
-			}
-			if ( true || get_option( 'sequra_allowstats_status' ) ) {
-				$stat['raw_status'] = $this->current_order->get_status();
-				$stat['status']     = self::mapStatus( $stat['raw_status'] );
-			}
 			$stats[] = $stat;
 		}
 

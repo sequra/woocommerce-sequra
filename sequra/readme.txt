@@ -2,8 +2,8 @@
 Contributors: sequradev
 Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.3.2
-Stable tag: 2.0.5
+Tested up to: 6.4
+Stable tag: 2.0.6
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -102,6 +102,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.6 =
+* FIX javascript warning due to changes in the integrations assets
+* FIX php warning due to sequra/php-client package upgrade
+* IMP Removed all referencces to deprecated `without_tax` values.
+* FIX Add dependance on the "enabled in product" admin option to "Simulator params" option.
 = 2.0.5 =
 * FIX: Copy billing address to shiping address when ship_to_different_address is not set
 * Update: compatibility till WooCommerce 8.2
