@@ -102,14 +102,11 @@ class SequraBuilderLP extends SequraBuilderWC {
 			$item["type"] = 'invoice_fee';
 			if ( $this->_current_order instanceof SequraTempOrder ) {
 				$item["total_with_tax"] = self::integerPrice( $fee->amount );
-				$item["tax_rate"]       = 0;
 				if ( $fee->tax ) {
 					$item["total_with_tax"] += self::integerPrice( $fee->tax );
 				}
-				$item["total_without_tax"] = $item["total_with_tax"];
 			} else {
-				$item["total_without_tax"] = $item["total_with_tax"] = self::integerPrice( $fee['line_total'] );
-				$item["tax_rate"]          = 0;
+				$item["total_with_tax"] = self::integerPrice( $fee['line_total'] );
 			}
 			$items[] = $item;
 		}
