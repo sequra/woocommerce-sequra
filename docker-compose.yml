@@ -14,7 +14,7 @@ x-wp-env: &wp-env
 
 x-wp-volumes: &wp-volumes
   volumes:
-    - "sq_wordpress:/var/www/html:rw"
+    - "${SQ_WORDPRESS_DATA_DIR:-sq_wordpress}:/var/www/html:rw"
     - ./.devcontainer/wp-config.php:/var/www/html/wp-config.php
     #- ../..:/workspaces
     - ./sequra:/var/www/html/wp-content/plugins/sequra:ro
