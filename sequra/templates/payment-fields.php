@@ -24,7 +24,7 @@
 			<?php } ?>
 			<?php if ( ! in_array( $method['product'], array( 'fp1' ), true ) ) { ?>
 				<span id="sequra_info_link" class="sequra-educational-popup sequra_more_info"
-					data-amount="<?php echo esc_attr( (int) $this->get_order_total() * 100 ); ?>"
+					data-amount="<?php echo esc_attr( round($this->get_order_total() * 100) ); ?>"
 					data-product="<?php echo esc_attr( $method['product'] ); ?>"
 					data-campaign="<?php echo esc_attr( $method['campaign'] ); ?>" rel="sequra_invoice_popup_checkout"
 					title="Más información"><span class="sequra-more-info"> + info</span>
@@ -36,7 +36,7 @@
 		<?php if ( isset( $method['cost_description'] ) ) { ?>
 			<span id="sequra_cost_link_<?php echo esc_attr( $sq_product_campaign ); ?>"
 				class="sequra-educational-popup sequra_cost_description"
-				data-amount="<?php echo esc_attr( (int) $this->get_order_total() * 100 ); ?>"
+				data-amount="<?php echo esc_attr( round($this->get_order_total() * 100) ); ?>"
 				data-product="<?php echo esc_attr( $method['product'] ); ?>"
 				data-campaign="<?php echo esc_attr( $method['campaign'] ); ?>" rel="sequra_invoice_popup_checkout"
 				title="Más información">

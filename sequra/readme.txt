@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.4
-Stable tag: 2.0.6
+Stable tag: 2.0.7
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -102,6 +102,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.7 =
+* FIX rounding amount total for the +info popup in the checkout
 = 2.0.6 =
 * FIX javascript warning due to changes in the integrations assets
 * FIX php warning due to sequra/php-client package upgrade

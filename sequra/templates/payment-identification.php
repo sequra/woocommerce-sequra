@@ -41,7 +41,6 @@ if ( $identity_form ) {
 				setTimeout(tryToOpenPumbaa, 500);
 			}
 		}
-
 		document.addEventListener("DOMContentLoaded", function () {
 			tryToOpenPumbaa();
 		});

@@ -3,11 +3,11 @@
  * Plugin Name: seQura
  * Plugin URI: https://sequra.es/
  * Description: Ofrece las opciones de pago con seQura
- * Version: 2.0.6
+ * Version: 2.0.7
  * Author: "seQura Tech" <dev+wordpress@sequra.es>
  * Author URI: https://engineering.sequra.es/
  * WC requires at least: 4.0
- * WC tested up to: 8.2
+ * WC tested up to: 8.2.2
  * Text Domain: sequra
  * Domain Path: /i18n/languages/
  * Requires at least: 5.9
