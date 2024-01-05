@@ -200,14 +200,13 @@ class SequraRemoteConfig {
 	 */
 	public function get_available_payment_methods() {
 		if ( ! self::$order_payment_methods ) {
-			self::$order_payment_methods = array();
 			$client = $this->helper->get_client();
 			if ( $this->helper->start_solicitation() ) {
 				self::$order_payment_methods = $this->get_order_payment_methods( $client->getOrderUri() );
 			}
 		}
 
-		return self::$order_payment_methods;
+		return self::$order_payment_methods ?? array();
 	}
 
 	/**
