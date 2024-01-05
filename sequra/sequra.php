@@ -35,7 +35,7 @@
 
 // Make sure old WooCommerce seQura is not installed.
 if ( ! defined( 'WC_SEQURA_PLG_PATH' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequra' ) && ! file_exists( WP_PLUGIN_DIR . '/woocommerce-sequracheckout' ) ) {
-	define( 'SEQURA_VERSION', '2.0.5' );
+	define( 'SEQURA_VERSION', '2.0.8' );
 	define( 'WC_SEQURA_PLG_PATH', WP_PLUGIN_DIR . '/' . basename( plugin_dir_path( __FILE__ ) ) . '/' );
 	define( 'SEQURA_SIGNUP_URL', 'https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg' );
 	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'sequrapayment_action_links' );
