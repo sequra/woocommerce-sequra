@@ -368,7 +368,11 @@ function woocommerce_sequra_init() {
 		foreach ( $methods as $method ) {
 			$sq_product = $sequra->get_remote_config()->build_unique_product_code( $method );
 			$too_high   = isset( $method['max_amount'] ) && $method['max_amount'] < $price * 100;
+			$too_early  = isset( $method['starts_at'] ) && time() < strtotime( $method['starts_at'] );
+			$too_late   = isset( $method['ends_at'] ) && strtotime( $method['ends_at'] ) < time();
 			if (
+				! $too_early &&
+				! $too_late &&
 				! $too_high &&
 				isset( $sequra->settings[ 'enabled_in_product_' . $sq_product ] ) &&
 				'yes' === $sequra->settings[ 'enabled_in_product_' . $sq_product ]
