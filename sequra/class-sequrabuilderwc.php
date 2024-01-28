@@ -245,8 +245,8 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$data['items']           = $this->items();
 		$total                   = \Sequra\PhpClient\Helper::totals( $data );
 
-		$data['order_total_with_tax']    = $total['with_tax'];
-		$data['order_total_tax']         = 0;
+		$data['order_total_with_tax'] = $total['with_tax'];
+		$data['order_total_tax']      = 0;
 		if ( $this->pm->settings['allow_registration_items'] ) {
 			$this->registrationItems( $data );
 		}
@@ -407,8 +407,8 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 			$item['description'] = (string) wp_strip_all_tags( self::notNull( get_post( $_product->get_id() )->post_content ) );
 			$item['product_id']  = self::notNull( $_product->get_id() );
 			$item['url']         = (string) self::notNull( get_permalink( $_product->get_id() ) );
-			$item['category'] = (string) self::notNull( wp_strip_all_tags( wc_get_product_category_list( $_product->get_id() ) ) );
-			$items[] = $item;
+			$item['category']    = (string) self::notNull( wp_strip_all_tags( wc_get_product_category_list( $_product->get_id() ) ) );
+			$items[]             = $item;
 		}
 		return $items;
 	}
@@ -521,12 +521,12 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	protected function discount( $ref, $amount ) {
-		$discount                  = -1 * $amount;
-		$item                      = array();
-		$item['type']              = 'discount';
-		$item['reference']         = self::notNull( $ref );
-		$item['name']              = 'Descuento';
-		$item['total_with_tax']    = self::integerPrice( $discount );
+		$discount               = -1 * $amount;
+		$item                   = array();
+		$item['type']           = 'discount';
+		$item['reference']      = self::notNull( $ref );
+		$item['name']           = 'Descuento';
+		$item['total_with_tax'] = self::integerPrice( $discount );
 
 		return $item;
 	}
@@ -539,12 +539,12 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	protected function feeHandlingOrDiscount( $name, $amount ) {
-		$item                      = array();
-		$item['type']              = $amount > 0 ? 'handling' : 'discount';
-		$item['reference']         = $name;
-		$item['name']              = $name;
-		$item['tax_rate']          = 0;
-		$item['total_with_tax']    = self::integerPrice( $amount );
+		$item                   = array();
+		$item['type']           = $amount > 0 ? 'handling' : 'discount';
+		$item['reference']      = $name;
+		$item['name']           = $name;
+		$item['tax_rate']       = 0;
+		$item['total_with_tax'] = self::integerPrice( $amount );
 
 		return $item;
 	}
@@ -590,19 +590,19 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	public function fixRoundingProblems( $order ) {
-		$totals           = \Sequra\PhpClient\Helper::totals( $order['cart'] );
-		$diff_with_tax    = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
+		$totals        = \Sequra\PhpClient\Helper::totals( $order['cart'] );
+		$diff_with_tax = $order['cart']['order_total_with_tax'] - $totals['with_tax'];
 		/*Don't correct error bigger than 1 cent per line*/
 		if ( 0 === $diff_with_tax || count( $order['cart']['items'] ) < abs( $diff_with_tax ) ) {
 			return $order;
 		}
-		$item                      = array();
-		$item['type']              = 'discount';
-		$item['reference']         = 'Ajuste';
-		$item['name']              = 'Ajuste';
-		$item['total_with_tax']    = $diff_with_tax;
+		$item                   = array();
+		$item['type']           = 'discount';
+		$item['reference']      = 'Ajuste';
+		$item['name']           = 'Ajuste';
+		$item['total_with_tax'] = $diff_with_tax;
 		if ( $diff_with_tax > 0 ) {
-			$item['type']     = 'handling';
+			$item['type'] = 'handling';
 		}
 		$order['cart']['items'][] = $item;
 
@@ -938,7 +938,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	public function shipmentCart() {
 		$data                    = array(
-			'order_total_with_tax'    => 0,
+			'order_total_with_tax' => 0,
 		);
 		$data['currency']        = $this->current_order->get_currency();
 		$data['delivery_method'] = $this->deliveryMethod();
@@ -946,8 +946,8 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		$data['items']           = $this->items();
 
 		if ( count( $data['items'] ) > 0 ) {
-			$totals                          = \Sequra\PhpClient\Helper::totals( $data );
-			$data['order_total_with_tax']    = $totals['with_tax'];
+			$totals                       = \Sequra\PhpClient\Helper::totals( $data );
+			$data['order_total_with_tax'] = $totals['with_tax'];
 		}
 
 		return $data;
@@ -959,8 +959,8 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	public function remainingCart() {
 		$empty_cart = array(
-			'order_total_with_tax'    => 0,
-			'items'                   => array(),
+			'order_total_with_tax' => 0,
+			'items'                => array(),
 		);
 		return $empty_cart;
 	}

@@ -23,16 +23,16 @@ class SequraTempOrder {
 	 */
 	public function __construct( $post_data ) {
 		parse_str( $post_data, $this->data );
-		if ( !isset( $this->data['ship_to_different_address'] ) || !$this->data['ship_to_different_address']) {
-			$this->data['shipping_first_name'] = isset( $this->data['billing_first_name'] ) ? $this->data['billing_first_name']: '';
-			$this->data['shipping_last_name'] = isset( $this->data['billing_last_name'] ) ? $this->data['billing_last_name']: '';
-			$this->data['shipping_company'] = isset( $this->data['billing_company'] ) ? $this->data['billing_company']: '';
-			$this->data['shipping_address_1'] = isset( $this->data['billing_address_1'] ) ? $this->data['billing_address_1']: '';
-			$this->data['shipping_address_2'] = isset( $this->data['billing_address_2'] ) ? $this->data['billing_address_2']: '';
-			$this->data['shipping_city'] = isset( $this->data['billing_city'] ) ? $this->data['billing_city']: '';
-			$this->data['shipping_state'] = isset( $this->data['billing_state'] ) ? $this->data['billing_state']: '';
-			$this->data['shipping_postcode'] = isset( $this->data['billing_postcode'] ) ? $this->data['billing_postcode']: '';
-			$this->data['shipping_country'] = isset( $this->data['billing_country'] ) ? $this->data['billing_country']: '';
+		if ( ! isset( $this->data['ship_to_different_address'] ) || ! $this->data['ship_to_different_address'] ) {
+			$this->data['shipping_first_name'] = isset( $this->data['billing_first_name'] ) ? $this->data['billing_first_name'] : '';
+			$this->data['shipping_last_name']  = isset( $this->data['billing_last_name'] ) ? $this->data['billing_last_name'] : '';
+			$this->data['shipping_company']    = isset( $this->data['billing_company'] ) ? $this->data['billing_company'] : '';
+			$this->data['shipping_address_1']  = isset( $this->data['billing_address_1'] ) ? $this->data['billing_address_1'] : '';
+			$this->data['shipping_address_2']  = isset( $this->data['billing_address_2'] ) ? $this->data['billing_address_2'] : '';
+			$this->data['shipping_city']       = isset( $this->data['billing_city'] ) ? $this->data['billing_city'] : '';
+			$this->data['shipping_state']      = isset( $this->data['billing_state'] ) ? $this->data['billing_state'] : '';
+			$this->data['shipping_postcode']   = isset( $this->data['billing_postcode'] ) ? $this->data['billing_postcode'] : '';
+			$this->data['shipping_country']    = isset( $this->data['billing_country'] ) ? $this->data['billing_country'] : '';
 		}
 		$this->shipping_first_name = isset( $this->data['shipping_first_name'] ) ? $this->data['shipping_first_name'] : '';
 		$this->shipping_last_name  = isset( $this->data['shipping_last_name'] ) ? $this->data['shipping_last_name'] : '';

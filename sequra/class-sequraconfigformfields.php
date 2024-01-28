@@ -254,10 +254,10 @@ class SequraConfigFormFields {
 			),
 		);
 		$this->pm->form_fields[ 'widget_theme_' . $product ]       = array(
-			'title'       => __( 'Simulator params', 'sequra' ),
-			'type'        => 'text',
-			'description' => __( 'Widget visualization params', 'sequra' ),
-			'default'     => 'L',
+			'title'             => __( 'Simulator params', 'sequra' ),
+			'type'              => 'text',
+			'description'       => __( 'Widget visualization params', 'sequra' ),
+			'default'           => 'L',
 			'custom_attributes' => array(
 				'dependson' => 'enabled_in_product_' . $product,
 			),
