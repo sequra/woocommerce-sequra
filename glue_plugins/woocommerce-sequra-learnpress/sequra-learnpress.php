@@ -16,14 +16,6 @@ add_action( 'woocommerce_sequra_plugin_loaded', 'woocommerce_sequralearnpress_in
  * Init plugin
  */
 function woocommerce_sequralearnpress_init() {
-	require_once WC_SEQURA_PLG_PATH . '/lib/wp-package-updater/class-wp-package-updater.php';
-
-	$learnpress_updater = new WP_Package_Updater(
-		get_option( 'sequra_plugin_update_server', SEQURA_PLUGIN_UPDATE_SERVER ),
-		wp_normalize_path( __FILE__ ),
-		wp_normalize_path( plugin_dir_path( __FILE__ ) )
-	);
-
 	/**
 	 * Set the builder class for LearnPress.
 	 *
