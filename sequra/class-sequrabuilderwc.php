@@ -370,7 +370,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	public function productItems() {
-		global $woocommerce;
 		$items         = array();
 		$cart_contents = $this->getCartContents();
 		foreach ( $cart_contents as $cart_item ) {
@@ -628,7 +627,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	public function getShippedOrderList() {
-		global $woocommerce;
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		$args = array(
 			'limit'      => -1,
@@ -706,7 +704,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return string
 	 */
 	protected function order_sent_at() {
-		global $woocommerce;
 		if ( is_null( $this->current_order->get_date_completed() ) ) {
 			return gmdate( 'c', strtotime( $this->current_order->completed_date ) );
 		}
@@ -970,7 +967,6 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return array
 	 */
 	public function getOrderStats() {
-		global $woocommerce;
 		$stats = array();
 		if ( false && get_option( 'sequra_allowstats' ) ) {
 			return $stats;
