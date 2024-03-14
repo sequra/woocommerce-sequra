@@ -421,7 +421,7 @@ class SequraHelper {
 				return $uri;
 			} else {
 				$this->logger->error( $client->getJson() );
-				$this->logger->debug( 'Invalid payload:' . json_encode($order) );
+				$this->logger->debug( 'Invalid payload:' . wp_json_encode( $order ) );
 			}
 		} catch ( Exception $e ) {
 			$this->logger->error( $e->getMessage() );

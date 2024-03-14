@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.4
-Stable tag: 2.0.8
+Stable tag: 2.0.9
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -102,6 +102,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.9	=
+* FIX: Fix deprecation warning on plugin's settings page.
+* FIX: Hide widgets when payment methods start/end dates don't match.
 = 2.0.8	=
 * FIX: Information about plugin version
 * IMP: Avoid warning in sequratemporder class

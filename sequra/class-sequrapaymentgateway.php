@@ -10,6 +10,12 @@
  * */
 class SequraPaymentGateway extends WC_Payment_Gateway {
 
+	/**
+	 * Check validity of credentials of the merchant.
+	 *
+	 * @var boolean
+	 */
+	public $is_valid_auth;
 
 	/**
 	 * Endpoints
