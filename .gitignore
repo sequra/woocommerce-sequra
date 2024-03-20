@@ -10,3 +10,4 @@ woocommerce-sequra/composer.lock
 sequra/composer.lock
 node-modules
 e2e-tests/node_modules/*
+*.code-workspace
