@@ -34,6 +34,9 @@ services:
       - db
     ports:
       - 8000:80
+    extra_hosts:
+      - "localhost.sequrapi.com:host-gateway"
+      - "host.docker.internal:host-gateway"
     environment:
       <<: *wp-env
     <<: [*wp-volumes, *wp-networks]

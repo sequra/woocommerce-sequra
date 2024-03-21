@@ -10,4 +10,9 @@ woocommerce-sequra/composer.lock
 sequra/composer.lock
 node-modules
 e2e-tests/node_modules/*
+# Ignore Vscode workspace files
 *.code-workspace
+# Ignore WordPress source files copied to the workspace during development
+.devcontainer/wp-admin
+.devcontainer/wp-includes
+.devcontainer/wp-content
