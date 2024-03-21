@@ -1,0 +1,8 @@
+.sequra-educational-popup {
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.sequra-promotion-widget[data-type="legacy"] {
+    max-width: 320px;
+}

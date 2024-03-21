@@ -322,28 +322,42 @@ function woocommerce_sequra_init() {
 		$core_settings = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 		return 'https://' . ( 1 === (int) $core_settings['env'] ? 'sandbox' : 'live' ) . '.sequracdn.com/assets/';
 	}
+	
 	/**
-	 * Undocumented function
-	 *
-	 * @return void
+	 * Enqueue plugin scripts and styles for Sequra Helper initialization
 	 */
 	function sequra_head_js() {
 		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
-		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		// phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-		$available_products = unserialize( get_option( 'SEQURA_ACTIVE_METHODS' ) );
+		wp_enqueue_style( 'sequra-head', plugins_url( 'assets/css/sequra_head.css', __FILE__ ), array(), SEQURA_VERSION );
+		wp_register_script( 'sequra-head', plugins_url( 'assets/js/sequra_head.js', __FILE__ ), array(), SEQURA_VERSION, false );
+		// Add required object for Sequra Helper initialization.
+		$available_products = get_option( 'SEQURA_ACTIVE_METHODS' );
+		if ( is_serialized( $available_products ) ) {
+			$available_products = unserialize( $available_products );
+		}
+		$available_products = array_map( 'esc_js', (array) $available_products );
 		$core_settings      = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
 		$script_base_uri    = sequra_get_script_basesurl();
-		ob_start();
-		//phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
-		include SequraHelper::template_loader( 'header-js' );
-		// Could have any html disable phpcs.
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo ob_get_clean();
-		// phpcs:enable
+		wp_localize_script(
+			'sequra-head',
+			'sequraConfigParams',
+			array(
+				'merchant'          => esc_js( SequraHelper::get_instance()->get_merchant_ref() ),
+				'assetKey'          => esc_js( $core_settings['assets_secret'] ),
+				'products'          => $available_products,
+				'scriptUri'         => esc_js( $script_base_uri ) . 'sequra-checkout.min.js',
+				'decimalSeparator'  => esc_js( wc_get_price_decimal_separator() ),
+				'thousandSeparator' => esc_js( wc_get_price_thousand_separator() ),
+				'locale'            => esc_js( str_replace( '_', '-', get_locale() ) ),
+		
+			)
+		);
+		wp_enqueue_script( 'sequra-head' );
 	}
+	add_action( 'wp_enqueue_scripts', 'sequra_head_js' );
+	// TODO: Check if this is really needed. We keep this for backward compatibility. Originally it was using wp_head hook, which fires in both admin and fronted.
+	add_action( 'admin_enqueue_scripts', 'sequra_head_js' );
 
-	add_action( 'wp_head', 'sequra_head_js' );
 	/**
 	 * Create something similar to a cart_ref that could be used during the session.
 	 *
