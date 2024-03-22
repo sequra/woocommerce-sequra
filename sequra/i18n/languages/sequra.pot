@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Loco https://localise.biz/\n"
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
 "X-Poedit-WPHeader: sequra.php\n"
@@ -195,8 +195,16 @@ msgstr ""
 
 #: class-sequraconfigformfields.php:120
 msgid ""
-"While working in Sandbox the methods will only show to the following IP "
-"addresses."
+"Following information should be provided by seQura, you can sign-up <a "
+"href=\"%s\">here</a> to get it."
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://sequra.com/"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://sequra.es/"
 msgstr ""
 
 #: class-sequraconfigformfields.php:124
@@ -219,12 +227,12 @@ msgid ""
 "Current IP: %s"
 msgstr ""
 
-#: class-sequraconfigformfields.php:149
-msgid "Debugging"
+#: class-sequraconfigformfields.php:247 class-sequraconfigformfields.php:291
+msgid "Mostrar widget en la página del producto"
 msgstr ""
 
-#: class-sequraconfigformfields.php:150
-msgid "Debug mode"
+#. Description of the plugin
+msgid "Ofrece las opciones de pago con seQura"
 msgstr ""
 
 #: class-sequraconfigformfields.php:152
@@ -360,8 +368,8 @@ msgstr ""
 msgid "Invalid service end date, please enter a valid one"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:38
-msgid "Service end date"
+#: gateway-sequra.php:194
+msgid "View WooCommerce API docs"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:42

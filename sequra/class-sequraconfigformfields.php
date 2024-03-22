@@ -198,19 +198,25 @@ class SequraConfigFormFields {
 	 * Initialize Gateway Settings Form Fields
 	 */
 	private function init_communication_form_fields() {
-		$this->pm->form_fields['communication_fields'] = array(
+		$this->pm->form_fields['communication_fields']    = array(
 			'title'       => __( 'Communication configuration', 'sequra' ),
 			'type'        => 'title',
 			/* translators: %s: URL */
 			'description' => '',
 		);
-		$this->pm->form_fields['price_css_sel']        = array(
+		$this->pm->form_fields['price_css_sel']           = array(
 			'title'       => __( 'CSS price selector', 'sequra' ),
 			'type'        => 'text',
-			'description' => __( 'CSS selector to get the price for widgets in products', 'sequra' ),
+			'description' => __( 'CSS selector to get the price for widgets from product', 'sequra' ),
 			'default'     => '.summary .price>.amount,.summary .price ins .amount',
 		);
-		$methods                                       = $this->pm->get_remote_config()->get_merchant_payment_methods();
+		$this->pm->form_fields['variation_price_css_sel'] = array(
+			'title'       => __( 'CSS price selector (variable)', 'sequra' ),
+			'type'        => 'text',
+			'description' => __( 'CSS selector to get the price for widgets from variations', 'sequra' ),
+			'default'     => '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount',
+		);
+		$methods = $this->pm->get_remote_config()->get_merchant_payment_methods();
 		array_walk(
 			$methods,
 			array( $this, 'init_communication_form_fields_for_method' )
