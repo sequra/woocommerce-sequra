@@ -28,6 +28,20 @@ var SequraHelper = {
 		return selector && document.querySelector(selector) ? document.querySelector(selector).innerText : "0";
 	},
 
+	/**
+	 * Replace encoded characters in a string with their corresponding characters
+	 * @param {string} str - The string to unescape
+	 * @returns {string}
+	 */
+	decodeChars: function (str) {
+		// Decode <, >, &, ', "
+		return str.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&amp;/g, '&')
+		.replace(/&apos;/g, "'")
+		.replace(/&quot;/g, '"');
+	},
+
 	selectorToCents: function (selector) {
 		return SequraHelper.textToCents(SequraHelper.getText(selector));
 	},
