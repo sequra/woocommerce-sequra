@@ -349,7 +349,7 @@ function woocommerce_sequra_init() {
 				'decimalSeparator'  => esc_js( wc_get_price_decimal_separator() ),
 				'thousandSeparator' => esc_js( wc_get_price_thousand_separator() ),
 				'locale'            => esc_js( str_replace( '_', '-', get_locale() ) ),
-		
+				'widgets'           => array(), // Store widgets to be drawn.
 			)
 		);
 		wp_enqueue_script( 'sequra-head' );
@@ -357,6 +357,14 @@ function woocommerce_sequra_init() {
 	add_action( 'wp_enqueue_scripts', 'sequra_head_js' );
 	// TODO: Check if this is really needed. We keep this for backward compatibility. Originally it was using wp_head hook, which fires in both admin and fronted.
 	add_action( 'admin_enqueue_scripts', 'sequra_head_js' );
+
+	/**
+	 * Register plugin scripts used for teaser widgets
+	 */
+	function sequra_teaser_js() {
+		wp_register_script( 'sequra-widget', plugins_url( 'assets/js/sequra_widget.js', __FILE__ ), array( 'sequra-head', 'jquery' ), SEQURA_VERSION, true );
+	}
+	add_action( 'wp_enqueue_scripts', 'sequra_teaser_js' );
 
 	/**
 	 * Create something similar to a cart_ref that could be used during the session.
@@ -390,11 +398,28 @@ function woocommerce_sequra_init() {
 	 * @return void
 	 */
 	function woocommerce_sequra_add_widget_to_product_page() {
-		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
-		global $product;
+		if ( did_action( 'before_woocommerce_sequra_add_widget_to_product_page' ) ) {
+			return; // Only execute once.
+		}
+
 		if ( ! is_product() ) {
 			return;
 		}
+
+		/**
+		 * Fires before the SeQura widget is added to the product page to prevent multiple executions.
+		 *
+		 * @since 3.0.0.
+		 */
+		do_action( 'before_woocommerce_sequra_add_widget_to_product_page' );
+
+		/**
+		 * The current product.
+		 *
+		 * @var WC_Product $product
+		 */
+		global $product;
+
 		$sequra = SequraPaymentGateway::get_instance();
 		if ( ! $sequra->is_available( $product->get_id() ) ) {
 			return;
@@ -416,24 +441,19 @@ function woocommerce_sequra_init() {
 				isset( $sequra->settings[ 'enabled_in_product_' . $sq_product ] ) &&
 				'yes' === $sequra->settings[ 'enabled_in_product_' . $sq_product ]
 			) {
-				sequra_widget(
-					array(
-						'product'  => isset( $method['product'] ) ? $method['product'] : '',
-						'campaign' => isset( $method['campaign'] ) ? $method['campaign'] : '',
-						'price'    => trim( $sequra->settings['price_css_sel'] ),
-						'dest'     => trim( $sequra->settings[ 'dest_css_sel_' . $sq_product ] ),
-					),
-					$product->get_id()
-				);
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$att_product    = isset( $method['product'] ) ? $method['product'] : '';
+				$att_campaign   = isset( $method['campaign'] ) ? $method['campaign'] : '';
+				$att_dest       = trim( $sequra->settings[ 'dest_css_sel_' . $sq_product ] );
+				$att_product_id = $product->get_id();
+				// prefer do_shortcode over direct call to use a single way to draw the widget.
+				echo do_shortcode( "[sequra_widget product=\"$att_product\" campaign=\"$att_campaign\" dest=\"$att_dest\" product_id=\"$att_product_id\"]" );
 			}
 		}
-		// Once executed make sure it is not executed again.
-		remove_action( 'woocommerce_after_main_content', 'woocommerce_sequra_add_widget_to_product_page' );
-		remove_action( 'wp_footer', 'woocommerce_sequra_add_widget_to_product_page' );
 	}
 	/**
 	 * SeQura widget short code
-	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' dest='.price_container']
+	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' variation_price='#variation_price' dest='.price_container' product_id='123']
 	 *
 	 * @param array    $atts       Attributes.
 	 * @param int|null $product_id Product id.
@@ -445,31 +465,52 @@ function woocommerce_sequra_init() {
 			( new SequraLogger() )->log_error( '"product" attribute is required', __FUNCTION__ );
 			return;
 		}
+
 		$sequra = SequraPaymentGateway::get_instance();
-		if ( ! $sequra->is_available( $product_id ) ) {
-			return;
-		}
-		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		// Set default values to avoid errors. Added product_id to the shortcode_atts 
+		// because 2nd parameter in shortcode functions is reserved for $content.
+		// See https://developer.wordpress.org/reference/functions/add_shortcode/ .
+		$atts = shortcode_atts(
+			array(
+				'product'         => '',
+				'campaign'        => '',
+				'price'           => trim( $sequra->settings['price_css_sel'] ),
+				'variation_price' => trim( $sequra->settings['variation_price_css_sel'] ),
+				'dest'            => '',
+				'product_id'      => '',
+			),
+			$atts,
+			'sequra_widget'
+		);
+
 		$registration_amount = 0;
-		if ( ! is_null( $product_id ) && get_post_meta( $product_id, 'sequra_registration_amount', true ) ) {
-			$registration_amount = $sequra->helper->get_builder()->integerPrice(
-				get_post_meta( $product_id, 'sequra_registration_amount', true )
-			);
+
+		if ( ! empty( $atts['product_id'] ) ) {
+			$product_id = (int) $atts['product_id'];
+			
+			if ( ! $sequra->is_available( $product_id ) ) {
+				return;
+			}
+
+			$meta_value = get_post_meta( $product_id, 'sequra_registration_amount', true );
+			if ( ! empty( $meta_value ) ) {
+				$registration_amount = $sequra->helper->get_builder()->integerPrice( $meta_value );
+			}
 		}
-		$product         = $atts['product'];
-		$dest            = $atts['dest'];
-		$campaign        = isset( $atts['campaign'] ) ? $atts['campaign'] : '';
-		$price_container = isset( $atts['price'] ) ? $atts['price'] : '#product_price';
-		$sq_product      = $sequra->get_remote_config()->build_unique_product_code( $atts );
-		$theme           = isset( $sequra->settings[ 'widget_theme_' . $sq_product ] ) ? $sequra->settings[ 'widget_theme_' . $sq_product ] : '';
-		wp_enqueue_style( 'sequra-widget' );
-		// phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
-		if ( 'PARTPAYMENT' === SequraRemoteConfig::get_family_for( $atts ) ) {
-			include SequraHelper::template_loader( 'partpayment-teaser' );
-		} else {
-			include SequraHelper::template_loader( 'invoice-teaser' );
-		}
-		// phpcs:enable
+
+		$sq_product = $sequra->get_remote_config()->build_unique_product_code( $atts );
+		$reverse    = 0;
+		$theme      = isset( $sequra->settings[ 'widget_theme_' . $sq_product ] ) ? $sequra->settings[ 'widget_theme_' . $sq_product ] : '';
+		
+		! wp_style_is( 'sequra-widget' ) && wp_enqueue_style( 'sequra-widget' );
+		! wp_script_is( 'sequra-widget' ) && wp_enqueue_script( 'sequra-widget' );
+
+		
+		ob_start();
+		// $teaser_template = 'PARTPAYMENT' === SequraRemoteConfig::get_family_for( $atts ) ? 'partpayment-teaser' : 'invoice-teaser';
+		// include SequraHelper::template_loader( $teaser_template ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
+		include SequraHelper::template_loader( 'widget' ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
+		return ob_get_clean();
 	}
 
 	add_shortcode( 'sequra_widget', 'sequra_widget' );
