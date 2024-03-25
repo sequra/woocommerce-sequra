@@ -533,6 +533,18 @@ function woocommerce_sequra_init() {
 		
 		ob_start();
 		include SequraHelper::template_loader( 'widget' ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
+		
+		// Next is only for compatibility purposes.
+		if ( 'PARTPAYMENT' === SequraRemoteConfig::get_family_for( $atts ) ) {
+			$product         = $atts['product'];
+			$campaign        = $atts['campaign'];
+			$price_container = $atts['price'];
+			// phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
+			include SequraHelper::template_loader( 'partpayment-teaser' );
+			include SequraHelper::template_loader( 'widget-compat' );
+			// phpcs:enable WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
+		}
+
 		return ob_get_clean();
 	}
 
