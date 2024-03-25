@@ -434,7 +434,7 @@ function woocommerce_sequra_init() {
 		/**
 		 * Fires before the SeQura widget is added to the product page to prevent multiple executions.
 		 *
-		 * @since 3.0.0.
+		 * @since 2.1.0.
 		 */
 		do_action( 'before_woocommerce_sequra_add_widget_to_product_page' );
 
