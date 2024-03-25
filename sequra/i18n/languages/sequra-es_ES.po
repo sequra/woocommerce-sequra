@@ -8,7 +8,7 @@ msgstr ""
 "Language-Team: Español\n"
 =======
 "POT-Creation-Date: 2023-07-18 17:49+0200\n"
-"PO-Revision-Date: 2024-03-22 13:20+0000\n"
+"PO-Revision-Date: 2024-03-25 09:21+0000\n"
 "Last-Translator: Mikel <mikel.martin@sequra.es>\n"
 "Language-Team: Spanish (Spain)\n"
 >>>>>>> ad2b278 (Add option to manage css selector for variation price)
@@ -198,7 +198,6 @@ msgid "ISO8601 format"
 msgstr "Formato ISO8601"
 =======
 #. Author of the plugin
-#, fuzzy
 #| msgid "\"seQura Tech\" <dev+wordpress@sequra.es>"
 msgid "\"seQura Tech\" <wordpress@sequra.com>"
 msgstr "“seQura Tech” <dev+wordpress@sequra.es>"
@@ -445,7 +444,6 @@ msgid "CSS selector for widget in product page"
 msgstr "Selector CSS para widget en la página del producto"
 
 #: class-sequraconfigformfields.php:197
-#, fuzzy
 #| msgid "CSS selector to get the price for widgets in products"
 msgid "CSS selector to get the price for widgets from product"
 msgstr "Selector CSS para obtener el precio de widgets en productos"
