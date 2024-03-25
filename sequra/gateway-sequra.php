@@ -337,26 +337,51 @@ function woocommerce_sequra_init() {
 		}
 		$available_products = array_map( 'esc_js', (array) $available_products );
 		$core_settings      = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
-		$script_base_uri    = sequra_get_script_basesurl();
+		$script_base_uri    = sequra_get_script_baseurl();
+
+		/**
+		 * Filter the asset key used to load the Sequra assets.
+		 * 
+		 * @since 2.1.0
+		 */
+		$asset_key = apply_filters( 'woocommerce_sequra_get_assetkey', $core_settings['assets_secret'] );
+		/**
+		 * Filter the price decimal separator used to load the Sequra assets.
+		 * 
+		 * @since 2.1.0
+		 */
+		$price_decimal_separator = apply_filters( 'woocommerce_sequra_price_decimal_separator', wc_get_price_decimal_separator() );
+		/**
+		 * Filter the price thousand separator used to load the Sequra assets.
+		 * 
+		 * @since 2.1.0
+		 */
+		$price_thousand_separator = apply_filters( 'woocommerce_sequra_price_thousand_separator', wc_get_price_thousand_separator() );
+
+		/**
+		 * Filter the locale used to load the Sequra assets.
+		 * 
+		 * @since 2.1.0
+		 */
+		$locale = apply_filters( 'woocommerce_sequra_locale', str_replace( '_', '-', get_locale() ) );
+
 		wp_localize_script(
 			'sequra-head',
 			'sequraConfigParams',
 			array(
 				'merchant'          => esc_js( SequraHelper::get_instance()->get_merchant_ref() ),
-				'assetKey'          => esc_js( $core_settings['assets_secret'] ),
+				'assetKey'          => esc_js( $asset_key ),
 				'products'          => $available_products,
 				'scriptUri'         => esc_js( $script_base_uri ) . 'sequra-checkout.min.js',
-				'decimalSeparator'  => esc_js( wc_get_price_decimal_separator() ),
-				'thousandSeparator' => esc_js( wc_get_price_thousand_separator() ),
-				'locale'            => esc_js( str_replace( '_', '-', get_locale() ) ),
+				'decimalSeparator'  => esc_js( $price_decimal_separator ),
+				'thousandSeparator' => esc_js( $price_thousand_separator ),
+				'locale'            => esc_js( $locale ),
 				'widgets'           => array(), // Store widgets to be drawn.
 			)
 		);
 		wp_enqueue_script( 'sequra-head' );
 	}
 	add_action( 'wp_enqueue_scripts', 'sequra_head_js' );
-	// TODO: Check if this is really needed. We keep this for backward compatibility. Originally it was using wp_head hook, which fires in both admin and fronted.
-	add_action( 'admin_enqueue_scripts', 'sequra_head_js' );
 
 	/**
 	 * Register plugin scripts used for teaser widgets
@@ -446,7 +471,7 @@ function woocommerce_sequra_init() {
 				$att_campaign   = isset( $method['campaign'] ) ? $method['campaign'] : '';
 				$att_dest       = trim( $sequra->settings[ 'dest_css_sel_' . $sq_product ] );
 				$att_product_id = $product->get_id();
-				// prefer do_shortcode over direct call to use a single way to draw the widget.
+				
 				echo do_shortcode( "[sequra_widget product=\"$att_product\" campaign=\"$att_campaign\" dest=\"$att_dest\" product_id=\"$att_product_id\"]" );
 			}
 		}
@@ -507,8 +532,6 @@ function woocommerce_sequra_init() {
 
 		
 		ob_start();
-		// $teaser_template = 'PARTPAYMENT' === SequraRemoteConfig::get_family_for( $atts ) ? 'partpayment-teaser' : 'invoice-teaser';
-		// include SequraHelper::template_loader( $teaser_template ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
 		include SequraHelper::template_loader( 'widget' ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
 		return ob_get_clean();
 	}

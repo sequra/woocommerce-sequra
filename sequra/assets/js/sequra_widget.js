@@ -9,15 +9,14 @@
 	});
 	sequraConfigParams.widgets = uniqueWidgets;
 
+
 	Sequra.onLoad(function () {
 		SequraHelper.widgets = sequraConfigParams.widgets;
 		SequraHelper.drawWidgetsOnPage();
-
-		// $('.variations_form').on('woocommerce_variation_select_change', () => {
 		const variationForm = $('.variations_form');
 		if (variationForm.length) {
-			variationForm.on('show_variation', () => SequraHelper.drawWidgetsOnPage());
-			variationForm.on('hide_variation', () => SequraHelper.removeWidgetsOnPage());
+			variationForm.on('show_variation', () => SequraHelper.drawWidgetsOnPage(false));
+			variationForm.on('hide_variation', () => SequraHelper.drawWidgetsOnPage());
 		}
 	});
 })(jQuery);

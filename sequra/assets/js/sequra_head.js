@@ -8,6 +8,8 @@ var SequraHelper = {
 
 	mutationObserver: null,
 
+	forcePriceSelector: true,
+
 	presets: {
 		L: '{"alignment":"left"}',
 		R: '{"alignment":"right"}',
@@ -73,7 +75,7 @@ var SequraHelper = {
 	},
 
 	getPriceSelector: function (widget) {
-		return this.isVariableProduct() ? widget.variationPriceSel : widget.priceSel;
+		return !this.forcePriceSelector && this.isVariableProduct() ? widget.variationPriceSel : widget.priceSel;
 	},
 
 	/**
@@ -136,12 +138,14 @@ var SequraHelper = {
 
 	/**
 	 * Paint the widgets in the page and observe the DOM to refresh the widgets when the page changes.
-	 * @param parentElem The DOM element that contains the promotion widgets
+	 * @param forcePriceSelector {boolean} - If true, the price selector will be forced to the simple product price selector.
 	 */
-	drawWidgetsOnPage: function () {
+	drawWidgetsOnPage: function (forcePriceSelector = true) {
 		if (!this.widgets.length) {
 			return;
 		}
+
+		this.forcePriceSelector = forcePriceSelector;
 
 		// First, draw the widgets in the page for the first time.
 		const widgetsTargets = this.getWidgetsTargets(document, this.widgets, this.getObservedAt());
