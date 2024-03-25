@@ -91,11 +91,12 @@ var SequraHelper = {
 
 		const targets = [];
 		const children = parentElem.querySelectorAll(widget.dest);
+		const productObservedAttr = 'data-sequra-observed-' + widget.product;
 		for (const child of children) {
-			if (child.getAttribute('data-sequra-observed') == observedAt) {
+			if (child.getAttribute(productObservedAttr) == observedAt) {
 				continue;// skip elements that are already observed in this mutation.
 			}
-			child.setAttribute('data-sequra-observed', observedAt);
+			child.setAttribute(productObservedAttr, observedAt);
 			targets.push({ elem: child, widget: widget });
 		}
 		return targets;
@@ -184,8 +185,9 @@ var SequraHelper = {
 		const cents = SequraHelper.nodeToCents(priceElem);
 
 		const className = 'sequra-promotion-widget';
+		const modifierClassName = className + '--' + widget.product;
 
-		const oldWidget = element.parentNode.querySelector('.' + className);
+		const oldWidget = element.parentNode.querySelector('.' + className + '.' + modifierClassName);
 		if (oldWidget) {
 			if (cents == oldWidget.getAttribute('data-amount')) {
 				return; // no need to update the widget, the price is the same.
@@ -195,7 +197,7 @@ var SequraHelper = {
 		}
 
 		const promoWidgetNode = document.createElement('div');
-		promoWidgetNode.className = className;
+		promoWidgetNode.className = className + ' ' + modifierClassName;
 		promoWidgetNode.setAttribute('data-amount', cents);
 		promoWidgetNode.setAttribute('data-product', widget.product);
 		if (undefined != typeof this.presets[widget.theme]) {
