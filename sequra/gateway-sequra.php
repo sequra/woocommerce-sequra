@@ -333,7 +333,7 @@ function woocommerce_sequra_init() {
 		// Add required object for Sequra Helper initialization.
 		$available_products = get_option( 'SEQURA_ACTIVE_METHODS' );
 		if ( is_serialized( $available_products ) ) {
-			$available_products = unserialize( $available_products );
+			$available_products = unserialize( $available_products ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
 		}
 		$available_products = array_map( 'esc_js', (array) $available_products );
 		$core_settings      = get_option( 'woocommerce_sequra_settings', SequraHelper::get_empty_core_settings() );
