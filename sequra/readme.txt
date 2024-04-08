@@ -1,6 +1,6 @@
 === Pasarela de pago para seQura ===
 Contributors: sequradev
-Tags: woocommerce, payment, gateway, BNPL, installments, buy now pay later
+Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.4
 Stable tag: 2.0.9
@@ -103,30 +103,30 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 Contributors:
 == Changelog ==
 = 2.0.9	=
-* FIX: Fix deprecation warning on plugin's settings page.
-* FIX: Hide widgets when payment methods start/end dates don't match.
+* Fixed: Deprecation warning on plugin's settings page.
+* Fixed: Hide widgets when payment methods start/end dates don't match.
 = 2.0.8	=
-* FIX: Information about plugin version
-* IMP: Avoid warning in sequratemporder class
+* Fixed: Information about plugin version.
+* Fixed: Avoid warning in SequraTempOrder class.
 = 2.0.7 =
-* FIX rounding amount total for the +info popup in the checkout
+* Fixed: rounding amount total for the +info popup in the checkout.
 = 2.0.6 =
-* FIX javascript warning due to changes in the integrations assets
-* FIX php warning due to sequra/php-client package upgrade
-* IMP Removed all referencces to deprecated `without_tax` values.
-* FIX Add dependance on the "enabled in product" admin option to "Simulator params" option.
+* Fixed: javascript warning due to changes in the integrations assets.
+* Fixed: PHP warning due to sequra/php-client package upgrade.
+* Fixed: Removed all references to deprecated `without_tax` values.
+* Fixed: Add dependance on the "enabled in product" admin option to "Simulator params" option.
 = 2.0.5 =
-* FIX: Copy billing address to shiping address when ship_to_different_address is not set
-* Update: compatibility till WooCommerce 8.2
+* Fixed: Copy billing address to shipping address when ship_to_different_address is not set.
+* Added: compatibility till WooCommerce 8.2.
 = 2.0.4 =
-* Added: HPOS Compatibility declaration
-* Update: Compatibility with WooCommerce 8.0
+* Added: HPOS Compatibility declaration.
+* Added: Compatibility with WooCommerce 8.0.
 = 2.0.3 =
-* Fix: Delivery report generation when order had multiple discounts
+* Fixed: Delivery report generation when order had multiple discounts.
 = 2.0.2 =
-* Update: Information in readme.txt
-* Update: Compatibility with WooCommerce 7.9
+* Changed: Information in readme.txt
+* Added: Compatibility with WooCommerce 7.9.
 * Added: Log to file when debug mode is activated. 
 = 2.0.1 =
-* Update: Information in readme.txt
+* Changed: Information in readme.txt.
 = 2.0.0 =
