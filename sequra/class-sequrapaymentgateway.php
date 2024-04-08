@@ -159,7 +159,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * */
 	public function admin_options() {    ?>
 		<h3>
-			<?php esc_html_e( 'Configuración Sequra', 'sequra' ); ?>
+			<?php esc_html_e( 'seQura configuration', 'sequra' ); ?>
 		</h3>
 		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
