@@ -10,16 +10,24 @@ COPY ./launch.json /var/www/html/.vscode/launch.json
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends sudo
 
-RUN pecl install "xdebug" \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+RUN pecl install xdebug \
     && docker-php-ext-enable xdebug \
-	&& echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.client_port=${XDEBUG_PORT}" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.idekey=${XDEBUG_IDEKEY}" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    # && docker-php-ext-enable xdebug \
+	# && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    # && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    # && echo "xdebug.client_port=${XDEBUG_PORT}" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    # && echo "xdebug.idekey=${XDEBUG_IDEKEY}" >> /usr/local/etc/php/conf.d/xdebug.ini \
 	&& curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp \
 	&& mkdir /var/www/.wp-cli \
 	&& chown www-data:www-data /var/www/.wp-cli
+
+# Copy xdebug configuration for remote debugging.
+COPY ./xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+
+# Clean up for smaller image.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 # ARG NODE_VERSION="19"
