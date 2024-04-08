@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: SeQura\n"
-"POT-Creation-Date: 2024-04-08 11:43+0000\n"
+"POT-Creation-Date: 2024-04-08 11:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -43,7 +43,7 @@ msgid ""
 msgstr ""
 
 #: class-sequraconfigformfields.php:171
-msgid "Active payent methods"
+msgid "Active payment methods"
 msgstr ""
 
 #: class-sequraconfigformfields.php:98
@@ -69,7 +69,7 @@ msgid "Assets secret"
 msgstr ""
 
 #: class-sequraconfigformfields.php:189
-msgid "Comunication configuration"
+msgid "Communication configuration"
 msgstr ""
 
 #: class-sequraconfigformfields.php:49
@@ -204,10 +204,6 @@ msgstr ""
 msgid "Live"
 msgstr ""
 
-#: class-sequraconfigformfields.php:241 class-sequraconfigformfields.php:285
-msgid "Mostrar widget en la página del producto"
-msgstr ""
-
 #. Description of the plugin
 msgid "Ofrece las opciones de pago con seQura"
 msgstr ""
@@ -285,6 +281,10 @@ msgstr ""
 msgid "Show in product page"
 msgstr ""
 
+#: class-sequraconfigformfields.php:241 class-sequraconfigformfields.php:285
+msgid "Show widget on product page"
+msgstr ""
+
 #. %s: payment method title.
 #: class-sequraconfigformfields.php:233
 #, php-format
@@ -329,15 +329,15 @@ msgid "The payment was NOT approved (%s)"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:572
-msgid "The risk assesment for this order in progress"
+msgid "The risk assessment for this order in progress"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:569
-msgid "The risk assesment for this order is HIGH!!"
+msgid "The risk assessment for this order is HIGH!!"
 msgstr ""
 
 #: class-sequrapaymentgateway.php:566
-msgid "The risk assesment for this order is low"
+msgid "The risk assessment for this order is low"
 msgstr ""
 
 #: class-sequraconfigformfields.php:45

@@ -199,7 +199,7 @@ function sequrapayment_plugin_row_meta( $links, $file ) {
 				 * @since 2.0.0
 				 */
 				apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' )
-			) . '" aria-label="' . esc_attr__( 'Sopport', 'woocommerce' ) . '">' . esc_html__( 'Support', 'sequra' ) . '</a>',
+			) . '" aria-label="' . esc_attr__( 'Support', 'sequra' ) . '">' . esc_html__( 'Support', 'sequra' ) . '</a>',
 		);
 
 		return array_merge( $links, $row_meta );

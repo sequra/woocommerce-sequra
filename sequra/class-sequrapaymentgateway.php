@@ -563,13 +563,13 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		switch ( $risk_level ) {
 			case 'low_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is low', 'sequra' ) );
+				$order->add_order_note( __( 'The risk assessment for this order is low', 'sequra' ) );
 				break;
 			case 'high_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is HIGH!!', 'sequra' ) );
+				$order->add_order_note( __( 'The risk assessment for this order is HIGH!!', 'sequra' ) );
 				break;
 			case 'unknown_risk':
-				$order->add_order_note( __( 'The risk assesment for this order in progress', 'sequra' ) );
+				$order->add_order_note( __( 'The risk assessment for this order in progress', 'sequra' ) );
 				break;
 		}
 	}
