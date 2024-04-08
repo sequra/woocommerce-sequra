@@ -7,6 +7,7 @@ Stable tag: 2.0.9
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Flexible payment platform that enhances business conversion and recurrence. The easiest, safest, and quickest way for customers to pay installments.
 
 == Description ==
 
