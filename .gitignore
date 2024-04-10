@@ -16,3 +16,5 @@ e2e-tests/node_modules/*
 .devcontainer/wp-admin
 .devcontainer/wp-includes
 .devcontainer/wp-content
+*/vendor-bin
+sequra/build
