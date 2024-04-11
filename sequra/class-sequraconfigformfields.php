@@ -129,7 +129,7 @@ class SequraConfigFormFields {
 			'test_ips'                 => array(
 				'title'       => __( 'IPs for testing', 'sequra' ),
 				'label'       => '',
-				'type'        => 'test',
+				'type'        => 'text',
 				'description' => sprintf(
 					// translators: %s: IP address.
 					__( 'When working is sandbox mode only these ips addresses will see the plugin. Current IP: %s', 'sequra' ),
