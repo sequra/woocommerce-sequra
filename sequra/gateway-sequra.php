@@ -18,7 +18,7 @@ function sequra_activation() {
 		$loop = 3;
 		foreach ( $gateway_order as $gateway_id ) {
 			$order[ esc_attr( $gateway_id ) ] = $loop;
-			$loop++;
+			++$loop;
 		}
 	}
 	update_option( 'woocommerce_gateway_order', $order );
@@ -41,7 +41,7 @@ function sequra_upgrade_if_needed() {
 	$current = get_option( 'SEQURA_VERSION' );
 	if ( version_compare( $current, SEQURA_VERSION, '<' ) ) {
 		// phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
-		foreach ( glob( dirname( __FILE__ ) . '/upgrades/*.php' ) as $filename ) {
+		foreach ( glob( __DIR__ . '/upgrades/*.php' ) as $filename ) {
 			include $filename;
 		}
 		// phpcs:enable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
@@ -432,6 +432,45 @@ function woocommerce_sequra_init() {
 	}
 
 	add_shortcode( 'sequra_widget', 'sequra_widget' );
+
+	/**
+	 * Register logs page
+	 */
+	function sequra_register_logs_page() {
+		add_submenu_page(
+			'woocommerce',
+			'seQura Logs',
+			'seQura Logs',
+			'manage_options',
+			'sequra-logs',
+			'render_sequra_logs_page'
+		);
+	}
+	add_action( 'admin_menu', 'sequra_register_logs_page' );
+
+	/**
+	 * Remove logs page from submenu
+	 *
+	 * @param string $submenu_file Submenu file.
+	 * @param string $parent_file Parent file.
+	 * @return string
+	 */
+	function sequra_remove_submenu_logs_page( $submenu_file, $parent_file ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		remove_submenu_page( 'woocommerce', 'sequra-logs' );
+		return $submenu_file;
+	}
+	add_filter( 'submenu_file', 'sequra_remove_submenu_logs_page', 10, 2 );
+
+	/**
+	 * Render logs page
+	 */
+	function render_sequra_logs_page() {
+		$is_debug_enabled = SequraHelper::get_instance()->is_debug_enabled();
+		ob_start();     
+		include SequraHelper::template_loader( 'logs' ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
+		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
 	/**
 	 * Hook to plugin loaded event.
 	 *

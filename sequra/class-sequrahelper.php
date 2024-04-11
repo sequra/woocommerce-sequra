@@ -88,7 +88,7 @@ class SequraHelper {
 	public function __construct( $settings = null ) {
 		$this->settings      = $settings ? $settings : get_option( 'woocommerce_sequra_settings', self::get_empty_core_settings() );
 		$this->identity_form = null;
-		$this->dir           = dirname( __FILE__ ) . '/';
+		$this->dir           = __DIR__ . '/';
 		// phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
 		require_once $this->dir . 'vendor/autoload.php';
 		if ( ! class_exists( 'SequraTempOrder' ) ) {
@@ -96,8 +96,18 @@ class SequraHelper {
 		}
 		// phpcs:enable
 		$this->logger = new Logger( 'SEQURA-LOGGER' );
-		$this->logger->pushHandler( new StreamHandler( wp_upload_dir()['basedir'] . '/wc-logs/sequra.log', 'yes' === $this->settings['debug'] ? Logger::DEBUG : Logger::INFO ) );
+		$this->logger->pushHandler( new StreamHandler( wp_upload_dir()['basedir'] . '/wc-logs/sequra.log', $this->is_debug_enabled() ? Logger::DEBUG : Logger::INFO ) );
 	}
+
+	/**
+	 * Check if debug is enabled or not
+	 *
+	 * @return boolean
+	 */
+	public function is_debug_enabled() {
+		return isset( $this->settings['debug'] ) && 'yes' === $this->settings['debug'];
+	}
+
 	/**
 	 * Get logger
 	 *
@@ -465,7 +475,7 @@ class SequraHelper {
 		} elseif ( file_exists( get_template_directory() . '/' . $template . '.php' ) ) {
 			return get_template_directory() . '/' . $template . '.php';
 		} else {
-			return WP_CONTENT_DIR . '/plugins/' . plugin_basename( dirname( __FILE__ ) ) . '/templates/' . $template . '.php';
+			return WP_CONTENT_DIR . '/plugins/' . plugin_basename( __DIR__ ) . '/templates/' . $template . '.php';
 		}
 	}
 

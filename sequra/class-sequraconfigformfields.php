@@ -149,7 +149,7 @@ class SequraConfigFormFields {
 				'title'       => __( 'Debugging', 'sequra' ),
 				'label'       => __( 'Debug mode', 'sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Only for developers.', 'sequra' ),
+				'description' => __( 'Only for developers.', 'sequra' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=sequra-logs' ) ) . '">' . __( 'View logs', 'sequra' ) . '</a>',
 				'default'     => 'no',
 			),
 		);
