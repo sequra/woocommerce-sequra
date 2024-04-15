@@ -217,6 +217,10 @@ class SequraLogger {
 			$message .= ' - ';
 		}
 
+		if ( is_array( $msg ) || is_object( $msg ) ) {
+			$msg = wp_json_encode( $msg );
+		}
+
 		return $message . $msg;
 	}
 }
