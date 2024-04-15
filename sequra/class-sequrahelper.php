@@ -5,21 +5,12 @@
  * @package woocommerce-sequra
  */
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 /**
  * SequraHelper class
  */
 class SequraHelper {
 
-
 	const ISO8601_PATTERN = '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
-	/**
-	 * The Monolog Logger
-	 *
-	 * @var Logger $logger
-	 */
-	protected $logger;
 	
 	/**
 	 * Seqtttings.
@@ -62,6 +53,13 @@ class SequraHelper {
 	private $dir;
 
 	/**
+	 * Logger
+	 * 
+	 * @var SequraLogger
+	 */
+	private $logger;
+
+	/**
 	 * Instance
 	 *
 	 * @var SequraHelper
@@ -94,9 +92,11 @@ class SequraHelper {
 		if ( ! class_exists( 'SequraTempOrder' ) ) {
 			require_once $this->dir . 'class-sequratemporder.php';
 		}
+		if ( ! class_exists( 'SequraLogger' ) ) {
+			require_once $this->dir . 'class-sequralogger.php';
+		}
+		$this->logger = new SequraLogger();
 		// phpcs:enable
-		$this->logger = new Logger( 'SEQURA-LOGGER' );
-		$this->logger->pushHandler( new StreamHandler( wp_upload_dir()['basedir'] . '/wc-logs/sequra.log', $this->is_debug_enabled() ? Logger::DEBUG : Logger::INFO ) );
 	}
 
 	/**
@@ -108,14 +108,6 @@ class SequraHelper {
 		return isset( $this->settings['debug'] ) && 'yes' === $this->settings['debug'];
 	}
 
-	/**
-	 * Get logger
-	 *
-	 * @return Logger 
-	 */
-	public function get_logger() {
-		return $this->logger;
-	}
 	/**
 	 * Get merchant reference
 	 *
@@ -333,7 +325,7 @@ class SequraHelper {
 			isset( $_POST['signature'] ) &&
 			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )
 		) {
-			$this->logger->error( 'Error: Not valid signature' . sanitize_text_field( wp_unslash( $_POST['signature'] ) ) . '!=' . $builder->sign( $order->get_id() ) );
+			$this->logger->log_error( 'Error: Not valid signature' . sanitize_text_field( wp_unslash( $_POST['signature'] ) ) . '!=' . $builder->sign( $order->get_id() ), __FUNCTION__, __CLASS__ );
 			http_response_code( 498 );
 			die( 'Not valid signature' );
 		}
@@ -345,7 +337,7 @@ class SequraHelper {
 		update_post_meta( (int) $order->get_id(), 'Transaction Status', $client->getStatus() );
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		if ( ! $client->succeeded() ) {
-			$this->logger->error( 'Error: ' . wp_json_encode( $client->getJson() ) );
+			$this->logger->log_error( 'Error: ' . wp_json_encode( $client->getJson() ), __FUNCTION__, __CLASS__ );
 			http_response_code( 410 );
 			die(
 				'Error: ' .
@@ -370,7 +362,7 @@ class SequraHelper {
 			isset( $_POST['signature'] ) &&
 			$builder->sign( $order->get_id() ) !== sanitize_text_field( wp_unslash( $_POST['signature'] ) )
 		) {
-			$this->logger->error( 'Error: Not valid signature' . sanitize_text_field( wp_unslash( $_POST['signature'] ) ) . '!=' . $builder->sign( $order->get_id() ) );
+			$this->logger->log_error( 'Error: Not valid signature' . sanitize_text_field( wp_unslash( $_POST['signature'] ) ) . '!=' . $builder->sign( $order->get_id() ), __FUNCTION__, __CLASS__ );
 			http_response_code( 498 );
 			die( 'Not valid signature' );
 		}
@@ -382,7 +374,7 @@ class SequraHelper {
 		update_post_meta( (int) $order->get_id(), 'Transaction Status', 'in review' );
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		if ( ! $client->succeeded() ) {
-			$this->logger->error( 'Error: ' . wp_json_encode( $client->getJson() ) );
+			$this->logger->log_error( 'Error: ' . wp_json_encode( $client->getJson() ), __FUNCTION__, __CLASS__ );
 			http_response_code( 410 );
 			die(
 				'Error: ' .
@@ -430,11 +422,11 @@ class SequraHelper {
 				WC()->session->set( 'sequraURI', $uri );
 				return $uri;
 			} else {
-				$this->logger->error( $client->getJson() );
-				$this->logger->debug( 'Invalid payload:' . wp_json_encode( $order ) );
+				$this->logger->log_error( $client->getJson(), __FUNCTION__, __CLASS__ );
+				$this->logger->log_debug( 'Invalid payload:' . wp_json_encode( $order ), __FUNCTION__, __CLASS__ );
 			}
 		} catch ( Exception $e ) {
-			$this->logger->error( $e->getMessage() );
+			$this->logger->log_error( $e->getMessage(), __FUNCTION__, __CLASS__ );
 		}
 		return false;
 	}
@@ -519,11 +511,11 @@ class SequraHelper {
 		if ( isset( $wp->query_vars['order-pay'] ) ) { // if paying an order.
 			$order = wc_get_order( $wp->query_vars['order-pay'] );
 			if ( ! $order->needs_shipping_address() ) {
-				$this->logger->debug( 'Order doesn\'t need shipping address seQura will not be offered.' );
+				$this->logger->log_debug( 'Order doesn\'t need shipping address seQura will not be offered.', __FUNCTION__, __CLASS__ );
 				$elegible = false;
 			}
 		} elseif ( ! WC()->cart->needs_shipping() ) { // If paying cart.
-			$this->logger->debug( 'Order doesn\'t need shipping seQura will not be offered.' );
+			$this->logger->log_debug( 'Order doesn\'t need shipping seQura will not be offered.', __FUNCTION__, __CLASS__ );
 			$elegible = false;
 		}
 		/**
@@ -546,7 +538,7 @@ class SequraHelper {
 		$return = true;
 		foreach ( WC()->cart->cart_contents as $values ) {
 			if ( get_post_meta( $values['product_id'], 'is_sequra_banned', true ) === 'yes' ) {
-				$this->logger->debug( 'Banned product in the cart seQura will not be offered. Product Id :' . $values['product_id'] );
+				$this->logger->log_debug( 'Banned product in the cart seQura will not be offered. Product Id :' . $values['product_id'], __FUNCTION__, __CLASS__ );
 				$return = false;
 			}
 		}
