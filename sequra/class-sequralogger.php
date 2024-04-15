@@ -188,7 +188,10 @@ class SequraLogger {
 	 * @return bool
 	 */
 	private function is_log_enabled() {
-		return SequraHelper::get_instance()->is_debug_enabled();
+		// Move this responsibility to a settings service when proper class autoloading is working.
+		// Current implementation of loading classes by using require_once might be problematic.
+		$opts = (array) get_option( 'woocommerce_sequra_settings', false );
+		return isset( $opts['debug'] ) && 'yes' === $opts['debug'];
 	}
 
 	/**
