@@ -5,6 +5,7 @@
 #sequra-logs-content {
     width: 100%;
     min-height: 500px;
+    font-family: monospace;
 }
 
 .sequra-log__content-wrapper {

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: SeQura\n"
-"POT-Creation-Date: 2024-04-08 11:56+0000\n"
+"POT-Creation-Date: 2024-04-15 13:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -27,13 +27,13 @@ msgstr ""
 msgid "\"seQura Tech\" <wordpress@sequra.com>"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:179
+#: class-sequrapaymentgateway.php:192
 msgid ""
 "<a href=\"https://sequra.es/\">seQura</a> payment gateway for WooCommerce "
 "allows you to configure available payment methods as seQura."
 msgstr ""
 
-#: class-sequrapaymentgateway.php:412
+#: class-sequrapaymentgateway.php:428
 msgid ""
 "<p>seQura is processing your request.</p>\n"
 "\t\t\t\t\t<p>After a few minutes <b>you will get an email with your request "
@@ -60,7 +60,7 @@ msgid ""
 "registration"
 msgstr ""
 
-#: gateway-sequra.php:194
+#: gateway-sequra.php:205
 msgid "API docs"
 msgstr ""
 
@@ -212,7 +212,7 @@ msgstr ""
 msgid "Only for developers."
 msgstr ""
 
-#: class-sequrapaymentgateway.php:534
+#: class-sequrapaymentgateway.php:550
 msgid "Order cancelled payment could not be approved."
 msgstr ""
 
@@ -225,13 +225,13 @@ msgid "Password"
 msgstr ""
 
 #. %s is the payment method title.
-#: class-sequrapaymentgateway.php:494
+#: class-sequrapaymentgateway.php:510
 #, php-format
 msgid "Payment accepted by seQura.(%s)"
 msgstr ""
 
 #. %s is the payment method title.
-#: class-sequrapaymentgateway.php:474
+#: class-sequrapaymentgateway.php:490
 #, php-format
 msgid "Payment is in review by seQura.(%s)"
 msgstr ""
@@ -240,7 +240,7 @@ msgstr ""
 msgid "Please, remove any previously installed seQura plugins from WooCommerce"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:169
+#: class-sequrapaymentgateway.php:182
 msgid "Provided seQura credentials are not valid for the selected environment"
 msgstr ""
 
@@ -253,11 +253,11 @@ msgid "Sandbox"
 msgstr ""
 
 #. Name of the plugin
-#: class-sequrapaymentgateway.php:78
+#: class-sequrapaymentgateway.php:90
 msgid "seQura"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:162
+#: class-sequrapaymentgateway.php:175
 msgid "seQura configuration"
 msgstr ""
 
@@ -265,7 +265,7 @@ msgstr ""
 msgid "seQura Merchant Reference"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:79
+#: class-sequrapaymentgateway.php:91
 msgid "seQura payment method's configuration"
 msgstr ""
 
@@ -299,7 +299,7 @@ msgstr ""
 msgid "Sorry, something went wrong.\\n Please contact the merchant."
 msgstr ""
 
-#: gateway-sequra.php:202
+#: gateway-sequra.php:213
 msgid "Support"
 msgstr ""
 
@@ -317,26 +317,26 @@ msgstr ""
 msgid "Teaser visualization params"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:343
+#: class-sequrapaymentgateway.php:359
 msgid ""
 "Thank you for your order, please click the button below to pay with seQura."
 msgstr ""
 
 #. %s is the payment method title.
-#: class-sequrapaymentgateway.php:528
+#: class-sequrapaymentgateway.php:544
 #, php-format
 msgid "The payment was NOT approved (%s)"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:572
+#: class-sequrapaymentgateway.php:588
 msgid "The risk assessment for this order in progress"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:569
+#: class-sequrapaymentgateway.php:585
 msgid "The risk assessment for this order is HIGH!!"
 msgstr ""
 
-#: class-sequrapaymentgateway.php:566
+#: class-sequrapaymentgateway.php:582
 msgid "The risk assessment for this order is low"
 msgstr ""
 
@@ -353,11 +353,15 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: gateway-sequra.php:194
+#: class-sequraconfigformfields.php:152
+msgid "View logs"
+msgstr ""
+
+#: gateway-sequra.php:205
 msgid "View WooCommerce API docs"
 msgstr ""
 
-#: gateway-sequra.php:186 gateway-sequra.php:226
+#: gateway-sequra.php:197 gateway-sequra.php:237
 msgid "View WooCommerce documentation"
 msgstr ""
 
