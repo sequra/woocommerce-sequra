@@ -256,6 +256,9 @@ function woocommerce_sequra_init() {
 	if ( ! class_exists( 'SequraPaymentGateway' ) ) {
 		require_once WC_SEQURA_PLG_PATH . 'class-sequrapaymentgateway.php';
 	}
+	if ( ! class_exists( 'SequraLogger' ) ) {
+		require_once WC_SEQURA_PLG_PATH . 'class-sequralogger.php';
+	}
 	/**
 	 * Fires when the plugin needs to update payment methods information.
 	 *
@@ -519,11 +522,13 @@ function woocommerce_sequra_init() {
 	 * API REST: Get logs
 	 */
 	function sequra_api_get_logs() {
-		// TODO: call the logger instance
-		$logs = file_get_contents( __DIR__ . '/sequra.log' );
-		if ( false === $logs ) {
-			return rest_ensure_response( new WP_Error( 'error', 'Error reading logs' ) );
-		} 
+		$logs = false;
+		try {
+			$logger = new SequraLogger();
+			$logs   = $logger->get_log_content();
+		} catch ( Exception $e ) {
+			return rest_ensure_response( new WP_Error( 'error', $e->getMessage() ) );
+		}
 		echo esc_textarea( $logs );
 		exit;
 	}
@@ -532,8 +537,14 @@ function woocommerce_sequra_init() {
 	 * API REST: Delete logs
 	 */
 	function sequra_api_delete_logs() {
-		// TODO
-		return rest_ensure_response( array( 'message' => 'Logs deleted' ) );
+		$response = array( 'message' => 'Logs deleted' );
+		try {
+			$logger = new SequraLogger();
+			$logger->clear_log();
+		} catch ( \Exception $e ) {
+			$response = new WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
