@@ -162,6 +162,17 @@ add_action(
 	'admin_enqueue_scripts',
 	function () {
 		wp_enqueue_script( 'sequra_configuration_script', plugin_dir_url( __FILE__ ) . 'assets/js/sequra_config.js', array(), SEQURA_VERSION, true );
+
+		wp_register_style( 'sequra_logs', plugin_dir_url( __FILE__ ) . 'assets/css/logs.css', array(), SEQURA_VERSION );
+		wp_register_script( 'sequra_logs', plugin_dir_url( __FILE__ ) . 'assets/js/logs.js', array(), SEQURA_VERSION, true );
+		wp_localize_script(
+			'sequra_logs',
+			'sequraLogs',
+			array(
+				'nonce' => wp_create_nonce( 'wp_rest' ),
+				'url'   => rest_url( 'sequra/v1/logs' ),
+			)
+		);
 	}
 );
 
@@ -465,10 +476,71 @@ function woocommerce_sequra_init() {
 	 * Render logs page
 	 */
 	function render_sequra_logs_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		wp_enqueue_style( 'sequra_logs' );
+		wp_enqueue_script( 'sequra_logs' );
 		$is_debug_enabled = SequraHelper::get_instance()->is_debug_enabled();
 		ob_start();     
 		include SequraHelper::template_loader( 'logs' ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant
 		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Register the REST API endpoints
+	 */
+	add_action(
+		'rest_api_init',
+		function () {
+			register_rest_route(
+				'sequra/v1',
+				'/logs',
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => 'sequra_api_get_logs',
+					'permission_callback' => 'sequra_api_permission_callback',
+				)
+			);
+
+			register_rest_route(
+				'sequra/v1',
+				'/logs',
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => 'sequra_api_delete_logs',
+					'permission_callback' => 'sequra_api_permission_callback',
+				)
+			);
+		} 
+	);
+
+	/**
+	 * API REST: Get logs
+	 */
+	function sequra_api_get_logs() {
+		// TODO: call the logger instance
+		$logs = file_get_contents( __DIR__ . '/sequra.log' );
+		if ( false === $logs ) {
+			return rest_ensure_response( new WP_Error( 'error', 'Error reading logs' ) );
+		} 
+		echo esc_textarea( $logs );
+		exit;
+	}
+
+	/**
+	 * API REST: Delete logs
+	 */
+	function sequra_api_delete_logs() {
+		// TODO
+		return rest_ensure_response( array( 'message' => 'Logs deleted' ) );
+	}
+
+	/**
+	 * API REST: Permission callback
+	 */
+	function sequra_api_permission_callback() {
+		return current_user_can( 'manage_options' );
 	}
 
 	/**

@@ -15,74 +15,14 @@ if ( ! isset( $is_debug_enabled ) ) {
 }
 
 ?>
-<style>
-	#sequra-logs-container {
-		display: grid;
-	}
-
-	#sequra-logs-content{
-		width: 100%;
-		min-height: 500px;
-	}
-	
-	.sequra-log__content-wrapper{
-		margin: 2rem 0;
-		position: relative;
-	}
-
-	.sequra-logs__title{
-		position: absolute;
-		top: 8px;
-		font-weight: 700;
-		font-size: 18px;
-		left: 8px;
-		opacity: .75;
-		transition: all .3s;
-	}
-	#sequra-logs-content.active + .sequra-logs__title,
-	#sequra-logs-content:focus + .sequra-logs__title{
-		top: -24px;
-		font-size: 14px;
-		left: 0;
-		opacity: 1;
-	}
-	
-	.sequra-log__actions{
-		display: flex;
-		justify-content: center;
-		gap: 1rem;
-	}
-
-	#sequra-logs-container .button{
-		display: flex;
-		align-items: center;
-		padding: .25rem 1rem;
-	}
-	.button.button-danger, .button.button-danger:focus{
-		background-color: #dc3232;
-		color: #fff;
-		border-color: #dc3232;
-		text-decoration: none;
-		text-shadow: none;
-	}
-
-	.button.button-danger:hover{
-		background: #b32d2e;
-		border-color: #b32d2e;
-		color: #fff;
-	}
-	
-	.button.button-danger:focus {
-		box-shadow: 0 0 0 1px #fff, 0 0 0 3px #dc3232;
-	}
-</style>
-
 <div class="wrap" id="sequra-logs-container">
 	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-	<p><?php echo esc_html__( 'Debug mode', 'sequra' ) . ' ' . ( $is_debug_enabled ? '✅' : '❌' ); ?>  </p>
+	<p><?php echo ( $is_debug_enabled ? '✅' : '❌' ) . ' ' . esc_html__( 'Debug mode', 'sequra' ); ?>  </p>
 	<div class="sequra-log__content-wrapper">
 		<textarea id="sequra-logs-content"></textarea>
 		<span class="sequra-logs__title">Logs</span>
+		<span class="sequra-logs__error"></span>
+		<span class="sequra-logs__success"></span>
 	</div>
 	<div class="sequra-log__actions">
 		<button class="button" id="sequra-logs-reload">
@@ -95,3 +35,12 @@ if ( ! isset( $is_debug_enabled ) ) {
 		</button>
 	</div>
 </div>
+
+<dialog class="sequra-modal">
+	<span class="sequra-modal__title">Delete logs</span>
+	<span class="sequra-modal__subtitle">Are you sure you want to clear the logs? You won't be able to recover them.</span>
+	<div class="sequra-modal__actions">
+		<button class="sequra-modal__ko button">Cancel</button>
+		<button class="sequra-modal__ok button button-danger">Delete</button>
+	</div>
+</dialog>
