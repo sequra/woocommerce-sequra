@@ -247,8 +247,16 @@ add_action( 'woocommerce_loaded', 'woocommerce_sequra_init', 200 );
  * @return mixed
  */
 function woocommerce_sequra_init() {
+	if ( did_action( 'woocommerce_loaded' ) >= 2 ) {
+		// avoid double execution.
+		return;
+	}
+
 	if ( ! class_exists( 'SequraHelper' ) ) {
 		require_once WC_SEQURA_PLG_PATH . 'class-sequrahelper.php';
+	}
+	if ( ! class_exists( 'SequraLogger' ) ) {
+		require_once WC_SEQURA_PLG_PATH . 'class-sequralogger.php';
 	}
 	if ( ! class_exists( 'SequraRemoteConfig' ) ) {
 		require_once WC_SEQURA_PLG_PATH . 'class-sequraremoteconfig.php';
@@ -256,9 +264,7 @@ function woocommerce_sequra_init() {
 	if ( ! class_exists( 'SequraPaymentGateway' ) ) {
 		require_once WC_SEQURA_PLG_PATH . 'class-sequrapaymentgateway.php';
 	}
-	if ( ! class_exists( 'SequraLogger' ) ) {
-		require_once WC_SEQURA_PLG_PATH . 'class-sequralogger.php';
-	}
+	( new \SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 	/**
 	 * Fires when the plugin needs to update payment methods information.
 	 *
@@ -274,6 +280,7 @@ function woocommerce_sequra_init() {
 	 * @return array
 	 */
 	function add_sequra_gateway( $methods ) {
+		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 		$methods[] = 'SequraPaymentGateway';
 		return $methods;
 	}
@@ -298,6 +305,7 @@ function woocommerce_sequra_init() {
 	 * Enqueue plugin style-file
 	 */
 	function sequra_add_stylesheet_cdn_js() {
+		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 		// Respects SSL, Style.css is relative to the current file.
 		wp_register_style( 'sequra-banner', plugins_url( 'assets/css/banner.css', __FILE__ ), array(), SEQURA_VERSION );
 		wp_register_style( 'sequra-widget', plugins_url( 'assets/css/widget.css', __FILE__ ), array(), SEQURA_VERSION );
@@ -320,6 +328,7 @@ function woocommerce_sequra_init() {
 	 * @return void
 	 */
 	function sequra_head_js() {
+		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		// phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
 		$available_products = unserialize( get_option( 'SEQURA_ACTIVE_METHODS' ) );
@@ -341,6 +350,7 @@ function woocommerce_sequra_init() {
 	 * @return void
 	 */
 	function sequra_add_cart_info_to_session() {
+		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 		$sequra_cart_info = WC()->session->get( 'sequra_cart_info' );
 		if ( ! $sequra_cart_info ) {
 			$sequra_cart_info = array(
@@ -366,6 +376,7 @@ function woocommerce_sequra_init() {
 	 * @return void
 	 */
 	function woocommerce_sequra_add_widget_to_product_page() {
+		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 		global $product;
 		if ( ! is_product() ) {
 			return;
@@ -415,7 +426,9 @@ function woocommerce_sequra_init() {
 	 * @return void
 	 */
 	function sequra_widget( $atts, $product_id = null ) {
+		( new SequraLogger() )->log_info( 'Shortcode called', __FUNCTION__ );
 		if ( ! isset( $atts['product'] ) ) {
+			( new SequraLogger() )->log_error( '"product" attribute is required', __FUNCTION__ );
 			return;
 		}
 		$sequra = SequraPaymentGateway::get_instance();
@@ -451,6 +464,7 @@ function woocommerce_sequra_init() {
 	 * Register logs page
 	 */
 	function sequra_register_logs_page() {
+		( new SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 		add_submenu_page(
 			'woocommerce',
 			'seQura Logs',
@@ -470,6 +484,7 @@ function woocommerce_sequra_init() {
 	 * @return string
 	 */
 	function sequra_remove_submenu_logs_page( $submenu_file, $parent_file ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		( new \SequraLogger() )->log_info( 'Hook executed', __FUNCTION__ );
 		remove_submenu_page( 'woocommerce', 'sequra-logs' );
 		return $submenu_file;
 	}
@@ -496,6 +511,7 @@ function woocommerce_sequra_init() {
 	add_action(
 		'rest_api_init',
 		function () {
+			( new \SequraLogger() )->log_info( 'API endpoints registered' );
 			register_rest_route(
 				'sequra/v1',
 				'/logs',
@@ -522,10 +538,12 @@ function woocommerce_sequra_init() {
 	 * API REST: Get logs
 	 */
 	function sequra_api_get_logs() {
+		$logger = new \SequraLogger();
+		$logger->log_info( 'API request received', __FUNCTION__ );
+
 		$logs = false;
 		try {
-			$logger = new SequraLogger();
-			$logs   = $logger->get_log_content();
+			$logs = $logger->get_log_content();
 		} catch ( Exception $e ) {
 			return rest_ensure_response( new WP_Error( 'error', $e->getMessage() ) );
 		}
@@ -537,9 +555,11 @@ function woocommerce_sequra_init() {
 	 * API REST: Delete logs
 	 */
 	function sequra_api_delete_logs() {
+		$logger = new \SequraLogger();
+		$logger->log_info( 'API request received', __FUNCTION__ );
+	
 		$response = array( 'message' => 'Logs deleted' );
 		try {
-			$logger = new SequraLogger();
 			$logger->clear_log();
 		} catch ( \Exception $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );
