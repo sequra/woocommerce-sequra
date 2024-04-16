@@ -16,10 +16,81 @@ class SequraTempOrder {
 	 * @var array
 	 */
 	public $data = array();
+
+	/**
+	 * Shipping first name
+	 *
+	 * @var string
+	 */
+	public $shipping_first_name;
+
+	/**
+	 * Shipping last name
+	 *
+	 * @var string
+	 */
+	public $shipping_last_name;
+	
+	/**
+	 * Shipping company
+	 *
+	 * @var string
+	 */
+	public $shipping_company;
+	
+	/**
+	 * Shipping address 1
+	 *
+	 * @var string
+	 */
+	public $shipping_address_1;
+	
+	/**
+	 * Shipping address 2
+	 *
+	 * @var string
+	 */
+	public $shipping_address_2;
+	
+	/**
+	 * Shipping city
+	 *
+	 * @var string
+	 */
+	public $shipping_city;
+	
+	/**
+	 * Shipping state
+	 *
+	 * @var string
+	 */
+	public $shipping_state;
+	
+	/**
+	 * Shipping postcode
+	 *
+	 * @var string
+	 */
+	public $shipping_postcode;
+	
+	/**
+	 * Shipping country
+	 *
+	 * @var string
+	 */
+	public $shipping_country;
+	
+	/**
+	 * Status
+	 *
+	 * @var string
+	 */
+	public $status;
+
 	/**
 	 * Constructor
 	 *
-	 * @param array $post_data Data submited during checkout.
+	 * @param string $post_data Data submitted during checkout.
 	 */
 	public function __construct( $post_data ) {
 		parse_str( $post_data, $this->data );
