@@ -41,6 +41,13 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	public $helper = null;
 
 	/**
+	 * Logger
+	 *
+	 * @var SequraLogger
+	 */
+	private $logger = null;
+
+	/**
 	 * Is initialized
 	 *
 	 * @var boolean
@@ -53,6 +60,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * @var SequraPaymentGateway
 	 */
 	public static $instance = null;
+
 	/**
 	 * Get instance
 	 */
@@ -67,6 +75,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
+		if ( ! class_exists( 'SequraLogger' ) ) {
+			require_once WC_SEQURA_PLG_PATH . 'class-sequralogger.php';
+		}
+		$this->logger = new \SequraLogger();
 		/**
 		 * Action hook to allow plugins to run when the class is loaded.
 		 *
@@ -120,7 +132,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Get remote config object
 	 * 
-	 * @return array
+	 * @return SequraRemoteConfig
 	 */
 	public function get_remote_config() {
 		if ( is_null( $this->remote_config ) ) {
@@ -157,9 +169,10 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 * Admin Panel Options
 	 * - Options for bits like 'title' and availability on a country-by-country basis
 	 * */
-	public function admin_options() {    ?>
+	public function admin_options() {
+		?>
 		<h3>
-			<?php esc_html_e( 'Configuración Sequra', 'sequra' ); ?>
+			<?php esc_html_e( 'seQura configuration', 'sequra' ); ?>
 		</h3>
 		<?php if ( ! $this->is_valid_auth ) { ?>
 			<div class="error error-warning is-dismissible">
@@ -194,18 +207,21 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	 */
 	public function is_available( $product_id = null ) {
 		if ( 'yes' !== $this->enabled ) {
+			$this->logger->log_info( 'Payment gateway is disabled', __FUNCTION__, __CLASS__ );
 			return false;
 		} elseif ( is_admin() ) {
 			return true;
 		}
 		if ( SequraHelper::is_order_review() && count( $this->get_remote_config()->get_available_payment_methods() ) < 1 ) {
-			$this->helper->get_logger()->debug( 'No sequra payment method available' );
+			$this->logger->log_info( 'No sequra payment method available', __FUNCTION__, __CLASS__ );
 			return false;
 		}
 		if ( SequraHelper::is_checkout() && WC()->cart && ! $this->is_available_in_checkout() ) {
+			$this->logger->log_info( 'Widget is not available in checkout', __FUNCTION__ );
 			return false;
 		}
 		if ( is_product() && $product_id && ! $this->is_available_in_product_page( $product_id ) ) {
+			$this->logger->log_info( 'Widget is not available in product page', __FUNCTION__ );
 			return false;
 		}
 		$ret = $this->helper->is_available_for_ip();
@@ -227,11 +243,11 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		}
 		if ( 'yes' === $this->settings['enable_for_virtual'] ) {
 			if ( ! $this->helper->is_elegible_for_service_sale() ) {
-				$this->helper->get_logger()->debug( 'Order is not elegible for service sale.' );
+				$this->logger->log_info( 'Order is not eligible for service sale.', __FUNCTION__, __CLASS__ );
 				return false;
 			}
 		} elseif ( ! $this->helper->is_elegible_for_product_sale() ) {
-			$this->helper->get_logger()->debug( 'Order is not elegible for product sale.' );
+			$this->logger->log_info( 'Order is not eligible for for product sale.', __FUNCTION__, __CLASS__ );
 			return false;
 		}
 		return $this->helper->is_available_in_checkout();
@@ -245,7 +261,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 	public function is_available_in_product_page( $product_id ) {
 		$product = new WC_Product( $product_id );
 		if ( 'yes' !== $this->settings['enable_for_virtual'] && ! $product->needs_shipping() ) {
-			$this->helper->get_logger()->debug( 'Widget is not available in product page . Product id:' . $product_id );
+			$this->logger->log_info( 'Widget is not available in product page . Product id:' . $product_id, __FUNCTION__, __CLASS__ );
 			return false;
 		}
 
@@ -563,13 +579,13 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		switch ( $risk_level ) {
 			case 'low_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is low', 'sequra' ) );
+				$order->add_order_note( __( 'The risk assessment for this order is low', 'sequra' ) );
 				break;
 			case 'high_risk':
-				$order->add_order_note( __( 'The risk assesment for this order is HIGH!!', 'sequra' ) );
+				$order->add_order_note( __( 'The risk assessment for this order is HIGH!!', 'sequra' ) );
 				break;
 			case 'unknown_risk':
-				$order->add_order_note( __( 'The risk assesment for this order in progress', 'sequra' ) );
+				$order->add_order_note( __( 'The risk assessment for this order in progress', 'sequra' ) );
 				break;
 		}
 	}

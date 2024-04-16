@@ -129,7 +129,7 @@ class SequraConfigFormFields {
 			'test_ips'                 => array(
 				'title'       => __( 'IPs for testing', 'sequra' ),
 				'label'       => '',
-				'type'        => 'test',
+				'type'        => 'text',
 				'description' => sprintf(
 					// translators: %s: IP address.
 					__( 'When working is sandbox mode only these ips addresses will see the plugin. Current IP: %s', 'sequra' ),
@@ -149,7 +149,7 @@ class SequraConfigFormFields {
 				'title'       => __( 'Debugging', 'sequra' ),
 				'label'       => __( 'Debug mode', 'sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Only for developers.', 'sequra' ),
+				'description' => __( 'Only for developers.', 'sequra' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=sequra-logs' ) ) . '">' . __( 'View logs', 'sequra' ) . '</a>',
 				'default'     => 'no',
 			),
 		);
@@ -168,7 +168,7 @@ class SequraConfigFormFields {
 	 */
 	private function add_active_methods_info() {
 		$this->pm->form_fields['active_methods_info'] = array(
-			'title'       => __( 'Active payent methods', 'sequra' ),
+			'title'       => __( 'Active payment methods', 'sequra' ),
 			'type'        => 'title',
 			/* translators: %s: URL */
 			'description' => __( 'Information will be available once the credentials are set and correct', 'sequra' ),
@@ -186,7 +186,7 @@ class SequraConfigFormFields {
 	 */
 	private function init_communication_form_fields() {
 		$this->pm->form_fields['communication_fields'] = array(
-			'title'       => __( 'Comunication configuration', 'sequra' ),
+			'title'       => __( 'Communication configuration', 'sequra' ),
 			'type'        => 'title',
 			/* translators: %s: URL */
 			'description' => '',
@@ -238,7 +238,7 @@ class SequraConfigFormFields {
 		$this->pm->form_fields[ 'enabled_in_product_' . $product ] = array(
 			'title'       => __( 'Show in product page', 'sequra' ),
 			'type'        => 'checkbox',
-			'description' => __( 'Mostrar widget en la página del producto', 'sequra' ),
+			'description' => __( 'Show widget on product page', 'sequra' ),
 			'default'     => 'yes',
 		);
 		$this->pm->form_fields[ 'dest_css_sel_' . $product ]       = array(
@@ -282,7 +282,7 @@ class SequraConfigFormFields {
 		$this->pm->form_fields[ 'enabled_in_product_' . $product ] = array(
 			'title'       => __( 'Show in product page', 'sequra' ),
 			'type'        => 'checkbox',
-			'description' => __( 'Mostrar widget en la página del producto', 'sequra' ),
+			'description' => __( 'Show widget on product page', 'sequra' ),
 			'default'     => 'yes',
 		);
 		$this->pm->form_fields[ 'dest_css_sel_' . $product ]       = array(
