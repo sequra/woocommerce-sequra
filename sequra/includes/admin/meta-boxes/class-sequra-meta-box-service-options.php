@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Sequra_Meta_Box_Service_Options {
 
-
-
 	/**
 	 * Output the metabox
 	 *
@@ -92,34 +90,53 @@ class Sequra_Meta_Box_Service_Options {
 		<?php
 	}
 
-	// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 	/**
 	 * Save meta box data
 	 *
 	 * @param int     $post_id the post id.
 	 * @param WP_Post $post the post.
 	 */
-	public static function save( $post_id, $post ) {
-		$is_service = isset( $_POST['is_sequra_service'] ) && 'no' === $_POST['is_sequra_service'] ? 'no' : 'yes';
-		update_post_meta( $post_id, 'is_sequra_service', $is_service );
-		$service_end_date = isset( $_POST['sequra_service_end_date'] ) ?
-			sanitize_text_field( wp_unslash( $_POST['sequra_service_end_date'] ) ) :
-			'';
-		if ( SequraHelper::validate_service_date( $service_end_date ) ) {
-			update_post_meta( $post_id, 'sequra_service_end_date', $service_end_date );
+	public static function save( $post_id, $post ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$meta_keys_types = array(
+			'is_sequra_service'                => 'bool',
+			'sequra_service_end_date'          => 'date',
+			'sequra_desired_first_charge_date' => 'date',
+			'sequra_registration_amount'       => 'text',
+		);
+
+		foreach ( $meta_keys_types as $key => $type ) {
+			$meta_value = self::get_submitted_meta_value( $key, $type );
+			if ( '' === $meta_value ) {
+				delete_post_meta( $post_id, $key );
+			} else {
+				update_post_meta( $post_id, $key, $meta_value );
+			}
 		}
-		$desired_first_charge_date = isset( $_POST['sequra_desired_first_charge_date'] ) ?
-			sanitize_text_field( wp_unslash( $_POST['sequra_desired_first_charge_date'] ) ) :
-			'';
-		if ( SequraHelper::validate_service_date( $desired_first_charge_date ) ) {
-			update_post_meta( $post_id, 'sequra_desired_first_charge_date', $desired_first_charge_date );
-		}
-		$registration_amount = isset( $_POST['sequra_registration_amount'] ) ?
-			sanitize_text_field( wp_unslash( $_POST['sequra_registration_amount'] ) ) :
-			'';
-		update_post_meta( $post_id, 'sequra_registration_amount', $registration_amount );
 	}
-	// phpcs:enable
+
+	/**
+	 * Retrieve submitted meta value from POST data
+	 * 
+	 * @param string $key the key.
+	 * @param string $data_type Use 'text', 'date', 'bool'.
+	 * 
+	 * @return string
+	 */
+	public static function get_submitted_meta_value( $key, $data_type = 'text' ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$meta_value = isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : '';
+		switch ( $data_type ) {
+			case 'date':
+				if ( ! SequraHelper::validate_service_date( $meta_value ) ) {
+					$meta_value = '';
+				}
+				break;
+			case 'bool':
+				$meta_value = 'no' === $meta_value ? 'no' : 'yes';
+				break;
+		}
+		return $meta_value;
+	}
 
 	/**
 	 * Show warning
