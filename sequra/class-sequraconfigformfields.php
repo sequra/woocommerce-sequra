@@ -129,7 +129,7 @@ class SequraConfigFormFields {
 			'test_ips'                 => array(
 				'title'       => __( 'IPs for testing', 'sequra' ),
 				'label'       => '',
-				'type'        => 'test',
+				'type'        => 'text',
 				'description' => sprintf(
 					// translators: %s: IP address.
 					__( 'When working is sandbox mode only these ips addresses will see the plugin. Current IP: %s', 'sequra' ),
@@ -149,7 +149,7 @@ class SequraConfigFormFields {
 				'title'       => __( 'Debugging', 'sequra' ),
 				'label'       => __( 'Debug mode', 'sequra' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Only for developers.', 'sequra' ),
+				'description' => __( 'Only for developers.', 'sequra' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=sequra-logs' ) ) . '">' . __( 'View logs', 'sequra' ) . '</a>',
 				'default'     => 'no',
 			),
 		);
