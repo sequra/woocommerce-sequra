@@ -164,7 +164,7 @@ class SequraLogger {
 
 	private function get_formatted_message( $message, $func = null, $class_name = null, $level = self::DEBUG ) {
 		return sprintf(
-			"*%s*\tv%s\t%s: %s\r\n",
+			'*%s*\tv%s\t%s: %s\r\n',
 			self::LEVEL_MAP[ $level ],
 			get_bloginfo( 'version' ),
 			date( 'Y-m-d H:i:s' ), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
