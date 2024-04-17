@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: SeQura\n"
-"POT-Creation-Date: 2023-07-18 17:49+0200\n"
-"PO-Revision-Date: 2024-04-15 13:44+0000\n"
+"POT-Creation-Date: 2024-04-16 11:24+0200\n"
+"PO-Revision-Date: 2024-04-16 11:31+0200\n"
 "Last-Translator: Mikel <mikel.martin@sequra.es>\n"
 "Language-Team: Español\n"
 "Language: es_ES\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Loco https://localise.biz/\n"
+"X-Generator: Poedit 3.2.2\n"
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
 "X-Poedit-WPHeader: sequra.php\n"
@@ -23,12 +23,26 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 "X-Poedit-SearchPathExcluded-2: .history/*\n"
 
-#. Author of the plugin
-#| msgid "\"seQura Tech\" <dev+wordpress@sequra.es>"
-msgid "\"seQura Tech\" <wordpress@sequra.com>"
-msgstr "\"seQura Tech\" <dev+wordpress@sequra.es>"
+#. Plugin Name of the plugin/theme
+#: class-sequra.php:72 class-sequrapaymentgateway.php:90
+msgid "seQura"
+msgstr "seQura"
 
-#: class-sequrapaymentgateway.php:192
+#: class-sequra.php:73 class-sequrapaymentgateway.php:91
+msgid "seQura payment method's configuration"
+msgstr "Configuración de métodos de pago de seQura"
+
+#: class-sequra.php:156
+msgid "Configuración Sequra"
+msgstr "Configuración Sequra"
+
+#: class-sequra.php:163 class-sequrapaymentgateway.php:182
+msgid "Provided seQura credentials are not valid for the selected environment"
+msgstr ""
+"Las credenciales de seQura configuradas no son válidas para el entorno "
+"seleccionado"
+
+#: class-sequra.php:173 class-sequrapaymentgateway.php:192
 msgid ""
 "<a href=\"https://sequra.es/\">seQura</a> payment gateway for WooCommerce "
 "allows you to configure available payment methods as seQura."
@@ -36,7 +50,14 @@ msgstr ""
 "La pasarela <a href=\"https://sequra.es/\">seQura</a> para Woocommerce le "
 "permitirá configurar los métodos de pago disponibles con seQura."
 
-#: class-sequrapaymentgateway.php:428
+#: class-sequra.php:338 class-sequrapaymentgateway.php:360
+msgid ""
+"Thank you for your order, please click the button below to pay with seQura."
+msgstr ""
+"Gracias por su pedido, por favor haga clic en el botón de abajo para pagar "
+"con seQura."
+
+#: class-sequra.php:407 class-sequrapaymentgateway.php:429
 msgid ""
 "<p>seQura is processing your request.</p>\n"
 "\t\t\t\t\t<p>After a few minutes <b>you will get an email with your request "
@@ -48,76 +69,111 @@ msgstr ""
 "resultado por email</b>. seQura podría contactarle para solicitar "
 "información adicional.</p><p><b>¡Gracias por elegir seQura!</b>"
 
-#: class-sequraconfigformfields.php:171
-#| msgid "Active payent methods"
-msgid "Active payment methods"
-msgstr "Métodos de pago activos"
+#. translators: %s is the payment method title.
+#: class-sequra.php:468 class-sequrapaymentgateway.php:490
+#, php-format
+msgid "Payment is in review by seQura.(%s)"
+msgstr "El pago está en revisión por parte de seQura (%s)"
 
-#: class-sequraconfigformfields.php:98
-msgid "Allow first payment delay"
-msgstr "Permitir el retraso del primer pago"
+#. translators: %s is the payment method title.
+#: class-sequra.php:488 class-sequrapaymentgateway.php:510
+#, php-format
+msgid "Payment accepted by seQura.(%s)"
+msgstr "Pago aceptado por seQura (%s)"
 
-#: class-sequraconfigformfields.php:108
-msgid "Allow registration items"
-msgstr "Permitir cuota por inscripción"
+#. translators: %s is the payment method title.
+#: class-sequra.php:522 class-sequrapaymentgateway.php:544
+#, php-format
+msgid "The payment was NOT approved (%s)"
+msgstr "El pago NO fue aprobado (%s)"
 
-#: class-sequraconfigformfields.php:111
-msgid ""
-"Allows configuring part of the product price to be paid in advance as "
-"registration"
-msgstr "Parte del precio que se pagará como cuota de inscripción"
+#: class-sequra.php:528 class-sequrapaymentgateway.php:550
+msgid "Order cancelled payment could not be approved."
+msgstr "Pedido cancelado el pago no fue aprobado."
 
-#: gateway-sequra.php:205
-msgid "API docs"
-msgstr "Documentos de la API"
+#: class-sequra.php:560
+msgid "The risk assesment for this order is low"
+msgstr "El riesgo de este pedido es bajo"
 
-#: class-sequraconfigformfields.php:74
-msgid "Assets secret"
-msgstr "Assets secret"
+#: class-sequra.php:563
+msgid "The risk assesment for this order is HIGH!!"
+msgstr "La evaluación de riesgo para este pedido es ALTA!!"
 
-#: class-sequraconfigformfields.php:189
-#| msgid "Comunication configuration"
-msgid "Communication configuration"
-msgstr "Configuración de comunicación"
+#: class-sequra.php:566
+msgid "The risk assesment for this order in progress"
+msgstr "La evaluación del riesgo para esta orden en curso"
+
+#: class-sequraconfigformfields.php:37
+msgid "Enable/Disable"
+msgstr "Activar/Desactivar"
+
+#: class-sequraconfigformfields.php:39
+msgid "Enable seQura payments"
+msgstr "Habilitar seQura para servicios"
+
+#: class-sequraconfigformfields.php:43
+msgid "Title"
+msgstr "Título"
+
+#: class-sequraconfigformfields.php:45
+msgid "This controls the title which the user sees during checkout."
+msgstr "Esto controla el título que el usuario ve durante el pago."
+
+#: class-sequraconfigformfields.php:46
+msgid "Flexible payment with seQura"
+msgstr "Pagos flexibles con seQura"
 
 #: class-sequraconfigformfields.php:49
 msgid "Credentials:"
 msgstr "Credenciales:"
 
-#: class-sequraconfigformfields.php:247 class-sequraconfigformfields.php:291
-msgid "CSS after which the simulator will be drawn."
-msgstr "CSS después del cual se dibujará el simulador."
+#. translators: %s: URL to seQura signup page.
+#: class-sequraconfigformfields.php:53
+#, php-format
+msgid ""
+"Following information should be provided by seQura, you can sign-up <a "
+"href=\"%s\">here</a> to get it."
+msgstr ""
+"La siguiente información debe ser proporcionada por seQura, puede darse de "
+"alta <a href=“%s”>aquí</a> si no dispone de cuenta."
 
-#. %s: URL
-#: class-sequraconfigformfields.php:195
-msgid "CSS price selector"
-msgstr "Selector de precios CSS"
+#: class-sequraconfigformfields.php:58
+msgid "seQura Merchant Reference"
+msgstr "Referencia del comercio en seQura"
 
-#: class-sequraconfigformfields.php:245 class-sequraconfigformfields.php:289
-msgid "CSS selector for widget in product page"
-msgstr "Selector CSS para widget en la página del producto"
+#: class-sequraconfigformfields.php:63
+msgid "seQura Username"
+msgstr "Nombre de usuario de seQura"
 
-#: class-sequraconfigformfields.php:197
-msgid "CSS selector to get the price for widgets in products"
-msgstr "Selector CSS para obtener el precio de widgets en productos"
+#: class-sequraconfigformfields.php:69
+msgid "Password"
+msgstr "Contraseña"
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:38
-msgid "Date i.e: 2018-06-06 or period i.e: P1Y for 1 year"
-msgstr "Fecha, es decir: 2018-06-06 o período, es decir: P1Y por 1 año"
+#: class-sequraconfigformfields.php:74
+msgid "Assets secret"
+msgstr "Assets secret"
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:52
-msgid "Date i.e: 2021-01-01 or period i.e: P1M for 1 month"
-msgstr "Fecha, es decir: 2021-01-01 o período, es decir: P1M por 1 mes"
+#: class-sequraconfigformfields.php:79
+msgid "Enable for virtual orders"
+msgstr "Habilitar para pedidos virtuales"
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:42
-msgid "Date i.e: 2021-06-06 or period i.e: P1Y for 1 year"
-msgstr "Fecha, es decir: 2021-06-06 o período, es decir: P1Y por 1 año"
+#: class-sequraconfigformfields.php:80
+msgid "Enable seQura for services"
+msgstr "Habilitar seQura para servicios"
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:40
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:50
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:35
-msgid "date or period in ISO8601 format"
-msgstr "fecha o período en formato ISO8601"
+#: class-sequraconfigformfields.php:82
+msgid ""
+"Your contract must allow selling services, seQura will be enabled only for "
+"virtual products that have a \"Service end date\" specified. Only one "
+"product can be purchased at a time"
+msgstr ""
+"Su contrato debe permitir la venta de servicios, seQura se habilitará solo "
+"para productos virtuales que tengan especificada una \"Fecha de finalización "
+"del servicio\". Solo se puede comprar un producto a la vez"
+
+#: class-sequraconfigformfields.php:86
+msgid "Default service end date"
+msgstr "Fecha de finalización del servicio predeterminada"
 
 #: class-sequraconfigformfields.php:89
 msgid ""
@@ -129,170 +185,106 @@ msgstr ""
 "por defecto a todos los productos salvo que se indique otro valor en la "
 "ficha del producto."
 
-#: class-sequraconfigformfields.php:150
-msgid "Debug mode"
-msgstr "Modo debug"
+#: class-sequraconfigformfields.php:91
+msgid "ISO8601 format"
+msgstr "Formato ISO8601"
 
-#: class-sequraconfigformfields.php:149
-msgid "Debugging"
-msgstr "Depurando"
-
-#: class-sequraconfigformfields.php:86
-msgid "Default service end date"
-msgstr "Fecha de finalización del servicio predeterminada"
+#: class-sequraconfigformfields.php:98
+msgid "Allow first payment delay"
+msgstr "Permitir el retraso del primer pago"
 
 #: class-sequraconfigformfields.php:101 class-sequraconfigformfields.php:111
 msgid "Do not enable except by indication of seQura."
 msgstr "No habilitar salvo indicación de seQura."
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-settings.php:31
-msgid "Do not offer seQura for this product"
-msgstr "No ofrezca seQura para este producto"
+#: class-sequraconfigformfields.php:108
+msgid "Allow registration items"
+msgstr "Permitir cuota por inscripción"
 
-#: class-sequraconfigformfields.php:79
-msgid "Enable for virtual orders"
-msgstr "Habilitar para pedidos virtuales"
-
-#: class-sequraconfigformfields.php:80
-msgid "Enable seQura for services"
-msgstr "Habilitar seQura para servicios"
-
-#: class-sequraconfigformfields.php:39
-msgid "Enable seQura payments"
-msgstr "Habilitar seQura para servicios"
-
-#: class-sequraconfigformfields.php:37
-msgid "Enable/Disable"
-msgstr "Activar/Desactivar"
+#: class-sequraconfigformfields.php:111
+msgid ""
+"Allows configuring part of the product price to be paid in advance as "
+"registration"
+msgstr "Parte del precio que se pagará como cuota de inscripción"
 
 #: class-sequraconfigformfields.php:118
 msgid "Environment"
 msgstr "Ambiente"
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:48
-msgid "First instalment delay or date"
-msgstr "Fecha o plazo para el primer pago"
+#: class-sequraconfigformfields.php:120
+msgid ""
+"While working in Sandbox the methods will only show to the following IP "
+"addresses."
+msgstr ""
+"Mientras se trabaja en Sandbox, los métodos solo se mostrarán a las "
+"siguientes direcciones IP."
 
-#: class-sequraconfigformfields.php:46
-msgid "Flexible payment with seQura"
-msgstr "Pagos flexibles con seQura"
+#: class-sequraconfigformfields.php:124
+msgid "Sandbox"
+msgstr "Sandbox"
 
-#. %s: URL to seQura signup page.
-#: class-sequraconfigformfields.php:53
+#: class-sequraconfigformfields.php:125
+msgid "Live"
+msgstr "Live"
+
+#: class-sequraconfigformfields.php:130
+msgid "IPs for testing"
+msgstr "IPs para pruebas"
+
+#. translators: %s: IP address.
+#: class-sequraconfigformfields.php:135
 #, php-format
 msgid ""
-"Following information should be provided by seQura, you can sign-up <a "
-"href=\"%s\">here</a> to get it."
+"When working is sandbox mode only these ips addresses will see the plugin. "
+"Current IP: %s"
 msgstr ""
-"La siguiente información debe ser proporcionada por seQura, puede darse de "
-"alta <a href=“%s”>aquí</a> si no dispone de cuenta."
+"Cuando se trabaja es el modo sandbox sólo estas direcciones ips verán el "
+"plugin. IP actual: %s"
 
-#. Author URI of the plugin
-msgid "https://sequra.com/"
-msgstr "https://sequra.com/"
+#: class-sequraconfigformfields.php:149
+msgid "Debugging"
+msgstr "Depurando"
 
-#. URI of the plugin
-msgid "https://sequra.es/"
-msgstr "https://sequra.es/"
+#: class-sequraconfigformfields.php:150
+msgid "Debug mode"
+msgstr "Modo debug"
 
-#. %s: URL
+#: class-sequraconfigformfields.php:152
+msgid "Only for developers."
+msgstr "Solo para desarrolladores."
+
+#: class-sequraconfigformfields.php:152
+msgid "View logs"
+msgstr "Ver registros"
+
+#: class-sequraconfigformfields.php:171
+msgid "Active payment methods"
+msgstr "Métodos de pago activos"
+
+#. translators: %s: URL
 #: class-sequraconfigformfields.php:174
 msgid "Information will be available once the credentials are set and correct"
 msgstr ""
 "La información estará disponible una vez que se establezcan las credenciales "
 "y sean válidas"
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:133
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:91
-msgid "Invalid service end date, please enter a valid one"
-msgstr "Fecha de finalización del servicio no válida, introduzca una válida"
+#: class-sequraconfigformfields.php:189
+msgid "Communication configuration"
+msgstr "Configuración de comunicación"
 
-#: class-sequraconfigformfields.php:130
-msgid "IPs for testing"
-msgstr "IPs para pruebas"
+#: class-sequraconfigformfields.php:195
+msgid "CSS price selector"
+msgstr "Selector de precios CSS"
 
-#: class-sequraconfigformfields.php:91
-msgid "ISO8601 format"
-msgstr "Formato ISO8601"
+#: class-sequraconfigformfields.php:197
+msgid "CSS selector to get the price for widgets in products"
+msgstr "Selector CSS para obtener el precio de widgets en productos"
 
-#: class-sequraconfigformfields.php:125
-msgid "Live"
-msgstr "Live"
-
-#. Description of the plugin
-msgid "Ofrece las opciones de pago con seQura"
-msgstr "Ofrece las opciones de pago de SeQura"
-
-#: class-sequraconfigformfields.php:152
-msgid "Only for developers."
-msgstr "Solo para desarrolladores."
-
-#: class-sequrapaymentgateway.php:550
-msgid "Order cancelled payment could not be approved."
-msgstr "Pedido cancelado el pago no fue aprobado."
-
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:63
-msgid "Part of the price that will be paid as registration fee"
-msgstr "Parte del precio que se pagará como cuota de inscripción"
-
-#: class-sequraconfigformfields.php:69
-msgid "Password"
-msgstr "Contraseña"
-
-#. %s is the payment method title.
-#: class-sequrapaymentgateway.php:510
+#. translators: %s: payment method title.
+#: class-sequraconfigformfields.php:233
 #, php-format
-msgid "Payment accepted by seQura.(%s)"
-msgstr "Pago aceptado por seQura (%s)"
-
-#. %s is the payment method title.
-#: class-sequrapaymentgateway.php:490
-#, php-format
-msgid "Payment is in review by seQura.(%s)"
-msgstr "El pago está en revisión por parte de seQura (%s)"
-
-#: sequra.php:48
-msgid "Please, remove any previously installed seQura plugins from WooCommerce"
-msgstr "Por favor, elimine cualquier plugin de seQura instalado previamente"
-
-#: class-sequrapaymentgateway.php:182
-msgid "Provided seQura credentials are not valid for the selected environment"
-msgstr ""
-"Las credenciales de seQura configuradas no son válidas para el entorno "
-"seleccionado"
-
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:59
-msgid "Registration amount"
-msgstr "Importe de la inscripción"
-
-#: class-sequraconfigformfields.php:124
-msgid "Sandbox"
-msgstr "Sandbox"
-
-#. Name of the plugin
-#: class-sequrapaymentgateway.php:90
-msgid "seQura"
-msgstr "seQura"
-
-#: class-sequrapaymentgateway.php:175
-msgid "seQura configuration"
-msgstr "Configuración seQura"
-
-#: class-sequraconfigformfields.php:58
-msgid "seQura Merchant Reference"
-msgstr "Referencia del comercio en seQura"
-
-#: class-sequrapaymentgateway.php:91
-msgid "seQura payment method's configuration"
-msgstr "Configuración de métodos de pago de seQura"
-
-#: class-sequraconfigformfields.php:63
-msgid "seQura Username"
-msgstr "Nombre de usuario de seQura"
-
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:38
-msgid "Service end date"
-msgstr "Fecha de finalización del servicio"
+msgid "Simulator config for %s"
+msgstr "Configuración del simulador para %s"
 
 #: class-sequraconfigformfields.php:239 class-sequraconfigformfields.php:283
 msgid "Show in product page"
@@ -302,25 +294,23 @@ msgstr "Mostrar en la página del producto"
 msgid "Show widget on product page"
 msgstr "Mostrar widget en la página del producto"
 
-#. %s: payment method title.
-#: class-sequraconfigformfields.php:233
-#, php-format
-msgid "Simulator config for %s"
-msgstr "Configuración del simulador para %s"
+#: class-sequraconfigformfields.php:245 class-sequraconfigformfields.php:289
+msgid "CSS selector for widget in product page"
+msgstr "Selector CSS para widget en la página del producto"
+
+#: class-sequraconfigformfields.php:248 class-sequraconfigformfields.php:292
+msgid "CSS after which the simulator will be drawn."
+msgstr "CSS después del cual se dibujará el simulador."
 
 #: class-sequraconfigformfields.php:257
 msgid "Simulator params"
 msgstr "Parámetros simulador"
 
-#: templates/payment-identification.php:50
-msgid "Sorry, something went wrong.\\n Please contact the merchant."
-msgstr "Lo sentimos, algo ha ido mal.\\n Contacte con el comercio."
+#: class-sequraconfigformfields.php:259
+msgid "Widget visualization params"
+msgstr "Parámetros de visualización de widgets"
 
-#: gateway-sequra.php:213
-msgid "Support"
-msgstr "Soporte"
-
-#. %s: payment method title.
+#. translators: %s: payment method title.
 #: class-sequraconfigformfields.php:277
 #, php-format
 msgid "Teaser config for %s"
@@ -334,87 +324,118 @@ msgstr "Parámetros teaser"
 msgid "Teaser visualization params"
 msgstr "Parámetros de visualización teaser"
 
-#: class-sequrapaymentgateway.php:359
-msgid ""
-"Thank you for your order, please click the button below to pay with seQura."
-msgstr ""
-"Gracias por su pedido, por favor haga clic en el botón de abajo para pagar "
-"con seQura."
-
-#. %s is the payment method title.
-#: class-sequrapaymentgateway.php:544
-#, php-format
-msgid "The payment was NOT approved (%s)"
-msgstr "El pago NO fue aprobado (%s)"
-
-#: class-sequrapaymentgateway.php:588
-#| msgid "The risk assesment for this order in progress"
-msgid "The risk assessment for this order in progress"
-msgstr "La evaluación del riesgo para esta orden en curso"
-
-#: class-sequrapaymentgateway.php:585
-#| msgid "The risk assesment for this order is HIGH!!"
-msgid "The risk assessment for this order is HIGH!!"
-msgstr "La evaluación de riesgo para este pedido es ALTA!!"
+#: class-sequrapaymentgateway.php:175
+msgid "seQura configuration"
+msgstr "Configuración seQura"
 
 #: class-sequrapaymentgateway.php:582
-#| msgid "The risk assesment for this order is low"
 msgid "The risk assessment for this order is low"
 msgstr "El riesgo de este pedido es bajo"
 
-#: class-sequraconfigformfields.php:45
-msgid "This controls the title which the user sees during checkout."
-msgstr "Esto controla el título que el usuario ve durante el pago."
+#: class-sequrapaymentgateway.php:585
+msgid "The risk assessment for this order is HIGH!!"
+msgstr "La evaluación de riesgo para este pedido es ALTA!!"
 
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:71
-#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:44
-msgid "This is not a service"
-msgstr "Este producto no es un servicio"
-
-#: class-sequraconfigformfields.php:43
-msgid "Title"
-msgstr "Título"
-
-#: class-sequraconfigformfields.php:152
-msgid "View logs"
-msgstr "Ver registros"
-
-#: gateway-sequra.php:205
-msgid "View WooCommerce API docs"
-msgstr "Ver la documentación de la API de WooCommerce"
+#: class-sequrapaymentgateway.php:588
+msgid "The risk assessment for this order in progress"
+msgstr "La evaluación del riesgo para esta orden en curso"
 
 #: gateway-sequra.php:197 gateway-sequra.php:237
 msgid "View WooCommerce documentation"
 msgstr "Ver la documentación de WooCommerce"
 
-#. %s: IP address.
-#: class-sequraconfigformfields.php:135
-#, php-format
-msgid ""
-"When working is sandbox mode only these ips addresses will see the plugin. "
-"Current IP: %s"
-msgstr ""
-"Cuando se trabaja es el modo sandbox sólo estas direcciones ips verán el "
-"plugin. IP actual: %s"
+#: gateway-sequra.php:197
+msgid "Docs"
+msgstr "Documentos"
 
-#: class-sequraconfigformfields.php:120
-msgid ""
-"While working in Sandbox the methods will only show to the following IP "
-"addresses."
-msgstr ""
-"Mientras se trabaja en Sandbox, los métodos solo se mostrarán a las "
-"siguientes direcciones IP."
+#: gateway-sequra.php:205
+msgid "View WooCommerce API docs"
+msgstr "Ver la documentación de la API de WooCommerce"
 
-#: class-sequraconfigformfields.php:259
-msgid "Widget visualization params"
-msgstr "Parámetros de visualización de widgets"
+#: gateway-sequra.php:205
+msgid "API docs"
+msgstr "Documentos de la API"
 
-#: class-sequraconfigformfields.php:82
-msgid ""
-"Your contract must allow selling services, seQura will be enabled only for "
-"virtual products that have a \"Service end date\" specified. Only one "
-"product can be purchased at a time"
-msgstr ""
-"Su contrato debe permitir la venta de servicios, seQura se habilitará solo "
-"para productos virtuales que tengan especificada una \"Fecha de finalización "
-"del servicio\". Solo se puede comprar un producto a la vez"
+#: gateway-sequra.php:213
+msgid "Support"
+msgstr "Soporte"
+
+#: gateway-sequra.php:237
+msgid "Settings"
+msgstr "Ajustes"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:35
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:40
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:50
+msgid "date or period in ISO8601 format"
+msgstr "fecha o período en formato ISO8601"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:38
+msgid "Date i.e: 2018-06-06 or period i.e: P1Y for 1 year"
+msgstr "Fecha, es decir: 2018-06-06 o período, es decir: P1Y por 1 año"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:44
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:71
+msgid "This is not a service"
+msgstr "Este producto no es un servicio"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:91
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:133
+msgid "Invalid service end date, please enter a valid one"
+msgstr "Fecha de finalización del servicio no válida, introduzca una válida"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:38
+msgid "Service end date"
+msgstr "Fecha de finalización del servicio"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:42
+msgid "Date i.e: 2021-06-06 or period i.e: P1Y for 1 year"
+msgstr "Fecha, es decir: 2021-06-06 o período, es decir: P1Y por 1 año"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:48
+msgid "First instalment delay or date"
+msgstr "Fecha o plazo para el primer pago"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:52
+msgid "Date i.e: 2021-01-01 or period i.e: P1M for 1 month"
+msgstr "Fecha, es decir: 2021-01-01 o período, es decir: P1M por 1 mes"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:59
+msgid "Registration amount"
+msgstr "Importe de la inscripción"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-service-options.php:63
+msgid "Part of the price that will be paid as registration fee"
+msgstr "Parte del precio que se pagará como cuota de inscripción"
+
+#: includes/admin/meta-boxes/class-sequra-meta-box-settings.php:31
+msgid "Do not offer seQura for this product"
+msgstr "No ofrezca seQura para este producto"
+
+#: sequra.php:48
+msgid "Please, remove any previously installed seQura plugins from WooCommerce"
+msgstr "Por favor, elimine cualquier plugin de seQura instalado previamente"
+
+#: templates/payment-identification.php:50
+msgid "Sorry, something went wrong.\\n Please contact the merchant."
+msgstr "Lo sentimos, algo ha ido mal.\\n Contacte con el comercio."
+
+#: tests/framework/class-wc-mock-payment-gateway.php:9
+msgid "Proceed to PayPal"
+msgstr "Proceder a seQura"
+
+#. Plugin URI of the plugin/theme
+msgid "https://sequra.es/"
+msgstr "https://sequra.es/"
+
+#. Description of the plugin/theme
+msgid "Ofrece las opciones de pago con seQura"
+msgstr "Ofrece las opciones de pago de SeQura"
+
+#. Author of the plugin/theme
+msgid "\"seQura Tech\" <wordpress@sequra.com>"
+msgstr "\"seQura Tech\" <dev+wordpress@sequra.es>"
+
+#. Author URI of the plugin/theme
+msgid "https://sequra.com/"
+msgstr "https://sequra.com/"

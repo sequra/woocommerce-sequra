@@ -46,20 +46,14 @@ class SequraLogger {
 		if ( ! file_exists( $this->log_file_path ) ) {
 			$dir = dirname( $this->log_file_path );
 			if ( ! is_dir( $dir ) && file_exists( $dir ) ) {
-				error_log( 'Log file does not exist and parent log directory is a file.' );
-
 				return false;
 			}
 			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.directory_mkdir
 			if ( ! file_exists( $dir ) && ! mkdir( $dir, 0755, true ) ) {
-				error_log( 'Could not create log file directory.' );
-
 				return false;
 			}
 
-			if ( ! touch( $this->log_file_path ) ) { // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_touch
-				error_log( 'Could not create log file.' );
-
+			if ( ! file_put_contents( $this->get_formatted_message( 'Log file created' ), $this->log_file_path ) ) { // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
 				return false;
 			}
 		}
@@ -163,23 +157,28 @@ class SequraLogger {
 			return;
 		}
 		if ( $this->setup() ) {
-			try {
-				$formatted_message = sprintf(
-					"*%s*\tv%s\t%s: %s\r\n",
-					self::LEVEL_MAP[ $level ],
-					get_bloginfo( 'version' ),
-					date( 'Y-m-d H:i:s' ), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-					$this->format_msg( $message, $func, $class_name )
-				);
-
-				$result = file_put_contents( $this->log_file_path, $formatted_message, FILE_APPEND ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
-				if ( is_bool( $result ) && false === $result ) {
-					throw new \Exception( 'Could not write to log file.' );
-				}
-			} catch ( \Exception $e ) {
-				error_log( 'Could not log message: ' . $e->getMessage() );
-			}
+			$formatted_message = $this->get_formatted_message( $message, $func, $class_name, $level );
+			file_put_contents( $this->log_file_path, $formatted_message, FILE_APPEND ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
 		}
+	}
+	/**
+	 * Get the formatted message. 
+	 *
+	 * @param mixed $message Message to log.
+	 * @param mixed $func Function name.
+	 * @param mixed $class_name Class name.
+	 * @param int   $level Debug level.
+	 *
+	 * @return string
+	 */
+	private function get_formatted_message( $message, $func = null, $class_name = null, $level = self::DEBUG ) {
+		return sprintf(
+			'*%s*\tv%s\t%s: %s\r\n',
+			self::LEVEL_MAP[ $level ],
+			get_bloginfo( 'version' ),
+			date( 'Y-m-d H:i:s' ), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			$this->format_msg( $message, $func, $class_name )
+		);
 	}
 
 	/**
