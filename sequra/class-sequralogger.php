@@ -53,7 +53,7 @@ class SequraLogger {
 				return false;
 			}
 
-			if ( ! file_put_contents( $this->get_formatted_message( "Log file created" ), $this->log_file_path ) ) { // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
+			if ( ! file_put_contents( $this->get_formatted_message( 'Log file created' ), $this->log_file_path ) ) { // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
 				return false;
 			}
 		}
@@ -161,7 +161,16 @@ class SequraLogger {
 			file_put_contents( $this->log_file_path, $formatted_message, FILE_APPEND ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
 		}
 	}
-
+	/**
+	 * Get the formatted message. 
+	 *
+	 * @param mixed $message Message to log.
+	 * @param mixed $func Function name.
+	 * @param mixed $class_name Class name.
+	 * @param int   $level Debug level.
+	 *
+	 * @return string
+	 */
 	private function get_formatted_message( $message, $func = null, $class_name = null, $level = self::DEBUG ) {
 		return sprintf(
 			'*%s*\tv%s\t%s: %s\r\n',
