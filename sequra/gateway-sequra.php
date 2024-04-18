@@ -286,6 +286,21 @@ function woocommerce_sequra_init() {
 	}
 	add_filter( 'woocommerce_payment_gateways', 'add_sequra_gateway' );
 
+
+	/**
+	 * Register payment method in blocks
+	 */
+	function sequra_gateway_block_support() {
+		require_once __DIR__ . '/class-wc-sequra-gateway-blocks-support.php';
+		add_action(
+			'woocommerce_blocks_payment_method_type_registration',
+			function ( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+				$payment_method_registry->register( new \WC_Sequra_Gateway_Blocks_Support() );
+			}
+		);
+	}
+	add_action( 'woocommerce_blocks_loaded', 'sequra_gateway_block_support' );
+
 	if ( ! class_exists( 'Sequra_Meta_Box_Settings' ) ) {
 		require_once WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ) ) . '/includes/admin/meta-boxes/class-sequra-meta-box-settings.php';
 	}

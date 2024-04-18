@@ -1,0 +1,12 @@
+{
+    "name": "woocommerce-sequra",
+    "version": "1.0.0",
+    "author": "Michel Escalante <michel.escalante@sequra.es>",
+    "devDependencies": {
+        "@wordpress/scripts": "^27.6.0"
+    },
+    "scripts": {
+        "build": "wp-scripts build",
+        "start": "wp-scripts start"
+    }
+}
