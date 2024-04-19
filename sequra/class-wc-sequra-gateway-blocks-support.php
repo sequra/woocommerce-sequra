@@ -49,16 +49,15 @@ class WC_Sequra_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles(): array {
 
-		// sequra/assets/js/dist/index.asset.php
 		$asset_path = WC_SEQURA_PLG_PATH . 'assets/js/dist/index.asset.php';
-		$asset_url  = plugin_dir_url( __DIR__ ) . __DIR__ . '/assets/js/dist/index.js';
+		$asset_url  = plugin_dir_url( __FILE__ ) . '/assets/js/dist/index.js';
 	
 		$dependencies = array();
 		if ( ! file_exists( $asset_path ) ) {
 			return array();
 		}
 		
-		$asset        = require $asset_path;
+		$asset        = require $asset_path; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
 		$version      = isset( $asset['version'] ) ? $asset['version'] : $version;
 		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : $dependencies;
 	
