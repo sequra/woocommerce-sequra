@@ -206,17 +206,17 @@ var SequraHelper = {
 		promoWidgetNode.className = className + ' ' + modifierClassName;
 		promoWidgetNode.setAttribute('data-amount', cents);
 		promoWidgetNode.setAttribute('data-product', widget.product);
-		if (undefined != typeof this.presets[widget.theme]) {
-			const theme = this.presets[widget.theme]
-			try {
-				const attributes = JSON.parse(theme);
-				for (var key in attributes) {
-					promoWidgetNode.setAttribute('data-' + key, "" + attributes[key]);
-				}
-			} catch (e) {
-				promoWidgetNode.setAttribute('data-type', 'text');
+
+		const theme = this.presets[widget.theme] ? this.presets[widget.theme] : widget.theme;
+		try {
+			const attributes = JSON.parse(theme);
+			for (let key in attributes) {
+				promoWidgetNode.setAttribute('data-' + key, "" + attributes[key]);
 			}
+		} catch (e) {
+			promoWidgetNode.setAttribute('data-type', 'text');
 		}
+
 		if (widget.campaign) {
 			promoWidgetNode.setAttribute('data-campaign', widget.campaign);
 		}
