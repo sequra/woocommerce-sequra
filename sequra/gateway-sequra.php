@@ -492,9 +492,6 @@ function woocommerce_sequra_init() {
 		}
 
 		$sequra = SequraPaymentGateway::get_instance();
-		// Set default values to avoid errors. Added product_id to the shortcode_atts 
-		// because 2nd parameter in shortcode functions is reserved for $content.
-		// See https://developer.wordpress.org/reference/functions/add_shortcode/ .
 		$atts = shortcode_atts(
 			array(
 				'product'         => '',
