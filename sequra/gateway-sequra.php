@@ -492,7 +492,7 @@ function woocommerce_sequra_init() {
 		}
 
 		$sequra = SequraPaymentGateway::get_instance();
-		$atts = shortcode_atts(
+		$atts   = shortcode_atts(
 			array(
 				'product'         => '',
 				'campaign'        => '',

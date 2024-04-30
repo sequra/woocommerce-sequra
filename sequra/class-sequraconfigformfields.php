@@ -317,7 +317,7 @@ class SequraConfigFormFields {
 				'CSS after which the simulator will be drawn.',
 				'sequra'
 			),
-			'default'           => '.single_add_to_cart_button, .woocommerce-variation-add-to-cart',
+			'default'           => '.summary:not(:has(.woocommerce-variation-add-to-cart)) .single_add_to_cart_button,.summary .woocommerce-variation-add-to-cart',
 			'custom_attributes' => array(
 				'dependson' => 'enabled_in_product_' . $product,
 			),
