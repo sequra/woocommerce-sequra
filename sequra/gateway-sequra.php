@@ -478,7 +478,7 @@ function woocommerce_sequra_init() {
 	}
 	/**
 	 * SeQura widget short code
-	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' variation_price='#variation_price' dest='.price_container' product_id='123']
+	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' variation_price='#variation_price' dest='.price_container' product_id='123' is_variable='.variations']
 	 *
 	 * @param array    $atts       Attributes.
 	 * @param int|null $product_id Product id.
@@ -499,8 +499,9 @@ function woocommerce_sequra_init() {
 			array(
 				'product'         => '',
 				'campaign'        => '',
-				'price'           => trim( $sequra->settings['price_css_sel'] ),
-				'variation_price' => trim( $sequra->settings['variation_price_css_sel'] ),
+				'price'           => trim( $sequra->get_setting( 'price_css_sel' ) ),
+				'variation_price' => trim( $sequra->get_setting( 'variation_price_css_sel' ) ),
+				'is_variable'     => trim( $sequra->get_setting( 'is_variable_css_sel' ) ),
 				'dest'            => '',
 				'product_id'      => '',
 			),

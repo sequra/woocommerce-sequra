@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 // Check if the variables are defined.
-if ( ! isset( $atts['product'], $atts['dest'], $theme, $reverse, $atts['campaign'], $atts['price'], $atts['variation_price'], $atts['product_id'], $registration_amount ) ) {
+if ( ! isset( $atts['product'], $atts['dest'], $theme, $reverse, $atts['campaign'], $atts['price'], $atts['variation_price'], $atts['is_variable'], $atts['product_id'], $registration_amount ) ) {
 	return;
 }
 ?>
@@ -24,6 +24,7 @@ if ( ! isset( $atts['product'], $atts['dest'], $theme, $reverse, $atts['campaign
 		campaign: SequraHelper.decodeChars("<?php echo esc_js( $atts['campaign'] ); ?>"),
 		priceSel: SequraHelper.decodeChars("<?php echo esc_js( $atts['price'] ); ?>"),
 		variationPriceSel: SequraHelper.decodeChars("<?php echo esc_js( $atts['variation_price'] ); ?>"),
+		isVariableSel: SequraHelper.decodeChars("<?php echo esc_js( $atts['is_variable'] ); ?>"),
 		registrationAmount: SequraHelper.decodeChars("<?php echo esc_js( $registration_amount ); ?>"),
 	});
 </script>

@@ -10,6 +10,12 @@
  * */
 class SequraPaymentGateway extends WC_Payment_Gateway {
 
+	public const DEFAULT_SETTINGS = array(
+		'price_css_sel'           => '.summary .price>.amount,.summary .price ins .amount',
+		'variation_price_css_sel' => '.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price:not(:has(ins)) .price .amount',
+		'is_variable_css_sel'     => '.variations',
+	);
+
 	/**
 	 * Check validity of credentials of the merchant.
 	 *
@@ -608,5 +614,22 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			$total = (float) WC()->cart->total;
 		}
 		return $total;
+	}
+
+	/**
+	 * Get the setting value, the default one or null if not found.
+	 * 
+	 * @param string $key Setting key.
+	 * 
+	 * @return string|null
+	 */
+	public function get_setting( $key ) {
+		if ( isset( $this->settings[ $key ] ) ) {
+			return $this->settings[ $key ];
+		}
+		if ( isset( self::DEFAULT_SETTINGS[ $key ] ) ) {
+			return self::DEFAULT_SETTINGS[ $key ];
+		}
+		return null;
 	}
 }

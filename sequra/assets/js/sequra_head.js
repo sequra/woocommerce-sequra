@@ -68,13 +68,12 @@ var SequraHelper = {
 		);
 	},
 
-	isVariableProduct: function () {
-		// return document.querySelector('.woocommerce-variation-price') ? true : false;
-		return document.querySelector('.variations') ? true : false;
+	isVariableProduct: function (selector) {
+		return document.querySelector(selector) ? true : false;
 	},
 
 	getPriceSelector: function (widget) {
-		return !this.forcePriceSelector && this.isVariableProduct() ? widget.variationPriceSel : widget.priceSel;
+		return !this.forcePriceSelector && this.isVariableProduct(widget.isVariableSel) ? widget.variationPriceSel : widget.priceSel;
 	},
 
 	/**

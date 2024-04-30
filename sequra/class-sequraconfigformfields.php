@@ -208,13 +208,19 @@ class SequraConfigFormFields {
 			'title'       => __( 'CSS price selector', 'sequra' ),
 			'type'        => 'text',
 			'description' => __( 'CSS selector to get the price for widgets from product', 'sequra' ),
-			'default'     => '.summary .price>.amount,.summary .price ins .amount',
+			'default'     => SequraPaymentGateway::DEFAULT_SETTINGS['price_css_sel'],
 		);
 		$this->pm->form_fields['variation_price_css_sel'] = array(
 			'title'       => __( 'CSS price selector (variable)', 'sequra' ),
 			'type'        => 'text',
 			'description' => __( 'CSS selector to get the price for widgets from variations', 'sequra' ),
-			'default'     => '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount',
+			'default'     => SequraPaymentGateway::DEFAULT_SETTINGS['variation_price_css_sel'],
+		);
+		$this->pm->form_fields['is_variable_css_sel']     = array(
+			'title'       => __( 'CSS selector to detect variations', 'sequra' ),
+			'type'        => 'text',
+			'description' => __( 'CSS selector to search the DOM for an element that is only present for variable products', 'sequra' ),
+			'default'     => SequraPaymentGateway::DEFAULT_SETTINGS['is_variable_css_sel'],
 		);
 		$methods = $this->pm->get_remote_config()->get_merchant_payment_methods();
 		array_walk(
