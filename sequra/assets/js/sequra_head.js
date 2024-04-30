@@ -75,9 +75,7 @@ var SequraHelper = {
 	},
 
 	getPriceSelector: function (widget) {
-		// Provide compatibility with the old price selector using the global variable VARIATION_PRICE_SEL.
-		// The old one have precedence over the new one.
-		return !this.forcePriceSelector && this.isVariableProduct() ? ('undefined' !== typeof VARIATION_PRICE_SEL ? VARIATION_PRICE_SEL : widget.variationPriceSel) : widget.priceSel;
+		return !this.forcePriceSelector && this.isVariableProduct() ? widget.variationPriceSel : widget.priceSel;
 	},
 
 	/**
