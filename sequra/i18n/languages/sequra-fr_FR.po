@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SeQura\n"
 "POT-Creation-Date: 2024-04-16 11:22+0200\n"
-"PO-Revision-Date: 2024-04-29 16:12+0000\n"
-"Last-Translator: Mikel <mikel.martin@sequra.es>\n"
+"PO-Revision-Date: 2024-04-30 09:31+0000\n"
+"Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -21,12 +21,14 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
+"Report-Msgid-Bugs-To: \n"
+"X-Loco-Version: 2.6.7; wp-6.4.3"
 
 #. Author of the plugin
 msgid "\"seQura Tech\" <wordpress@sequra.com>"
 msgstr "\"seQura Tech\" <wordpress@sequra.com>"
 
-#: class-sequrapaymentgateway.php:192
+#: class-sequrapaymentgateway.php:198
 msgid ""
 "<a href=\"https://sequra.es/\">seQura</a> payment gateway for WooCommerce "
 "allows you to configure available payment methods as seQura."
@@ -35,7 +37,7 @@ msgstr ""
 "WooCommerce vous permet de configurer les méthodes de paiement disponibles "
 "en tant que seQura."
 
-#: class-sequrapaymentgateway.php:428
+#: class-sequrapaymentgateway.php:434
 msgid ""
 "<p>seQura is processing your request.</p>\n"
 "\t\t\t\t\t<p>After a few minutes <b>you will get an email with your request "
@@ -86,7 +88,7 @@ msgstr "Configuration de la communication"
 msgid "Credentials:"
 msgstr "Informations d'identification :"
 
-#: class-sequraconfigformfields.php:253 class-sequraconfigformfields.php:297
+#: class-sequraconfigformfields.php:259 class-sequraconfigformfields.php:303
 msgid "CSS after which the simulator will be drawn."
 msgstr "CSS après lequel le simulateur sera dessiné."
 
@@ -99,12 +101,15 @@ msgstr "Sélecteur de prix CSS"
 msgid "CSS price selector (variable)"
 msgstr "Sélecteur de prix CSS (variable)"
 
-#: class-sequraconfigformfields.php:251 class-sequraconfigformfields.php:295
+#: class-sequraconfigformfields.php:257 class-sequraconfigformfields.php:301
 msgid "CSS selector for widget in product page"
 msgstr "Sélecteur CSS pour le widget dans la page produit"
 
+#: class-sequraconfigformfields.php:207
+msgid "CSS selector to detect variations"
+msgstr "Sélecteur CSS pour détecter les variations"
+
 #: class-sequraconfigformfields.php:197
-#, fuzzy
 #| msgid "CSS selector to get the price for widgets in products"
 msgid "CSS selector to get the price for widgets from product"
 msgstr "Sélecteur CSS pour obtenir le prix des widgets dans les produits"
@@ -112,6 +117,14 @@ msgstr "Sélecteur CSS pour obtenir le prix des widgets dans les produits"
 #: class-sequraconfigformfields.php:203
 msgid "CSS selector to get the price for widgets from variations"
 msgstr "Sélecteur CSS pour obtenir le prix des widgets à partir des variantes"
+
+#: class-sequraconfigformfields.php:209
+msgid ""
+"CSS selector to search the DOM for an element that is only present for "
+"variable products"
+msgstr ""
+"Sélecteur CSS pour rechercher dans le DOM un élément présent uniquement pour "
+"les produits variables"
 
 #: includes/admin/meta-boxes/class-sequra-meta-box-service-end-date.php:38
 msgid "Date i.e: 2018-06-06 or period i.e: P1Y for 1 year"
@@ -239,7 +252,7 @@ msgstr "Offre les options de paiement avec seQura"
 msgid "Only for developers."
 msgstr "Uniquement pour les développeurs."
 
-#: class-sequrapaymentgateway.php:550
+#: class-sequrapaymentgateway.php:556
 msgid "Order cancelled payment could not be approved."
 msgstr "Le paiement de la commande annulée n'a pas pu être approuvé."
 
@@ -252,13 +265,13 @@ msgid "Password"
 msgstr "Mot de passe"
 
 #. %s is the payment method title.
-#: class-sequrapaymentgateway.php:510
+#: class-sequrapaymentgateway.php:516
 #, php-format
 msgid "Payment accepted by seQura.(%s)"
 msgstr "Paiement accepté par seQura.(%s)"
 
 #. %s is the payment method title.
-#: class-sequrapaymentgateway.php:490
+#: class-sequrapaymentgateway.php:496
 #, php-format
 msgid "Payment is in review by seQura.(%s)"
 msgstr "Le paiement est en cours d'examen par seQura.(%s)"
@@ -269,7 +282,7 @@ msgstr ""
 "Veuillez supprimer tous les plugins seQura précédemment installés dans "
 "WooCommerce"
 
-#: class-sequrapaymentgateway.php:182
+#: class-sequrapaymentgateway.php:188
 msgid "Provided seQura credentials are not valid for the selected environment"
 msgstr ""
 "Les informations d'identification seQura fournies ne sont pas valides pour "
@@ -284,11 +297,11 @@ msgid "Sandbox"
 msgstr "Sandbox"
 
 #. Name of the plugin
-#: class-sequrapaymentgateway.php:90
+#: class-sequrapaymentgateway.php:96
 msgid "seQura"
 msgstr "seQura"
 
-#: class-sequrapaymentgateway.php:175
+#: class-sequrapaymentgateway.php:181
 msgid "seQura configuration"
 msgstr "configuration seQura"
 
@@ -296,7 +309,7 @@ msgstr "configuration seQura"
 msgid "seQura Merchant Reference"
 msgstr "référence du marchand seQura"
 
-#: class-sequrapaymentgateway.php:91
+#: class-sequrapaymentgateway.php:97
 msgid "seQura payment method's configuration"
 msgstr "configuration de la méthode de paiement seQura"
 
@@ -308,21 +321,21 @@ msgstr "seQura Nom d'utilisateur"
 msgid "Service end date"
 msgstr "Date de fin de service"
 
-#: class-sequraconfigformfields.php:245 class-sequraconfigformfields.php:289
+#: class-sequraconfigformfields.php:251 class-sequraconfigformfields.php:295
 msgid "Show in product page"
 msgstr "Afficher dans la page du produit"
 
-#: class-sequraconfigformfields.php:247 class-sequraconfigformfields.php:291
+#: class-sequraconfigformfields.php:253 class-sequraconfigformfields.php:297
 msgid "Show widget on product page"
 msgstr "Afficher le widget sur la page produit"
 
 #. %s: payment method title.
-#: class-sequraconfigformfields.php:239
+#: class-sequraconfigformfields.php:245
 #, php-format
 msgid "Simulator config for %s"
 msgstr "Configuration du simulateur pour %s"
 
-#: class-sequraconfigformfields.php:263
+#: class-sequraconfigformfields.php:269
 msgid "Simulator params"
 msgstr "Paramètres du simulateur"
 
@@ -336,20 +349,20 @@ msgid "Support"
 msgstr "Support"
 
 #. %s: payment method title.
-#: class-sequraconfigformfields.php:283
+#: class-sequraconfigformfields.php:289
 #, php-format
 msgid "Teaser config for %s"
 msgstr "Teaser config pour %s"
 
-#: class-sequraconfigformfields.php:307
+#: class-sequraconfigformfields.php:313
 msgid "Teaser params"
 msgstr "Paramètres de l'accroche"
 
-#: class-sequraconfigformfields.php:309
+#: class-sequraconfigformfields.php:315
 msgid "Teaser visualization params"
 msgstr "Paramètres de visualisation de l'accroche"
 
-#: class-sequrapaymentgateway.php:359
+#: class-sequrapaymentgateway.php:365
 msgid ""
 "Thank you for your order, please click the button below to pay with seQura."
 msgstr ""
@@ -357,20 +370,20 @@ msgstr ""
 "payer avec seQura."
 
 #. %s is the payment method title.
-#: class-sequrapaymentgateway.php:544
+#: class-sequrapaymentgateway.php:550
 #, php-format
 msgid "The payment was NOT approved (%s)"
 msgstr "Le paiement n'a pas été approuvé (%s)"
 
-#: class-sequrapaymentgateway.php:588
+#: class-sequrapaymentgateway.php:594
 msgid "The risk assessment for this order in progress"
 msgstr "L'évaluation des risques pour cette commande est en cours"
 
-#: class-sequrapaymentgateway.php:585
+#: class-sequrapaymentgateway.php:591
 msgid "The risk assessment for this order is HIGH!!"
 msgstr "L'évaluation des risques pour cette commande est HAUTE !"
 
-#: class-sequrapaymentgateway.php:582
+#: class-sequrapaymentgateway.php:588
 msgid "The risk assessment for this order is low"
 msgstr "L'évaluation du risque pour cette commande est faible"
 
@@ -418,7 +431,7 @@ msgstr ""
 "Lorsque vous travaillez dans l'Environnement de travail, les méthodes ne "
 "s'affichent que pour les adresses IP suivantes."
 
-#: class-sequraconfigformfields.php:265
+#: class-sequraconfigformfields.php:271
 msgid "Widget visualization params"
 msgstr "Paramètres de visualisation du widget"
 
