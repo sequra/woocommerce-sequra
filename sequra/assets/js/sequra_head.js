@@ -1,5 +1,4 @@
 (function (i, s, o, g, r, a, m) { i['SequraConfiguration'] = g; i['SequraOnLoad'] = []; i[r] = {}; i[r][a] = function (callback) { i['SequraOnLoad'].push(callback); }; (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]); a.async = 1; a.src = g.scriptUri; m.parentNode.insertBefore(a, m); })(window, document, 'script', sequraConfigParams, 'Sequra', 'onLoad');
-// Helper
 var SequraHelper = {
 	/**
 	 * The widgets to be drawn in the page
@@ -81,10 +80,10 @@ var SequraHelper = {
 	/**
 	 * Search for child elements in the parentElem that are targets of the widget
 	 * @param {object} parentElem DOM element that may contains the widget's targets
-		* @param {object} widget  Widget object
-		* @param {string} observedAt Unique identifier to avoid fetch the same element multiple times
-		* @returns {array} Array of objects containing the target elements and a reference to the widget
-		*/
+	 * @param {object} widget  Widget object
+	 * @param {string} observedAt Unique identifier to avoid fetch the same element multiple times
+	 * @returns {array} Array of objects containing the target elements and a reference to the widget
+	 */
 	getWidgetTargets: function (parentElem, widget, observedAt) {
 
 		if (!widget.dest) {
@@ -107,10 +106,10 @@ var SequraHelper = {
 	/**
 	 * Search for all the targets of the widgets in a parent element
 	 * @param {object} parentElem DOM element that may contains the widget's targets
-		* @param {array} widgets List of widgets to be drawn in the page
-		* @param {string} observedAt Unique identifier to avoid fetch the same element multiple times
-		* @returns {array} Array of objects containing the target elements and a reference to the widget 
-		*/
+	 * @param {array} widgets List of widgets to be drawn in the page
+	 * @param {string} observedAt Unique identifier to avoid fetch the same element multiple times
+	 * @returns {array} Array of objects containing the target elements and a reference to the widget 
+	 */
 	getWidgetsTargets: function (parentElem, widgets, observedAt) {
 		const targets = [];
 		for (const widget of widgets) {
@@ -123,7 +122,7 @@ var SequraHelper = {
 	/**
 	 * Get an unique identifier to avoid fetch the same element multiple times
 	 * @returns {number} The current timestamp
-		*/
+	 */
 	getObservedAt: () => Date.now(),
 
 	removeWidgetsOnPage: function () {
