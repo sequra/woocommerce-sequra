@@ -8,6 +8,7 @@ publish.sh
 .vscode
 woocommerce-sequra/composer.lock
 sequra/composer.lock
+sequra-legacy/composer.lock
 node-modules
 e2e-tests/node_modules/*
 # Ignore Vscode workspace files
@@ -16,4 +17,5 @@ e2e-tests/node_modules/*
 .devcontainer/wp-admin
 .devcontainer/wp-includes
 .devcontainer/wp-content
+sequra-legacy/sequra.log
 sequra/sequra.log
