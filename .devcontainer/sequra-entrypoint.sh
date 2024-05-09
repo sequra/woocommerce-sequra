@@ -7,15 +7,15 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     export XDEBUG_MODE=off
 
     wait_for() {
-        local RETRY=20
-        local TIMEOUT=1
-        local START=$(date +%s)
+        local retry=30
+        local timeout=1
+        local start=$(date +%s)
 
-        while [ $(($(date +%s) - $START)) -lt $RETRY ]; do
+        while [ $(($(date +%s) - $start)) -lt $retry ]; do
             if "$@" > /dev/null 2>&1; then
                 return 0
             fi
-            sleep $TIMEOUT
+            sleep $timeout
         done
         return 1
     }
@@ -51,7 +51,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     }
 
     # Install plugins
-    wp plugin deactivate --allow-root --all --uninstall
+    wp plugin deactivate --allow-root --all
 
     if [ -n "${WP_PLUGINS}" ]; then
         IFS=',' read -ra plugins <<< "${WP_PLUGINS}"
@@ -89,13 +89,13 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
 
     wp wc shipping_zone_method create 0 --method_id="${WC_SHIPPING_ZONE_METHOD_ID}" --settings="${WC_SHIPPING_ZONE_METHOD_SETTINGS}" --user=admin --allow-root
     
-
-    wp plugin deactivate --allow-root wordpress-importer --uninstall
-    
     wp plugin activate --allow-root sequra
     # wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Fraccionar pago","merchantref":"dummy","user":"dummy","password":"ZqbjrN6bhPYVIyram3wcuQgHUmP1C4","assets_secret":"ADc3ZdOLh4","enable_for_virtual":"no","default_service_end_date":"P1Y","allow_payment_delay":"no","allow_registration_items":"no","env":"1","test_ips":"","debug":"yes","active_methods_info":"","communication_fields":"","price_css_sel":".summary .price&gt;.amount,.summary .price ins .amount"}'
     # curl "http://127.0.0.1/?post_type=product&RESET_SEQURA_ACTIVE_METHODS=true" > /dev/null
 
+    wp plugin deactivate --allow-root wordpress-importer --uninstall
+    wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name)
+
     touch /var/www/html/.post-install-complete
-    echo "✅ Post install done!"
 fi
+echo "✅ seQura plugin installed and configured."
