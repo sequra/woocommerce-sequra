@@ -1,0 +1,41 @@
+x-env_file: &env_file
+  env_file:
+    - path: ./.env
+      required: true
+    - path: ./override.env
+      required: false
+
+services:
+  web:
+    image: sequra/wordpress:$WP_TAG
+    build:
+      dockerfile: Dockerfile
+      context: ./.devcontainer
+      args:
+        WP_TAG: $WP_TAG
+    depends_on:
+      - db
+    ports:
+      - 8000:80
+    extra_hosts:
+      - "localhost.sequrapi.com:host-gateway"
+    <<: *env_file
+    environment:
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_LOCALE', '$WP_LOCALE' );
+    volumes:
+      - sq_wordpress:/var/www/html
+      # - ./.devcontainer/wp-config.php:/var/www/html/wp-config.php
+      # - ./sequra:/var/www/html/wp-content/plugins/sequra:ro
+      - ./sequra:/var/www/html/wp-content/plugins/sequra
+  db:
+    image: mariadb:$MARIADB_TAG
+    ports:
+      - 3326:3306
+    <<: *env_file
+    volumes:
+      - sq_db:/var/lib/mysql
+  
+volumes:
+  sq_wordpress:
+  sq_db:

@@ -1,0 +1,9 @@
+bin/
+vendor/
+.circleci/
+.phpcs.*
+.phpunit.*
+phpunit.xml*
+tests/bootstrap.php
+tests/test-sample.php
+sequra.log

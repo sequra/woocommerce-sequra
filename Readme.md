@@ -1,24 +1,32 @@
 # seQura Payment Gateway for WooCommerce
 
-### Description
 This repository contains the plugin seQura Payment Gateway for WooCommerce.
 
-### How to use
+## How to use
 
-You can download the plugin from https://wordpress.org/plugins/sequra/ and use it on you own WooCommerce installation.
+You can download the plugin from https://wordpress.org/plugins/sequra/ and use it on your own WooCommerce installation.
 
-#### Local version
+## Running with Docker 🐳
 
-You could also run a local docker containing a WordPress with WooCommerce with the plugin installed.
-
-Rename .env.test to .env if you want to customize any available option and then run
+To setup and start the containers run:
 
 ```bash
 ./setup.sh
 ```
-and then open [plugin settings](http://localhost.sequrapi.com:8000/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra) and login with user `admin` and password `admin`
-or browse the [frontend](http://localhost.sequrapi.com:8000/?post_type=product)
+To stop the containers and perform some cleanup operations run:
 
-#### Available customizations
-* SQ_WORDPRESS_VERSION: (default:latest) WordPress version to use
-* SQ_WORDPRESS_DATA_DIR: (default:sq_wordpress_data) Directory to store WordPress data
+```bash
+./terminate.sh
+```
+
+Then, access to [plugin settings](http://localhost.sequrapi.com:8000/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra) and login with user `admin` and password `admin`, or browse the [frontend](http://localhost.sequrapi.com:8000/?post_type=product)
+
+> [!WARNING]  
+> The ```docker-compose.yml``` file is created or deleted with those scripts. If you need to edit it, change the ```docker-compose-template.yml``` instead.
+
+### Configuration
+
+By default, the environment is set up with the latest versions of WordPress and MariaDB.
+You might like to change this behavior in some scenarios (for example, to test with a different version of WordPress/PHP). 
+
+For those cases, make a copy of the ```.env``` file in the root directory of the repository, rename it to ```override.env``` and customize the values. Leave only the variables with custom values in the file.

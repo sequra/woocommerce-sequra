@@ -1,0 +1,8 @@
+*phpunit*
+*.json
+*.lock
+*.xml
+*/tests/*
+*/bin/*
+*.sh
+*.lst

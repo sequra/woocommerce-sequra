@@ -1,0 +1,134 @@
+<?php
+/**
+ * Tests for the Plugin class.
+ *
+ * @package Sequra/WC
+ * @subpackage Sequra/WC/Tests
+ */
+
+namespace Sequra\WC\Tests;
+
+use Sequra\WC\Controllers\Interface_Assets_Controller;
+use Sequra\WC\Controllers\Interface_I18n_Controller;
+use Sequra\WC\Plugin;
+use PHPUnit\Framework\MockObject\MockObject;
+use WP_UnitTestCase;
+
+
+/**
+ * Tests for the Plugin class.
+ */
+class PluginTest extends WP_UnitTestCase {
+
+	/**
+	 * Plugin
+	 *
+	 * @var Plugin
+	 */
+	private $plugin;
+
+	/**
+	 * Plugin data
+	 *
+	 * @var array
+	 */
+	private $plugin_data;
+
+	/**
+	 * Base name
+	 *
+	 * @var string
+	 */
+	private $base_name;
+
+	/**
+	 * I18n mock
+	 *
+	 * @var mixed
+	 */
+	private $i18n_controller;
+
+	/**
+	 * Asset mock
+	 *
+	 * @var mixed
+	 */
+	private $asset_controller;
+
+	/**
+	 * Setup values before each test case
+	 */
+	public function set_up() {
+
+		$this->plugin_data = array(
+			'Name'        => 'seQura',
+			'TextDomain'  => 'sequra',
+			'DomainPath'  => '/languages',
+			'Version'     => '3.0.0',
+			'RequiresPHP' => '7.3',
+			'RequiresWP'  => '5.9',
+		);
+
+		$this->base_name        = 'sequra/sequra.php';
+		$this->i18n_controller  = $this->createMock( Interface_I18n_Controller::class );
+		$this->asset_controller = $this->createMock( Interface_Assets_Controller::class );
+	}
+
+	/**
+	 * Test case for construction
+	 */
+	public function testConstructor_happyPath_hooksAreRegistered() {
+		$this->plugin = new Plugin( 
+			$this->plugin_data, 
+			$this->base_name, 
+			$this->i18n_controller, 
+			$this->asset_controller
+		);
+		
+		$this->assertEquals( 10, has_action( 'plugins_loaded', array( $this->i18n_controller, 'load_text_domain' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( $this->asset_controller, 'enqueue_admin' ) ) );
+		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $this->asset_controller, 'enqueue_front' ) ) );
+	}
+
+	/**
+	 * Test case for activation
+	 */
+	public function testActivate_notMeetPhpRequirements_deactivateAndDie() {
+
+		// A very high PHP version requirement to force the failure.
+		$this->plugin_data['RequiresPHP'] = '999';
+
+		$this->plugin = new Plugin( 
+			$this->plugin_data, 
+			$this->base_name, 
+			$this->i18n_controller, 
+			$this->asset_controller
+		);
+
+		$this->plugin->activate();
+
+		$this->assertFalse( is_plugin_active( $this->base_name ) );
+		$this->expectOutputString( "\nwp_die() called\nMessage: This plugin requires PHP " . $this->plugin_data['RequiresPHP'] . " or greater.\nTitle: WordPress &rsaquo; Error\nArgs:\n\tresponse: 500\n\tcode: wp_die\n\texit: 1\n\tback_link: \n\tlink_url: \n\tlink_text: \n\ttext_direction: ltr\n\tcharset: UTF-8\n\tadditional_errors: array (\n)\n" );
+	}
+
+	/**
+	 * Test case for activation
+	 */
+	public function testActivate_notMeetWpRequirements_deactivateAndDie() {
+
+		// A very high WP version requirement to force the failure.
+		$this->plugin_data['RequiresWP'] = '999';
+
+		$this->plugin = new Plugin( 
+			$this->plugin_data, 
+			$this->base_name, 
+			$this->i18n_controller, 
+			$this->asset_controller
+		);
+
+		$this->plugin->activate();
+
+		$this->assertFalse( is_plugin_active( $this->base_name ) );
+		$this->expectOutputString( "\nwp_die() called\nMessage: This plugin requires WordPress " . $this->plugin_data['RequiresWP'] . " or greater.\nTitle: WordPress &rsaquo; Error\nArgs:\n\tresponse: 500\n\tcode: wp_die\n\texit: 1\n\tback_link: \n\tlink_url: \n\tlink_text: \n\ttext_direction: ltr\n\tcharset: UTF-8\n\tadditional_errors: array (\n)\n" );
+	}
+}
