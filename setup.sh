@@ -20,7 +20,7 @@ docker compose up -d --build
 
 echo "Waiting for installation to complete..."
 
-retry=30
+retry=60
 timeout=1
 start=$(date +%s)
 while [ $(($(date +%s) - $start)) -lt $retry ]; do

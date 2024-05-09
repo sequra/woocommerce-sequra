@@ -7,7 +7,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     export XDEBUG_MODE=off
 
     wait_for() {
-        local retry=30
+        local retry=60
         local timeout=1
         local start=$(date +%s)
 
