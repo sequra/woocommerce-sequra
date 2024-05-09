@@ -21,14 +21,14 @@ use Sequra\WC\Services\Settings;
 
 return array(
 	// Global constants definitions.
-	'plugin.basename'                  => plugin_basename( plugin_dir_path( __FILE__ ) . 'demo.php' ),
+	'plugin.basename'                  => plugin_basename( plugin_dir_path( __FILE__ ) . 'sequra.php' ),
 	'plugin.dir_path'                  => plugin_dir_path( __FILE__ ),
 	'plugin.dir_url'                   => plugin_dir_url( __FILE__ ),
 	'plugin.data'                      => function ( Container $c ) {
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		return get_plugin_data( $c->get( 'plugin.dir_path' ) . 'demo.php' );
+		return get_plugin_data( $c->get( 'plugin.dir_path' ) . 'sequra.php' );
 	},
 	// Third party.
 	// Data Mappers.
