@@ -19,5 +19,5 @@ e2e-tests/node_modules/*
 .devcontainer/wp-content
 sequra-legacy/sequra.log
 override.env
-docker-compose.yml
 .DS_Store
+.env

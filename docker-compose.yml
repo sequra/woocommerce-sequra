@@ -1,9 +1,6 @@
 x-env_file: &env_file
   env_file:
-    - path: ./.env
-      required: true
-    - path: ./override.env
-      required: false
+    - .env
 
 services:
   web:
