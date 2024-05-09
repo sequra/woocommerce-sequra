@@ -13,11 +13,11 @@ jobs:
         run: ./setup.sh
 
       - name: Setup Tests
-        run: docker compose exec web /var/www/html/setup-tests.sh
+        run: docker compose exec web /usr/local/bin/setup-tests.sh
 
       - name: Run Tests
         run: |
-          docker compose exec web /var/www/html/run-tests.sh
+          docker compose exec web /usr/local/bin/run-tests.sh
 
       - name: Cleanup
         run: ./terminate.sh
