@@ -51,18 +51,18 @@ Add this configuration to project workspace's settings:
 
 ```json
 {
-	"settings": {
+    "settings": {
 
         "phpunit.command": "docker compose exec web /bin/bash -c",
-		"phpunit.php": "php",
-		"phpunit.phpunit": "/var/www/html/wp-content/plugins/sequra/vendor/bin/phpunit",
-		"phpunit.args": [
-			"-c",
-			"/var/www/html/wp-content/plugins/sequra/phpunit.xml.dist"
-		],
-		"phpunit.paths": {
-			"${workspaceFolder}": "/var/www/html/wp-content/plugins",
-		},
+	    "phpunit.php": "php",
+	    "phpunit.phpunit": "/var/www/html/wp-content/plugins/sequra/vendor/bin/phpunit",
+	    "phpunit.args": [
+		    "-c",
+		    "/var/www/html/wp-content/plugins/sequra/phpunit.xml.dist"
+	    ],
+	    "phpunit.paths": {
+	        "${workspaceFolder}": "/var/www/html/wp-content/plugins",
+	    },
     }
 }
 ```
