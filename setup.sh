@@ -1,21 +1,26 @@
 #!/bin/bash
-# ARGS in docker-compose cannot be dynamically set.
-# This script will generate the docker-compose.yml file with the correct values from the .env files.
-
 if [ ! -f .env ]; then
     cp .env.sample .env
 fi
 
-# set -o allexport
-# source .env
-# set +o allexport
+# Variables
+install=1  # Valor por defecto
 
-# envsubst < docker-compose-template.yml > docker-compose.yml
+# Parse arguments:
+# --install=0: Skip installation of dependencies
+while [[ "$#" -gt 0 ]]; do
+    if [ "$1" == "--install=0" ]; then
+        install=0
+        break
+    fi
+    shift
+done
 
-# Run composer install
-docker run --rm -v "$(pwd)"/sequra:/app -w /app composer:latest composer install
-
-# TODO: Run npm install?
+if [ $install -eq 1 ]; then
+    ./composer_install.sh
+else
+    echo "Skipping installation of dependencies."   
+fi
 
 docker compose up -d --build
 
