@@ -50,7 +50,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 		// // Scripts.
 		// wp_register_script( self::HANDLE_ADMIN, "$this->assets_dir_url/js/admin.js", array(), $this->assets_version, true );
 		// $l10n = array(
-		// 	// TODO: Add localization strings here.
+		// TODO: Add localization strings here.
 		// );
 		// wp_localize_script( self::HANDLE_ADMIN, 'demoAdmin', $l10n );
 		// wp_enqueue_script( self::HANDLE_ADMIN );

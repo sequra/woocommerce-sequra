@@ -3,7 +3,7 @@
  * The plugin bootstrap file
  * TODO: All texts MUST be in English
  *
- * @package           Sequra/WC
+ * @package Sequra/WC
  *
  * @wordpress-plugin
  * Plugin Name:       seQura
@@ -33,7 +33,7 @@ call_user_func(
 		$builder = new \DI\ContainerBuilder();
 		$builder->useAutowiring( true );
 		$builder->useAnnotations( false );
-		$definitions = require_once plugin_dir_path( __FILE__ ) . 'di-config.php';
+		$definitions = include_once plugin_dir_path( __FILE__ ) . 'di-config.php';
 		$builder->addDefinitions( $definitions );
 		$container = $builder->build();
 

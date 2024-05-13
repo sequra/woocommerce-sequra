@@ -2,7 +2,7 @@
 /**
  * Tests for the Plugin class.
  *
- * @package Sequra/WC
+ * @package    Sequra/WC
  * @subpackage Sequra/WC/Tests
  */
 
@@ -15,6 +15,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use WP_UnitTestCase;
 
 class PluginTest extends WP_UnitTestCase {
+
 
 	private $plugin;
 	private $plugin_data;
