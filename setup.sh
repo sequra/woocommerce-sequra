@@ -3,7 +3,7 @@
 # This script will generate the docker-compose.yml file with the correct values from the .env files.
 
 if [ ! -f .env ]; then
-    cp .env.example .env
+    cp .env.sample .env
 fi
 
 # set -o allexport
