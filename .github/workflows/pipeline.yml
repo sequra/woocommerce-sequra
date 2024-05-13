@@ -1,0 +1,50 @@
+name: CI
+
+on: [push, pull_request]
+
+concurrency:
+  # For pull requests, cancel all currently-running jobs for this workflow
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  # Force terminal colors. @see https://www.npmjs.com/package/colors
+  FORCE_COLOR: 1
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        id: cache-composer
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: composer-${{ hashFiles('sequra/composer.json') }}
+
+      - name: Install composer dependencies
+        if: steps.cache-composer.outputs.cache-hit != 'true'
+        run: ./composer_install.sh
+
+      - name: Setup Environment
+        run: ./setup.sh --install=0
+      
+      - name: PHPCS
+        run: ./phpcs.sh
+      
+      - name: Setup Tests
+        if: github.event_name == 'pull_request'
+        run: docker compose exec web /usr/local/bin/setup-tests.sh
+
+      - name: Run Tests
+        if: github.event_name == 'pull_request'
+        run: |
+          docker compose exec web /usr/local/bin/run-tests.sh
+
+      - name: Terminate Environment
+        run: ./terminate.sh
