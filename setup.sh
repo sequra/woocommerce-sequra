@@ -17,7 +17,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [ $install -eq 1 ]; then
-    ./composer_install.sh
+    ./bin/composer install
 else
     echo "Skipping installation of dependencies."   
 fi

@@ -1,0 +1,7 @@
+parameters:
+    level: 9
+    paths:
+        - sequra.php
+        - di-config.php
+        - src/
+        - templates/

@@ -29,14 +29,18 @@ jobs:
 
       - name: Install composer dependencies
         if: steps.cache-composer.outputs.cache-hit != 'true'
-        run: ./composer_install.sh
+        run: ./bin/composer install
+
+      - name: PHPCS
+        run: ./bin/phpcs
+
+      - name: PHPStan
+        run: ./bin/phpstan
 
       - name: Setup Environment
+        if: github.event_name == 'pull_request'
         run: ./setup.sh --install=0
-      
-      - name: PHPCS
-        run: ./phpcs.sh
-      
+
       - name: Setup Tests
         if: github.event_name == 'pull_request'
         run: docker compose exec web /usr/local/bin/setup-tests.sh

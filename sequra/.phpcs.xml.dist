@@ -29,6 +29,12 @@
 	<rule ref="Generic.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
+	<rule ref="Generic.Commenting.Todo.TaskFound">
+		<exclude name="Generic.Commenting.Todo.TaskFound"/>
+	</rule>
+	<rule ref="Squiz.PHP.CommentedOutCode.Found">
+		<exclude name="Squiz.PHP.CommentedOutCode.Found"/>
+	</rule>
 	<rule ref="Squiz.Commenting.ClassComment.Missing">
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
