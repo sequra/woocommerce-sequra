@@ -51,4 +51,5 @@ jobs:
           docker compose exec web /usr/local/bin/run-tests.sh
 
       - name: Terminate Environment
+        if: github.event_name == 'pull_request'
         run: ./terminate.sh
