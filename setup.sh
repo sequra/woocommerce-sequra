@@ -3,6 +3,10 @@ if [ ! -f .env ]; then
     cp .env.sample .env
 fi
 
+set -o allexport
+source .env
+set +o allexport
+
 # Variables
 install=1  # Valor por defecto
 
@@ -33,6 +37,10 @@ while [ $(($(date +%s) - $start)) -lt $retry ]; do
     if docker compose exec web ls /var/www/html/.post-install-complete > /dev/null 2>&1; then
         seconds=$(($(date +%s) - $start))
         echo "✅ Done in ${seconds} seconds."
+        echo "🔗 Access seQura settings at ${WP_URL}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra"
+        echo "🔗 Or browse products at ${WP_URL}/?post_type=product"
+        echo "User: $WP_ADMIN_USER"
+        echo "Password: $WP_ADMIN_PASSWORD"
         exit 0
     fi
     sleep $timeout
