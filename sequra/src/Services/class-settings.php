@@ -2,11 +2,11 @@
 /**
  * Settings
  *
- * @package    Sequra/WC
- * @subpackage Sequra/WC/Services
+ * @package    SeQura/WC
+ * @subpackage SeQura/WC/Services
  */
 
-namespace Sequra\WC\Services;
+namespace SeQura\WC\Services;
 
 /**
  * Settings

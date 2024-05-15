@@ -2,11 +2,11 @@
 /**
  * I18n Controller
  *
- * @package    Sequra/WC
- * @subpackage Sequra/WC/Controllers
+ * @package    SeQura/WC
+ * @subpackage SeQura/WC/Controllers
  */
 
-namespace Sequra\WC\Controllers;
+namespace SeQura\WC\Controllers;
 
 /**
  * Define the internationalization functionality

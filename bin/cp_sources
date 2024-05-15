@@ -16,6 +16,10 @@ else
     # woocommerce plugin
     mkdir -p "${BASEDIR}"/.devcontainer/wp-content/plugins
     docker cp "$container_id":/var/www/html/wp-content/plugins/woocommerce "${BASEDIR}"/.devcontainer/wp-content/plugins
+    # Wordpress Test libs
+    mkdir -p "${BASEDIR}"/.devcontainer/wordpress-tests-lib
+    docker cp "$container_id":/tmp/wordpress-tests-lib/data "${BASEDIR}"/.devcontainer/wordpress-tests-lib
+    docker cp "$container_id":/tmp/wordpress-tests-lib/includes "${BASEDIR}"/.devcontainer/wordpress-tests-lib
     
     echo "Done!"
 fi

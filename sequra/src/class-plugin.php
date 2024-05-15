@@ -2,13 +2,14 @@
 /**
  * The core plugin class.
  *
- * @package    Sequra/WC
+ * @package    SeQura/WC
  */
 
-namespace Sequra\WC;
+namespace SeQura\WC;
 
-use Sequra\WC\Controllers\Interface_I18n_Controller;
-use Sequra\WC\Controllers\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Interface_Settings_Controller;
 
 /**
  * The core plugin class.
@@ -34,14 +35,18 @@ class Plugin {
 	 *
 	 * @param array                       $data            The plugin data.
 	 * @param string                      $base_name       The plugin base name.
+	 * @param Interface_Bootstrap   $bootstrap SeQura Integration Core bootstrap.
 	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
 	 * @param Interface_Assets_Controller $assets_controller Assets controller.
+	 * @param Interface_Settings_Controller $settings_controller Settings controller.
 	 */
 	public function __construct(
 		$data,
 		$base_name,
+		Interface_Bootstrap $bootstrap,
 		Interface_I18n_Controller $i18n_controller,
-		Interface_Assets_Controller $assets_controller
+		Interface_Assets_Controller $assets_controller,
+		Interface_Settings_Controller $settings_controller
 	) {
 		$this->data      = $data;
 		$this->base_name = $base_name;
@@ -52,6 +57,13 @@ class Plugin {
 		// Assets hooks.
 		add_action( 'admin_enqueue_scripts', array( $assets_controller, 'enqueue_admin' ) );
 		add_action( 'wp_enqueue_scripts', array( $assets_controller, 'enqueue_front' ) );
+
+		// Settings hooks.
+		add_action( 'admin_menu', array( $settings_controller, 'register_page' ) );
+		add_filter( "plugin_action_links_{$base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
+
+		// TODO: Maybe this should be moved to plugin_loaded action.
+		$bootstrap->do_init();
 	}
 
 	/**
@@ -67,6 +79,11 @@ class Plugin {
 		if ( version_compare( $wp_version, $this->data['RequiresWP'], '<' ) ) {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires WordPress ' . $this->data['RequiresWP'] . ' or greater.' ) );
+		}
+
+		if ( ! defined( 'WC_VERSION' ) || version_compare( WC_VERSION, $this->data['RequiresWC'], '<' ) ) {
+			deactivate_plugins( $this->base_name );
+			wp_die( esc_html( 'This plugin requires WooCommerce ' . $this->data['RequiresWC'] . ' or greater.' ) );
 		}
 
 		// TODO: Do something on activation.
