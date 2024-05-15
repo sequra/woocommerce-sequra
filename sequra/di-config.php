@@ -66,7 +66,7 @@ return array(
 		return new I18n_Controller( $domain . $data['DomainPath'], $domain );
 	},
 	Interface_Assets_Controller::class   => function ( Container $c ) {
-		return new Assets_Controller( $c->get( 'plugin.dir_url' ), $c->get( 'plugin.data' )['Version'] );
+		return new Assets_Controller( $c->get( 'plugin.dir_url' ) . 'assets', $c->get( 'plugin.data' )['Version'] );
 	},
 	Interface_Settings_Controller::class => function ( Container $c ) {
 		return new Settings_Controller( $c->get( 'plugin.templates_path' ) );

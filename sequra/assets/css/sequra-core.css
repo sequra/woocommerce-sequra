@@ -176,10 +176,11 @@ table tr th {
 }
 
 #sq-page-wrapper {
-  min-width: 100vw;
+  /* min-width: 100vw; */
+  min-width: 100%;
   min-height: 100vh;
   padding: 30px 20px 60px 30px;
-  background: #f3f6f9;
+  /* background: #f3f6f9; */
 }
 #sq-page-wrapper .sq-page-content-wrapper {
   position: relative;
@@ -544,27 +545,27 @@ table tr th {
   font-family: "Inter";
   font-style: normal;
   font-weight: 400;
-  src: local("Inter Regular"), url(../assets/fonts/Inter/Inter-Regular.woff2) format("woff2"), url(../assets/fonts/Inter/Inter-Regular.woff) format("woff");
+  src: local("Inter Regular"), url(../fonts/Inter/Inter-Regular.woff2) format("woff2"), url(../fonts/Inter/Inter-Regular.woff) format("woff");
 }
 @font-face {
   font-family: "Inter";
   font-style: normal;
   font-weight: 600;
-  src: local("Inter SemiBold"), url(../assets/fonts/Inter/Inter-SemiBold.woff2) format("woff2"), url(../assets/fonts/Inter/Inter-SemiBold.woff) format("woff");
+  src: local("Inter SemiBold"), url(../fonts/Inter/Inter-SemiBold.woff2) format("woff2"), url(../fonts/Inter/Inter-SemiBold.woff) format("woff");
 }
 @font-face {
   font-family: "Inter";
   font-style: normal;
   font-weight: 700;
-  src: local("Inter Bold"), url(../assets/fonts/Inter/Inter-Bold.woff2) format("woff2"), url(../assets/fonts/Inter/Inter-Bold.woff) format("woff");
+  src: local("Inter Bold"), url(../fonts/Inter/Inter-Bold.woff2) format("woff2"), url(../fonts/Inter/Inter-Bold.woff) format("woff");
 }
 /**
  * Font face declaration for icons
  */
 @font-face {
   font-family: "sq-icons";
-  src: url("../assets/fonts/sq-icons/sq-icons.eot");
-  src: url("../assets/fonts/sq-icons/sq-icons.eot") format("embedded-opentype"), url("../assets/fonts/sq-icons/sq-icons.ttf") format("truetype"), url("../assets/fonts/sq-icons/sq-icons.woff") format("woff"), url("../assets/fonts/sq-icons/sq-icons.svg") format("svg");
+  src: url("../fonts/sq-icons/sq-icons.eot");
+  src: url("../fonts/sq-icons/sq-icons.eot") format("embedded-opentype"), url("../fonts/sq-icons/sq-icons.ttf") format("truetype"), url("../fonts/sq-icons/sq-icons.woff") format("woff"), url("../fonts/sq-icons/sq-icons.svg") format("svg");
   font-weight: normal;
   font-style: normal;
 }
