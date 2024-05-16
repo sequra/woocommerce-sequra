@@ -77,7 +77,7 @@ if (!window.SequraFE) {
             }
 
             Promise.all([
-                transactionLogs ? [] : api.get(configuration.getTransactionLogsUrl + `&page=${page}&limit=${limit}`),
+                transactionLogs ? [] : api.get(configuration.getTransactionLogsUrl + `&page=${page}&limit=${limit}`, null, SequraFE.customHeader),
             ]).then(([transactionLogsRes]) => {
                 if (transactionLogsRes.length !== 0) {
                     transactionLogs = transactionLogsRes.transactionLogs;
@@ -274,7 +274,7 @@ if (!window.SequraFE) {
 
                 tableWrapper?.append(spinnerWrapper);
 
-                api.get(configuration.getTransactionLogsUrl + `&page=${page + 1}&limit=${limit}`)
+                api.get(configuration.getTransactionLogsUrl + `&page=${page + 1}&limit=${limit}`, null, SequraFE.customHeader)
                     .then((res) => {
                         page++;
                         hasNextPage = res?.hasNextPage;

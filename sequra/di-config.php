@@ -15,6 +15,9 @@ use SeQura\WC\Controllers\I18n_Controller;
 use SeQura\WC\Controllers\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Interface_Settings_Controller;
+use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
+use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
+use SeQura\WC\Controllers\Rest\Settings_REST_Controller;
 use SeQura\WC\Controllers\Settings_Controller;
 use SeQura\WC\Interface_Bootstrap;
 use SeQura\WC\Plugin;
@@ -32,6 +35,7 @@ return array(
 	'plugin.basename'                    => plugin_basename( plugin_dir_path( __FILE__ ) . 'sequra.php' ),
 	'plugin.dir_path'                    => plugin_dir_path( __FILE__ ),
 	'plugin.dir_url'                     => plugin_dir_url( __FILE__ ),
+	'plugin.rest_namespace'              => 'sequra/v1',
 	'plugin.data'                        => function ( Container $c ) {
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -86,6 +90,16 @@ return array(
 			$c->get( Interface_Settings::class )
 		);
 	},
+	Onboarding_REST_Controller::class    => function ( Container $c ) {
+		return new Onboarding_REST_Controller( $c->get( 'plugin.rest_namespace' ) );
+	},
+	Payment_REST_Controller::class       => function ( Container $c ) {
+		return new Payment_REST_Controller( $c->get( 'plugin.rest_namespace' ) );
+	},
+
+	Settings_REST_Controller::class      => function ( Container $c ) {
+		return new Settings_REST_Controller( $c->get( 'plugin.rest_namespace' ) );
+	},
 	// Bootstrap.
 	Interface_Bootstrap::class           => function ( Container $c ) {
 		// TODO: Add the required dependencies.
@@ -100,7 +114,10 @@ return array(
 			$c->get( Interface_Bootstrap::class ), 
 			$c->get( Interface_I18n_Controller::class ), 
 			$c->get( Interface_Assets_Controller::class ),
-			$c->get( Interface_Settings_Controller::class )
+			$c->get( Interface_Settings_Controller::class ),
+			$c->get( Settings_REST_Controller::class ),
+			$c->get( Onboarding_REST_Controller::class ),
+			$c->get( Payment_REST_Controller::class )
 		);
 	},
 );

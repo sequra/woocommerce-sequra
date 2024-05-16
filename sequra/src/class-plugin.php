@@ -10,6 +10,7 @@ namespace SeQura\WC;
 use SeQura\WC\Controllers\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Interface_Settings_Controller;
+use SeQura\WC\Controllers\Rest\REST_Controller;
 
 /**
  * The core plugin class.
@@ -39,6 +40,9 @@ class Plugin {
 	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
 	 * @param Interface_Assets_Controller $assets_controller Assets controller.
 	 * @param Interface_Settings_Controller $settings_controller Settings controller.
+	 * @param WP_REST_Controller          $rest_settings_controller REST Settings controller.
+	 * @param WP_REST_Controller          $rest_onboarding_controller REST Onboarding controller.
+	 * @param WP_REST_Controller          $rest_payment_controller REST Payment controller.
 	 */
 	public function __construct(
 		$data,
@@ -46,7 +50,10 @@ class Plugin {
 		Interface_Bootstrap $bootstrap,
 		Interface_I18n_Controller $i18n_controller,
 		Interface_Assets_Controller $assets_controller,
-		Interface_Settings_Controller $settings_controller
+		Interface_Settings_Controller $settings_controller,
+		REST_Controller $rest_settings_controller,
+		REST_Controller $rest_onboarding_controller,
+		REST_Controller $rest_payment_controller
 	) {
 		$this->data      = $data;
 		$this->base_name = $base_name;
@@ -63,7 +70,11 @@ class Plugin {
 		add_filter( "plugin_action_links_{$base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
 		add_filter( 'admin_footer_text', array( $settings_controller, 'remove_footer_admin' ) );
 
-		add_action( 'rest_api_init', array( $settings_controller, 'register_api_endpoints' ) );
+
+		// REST Controllers.
+		add_action( 'rest_api_init', array( $rest_settings_controller, 'register_routes' ), 11, 1 );
+		add_action( 'rest_api_init', array( $rest_onboarding_controller, 'register_routes' ) );
+		add_action( 'rest_api_init', array( $rest_payment_controller, 'register_routes' ) );
 
 		// TODO: Maybe this should be moved to plugin_loaded action.
 		$bootstrap->do_init();

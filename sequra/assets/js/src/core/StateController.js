@@ -86,7 +86,7 @@ SequraFE.appPages = {
     function StateController(configuration) {
         /** @type AjaxServiceType */
         const api = SequraFE.ajaxService;
-        const {pageControllerFactory, templateService, utilities} = SequraFE;
+        const { pageControllerFactory, templateService, utilities } = SequraFE;
 
         let currentState = '';
         let previousState = '';
@@ -122,15 +122,8 @@ SequraFE.appPages = {
             window.addEventListener('hashchange', updateStateOnHashChange, false);
 
             // const url = !this.getStoreId() ? configuration.currentStoreUrl : configuration.storesUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId());
-            const url = configuration.currentStoreUrl;
-            const errorCallback = e => {
-                console.error(e);
-            };
-            customHeader = {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': SequraFE._nonce
-            };
-            api.get(url, errorCallback, customHeader)
+            // const url = configuration.currentStoreUrl;
+            api.get(configuration.currentStoreUrl, null, SequraFE.customHeader)
                 .then(
                     /** @param {Store|Store[]} response */
                     (response) => {
@@ -146,7 +139,7 @@ SequraFE.appPages = {
 
                         if (!store) {
                             // the active store is probably deleted, we need to switch to the default store
-                            return api.get(configuration.currentStoreUrl, null, true).then(loadStore);
+                            return api.get(configuration.currentStoreUrl, null, SequraFE.customHeader).then(loadStore);
                         }
 
                         return loadStore(store);
@@ -171,11 +164,11 @@ SequraFE.appPages = {
             const isMultistore = SequraFE?.integration?.isMultistore ?? true;
 
             return Promise.all([
-                hasVersion ? api.get(configuration.versionUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId())) : null,
-                isMultistore ? api.get(configuration.storesUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId())) : null,
-                api.get(configuration.pageConfiguration.onboarding.getConnectionDataUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId())),
-                api.get(configuration.pageConfiguration.onboarding.getCountrySettingsUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId())),
-                SequraFE.pages.onboarding.includes(SequraFE.appPages.ONBOARDING.WIDGETS) ? api.get(configuration.pageConfiguration.onboarding.getWidgetSettingsUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId())) : null,
+                hasVersion ? api.get(configuration.versionUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader) : null,
+                isMultistore ? api.get(configuration.storesUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader) : null,
+                api.get(configuration.pageConfiguration.onboarding.getConnectionDataUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader),
+                api.get(configuration.pageConfiguration.onboarding.getCountrySettingsUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader),
+                SequraFE.pages.onboarding.includes(SequraFE.appPages.ONBOARDING.WIDGETS) ? api.get(configuration.pageConfiguration.onboarding.getWidgetSettingsUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader) : null,
             ]).then(([versionRes, storesRes, connectionSettingsRes, countrySettingsRes, widgetSettingsRes]) => {
                 dataStore.version = versionRes;
                 dataStore.stores = storesRes ?? [];
@@ -183,7 +176,7 @@ SequraFE.appPages = {
                 dataStore.countrySettings = countrySettingsRes;
                 dataStore.widgetSettings = widgetSettingsRes;
 
-                return api.get(configuration.stateUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()));
+                return api.get(configuration.stateUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader);
             }).then((stateRes) => {
                 if (SequraFE.state.getCredentialsChanged()) {
                     SequraFE.state.removeCredentialsChanged();
@@ -296,7 +289,7 @@ SequraFE.appPages = {
                 state = page ? controllerName + '-' + page : controllerName;
             }
 
-            const config = {storeId: this.getStoreId(), ...(additionalConfig || {})};
+            const config = { storeId: this.getStoreId(), ...(additionalConfig || {}) };
             const controller = pageControllerFactory.getInstance(
                 controllerName,
                 getControllerConfiguration(controllerName, page)
@@ -398,7 +391,7 @@ SequraFE.appPages = {
          */
         this.getShopName = () => {
             return api.get(configuration.shopNameUrl, () => {
-            });
+            }, SequraFE.customHeader);
         };
 
         this.getData = (key) => {

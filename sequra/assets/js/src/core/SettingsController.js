@@ -81,27 +81,27 @@ if (!window.SequraFE) {
                     renderer = renderOrderStatusMappingSettingsForm;
                     promises = Promise.all([
                         SequraFE.isPromotional ? [] :
-                            SequraFE.state.getData('orderStatusSettings') ?? api.get(configuration.getOrderStatusMappingSettingsUrl),
+                            SequraFE.state.getData('orderStatusSettings') ?? api.get(configuration.getOrderStatusMappingSettingsUrl, null, SequraFE.customHeader),
                         SequraFE.isPromotional ? [] :
-                            SequraFE.state.getData('shopOrderStatuses') ?? api.get(configuration.getShopOrderStatusesUrl)
+                            SequraFE.state.getData('shopOrderStatuses') ?? api.get(configuration.getShopOrderStatusesUrl, null, SequraFE.customHeader)
                     ])
                     break;
                 case SequraFE.appPages.SETTINGS.WIDGET:
                     renderer = renderWidgetSettingsForm;
                     promises = Promise.all([
-                        SequraFE.state.getData('paymentMethods') ?? api.get(configuration.getPaymentMethodsUrl.replace('{merchantId}', countrySettings[0].merchantId)),
+                        SequraFE.state.getData('paymentMethods') ?? api.get(configuration.getPaymentMethodsUrl.replace('{merchantId}', countrySettings[0].merchantId), null, SequraFE.customHeader),
                     ])
                     break;
                 default:
                     renderer = renderGeneralSettingsForm;
                     promises = Promise.all([
                         SequraFE.isPromotional ? [] :
-                            SequraFE.state.getData('generalSettings') ?? api.get(configuration.getGeneralSettingsUrl),
+                            SequraFE.state.getData('generalSettings') ?? api.get(configuration.getGeneralSettingsUrl, null, SequraFE.customHeader),
                         SequraFE.isPromotional ? [] :
-                            SequraFE.state.getData('shopCategories') ?? api.get(configuration.getShopCategoriesUrl),
+                            SequraFE.state.getData('shopCategories') ?? api.get(configuration.getShopCategoriesUrl, null, SequraFE.customHeader),
                         SequraFE?.generalSettings?.useReplacementPaymentMethod && !SequraFE.isPromotional ?
-                            SequraFE.state.getData('shopPaymentMethods') ?? api.get(configuration.getShopPaymentMethodsUrl) : [],
-                        SequraFE.state.getData('sellingCountries') ?? api.get(configuration.getSellingCountriesUrl),
+                            SequraFE.state.getData('shopPaymentMethods') ?? api.get(configuration.getShopPaymentMethodsUrl, null, SequraFE.customHeader) : [],
+                        SequraFE.state.getData('sellingCountries') ?? api.get(configuration.getSellingCountriesUrl, null, SequraFE.customHeader),
                     ])
             }
 

@@ -69,8 +69,8 @@ if (!window.SequraFE) {
             }
 
             Promise.all([
-                sellingCountries ? [] : api.get(configuration.getSellingCountriesUrl),
-                paymentMethods ? [] : api.get(configuration.getPaymentMethodsUrl.replace('{merchantId}', countryConfiguration[0].merchantId)),
+                sellingCountries ? [] : api.get(configuration.getSellingCountriesUrl, null, SequraFE.customHeader),
+                paymentMethods ? [] : api.get(configuration.getPaymentMethodsUrl.replace('{merchantId}', countryConfiguration[0].merchantId), null, SequraFE.customHeader),
             ]).then(([sellingCountriesRes, paymentMethodsRes]) => {
                 if (sellingCountriesRes.length !== 0) {
                     sellingCountries = sellingCountriesRes;
@@ -201,7 +201,7 @@ if (!window.SequraFE) {
          */
         const handleCountryChange = (value) => {
             utilities.showLoader();
-            api.get(configuration.getPaymentMethodsUrl.replace('{merchantId}', value))
+            api.get(configuration.getPaymentMethodsUrl.replace('{merchantId}', value), null, SequraFE.customHeader)
                 .then((methods) => {
                     paymentMethods = [...methods];
                     document.querySelector('.sq-table-container').remove();

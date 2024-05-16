@@ -450,7 +450,7 @@ if (!window.SequraFE) {
                 'Content-Type': 'text/plain'
             };
 
-            return api.get(validationUrl, null, customHeader).then(() => true).catch(() => false)
+            return api.get(validationUrl, null, customHeader, null, SequraFE.customHeader).then(() => true).catch(() => false)
         }
     }
 
