@@ -1,0 +1,46 @@
+{
+    "name": "sequra-wc",
+    "version": "3.0.0",
+    "description": "seQura WordPress plugin",
+    "main": "index.js",
+    "scripts": {
+        "autoprefix": "postcss assets/css/sequra-core.css --use=autoprefixer --output=assets/css/sequra-core.css",
+        "build": "webpack --mode production --progress && sass --style=compressed --no-source-map ./assets/css/scss:./assets/css/ && npm run autoprefix",
+        "dev": "webpack --mode development --progress && sass ./assets/css/scss:./assets/css/"
+    },
+    "author": "seQura Tech",
+    "license": "GPL-3.0-or-later",
+    "private": true,
+    "browserslist": [
+        "last 2 versions",
+        "ie >= 8",
+        "edge >= 15",
+        "ie_mob >= 10",
+        "ff >= 45",
+        "chrome >= 45",
+        "safari >= 5",
+        "opera >= 23",
+        "ios >= 7",
+        "android >= 4",
+        "bb >= 10"
+    ],
+    "devDependencies": {
+        "@babel/core": "~7.17.0",
+        "@babel/preset-env": "~7.16.0",
+        "autoprefixer": "~10.4.0",
+        "babel-loader": "~8.2.0",
+        "css-loader": "~6.7.0",
+        "cssnano": "~5.1.0",
+        "postcss-cli": "~9.1.0",
+        "postcss-loader": "~6.2.0",
+        "sass": "~1.49.0",
+        "sass-loader": "~12.6.0",
+        "source-map-loader": "~3.0.0",
+        "style-loader": "^3.3.1",
+        "terser-webpack-plugin": "~5.3.0",
+        "webpack": "^5.89.0",
+        "webpack-cli": "~4.9.0"
+    },
+    "dependencies": {
+    }
+}
