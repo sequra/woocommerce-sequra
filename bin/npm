@@ -1,0 +1,3 @@
+#!/bin/bash
+BASEDIR="$(dirname $(realpath $0))/.."
+docker run --rm -v "$(pwd)"/sequra:/app -w /app node:20-alpine npm "$@"

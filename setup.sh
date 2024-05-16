@@ -22,6 +22,7 @@ done
 
 if [ $install -eq 1 ]; then
     ./bin/composer install
+    ./bin/npm install
 else
     echo "Skipping installation of dependencies."   
 fi
