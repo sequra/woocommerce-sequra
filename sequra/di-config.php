@@ -18,6 +18,10 @@ use SeQura\WC\Controllers\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Settings_Controller;
 use SeQura\WC\Interface_Bootstrap;
 use SeQura\WC\Plugin;
+use SeQura\WC\Repositories\Interface_Settings_Repo;
+use SeQura\WC\Repositories\Settings_Repo;
+use SeQura\WC\Services\I18n;
+use SeQura\WC\Services\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger;
 use SeQura\WC\Services\Interface_Settings;
 use SeQura\WC\Services\Logger;
@@ -53,8 +57,10 @@ return array(
 	// Third party.
 	// Data Mappers.
 	// Repositories.
+	Interface_Settings_Repo::class       => DI\autowire( Settings_Repo::class ),
 	// Services.
 	Interface_Settings::class            => DI\autowire( Settings::class ),
+	Interface_I18n::class                => DI\autowire( I18n::class ),
 	Interface_Logger::class              => function ( Container $c ) {
 		return new Logger( $c->get( 'plugin.dir_path' ), $c->get( Interface_Settings::class ) );
 	},
@@ -66,10 +72,19 @@ return array(
 		return new I18n_Controller( $domain . $data['DomainPath'], $domain );
 	},
 	Interface_Assets_Controller::class   => function ( Container $c ) {
-		return new Assets_Controller( $c->get( 'plugin.dir_url' ) . 'assets', $c->get( 'plugin.data' )['Version'] );
+		return new Assets_Controller( 
+			trailingslashit( $c->get( 'plugin.dir_url' ) ) . 'assets', 
+			trailingslashit( $c->get( 'plugin.dir_path' ) ) . 'assets', 
+			$c->get( 'plugin.data' )['Version'],
+			$c->get( Interface_I18n::class ),
+			$c->get( Interface_Settings::class )
+		);
 	},
 	Interface_Settings_Controller::class => function ( Container $c ) {
-		return new Settings_Controller( $c->get( 'plugin.templates_path' ) );
+		return new Settings_Controller( 
+			$c->get( 'plugin.templates_path' ),
+			$c->get( Interface_Settings::class )
+		);
 	},
 	// Bootstrap.
 	Interface_Bootstrap::class           => function ( Container $c ) {

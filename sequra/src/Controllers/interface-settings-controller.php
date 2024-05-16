@@ -33,4 +33,9 @@ interface Interface_Settings_Controller {
 	 * @return string[]
 	 */
 	public function add_action_link( $actions, $plugin_file, $plugin_data, $context ): array;
+
+	/**
+	 * Removes the WP footer message
+	 */
+	public function remove_footer_admin( $text ): string;
 }

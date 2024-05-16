@@ -61,6 +61,9 @@ class Plugin {
 		// Settings hooks.
 		add_action( 'admin_menu', array( $settings_controller, 'register_page' ) );
 		add_filter( "plugin_action_links_{$base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
+		add_filter( 'admin_footer_text', array( $settings_controller, 'remove_footer_admin' ) );
+
+		add_action( 'rest_api_init', array( $settings_controller, 'register_api_endpoints' ) );
 
 		// TODO: Maybe this should be moved to plugin_loaded action.
 		$bootstrap->do_init();

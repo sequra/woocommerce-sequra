@@ -121,7 +121,16 @@ SequraFE.appPages = {
 
             window.addEventListener('hashchange', updateStateOnHashChange, false);
 
-            api.get(!this.getStoreId() ? configuration.currentStoreUrl : configuration.storesUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), () => null, true)
+            // const url = !this.getStoreId() ? configuration.currentStoreUrl : configuration.storesUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId());
+            const url = configuration.currentStoreUrl;
+            const errorCallback = e => {
+                console.error(e);
+            };
+            customHeader = {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': SequraFE._nonce
+            };
+            api.get(url, errorCallback, customHeader)
                 .then(
                     /** @param {Store|Store[]} response */
                     (response) => {

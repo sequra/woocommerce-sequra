@@ -117,6 +117,9 @@ if (!window.SequraFE) {
                     ...(customHeader || {})
                 };
 
+                console.log('call headers', headers);
+                console.log(url);
+
                 if (headers['Content-Type'] === 'multipart/form-data') {
                     delete headers['Content-Type'];
                 }

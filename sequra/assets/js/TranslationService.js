@@ -35,6 +35,7 @@ if (!window.SequraFE) {
          * @returns {null|string}
          */
         const getTranslation = (type, group, key) => {
+            // debugger
             if (SequraFE.translations[type][group] && SequraFE.translations[type][group]) {
                 let value = SequraFE.translations[type][group];
                 if (Array.isArray(key)) {

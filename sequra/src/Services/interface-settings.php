@@ -42,4 +42,18 @@ interface Interface_Settings {
 	 * @return bool
 	 */
 	public function is_debug_enabled();
+
+	/**
+	 * Get general settings.
+	 *
+	 * @param int|null $blog_id The blog ID.
+	 * 
+	 * @return mixed
+	 */
+	public function get_general_settings( $blog_id = null );
+
+	/**
+	 * Check if the current page is the settings page.
+	 */
+	public function is_settings_page(): bool;
 }
