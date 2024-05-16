@@ -254,7 +254,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 		// );
 		wp_register_script( self::HANDLE_SETTINGS_PAGE, "{$this->assets_dir_url}/js/settings-page.js", array(), $this->assets_version, true );
 		wp_localize_script( self::HANDLE_SETTINGS_PAGE, 'SequraFE', $sequra_fe );
-		wp_enqueue_script( self::HANDLE_CORE );
+		wp_enqueue_script( self::HANDLE_SETTINGS_PAGE );
 	}
 
 	/**
