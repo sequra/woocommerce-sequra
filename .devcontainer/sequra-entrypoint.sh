@@ -97,5 +97,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name)
 
     touch /var/www/html/.post-install-complete
+    
+    chown -R www-data:www-data /var/www/html
 fi
 echo "✅ seQura plugin installed and configured."
