@@ -36,7 +36,6 @@ class Plugin {
 	 *
 	 * @param array                       $data            The plugin data.
 	 * @param string                      $base_name       The plugin base name.
-	 * @param Interface_Bootstrap   $bootstrap SeQura Integration Core bootstrap.
 	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
 	 * @param Interface_Assets_Controller $assets_controller Assets controller.
 	 * @param Interface_Settings_Controller $settings_controller Settings controller.
@@ -47,7 +46,6 @@ class Plugin {
 	public function __construct(
 		$data,
 		$base_name,
-		Interface_Bootstrap $bootstrap,
 		Interface_I18n_Controller $i18n_controller,
 		Interface_Assets_Controller $assets_controller,
 		Interface_Settings_Controller $settings_controller,
@@ -75,9 +73,6 @@ class Plugin {
 		add_action( 'rest_api_init', array( $rest_settings_controller, 'register_routes' ), 11, 1 );
 		add_action( 'rest_api_init', array( $rest_onboarding_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_payment_controller, 'register_routes' ) );
-
-		// TODO: Maybe this should be moved to plugin_loaded action.
-		$bootstrap->do_init();
 	}
 
 	/**

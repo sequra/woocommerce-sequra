@@ -30,5 +30,6 @@ class Logger_Service implements LoggerAdapter {
 	 * @param LogData $data Log data.
 	 */
 	public function logMessage( LogData $data ) {
+		// TODO: Implement logMessage() method.
 	}
 }
