@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+
 /**
  * REST Onboarding Controller
  */
@@ -38,6 +40,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_data() {
+
+		// $a = AdminAPI::get()->connection($this->storeId);
+
+		$data = AdminAPI::get()->connection( (string) get_current_blog_id() )->getOnboardingData();
+
 		$onboarding_data = array(
 			'environment'         => 'sandbox',
 			'username'            => 'dummy',

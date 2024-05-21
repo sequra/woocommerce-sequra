@@ -8,8 +8,8 @@
 
 namespace SeQura\WC\Controllers;
 
+use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Interface_I18n;
-use SeQura\WC\Services\Interface_Settings;
 
 /**
  * Define the assets related functionality
@@ -51,9 +51,9 @@ class Assets_Controller implements Interface_Assets_Controller {
 	/**
 	 * Settings service
 	 *
-	 * @var Interface_Settings
+	 * @var Configuration
 	 */
-	private $settings;
+	private $configuration;
 
 	/**
 	 * Constructor
@@ -62,27 +62,27 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 * @param string $assets_dir_path Path to the assets directory.
 	 * @param string $assets_version Version of the assets.
 	 * @param Interface_I18n $i18n I18n service.
-	 * @param Interface_Settings $settings Settings service.
+	 * @param Configuration $configuration Configuration service.
 	 */
 	public function __construct( 
 		$assets_dir_url, 
 		$assets_dir_path, 
 		$assets_version, 
 		Interface_I18n $i18n, 
-		Interface_Settings $settings 
+		Configuration $configuration 
 	) {
 		$this->assets_dir_url  = $assets_dir_url;
 		$this->assets_dir_path = $assets_dir_path;
 		$this->assets_version  = $assets_version;
 		$this->i18n            = $i18n;
-		$this->settings        = $settings;
+		$this->configuration   = $configuration;
 	}
 
 	/**
 	 * Enqueue styles and scripts in WP-Admin
 	 */
 	public function enqueue_admin() {
-		if ( ! $this->settings->is_settings_page() ) {
+		if ( ! $this->configuration->is_settings_page() ) {
 			return;
 		}
 		// Styles.

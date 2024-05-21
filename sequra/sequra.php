@@ -29,16 +29,6 @@ require plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
 call_user_func(
 	function () {
-
-		// $builder = new \DI\ContainerBuilder();
-		// $builder->useAutowiring( true );
-		// $builder->useAnnotations( false );
-		// $definitions = include_once plugin_dir_path( __FILE__ ) . 'di-config.php';
-		// $builder->addDefinitions( $definitions );
-		// $container = $builder->build();
-
-		// $plugin = $container->get( \SeQura\WC\Plugin::class );
-
 		\SeQura\WC\Bootstrap::init();
 		$plugin = \SeQura\Core\Infrastructure\ServiceRegister::getService( \SeQura\WC\Plugin::class );
 
