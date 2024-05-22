@@ -85,8 +85,8 @@ if (!window.SequraFE) {
                         value: changedSettings.environment,
                         label: 'connection.environment.label',
                         options: [
-                            {label: 'connection.environment.options.live', value: 'live'},
-                            {label: 'connection.environment.options.sandbox', value: 'sandbox'}
+                            { label: 'connection.environment.options.live', value: 'live' },
+                            { label: 'connection.environment.options.sandbox', value: 'sandbox' }
                         ],
                         onChange: (value) => handleChange('environment', value)
                     }),
@@ -244,14 +244,14 @@ if (!window.SequraFE) {
                     utilities.showLoader();
 
                     const merchantId = configuration.appState === SequraFE.appStates.ONBOARDING ? 'test' : data.countrySettings[0]?.merchantId;
-                    api.post(configuration.validateConnectionDataUrl, {...changedSettings, merchantId: merchantId})
+                    api.post(configuration.validateConnectionDataUrl, { ...changedSettings, merchantId: merchantId }, SequraFE.customHeader)
                         .then((result) => areCredentialsValid(result) ? saveChangedData() : handleValidationError())
                 })
             } else {
                 utilities.showLoader();
 
                 const merchantId = configuration.appState === SequraFE.appStates.ONBOARDING ? 'test' : data.countrySettings[0]?.merchantId;
-                api.post(configuration.validateConnectionDataUrl, {...changedSettings, merchantId: merchantId})
+                api.post(configuration.validateConnectionDataUrl, { ...changedSettings, merchantId: merchantId }, SequraFE.customHeader)
                     .then((result) => areCredentialsValid(result) ? saveChangedData() : handleValidationError());
             }
         }
@@ -280,7 +280,7 @@ if (!window.SequraFE) {
          * Handle connection validation error.
          */
         const handleValidationError = () => {
-            SequraFE.responseService.errorHandler({errorCode: 'general.errors.connection.invalidUsernameOrPassword'}).catch(() => {
+            SequraFE.responseService.errorHandler({ errorCode: 'general.errors.connection.invalidUsernameOrPassword' }).catch(() => {
             });
 
             utilities.hideLoader();
@@ -288,7 +288,7 @@ if (!window.SequraFE) {
 
         const saveChangedData = () => {
             utilities.showLoader();
-            api.post(configuration.saveConnectionDataUrl, changedSettings)
+            api.post(configuration.saveConnectionDataUrl, changedSettings, SequraFE.customHeader)
                 .then(() => {
                     if (configuration.appState === SequraFE.appStates.ONBOARDING) {
                         if (activeSettings.username.length !== 0) {
@@ -312,7 +312,7 @@ if (!window.SequraFE) {
                     } else {
                         utilities.hideLoader();
                     }
-                });
+                }).finally(() => utilities.hideLoader());
         }
 
         /**
@@ -325,7 +325,7 @@ if (!window.SequraFE) {
                 }
 
                 utilities.showLoader();
-                api.post(configuration.disconnectUrl, null)
+                api.post(configuration.disconnectUrl, null, SequraFE.customHeader)
                     .then(() => SequraFE.state.display())
                     .finally(utilities.hideLoader);
             })

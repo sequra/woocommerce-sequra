@@ -17,6 +17,7 @@ use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
+use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
@@ -29,6 +30,7 @@ use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Core\Configuration_Service;
+use SeQura\WC\Services\Core\Encryptor;
 use SeQura\WC\Services\Core\Logger_Service;
 
 /**
@@ -174,6 +176,17 @@ class Bootstrap extends BootstrapComponent {
 		parent::initServices();
 
 		// TODO: add sequra-core services implementations here...
+		Reg::registerService(
+			EncryptorInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ EncryptorInterface::class ] ) ) {
+					self::$cache[ EncryptorInterface::class ] = new Encryptor();
+				}
+				return self::$cache[ EncryptorInterface::class ];
+			}
+		);
+
+
 		Reg::registerService(
 			ShopLoggerAdapter::CLASS_NAME,
 			static function () {
@@ -325,7 +338,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ] ) ) {
 					self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ] = new Controllers\Rest\Onboarding_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' )
+						Reg::getService( 'plugin.rest_namespace' ),
+						Reg::getService( Configuration::class )
 					);
 				}
 				return self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ];
@@ -347,7 +361,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Controllers\Rest\Settings_REST_Controller::class ] ) ) {
 					self::$cache[ Controllers\Rest\Settings_REST_Controller::class ] = new Controllers\Rest\Settings_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' )
+						Reg::getService( 'plugin.rest_namespace' ),
+						Reg::getService( Configuration::class )
 					);
 				}
 				return self::$cache[ Controllers\Rest\Settings_REST_Controller::class ];

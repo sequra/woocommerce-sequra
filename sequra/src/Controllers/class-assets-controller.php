@@ -102,8 +102,8 @@ class Assets_Controller implements Interface_Assets_Controller {
 	private function get_sequra_fe_l10n() {
 		$onboarding_page_config = array(
 			'getConnectionDataUrl'      => get_rest_url( null, 'sequra/v1/onboarding/data' ), // TODO: Add the URL.
-			'saveConnectionDataUrl'     => '', // TODO: Add the URL.
-			'validateConnectionDataUrl' => '', // TODO: Add the URL.
+			'saveConnectionDataUrl'     => get_rest_url( null, 'sequra/v1/onboarding/data' ), // TODO: Add the URL.
+			'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/validate' ), // TODO: Add the URL.
 			'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/payment/selling-countries' ), // TODO: Add the URL.
 			'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries' ), // TODO: Add the URL.
 			'saveCountrySettingsUrl'    => '', // TODO: Add the URL.

@@ -35,6 +35,12 @@ class Migration_Install_300 extends Migration {
 				`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				`type` VARCHAR(255),
 				`index_1` VARCHAR(127),
+				`index_2` VARCHAR(127),
+				`index_3` VARCHAR(127),
+				`index_4` VARCHAR(127),
+				`index_5` VARCHAR(127),
+				`index_6` VARCHAR(127),
+				`index_7` VARCHAR(127),
 				`data` LONGTEXT,
 				PRIMARY KEY  (id)
 			) $charset_collate;" 

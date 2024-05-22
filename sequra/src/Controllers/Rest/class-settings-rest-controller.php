@@ -8,19 +8,30 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\WC\Services\Core\Configuration;
+
 /**
  * REST Settings Controller
  */
 class Settings_REST_Controller extends REST_Controller {
 
 	/**
+	 * Configuration.
+	 *
+	 * @var Configuration
+	 */
+	private $configuration;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string            $rest_namespace The namespace.
+	 * @param Configuration $configuration The configuration.
 	 */
-	public function __construct( $rest_namespace ) {
-		$this->namespace = $rest_namespace;
-		$this->rest_base = '/settings';
+	public function __construct( $rest_namespace, Configuration $configuration ) {
+		$this->namespace     = $rest_namespace;
+		$this->rest_base     = '/settings';
+		$this->configuration = $configuration;
 	}
 
 	/**
@@ -41,11 +52,7 @@ class Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_current_store() {
-		$data = array(
-			'storeId'   => get_current_blog_id(),
-			'storeName' => 'Default Store View',
-		);
-		return rest_ensure_response( $data );
+		return rest_ensure_response( $this->configuration->get_current_store() );
 	}
 
 	/**
@@ -54,13 +61,13 @@ class Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_version() {
-		$data = array(
-			'current'               => '2.5.0.3',
-			'new'                   => '2.5.0.4',
-			'downloadNewVersionUrl' => 'https://sequra.es',
+		return rest_ensure_response(
+			array(
+				'current'               => $this->configuration->get_module_version(),
+				'new'                   => $this->configuration->get_marketplace_version(),
+				'downloadNewVersionUrl' => $this->configuration->get_marketplace_url(),
+			) 
 		);
-
-		return rest_ensure_response( $data );
 	}
 
 	/**
@@ -69,12 +76,7 @@ class Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_stores() {
-		$data = array(
-			'storeId'   => get_current_blog_id(),
-			'storeName' => 'Default Store View',
-		);
-
-		return rest_ensure_response( array( $data ) );
+		return rest_ensure_response( $this->configuration->get_stores() );
 	}
 
 	/**
@@ -96,7 +98,7 @@ class Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_general() {
-		$data = array();
+		$data = array();// TODO: what is this data?
 
 		return rest_ensure_response( $data );
 	}

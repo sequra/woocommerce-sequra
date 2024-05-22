@@ -86,7 +86,6 @@ class Plugin {
 		add_action( 'rest_api_init', array( $rest_settings_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_onboarding_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_payment_controller, 'register_routes' ) );
-
 	}
 
 	/**

@@ -387,7 +387,7 @@ if (!window.SequraFE) {
             }
 
             utilities.showLoader();
-            api.post(configuration.saveWidgetSettingsUrl, changedSettings)
+            api.post(configuration.saveWidgetSettingsUrl, changedSettings, SequraFE.customHeader)
                 .then(() => {
                     if (configuration.appState === SequraFE.appStates.ONBOARDING) {
                         const index = SequraFE.pages.onboarding.indexOf(SequraFE.appPages.ONBOARDING.WIDGETS)

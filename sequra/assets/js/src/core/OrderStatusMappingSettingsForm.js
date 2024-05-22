@@ -157,7 +157,7 @@ if (!window.SequraFE) {
          */
         const handleSave = () => {
             utilities.showLoader();
-            api.post(configuration.saveOrderStatusMappingSettingsUrl, changedSettings)
+            api.post(configuration.saveOrderStatusMappingSettingsUrl, changedSettings, SequraFE.customHeader)
                 .then(() => {
                     activeSettings = utilities.cloneObject(changedSettings);
                     SequraFE.state.setData('orderStatusSettings', activeSettings);

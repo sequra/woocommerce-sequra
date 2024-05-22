@@ -40,4 +40,26 @@ abstract class Configuration extends \SeQura\Core\Infrastructure\Configuration\C
 	 * Get the configuration page parent slug.
 	 */
 	abstract public function get_parent_page(): string;
+
+	/**
+	 * Version published in the marketplace.
+	 */
+	abstract public function get_marketplace_version(): string;
+
+	/**
+	 * Current store. Has keys storeId and storeName.
+	 */
+	abstract public function get_current_store(): array;
+
+	/**
+	 * List of stores. Each store is an array with storeId and storeName.
+	 */
+	abstract public function get_stores(): array;
+
+	/**
+	 * URL to the marketplace's plugin page.
+	 */
+	public function get_marketplace_url(): string {
+		return 'https://www.example.com';
+	}
 }
