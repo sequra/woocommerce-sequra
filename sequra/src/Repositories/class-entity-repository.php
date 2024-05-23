@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings
+ * Repository for generic entities.
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -9,14 +9,14 @@
 namespace SeQura\WC\Repositories;
 
 /**
- * Class Base_Repository
+ * Repository for generic entities.
  */
-class SeQura_Order_Repository extends Repository {
+class Entity_Repository extends Repository {
 
 	/**
 	 * Returns unprefixed table name.
 	 */
 	protected function get_unprefixed_table_name() {
-		return 'sequra_order';
+		return 'sequra_entity';
 	}
 }

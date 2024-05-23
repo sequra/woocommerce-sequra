@@ -20,24 +20,13 @@ use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 /**
  * Class Base_Repository
  */
-class Queue_Item_Repository extends Base_Repository implements QueueItemRepository {
+class Queue_Item_Repository extends Repository implements QueueItemRepository {
 
 	/**
-	 * Table name.
-	 *
-	 * @var string
+	 * Returns unprefixed table name.
 	 */
-	protected $table_name = 'sequra_queue';
-
-	/**
-	 * Returns full class name.
-	 *
-	 * @noinspection SenselessMethodDuplicationInspection
-	 *
-	 * @return string Full class name.
-	 */
-	public static function getClassName() {
-		return __CLASS__;
+	protected function get_unprefixed_table_name() {
+		return 'sequra_queue';
 	}
 
 	/**
@@ -67,17 +56,17 @@ class Queue_Item_Repository extends Base_Repository implements QueueItemReposito
 		$status_index     = 'index_' . $index_map['status'];
 		$queue_name_index = 'index_' . $index_map['queueName'];
 
-		$running_queues_query = "SELECT $queue_name_index FROM `$this->table_name` q2 WHERE q2.`$status_index` = '"
+		$running_queues_query = "SELECT $queue_name_index FROM `{$this->get_table_name()}` q2 WHERE q2.`$status_index` = '"
 								. QueueItem::IN_PROGRESS . "' AND q2.`type` = $type";
 
 		$sql = "SELECT queueTable.* 
 	            FROM (
 	                 SELECT $queue_name_index, MIN(id) AS id
-	                 FROM `$this->table_name` AS q
+	                 FROM `{$this->get_table_name()}` AS q
 	                 WHERE q.`type` = $type AND q.`$status_index` = '" . QueueItem::QUEUED . "' AND q.`$queue_name_index` NOT IN ($running_queues_query)
 	                 GROUP BY `$queue_name_index` LIMIT $limit
 	            ) AS queueView  
-	            INNER JOIN `$this->table_name` as queueTable
+	            INNER JOIN `{$this->get_table_name()}` as queueTable
 	            ON queueView.id = queueTable.id";
 
 		$result = $this->db->get_results( $sql, ARRAY_A );
@@ -168,7 +157,7 @@ class Queue_Item_Repository extends Base_Repository implements QueueItemReposito
 
 		$filter = $this->build_query_filter( $conditions );
 
-		$query  = "SELECT * FROM {$this->table_name} WHERE type = '$type' ";
+		$query  = "SELECT * FROM {$this->get_table_name()} WHERE type = '$type' ";
 		$query .= $this->apply_query_filter( $filter, $field_index_map );
 		$query .= ' FOR UPDATE';
 
@@ -241,6 +230,6 @@ class Queue_Item_Repository extends Base_Repository implements QueueItemReposito
 		}
 
 		// Only one record should be updated.
-		return 1 === $this->db->update( $this->table_name, $prepared, $indexed_conditions );
+		return 1 === $this->db->update( $this->get_table_name(), $prepared, $indexed_conditions );
 	}
 }

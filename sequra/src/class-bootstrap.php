@@ -16,6 +16,7 @@ use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalDat
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
@@ -25,13 +26,14 @@ use SeQura\Core\Infrastructure\ORM\RepositoryRegistry;
 use SeQura\Core\Infrastructure\ServiceRegister as Reg;
 use SeQura\Core\Infrastructure\TaskExecution\Process;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
-use SeQura\WC\Repositories\Base_Repository;
+use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Core\Configuration_Service;
+use SeQura\WC\Services\Core\Disconnect_Service;
 use SeQura\WC\Services\Core\Encryptor;
-use SeQura\WC\Services\Core\Logger_Service;
+use SeQura\WC\Services\Core\Logger;
 
 /**
  * Implementation for the core bootstrap class.
@@ -186,12 +188,29 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 
+		Reg::registerService(
+			DisconnectServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ DisconnectServiceInterface::class ] ) ) {
+					self::$cache[ DisconnectServiceInterface::class ] = new Disconnect_Service(
+						array(
+							RepositoryRegistry::getRepository( ConnectionData::class ),
+							RepositoryRegistry::getRepository( StatisticalData::class ),
+							RepositoryRegistry::getRepository( SendReport::class ),
+							RepositoryRegistry::getRepository( QueueItem::class ),
+							RepositoryRegistry::getRepository( SeQuraOrder::class ), // TODO: why is this here?
+						)
+					);
+				}
+				return self::$cache[ DisconnectServiceInterface::class ];
+			}
+		);
 
 		Reg::registerService(
 			ShopLoggerAdapter::CLASS_NAME,
 			static function () {
 				if ( ! isset( self::$cache[ ShopLoggerAdapter::CLASS_NAME ] ) ) {
-					self::$cache[ ShopLoggerAdapter::CLASS_NAME ] = new Logger_Service();
+					self::$cache[ ShopLoggerAdapter::CLASS_NAME ] = new Logger();
 				}
 				return self::$cache[ ShopLoggerAdapter::CLASS_NAME ];
 			}
@@ -271,19 +290,19 @@ class Bootstrap extends BootstrapComponent {
 
 		// TODO: add sequra-core repositories implementations here...
 
-		RepositoryRegistry::registerRepository( ConfigEntity::class, Base_Repository::class );
+		RepositoryRegistry::registerRepository( ConfigEntity::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( QueueItem::class, Queue_Item_Repository::class );
-		RepositoryRegistry::registerRepository( Process::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( ConnectionData::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( OrderStatusSettings::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( StatisticalData::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( CountryConfiguration::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( GeneralSettings::class, Base_Repository::class );
+		RepositoryRegistry::registerRepository( Process::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( ConnectionData::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( OrderStatusSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( StatisticalData::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( CountryConfiguration::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( GeneralSettings::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( SeQuraOrder::class, SeQura_Order_Repository::class );
-		RepositoryRegistry::registerRepository( WidgetSettings::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( SendReport::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( StatisticalData::class, Base_Repository::class );
-		RepositoryRegistry::registerRepository( TransactionLog::class, Base_Repository::class );
+		RepositoryRegistry::registerRepository( WidgetSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( SendReport::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( StatisticalData::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( TransactionLog::class, Entity_Repository::class );
 	}
 
 	/**

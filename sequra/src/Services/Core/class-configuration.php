@@ -57,6 +57,11 @@ abstract class Configuration extends \SeQura\Core\Infrastructure\Configuration\C
 	abstract public function get_stores(): array;
 
 	/**
+	 * Get current store ID.
+	 */
+	abstract public function get_store_id(): string;
+
+	/**
 	 * URL to the marketplace's plugin page.
 	 */
 	public function get_marketplace_url(): string {

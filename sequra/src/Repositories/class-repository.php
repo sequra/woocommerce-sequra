@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings
+ * Shared repository functionality.
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -15,11 +15,12 @@ use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryCondition;
 use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
 use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use wpdb;
 
 /**
- * Class Base_Repository
+ * Shared repository functionality.
  */
-class Base_Repository implements RepositoryInterface {
+abstract class Repository implements RepositoryInterface, Interface_Deletable_Repository {
 
 	/**
 	 * Entity class FQN.
@@ -36,18 +37,22 @@ class Base_Repository implements RepositoryInterface {
 	protected $db;
 
 	/**
-	 * Table name.
-	 *
-	 * @var string
+	 * Returns unprefixed table name.
 	 */
-	protected $table_name = 'sequra_entity';
+	abstract protected function get_unprefixed_table_name();
 
 	/**
-	 * Base_Repository constructor.
+	 * Returns full table name.
+	 */
+	protected function get_table_name() {
+		return $this->db->prefix . $this->get_unprefixed_table_name();
+	}
+
+	/**
+	 * Constructor.
 	 */
 	public function __construct() {
-		$this->db         = ServiceRegister::getService( \wpdb::class );
-		$this->table_name = $this->db->prefix . $this->table_name; // Prefix table name with WP prefix.
+		$this->db = ServiceRegister::getService( \wpdb::class );
 	}
 
 	/**
@@ -87,7 +92,7 @@ class Base_Repository implements RepositoryInterface {
 		$entity = new $this->entity_class();
 		$type   = $entity->getConfig()->getType();
 
-		$query = "SELECT * FROM {$this->table_name} WHERE type = '$type' ";
+		$query = "SELECT * FROM {$this->get_table_name()} WHERE type = '$type' ";
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
@@ -144,7 +149,7 @@ class Base_Repository implements RepositoryInterface {
 		$item = $this->prepare_entity_for_storage( $entity );
 
 		// Only one record should be updated.
-		return 1 === $this->db->update( $this->table_name, $item, array( 'id' => $entity->getId() ) );
+		return 1 === $this->db->update( $this->get_table_name(), $item, array( 'id' => $entity->getId() ) );
 	}
 
 	/**
@@ -155,7 +160,7 @@ class Base_Repository implements RepositoryInterface {
 	 * @return bool TRUE if operation succeeded; otherwise, FALSE.
 	 */
 	public function delete( Entity $entity ) {
-		return false !== $this->db->delete( $this->table_name, array( 'id' => $entity->getId() ) );
+		return false !== $this->db->delete( $this->get_table_name(), array( 'id' => $entity->getId() ) );
 	}
 
 	/**
@@ -175,7 +180,7 @@ class Base_Repository implements RepositoryInterface {
 		$entity = new $this->entity_class();
 		$type   = $entity->getConfig()->getType();
 
-		$query = "SELECT COUNT(*) as `total` FROM {$this->table_name} WHERE type = '$type' ";
+		$query = "SELECT COUNT(*) as `total` FROM {$this->get_table_name()} WHERE type = '$type' ";
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
@@ -346,7 +351,7 @@ class Base_Repository implements RepositoryInterface {
 	protected function save_entity_to_storage( Entity $entity ) {
 		$storage_item = $this->prepare_entity_for_storage( $entity );
 
-		$this->db->insert( $this->table_name, $storage_item );
+		$this->db->insert( $this->get_table_name(), $storage_item );
 
 		$insert_id = (int) $this->db->insert_id;
 		$entity->setId( $insert_id );
@@ -394,5 +399,12 @@ class Base_Repository implements RepositoryInterface {
 		if ( 'id' !== $column && ! array_key_exists( $column, $index_map ) ) {
 			throw new QueryFilterInvalidParamException( esc_html__( 'Column is not id or index.', 'sequra' ) );
 		}
+	}
+
+	/**
+	 * Delete all the entities.
+	 */
+	public function delete_all(): bool {
+		return false !== $this->db->query( 'DELETE FROM ' . sanitize_text_field( $this->get_table_name() ) );
 	}
 }

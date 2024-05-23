@@ -11,9 +11,9 @@ use SeQura\Core\Infrastructure\Logger\Interfaces\LoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\LogData;
 
 /**
- * Class Logger_Service
+ * Logger
  */
-class Logger_Service implements LoggerAdapter {
+class Logger implements LoggerAdapter {
 
 	/**
 	 * Returns log file name.

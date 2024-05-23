@@ -12,6 +12,15 @@ namespace SeQura\WC\Services\Core;
  * Wrapper to ease the read and write of configuration values.
  */
 class Configuration_Service extends Configuration {
+	
+	/**
+	 * Retrieves the store ID.
+	 *
+	 * @return int The store ID.
+	 */
+	public function get_store_id(): string {
+		return (string) get_current_blog_id();
+	}
 
 	/**
 	 * Retrieves integration name.
@@ -124,19 +133,4 @@ class Configuration_Service extends Configuration {
 		}
 		return $stores;
 	}
-
-	// /**
-	// * Get general settings.
-	// *
-	// * @param int|null $blog_id The blog ID.
-	// * 
-	// * @return mixed
-	// */
-	// public function get_general_settings( $blog_id = null ) {
-	// if ( null === $blog_id ) {
-	// $blog_id = get_current_blog_id();
-	// }
-	// $data = AdminAPI::get()->generalSettings( $blog_id )->getGeneralSettings();
-	// return $data;
-	// }
 }

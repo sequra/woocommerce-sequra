@@ -101,9 +101,9 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 */
 	private function get_sequra_fe_l10n() {
 		$onboarding_page_config = array(
-			'getConnectionDataUrl'      => get_rest_url( null, 'sequra/v1/onboarding/data' ), // TODO: Add the URL.
-			'saveConnectionDataUrl'     => get_rest_url( null, 'sequra/v1/onboarding/data' ), // TODO: Add the URL.
-			'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/validate' ), // TODO: Add the URL.
+			'getConnectionDataUrl'      => get_rest_url( null, 'sequra/v1/onboarding/data' ),
+			'saveConnectionDataUrl'     => get_rest_url( null, 'sequra/v1/onboarding/data' ),
+			'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/validate' ),
 			'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/payment/selling-countries' ), // TODO: Add the URL.
 			'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries' ), // TODO: Add the URL.
 			'saveCountrySettingsUrl'    => '', // TODO: Add the URL.
@@ -125,7 +125,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 					'getShopOrderStatusesUrl'           => '', // TODO: Add the URL.
 					'getOrderStatusMappingSettingsUrl'  => '', // TODO: Add the URL.
 					'saveOrderStatusMappingSettingsUrl' => '', // TODO: Add the URL.
-					'disconnectUrl'                     => '', // TODO: Add the URL.
+					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect' ), // TODO: Add the URL.
 				)
 			),
 			'payment'      => array(
