@@ -106,9 +106,9 @@ class Assets_Controller implements Interface_Assets_Controller {
 		$payment_page_config    = array_merge(
 			$connection_config,
 			array(
-				'getPaymentMethodsUrl'      => get_rest_url( null, 'sequra/v1/payment/methods' ), // TODO: Add the URL.
+				'getPaymentMethodsUrl'      => get_rest_url( null, 'sequra/v1/payment/methods/{merchantId}' ),
 				'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/onboarding/countries/selling' ),
-				'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries' ), // TODO: Add the URL.
+				'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries' ),
 				'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/validate' ),
 			)
 		);

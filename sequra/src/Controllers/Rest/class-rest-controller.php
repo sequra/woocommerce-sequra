@@ -25,18 +25,11 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * 
 	 * @param string $endpoint The endpoint.
 	 * @param string $fun       The function.
+	 * @param array  $arguments The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
 	 * @param string $permission_callback The permission callback.
 	 */
-	protected function register_get( $endpoint, $fun, $permission_callback = 'can_user_manage_options' ) {
-		register_rest_route(
-			$this->namespace,
-			"{$this->rest_base}/$endpoint",
-			array(
-				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( $this, $fun ),
-				'permission_callback' => array( $this, $permission_callback ),
-			), 
-		);
+	protected function register_get( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ) {
+		$this->register( \WP_REST_Server::READABLE, $endpoint, $fun, $args, $permission_callback );
 	}
 
 	/**
@@ -48,8 +41,20 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * @param string $permission_callback The permission callback.
 	 */
 	protected function register_post( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ) {
+		$this->register( \WP_REST_Server::CREATABLE, $endpoint, $fun, $args, $permission_callback );
+	}
+
+	/**
+	 * Register endpoint.
+	 * 
+	 * @param string $endpoint The endpoint.
+	 * @param string $fun       The function.
+	 * @param array  $arguments The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
+	 * @param string $permission_callback The permission callback.
+	 */
+	private function register( $methods, $endpoint, $fun, $args, $permission_callback ) {
 		$args = array(
-			'methods'             => \WP_REST_Server::CREATABLE,
+			'methods'             => $methods,
 			'callback'            => array( $this, $fun ),
 			'permission_callback' => array( $this, $permission_callback ),
 		);
