@@ -65,6 +65,6 @@ abstract class Configuration extends \SeQura\Core\Infrastructure\Configuration\C
 	 * URL to the marketplace's plugin page.
 	 */
 	public function get_marketplace_url(): string {
-		return 'https://www.example.com';
+		return 'https://wordpress.org/plugins/sequra/';
 	}
 }
