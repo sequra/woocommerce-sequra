@@ -1,6 +1,9 @@
 if (!window.SequraFE) {
     window.SequraFE = {};
 }
+if (!window.SequraFE.customHeader) {
+    window.SequraFE.customHeader = {};
+}
 
 /**
  * @typedef AjaxServiceType
@@ -43,7 +46,7 @@ if (!window.SequraFE) {
                 if (response.status === 400) {
                     return response.json().then(errorCallback);
                 }
-            } catch (e) {}
+            } catch (e) { }
 
             return errorCallback({ status: response.status, error: response.statusMessage });
         };
