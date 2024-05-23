@@ -89,7 +89,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 		wp_enqueue_style( self::HANDLE_CORE, "{$this->assets_dir_url}/css/sequra-core.css", array(), self::INTEGRATION_CORE_VERSION );
 		
 		// Scripts.
-		wp_register_script( self::HANDLE_SETTINGS_PAGE, "{$this->assets_dir_url}/js/settings-page.js", array(), $this->assets_version, true );
+		wp_register_script( self::HANDLE_SETTINGS_PAGE, "{$this->assets_dir_url}/js/settings-page.min.js", array(), $this->assets_version, true );
 		wp_localize_script( self::HANDLE_SETTINGS_PAGE, 'SequraFE', $this->get_sequra_fe_l10n() );
 		wp_enqueue_script( self::HANDLE_SETTINGS_PAGE );
 	}

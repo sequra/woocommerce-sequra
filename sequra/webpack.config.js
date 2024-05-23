@@ -1,4 +1,4 @@
-// const TerserPlugin = require("terser-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const path = require('path');
 
 module.exports = (env, argv) => {
@@ -13,9 +13,9 @@ module.exports = (env, argv) => {
 
     if (isProd) {
         // Uglify JS
-        // config.optimization = {
-        //     minimizer: [new TerserPlugin()],
-        // };
+        config.optimization = {
+            minimizer: [new TerserPlugin()],
+        };
         // Babel
         config.module.rules.push(
             {
@@ -40,7 +40,7 @@ module.exports = (env, argv) => {
             entry: "./assets/js/src/settings-page.js",
             output: {
                 path: path.resolve(__dirname, './assets/js'),
-                filename: "settings-page.js",
+                filename: "settings-page.min.js",
             },
         },
         // Add more entries here for processing other files.
