@@ -17,6 +17,7 @@ use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
@@ -34,6 +35,7 @@ use SeQura\WC\Services\Core\Configuration_Service;
 use SeQura\WC\Services\Core\Disconnect_Service;
 use SeQura\WC\Services\Core\Encryptor;
 use SeQura\WC\Services\Core\Logger;
+use SeQura\WC\Services\Core\Selling_Countries_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -207,6 +209,16 @@ class Bootstrap extends BootstrapComponent {
 		);
 
 		Reg::registerService(
+			SellingCountriesServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ SellingCountriesServiceInterface::class ] ) ) {
+					self::$cache[ SellingCountriesServiceInterface::class ] = new Selling_Countries_Service();
+				}
+				return self::$cache[ SellingCountriesServiceInterface::class ];
+			}
+		);
+
+		Reg::registerService(
 			ShopLoggerAdapter::CLASS_NAME,
 			static function () {
 				if ( ! isset( self::$cache[ ShopLoggerAdapter::CLASS_NAME ] ) ) {
@@ -369,7 +381,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Controllers\Rest\Payment_REST_Controller::class ] ) ) {
 					self::$cache[ Controllers\Rest\Payment_REST_Controller::class ] = new Controllers\Rest\Payment_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' )
+						Reg::getService( 'plugin.rest_namespace' ),
+						Reg::getService( Configuration::class )
 					);
 				}
 				return self::$cache[ Controllers\Rest\Payment_REST_Controller::class ];

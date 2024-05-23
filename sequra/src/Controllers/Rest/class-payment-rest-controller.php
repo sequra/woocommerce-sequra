@@ -8,19 +8,30 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\WC\Services\Core\Configuration;
+
 /**
  * REST Payment Controller
  */
 class Payment_REST_Controller extends REST_Controller {
 	
 	/**
+	 * Configuration.
+	 *
+	 * @var Configuration
+	 */
+	private $configuration;
+	
+	/**
 	 * Constructor.
 	 *
 	 * @param string $rest_namespace The namespace.
 	 */
-	public function __construct( $rest_namespace ) {
-		$this->namespace = $rest_namespace;
-		$this->rest_base = '/payment';
+	public function __construct( $rest_namespace, Configuration $configuration ) {
+		$this->namespace     = $rest_namespace;
+		$this->rest_base     = '/payment';
+		$this->configuration = $configuration;
 	}
 
 	/**
@@ -37,33 +48,15 @@ class Payment_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_selling_countries() {
-		$data = array(
-			array(
-				'code' => 'CO',
-				'name' => 'Colombia',
-			),
-			array(
-				'code' => 'FR',
-				'name' => 'France',
-			),
-			array(
-				'code' => 'IT',
-				'name' => 'Italy',
-			),
-			array(
-				'code' => 'PE',
-				'name' => 'Peru',
-			),
-			array(
-				'code' => 'PT',
-				'name' => 'Portugal',
-			),
-			array(
-				'code' => 'ES',
-				'name' => 'Spain',
-			),
-		);
-		return rest_ensure_response( $data );
+		$response = null;
+		try {
+			$response = AdminAPI::get()->countryConfiguration( $this->configuration->get_store_id() )->getSellingCountries();
+			$response = $response->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
