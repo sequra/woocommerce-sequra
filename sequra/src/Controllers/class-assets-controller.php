@@ -100,19 +100,28 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 * @return array
 	 */
 	private function get_sequra_fe_l10n() {
-		$onboarding_page_config = array(
-			'getConnectionDataUrl'      => get_rest_url( null, 'sequra/v1/onboarding/data' ),
-			'saveConnectionDataUrl'     => get_rest_url( null, 'sequra/v1/onboarding/data' ),
-			'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/validate' ),
-			'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/payment/selling-countries' ), // TODO: Add the URL.
-			'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries' ), // TODO: Add the URL.
-			'saveCountrySettingsUrl'    => '', // TODO: Add the URL.
-			'getPaymentMethodsUrl'      => '', // TODO: Add the URL.
-			'getWidgetSettingsUrl'      => get_rest_url( null, 'sequra/v1/onboarding/widgets' ), // TODO: Add the URL.
-			'saveWidgetSettingsUrl'     => '', // TODO: Add the URL.
+		$connection_config      = array(
+			'getConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data' ),
 		);
-
-		$page_config = array(
+		$payment_page_config    = array_merge(
+			$connection_config,
+			array(
+				'getPaymentMethodsUrl'      => get_rest_url( null, 'sequra/v1/payment/methods' ), // TODO: Add the URL.
+				'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/onboarding/countries/selling' ),
+				'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries' ), // TODO: Add the URL.
+				'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/validate' ),
+			)
+		);
+		$onboarding_page_config = array_merge(
+			$payment_page_config, 
+			array(
+				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data' ),
+				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries' ), // TODO: Add the URL.
+				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets' ), // TODO: Add the URL.
+				'saveWidgetSettingsUrl'  => '', // TODO: Add the URL.
+			)
+		);
+		$page_config            = array(
 			'onboarding'   => $onboarding_page_config,
 			'settings'     => array_merge(
 				$onboarding_page_config,
@@ -128,16 +137,12 @@ class Assets_Controller implements Interface_Assets_Controller {
 					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect' ), // TODO: Add the URL.
 				)
 			),
-			'payment'      => array(
-				'getPaymentMethodsUrl'      => get_rest_url( null, 'sequra/v1/payment/methods' ), // TODO: Add the URL.
-				'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/payment/selling-countries' ), // TODO: Add the URL.
-				'getCountrySettingsUrl'     => '', // TODO: Add the URL.
-				'getConnectionDataUrl'      => '', // TODO: Add the URL.
-				'validateConnectionDataUrl' => '', // TODO: Add the URL.
-			),
-			'transactions' => array(
-				'getConnectionDataUrl'  => '', // TODO: Add the URL.
-				'getTransactionLogsUrl' => '', // TODO: Add the URL.
+			'payment'      => $payment_page_config,
+			'transactions' => array_merge(
+				$connection_config,
+				array(
+					'getTransactionLogsUrl' => '', // TODO: Add the URL.
+				)
 			),
 		);
 

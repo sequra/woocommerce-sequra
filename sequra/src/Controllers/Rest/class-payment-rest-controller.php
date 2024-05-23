@@ -38,25 +38,7 @@ class Payment_REST_Controller extends REST_Controller {
 	 * Register the API endpoints.
 	 */
 	public function register_routes() {
-		$this->register_get( 'selling-countries', 'get_selling_countries' );
 		$this->register_get( 'methods', 'get_methods' );
-	}
-
-	/**
-	 * GET selling countries.
-	 * 
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function get_selling_countries() {
-		$response = null;
-		try {
-			$response = AdminAPI::get()->countryConfiguration( $this->configuration->get_store_id() )->getSellingCountries();
-			$response = $response->toArray();
-		} catch ( \Throwable $e ) {
-			// TODO: Log error.
-			$response = new \WP_Error( 'error', $e->getMessage() );
-		}
-		return rest_ensure_response( $response );
 	}
 
 	/**

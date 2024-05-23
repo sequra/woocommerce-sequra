@@ -11,7 +11,10 @@ namespace SeQura\WC\Controllers\Rest;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
 use SeQura\WC\Services\Core\Configuration;
+use WP_HTTP_Response;
+use WP_REST_Response;
 
 /**
  * REST Onboarding Controller
@@ -73,8 +76,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$this->register_post( 'data/validate', 'validate_connection_data', $data_args );
 		$this->register_post( 'data/disconnect', 'disconnect' );
 
-		$this->register_get( 'countries', 'get_countries' );
 		$this->register_get( 'widgets', 'get_widgets' );
+		
+		$this->register_get( 'countries/selling', 'get_selling_countries' );
+		$this->register_get( 'countries', 'get_countries' );
+		$this->register_post( 'countries', 'save_countries' );
 	}
 
 	/**
@@ -83,8 +89,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_connection_data() {
-		$data = AdminAPI::get()->connection( $this->configuration->get_store_id() )->getOnboardingData();
-		return rest_ensure_response( $data->toArray() );
+		$response = AdminAPI::get()
+		->connection( $this->configuration->get_store_id() )
+		->getOnboardingData()
+		->toArray();
+		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -97,7 +106,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function validate_connection_data( $request ) {
 		$response = null;
 		try {
-			$response = AdminAPI::get()->connection( $this->configuration->get_store_id() )->isConnectionDataValid(
+			$response = AdminAPI::get()
+			->connection( $this->configuration->get_store_id() )
+			->isConnectionDataValid(
 				new ConnectionRequest(
 					$request->get_param( 'environment' ),
 					$request->get_param( 'merchantId' ),
@@ -124,7 +135,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function save_connection_data( $request ) {
 		$response = null;
 		try {
-			$response = AdminAPI::get()->connection( $this->configuration->get_store_id() )->saveOnboardingData(
+			$response = AdminAPI::get()
+			->connection( $this->configuration->get_store_id() )
+			->saveOnboardingData(
 				new OnboardingRequest(
 					$request->get_param( 'environment' ),
 					$request->get_param( 'username' ),
@@ -155,8 +168,29 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function disconnect() {
 		$response = null;
 		try {
-			$response = AdminAPI::get()->disconnect( $this->configuration->get_store_id() )->disconnect();
-			$response = $response->toArray();
+			$response = AdminAPI::get()
+			->disconnect( $this->configuration->get_store_id() )
+			->disconnect()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * GET selling countries.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_selling_countries() {
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->countryConfiguration( $this->configuration->get_store_id() )
+			->getSellingCountries()
+			->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.
 			$response = new \WP_Error( 'error', $e->getMessage() );
@@ -170,17 +204,45 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_countries() {
-		$data = array(
-			array(
-				'countryCode' => 'ES',
-				'merchantId'  => 'dummy_ps_mikel',
-			),
-			array(
-				'countryCode' => 'FR',
-				'merchantId'  => 'dummy_fr',
-			),
-		);
-		return rest_ensure_response( $data );
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->countryConfiguration( $this->configuration->get_store_id() )
+			->getCountryConfigurations()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Save countries.
+	 * 
+	 * @throws \Exception
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function save_countries( $request ) {
+		if ( ! $this->validate_countries( $request ) ) {
+			return new WP_REST_Response( 'Invalid data', 400 );
+		}
+
+		$response = null;
+		try {
+			$data = json_decode( $request->get_body(), true );
+
+			$response = AdminAPI::get()
+			->countryConfiguration( $this->configuration->get_store_id() )
+			->saveCountryConfigurations( new CountryConfigurationRequest( $data ) )
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -210,5 +272,39 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 */
 	public function validate_environment( $param, $request, $key ) {
 		return in_array( $param, array( 'sandbox', 'production' ), true );
+	}
+
+	/**
+	 * Validate if countries payload is valid.
+	 * 
+	 * @param WP_REST_Request $request The request.
+	 */
+	public function validate_countries( $request ): bool {
+		try {
+			$data = json_decode( $request->get_body(), true );
+			if ( ! is_array( $data ) ) {
+				return false;
+			}
+			$allowed_countries = AdminAPI::get()
+			->countryConfiguration( $this->configuration->get_store_id() )
+			->getSellingCountries()
+			->toArray();
+
+			$allowed_countries = array_column( $allowed_countries, 'code' );
+
+			foreach ( $data as $country ) {
+				if ( ! isset( $country['countryCode'] ) 
+				|| ! isset( $country['merchantId'] ) 
+				|| ! is_string( $country['countryCode'] ) 
+				|| ! is_string( $country['merchantId'] )
+				|| ! in_array( $country['countryCode'], $allowed_countries, true )
+				) {
+					return false;
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+		return true;
 	}
 }
