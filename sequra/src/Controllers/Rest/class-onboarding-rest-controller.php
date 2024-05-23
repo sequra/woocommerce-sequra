@@ -71,12 +71,20 @@ class Onboarding_REST_Controller extends REST_Controller {
 			),
 		);
 
+		$store_id_args = array(
+			'storeId' => array(
+				'required'          => true,
+				'validate_callback' => array( $this, 'validate_not_empty_string' ),
+			),
+		);
+
 		$this->register_get( 'data', 'get_connection_data' );
 		$this->register_post( 'data', 'save_connection_data', $data_args );
 		$this->register_post( 'data/validate', 'validate_connection_data', $data_args );
 		$this->register_post( 'data/disconnect', 'disconnect' );
 
-		$this->register_get( 'widgets', 'get_widgets' );
+		$this->register_get( 'widgets/(?P<storeId>[\w]+)', 'get_widgets', $store_id_args );
+		$this->register_post( 'widgets/(?P<storeId>[\w]+)', 'save_widgets', $store_id_args );
 		
 		$this->register_get( 'countries/selling', 'get_selling_countries' );
 		$this->register_get( 'countries', 'get_countries' );
@@ -247,24 +255,73 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 	/**
 	 * GET widgets.
+	 *
+	 * @param WP_REST_Request $request The request.
 	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_widgets() {
-		$data = array(
-			'useWidgets'                            => true,
-			'displayWidgetOnProductPage'            => true,
-			'showInstallmentAmountInProductListing' => true,
-			'showInstallmentAmountInCartPage'       => true,
-			'assetsKey'                             => 'ADc3ZdOLh4',
-			'miniWidgetSelector'                    => '',
-			'widgetLabels'                          => array(
-				'message'           => 'Desde %s/mes',
-				'messageBelowLimit' => 'Fracciona a partir de %s',
-			),
-			'widgetStyles'                          => '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
-		);
-		return rest_ensure_response( $data );
+	public function get_widgets( $request ) {
+		// $data = AdminAPI::get()->widgetConfiguration( $this->storeId )->getWidgetSettings();
+
+		// $result = $data->toArray();
+
+		// if ( empty( $result ) ) {
+		// return $this->result->setData( $result );
+		// }
+
+		// $result['widgetLabels']['message']           = ! empty( $result['widgetLabels']['messages'] ) ?
+		// reset( $result['widgetLabels']['messages'] ) : '';
+		// $result['widgetLabels']['messageBelowLimit'] = ! empty( $result['widgetLabels']['messagesBelowLimit'] ) ?
+		// reset( $result['widgetLabels']['messagesBelowLimit'] ) : '';
+		// $result['widgetStyles']                      = $result['widgetConfiguration'];
+		// unset( $result['widgetLabels']['messages'], $result['widgetLabels']['messagesBelowLimit'] );
+		// unset( $result['widgetConfiguration'] );
+
+		// $this->addResponseCode( $data );
+
+		// return $this->result->setData( $result );
+
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->widgetConfiguration( $request->get_param( 'storeId' ) )
+			->getWidgetSettings()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Save countries.
+	 * 
+	 * @throws \Exception
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function save_widgets( $request ) {
+		// TODO: Implement this.
+		// if ( ! $this->validate_countries( $request ) ) {
+		// return new WP_REST_Response( 'Invalid data', 400 );
+		// }
+
+		// $response = null;
+		// try {
+		// $data = json_decode( $request->get_body(), true );
+
+		// $response = AdminAPI::get()
+		// ->countryConfiguration( $this->configuration->get_store_id() )
+		// ->saveCountryConfigurations( new CountryConfigurationRequest( $data ) )
+		// ->toArray();
+		// } catch ( \Throwable $e ) {
+		// TODO: Log error.
+		// $response = new \WP_Error( 'error', $e->getMessage() );
+		// }
+		// return rest_ensure_response( $response );
+		return new WP_REST_Response( 'Not implemented', 501 );
 	}
 
 	/**

@@ -117,8 +117,8 @@ class Assets_Controller implements Interface_Assets_Controller {
 			array(
 				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data' ),
 				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries' ),
-				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets' ), // TODO: Add the URL.
-				'saveWidgetSettingsUrl'  => '', // TODO: Add the URL.
+				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
+				'saveWidgetSettingsUrl'  => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
 			)
 		);
 		$page_config            = array(
@@ -130,7 +130,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories' ),
 					'getShopProductsUrl'                => '', // TODO: Add the URL.
 					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general' ), // TODO: Add the URL.
-					'saveGeneralSettingsUrl'            => '', // TODO: Add the URL.
+					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general' ), // TODO: Add the URL.
 					'getShopOrderStatusesUrl'           => '', // TODO: Add the URL.
 					'getOrderStatusMappingSettingsUrl'  => '', // TODO: Add the URL.
 					'saveOrderStatusMappingSettingsUrl' => '', // TODO: Add the URL.
@@ -162,20 +162,22 @@ class Assets_Controller implements Interface_Assets_Controller {
 				'current' => $this->load_translation( $this->i18n->get_lang() ),
 			),
 			'pages'             => array(
+				// 'onboarding'   => array( 'connect', 'countries', 'widgets' ),
 				'onboarding'   => array( 'connect', 'countries' ),
-				'settings'     => array( 'general', 'connection', 'order_status' ),
+				// 'settings'     => array( 'general', 'connection', 'order_status' ),
+				'settings'     => array( 'general', 'connection', 'order_status', 'widget' ),
 				'payment'      => $pages_payment,
 				'transactions' => array( 'logs' ),
 			),
 			'integration'       => array(
-				'authToken'    => '', // TODO: Add the token.
-				'isMultistore' => false,
-				'hasVersion'   => false,
+				'authToken'    => '', // TODO: Add the token?
+				'isMultistore' => false, // TODO: this must be true for multi-site installations.
+				'hasVersion'   => true, // TODO: this must be true if the current version is not the latest.
 			),
 			'generalSettings'   => array(
 				'useHostedPage'               => false,
 				'useReplacementPaymentMethod' => false,
-				'useAllowedIPAddresses'       => false,
+				'useAllowedIPAddresses'       => true,
 			),
 			'isPromotional'     => empty( $pages_payment ),
 			'_state_controller' => $state_controller,
