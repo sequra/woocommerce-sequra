@@ -116,7 +116,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 			$payment_page_config, 
 			array(
 				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data' ),
-				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries' ), // TODO: Add the URL.
+				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries' ),
 				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets' ), // TODO: Add the URL.
 				'saveWidgetSettingsUrl'  => '', // TODO: Add the URL.
 			)
@@ -127,7 +127,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 				$onboarding_page_config,
 				array(
 					'getShopPaymentMethodsUrl'          => '', // TODO: Add the URL.
-					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories' ), // TODO: Add the URL.
+					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories' ),
 					'getShopProductsUrl'                => '', // TODO: Add the URL.
 					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general' ), // TODO: Add the URL.
 					'saveGeneralSettingsUrl'            => '', // TODO: Add the URL.

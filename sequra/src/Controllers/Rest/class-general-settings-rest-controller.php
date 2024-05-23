@@ -8,12 +8,13 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\WC\Services\Core\Configuration;
 
 /**
  * REST Settings Controller
  */
-class Settings_REST_Controller extends REST_Controller {
+class General_Settings_REST_Controller extends REST_Controller {
 
 	/**
 	 * Configuration.
@@ -109,17 +110,16 @@ class Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_shop_categories() {
-		$data = array(
-			array(
-				'id'   => '2',
-				'name' => 'Default Category',
-			),
-			array(
-				'id'   => '3',
-				'name' => 'testcat',
-			),
-		);
-
-		return rest_ensure_response( $data );
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->generalSettings( $this->configuration->get_store_id() )
+			->getShopCategories()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 }

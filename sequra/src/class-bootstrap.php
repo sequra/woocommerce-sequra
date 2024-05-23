@@ -16,6 +16,7 @@ use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalDat
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
@@ -30,6 +31,7 @@ use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
+use SeQura\WC\Services\Core\Category_Service;
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Core\Configuration_Service;
 use SeQura\WC\Services\Core\Disconnect_Service;
@@ -64,7 +66,7 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Controllers\Interface_I18n_Controller::class ),
 					Reg::getService( Controllers\Interface_Assets_Controller::class ),
 					Reg::getService( Controllers\Interface_Settings_Controller::class ),
-					Reg::getService( Controllers\Rest\Settings_REST_Controller::class ),
+					Reg::getService( Controllers\Rest\General_Settings_REST_Controller::class ),
 					Reg::getService( Controllers\Rest\Onboarding_REST_Controller::class ),
 					Reg::getService( Controllers\Rest\Payment_REST_Controller::class )
 				);
@@ -215,6 +217,16 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ SellingCountriesServiceInterface::class ] = new Selling_Countries_Service();
 				}
 				return self::$cache[ SellingCountriesServiceInterface::class ];
+			}
+		);
+
+		Reg::registerService(
+			CategoryServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ CategoryServiceInterface::class ] ) ) {
+					self::$cache[ CategoryServiceInterface::class ] = new Category_Service();
+				}
+				return self::$cache[ CategoryServiceInterface::class ];
 			}
 		);
 
@@ -389,15 +401,15 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
-			Controllers\Rest\Settings_REST_Controller::class,
+			Controllers\Rest\General_Settings_REST_Controller::class,
 			static function () {
-				if ( ! isset( self::$cache[ Controllers\Rest\Settings_REST_Controller::class ] ) ) {
-					self::$cache[ Controllers\Rest\Settings_REST_Controller::class ] = new Controllers\Rest\Settings_REST_Controller(
+				if ( ! isset( self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ] ) ) {
+					self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ] = new Controllers\Rest\General_Settings_REST_Controller(
 						Reg::getService( 'plugin.rest_namespace' ),
 						Reg::getService( Configuration::class )
 					);
 				}
-				return self::$cache[ Controllers\Rest\Settings_REST_Controller::class ];
+				return self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ];
 			}
 		);
 	}
