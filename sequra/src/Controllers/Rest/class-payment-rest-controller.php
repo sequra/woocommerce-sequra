@@ -9,29 +9,20 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
-use SeQura\WC\Services\Core\Configuration;
 
 /**
  * REST Payment Controller
  */
 class Payment_REST_Controller extends REST_Controller {
-	
-	/**
-	 * Configuration.
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
-	
+
 	/**
 	 * Constructor.
 	 *
 	 * @param string $rest_namespace The namespace.
 	 */
-	public function __construct( $rest_namespace, Configuration $configuration ) {
-		$this->namespace     = $rest_namespace;
-		$this->rest_base     = '/payment';
-		$this->configuration = $configuration;
+	public function __construct( $rest_namespace ) {
+		$this->namespace = $rest_namespace;
+		$this->rest_base = '/payment';
 	}
 
 	/**
@@ -40,18 +31,15 @@ class Payment_REST_Controller extends REST_Controller {
 	public function register_routes() {
 
 		$data_methods = array(
-			'merchantId' => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_not_empty_string' ),
-				'sanitize_callback' => 'sanitize_text_field',
-			),
+			self::PARAM_STORE_ID    => $this->get_arg_string(),
+			self::PARAM_MERCHANT_ID => $this->get_arg_string(),
 		);
 
-		$this->register_get( 'methods/(?P<merchantId>[\w]+)', 'get_methods', $data_methods );
+		$this->register_get( 'methods/(?P<' . self::PARAM_STORE_ID . '>[\w]+)/(?P<' . self::PARAM_MERCHANT_ID . '>[\w]+)', 'get_methods', $data_methods );
 	}
 
 	/**
-	 * GET methods.
+	 * Get payment methods.
 	 * 
 	 * @param WP_REST_Request $request The request.
 	 * 
@@ -61,8 +49,8 @@ class Payment_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->paymentMethods( $this->configuration->get_store_id() )
-			->getPaymentMethods( $request->get_param( 'merchantId' ) )
+			->paymentMethods( $request->get_param( self::PARAM_STORE_ID ) )
+			->getPaymentMethods( $request->get_param( self::PARAM_MERCHANT_ID ) )
 			->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.

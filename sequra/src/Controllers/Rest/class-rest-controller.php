@@ -13,6 +13,9 @@ namespace SeQura\WC\Controllers\Rest;
  */
 abstract class REST_Controller extends \WP_REST_Controller {
 
+	protected const PARAM_STORE_ID    = 'storeId';
+	protected const PARAM_MERCHANT_ID = 'merchantId';
+
 	/**
 	 * Check if the current user can manage options.
 	 */
