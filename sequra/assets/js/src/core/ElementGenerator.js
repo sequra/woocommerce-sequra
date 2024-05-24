@@ -630,11 +630,6 @@ if (!window.SequraFE) {
             [
                 createElement(
                     'span',
-                    'material-symbols-outlined sq-support-icon',
-                    'contact_support'
-                ),
-                createElement(
-                    'span',
                     'sq-support-link-label',
                     'supportLink.label'
                 )
