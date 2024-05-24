@@ -79,6 +79,23 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	}
 
 	/**
+	 * Validate id the parameter is an array of IP addresses.
+	 */
+	public function validate_ip_list( $param, $request, $key ) {
+		// phpcs:ignore Generic.Files.LineLength.TooLong
+		$ip_regex = '/^(((25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?))|([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}))$/';
+		if ( ! is_array( $param ) ) {
+			return false;
+		}
+		foreach ( $param as $ip ) {
+			if ( preg_match( $ip_regex, $ip ) !== 1 ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Sanitize boolean.
 	 */
 	public function sanitize_bool( $param ) {
@@ -138,6 +155,24 @@ abstract class REST_Controller extends \WP_REST_Controller {
 			array(
 				'validate_callback' => null === $validate ? array( $this, 'validate_not_empty_string' ) : $validate,
 				'sanitize_callback' => null === $sanitize ? 'sanitize_text_field' : $sanitize,
+			)
+		);
+	}
+
+	/**
+	 * Get argument structure for an IP list.
+	 * 
+	 * @param bool $required      If the argument is required.
+	 * @param mixed $default_value The default value. Null will be ignored.
+	 * @param callable $validate The validate callback. Leave null to use the default.
+	 * @param callable $sanitize The sanitize callback. Leave null to use the default.
+	 */
+	protected function get_arg_ip_list( $required = true, $default_value = null, $validate = null, $sanitize = null ) {
+		return array_merge(
+			$this->get_arg( $required, $default_value ),
+			array(
+				'validate_callback' => null === $validate ? array( $this, 'validate_ip_list' ) : $validate,
+				'sanitize_callback' => null === $sanitize ? array( $this, 'sanitize_array_sanitize_text_field' ) : $sanitize,
 			)
 		);
 	}

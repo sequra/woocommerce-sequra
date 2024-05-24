@@ -44,10 +44,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$general_args = array(
 			'sendOrderReportsPeriodicallyToSeQura' => $this->get_arg_bool(),
 			'showSeQuraCheckoutAsHostedPage'       => $this->get_arg_bool(),
-			'allowedIPAddresses'                   => array(
-				'required' => true,
-				// 'validate_callback' => array( $this, 'validate_not_empty_string' ),
-			),
+			'allowedIPAddresses'                   => $this->get_arg_ip_list( true, array() ),
 			'excludedProducts'                     => array(
 				'required'          => true,
 				'validate_callback' => array( $this, 'validate_array_of_product_sku' ),
