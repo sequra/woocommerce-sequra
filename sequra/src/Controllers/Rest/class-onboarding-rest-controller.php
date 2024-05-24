@@ -20,13 +20,6 @@ use WP_REST_Response;
  * REST Onboarding Controller
  */
 class Onboarding_REST_Controller extends REST_Controller {
-
-	/**
-	 * Configuration.
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
 	
 	/**
 	 * Constructor.
@@ -34,10 +27,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @param string $rest_namespace The namespace.
 	 * @param Configuration $configuration The configuration.
 	 */
-	public function __construct( $rest_namespace, Configuration $configuration ) {
-		$this->namespace     = $rest_namespace;
-		$this->rest_base     = '/onboarding';
-		$this->configuration = $configuration;
+	public function __construct( $rest_namespace ) {
+		$this->namespace = $rest_namespace;
+		$this->rest_base = '/onboarding';
 	}
 
 	/**
@@ -45,60 +37,69 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 */
 	public function register_routes() {
 
-		$data_args = array(
-			'environment'         => array_merge(
-				$this->get_arg_string(),
-				array( 'enum' => array( 'sandbox', 'production' ) )
-			),
-			'username'            => $this->get_arg_string(),
-			'password'            => $this->get_arg_string(),
-			'sendStatisticalData' => $this->get_arg_bool(),
-			'merchantId'          => $this->get_arg_string(),
-		);
+		$store_id_args = array( self::PARAM_STORE_ID => $this->get_arg_string() );
 
-		$store_id_args = array( 'storeId' => $this->get_arg_string() );
-
-		$widget_args = array(
-			'storeId'                               => $this->get_arg_string(),
-			'useWidgets'                            => $this->get_arg_bool(),
-			'assetsKey'                             => $this->get_arg_string(),
-			'displayWidgetOnProductPage'            => $this->get_arg_bool(),
-			'showInstallmentAmountInProductListing' => $this->get_arg_bool(),
-			'showInstallmentAmountInCartPage'       => $this->get_arg_bool(),
-			'miniWidgetSelector'                    => $this->get_arg_string( true, '', '__return_true' ), // TODO: Add this field to form in the UI.
-			'widgetStyles'                          => $this->get_arg_string(),
-			'widgetLabels'                          => array(
-				'default'           => array(
-					'message'           => '',
-					'messageBelowLimit' => '',
+		$data_args = array_merge(
+			$store_id_args,
+			array(
+				'environment'           => array_merge(
+					$this->get_arg_string(),
+					array( 'enum' => array( 'sandbox', 'production' ) )
 				),
-				'required'          => false,
-				'validate_callback' => array( $this, 'validate_widget_labels' ),
-				'sanitize_callback' => array( $this, 'sanitize_widget_labels' ),
-			),
+				'username'              => $this->get_arg_string(),
+				'password'              => $this->get_arg_string(),
+				'sendStatisticalData'   => $this->get_arg_bool(),
+				self::PARAM_MERCHANT_ID => $this->get_arg_string(),
+			)
 		);
 
-		$this->register_get( 'data', 'get_connection_data' );
-		$this->register_post( 'data', 'save_connection_data', $data_args );
-		$this->register_post( 'data/validate', 'validate_connection_data', $data_args );
-		$this->register_post( 'data/disconnect', 'disconnect' );
+		$widget_args = array_merge(
+			$store_id_args,
+			array(
+				'useWidgets'                            => $this->get_arg_bool(),
+				'assetsKey'                             => $this->get_arg_string(),
+				'displayWidgetOnProductPage'            => $this->get_arg_bool(),
+				'showInstallmentAmountInProductListing' => $this->get_arg_bool(),
+				'showInstallmentAmountInCartPage'       => $this->get_arg_bool(),
+				'miniWidgetSelector'                    => $this->get_arg_string( true, '', '__return_true' ), // TODO: Add this field to form in the UI.
+				'widgetStyles'                          => $this->get_arg_string(),
+				'widgetLabels'                          => array(
+					'default'           => array(
+						'message'           => '',
+						'messageBelowLimit' => '',
+					),
+					'required'          => false,
+					'validate_callback' => array( $this, 'validate_widget_labels' ),
+					'sanitize_callback' => array( $this, 'sanitize_widget_labels' ),
+				),
+			)
+		);
 
-		$this->register_get( 'widgets/(?P<storeId>[\w]+)', 'get_widgets', $store_id_args );
-		$this->register_post( 'widgets/(?P<storeId>[\w]+)', 'save_widgets', $widget_args );
+		$store_id = $this->url_param_pattern( self::PARAM_STORE_ID );
+
+		$this->register_get( "data/{$store_id}", 'get_connection_data', $store_id_args );
+		$this->register_post( "data/{$store_id}", 'save_connection_data', $data_args );
+		$this->register_post( "data/validate/{$store_id}", 'validate_connection_data', $data_args );
+		$this->register_post( "data/disconnect/{$store_id}", 'disconnect', $store_id_args );
+
+		$this->register_get( "widgets/{$store_id}", 'get_widgets', $store_id_args );
+		$this->register_post( "widgets/{$store_id}", 'save_widgets', $widget_args );
 		
-		$this->register_get( 'countries/selling', 'get_selling_countries' );
-		$this->register_get( 'countries', 'get_countries' );
-		$this->register_post( 'countries', 'save_countries' );
+		$this->register_get( "countries/selling/{$store_id}", 'get_selling_countries', $store_id_args );
+		$this->register_get( "countries/{$store_id}", 'get_countries', $store_id_args );
+		$this->register_post( "countries/{$store_id}", 'save_countries', $store_id_args );
 	}
 
 	/**
 	 * Get connection data.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_connection_data() {
+	public function get_connection_data( $request ) {
 		$response = AdminAPI::get()
-		->connection( $this->configuration->get_store_id() )
+		->connection( $request->get_param( self::PARAM_STORE_ID ) )
 		->getOnboardingData()
 		->toArray();
 		return rest_ensure_response( $response );
@@ -115,7 +116,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->connection( $this->configuration->get_store_id() )
+			->connection( $request->get_param( self::PARAM_STORE_ID ) )
 			->isConnectionDataValid(
 				new ConnectionRequest(
 					$request->get_param( 'environment' ),
@@ -144,7 +145,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->connection( $this->configuration->get_store_id() )
+			->connection( $request->get_param( self::PARAM_STORE_ID ) )
 			->saveOnboardingData(
 				new OnboardingRequest(
 					$request->get_param( 'environment' ),
@@ -171,13 +172,15 @@ class Onboarding_REST_Controller extends REST_Controller {
 	/**
 	 * Disconnects integration from the shop.
 	 *
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function disconnect() {
+	public function disconnect( $request ) {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->disconnect( $this->configuration->get_store_id() )
+			->disconnect( $request->get_param( self::PARAM_STORE_ID ) )
 			->disconnect()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -190,13 +193,15 @@ class Onboarding_REST_Controller extends REST_Controller {
 	/**
 	 * GET selling countries.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_selling_countries() {
+	public function get_selling_countries( $request ) {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->countryConfiguration( $this->configuration->get_store_id() )
+			->countryConfiguration( $request->get_param( self::PARAM_STORE_ID ) )
 			->getSellingCountries()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -209,13 +214,15 @@ class Onboarding_REST_Controller extends REST_Controller {
 	/**
 	 * GET countries.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_countries() {
+	public function get_countries( $request ) {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->countryConfiguration( $this->configuration->get_store_id() )
+			->countryConfiguration( $request->get_param( self::PARAM_STORE_ID ) )
 			->getCountryConfigurations()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -243,7 +250,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$data = json_decode( $request->get_body(), true );
 
 			$response = AdminAPI::get()
-			->countryConfiguration( $this->configuration->get_store_id() )
+			->countryConfiguration( $request->get_param( self::PARAM_STORE_ID ) )
 			->saveCountryConfigurations( new CountryConfigurationRequest( $data ) )
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -264,7 +271,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->widgetConfiguration( $request->get_param( 'storeId' ) )
+			->widgetConfiguration( $request->get_param( self::PARAM_STORE_ID ) )
 			->getWidgetSettings()
 			->toArray();
 
@@ -295,6 +302,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function save_widgets( $request ) {
 		$response = null;
 		try {
+			// TODO: Add support to CSS selector.
+			// TODO: Add support to widget labels. See shopify example.
 			// $labels               = $request->get_param( 'widgetLabels' );
 			// $messages             = $labels['message'] ? array( $storeConfig->getLocale() => $labels['message'] ) : array();
 			// $messages_below_limit = $labels['messageBelowLimit'] ? array( $storeConfig->getLocale() => $labels['messageBelowLimit'] ) : array();
@@ -303,7 +312,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$messages_below_limit = array();
 
 			$response = AdminAPI::get()
-			->widgetConfiguration( $request->get_param( 'storeId' ) )
+			->widgetConfiguration( $request->get_param( self::PARAM_STORE_ID ) )
 			->setWidgetSettings(
 				new WidgetSettingsRequest(
 					$request->get_param( 'useWidgets' ),
@@ -337,7 +346,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 				return false;
 			}
 			$allowed_countries = AdminAPI::get()
-			->countryConfiguration( $this->configuration->get_store_id() )
+			->countryConfiguration( $request->get_param( self::PARAM_STORE_ID ) )
 			->getSellingCountries()
 			->toArray();
 

@@ -18,61 +18,51 @@ use SeQura\WC\Services\Core\Configuration;
 class General_Settings_REST_Controller extends REST_Controller {
 
 	/**
-	 * Configuration.
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string            $rest_namespace The namespace.
 	 * @param Configuration $configuration The configuration.
 	 */
-	public function __construct( $rest_namespace, Configuration $configuration ) {
-		$this->namespace     = $rest_namespace;
-		$this->rest_base     = '/settings';
-		$this->configuration = $configuration;
+	public function __construct( $rest_namespace ) {
+		$this->namespace = $rest_namespace;
+		$this->rest_base = '/settings';
 	}
 
 	/**
 	 * Register the API endpoints.
 	 */
 	public function register_routes() {
-
-		$general_args = array(
-			'sendOrderReportsPeriodicallyToSeQura' => $this->get_arg_bool(),
-			'showSeQuraCheckoutAsHostedPage'       => $this->get_arg_bool(),
-			'allowedIPAddresses'                   => $this->get_arg_ip_list( true, array() ),
-			'excludedProducts'                     => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_array_of_product_sku' ),
-				'sanitize_callback' => array( $this, 'sanitize_array_sanitize_text_field' ),
-			),
-			'excludedCategories'                   => array(
-				'required'          => false,
-				'validate_callback' => array( $this, 'validate_array_of_product_cat' ),
-				'sanitize_callback' => array( $this, 'sanitize_array_of_ids' ),
-			),
+		$store_id_args = array( self::PARAM_STORE_ID => $this->get_arg_string() );
+		$general_args  = array_merge(
+			$store_id_args,
+			array(
+				'sendOrderReportsPeriodicallyToSeQura' => $this->get_arg_bool(),
+				'showSeQuraCheckoutAsHostedPage'       => $this->get_arg_bool(),
+				'allowedIPAddresses'                   => $this->get_arg_ip_list( true, array() ),
+				'excludedProducts'                     => array(
+					'required'          => true,
+					'validate_callback' => array( $this, 'validate_array_of_product_sku' ),
+					'sanitize_callback' => array( $this, 'sanitize_array_sanitize_text_field' ),
+				),
+				'excludedCategories'                   => array(
+					'required'          => false,
+					'validate_callback' => array( $this, 'validate_array_of_product_cat' ),
+					'sanitize_callback' => array( $this, 'sanitize_array_of_ids' ),
+				),
+			)
 		);
 
-		$store_id_args = array(
-			'storeId' => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_not_empty_string' ),
-			),
-		);
+		$store_id = $this->url_param_pattern( self::PARAM_STORE_ID );
 
 		$this->register_get( 'current-store', 'get_current_store' );
-		$this->register_get( 'version/(?P<storeId>[\w]+)', 'get_version', $store_id_args );
-		$this->register_get( 'stores/(?P<storeId>[\w]+)', 'get_stores', $store_id_args );
-		$this->register_get( 'state/(?P<storeId>[\w]+)', 'get_state', $store_id_args );
-		$this->register_get( 'shop-categories', 'get_shop_categories' );
-		$this->register_get( 'shop-name', 'get_shop_name' );
+		$this->register_get( "version/{$store_id}", 'get_version', $store_id_args );
+		$this->register_get( "stores/{$store_id}", 'get_stores', $store_id_args );
+		$this->register_get( "state/{$store_id}", 'get_state', $store_id_args );
+		$this->register_get( "shop-categories/{$store_id}", 'get_shop_categories', $store_id_args );
+		$this->register_get( "shop-name/{$store_id}", 'get_shop_name', $store_id_args );
 		
-		$this->register_get( 'general', 'get_general' );
-		$this->register_post( 'general', 'save_general', $general_args );
+		$this->register_get( "general/{$store_id}", 'get_general', $store_id_args );
+		$this->register_post( "general/{$store_id}", 'save_general', $general_args );
 	}
 
 	/**
@@ -81,8 +71,6 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_current_store() {
-		// return rest_ensure_response( $this->configuration->get_current_store() );
-
 		$response = null;
 		try {
 			$response = AdminAPI::get()
@@ -107,7 +95,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->integration( $request->get_param( 'storeId' ) )
+			->integration( $request->get_param( self::PARAM_STORE_ID ) )
 			->getVersion()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -128,7 +116,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->store( $request->get_param( 'storeId' ) )
+			->store( $request->get_param( self::PARAM_STORE_ID ) )
 			->getStores()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -149,8 +137,8 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->integration( $request->get_param( 'storeId' ) )
-			->getUIState( true ) // Pass false if the Onboarding does not configure widgets. 
+			->integration( $request->get_param( self::PARAM_STORE_ID ) )
+			->getUIState( true ) // TODO: Pass false if the Onboarding does not configure widgets. 
 			->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.
@@ -162,13 +150,15 @@ class General_Settings_REST_Controller extends REST_Controller {
 	/**
 	 * GET general settings.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_general() {
+	public function get_general( $request ) {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->generalSettings( $this->configuration->get_store_id() )
+			->generalSettings( $request->get_param( self::PARAM_STORE_ID ) )
 			->getGeneralSettings()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -181,13 +171,15 @@ class General_Settings_REST_Controller extends REST_Controller {
 	/**
 	 * GET general settings.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_shop_name() {
+	public function get_shop_name( $request ) {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->integration( (string) get_current_blog_id() )
+			->integration( $request->get_param( self::PARAM_STORE_ID ) )
 			->getShopName()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -209,7 +201,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->generalSettings( $this->configuration->get_store_id() )
+			->generalSettings( $request->get_param( self::PARAM_STORE_ID ) )
 			->saveGeneralSettings(
 				new GeneralSettingsRequest(
 					$request->get_param( 'sendOrderReportsPeriodicallyToSeQura' ),
@@ -230,13 +222,15 @@ class General_Settings_REST_Controller extends REST_Controller {
 	/**
 	 * GET shop categories.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_shop_categories() {
+	public function get_shop_categories( $request ) {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->generalSettings( $this->configuration->get_store_id() )
+			->generalSettings( $request->get_param( self::PARAM_STORE_ID ) )
 			->getShopCategories()
 			->toArray();
 		} catch ( \Throwable $e ) {

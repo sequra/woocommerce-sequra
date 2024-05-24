@@ -121,8 +121,6 @@ SequraFE.appPages = {
 
             window.addEventListener('hashchange', updateStateOnHashChange, false);
 
-            // const url = !this.getStoreId() ? configuration.currentStoreUrl : configuration.storesUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId());
-            // const url = configuration.currentStoreUrl;
             api.get(configuration.currentStoreUrl, null, SequraFE.customHeader)
                 .then(
                     /** @param {Store|Store[]} response */
@@ -314,7 +312,6 @@ SequraFE.appPages = {
         const getControllerConfiguration = (controllerName, page) => {
             let config = utilities.cloneObject(configuration.pageConfiguration[controllerName] || {});
             Object.keys(config).forEach((key) => {
-                // config[key] = config[key].replace(encodeURIComponent('{storeId}'), this.getStoreId);
                 config[key] = config[key].replace('{storeId}', this.getStoreId);
             })
 

@@ -430,8 +430,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ] ) ) {
 					self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ] = new Controllers\Rest\General_Settings_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' ),
-						Reg::getService( Configuration::class )
+						Reg::getService( 'plugin.rest_namespace' )
 					);
 				}
 				return self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ];

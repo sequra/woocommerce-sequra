@@ -35,7 +35,10 @@ class Payment_REST_Controller extends REST_Controller {
 			self::PARAM_MERCHANT_ID => $this->get_arg_string(),
 		);
 
-		$this->register_get( 'methods/(?P<' . self::PARAM_STORE_ID . '>[\w]+)/(?P<' . self::PARAM_MERCHANT_ID . '>[\w]+)', 'get_methods', $data_methods );
+		$store_id    = $this->url_param_pattern( self::PARAM_STORE_ID );
+		$merchant_id = $this->url_param_pattern( self::PARAM_MERCHANT_ID );
+		
+		$this->register_get( "methods/{$store_id}/{$merchant_id}", 'get_methods', $data_methods );
 	}
 
 	/**

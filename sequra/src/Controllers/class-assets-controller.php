@@ -101,22 +101,22 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 */
 	private function get_sequra_fe_l10n() {
 		$connection_config      = array(
-			'getConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data' ),
+			'getConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
 		);
 		$payment_page_config    = array_merge(
 			$connection_config,
 			array(
 				'getPaymentMethodsUrl'      => get_rest_url( null, 'sequra/v1/payment/methods/{storeId}/{merchantId}' ),
-				'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/onboarding/countries/selling' ),
-				'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries' ),
-				'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/validate' ),
+				'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/onboarding/countries/selling/{storeId}' ),
+				'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
+				'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/validate/{storeId}' ),
 			)
 		);
 		$onboarding_page_config = array_merge(
 			$payment_page_config, 
 			array(
-				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data' ),
-				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries' ),
+				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
+				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
 				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
 				'saveWidgetSettingsUrl'  => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
 			)
@@ -127,14 +127,14 @@ class Assets_Controller implements Interface_Assets_Controller {
 				$onboarding_page_config,
 				array(
 					'getShopPaymentMethodsUrl'          => '', // TODO: Add the URL.
-					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories' ),
+					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
 					'getShopProductsUrl'                => '', // TODO: Add the URL.
-					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general' ), // TODO: Add the URL.
-					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general' ), // TODO: Add the URL.
+					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
+					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
 					'getShopOrderStatusesUrl'           => '', // TODO: Add the URL.
 					'getOrderStatusMappingSettingsUrl'  => '', // TODO: Add the URL.
 					'saveOrderStatusMappingSettingsUrl' => '', // TODO: Add the URL.
-					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect' ), // TODO: Add the URL.
+					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ), // TODO: Add the URL.
 				)
 			),
 			'payment'      => $payment_page_config,
@@ -151,7 +151,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 			'currentStoreUrl'   => get_rest_url( null, 'sequra/v1/settings/current-store' ),
 			'stateUrl'          => get_rest_url( null, 'sequra/v1/settings/state/{storeId}' ),
 			'versionUrl'        => get_rest_url( null, 'sequra/v1/settings/version/{storeId}' ),
-			'shopNameUrl'       => get_rest_url( null, 'sequra/v1/settings/shop-name' ),
+			'shopNameUrl'       => get_rest_url( null, 'sequra/v1/settings/shop-name/{storeId}' ),
 			'pageConfiguration' => $page_config,
 		);
 

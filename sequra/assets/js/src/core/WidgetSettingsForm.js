@@ -401,7 +401,7 @@ if (!window.SequraFE) {
             utilities.showLoader();
             api.post(configuration.saveWidgetSettingsUrl, changedSettings, SequraFE.customHeader)
                 .then(() => {
-                    debugger
+                    //debugger
                     if (configuration.appState === SequraFE.appStates.ONBOARDING) {
                         const index = SequraFE.pages.onboarding.indexOf(SequraFE.appPages.ONBOARDING.WIDGETS)
                         SequraFE.pages.onboarding.length > index + 1 ?

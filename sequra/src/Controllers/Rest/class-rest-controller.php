@@ -179,4 +179,21 @@ abstract class REST_Controller extends \WP_REST_Controller {
 			)
 		);
 	}
+
+	/**
+	 * Return a valid pattern to be used in a URL to match a parameter.
+	 * 
+	 * @param string $param_name The URL parameter name.
+	 * @param string $type       The type of the parameter. Default is 'string'. 
+	 * Supported values are:
+	 *  - 'string'.
+	 */
+	protected function url_param_pattern( $param_name, $type = 'string' ): string {
+		switch ( $type ) {
+			case 'string':
+				return '(?P<' . $param_name . '>[\w]+)';
+			default:
+				return '';
+		}
+	}
 }
