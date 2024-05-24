@@ -164,15 +164,10 @@ SequraFE.appPages = {
             const isMultistore = SequraFE?.integration?.isMultistore ?? true;
 
             return Promise.all([
-                // hasVersion ? api.get(configuration.versionUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader) : null,
                 hasVersion ? api.get(configuration.versionUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader) : null,
-                // isMultistore ? api.get(configuration.storesUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader) : null,
                 isMultistore ? api.get(configuration.storesUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader) : null,
-                // api.get(configuration.pageConfiguration.onboarding.getConnectionDataUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader),
                 api.get(configuration.pageConfiguration.onboarding.getConnectionDataUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader),
-                // api.get(configuration.pageConfiguration.onboarding.getCountrySettingsUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader),
                 api.get(configuration.pageConfiguration.onboarding.getCountrySettingsUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader),
-                // SequraFE.pages.onboarding.includes(SequraFE.appPages.ONBOARDING.WIDGETS) ? api.get(configuration.pageConfiguration.onboarding.getWidgetSettingsUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader) : null,
                 SequraFE.pages.onboarding.includes(SequraFE.appPages.ONBOARDING.WIDGETS) ? api.get(configuration.pageConfiguration.onboarding.getWidgetSettingsUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader) : null,
             ]).then(([versionRes, storesRes, connectionSettingsRes, countrySettingsRes, widgetSettingsRes]) => {
                 dataStore.version = versionRes;
@@ -180,8 +175,7 @@ SequraFE.appPages = {
                 dataStore.connectionSettings = connectionSettingsRes;
                 dataStore.countrySettings = countrySettingsRes;
                 dataStore.widgetSettings = widgetSettingsRes;
-
-                // return api.get(configuration.stateUrl.replace(encodeURIComponent('{storeId}'), this.getStoreId()), null, SequraFE.customHeader);
+;
                 return api.get(configuration.stateUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader);
             }).then((stateRes) => {
                 if (SequraFE.state.getCredentialsChanged()) {
@@ -273,7 +267,7 @@ SequraFE.appPages = {
             if (
                 !dataStore.connectionSettings?.username ||
                 dataStore.countrySettings?.length === 0 ||
-                (SequraFE.pages.onboarding.includes(SequraFE.appPages.ONBOARDING.WIDGETS) && widgetSettings?.useWidgets === undefined) ||
+                (SequraFE.pages.onboarding.includes(SequraFE.appPages.ONBOARDING.WIDGETS) && dataStore.widgetSettings?.useWidgets === undefined) ||
                 SequraFE.state.getCredentialsChanged()
             ) {
                 this.goToState(SequraFE.appStates.ONBOARDING, additionalConfig, true);

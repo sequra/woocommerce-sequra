@@ -12,8 +12,8 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\WC\Services\Core\Configuration;
-use WP_HTTP_Response;
 use WP_REST_Response;
 
 /**
@@ -46,35 +46,35 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function register_routes() {
 
 		$data_args = array(
-			'environment'         => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_environment' ),
+			'environment'         => array_merge(
+				$this->get_arg_string(),
+				array( 'enum' => array( 'sandbox', 'production' ) )
 			),
-			'username'            => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_not_empty_string' ),
-			),
-			'password'            => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_not_empty_string' ),
-			),
-			'sendStatisticalData' => array(
-				'default'           => false,
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_is_bool' ),
-				'sanitize_callback' => array( $this, 'sanitize_bool' ),
-			),
-			'merchantId'          => array(
-				'default'           => null,
-				'required'          => false,
-				'validate_callback' => array( $this, 'validate_not_empty_string' ),
-			),
+			'username'            => $this->get_arg_string(),
+			'password'            => $this->get_arg_string(),
+			'sendStatisticalData' => $this->get_arg_bool(),
+			'merchantId'          => $this->get_arg_string(),
 		);
 
-		$store_id_args = array(
-			'storeId' => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_not_empty_string' ),
+		$store_id_args = array( 'storeId' => $this->get_arg_string() );
+
+		$widget_args = array(
+			'storeId'                               => $this->get_arg_string(),
+			'useWidgets'                            => $this->get_arg_bool(),
+			'assetsKey'                             => $this->get_arg_string(),
+			'displayWidgetOnProductPage'            => $this->get_arg_bool(),
+			'showInstallmentAmountInProductListing' => $this->get_arg_bool(),
+			'showInstallmentAmountInCartPage'       => $this->get_arg_bool(),
+			'miniWidgetSelector'                    => $this->get_arg_string( true, '', '__return_true' ), // TODO: Add this field to form in the UI.
+			'widgetStyles'                          => $this->get_arg_string(),
+			'widgetLabels'                          => array(
+				'default'           => array(
+					'message'           => '',
+					'messageBelowLimit' => '',
+				),
+				'required'          => false,
+				'validate_callback' => array( $this, 'validate_widget_labels' ),
+				'sanitize_callback' => array( $this, 'sanitize_widget_labels' ),
 			),
 		);
 
@@ -84,7 +84,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$this->register_post( 'data/disconnect', 'disconnect' );
 
 		$this->register_get( 'widgets/(?P<storeId>[\w]+)', 'get_widgets', $store_id_args );
-		$this->register_post( 'widgets/(?P<storeId>[\w]+)', 'save_widgets', $store_id_args );
+		$this->register_post( 'widgets/(?P<storeId>[\w]+)', 'save_widgets', $widget_args );
 		
 		$this->register_get( 'countries/selling', 'get_selling_countries' );
 		$this->register_get( 'countries', 'get_countries' );
@@ -261,32 +261,22 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_widgets( $request ) {
-		// $data = AdminAPI::get()->widgetConfiguration( $this->storeId )->getWidgetSettings();
-
-		// $result = $data->toArray();
-
-		// if ( empty( $result ) ) {
-		// return $this->result->setData( $result );
-		// }
-
-		// $result['widgetLabels']['message']           = ! empty( $result['widgetLabels']['messages'] ) ?
-		// reset( $result['widgetLabels']['messages'] ) : '';
-		// $result['widgetLabels']['messageBelowLimit'] = ! empty( $result['widgetLabels']['messagesBelowLimit'] ) ?
-		// reset( $result['widgetLabels']['messagesBelowLimit'] ) : '';
-		// $result['widgetStyles']                      = $result['widgetConfiguration'];
-		// unset( $result['widgetLabels']['messages'], $result['widgetLabels']['messagesBelowLimit'] );
-		// unset( $result['widgetConfiguration'] );
-
-		// $this->addResponseCode( $data );
-
-		// return $this->result->setData( $result );
-
 		$response = null;
 		try {
 			$response = AdminAPI::get()
 			->widgetConfiguration( $request->get_param( 'storeId' ) )
 			->getWidgetSettings()
 			->toArray();
+
+			if ( ! empty( $response ) ) {
+				$response['widgetLabels']['message']           = ! empty( $response['widgetLabels']['messages'] ) ?
+				reset( $response['widgetLabels']['messages'] ) : '';
+				$response['widgetLabels']['messageBelowLimit'] = ! empty( $response['widgetLabels']['messagesBelowLimit'] ) ?
+				reset( $response['widgetLabels']['messagesBelowLimit'] ) : '';
+				$response['widgetStyles']                      = $response['widgetConfiguration'];
+				unset( $response['widgetLabels']['messages'], $response['widgetLabels']['messagesBelowLimit'] );
+				unset( $response['widgetConfiguration'] );
+			}
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.
 			$response = new \WP_Error( 'error', $e->getMessage() );
@@ -303,32 +293,36 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_widgets( $request ) {
-		// TODO: Implement this.
-		// if ( ! $this->validate_countries( $request ) ) {
-		// return new WP_REST_Response( 'Invalid data', 400 );
-		// }
+		$response = null;
+		try {
+			// $labels               = $request->get_param( 'widgetLabels' );
+			// $messages             = $labels['message'] ? array( $storeConfig->getLocale() => $labels['message'] ) : array();
+			// $messages_below_limit = $labels['messageBelowLimit'] ? array( $storeConfig->getLocale() => $labels['messageBelowLimit'] ) : array();
 
-		// $response = null;
-		// try {
-		// $data = json_decode( $request->get_body(), true );
+			$messages             = array();
+			$messages_below_limit = array();
 
-		// $response = AdminAPI::get()
-		// ->countryConfiguration( $this->configuration->get_store_id() )
-		// ->saveCountryConfigurations( new CountryConfigurationRequest( $data ) )
-		// ->toArray();
-		// } catch ( \Throwable $e ) {
-		// TODO: Log error.
-		// $response = new \WP_Error( 'error', $e->getMessage() );
-		// }
-		// return rest_ensure_response( $response );
-		return new WP_REST_Response( 'Not implemented', 501 );
-	}
-
-	/**
-	 * Validate if the parameter is not empty.
-	 */
-	public function validate_environment( $param, $request, $key ) {
-		return in_array( $param, array( 'sandbox', 'production' ), true );
+			$response = AdminAPI::get()
+			->widgetConfiguration( $request->get_param( 'storeId' ) )
+			->setWidgetSettings(
+				new WidgetSettingsRequest(
+					$request->get_param( 'useWidgets' ),
+					$request->get_param( 'assetsKey' ),
+					$request->get_param( 'displayWidgetOnProductPage' ),
+					$request->get_param( 'showInstallmentAmountInProductListing' ),
+					$request->get_param( 'showInstallmentAmountInCartPage' ),
+					$request->get_param( 'miniWidgetSelector' ) ?? '',
+					$request->get_param( 'widgetStyles' ),
+					$messages,
+					$messages_below_limit
+				)
+			)
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -363,5 +357,26 @@ class Onboarding_REST_Controller extends REST_Controller {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Validate if widget label is valid.
+	 */
+	public function validate_widget_labels( $param, $request, $key ) {
+		return is_array( $param ) 
+		&& isset( $param['message'] )
+		&& is_string( $param['message'] )
+		&& isset( $param['messageBelowLimit'] )
+		&& is_string( $param['messageBelowLimit'] );
+	}
+
+	/**
+	 * Sanitize widget label.
+	 */
+	public function sanitize_widget_labels( $param ) {
+		return array(
+			'message'           => sanitize_text_field( $param['message'] ),
+			'messageBelowLimit' => sanitize_text_field( $param['messageBelowLimit'] ),
+		);
 	}
 }

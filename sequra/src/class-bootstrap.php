@@ -19,6 +19,8 @@ use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSetting
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
@@ -38,6 +40,8 @@ use SeQura\WC\Services\Core\Disconnect_Service;
 use SeQura\WC\Services\Core\Encryptor;
 use SeQura\WC\Services\Core\Logger;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
+use SeQura\WC\Services\Core\Store_Service;
+use SeQura\WC\Services\Core\Version_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -217,6 +221,28 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ SellingCountriesServiceInterface::class ] = new Selling_Countries_Service();
 				}
 				return self::$cache[ SellingCountriesServiceInterface::class ];
+			}
+		);
+
+		Reg::registerService(
+			StoreServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ StoreServiceInterface::class ] ) ) {
+					self::$cache[ StoreServiceInterface::class ] = new Store_Service();
+				}
+				return self::$cache[ StoreServiceInterface::class ];
+			}
+		);
+
+		Reg::registerService(
+			VersionServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ VersionServiceInterface::class ] ) ) {
+					self::$cache[ VersionServiceInterface::class ] = new Version_Service(
+						Reg::getService( 'plugin.data' )['Version']
+					);
+				}
+				return self::$cache[ VersionServiceInterface::class ];
 			}
 		);
 

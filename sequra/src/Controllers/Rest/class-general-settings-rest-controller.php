@@ -42,16 +42,8 @@ class General_Settings_REST_Controller extends REST_Controller {
 	public function register_routes() {
 
 		$general_args = array(
-			'sendOrderReportsPeriodicallyToSeQura' => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_is_bool' ),
-				'sanitize_callback' => array( $this, 'sanitize_bool' ),
-			),
-			'showSeQuraCheckoutAsHostedPage'       => array(
-				'required'          => true,
-				'validate_callback' => array( $this, 'validate_is_bool' ),
-				'sanitize_callback' => array( $this, 'sanitize_bool' ),
-			),
+			'sendOrderReportsPeriodicallyToSeQura' => $this->get_arg_bool(),
+			'showSeQuraCheckoutAsHostedPage'       => $this->get_arg_bool(),
 			'allowedIPAddresses'                   => array(
 				'required' => true,
 				// 'validate_callback' => array( $this, 'validate_not_empty_string' ),
@@ -59,7 +51,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			'excludedProducts'                     => array(
 				'required'          => true,
 				'validate_callback' => array( $this, 'validate_array_of_product_sku' ),
-				'sanitize_callback' => array( $this, 'sanitize_array_of_sku' ),
+				'sanitize_callback' => array( $this, 'sanitize_array_sanitize_text_field' ),
 			),
 			'excludedCategories'                   => array(
 				'required'          => false,
@@ -68,11 +60,19 @@ class General_Settings_REST_Controller extends REST_Controller {
 			),
 		);
 
+		$store_id_args = array(
+			'storeId' => array(
+				'required'          => true,
+				'validate_callback' => array( $this, 'validate_not_empty_string' ),
+			),
+		);
+
 		$this->register_get( 'current-store', 'get_current_store' );
-		$this->register_get( 'version', 'get_version' );
-		$this->register_get( 'stores', 'get_stores' );
-		$this->register_get( 'state', 'get_state' );
+		$this->register_get( 'version/(?P<storeId>[\w]+)', 'get_version', $store_id_args );
+		$this->register_get( 'stores/(?P<storeId>[\w]+)', 'get_stores', $store_id_args );
+		$this->register_get( 'state/(?P<storeId>[\w]+)', 'get_state', $store_id_args );
 		$this->register_get( 'shop-categories', 'get_shop_categories' );
+		$this->register_get( 'shop-name', 'get_shop_name' );
 		
 		$this->register_get( 'general', 'get_general' );
 		$this->register_post( 'general', 'save_general', $general_args );
@@ -84,44 +84,82 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_current_store() {
-		return rest_ensure_response( $this->configuration->get_current_store() );
+		// return rest_ensure_response( $this->configuration->get_current_store() );
+
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->store( (string) get_current_blog_id() )
+			->getCurrentStore()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
 	 * GET version.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_version() {
-		return rest_ensure_response(
-			array(
-				'current'               => $this->configuration->get_module_version(),
-				'new'                   => $this->configuration->get_marketplace_version(),
-				'downloadNewVersionUrl' => $this->configuration->get_marketplace_url(),
-			) 
-		);
+	public function get_version( $request ) {
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->integration( $request->get_param( 'storeId' ) )
+			->getVersion()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
 	 * GET stores.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_stores() {
-		return rest_ensure_response( $this->configuration->get_stores() );
+	public function get_stores( $request ) {
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->store( $request->get_param( 'storeId' ) )
+			->getStores()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
 	 * GET state.
 	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_state() {
-		$data = array(
-			'state' => 'dashboard',
-		);
-
-		return rest_ensure_response( $data );
+	public function get_state( $request ) {
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->integration( $request->get_param( 'storeId' ) )
+			->getUIState( true ) // Pass false if the Onboarding does not configure widgets. 
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -135,6 +173,25 @@ class General_Settings_REST_Controller extends REST_Controller {
 			$response = AdminAPI::get()
 			->generalSettings( $this->configuration->get_store_id() )
 			->getGeneralSettings()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * GET general settings.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_shop_name() {
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->integration( (string) get_current_blog_id() )
+			->getShopName()
 			->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.
@@ -237,19 +294,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 */
 	public function sanitize_array_of_ids( $param ): array {
 		foreach ( $param as &$val ) {
-			$val = "{absint( $val )}";
-		}
-		return $param;
-	}
-
-	/**
-	 * Sanitize an array of SKU.
-	 * 
-	 * @param array $param The parameter.
-	 */
-	public function sanitize_array_of_sku( $param ): array {
-		foreach ( $param as &$val ) {
-			$val = sanitize_text_field( $val );
+			$val = (string) absint( $val );
 		}
 		return $param;
 	}

@@ -84,4 +84,61 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	public function sanitize_bool( $param ) {
 		return (bool) $param;
 	}
+
+	/**
+	 * Sanitize an array strings.
+	 * 
+	 * @param array $param The parameter.
+	 */
+	public function sanitize_array_sanitize_text_field( $param ): array {
+		return map_deep( $param, 'sanitize_text_field' );
+	}
+
+	/**
+	 * Get base argument structure.
+	 * 
+	 * @param bool $required      If the argument is required.
+	 * @param mixed $default_value The default value. Null will be ignored.
+	 */
+	private function get_arg( $required = true, $default_value = null ): array {
+		$arg = array( 'required' => $required );
+		if ( null !== $default_value ) {
+			$arg['default'] = $default_value;
+		}
+		return $arg;
+	}
+
+	/**
+	 * Get argument structure for a boolean parameter.
+	 * 
+	 * @param bool $required      If the argument is required.
+	 * @param mixed $default_value The default value. Null will be ignored.
+	 */
+	protected function get_arg_bool( $required = true, $default_value = null ) {
+		return array_merge(
+			$this->get_arg( $required, $default_value ),
+			array(
+				'validate_callback' => array( $this, 'validate_is_bool' ),
+				'sanitize_callback' => array( $this, 'sanitize_bool' ),
+			)
+		);
+	}
+
+	/**
+	 * Get argument structure for a boolean parameter.
+	 * 
+	 * @param bool $required      If the argument is required.
+	 * @param mixed $default_value The default value. Null will be ignored.
+	 * @param callable $validate The validate callback. Leave null to use the default.
+	 * @param callable $sanitize The sanitize callback. Leave null to use the default.
+	 */
+	protected function get_arg_string( $required = true, $default_value = null, $validate = null, $sanitize = null ) {
+		return array_merge(
+			$this->get_arg( $required, $default_value ),
+			array(
+				'validate_callback' => null === $validate ? array( $this, 'validate_not_empty_string' ) : $validate,
+				'sanitize_callback' => null === $sanitize ? 'sanitize_text_field' : $sanitize,
+			)
+		);
+	}
 }

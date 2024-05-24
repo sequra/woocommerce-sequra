@@ -43,6 +43,7 @@ class Payment_REST_Controller extends REST_Controller {
 			'merchantId' => array(
 				'required'          => true,
 				'validate_callback' => array( $this, 'validate_not_empty_string' ),
+				'sanitize_callback' => 'sanitize_text_field',
 			),
 		);
 

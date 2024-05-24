@@ -147,11 +147,11 @@ class Assets_Controller implements Interface_Assets_Controller {
 		);
 
 		$state_controller = array(
-			'storesUrl'         => get_rest_url( null, 'sequra/v1/settings/stores' ), // TODO: Add the URL.
-			'currentStoreUrl'   => get_rest_url( null, 'sequra/v1/settings/current-store' ), // TODO: Add the URL.
-			'stateUrl'          => get_rest_url( null, 'sequra/v1/settings/state' ), // TODO: Add the URL.
-			'versionUrl'        => get_rest_url( null, 'sequra/v1/settings/version' ), // TODO: Add the URL.
-			'shopNameUrl'       => '', // TODO: Add the URL.
+			'storesUrl'         => get_rest_url( null, 'sequra/v1/settings/stores/{storeId}' ),
+			'currentStoreUrl'   => get_rest_url( null, 'sequra/v1/settings/current-store' ),
+			'stateUrl'          => get_rest_url( null, 'sequra/v1/settings/state/{storeId}' ),
+			'versionUrl'        => get_rest_url( null, 'sequra/v1/settings/version/{storeId}' ),
+			'shopNameUrl'       => get_rest_url( null, 'sequra/v1/settings/shop-name' ),
 			'pageConfiguration' => $page_config,
 		);
 
@@ -162,8 +162,8 @@ class Assets_Controller implements Interface_Assets_Controller {
 				'current' => $this->load_translation( $this->i18n->get_lang() ),
 			),
 			'pages'             => array(
-				// 'onboarding'   => array( 'connect', 'countries', 'widgets' ),
-				'onboarding'   => array( 'connect', 'countries' ),
+				'onboarding'   => array( 'connect', 'countries', 'widgets' ),
+				// 'onboarding'   => array( 'connect', 'countries' ),
 				// 'settings'     => array( 'general', 'connection', 'order_status' ),
 				'settings'     => array( 'general', 'connection', 'order_status', 'widget' ),
 				'payment'      => $pages_payment,
