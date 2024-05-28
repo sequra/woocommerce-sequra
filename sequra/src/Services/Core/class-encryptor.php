@@ -41,8 +41,8 @@ class Encryptor implements EncryptorInterface {
 	 *
 	 * @return string
 	 */
-	public function decrypt( string $encryptedData ): string {
-		$data  = base64_decode( $encryptedData );
+	public function decrypt( string $encryptedData ): string { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+		$data  = base64_decode( $encryptedData );// phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 		$nonce = mb_substr( $data, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit' );
 		$value = mb_substr( $data, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit' );
 		return sodium_crypto_secretbox_open( $value, $nonce, $this->get_key() );

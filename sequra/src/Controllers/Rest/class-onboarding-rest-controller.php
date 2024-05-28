@@ -304,10 +304,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 		try {
 			// TODO: Add support to CSS selector.
 			// TODO: Add support to widget labels. See shopify example.
+			//phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
 			// $labels               = $request->get_param( 'widgetLabels' );
 			// $messages             = $labels['message'] ? array( $storeConfig->getLocale() => $labels['message'] ) : array();
 			// $messages_below_limit = $labels['messageBelowLimit'] ? array( $storeConfig->getLocale() => $labels['messageBelowLimit'] ) : array();
-
+			//phpcs:enable
 			$messages             = array();
 			$messages_below_limit = array();
 
