@@ -1,3 +1,3 @@
 #!/bin/bash
 BASEDIR="$(dirname $(realpath $0))/.."
-docker run --rm -v "${BASEDIR}"/sequra:/app -w /app php:cli-alpine php vendor/bin/phpcbf --standard=.phpcs.xml.dist .
+docker run $@ --rm -v "${BASEDIR}"/sequra:/app -w /app php:cli-alpine php vendor/bin/phpcbf --standard=.phpcs.xml.dist .
