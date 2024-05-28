@@ -19,9 +19,12 @@ use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSetting
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
+use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
@@ -39,6 +42,8 @@ use SeQura\WC\Services\Core\Configuration_Service;
 use SeQura\WC\Services\Core\Disconnect_Service;
 use SeQura\WC\Services\Core\Encryptor;
 use SeQura\WC\Services\Core\Logger;
+use SeQura\WC\Services\Core\Order_Status_Service;
+use SeQura\WC\Services\Core\Order_Status_Settings_Service;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
@@ -253,6 +258,30 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ CategoryServiceInterface::class ] = new Category_Service();
 				}
 				return self::$cache[ CategoryServiceInterface::class ];
+			}
+		);
+
+		Reg::registerService(
+			ShopOrderStatusesServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ ShopOrderStatusesServiceInterface::class ] ) ) {
+					self::$cache[ ShopOrderStatusesServiceInterface::class ] = new Order_Status_Service();
+				}
+				return self::$cache[ ShopOrderStatusesServiceInterface::class ];
+			}
+		);
+
+		// Override OrderStatusSettingsService service to use the WC order statuses.
+		Reg::registerService(
+			OrderStatusSettingsService::class,
+			static function () {
+				if ( ! isset( self::$cache[ OrderStatusSettingsService::class ] ) ) {
+					self::$cache[ OrderStatusSettingsService::class ] = new Order_Status_Settings_Service(
+						Reg::getService( OrderStatusSettingsRepositoryInterface::class ),
+						Reg::getService( ShopOrderStatusesServiceInterface::class )
+					);
+				}
+				return self::$cache[ OrderStatusSettingsService::class ];
 			}
 		);
 

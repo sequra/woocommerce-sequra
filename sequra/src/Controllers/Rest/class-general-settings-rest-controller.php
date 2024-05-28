@@ -10,7 +10,10 @@ namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\OrderStatusSettings\Requests\OrderStatusSettingsRequest;
+use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\WC\Services\Core\Configuration;
+use WP_REST_Response;
 
 /**
  * REST Settings Controller
@@ -63,6 +66,10 @@ class General_Settings_REST_Controller extends REST_Controller {
 		
 		$this->register_get( "general/{$store_id}", 'get_general', $store_id_args );
 		$this->register_post( "general/{$store_id}", 'save_general', $general_args );
+		
+		$this->register_get( "order-status/list/{$store_id}", 'get_list_order_status', $store_id_args );
+		$this->register_get( "order-status/{$store_id}", 'get_order_status', $store_id_args );
+		$this->register_post( "order-status/{$store_id}", 'save_order_status', $store_id_args );
 	}
 
 	/**
@@ -241,6 +248,75 @@ class General_Settings_REST_Controller extends REST_Controller {
 	}
 
 	/**
+	 * GET Order Status List.
+	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_list_order_status( $request ) {
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->orderStatusSettings( $request->get_param( self::PARAM_STORE_ID ) )
+			->getShopOrderStatuses()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * GET Order Status settings.
+	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_order_status( $request ) {
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->orderStatusSettings( $request->get_param( self::PARAM_STORE_ID ) )
+			->getOrderStatusSettings()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * POST Order Status settings.
+	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function save_order_status( $request ) {
+		if ( ! $this->validate_order_status( $request ) ) {
+			return new WP_REST_Response( 'Invalid data', 400 );
+		}
+
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->orderStatusSettings( $request->get_param( self::PARAM_STORE_ID ) )
+			->saveOrderStatusSettings(
+				new OrderStatusSettingsRequest( json_decode( $request->get_body(), true ) )
+			)
+			->toArray();
+		} catch ( \Throwable $e ) {
+			// TODO: Log error.
+			$response = new \WP_Error( 'error', $e->getMessage() );
+		}
+		return rest_ensure_response( $response );
+	}
+
+	/**
 	 * Validate if the parameter is a boolean.
 	 * 
 	 * @param mixed $param The parameter.
@@ -276,6 +352,41 @@ class General_Settings_REST_Controller extends REST_Controller {
 				return false;
 			}
 		}
+	}
+
+	/**
+	 * Validate if order status payload is valid.
+	 * 
+	 * @param WP_REST_Request $request The request.
+	 */
+	public function validate_order_status( $request ): bool {
+		try {
+			$data = json_decode( $request->get_body(), true );
+			if ( ! is_array( $data ) ) {
+				return false;
+			}
+			$allowed_shop_statuses   = AdminAPI::get()
+			->orderStatusSettings( $request->get_param( self::PARAM_STORE_ID ) )
+			->getShopOrderStatuses()
+			->toArray();
+			$allowed_shop_statuses   = array_column( $allowed_shop_statuses, 'id' );
+			$allowed_sequra_statuses = OrderStates::toArray();
+
+			foreach ( $data as $status_map ) {
+				if ( ! isset( $status_map['sequraStatus'] ) 
+				|| ! isset( $status_map['shopStatus'] ) 
+				|| ! is_string( $status_map['sequraStatus'] ) 
+				|| ! is_string( $status_map['shopStatus'] )
+				|| ! in_array( $status_map['sequraStatus'], $allowed_sequra_statuses, true )
+				|| ! in_array( $status_map['shopStatus'], $allowed_shop_statuses, true )
+				) {
+					return false;
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

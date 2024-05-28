@@ -131,9 +131,9 @@ class Assets_Controller implements Interface_Assets_Controller {
 					'getShopProductsUrl'                => '', // TODO: Add the URL.
 					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
 					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
-					'getShopOrderStatusesUrl'           => '', // TODO: Add the URL.
-					'getOrderStatusMappingSettingsUrl'  => '', // TODO: Add the URL.
-					'saveOrderStatusMappingSettingsUrl' => '', // TODO: Add the URL.
+					'getShopOrderStatusesUrl'           => get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
+					'getOrderStatusMappingSettingsUrl'  => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
+					'saveOrderStatusMappingSettingsUrl' => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
 					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ), // TODO: Add the URL.
 				)
 			),
