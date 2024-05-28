@@ -141,7 +141,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 			'transactions' => array_merge(
 				$connection_config,
 				array(
-					'getTransactionLogsUrl' => '', // TODO: Add the URL.
+					'getTransactionLogsUrl' => get_rest_url( null, 'sequra/v1/log/{storeId}' ), // TODO: Add the URL.
 				)
 			),
 		);

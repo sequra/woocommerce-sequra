@@ -77,7 +77,8 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Controllers\Interface_Settings_Controller::class ),
 					Reg::getService( Controllers\Rest\General_Settings_REST_Controller::class ),
 					Reg::getService( Controllers\Rest\Onboarding_REST_Controller::class ),
-					Reg::getService( Controllers\Rest\Payment_REST_Controller::class )
+					Reg::getService( Controllers\Rest\Payment_REST_Controller::class ),
+					Reg::getService( Controllers\Rest\Log_REST_Controller::class )
 				);
 			}
 		);
@@ -463,6 +464,17 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Controllers\Rest\Log_REST_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Controllers\Rest\Log_REST_Controller::class ] ) ) {
+					self::$cache[ Controllers\Rest\Log_REST_Controller::class ] = new Controllers\Rest\Log_REST_Controller(
+						Reg::getService( 'plugin.rest_namespace' )
+					);
+				}
+				return self::$cache[ Controllers\Rest\Log_REST_Controller::class ];
 			}
 		);
 	}

@@ -229,7 +229,7 @@ if (!window.SequraFE) {
                     generator.createElement('main', 'sq-content', '', null, [
                         generator.createElement('div', 'sqp-content-header', '', null, [
                             generator.createElementFromHTML(SequraFE.imagesProvider.logo || ''),
-                            stores.length <= 1 ? [] : generator.createStoreSwitcher({
+                            !stores || stores?.length <= 1 ? [] : generator.createStoreSwitcher({
                                 label: 'general.selectStore',
                                 value: currentStoreId,
                                 options: stores.map((store) => ({

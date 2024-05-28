@@ -22,6 +22,7 @@ import './core/StateController';
 import './core/OnboardingController';
 import './core/PaymentController';
 import './core/SettingsController';
+import './core/TransactionsController';
 
 document.addEventListener('DOMContentLoaded', () => {
     SequraFE.utilities.showLoader();

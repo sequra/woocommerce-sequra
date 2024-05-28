@@ -48,9 +48,10 @@ class Plugin {
 	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
 	 * @param Interface_Assets_Controller $assets_controller Assets controller.
 	 * @param Interface_Settings_Controller $settings_controller Settings controller.
-	 * @param WP_REST_Controller          $rest_settings_controller REST Settings controller.
-	 * @param WP_REST_Controller          $rest_onboarding_controller REST Onboarding controller.
-	 * @param WP_REST_Controller          $rest_payment_controller REST Payment controller.
+	 * @param REST_Controller          $rest_settings_controller REST Settings controller.
+	 * @param REST_Controller          $rest_onboarding_controller REST Onboarding controller.
+	 * @param REST_Controller          $rest_payment_controller REST Payment controller.
+	 * @param REST_Controller          $rest_log_controller REST Log controller.
 	 */
 	public function __construct(
 		$data,
@@ -61,7 +62,8 @@ class Plugin {
 		Interface_Settings_Controller $settings_controller,
 		REST_Controller $rest_settings_controller,
 		REST_Controller $rest_onboarding_controller,
-		REST_Controller $rest_payment_controller
+		REST_Controller $rest_payment_controller,
+		REST_Controller $rest_log_controller
 	) {
 		$this->data              = $data;
 		$this->base_name         = $base_name;
@@ -86,6 +88,7 @@ class Plugin {
 		add_action( 'rest_api_init', array( $rest_settings_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_onboarding_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_payment_controller, 'register_routes' ) );
+		add_action( 'rest_api_init', array( $rest_log_controller, 'register_routes' ) );
 	}
 
 	/**
