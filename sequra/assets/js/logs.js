@@ -74,7 +74,6 @@
                     this.updateDom({ success: '', content: data })
                 })
                 .catch(e => {
-                    console.error(e);
                     this.updateDom({ error: e.message || 'Error loading logs' })
                 })
         },
@@ -97,7 +96,6 @@
                     this.updateDom({ success: data.message || 'Logs deleted', content: '' })
                 })
                 .catch(e => {
-                    console.error(e);
                     this.updateDom({ error: e.message || 'Error clearing logs' })
                 })
         },
