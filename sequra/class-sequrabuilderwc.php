@@ -630,18 +630,13 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		$args = array(
 			'limit'      => -1,
+			'payment_method' => 'sequra',
 			'meta_query' => array(
 				'relation' => 'AND',
 				array(
 					'key'     => '_sent_to_sequra',
 					'compare' => 'NOT EXISTS',
 				),
-				array(
-					'key'     => '_payment_method',
-					'compare' => 'LIKE',
-					'value'   => 'sequra',
-				),
-
 			),
 			'type'       => 'shop_order',
 			/**
