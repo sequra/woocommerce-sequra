@@ -30,6 +30,11 @@ require plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 call_user_func(
 	function () {
 		\SeQura\WC\Bootstrap::init();
+		/**
+		 * The instance of the plugin.
+		 *
+		 * @var \SeQura\WC\Plugin $plugin
+		 */
 		$plugin = \SeQura\Core\Infrastructure\ServiceRegister::getService( \SeQura\WC\Plugin::class );
 
 		register_activation_hook( __FILE__, array( $plugin, 'activate' ) );

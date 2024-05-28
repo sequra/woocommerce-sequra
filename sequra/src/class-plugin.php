@@ -21,7 +21,7 @@ class Plugin {
 	/**
 	 * The plugin data.
 	 * 
-	 * @var array
+	 * @var array<string, string>
 	 */
 	private $data;
 
@@ -42,7 +42,7 @@ class Plugin {
 	/**
 	 * Construct the plugin. Bind hooks with controllers.
 	 *
-	 * @param array                       $data            The plugin data.
+	 * @param array<string, string>                      $data            The plugin data.
 	 * @param string                      $base_name       The plugin base name.
 	 * @param Interface_Migration_Manager $migration_manager Migration manager.
 	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
@@ -94,7 +94,7 @@ class Plugin {
 	/**
 	 * Handle activation of the plugin.
 	 */
-	public function activate() {
+	public function activate(): void {
 		if ( version_compare( PHP_VERSION, $this->data['RequiresPHP'], '<' ) ) {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires PHP ' . $this->data['RequiresPHP'] . ' or greater.' ) );
@@ -117,14 +117,14 @@ class Plugin {
 	/**
 	 * Handle deactivation of the plugin.
 	 */
-	public function deactivate() {
+	public function deactivate(): void {
 		// TODO: Do something on deactivation.
 	}
 
 	/**
 	 * Execute the installation process if needed.
 	 */
-	public function install() {
+	public function install(): void {
 		$this->migration_manager->run_install_migrations();
 	}
 }

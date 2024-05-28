@@ -11,7 +11,8 @@ namespace SeQura\WC\Controllers\Rest;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\TransactionLogs\Responses\TransactionLogsResponse;
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
-use SeQura\WC\Services\Core\Configuration;
+use WP_Error;
+use WP_REST_Request;
 use WP_REST_Response;
 
 /**
@@ -23,7 +24,6 @@ class Log_REST_Controller extends REST_Controller {
 	 * Constructor.
 	 *
 	 * @param string            $rest_namespace The namespace.
-	 * @param Configuration $configuration The configuration.
 	 */
 	public function __construct( $rest_namespace ) {
 		$this->namespace = $rest_namespace;
@@ -33,7 +33,7 @@ class Log_REST_Controller extends REST_Controller {
 	/**
 	 * Register the API endpoints.
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		$store_id_args = array( self::PARAM_STORE_ID => $this->get_arg_string() );
 		$store_id      = $this->url_param_pattern( self::PARAM_STORE_ID );
 
@@ -47,14 +47,14 @@ class Log_REST_Controller extends REST_Controller {
 	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_logs( $request ) {
+	public function get_logs( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			$page_num = max( 1, (int) $request->get_param( 'page' ) );
-			$limit    = max( 10, (int) $request->get_param( 'limit' ) );
+			$page_num = max( 1, intval( $request->get_param( 'page' ) ) );
+			$limit    = max( 10, intval( $request->get_param( 'limit' ) ) );
 			
 			// $response = AdminAPI::get()
-			// ->transactionLogs( $request->get_param( self::PARAM_STORE_ID ) )
+			// ->transactionLogs( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			// ->getTransactionLogs( $page_num, $limit )
 			// ->toArray();
 
@@ -83,7 +83,7 @@ class Log_REST_Controller extends REST_Controller {
 			) )->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.
-			$response = new \WP_Error( 'error', $e->getMessage() );
+			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
 	}

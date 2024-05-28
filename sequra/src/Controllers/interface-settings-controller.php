@@ -37,5 +37,5 @@ interface Interface_Settings_Controller {
 	/**
 	 * Removes the WP footer message
 	 */
-	public function remove_footer_admin( $text ): string;
+	public function remove_footer_admin( string $text ): string;
 }

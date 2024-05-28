@@ -16,10 +16,10 @@ interface Interface_Assets_Controller {
 	/**
 	 * Enqueue styles and scripts in WP-Admin
 	 */
-	public function enqueue_admin();
+	public function enqueue_admin(): void;
 
 	/**
 	 * Enqueue styles and scripts in Front-End
 	 */
-	public function enqueue_front();
+	public function enqueue_front(): void;
 }

@@ -16,7 +16,7 @@ interface Interface_Settings {
 	/**
 	 * Get preferences. Also sets defaults if not set.
 	 *
-	 * @return array Array of preferences.
+	 * @return mixed[] Array of preferences.
 	 */
 	public function all();
 
@@ -25,14 +25,14 @@ interface Interface_Settings {
 	 *
 	 * @param string $key Preference key.
 	 *
-	 * @return mixed Preference value. Null if not found.
+	 * @return mixed|null Preference value. Null if not found.
 	 */
 	public function get( $key );
 
 	/**
 	 * Get default preferences
 	 *
-	 * @return array Array of default preferences.
+	 * @return mixed[] Array of default preferences.
 	 */
 	public function defaults();
 

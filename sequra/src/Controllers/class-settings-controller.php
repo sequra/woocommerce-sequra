@@ -42,7 +42,7 @@ class Settings_Controller implements Interface_Settings_Controller {
 	 */
 	public function register_page(): void {
 
-		\add_submenu_page(
+		add_submenu_page(
 			$this->configuration->get_parent_page(),
 			__( 'seQura', 'sequra' ),
 			__( 'seQura', 'sequra' ),
@@ -61,7 +61,7 @@ class Settings_Controller implements Interface_Settings_Controller {
 	 * Render the settings page.
 	 */
 	public function render_page(): void {
-		\wc_get_template( 'admin/settings_page.php', array(), '', $this->templates_path );
+		wc_get_template( 'admin/settings_page.php', array(), '', $this->templates_path );
 	}
 
 	/**
@@ -71,23 +71,23 @@ class Settings_Controller implements Interface_Settings_Controller {
 	 * @param string   $plugin_file The plugin file.
 	 * @param string   $plugin_data The plugin data.
 	 * @param string   $context The context.
-	 * @return string[]
+	 * @return mixed[]
 	 */
 	public function add_action_link( $actions, $plugin_file, $plugin_data, $context ): array {
 		$args = array(
 			'href' => admin_url( $this->configuration->get_parent_page() . '?page=' . $this->configuration->get_page() ),
 			'text' => esc_attr__( 'Settings', 'sequra' ),
 		);
-		\ob_start();
-		\wc_get_template( 'admin/action_link.php', $args, '', $this->templates_path );
-		$actions['settings'] = \ob_get_clean();
+		ob_start();
+		wc_get_template( 'admin/action_link.php', $args, '', $this->templates_path );
+		$actions['settings'] = ob_get_clean();
 		return $actions;
 	}
 
 	/**
 	 * Removes the WP footer message
 	 */
-	public function remove_footer_admin( $text ): string {
+	public function remove_footer_admin( string $text ): string {
 		if ( ! $this->configuration->is_settings_page() ) {
 			return $text;
 		}

@@ -18,16 +18,14 @@ class Encryptor implements EncryptorInterface {
 	/**
 	 * Get key used for encryption and decryption.
 	 */
-	private function get_key() {
-		return hash( 'sha256', AUTH_KEY, true );
+	private function get_key(): string {
+		return hash( 'sha256', AUTH_KEY, true ); // TODO: Review this!
 	}
 
 	/**
 	 * Encrypts a given string.
 	 *
 	 * @param string $data
-	 *
-	 * @return string
 	 */
 	public function encrypt( string $data ): string {
 		$nonce = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
@@ -38,13 +36,13 @@ class Encryptor implements EncryptorInterface {
 	 * Decrypts a given string.
 	 *
 	 * @param string $encryptedData
-	 *
-	 * @return string
+	 * @throws \SodiumException
 	 */
 	public function decrypt( string $encryptedData ): string { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
-		$data  = base64_decode( $encryptedData );// phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
-		$nonce = mb_substr( $data, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit' );
-		$value = mb_substr( $data, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit' );
-		return sodium_crypto_secretbox_open( $value, $nonce, $this->get_key() );
+		$data   = base64_decode( $encryptedData );// phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+		$nonce  = mb_substr( $data, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit' );
+		$value  = mb_substr( $data, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit' );
+		$result = sodium_crypto_secretbox_open( $value, $nonce, $this->get_key() );
+		return empty( $result ) ? '' : $result;
 	}
 }

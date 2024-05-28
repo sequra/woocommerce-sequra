@@ -9,6 +9,9 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST Payment Controller
@@ -28,7 +31,7 @@ class Payment_REST_Controller extends REST_Controller {
 	/**
 	 * Register the API endpoints.
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 
 		$data_methods = array(
 			self::PARAM_STORE_ID    => $this->get_arg_string(),
@@ -48,16 +51,16 @@ class Payment_REST_Controller extends REST_Controller {
 	 * 
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_methods( $request ) {
+	public function get_methods( WP_REST_Request $request ) {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->paymentMethods( $request->get_param( self::PARAM_STORE_ID ) )
-			->getPaymentMethods( $request->get_param( self::PARAM_MERCHANT_ID ) )
+			->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getPaymentMethods( strval( $request->get_param( self::PARAM_MERCHANT_ID ) ) )
 			->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.
-			$response = new \WP_Error( 'error', $e->getMessage() );
+			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
 	}

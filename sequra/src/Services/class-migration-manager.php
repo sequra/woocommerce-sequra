@@ -8,7 +8,7 @@
 
 namespace SeQura\WC\Services;
 
-use SeQura\WC\Repositories\Migration\Migration;
+use SeQura\WC\Repositories\Migrations\Migration;
 use SeQura\WC\Services\Core\Configuration;
 
 /**

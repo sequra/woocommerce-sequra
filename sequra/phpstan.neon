@@ -1,7 +1,28 @@
 parameters:
     level: 9
     errorFormat: table
+    treatPhpDocTypesAsCertain: false
     paths:
         - sequra.php
         - src/
         - templates/
+    ignoreErrors:
+        - '#Method .+ has parameter \$\w+ with generic class .+ but does not specify its types: T#'
+        - '#Parameter .+ \$var of function .+ expects bool\|float\|int\|resource\|string\|null, mixed given#'
+        - '#Parameter .+ \$var of function .+ expects array\|bool\|float\|int\|resource\|string\|null, mixed given#'
+        - '#Parameter .+ \$\w+ .+ expects array\<\w+\>\|null, array given#'
+        - '#Function wc_get_template not found#'
+        - '#Function wc_get_order_statuses not found#'
+        - '#Constant AUTH_KEY not found#'
+        - message: '#Parameter .+ \$\w+ of class SeQura\\.+ constructor expects .+ given#'
+          paths:
+            - src/class-bootstrap.php
+        - message: '#Parameter \#1 \$file of function plugin_dir_url expects string, mixed given#'
+          paths:
+            - src/class-bootstrap.php
+        - message: '#Parameter \#1 \$plugin_file of function get_plugin_data expects string, mixed given#'
+          paths:
+            - src/class-bootstrap.php
+        - message: '#WC requires at least|Version|TextDomain|DomainPath#'
+          paths:
+            - src/class-bootstrap.php

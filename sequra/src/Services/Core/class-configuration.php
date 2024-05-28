@@ -48,11 +48,15 @@ abstract class Configuration extends \SeQura\Core\Infrastructure\Configuration\C
 
 	/**
 	 * Current store. Has keys storeId and storeName.
+	 *
+	 * @return array<string, mixed>
 	 */
 	abstract public function get_current_store(): array;
 
 	/**
 	 * List of stores. Each store is an array with storeId and storeName.
+	 *
+	 * @return array<array<string, mixed>>
 	 */
 	abstract public function get_stores(): array;
 

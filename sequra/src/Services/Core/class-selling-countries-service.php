@@ -18,7 +18,7 @@ class Selling_Countries_Service implements SellingCountriesServiceInterface {
 	/**
 	 * Return all configured selling country ISO2 codes of the shop system.
 	 *
-	 * @return array
+	 * @return array<int, int|string>
 	 */
 	public function getSellingCountries(): array {
 		if ( ! class_exists( 'WC_Countries' ) ) {

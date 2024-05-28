@@ -25,7 +25,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	/**
 	 * Returns unprefixed table name.
 	 */
-	protected function get_unprefixed_table_name() {
+	protected function get_unprefixed_table_name(): string {
 		return 'sequra_queue';
 	}
 
@@ -37,7 +37,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * @param int $priority Queue item priority.
 	 * @param int $limit Result set limit. By default max 10 earliest queue items will be returned.
 	 *
-	 * @return QueueItem[] Found queue item list
+	 * @return Entity[] Found queue item list
 	 */
 	public function findOldestQueuedItems( $priority, $limit = 10 ) {
 		if ( Priority::NORMAL !== $priority ) {
@@ -70,6 +70,9 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	            ON queueView.id = queueTable.id";
 
 		$result = $this->db->get_results( $sql, ARRAY_A );
+		if ( ! is_array( $result ) ) {
+			return array();
+		}
 
 		return $this->translateToEntities( $result );
 	}
@@ -78,7 +81,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * Creates or updates given queue item. If queue item id is not set, new queue item will be created otherwise update will be performed.
 	 *
 	 * @param QueueItem $queue_item Item to save.
-	 * @param array     $additional_where List of key/value pairs that must be satisfied upon saving queue item.
+	 * @param mixed[]     $additional_where List of key/value pairs that must be satisfied upon saving queue item.
 	 *                                    Key is queue item property and value is condition value for that property.
 	 *
 	 * @return int Id of saved queue item.
@@ -108,7 +111,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	/**
 	 * Updates status of a batch of queue items.
 	 *
-	 * @param array $ids
+	 * @param mixed[] $ids
 	 * @param string $status
 	 *
 	 * @return void
@@ -121,12 +124,12 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * Updates database record with data from provided $queueItem.
 	 *
 	 * @param QueueItem $queue_item Queue item.
-	 * @param array     $conditions Array of update conditions.
+	 * @param mixed[]    $conditions Array of update conditions.
 	 *
 	 * @throws QueueItemSaveException Queue item save exception.
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
-	private function update_queue_item( QueueItem $queue_item, array $conditions = array() ) {
+	private function update_queue_item( QueueItem $queue_item, array $conditions = array() ): void {
 		$conditions = array_merge( $conditions, array( 'id' => $queue_item->getId() ) );
 
 		$item = $this->select_for_update( $conditions );
@@ -140,7 +143,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	/**
 	 * Executes select query for update.
 	 *
-	 * @param array $conditions Array of update conditions.
+	 * @param mixed[]$conditions Array of update conditions.
 	 *
 	 * @return QueueItem|null First found entity or NULL.
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
@@ -163,6 +166,15 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 
 		$raw_results = $this->db->get_results( $query, ARRAY_A );
 
+		if ( ! is_array( $raw_results ) ) {
+			return null;
+		}
+
+		/**
+		 * Entities
+		 *
+		 * @var QueueItem[] $entities
+		 */
 		$entities = $this->translateToEntities( $raw_results );
 
 		return ! empty( $entities ) ? $entities[0] : null;
@@ -173,7 +185,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 *
 	 * @noinspection PhpDocMissingThrowsInspection
 	 *
-	 * @param array $conditions Array of conditions.
+	 * @param mixed[]$conditions Array of conditions.
 	 *
 	 * @return QueryFilter Query filter object.
 	 */
@@ -199,7 +211,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 *
 	 * @throws QueueItemSaveException Queue item save exception.
 	 */
-	private function check_if_record_exists( QueueItem $item = null ) {
+	private function check_if_record_exists( QueueItem $item = null ): void {
 		if ( null === $item ) {
 			$message = 'Failed to save queue item, update condition(s) not met.';
 			throw new QueueItemSaveException( esc_html( $message ) );
@@ -210,7 +222,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * Updates single record.
 	 *
 	 * @param QueueItem $item Queue item.
-	 * @param array     $conditions List of simple search filters as key-value pair to find records to update.
+	 * @param mixed[]    $conditions List of simple search filters as key-value pair to find records to update.
 	 *
 	 * @return bool TRUE if operation succeeded; otherwise, FALSE.
 	 *
@@ -223,7 +235,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 		$indexed_conditions = array();
 		foreach ( $conditions as $key => $value ) {
 			if ( 'id' === $key ) {
-				$indexed_conditions[ $key ] = (int) $value;
+				$indexed_conditions[ $key ] = intval( $value );
 			} else {
 				$indexed_conditions[ 'index_' . $field_index_map[ $key ] ] = IndexHelper::castFieldValue( $value, gettype( $value ) );
 			}

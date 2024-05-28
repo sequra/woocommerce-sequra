@@ -17,10 +17,8 @@ class Logger implements LoggerAdapter {
 
 	/**
 	 * Returns log file name.
-	 *
-	 * @return string Log file name.
 	 */
-	public static function get_log_file() {
+	public static function get_log_file(): string {
 		return 'sequra.log';
 	}
 
@@ -28,6 +26,7 @@ class Logger implements LoggerAdapter {
 	 * Log message in system.
 	 *
 	 * @param LogData $data Log data.
+	 * @return void
 	 */
 	public function logMessage( LogData $data ) {
 		// TODO: Implement logMessage() method.

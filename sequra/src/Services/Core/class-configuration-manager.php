@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Services\Core;
 
+use PSpell\Config;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
@@ -23,7 +24,7 @@ class Configuration_Manager extends ConfigurationManager {
 	/**
 	 * The preferences
 	 *
-	 * @var      array
+	 * @var      mixed[]
 	 */
 	private $preferences;
 
@@ -64,7 +65,13 @@ class Configuration_Manager extends ConfigurationManager {
 	public function saveConfigValue( $name, $value, $isContextSpecific = true ) {
 		$this->preferences[ $name ] = $value;
 		update_option( self::OPTION_NAME, $this->preferences );
-		return null;
+		return ConfigEntity::fromArray(
+			array(
+				'name'    => $name,
+				'value'   => $value,
+				'context' => '',
+			)
+		);
 	}
 
 	/**
@@ -74,7 +81,7 @@ class Configuration_Manager extends ConfigurationManager {
 		if ( null !== $this->preferences ) {
 			return;
 		}
-		$this->preferences = get_option( self::OPTION_NAME, array() );
+		$this->preferences = (array) get_option( self::OPTION_NAME, array() );
 		$need_update       = false;
 		foreach ( $this->get_defaults() as $key => $value ) {
 			if ( isset( $this->preferences[ $key ] ) ) {
@@ -92,6 +99,8 @@ class Configuration_Manager extends ConfigurationManager {
 
 	/**
 	 * Get default values.
+	 *
+	 * @return mixed[]
 	 */
 	private function get_defaults(): array {
 		return array(

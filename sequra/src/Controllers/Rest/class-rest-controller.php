@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use WP_REST_Request;
+
 /**
  * Helper for REST Controllers
  */
@@ -19,7 +21,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	/**
 	 * Check if the current user can manage options.
 	 */
-	public function can_user_manage_options() {
+	public function can_user_manage_options(): bool {
 		return user_can( get_current_user_id(), 'manage_options' );
 	}
 
@@ -28,10 +30,10 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * 
 	 * @param string $endpoint The endpoint.
 	 * @param string $fun       The function.
-	 * @param array  $arguments The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
+	 * @param mixed[]  $args The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
 	 * @param string $permission_callback The permission callback.
 	 */
-	protected function register_get( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ) {
+	protected function register_get( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ): void {
 		$this->register( \WP_REST_Server::READABLE, $endpoint, $fun, $args, $permission_callback );
 	}
 
@@ -40,22 +42,23 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * 
 	 * @param string $endpoint The endpoint.
 	 * @param string $fun       The function.
-	 * @param array  $arguments The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
+	 * @param mixed[]  $args The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
 	 * @param string $permission_callback The permission callback.
 	 */
-	protected function register_post( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ) {
+	protected function register_post( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ): void {
 		$this->register( \WP_REST_Server::CREATABLE, $endpoint, $fun, $args, $permission_callback );
 	}
 
 	/**
 	 * Register endpoint.
 	 * 
+	 * @param string $methods The HTTP Verb.
 	 * @param string $endpoint The endpoint.
 	 * @param string $fun       The function.
-	 * @param array  $arguments The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
+	 * @param mixed[]  $arguments The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
 	 * @param string $permission_callback The permission callback.
 	 */
-	private function register( $methods, $endpoint, $fun, $args, $permission_callback ) {
+	private function register( $methods, $endpoint, $fun, $arguments, $permission_callback ): void {
 		$args = array(
 			'methods'             => $methods,
 			'callback'            => array( $this, $fun ),
@@ -69,22 +72,34 @@ abstract class REST_Controller extends \WP_REST_Controller {
 
 	/**
 	 * Validate if the parameter is not empty string.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
 	 */
-	public function validate_not_empty_string( $param, $request, $key ) {
+	public function validate_not_empty_string( $param, $request, $key ): bool {
 		return is_string( $param ) && '' !== trim( $param );
 	}
 
 	/**
 	 * Validate if the parameter is a boolean.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
 	 */
-	public function validate_is_bool( $param, $request, $key ) {
+	public function validate_is_bool( $param, $request, $key ): bool {
 		return is_bool( $param );
 	}
 
 	/**
 	 * Validate id the parameter is an array of IP addresses.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
 	 */
-	public function validate_ip_list( $param, $request, $key ) {
+	public function validate_ip_list( $param, $request, $key ): bool {
 		// phpcs:ignore Generic.Files.LineLength.TooLong
 		$ip_regex = '/^(((25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?))|([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}))$/';
 		if ( ! is_array( $param ) ) {
@@ -100,18 +115,24 @@ abstract class REST_Controller extends \WP_REST_Controller {
 
 	/**
 	 * Sanitize boolean.
+	 * 
+	 * @param mixed $param The parameter.
 	 */
-	public function sanitize_bool( $param ) {
+	public function sanitize_bool( $param ): bool {
 		return (bool) $param;
 	}
 
 	/**
 	 * Sanitize an array strings.
 	 * 
-	 * @param array $param The parameter.
+	 * @param mixed[] $param The parameter.
+	 * @return mixed[]
 	 */
 	public function sanitize_array_sanitize_text_field( $param ): array {
-		return map_deep( $param, 'sanitize_text_field' );
+		foreach ( $param as &$value ) {
+			$value = sanitize_text_field( strval( $value ) );
+		}
+		return $param;
 	}
 
 	/**
@@ -119,6 +140,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * 
 	 * @param bool $required      If the argument is required.
 	 * @param mixed $default_value The default value. Null will be ignored.
+	 * @return mixed[]
 	 */
 	private function get_arg( $required = true, $default_value = null ): array {
 		$arg = array( 'required' => $required );
@@ -133,8 +155,9 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * 
 	 * @param bool $required      If the argument is required.
 	 * @param mixed $default_value The default value. Null will be ignored.
+	 * @return mixed[]
 	 */
-	protected function get_arg_bool( $required = true, $default_value = null ) {
+	protected function get_arg_bool( $required = true, $default_value = null ): array {
 		return array_merge(
 			$this->get_arg( $required, $default_value ),
 			array(
@@ -151,8 +174,9 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * @param mixed $default_value The default value. Null will be ignored.
 	 * @param callable $validate The validate callback. Leave null to use the default.
 	 * @param callable $sanitize The sanitize callback. Leave null to use the default.
+	 * @return mixed[]
 	 */
-	protected function get_arg_string( $required = true, $default_value = null, $validate = null, $sanitize = null ) {
+	protected function get_arg_string( $required = true, $default_value = null, $validate = null, $sanitize = null ): array {
 		return array_merge(
 			$this->get_arg( $required, $default_value ),
 			array(
@@ -169,8 +193,9 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * @param mixed $default_value The default value. Null will be ignored.
 	 * @param callable $validate The validate callback. Leave null to use the default.
 	 * @param callable $sanitize The sanitize callback. Leave null to use the default.
+	 * @return mixed[]
 	 */
-	protected function get_arg_ip_list( $required = true, $default_value = null, $validate = null, $sanitize = null ) {
+	protected function get_arg_ip_list( $required = true, $default_value = null, $validate = null, $sanitize = null ): array {
 		return array_merge(
 			$this->get_arg( $required, $default_value ),
 			array(

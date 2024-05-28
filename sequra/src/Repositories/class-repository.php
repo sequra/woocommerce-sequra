@@ -39,20 +39,26 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Returns unprefixed table name.
 	 */
-	abstract protected function get_unprefixed_table_name();
+	abstract protected function get_unprefixed_table_name(): string;
 
 	/**
 	 * Returns full table name.
 	 */
-	protected function get_table_name() {
+	protected function get_table_name(): string {
 		return $this->db->prefix . $this->get_unprefixed_table_name();
 	}
 
 	/**
 	 * Constructor.
+	 * 
+	 * @throws \RuntimeException If database service not found.
 	 */
 	public function __construct() {
-		$this->db = ServiceRegister::getService( \wpdb::class );
+		$db = ServiceRegister::getService( \wpdb::class );
+		if ( ! $db instanceof \wpdb ) {
+			throw new \RuntimeException( 'Database service not found.' );
+		}
+		$this->db = $db;
 	}
 
 	/**
@@ -70,6 +76,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @noinspection PhpDocMissingThrowsInspection
 	 *
 	 * @param string $entity_class Entity class.
+	 * @return void
 	 */
 	public function setEntityClass( $entity_class ) {
 		$this->entity_class = $entity_class;
@@ -98,6 +105,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		}
 
 		$raw_results = $this->db->get_results( $query, ARRAY_A );
+		if ( ! is_array( $raw_results ) ) {
+			return array();
+		}
 
 		return $this->translateToEntities( $raw_results );
 	}
@@ -187,7 +197,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 		$result = $this->db->get_results( $query, ARRAY_A );
 
-		return empty( $result ) ? 0 : (int) $result[0]['total'];
+		return empty( $result[0]['total'] ) ? 0 : intval( $result[0]['total'] );
 	}
 
 	/**
@@ -198,7 +208,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return string Escaped value.
 	 */
 	protected function escape( $value ) {
-		return addslashes( $value );
+		return addslashes( strval( $value ) );
 	}
 
 	/**
@@ -215,7 +225,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Builds WHERE part of select query.
 	 *
-	 * @param array $filter_by Filter conditions in query.
+	 * @param mixed[]$filter_by Filter conditions in query.
 	 *
 	 * @return string Where condition.
 	 */
@@ -246,16 +256,15 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	protected function convert_value( QueryCondition $condition ) {
 		$value = IndexHelper::castFieldValue( $condition->getValue(), $condition->getValueType() );
 		switch ( $condition->getValueType() ) {
-			case 'integer':
-			case 'dateTime':
-			case 'boolean':
-			case 'double':
-				$value = $this->escape_value( $value );
-				break;
 			case 'string':
 				$value = $this->escape_value( $condition->getValue() );
 				break;
 			case 'array':
+				/** 
+				 * Values
+				 *
+				 * @var mixed[] $values
+				 */
 				$values         = $condition->getValue();
 				$escaped_values = array();
 				foreach ( $values as $value ) {
@@ -263,6 +272,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 				}
 
 				$value = '(' . implode( ', ', $escaped_values ) . ')';
+				break;
+			default:
+				// 'integer', 'dateTime','boolean','double'
+				$value = $this->escape_value( $value );
 				break;
 		}
 
@@ -273,7 +286,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * Builds query filter part of the query.
 	 *
 	 * @param QueryFilter $filter Query filter object.
-	 * @param array       $field_index_map Property to index number map.
+	 * @param mixed[]      $field_index_map Property to index number map.
 	 *
 	 * @return string Query filter addendum.
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
@@ -313,7 +326,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Transforms raw database query rows to entities.
 	 *
-	 * @param array $result Raw database query result.
+	 * @param mixed[]$result Raw database query result.
 	 *
 	 * @return Entity[] Array of transformed entities.
 	 */
@@ -326,11 +339,19 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		$entities = array();
 		foreach ( $result as $item ) {
 			/**
+			 * Raw data.
+			 *
+			 * @var mixed[] $item
+			 */
+			if ( ! isset( $item['data'] ) || ! isset( $item['id'] ) ) {
+				continue;
+			}
+			$data = (array) json_decode( strval( $item['data'] ), true );
+			/**
 			 * Entity object.
 			 *
 			 * @var Entity $entity
 			 */
-			$data   = json_decode( $item['data'], true );
 			$entity = isset( $data['class_name'] ) ? new $data['class_name']() : new $this->entity_class();
 			$entity->inflate( $data );
 			$entity->setId( $item['id'] );
@@ -364,7 +385,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 *
 	 * @param Entity $entity Entity to be stored.
 	 *
-	 * @return array Item prepared for storage.
+	 * @return mixed[] Item prepared for storage.
 	 */
 	protected function prepare_entity_for_storage( Entity $entity ) {
 		$indexes      = IndexHelper::transformFieldsToIndexes( $entity );
@@ -391,9 +412,11 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * Validates if column can be filtered or sorted by.
 	 *
 	 * @param string $column Column name.
-	 * @param array  $index_map Index map.
+	 * @param mixed[] $index_map Index map.
 	 *
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
+	 * 
+	 * @return void
 	 */
 	protected function validate_index_column( $column, array $index_map ) {
 		if ( 'id' !== $column && ! array_key_exists( $column, $index_map ) ) {

@@ -55,6 +55,8 @@ class Bootstrap extends BootstrapComponent {
 
 	/**
 	 * Cache for Service instances.
+	 *
+	 * @var array<string, mixed>
 	 */
 	private static $cache = array();
 
@@ -157,14 +159,13 @@ class Bootstrap extends BootstrapComponent {
 					if ( ! function_exists( 'get_plugin_data' ) ) {
 						require_once ABSPATH . 'wp-admin/includes/plugin.php';
 					}
-					add_filter(
-						'extra_plugin_headers',
-						function ( $headers ) {
-							$headers['WC requires at least'] = 'WC requires at least';
-							return $headers;
-						} 
-					);
-					$data               = get_plugin_data( Reg::getService( 'plugin.file_path' ) );
+					$add_wc_headers = function ( $headers ) {
+						$headers['WC requires at least'] = 'WC requires at least';
+						return $headers;
+					};
+					add_filter( 'extra_plugin_headers', $add_wc_headers );
+					$data = get_plugin_data( Reg::getService( 'plugin.file_path' ) );
+					remove_filter( 'extra_plugin_headers', $add_wc_headers );
 					$data['RequiresWC'] = $data['WC requires at least'];
 					unset( $data['WC requires at least'] );
 
@@ -437,8 +438,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ] ) ) {
 					self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ] = new Controllers\Rest\Onboarding_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' ),
-						Reg::getService( Configuration::class )
+						Reg::getService( 'plugin.rest_namespace' )
 					);
 				}
 				return self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ];

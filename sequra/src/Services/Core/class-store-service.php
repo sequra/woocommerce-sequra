@@ -10,6 +10,7 @@ namespace SeQura\WC\Services\Core;
 
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Stores\Models\Store;
+use WP_Site;
 
 /**
  * Wrapper to ease the read and write of configuration values.
@@ -39,10 +40,13 @@ class Store_Service implements StoreServiceInterface {
 			 * @var WP_Site $site
 			 */
 			foreach ( get_sites() as $site ) {
-				$stores[] = new Store( (string) $site->blog_id, get_bloginfo( 'name', '', $site->blog_id ) );
+				$stores[] = new Store( (string) $site->blog_id, $site->blogname );
 			}
 		} else {
-			$stores[] = $this->getDefaultStore();
+			$default = $this->getDefaultStore();
+			if ( $default ) {
+				$stores[] = $default;
+			}
 		}
 		return $stores;
 	}

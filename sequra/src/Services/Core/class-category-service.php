@@ -10,6 +10,7 @@ namespace SeQura\WC\Services\Core;
 
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\Category;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
+use WP_Term;
 
 /**
  * Wrapper to ease the read and write of configuration values.
@@ -35,8 +36,13 @@ class Category_Service implements CategoryServiceInterface {
 			return $categories;
 		}
 
+		/**
+		 * Terms
+		 *
+		 * @var WP_Term[] $terms
+		 */
 		foreach ( $terms as $term ) {
-			$categories[] = new Category( $term->term_id, $this->get_category_name( $term->term_id, $terms ) );
+			$categories[] = new Category( strval( $term->term_id ), $this->get_category_name( $term->term_id, $terms ) );
 		}
 
 		usort(
@@ -64,7 +70,12 @@ class Category_Service implements CategoryServiceInterface {
 				return $term_id === $cat->term_id;
 			}
 		);
-		$term     = array_shift( $filtered );
+		/**
+		 * Term
+		 *
+		 * @var WP_Term $term
+		 */
+		$term = array_shift( $filtered );
 		if ( null === $term->parent ) {
 			return '';
 		}

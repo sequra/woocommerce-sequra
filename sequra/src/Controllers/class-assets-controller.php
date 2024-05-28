@@ -81,7 +81,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 	/**
 	 * Enqueue styles and scripts in WP-Admin
 	 */
-	public function enqueue_admin() {
+	public function enqueue_admin(): void {
 		if ( ! $this->configuration->is_settings_page() ) {
 			return;
 		}
@@ -97,9 +97,9 @@ class Assets_Controller implements Interface_Assets_Controller {
 	/**
 	 * Get the SequraFE object
 	 *
-	 * @return array
+	 * @return mixed[]
 	 */
-	private function get_sequra_fe_l10n() {
+	private function get_sequra_fe_l10n(): array {
 		$connection_config      = array(
 			'getConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
 		);
@@ -179,7 +179,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 				'useReplacementPaymentMethod' => false,
 				'useAllowedIPAddresses'       => true,
 			),
-			'isPromotional'     => empty( $pages_payment ),
+			'isPromotional'     => false,
 			'_state_controller' => $state_controller,
 			'customHeader'      => array( 'X-WP-Nonce' => wp_create_nonce( 'wp_rest' ) ),
 		);
@@ -190,13 +190,14 @@ class Assets_Controller implements Interface_Assets_Controller {
 	/**
 	 * Enqueue styles and scripts in Front-End
 	 */
-	public function enqueue_front() {
+	public function enqueue_front(): void {
 	}
 
 	/**
 	 * Load translations from the .json file
 	 * 
 	 * @param string $lang Language code.
+	 * @return mixed[]
 	 */
 	private function load_translation( $lang = 'en' ): array {
 		$path         = "{$this->assets_dir_path}/lang/{$lang}.json";

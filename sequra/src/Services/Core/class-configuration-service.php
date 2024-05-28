@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Services\Core;
 
+use WP_Site;
+
 /**
  * Wrapper to ease the read and write of configuration values.
  */
@@ -15,8 +17,6 @@ class Configuration_Service extends Configuration {
 	
 	/**
 	 * Retrieves the store ID.
-	 *
-	 * @return int The store ID.
 	 */
 	public function get_store_id(): string {
 		return (string) get_current_blog_id();
@@ -35,7 +35,7 @@ class Configuration_Service extends Configuration {
 	 * Gets the current version of the module/integration.
 	 */
 	public function get_module_version(): string {
-		return $this->getConfigurationManager()->getConfigValue( 'version', '' );
+		return strval( $this->getConfigurationManager()->getConfigValue( 'version', '' ) );
 	}
 
 	/**
@@ -103,6 +103,8 @@ class Configuration_Service extends Configuration {
 
 	/**
 	 * Current store. Has keys storeId and storeName.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function get_current_store(): array {
 		return array(
@@ -113,6 +115,8 @@ class Configuration_Service extends Configuration {
 
 	/**
 	 * List of stores. Each store is an array with storeId and storeName.
+	 * 
+	 * @return array<array<string, mixed>>
 	 */
 	public function get_stores(): array {
 		$stores = array();
@@ -125,7 +129,7 @@ class Configuration_Service extends Configuration {
 			foreach ( get_sites() as $site ) {
 				$stores[] = array(
 					'storeId'   => $site->blog_id,
-					'storeName' => get_bloginfo( 'name', '', $site->blog_id ),
+					'storeName' => $site->blogname,
 				);
 			}
 		} else {
