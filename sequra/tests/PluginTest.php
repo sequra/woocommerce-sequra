@@ -11,9 +11,9 @@ namespace SeQura\WC\Tests;
 use SeQura\WC\Controllers\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Interface_I18n_Controller;
 use SeQura\WC\Plugin;
-use PHPUnit\Framework\MockObject\MockObject;
 use SeQura\WC\Controllers\Interface_Settings_Controller;
-use SeQura\WC\Interface_Bootstrap;
+use SeQura\WC\Controllers\Rest\REST_Controller;
+use SeQura\WC\Services\Interface_Migration_Manager;
 use WP_UnitTestCase;
 
 class PluginTest extends WP_UnitTestCase {
@@ -22,10 +22,14 @@ class PluginTest extends WP_UnitTestCase {
 	private $plugin;
 	private $plugin_data;
 	private $base_name;
-	private $bootstrap;
 	private $i18n_controller;
 	private $asset_controller;
 	private $settings_controller;
+	private $rest_settings_controller;
+	private $rest_onboarding_controller;
+	private $rest_payment_controller;
+	private $rest_log_controller;
+	private $migration_manager;
 
 	public function set_up() {
 
@@ -39,28 +43,42 @@ class PluginTest extends WP_UnitTestCase {
 			'RequiresWC'  => '4.0',
 		);
 
-		$this->base_name           = 'sequra/sequra.php';
-		$this->bootstrap           = $this->createMock( Interface_Bootstrap::class );
-		$this->i18n_controller     = $this->createMock( Interface_I18n_Controller::class );
-		$this->asset_controller    = $this->createMock( Interface_Assets_Controller::class );
-		$this->settings_controller = $this->createMock( Interface_Settings_Controller::class );
+		$this->base_name                  = 'sequra/sequra.php';
+		$this->i18n_controller            = $this->createMock( Interface_I18n_Controller::class );
+		$this->migration_manager          = $this->createMock( Interface_Migration_Manager::class );
+		$this->asset_controller           = $this->createMock( Interface_Assets_Controller::class );
+		$this->settings_controller        = $this->createMock( Interface_Settings_Controller::class );
+		$this->rest_settings_controller   = $this->createMock( REST_Controller::class );
+		$this->rest_onboarding_controller = $this->createMock( REST_Controller::class );
+		$this->rest_payment_controller    = $this->createMock( REST_Controller::class );
+		$this->rest_log_controller        = $this->createMock( REST_Controller::class );
 	}
 
 	public function testConstructor_happyPath_hooksAreRegistered() {
-		$this->bootstrap->expects( $this->once() )->method( 'do_init' );
-
 		$this->plugin = new Plugin( 
 			$this->plugin_data, 
 			$this->base_name,
-			$this->bootstrap, 
+			$this->migration_manager,
 			$this->i18n_controller, 
 			$this->asset_controller,
-			$this->settings_controller
+			$this->settings_controller,
+			$this->rest_settings_controller,
+			$this->rest_onboarding_controller,
+			$this->rest_payment_controller,
+			$this->rest_log_controller
 		);
-		
+
+		$this->assertEquals( 10, \has_action( 'plugins_loaded', array( $this->plugin, 'install' ) ) );
 		$this->assertEquals( 10, \has_action( 'plugins_loaded', array( $this->i18n_controller, 'load_text_domain' ) ) );
 		$this->assertEquals( 10, \has_action( 'admin_enqueue_scripts', array( $this->asset_controller, 'enqueue_admin' ) ) );
 		$this->assertEquals( 10, \has_action( 'wp_enqueue_scripts', array( $this->asset_controller, 'enqueue_front' ) ) );
+		$this->assertEquals( 10, \has_action( 'admin_menu', array( $this->settings_controller, 'register_page' ) ) );
+		$this->assertEquals( 10, \has_filter( "plugin_action_links_{$this->base_name}", array( $this->settings_controller, 'add_action_link' ) ) );
+		$this->assertEquals( 10, \has_action( 'admin_footer_text', array( $this->settings_controller, 'remove_footer_admin' ) ) );
+		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_settings_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_onboarding_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_payment_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_log_controller, 'register_routes' ) ) );
 	}
 
 	public function testActivate_notMeetPhpRequirements_deactivateAndDie() {
@@ -71,10 +89,14 @@ class PluginTest extends WP_UnitTestCase {
 		$this->plugin = new Plugin( 
 			$this->plugin_data, 
 			$this->base_name,
-			$this->bootstrap,
+			$this->migration_manager,
 			$this->i18n_controller, 
 			$this->asset_controller,
-			$this->settings_controller
+			$this->settings_controller,
+			$this->rest_settings_controller,
+			$this->rest_onboarding_controller,
+			$this->rest_payment_controller,
+			$this->rest_log_controller
 		);
 
 		$this->plugin->activate();
@@ -91,10 +113,14 @@ class PluginTest extends WP_UnitTestCase {
 		$this->plugin = new Plugin( 
 			$this->plugin_data, 
 			$this->base_name,
-			$this->bootstrap, 
+			$this->migration_manager,
 			$this->i18n_controller, 
 			$this->asset_controller,
-			$this->settings_controller
+			$this->settings_controller,
+			$this->rest_settings_controller,
+			$this->rest_onboarding_controller,
+			$this->rest_payment_controller,
+			$this->rest_log_controller
 		);
 
 		$this->plugin->activate();
@@ -111,10 +137,14 @@ class PluginTest extends WP_UnitTestCase {
 		$this->plugin = new Plugin( 
 			$this->plugin_data, 
 			$this->base_name,
-			$this->bootstrap, 
+			$this->migration_manager,
 			$this->i18n_controller, 
 			$this->asset_controller,
-			$this->settings_controller
+			$this->settings_controller,
+			$this->rest_settings_controller,
+			$this->rest_onboarding_controller,
+			$this->rest_payment_controller,
+			$this->rest_log_controller
 		);
 
 		$this->plugin->activate();

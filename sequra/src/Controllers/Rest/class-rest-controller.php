@@ -71,6 +71,11 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	}
 
 	/**
+	 * Register the API endpoints.
+	 */
+	abstract public function register_routes(): void;
+
+	/**
 	 * Validate if the parameter is not empty string.
 	 * 
 	 * @param mixed $param The parameter.
