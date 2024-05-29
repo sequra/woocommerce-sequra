@@ -57,7 +57,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
         IFS=',' read -ra plugins <<< "${WP_PLUGINS}"
         for plugin in "${plugins[@]}"; do
             plugin_version=$(get_pkg_and_version "${plugin}")
-            wp plugin install --allow-root "${plugin_version}" --activate
+            wp plugin install --allow-root $plugin_version --activate
         done
     fi
 
@@ -70,7 +70,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     # Install theme
     if [ -n "${WP_THEME}" ]; then
         theme_version=$(get_pkg_and_version "${WP_THEME}")
-        wp theme install --allow-root "${theme_version}" --activate
+        wp theme install --allow-root $theme_version --activate
     fi
 
     wp plugin install --allow-root wordpress-importer --activate
