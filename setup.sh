@@ -30,7 +30,7 @@ fi
 
 docker compose up -d --build
 
-echo "Waiting for installation to complete..."
+echo "🚀 Waiting for installation to complete..."
 
 retry=60
 timeout=1
@@ -44,6 +44,10 @@ while [ $(($(date +%s) - $start)) -lt $retry ]; do
         echo "User: $WP_ADMIN_USER"
         echo "Password: $WP_ADMIN_PASSWORD"
         exit 0
+    elif docker compose exec web ls /var/www/html/.post-install-failed > /dev/null 2>&1; then
+        seconds=$(($(date +%s) - $start))
+        echo "❌ Installation failed after ${seconds} seconds."
+        exit 1
     fi
     sleep $timeout
 done

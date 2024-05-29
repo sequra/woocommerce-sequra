@@ -2,6 +2,7 @@
 
 # Check if need to install WordPress
 if [ ! -f /var/www/html/.post-install-complete ]; then
+    rm -f /var/www/html/.post-install-failed
     
     cd /var/www/html
     export XDEBUG_MODE=off
@@ -25,6 +26,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     result=$(wait_for nc -z "${WORDPRESS_DB_HOST}" "${DB_PORT}")
     if [ "$result" == "1" ]; then
         echo "❌ ${WORDPRESS_DB_HOST}:${DB_PORT} is not available"
+        touch /var/www/html/.post-install-failed
         exit 1
     fi
 
@@ -64,6 +66,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     # Check if WooCommerce is installed and run the setup script
     if ! wp plugin is-active --allow-root woocommerce; then
         echo "❌ WooCommerce is not installed"
+        touch /var/www/html/.post-install-failed
         exit 1
     fi
 
