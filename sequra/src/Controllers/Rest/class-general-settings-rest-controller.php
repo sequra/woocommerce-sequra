@@ -40,7 +40,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			$store_id_args,
 			array(
 				'sendOrderReportsPeriodicallyToSeQura' => $this->get_arg_bool(),
-				'showSeQuraCheckoutAsHostedPage'       => $this->get_arg_bool(),
+				'showSeQuraCheckoutAsHostedPage'       => $this->get_arg_bool( false, false ),
 				'allowedIPAddresses'                   => $this->get_arg_ip_list( true, array() ),
 				'excludedProducts'                     => array(
 					'required'          => true,

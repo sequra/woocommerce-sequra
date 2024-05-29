@@ -42,13 +42,19 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$data_args = array_merge(
 			$store_id_args,
 			array(
-				'environment'           => array_merge(
+				'environment'         => array_merge(
 					$this->get_arg_string(),
 					array( 'enum' => array( 'sandbox', 'production' ) )
 				),
-				'username'              => $this->get_arg_string(),
-				'password'              => $this->get_arg_string(),
-				'sendStatisticalData'   => $this->get_arg_bool(),
+				'username'            => $this->get_arg_string(),
+				'password'            => $this->get_arg_string(),
+				'sendStatisticalData' => $this->get_arg_bool(),
+			)
+		);
+		
+		$validate_data_args = array_merge(
+			$data_args,
+			array(
 				self::PARAM_MERCHANT_ID => $this->get_arg_string(),
 			)
 		);
@@ -79,7 +85,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 		$this->register_get( "data/{$store_id}", 'get_connection_data', $store_id_args );
 		$this->register_post( "data/{$store_id}", 'save_connection_data', $data_args );
-		$this->register_post( "data/validate/{$store_id}", 'validate_connection_data', $data_args );
+		$this->register_post( "data/validate/{$store_id}", 'validate_connection_data', $validate_data_args );
 		$this->register_post( "data/disconnect/{$store_id}", 'disconnect', $store_id_args );
 
 		$this->register_get( "widgets/{$store_id}", 'get_widgets', $store_id_args );
