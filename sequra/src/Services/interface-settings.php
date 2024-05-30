@@ -2,11 +2,11 @@
 /**
  * Settings interface
  *
- * @package    Sequra/WC
- * @subpackage Sequra/WC/Services
+ * @package    SeQura/WC
+ * @subpackage SeQura/WC/Services
  */
 
-namespace Sequra\WC\Services;
+namespace SeQura\WC\Services;
 
 /**
  * Settings interface
@@ -16,7 +16,7 @@ interface Interface_Settings {
 	/**
 	 * Get preferences. Also sets defaults if not set.
 	 *
-	 * @return array Array of preferences.
+	 * @return mixed[] Array of preferences.
 	 */
 	public function all();
 
@@ -25,14 +25,14 @@ interface Interface_Settings {
 	 *
 	 * @param string $key Preference key.
 	 *
-	 * @return mixed Preference value. Null if not found.
+	 * @return mixed|null Preference value. Null if not found.
 	 */
 	public function get( $key );
 
 	/**
 	 * Get default preferences
 	 *
-	 * @return array Array of default preferences.
+	 * @return mixed[] Array of default preferences.
 	 */
 	public function defaults();
 
@@ -42,4 +42,18 @@ interface Interface_Settings {
 	 * @return bool
 	 */
 	public function is_debug_enabled();
+
+	/**
+	 * Get general settings.
+	 *
+	 * @param int|null $blog_id The blog ID.
+	 * 
+	 * @return mixed
+	 */
+	public function get_general_settings( $blog_id = null );
+
+	/**
+	 * Check if the current page is the settings page.
+	 */
+	public function is_settings_page(): bool;
 }

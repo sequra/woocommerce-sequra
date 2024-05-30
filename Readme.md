@@ -51,6 +51,7 @@ This repo contains a group of utility scripts under ```bin/``` directory. The go
 | Utility | Description |
 | -------- | ------------------------------------------------------------------ |
 | ```./bin/composer <arguments>``` | This is a wrapper to run composer commands |
+| ```./bin/npm <arguments>``` | This is a wrapper to run npm commands |
 | ```./bin/phpcs``` | Run PHP code sniffer on the project files |
 | ```./bin/phpcbf``` | Automatically correct coding standard violations on the project files |
 | ```./bin/phpstan``` | Run PHPStan on the project files |

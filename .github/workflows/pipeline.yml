@@ -27,14 +27,44 @@ jobs:
             sequra/composer.lock
           key: composer-${{ hashFiles('sequra/composer.json') }}
 
-      - name: Install composer dependencies
+      - name: Install Composer dependencies
         if: steps.cache-composer.outputs.cache-hit != 'true'
         run: ./bin/composer install
 
+      - name: Cache NPM dependencies
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@v4
+        id: cache-npm
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: npm-${{ hashFiles('sequra/package.json') }}
+
+      - name: Install NPM dependencies
+        if: github.event_name == 'pull_request' && steps.cache-npm.outputs.cache-hit != 'true'
+        run: ./bin/npm install --no-progress
+
+      - name: Cache Assets
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@v4
+        id: cache-assets
+        with:
+          path: |
+            sequra/assets/css/*.css
+            sequra/assets/js/*.js
+          key: assets-${{ hashFiles('sequra/assets/css/*.css', 'sequra/assets/js/*.js') }}
+
+      - name: Build Assets
+        if: github.event_name == 'pull_request' && steps.cache-assets.outputs.cache-hit != 'true'
+        run: ./bin/npm run build
+
       - name: PHPCS
+        if: github.event_name == 'push'
         run: ./bin/phpcs
 
       - name: PHPStan
+        if: github.event_name == 'push'
         run: ./bin/phpstan
 
       - name: Setup Environment
@@ -50,6 +80,6 @@ jobs:
         run: |
           docker compose exec web /usr/local/bin/run-tests.sh
 
-      - name: Terminate Environment
+      - name: Teardown Environment
         if: github.event_name == 'pull_request'
-        run: ./terminate.sh
+        run: ./teardown.sh

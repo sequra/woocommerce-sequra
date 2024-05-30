@@ -2,6 +2,7 @@
 
 # Check if need to install WordPress
 if [ ! -f /var/www/html/.post-install-complete ]; then
+    rm -f /var/www/html/.post-install-failed
     
     cd /var/www/html
     export XDEBUG_MODE=off
@@ -25,6 +26,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     result=$(wait_for nc -z "${WORDPRESS_DB_HOST}" "${DB_PORT}")
     if [ "$result" == "1" ]; then
         echo "❌ ${WORDPRESS_DB_HOST}:${DB_PORT} is not available"
+        touch /var/www/html/.post-install-failed
         exit 1
     fi
 
@@ -57,20 +59,21 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
         IFS=',' read -ra plugins <<< "${WP_PLUGINS}"
         for plugin in "${plugins[@]}"; do
             plugin_version=$(get_pkg_and_version "${plugin}")
-            wp plugin install --allow-root "${plugin_version}" --activate
+            wp plugin install --allow-root $plugin_version --activate
         done
     fi
 
     # Check if WooCommerce is installed and run the setup script
     if ! wp plugin is-active --allow-root woocommerce; then
         echo "❌ WooCommerce is not installed"
+        touch /var/www/html/.post-install-failed
         exit 1
     fi
 
     # Install theme
     if [ -n "${WP_THEME}" ]; then
         theme_version=$(get_pkg_and_version "${WP_THEME}")
-        wp theme install --allow-root "${theme_version}" --activate
+        wp theme install --allow-root $theme_version --activate
     fi
 
     wp plugin install --allow-root wordpress-importer --activate
@@ -97,5 +100,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name)
 
     touch /var/www/html/.post-install-complete
+    
+    chown -R www-data:www-data /var/www/html
 fi
 echo "✅ seQura plugin installed and configured."

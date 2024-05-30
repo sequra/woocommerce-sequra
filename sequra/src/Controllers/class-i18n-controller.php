@@ -2,11 +2,11 @@
 /**
  * I18n Controller
  *
- * @package    Sequra/WC
- * @subpackage Sequra/WC/Controllers
+ * @package    SeQura/WC
+ * @subpackage SeQura/WC/Controllers
  */
 
-namespace Sequra\WC\Controllers;
+namespace SeQura\WC\Controllers;
 
 /**
  * Define the internationalization functionality
@@ -43,7 +43,7 @@ class I18n_Controller implements Interface_I18n_Controller {
 	/**
 	 * Load the plugin text domain for translation.
 	 */
-	public function load_text_domain() {
-		return load_plugin_textdomain( $this->text_domain, false, $this->domain_path );
+	public function load_text_domain(): void {
+		load_plugin_textdomain( $this->text_domain, false, $this->domain_path );
 	}
 }
