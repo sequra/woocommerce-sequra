@@ -36,7 +36,18 @@ use SeQura\Core\Infrastructure\ServiceRegister as Reg;
 use SeQura\Core\Infrastructure\TaskExecution\Process;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\Core\Infrastructure\Utility\TimeProvider;
+use SeQura\WC\Controllers\Assets_Controller;
+use SeQura\WC\Controllers\I18n_Controller;
+use SeQura\WC\Controllers\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Interface_Settings_Controller;
+use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
+use SeQura\WC\Controllers\Rest\Log_REST_Controller;
+use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
+use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
+use SeQura\WC\Controllers\Settings_Controller;
 use SeQura\WC\Repositories\Entity_Repository;
+use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Core\Category_Service;
@@ -51,8 +62,14 @@ use SeQura\WC\Services\Core\Selling_Countries_Service;
 use SeQura\WC\Services\Core\Shop_Logger_Adapter;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
+use SeQura\WC\Services\I18n;
+use SeQura\WC\Services\Interface_I18n;
 use SeQura\WC\Services\Interface_Log_File;
+use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Interface_Migration_Manager;
 use SeQura\WC\Services\Log_File;
+use SeQura\WC\Services\Logger_Service;
+use SeQura\WC\Services\Migration_Manager;
 
 /**
  * Implementation for the core bootstrap class.
@@ -79,14 +96,14 @@ class Bootstrap extends BootstrapComponent {
 				return new Plugin(
 					Reg::getService( 'plugin.data' ),
 					Reg::getService( 'plugin.basename' ),
-					Reg::getService( Services\Interface_Migration_Manager::class ),
-					Reg::getService( Controllers\Interface_I18n_Controller::class ),
-					Reg::getService( Controllers\Interface_Assets_Controller::class ),
-					Reg::getService( Controllers\Interface_Settings_Controller::class ),
-					Reg::getService( Controllers\Rest\General_Settings_REST_Controller::class ),
-					Reg::getService( Controllers\Rest\Onboarding_REST_Controller::class ),
-					Reg::getService( Controllers\Rest\Payment_REST_Controller::class ),
-					Reg::getService( Controllers\Rest\Log_REST_Controller::class )
+					Reg::getService( Interface_Migration_Manager::class ),
+					Reg::getService( Interface_I18n_Controller::class ),
+					Reg::getService( Interface_Assets_Controller::class ),
+					Reg::getService( Interface_Settings_Controller::class ),
+					Reg::getService( General_Settings_REST_Controller::class ),
+					Reg::getService( Onboarding_REST_Controller::class ),
+					Reg::getService( Payment_REST_Controller::class ),
+					Reg::getService( Log_REST_Controller::class )
 				);
 			}
 		);
@@ -369,41 +386,41 @@ class Bootstrap extends BootstrapComponent {
 
 		// Plugin services.
 		Reg::registerService(
-			Services\Interface_Migration_Manager::class,
+			Interface_Migration_Manager::class,
 			static function () {
-				if ( ! isset( self::$cache[ Services\Interface_Migration_Manager::class ] ) ) {
-					self::$cache[ Services\Interface_Migration_Manager::class ] = new Services\Migration_Manager(
+				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
+					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
 						Reg::getService( Configuration::CLASS_NAME ),
 						Reg::getService( 'plugin.data' )['Version'],
 						array(
-							new Repositories\Migrations\Migration_Install_300( Reg::getService( \wpdb::class ) ),
+							new Migration_Install_300( Reg::getService( \wpdb::class ) ),
 						)
 					);
 				}
-				return self::$cache[ Services\Interface_Migration_Manager::class ];
+				return self::$cache[ Interface_Migration_Manager::class ];
 			}
 		);
 
 		Reg::registerService(
-			Services\Interface_I18n::class,
+			Interface_I18n::class,
 			static function () {
-				if ( ! isset( self::$cache[ Services\Interface_I18n::class ] ) ) {
-					self::$cache[ Services\Interface_I18n::class ] = new Services\I18n();
+				if ( ! isset( self::$cache[ Interface_I18n::class ] ) ) {
+					self::$cache[ Interface_I18n::class ] = new I18n();
 				}
-				return self::$cache[ Services\Interface_I18n::class ];
+				return self::$cache[ Interface_I18n::class ];
 			}
 		);
 
 		Reg::registerService(
-			Services\Interface_Logger_Service::class,
+			Interface_Logger_Service::class,
 			static function () {
-				if ( ! isset( self::$cache[ Services\Interface_Logger_Service::class ] ) ) {
-					self::$cache[ Services\Interface_Logger_Service::class ] = new Services\Logger_Service(
+				if ( ! isset( self::$cache[ Interface_Logger_Service::class ] ) ) {
+					self::$cache[ Interface_Logger_Service::class ] = new Logger_Service(
 						Reg::getService( LoggerConfiguration::class ),
 						Reg::getService( Interface_Log_File::class )
 					);
 				}
-				return self::$cache[ Services\Interface_Logger_Service::class ];
+				return self::$cache[ Interface_Logger_Service::class ];
 			}
 		);
 	}
@@ -449,87 +466,95 @@ class Bootstrap extends BootstrapComponent {
 
 		// Plugin controllers.
 		Reg::registerService(
-			Controllers\Interface_I18n_Controller::class,
+			Interface_I18n_Controller::class,
 			static function () {
-				if ( ! isset( self::$cache[ Controllers\Interface_I18n_Controller::class ] ) ) {
+				if ( ! isset( self::$cache[ Interface_I18n_Controller::class ] ) ) {
 					$data   = Reg::getService( 'plugin.data' );
 					$domain = $data['TextDomain'];
-					self::$cache[ Controllers\Interface_I18n_Controller::class ] = new Controllers\I18n_Controller( $domain . $data['DomainPath'], $domain );
+					self::$cache[ Interface_I18n_Controller::class ] = new I18n_Controller( 
+						$domain . $data['DomainPath'],
+						$domain,
+						Reg::getService( Interface_Logger_Service::class ) 
+					);
 				}
 				return self::$cache[ Controllers\Interface_I18n_Controller::class ];
 			}
 		);
 		Reg::registerService(
-			Controllers\Interface_Assets_Controller::class,
+			Interface_Assets_Controller::class,
 			static function () {
-				if ( ! isset( self::$cache[ Controllers\Interface_Assets_Controller::class ] ) ) {
-					self::$cache[ Controllers\Interface_Assets_Controller::class ] = new Controllers\Assets_Controller(
+				if ( ! isset( self::$cache[ Interface_Assets_Controller::class ] ) ) {
+					self::$cache[ Interface_Assets_Controller::class ] = new Assets_Controller(
 						Reg::getService( 'plugin.dir_url' ) . '/assets', 
 						Reg::getService( 'plugin.dir_path' ) . 'assets', 
 						Reg::getService( 'plugin.data' )['Version'],
-						Reg::getService( Services\Interface_I18n::class ),
-						Reg::getService( Services\Interface_Logger_Service::class ),
+						Reg::getService( Interface_I18n::class ),
+						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( Configuration::class )
 					);
 				}
-				return self::$cache[ Controllers\Interface_Assets_Controller::class ];
+				return self::$cache[ Interface_Assets_Controller::class ];
 			}
 		);
 		Reg::registerService(
-			Controllers\Interface_Settings_Controller::class,
+			Interface_Settings_Controller::class,
 			static function () {
-				if ( ! isset( self::$cache[ Controllers\Interface_Settings_Controller::class ] ) ) {
-					self::$cache[ Controllers\Interface_Settings_Controller::class ] = new Controllers\Settings_Controller(
+				if ( ! isset( self::$cache[ Interface_Settings_Controller::class ] ) ) {
+					self::$cache[ Interface_Settings_Controller::class ] = new Settings_Controller(
 						Reg::getService( 'plugin.templates_path' ),
-						Reg::getService( Configuration::class )
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
 				return self::$cache[ Controllers\Interface_Settings_Controller::class ];
 			}
 		);
 		Reg::registerService(
-			Controllers\Rest\Onboarding_REST_Controller::class,
+			Onboarding_REST_Controller::class,
 			static function () {
-				if ( ! isset( self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ] ) ) {
-					self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ] = new Controllers\Rest\Onboarding_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' )
-					);
-				}
-				return self::$cache[ Controllers\Rest\Onboarding_REST_Controller::class ];
-			}
-		);
-		Reg::registerService(
-			Controllers\Rest\Payment_REST_Controller::class,
-			static function () {
-				if ( ! isset( self::$cache[ Controllers\Rest\Payment_REST_Controller::class ] ) ) {
-					self::$cache[ Controllers\Rest\Payment_REST_Controller::class ] = new Controllers\Rest\Payment_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' )
-					);
-				}
-				return self::$cache[ Controllers\Rest\Payment_REST_Controller::class ];
-			}
-		);
-		Reg::registerService(
-			Controllers\Rest\General_Settings_REST_Controller::class,
-			static function () {
-				if ( ! isset( self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ] ) ) {
-					self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ] = new Controllers\Rest\General_Settings_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' )
-					);
-				}
-				return self::$cache[ Controllers\Rest\General_Settings_REST_Controller::class ];
-			}
-		);
-		Reg::registerService(
-			Controllers\Rest\Log_REST_Controller::class,
-			static function () {
-				if ( ! isset( self::$cache[ Controllers\Rest\Log_REST_Controller::class ] ) ) {
-					self::$cache[ Controllers\Rest\Log_REST_Controller::class ] = new Controllers\Rest\Log_REST_Controller(
+				if ( ! isset( self::$cache[ Onboarding_REST_Controller::class ] ) ) {
+					self::$cache[ Onboarding_REST_Controller::class ] = new Onboarding_REST_Controller(
 						Reg::getService( 'plugin.rest_namespace' ),
-						Reg::getService( Services\Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
-				return self::$cache[ Controllers\Rest\Log_REST_Controller::class ];
+				return self::$cache[ Onboarding_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Payment_REST_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Payment_REST_Controller::class ] ) ) {
+					self::$cache[ Payment_REST_Controller::class ] = new Payment_REST_Controller(
+						Reg::getService( 'plugin.rest_namespace' ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Payment_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			General_Settings_REST_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ General_Settings_REST_Controller::class ] ) ) {
+					self::$cache[ General_Settings_REST_Controller::class ] = new General_Settings_REST_Controller(
+						Reg::getService( 'plugin.rest_namespace' ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ General_Settings_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Log_REST_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Log_REST_Controller::class ] ) ) {
+					self::$cache[ Log_REST_Controller::class ] = new Log_REST_Controller(
+						Reg::getService( 'plugin.rest_namespace' ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Log_REST_Controller::class ];
 			}
 		);
 	}

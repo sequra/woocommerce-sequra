@@ -22,28 +22,22 @@ class Log_REST_Controller extends REST_Controller {
 	const PARAM_LOG_LEVEL  = 'level';
 
 	/**
-	 * Logger service.
-	 *
-	 * @var Interface_Logger_Service
-	 */
-	private $logger;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string            $rest_namespace The namespace.
 	 * @param Interface_Logger_Service $logger         The logger service.
 	 */
 	public function __construct( $rest_namespace, Interface_Logger_Service $logger ) {
+		parent::__construct( $logger );
 		$this->namespace = $rest_namespace;
 		$this->rest_base = '/log';
-		$this->logger    = $logger;
 	}
 
 	/**
 	 * Register the API endpoints.
 	 */
 	public function register_routes(): void {
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$store_id_args = array( self::PARAM_STORE_ID => $this->get_arg_string() );
 		$conf_args     = array_merge(
 			$store_id_args,

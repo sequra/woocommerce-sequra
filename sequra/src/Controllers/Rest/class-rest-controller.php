@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\WC\Services\Interface_Logger_Service;
 use WP_REST_Request;
 
 /**
@@ -17,6 +18,22 @@ abstract class REST_Controller extends \WP_REST_Controller {
 
 	protected const PARAM_STORE_ID    = 'storeId';
 	protected const PARAM_MERCHANT_ID = 'merchantId';
+
+	/**
+	 * Logger service.
+	 *
+	 * @var Interface_Logger_Service
+	 */
+	protected $logger;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Interface_Logger_Service $logger         The logger service.
+	 */
+	public function __construct( Interface_Logger_Service $logger ) {
+		$this->logger = $logger;
+	}
 
 	/**
 	 * Check if the current user can manage options.

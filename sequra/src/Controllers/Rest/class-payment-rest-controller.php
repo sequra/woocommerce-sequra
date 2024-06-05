@@ -9,6 +9,7 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\WC\Services\Interface_Logger_Service;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,8 +23,10 @@ class Payment_REST_Controller extends REST_Controller {
 	 * Constructor.
 	 *
 	 * @param string $rest_namespace The namespace.
+	 * @param Interface_Logger_Service $logger         The logger service.
 	 */
-	public function __construct( $rest_namespace ) {
+	public function __construct( $rest_namespace, Interface_Logger_Service $logger ) {
+		parent::__construct( $logger );
 		$this->namespace = $rest_namespace;
 		$this->rest_base = '/payment';
 	}
@@ -32,7 +35,7 @@ class Payment_REST_Controller extends REST_Controller {
 	 * Register the API endpoints.
 	 */
 	public function register_routes(): void {
-
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$data_methods = array(
 			self::PARAM_STORE_ID    => $this->get_arg_string(),
 			self::PARAM_MERCHANT_ID => $this->get_arg_string(),

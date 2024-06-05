@@ -15,7 +15,7 @@ use SeQura\WC\Services\Interface_Logger_Service;
 /**
  * Define the assets related functionality
  */
-class Assets_Controller implements Interface_Assets_Controller {
+class Assets_Controller extends Controller implements Interface_Assets_Controller {
 
 	private const HANDLE_SETTINGS_PAGE     = 'sequra-settings';
 	private const HANDLE_CORE              = 'sequra-core';
@@ -50,13 +50,6 @@ class Assets_Controller implements Interface_Assets_Controller {
 	private $i18n;
 
 	/**
-	 * Logger service
-	 *
-	 * @var Interface_Logger_Service
-	 */
-	private $logger;
-
-	/**
 	 * Settings service
 	 *
 	 * @var Configuration
@@ -81,6 +74,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 		Interface_Logger_Service $logger, 
 		Configuration $configuration 
 	) {
+		parent::__construct( $logger );
 		$this->assets_dir_url  = $assets_dir_url;
 		$this->assets_dir_path = $assets_dir_path;
 		$this->assets_version  = $assets_version;
@@ -93,9 +87,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 * Enqueue styles and scripts in WP-Admin
 	 */
 	public function enqueue_admin(): void {
-
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-
 		if ( ! $this->configuration->is_settings_page() ) {
 			return;
 		}
@@ -215,6 +207,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 * Enqueue styles and scripts in Front-End
 	 */
 	public function enqueue_front(): void {
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 	}
 
 	/**
