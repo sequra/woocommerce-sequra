@@ -122,6 +122,13 @@ if (!window.SequraFE) {
                     isActive: activePage === SequraFE.appStates.TRANSACTION
                 })
             }
+            if (SequraFE.pages?.advanced?.[0]) {
+                menuItems.push({
+                    label: 'general.advanced',
+                    href: window.location.href.split('#')[0] + '#advanced',
+                    isActive: activePage === SequraFE.appStates.ADVANCED
+                })
+            }
 
             return menuItems;
         }

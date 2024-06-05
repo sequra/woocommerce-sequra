@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\OrderStatusSettings\Requests\OrderStatusSettingsRequest;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
+use SeQura\WC\Services\Interface_Logger_Service;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -25,8 +26,10 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * Constructor.
 	 *
 	 * @param string            $rest_namespace The namespace.
+	 * @param Interface_Logger_Service $logger         The logger service.
 	 */
-	public function __construct( $rest_namespace ) {
+	public function __construct( $rest_namespace, Interface_Logger_Service $logger ) {
+		parent::__construct( $logger );
 		$this->namespace = $rest_namespace;
 		$this->rest_base = '/settings';
 	}
@@ -35,6 +38,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * Register the API endpoints.
 	 */
 	public function register_routes(): void {
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$store_id_args = array( self::PARAM_STORE_ID => $this->get_arg_string() );
 		$general_args  = array_merge(
 			$store_id_args,
@@ -145,7 +149,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		try {
 			$response = AdminAPI::get()
 			->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getUIState( true ) // TODO: Pass false if the Onboarding does not configure widgets. 
+			->getUIState( true ) // Pass false if the Onboarding does not configure widgets. 
 			->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.

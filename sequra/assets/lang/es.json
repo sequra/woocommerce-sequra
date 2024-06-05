@@ -15,6 +15,7 @@
     "settings": "Ajustes",
     "paymentMethods": "Métodos de pago",
     "transactionLogs": "",
+    "advanced": "Avanzado",
     "changesSaved": "Cambios guardados exitosamente.",
     "noItemsAvailable": "No hay elementos disponibles",
     "mode": {
@@ -78,7 +79,7 @@
         "categories": "No se pudieron recuperar las categorías.",
         "paymentMethods": ""
       },
-      "orderStatusSettings" : {
+      "orderStatusSettings": {
         "orderStatuses": ""
       },
       "webhooks": {
@@ -159,6 +160,16 @@
     },
     "yes": "",
     "no": ""
+  },
+  "debug": {
+    "title": "Habilitar registros de depuración",
+    "description": "Ayuda a diagnosticar problemas en la integración de seQura",
+    "noLogs": "There are no logs available",
+    "log": {
+      "severity": "Severity",
+      "message": "Message",
+      "datetime": "Date and time"
+    }
   },
   "connection": {
     "title": {

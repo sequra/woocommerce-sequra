@@ -69,6 +69,7 @@ if (!window.SequraFE.components) {
         this.open = () => {
             const modalTemplate =
                 '<div id="sq-modal" class="sq-modal sqs--hidden">\n' +
+                '    <div class="sq-modal-backdrop"></div>' +
                 '    <div class="sqp-modal-content">' +
                 '        <button class="sqp-close-button"><span></span></button>' +
                 '        <div class="sqp-title"></div>' +

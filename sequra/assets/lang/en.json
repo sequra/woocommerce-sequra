@@ -15,6 +15,7 @@
     "settings": "Settings",
     "paymentMethods": "Payment methods",
     "transactionLogs": "Transaction logs",
+    "advanced": "Advanced",
     "changesSaved": "Changes saved successfully.",
     "noItemsAvailable": "No items available",
     "mode": {
@@ -28,6 +29,8 @@
       "saveEntityFailed": "Failed to save entity because %s",
       "getEntityFailed": "Failed to retrieve entity because %s",
       "failedToRetrieveStores": "Failed to retrieve stores.",
+      "failedToRetrieveLog": "Failed to retrieve log content.",
+      "failedToRemoveLog": "Failed to remove log content.",
       "failedToRetrieveOrderStatuses": "Failed to retrieve order statuses.",
       "stores": {
         "failed": "Failed to retrieve stores.",
@@ -160,6 +163,24 @@
     },
     "yes": "Yes",
     "no": "No"
+  },
+  "debug": {
+    "title": "Enable logs",
+    "description": "Help to diagnose issues with the seQura integration",
+    "reload": "Reload",
+    "remove": "Remove",
+    "noLogs": "There are no logs available",
+    "log": {
+      "severity": "Severity",
+      "message": "Message",
+      "datetime": "Date and time",
+      "removeModal": {
+        "title": "Delete logs",
+        "message": "Are you sure you want to clear the logs? You won't be able to recover them."
+      },
+      "minLevel": "Minimum severity level",
+      "minLevelDescription": "Set the minimum severity level of logs to write to the log file."
+    }
   },
   "connection": {
     "title": {

@@ -90,11 +90,6 @@ ul > li {
   padding: 0;
 }
 
-/*
-  description:
-    'Fix placeholder styles (https://css-tricks.com/almanac/selectors/p/placeholder/).',
-    '(default placeholder opacity)'
-*/
 input::placeholder {
   opacity: 1;
 }
@@ -171,32 +166,6 @@ button[disabled] > * {
   text-rendering: geometricPrecision;
 }
 
-/* @doc(group) { name: 'sass-extend', title: 'Sass extend' } */ /* @doc(group) { name: 'helpers', title: 'Helpers'} */
-/* @doc(function) {
-  description: 'Concatenate strings',
-  return: 'string that is joined from items',
-  params: {
-    $separator: 'string to use when concatenating values',
-    $items: 'item csv list to concatenate',
-  }
-}
-*/
-/* @doc(group) { name: 'map', title: 'Map'} */
-/* @doc(function) {
-  description: 'Check if variable is map'
-}
-*/
-/* @doc(function) {} */
-/* @doc(function) {
-  description: 'Get items from map',
-  return: 'map item value',
-}
-*/
-/* @doc(function) {
-  description: 'Merge second map into the first map',
-  return: 'new map which is result of the merge',
-}
-*/
 h2 {
   font-weight: 600;
   font-size: 24px;
@@ -242,6 +211,11 @@ table tr th {
   // min-height: 100vh;
   padding: 30px 20px 60px 30px;
   // background: #f3f6f9;
+
+  .sq-page-content {
+    position: relative;
+    z-index: 2
+  }
 }
 #sq-page-wrapper .sq-page-content-wrapper {
   position: relative;
@@ -412,7 +386,7 @@ table tr th {
   min-width: 780px;
 }
 .sq-table-container table .sqm--text-left {
-  text-align: left;
+  text-align: left !important;
 }
 .sq-table-container table tr .sq-button {
   font-size: inherit;
@@ -484,7 +458,7 @@ table tr th {
 }
 
 .sq-modal {
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
@@ -493,19 +467,25 @@ table tr th {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 250px;
+  width: min(600px, 90%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  &-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+  }
 }
 @media (max-width: 767.98px) {
   .sq-modal {
     padding: 10px;
   }
 }
-.sq-modal.sqv--connection-modal {
-  height: 250px;
-  width: 600px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
+
 .sq-modal .sqp-modal-content {
   display: flex;
   flex-direction: column;
@@ -572,47 +552,47 @@ table tr th {
   gap: 10px;
 }
 
-body {
+#sequra-page {
   color: #000;
   // background-color: #f3f6f9;
-}
-body > * {
-  font-family: "Inter", sans-serif;
-  font-size: 15px;
-  line-height: 1.4;
-}
+  & > * {
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
+  }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-table thead tr th {
-  border-bottom: 1px solid #dce0e5;
-}
-table tr:not(:last-of-type) td {
-  border-bottom: 1px solid #dce0e5;
-}
-table tr th,
-table tr td {
-  text-align: center;
-  padding: 14px;
-}
-table tr th.sqm--left-aligned,
-table tr td.sqm--left-aligned {
-  text-align: left;
-}
-table tr th.sqm--blue-text,
-table tr td.sqm--blue-text {
-  color: #0066ff;
-}
-table tr td {
-  font-weight: 400;
-}
-table tr td:last-of-type {
-  white-space: nowrap;
-}
-table tr th {
-  font-weight: 600;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table thead tr th {
+    border-bottom: 1px solid #dce0e5;
+  }
+  table tr:not(:last-of-type) td {
+    border-bottom: 1px solid #dce0e5;
+  }
+  table tr th,
+  table tr td {
+    text-align: center;
+    padding: 14px;
+  }
+  table tr th.sqm--left-aligned,
+  table tr td.sqm--left-aligned {
+    text-align: left;
+  }
+  table tr th.sqm--blue-text,
+  table tr td.sqm--blue-text {
+    color: #0066ff;
+  }
+  table tr td {
+    font-weight: 400;
+  }
+  table tr td:last-of-type {
+    white-space: nowrap;
+  }
+  table tr th {
+    font-weight: 600;
+  }
 }
 
 @font-face {
@@ -1612,6 +1592,14 @@ table tr th {
 .sq-field-wrapper.sqm--block {
   display: block;
 }
+.sqm--block {
+  &-inline {
+    margin-bottom: 0;
+    .sq-button {
+      padding: 12px 24px;
+    }
+  }
+}
 
 .sq-country-field-wrapper {
   display: flex;
@@ -2004,6 +1992,129 @@ table tr th {
   background: #ff3d00;
 }
 
+// DataTable -------
+
+tr:has(.sqm--log):hover {
+  background: #f4f4f4;
+}
+
+.sqm--log {
+  font-family: monospace;
+  font-size: 12px;
+
+  &-info {
+    color: #2196f3;
+  }
+  &-warning {
+    color: #ff9800;
+  }
+  &-error {
+    color: #f44336;
+  }
+  &-debug {
+    color: #000;
+  }
+}
+
+.sq-datatable {
+  &__wrapper {
+  }
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    font-size: 15px;
+    align-items: center;
+  }
+  &__container {
+  }
+  &__bottom {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 15px;
+    align-items: center;
+  }
+  &__info {
+    color: #686565;
+  }
+  &__pagination {
+    justify-self: flex-end;
+  }
+  &__pagination-list {
+    display: flex;
+    margin-left: auto;
+    margin-right: 0;
+
+    .datatable-pagination-list-item {
+      .datatable-pagination-list-item-link {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 2rem;
+        color: #000;
+        transition: all 0.15s;
+        margin: 0 0.25rem;
+        cursor: pointer;
+      }
+      &.sq-datatable__active,
+      &:hover:not(.datatable-disabled) {
+        .datatable-pagination-list-item-link {
+          background-color: #000;
+          color: #fff;
+        }
+      }
+      &.datatable-disabled {
+        .datatable-pagination-list-item-link {
+          color: #686565;
+          cursor: not-allowed;
+        }
+      }
+    }
+    // sq-datatable__ellipsis
+    // datatable-pagination-list-item sq-datatable__ellipsis datatable-disabled
+  }
+  &__search {
+    justify-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__selector {
+    padding: 8px 16px !important;
+    color: #000 !important;
+    border: 1px solid #dce0e5 !important;
+    border-radius: 6px !important;
+    min-width: 80px !important;
+    outline-color: transparent !important;
+    &:focus,
+    &:hover,
+    &:active {
+      border-color: #6fcf97 !important;
+      box-shadow: none !important;
+    }
+  }
+
+  &__input {
+    padding: 8px 16px !important;
+    color: #000 !important;
+    border: 1px solid #dce0e5 !important;
+    border-radius: 6px !important;
+    min-width: 300px !important;
+    outline-color: transparent !important;
+    &:focus,
+    &:hover,
+    &:active {
+      border-color: #6fcf97 !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+// DataTable ------
+
 * + .sqp-flash-message-wrapper,
 .sqp-flash-message-wrapper + * {
   margin-top: 20px;
@@ -2034,6 +2145,33 @@ body {
     line-height: 1;
     font-weight: 500;
     font-size: 20px;
+  }
+}
+.sqm--log-details {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  background: #fff;
+  border-radius: 20px;
+  width: 20px;
+  height: 20px;
+  &::before {
+    font-family: "sq-icons";
+    content: "\e909";
+    line-height: 1;
+    font-weight: 500;
+    font-size: 14px;
+    color: #000;
+  }
+  > span {
+    display: none;
+  }
+  &.sqm--log-details-open {
+    background: #000;
+    &::before {
+      color: #fff;
+    }
   }
 }
 

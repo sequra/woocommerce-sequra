@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\WC\Services\Interface_Logger_Service;
 use WP_REST_Request;
 
 /**
@@ -17,6 +18,22 @@ abstract class REST_Controller extends \WP_REST_Controller {
 
 	protected const PARAM_STORE_ID    = 'storeId';
 	protected const PARAM_MERCHANT_ID = 'merchantId';
+
+	/**
+	 * Logger service.
+	 *
+	 * @var Interface_Logger_Service
+	 */
+	protected $logger;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Interface_Logger_Service $logger         The logger service.
+	 */
+	public function __construct( Interface_Logger_Service $logger ) {
+		$this->logger = $logger;
+	}
 
 	/**
 	 * Check if the current user can manage options.
@@ -47,6 +64,18 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 */
 	protected function register_post( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ): void {
 		$this->register( \WP_REST_Server::CREATABLE, $endpoint, $fun, $args, $permission_callback );
+	}
+
+	/**
+	 * Register DELETE endpoint.
+	 * 
+	 * @param string $endpoint The endpoint.
+	 * @param string $fun       The function.
+	 * @param mixed[]  $args The arguments. See https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
+	 * @param string $permission_callback The permission callback.
+	 */
+	protected function register_delete( $endpoint, $fun, $args = array(), $permission_callback = 'can_user_manage_options' ): void {
+		$this->register( \WP_REST_Server::DELETABLE, $endpoint, $fun, $args, $permission_callback );
 	}
 
 	/**
@@ -93,6 +122,17 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	}
 
 	/**
+	 * Validate if the parameter is an integer.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
+	 */
+	public function validate_is_int( $param, $request, $key ): bool {
+		return is_int( $param );
+	}
+
+	/**
 	 * Validate id the parameter is an array of IP addresses.
 	 * 
 	 * @param mixed $param The parameter.
@@ -120,6 +160,15 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 */
 	public function sanitize_bool( $param ): bool {
 		return (bool) $param;
+	}
+	
+	/**
+	 * Sanitize boolean.
+	 * 
+	 * @param mixed $param The parameter.
+	 */
+	public function sanitize_int( $param ): int {
+		return intval( $param );
 	}
 
 	/**
@@ -163,6 +212,23 @@ abstract class REST_Controller extends \WP_REST_Controller {
 			array(
 				'validate_callback' => array( $this, 'validate_is_bool' ),
 				'sanitize_callback' => array( $this, 'sanitize_bool' ),
+			)
+		);
+	}
+
+	/**
+	 * Get argument structure for a integer parameter.
+	 * 
+	 * @param bool $required      If the argument is required.
+	 * @param mixed $default_value The default value. Null will be ignored.
+	 * @return mixed[]
+	 */
+	protected function get_arg_int( $required = true, $default_value = null ): array {
+		return array_merge(
+			$this->get_arg( $required, $default_value ),
+			array(
+				'validate_callback' => array( $this, 'validate_is_int' ),
+				'sanitize_callback' => array( $this, 'sanitize_int' ),
 			)
 		);
 	}

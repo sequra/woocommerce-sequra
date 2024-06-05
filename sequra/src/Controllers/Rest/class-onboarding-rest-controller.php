@@ -13,6 +13,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
+use SeQura\WC\Services\Interface_Logger_Service;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -26,8 +27,10 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * Constructor.
 	 *
 	 * @param string $rest_namespace The namespace.
+	 * @param Interface_Logger_Service $logger The logger service.
 	 */
-	public function __construct( $rest_namespace ) {
+	public function __construct( $rest_namespace, Interface_Logger_Service $logger ) {
+		parent::__construct( $logger );
 		$this->namespace = $rest_namespace;
 		$this->rest_base = '/onboarding';
 	}
@@ -36,7 +39,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * Register the API endpoints.
 	 */
 	public function register_routes(): void {
-
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$store_id_args = array( self::PARAM_STORE_ID => $this->get_arg_string() );
 
 		$data_args = array_merge(

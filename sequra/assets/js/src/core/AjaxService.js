@@ -85,9 +85,10 @@ if (!window.SequraFE.customHeader) {
          *
          * @param {string} url The URL to call.
          * @param {Record<string, any>?} data
+         * @param {Record<string, string>?} customHeader
          * @param {(error: Record<string, any>) => Promise<void>?} errorCallback
          */
-        const del = (url, data, errorCallback) => call('DELETE', url, data, errorCallback);
+        const del = (url, data, customHeader, errorCallback) => call('DELETE', url, data, errorCallback, customHeader);
 
         /**
          * Performs ajax call.
@@ -133,7 +134,7 @@ if (!window.SequraFE.customHeader) {
                 fetch(url, { method, headers, body }).then((response) => {
                     if (callUUID !== SequraFE.StateUUIDService.getStateUUID()) {
                         // Obsolete request. The app has changed the original state (page) that issued the call.
-                        console.log('cancelling an obsolete request', url);
+                        // console.log('cancelling an obsolete request', url);
                         return;
                     }
 

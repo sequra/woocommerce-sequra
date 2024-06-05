@@ -10,11 +10,12 @@ namespace SeQura\WC\Controllers;
 
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Interface_I18n;
+use SeQura\WC\Services\Interface_Logger_Service;
 
 /**
  * Define the assets related functionality
  */
-class Assets_Controller implements Interface_Assets_Controller {
+class Assets_Controller extends Controller implements Interface_Assets_Controller {
 
 	private const HANDLE_SETTINGS_PAGE     = 'sequra-settings';
 	private const HANDLE_CORE              = 'sequra-core';
@@ -62,6 +63,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 * @param string $assets_dir_path Path to the assets directory.
 	 * @param string $assets_version Version of the assets.
 	 * @param Interface_I18n $i18n I18n service.
+	 * @param Interface_Logger_Service $logger Logger service.
 	 * @param Configuration $configuration Configuration service.
 	 */
 	public function __construct( 
@@ -69,12 +71,15 @@ class Assets_Controller implements Interface_Assets_Controller {
 		$assets_dir_path, 
 		$assets_version, 
 		Interface_I18n $i18n, 
+		Interface_Logger_Service $logger, 
 		Configuration $configuration 
 	) {
+		parent::__construct( $logger );
 		$this->assets_dir_url  = $assets_dir_url;
 		$this->assets_dir_path = $assets_dir_path;
 		$this->assets_version  = $assets_version;
 		$this->i18n            = $i18n;
+		$this->logger          = $logger;
 		$this->configuration   = $configuration;
 	}
 
@@ -82,6 +87,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 * Enqueue styles and scripts in WP-Admin
 	 */
 	public function enqueue_admin(): void {
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( ! $this->configuration->is_settings_page() ) {
 			return;
 		}
@@ -117,8 +123,8 @@ class Assets_Controller implements Interface_Assets_Controller {
 			array(
 				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
 				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
-				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
-				'saveWidgetSettingsUrl'  => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
+				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
+				'saveWidgetSettingsUrl'  => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
 			)
 		);
 		$page_config            = array(
@@ -129,19 +135,28 @@ class Assets_Controller implements Interface_Assets_Controller {
 					'getShopPaymentMethodsUrl'          => '', // TODO: Add the URL.
 					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
 					'getShopProductsUrl'                => '', // TODO: Add the URL.
-					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
-					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
+					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
+					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
 					'getShopOrderStatusesUrl'           => get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
 					'getOrderStatusMappingSettingsUrl'  => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
 					'saveOrderStatusMappingSettingsUrl' => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
-					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ), // TODO: Add the URL.
+					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
 				)
 			),
 			'payment'      => $payment_page_config,
 			'transactions' => array_merge(
 				$connection_config,
 				array(
-					'getTransactionLogsUrl' => get_rest_url( null, 'sequra/v1/log/{storeId}' ), // TODO: Add the URL.
+					'getTransactionLogsUrl' => get_rest_url( null, 'sequra/v1/log/{storeId}' ),
+				)
+			),
+			'advanced'     => array_merge(
+				$connection_config,
+				array(
+					'getLogsUrl'          => get_rest_url( null, 'sequra/v1/log/{storeId}' ),
+					'removeLogsUrl'       => get_rest_url( null, 'sequra/v1/log/{storeId}' ),
+					'getLogsSettingsUrl'  => get_rest_url( null, 'sequra/v1/log/settings/{storeId}' ),
+					'saveLogsSettingsUrl' => get_rest_url( null, 'sequra/v1/log/settings/{storeId}' ),
 				)
 			),
 		);
@@ -162,12 +177,13 @@ class Assets_Controller implements Interface_Assets_Controller {
 				'current' => $this->load_translation( $this->i18n->get_lang() ),
 			),
 			'pages'             => array(
-				'onboarding'   => array( 'connect', 'countries', 'widgets' ),
+				'onboarding' => array( 'connect', 'countries', 'widgets' ),
 				// 'onboarding'   => array( 'connect', 'countries' ),
 				// 'settings'     => array( 'general', 'connection', 'order_status' ),
-				'settings'     => array( 'general', 'connection', 'order_status', 'widget' ),
-				'payment'      => $pages_payment,
-				'transactions' => array( 'logs' ),
+				'settings'   => array( 'general', 'connection', 'order_status', 'widget' ),
+				'payment'    => $pages_payment,
+				// 'transactions' => array( 'logs' ),
+				'advanced'   => array( 'debug' ),
 			),
 			'integration'       => array(
 				'authToken'    => '', // TODO: Add the token?
@@ -191,6 +207,7 @@ class Assets_Controller implements Interface_Assets_Controller {
 	 * Enqueue styles and scripts in Front-End
 	 */
 	public function enqueue_front(): void {
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 	}
 
 	/**
@@ -205,7 +222,9 @@ class Assets_Controller implements Interface_Assets_Controller {
 		
 		global $wp_filesystem;
 		require_once ABSPATH . '/wp-admin/includes/file.php';
-		WP_Filesystem();
+		if ( ! WP_Filesystem() ) {
+			return $translations;
+		}
 
 		if ( ! $wp_filesystem->exists( $path ) ) {
 			return $translations;
