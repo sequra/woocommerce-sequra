@@ -417,9 +417,9 @@ if (!window.SequraFE) {
             utilities.showLoader();
             api.get(configuration.getLogsUrl, null, SequraFE.customHeader)
                 .then(logsRes => {
-                    SequraFE.state.setData('logs', logsRes)
                     logs = logsRes;
-
+                    SequraFE.state.setData('logs', logs)
+                    initializeDataTable();
                 }).catch(error => {
                     console.error(error);
                     showFlashMessage('general.errors.failedToRetrieveLog', 'error');
