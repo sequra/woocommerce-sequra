@@ -145,7 +145,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		try {
 			$response = AdminAPI::get()
 			->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getUIState( true ) // TODO: Pass false if the Onboarding does not configure widgets. 
+			->getUIState( true ) // Pass false if the Onboarding does not configure widgets. 
 			->toArray();
 		} catch ( \Throwable $e ) {
 			// TODO: Log error.

@@ -110,8 +110,6 @@ class Plugin {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires WooCommerce ' . $this->data['RequiresWC'] . ' or greater.' ) );
 		}
-
-		// TODO: Do something on activation.
 	}
 
 	/**

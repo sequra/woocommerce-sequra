@@ -131,8 +131,8 @@ class Assets_Controller implements Interface_Assets_Controller {
 			array(
 				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
 				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
-				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
-				'saveWidgetSettingsUrl'  => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ), // TODO: Add the URL.
+				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
+				'saveWidgetSettingsUrl'  => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
 			)
 		);
 		$page_config            = array(
@@ -143,19 +143,19 @@ class Assets_Controller implements Interface_Assets_Controller {
 					'getShopPaymentMethodsUrl'          => '', // TODO: Add the URL.
 					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
 					'getShopProductsUrl'                => '', // TODO: Add the URL.
-					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
-					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ), // TODO: Add the URL.
+					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
+					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
 					'getShopOrderStatusesUrl'           => get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
 					'getOrderStatusMappingSettingsUrl'  => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
 					'saveOrderStatusMappingSettingsUrl' => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
-					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ), // TODO: Add the URL.
+					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
 				)
 			),
 			'payment'      => $payment_page_config,
 			'transactions' => array_merge(
 				$connection_config,
 				array(
-					'getTransactionLogsUrl' => get_rest_url( null, 'sequra/v1/log/{storeId}' ), // TODO: Add the URL.
+					'getTransactionLogsUrl' => get_rest_url( null, 'sequra/v1/log/{storeId}' ),
 				)
 			),
 			'advanced'     => array_merge(

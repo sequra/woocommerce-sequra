@@ -426,8 +426,6 @@ class Bootstrap extends BootstrapComponent {
 
 		parent::initRepositories();
 
-		// TODO: add sequra-core repositories implementations here...
-
 		RepositoryRegistry::registerRepository( ConfigEntity::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( QueueItem::class, Queue_Item_Repository::class );
 		RepositoryRegistry::registerRepository( Process::class, Entity_Repository::class );
