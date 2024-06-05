@@ -17,6 +17,8 @@ use WP_Filesystem_Base;
  */
 class Log_File implements Interface_Log_File {
 
+	private const MAX_LOG_SIZE = 2 * 1024 * 1024; // 2MB
+
 	/**
 	 * The path to the log file.
 	 *
@@ -94,7 +96,10 @@ class Log_File implements Interface_Log_File {
 	 * @param string $store_id The store ID.
 	 * @throws \Exception If something goes wrong. The exception message will contain the error message.
 	 */
-	public function clear( $store_id ): void {
+	public function clear( $store_id = null ): void {
+		if ( null === $store_id ) {
+			$store_id = $this->current_store_id();
+		}
 		$log_file_path = $this->get_log_file_path( $store_id );
 		$wp_filesystem = $this->get_file_system();
 		if ( $wp_filesystem->exists( $log_file_path ) && ! $wp_filesystem->delete( $log_file_path, false, 'f' ) ) {
@@ -132,6 +137,13 @@ class Log_File implements Interface_Log_File {
 			if ( ! $wp_filesystem->is_writable( dirname( $log_file_path ) ) ) {
 				return false;
 			}
+
+			// check if log file exceed 2MB and if so, clear it.
+			if ( filesize( $log_file_path ) >= self::MAX_LOG_SIZE ) {
+				$this->clear();
+				return $this->setup();
+			}
+
 			return true;
 		} catch ( Throwable $e ) {
 			return false;
@@ -146,8 +158,15 @@ class Log_File implements Interface_Log_File {
 	private function get_log_file_path( $store_id = null ): string {
 		$path = $this->log_file_path;
 		if ( null === $store_id ) {
-			$store_id = (string) get_current_blog_id();
+			$store_id = $this->current_store_id();
 		}
 		return str_replace( '{storeId}', $store_id, $path );
+	}
+
+	/**
+	 * Get the current store ID.
+	 */
+	private function current_store_id(): string {
+		return (string) get_current_blog_id();
 	}
 }

@@ -37,7 +37,7 @@ interface Interface_Log_File {
 	 * @param string $store_id The store ID.
 	 * @throws \Exception If something goes wrong. The exception message will contain the error message.
 	 */
-	public function clear( $store_id ): void;
+	public function clear( $store_id = null ): void;
 
 	/**
 	 * Make sure the log file exists and is writable.
