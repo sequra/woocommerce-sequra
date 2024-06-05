@@ -18,7 +18,7 @@ e2e-tests/node_modules/*
 .devcontainer/wp-includes
 .devcontainer/wp-content
 .devcontainer/wordpress-tests-lib
-sequra-legacy/sequra.log
+*.log
 override.env
 .DS_Store
 .env

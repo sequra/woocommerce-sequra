@@ -79,18 +79,6 @@ if (!window.SequraFE) {
             widgetLabels: {
                 message: 'Desde %s/mes',
                 messageBelowLimit: 'Fracciona a partir de %s'
-                // messages: {
-                //     "ES": "Desde %s/mes",
-                //     "FR": "À partir de %s/mois",
-                //     "IT": "Da %s/mese",
-                //     "PT": "De %s/mês"
-                // },
-                // messagesBelowLimit: {
-                //     "ES": "Fracciona a partir de %s",
-                //     "FR": "Fraction de %s",
-                //     "IT": "Frazione da %s",
-                //     "PT": "Fração de %s"
-                // }
             },
             widgetStyles: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
             showInstallmentAmountInProductListing: false,

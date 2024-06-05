@@ -28,25 +28,31 @@ use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSet
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
+use SeQura\Core\Infrastructure\Logger\Interfaces\DefaultLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
+use SeQura\Core\Infrastructure\Logger\LoggerConfiguration;
 use SeQura\Core\Infrastructure\ORM\RepositoryRegistry;
 use SeQura\Core\Infrastructure\ServiceRegister as Reg;
 use SeQura\Core\Infrastructure\TaskExecution\Process;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
+use SeQura\Core\Infrastructure\Utility\TimeProvider;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Core\Category_Service;
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Core\Configuration_Service;
+use SeQura\WC\Services\Core\Default_Logger_Adapter;
 use SeQura\WC\Services\Core\Disconnect_Service;
 use SeQura\WC\Services\Core\Encryptor;
-use SeQura\WC\Services\Core\Logger;
 use SeQura\WC\Services\Core\Order_Status_Service;
 use SeQura\WC\Services\Core\Order_Status_Settings_Service;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
+use SeQura\WC\Services\Core\Shop_Logger_Adapter;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
+use SeQura\WC\Services\Interface_Log_File;
+use SeQura\WC\Services\Log_File;
 
 /**
  * Implementation for the core bootstrap class.
@@ -106,6 +112,15 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache['plugin.file_path'] = Reg::getService( 'plugin.dir_path' ) . 'sequra.php';
 				}
 				return self::$cache['plugin.file_path'];
+			}
+		);
+		Reg::registerService(
+			'plugin.log_file_path',
+			static function () {
+				if ( ! isset( self::$cache['plugin.log_file_path'] ) ) {
+					self::$cache['plugin.log_file_path'] = Reg::getService( 'plugin.dir_path' ) . 'sequra.{storeId}.log';
+				}
+				return self::$cache['plugin.log_file_path'];
 			}
 		);
 
@@ -192,7 +207,6 @@ class Bootstrap extends BootstrapComponent {
 	protected static function initServices(): void {
 		parent::initServices();
 
-		// TODO: add sequra-core services implementations here...
 		Reg::registerService(
 			EncryptorInterface::class,
 			static function () {
@@ -288,12 +302,42 @@ class Bootstrap extends BootstrapComponent {
 		);
 
 		Reg::registerService(
+			Interface_Log_File::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Log_File::class ] ) ) {
+					self::$cache[ Interface_Log_File::class ] = new Log_File(
+						Reg::getService( 'plugin.log_file_path' )
+					);
+				}
+				return self::$cache[ Interface_Log_File::class ];
+			}
+		);
+		Reg::registerService(
 			ShopLoggerAdapter::CLASS_NAME,
 			static function () {
 				if ( ! isset( self::$cache[ ShopLoggerAdapter::CLASS_NAME ] ) ) {
-					self::$cache[ ShopLoggerAdapter::CLASS_NAME ] = new Logger();
+					self::$cache[ ShopLoggerAdapter::CLASS_NAME ] = new Shop_Logger_Adapter();
 				}
 				return self::$cache[ ShopLoggerAdapter::CLASS_NAME ];
+			}
+		);
+		Reg::registerService(
+			DefaultLoggerAdapter::CLASS_NAME,
+			static function () {
+				if ( ! isset( self::$cache[ DefaultLoggerAdapter::CLASS_NAME ] ) ) {
+					self::$cache[ DefaultLoggerAdapter::CLASS_NAME ] = new Default_Logger_Adapter(
+						Reg::getService( Interface_Log_File::class ),
+						Reg::getService( TimeProvider::CLASS_NAME )
+					);
+				}
+				return self::$cache[ DefaultLoggerAdapter::CLASS_NAME ];
+			}
+		);
+
+		Reg::registerService(
+			LoggerConfiguration::class, 
+			static function () {
+				return LoggerConfiguration::getInstance();
 			}
 		);
 
@@ -349,6 +393,19 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Services\Interface_I18n::class ];
 			}
 		);
+
+		Reg::registerService(
+			Services\Interface_Logger_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Services\Interface_Logger_Service::class ] ) ) {
+					self::$cache[ Services\Interface_Logger_Service::class ] = new Services\Logger_Service(
+						Reg::getService( LoggerConfiguration::class ),
+						Reg::getService( Interface_Log_File::class )
+					);
+				}
+				return self::$cache[ Services\Interface_Logger_Service::class ];
+			}
+		);
 	}
 
 	/**
@@ -392,8 +449,6 @@ class Bootstrap extends BootstrapComponent {
 	protected static function initControllers(): void {
 		parent::initControllers();
 
-		// TODO: add sequra-core repositories implementations here...
-
 		// Plugin controllers.
 		Reg::registerService(
 			Controllers\Interface_I18n_Controller::class,
@@ -415,6 +470,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( 'plugin.dir_path' ) . 'assets', 
 						Reg::getService( 'plugin.data' )['Version'],
 						Reg::getService( Services\Interface_I18n::class ),
+						Reg::getService( Services\Interface_Logger_Service::class ),
 						Reg::getService( Configuration::class )
 					);
 				}
@@ -471,7 +527,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Controllers\Rest\Log_REST_Controller::class ] ) ) {
 					self::$cache[ Controllers\Rest\Log_REST_Controller::class ] = new Controllers\Rest\Log_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' )
+						Reg::getService( 'plugin.rest_namespace' ),
+						Reg::getService( Services\Interface_Logger_Service::class )
 					);
 				}
 				return self::$cache[ Controllers\Rest\Log_REST_Controller::class ];

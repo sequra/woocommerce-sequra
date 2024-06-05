@@ -6,7 +6,8 @@ SequraFE.appStates = {
     ONBOARDING: 'onboarding',
     SETTINGS: 'settings',
     PAYMENT: 'payment',
-    TRANSACTION: 'transactions'
+    TRANSACTION: 'transactions',
+    ADVANCED: 'advanced'
 };
 
 SequraFE.appPages = {
@@ -26,6 +27,9 @@ SequraFE.appPages = {
     },
     TRANSACTION: {
         LOGS: 'logs'
+    },
+    ADVANCED: {
+        DEBUG: 'debug'
     }
 };
 
@@ -74,6 +78,7 @@ SequraFE.appPages = {
      * @property {ShopOrderStatus[] | null} shopOrderStatuses
      * @property {ShopPaymentMethod[] | null} shopPaymentMethods
      * @property {TransactionLog[] | null} transactionLogs
+     * @property {string[] | null} logs
      */
 
     /**
@@ -94,21 +99,29 @@ SequraFE.appPages = {
         /**
          * @type {DataStore}
          */
-        let dataStore = {
-            version: null,
-            stores: null,
-            connectionSettings: null,
-            countrySettings: null,
-            generalSettings: null,
-            orderStatusSettings: null,
-            widgetSettings: null,
-            paymentMethods: null,
-            sellingCountries: null,
-            shopCategories: null,
-            shopOrderStatuses: null,
-            shopPaymentMethods: null,
-            transactionLogs: null
-        };
+        let dataStore;
+
+        const clearDataStore = () => {
+            dataStore = {
+                version: null,
+                stores: null,
+                connectionSettings: null,
+                countrySettings: null,
+                generalSettings: null,
+                orderStatusSettings: null,
+                widgetSettings: null,
+                paymentMethods: null,
+                sellingCountries: null,
+                shopCategories: null,
+                shopOrderStatuses: null,
+                shopPaymentMethods: null,
+                transactionLogs: null,
+                logs: null,
+                logsSettingsRes: null
+            };
+        }
+
+        clearDataStore();
 
         /**
          * Main entry point for the application.
@@ -167,13 +180,14 @@ SequraFE.appPages = {
                 api.get(configuration.pageConfiguration.onboarding.getConnectionDataUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader),
                 api.get(configuration.pageConfiguration.onboarding.getCountrySettingsUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader),
                 SequraFE.pages.onboarding.includes(SequraFE.appPages.ONBOARDING.WIDGETS) ? api.get(configuration.pageConfiguration.onboarding.getWidgetSettingsUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader) : null,
-            ]).then(([versionRes, storesRes, connectionSettingsRes, countrySettingsRes, widgetSettingsRes]) => {
+                api.get(configuration.pageConfiguration.advanced.saveLogsSettingsUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader),
+            ]).then(([versionRes, storesRes, connectionSettingsRes, countrySettingsRes, widgetSettingsRes, logsSettingsRes]) => {
                 dataStore.version = versionRes;
                 dataStore.stores = storesRes ?? [];
                 dataStore.connectionSettings = connectionSettingsRes;
                 dataStore.countrySettings = countrySettingsRes;
                 dataStore.widgetSettings = widgetSettingsRes;
-;
+                dataStore.logsSettings = logsSettingsRes;
                 return api.get(configuration.stateUrl.replace('{storeId}', this.getStoreId()), null, SequraFE.customHeader);
             }).then((stateRes) => {
                 if (SequraFE.state.getCredentialsChanged()) {
@@ -193,6 +207,11 @@ SequraFE.appPages = {
                     return;
                 }
 
+                if (SequraFE.pages?.advanced?.includes(page)) {
+                    this.goToState(SequraFE.appStates.ADVANCED + '-' + page, null, true)
+                    return;
+                }
+
                 if (!page || SequraFE.pages.payment?.includes(page)) {
                     this.goToState(SequraFE.appStates.PAYMENT + '-' + SequraFE.appPages.PAYMENT.METHODS, null, true)
 
@@ -200,7 +219,8 @@ SequraFE.appPages = {
                 }
 
                 this.goToState(SequraFE.appStates.SETTINGS + '-' + page, null, true);
-            }).catch(() => {
+            }).catch(e => {
+                console.error(e);
             });
         };
 
@@ -393,6 +413,7 @@ SequraFE.appPages = {
         };
 
         this.getData = (key) => {
+            // debugger
             if (!Object.keys(dataStore).includes(key)) {
                 return null;
             }
@@ -404,24 +425,6 @@ SequraFE.appPages = {
             if (Object.keys(dataStore).includes(key)) {
                 dataStore[key] = value;
             }
-        }
-
-        const clearDataStore = () => {
-            dataStore = {
-                version: null,
-                stores: null,
-                connectionSettings: null,
-                countrySettings: null,
-                generalSettings: null,
-                orderStatusSettings: null,
-                widgetSettings: null,
-                paymentMethods: null,
-                sellingCountries: null,
-                shopCategories: null,
-                shopOrderStatuses: null,
-                shopPaymentMethods: null,
-                transactionLogs: null
-            };
         }
     }
 
