@@ -108,6 +108,7 @@
     "invalidField": "This field is invalid.",
     "invalidJson": "This field contains invalid JSON.",
     "invalidIPAddress": "This field must contain only valid IP addresses.",
+    "invalidTimeDuration": "This field must contain only dates as 2017-08-31 or time duration as P3M15D (3 months and 15 days). Check ISO 8601",
     "invalidJSON": "This field must be a valid JSON.",
     "invalidEmail": "This field must be a valid email.",
     "maxLength": "The field cannot have more than %s characters.",
@@ -342,6 +343,20 @@
     "excludedProducts": {
       "label": "Excluded products",
       "description": "The store products in this field will not be allowed to be purchased with SeQura payment methods. Please enter a valid SKU for every product you would like to exclude."
+    },
+    "enabledForServices": {
+      "label": "Enabled for services",
+      "description": "Your contract must allow selling services. Only one product can be purchased at a time."
+    },
+    "allowFirstServicePaymentDelay": {
+      "label": "Allow first service payment delay"
+    },
+    "allowServiceRegItems": {
+      "label": "Allow registration items"
+    },
+    "defaultServicesEndDate": {
+      "label": "Default services end date",
+      "description": "Dates as 2017-08-31, time duration as P3M15D (3 months and 15 days). The default value for all products."
     }
   },
   "supportLink": {

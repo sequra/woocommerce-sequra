@@ -22,6 +22,16 @@ use WP_REST_Response;
  */
 class General_Settings_REST_Controller extends REST_Controller {
 
+	const PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA = 'sendOrderReportsPeriodicallyToSeQura';
+	const PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE       = 'showSeQuraCheckoutAsHostedPage';
+	const PARAM_ALLOWED_IP_ADDRESSES                      = 'allowedIPAddresses';
+	const PARAM_EXCLUDED_PRODUCTS                         = 'excludedProducts';
+	const PARAM_EXCLUDED_CATEGORIES                       = 'excludedCategories';
+	const PARAM_ENABLED_FOR_SERVICES                      = 'enabledForServices';
+	const PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY         = 'allowFirstServicePaymentDelay';
+	const PARAM_ALLOW_SERVICE_REG_ITEMS                   = 'allowServiceRegItems';
+	const PARAM_DEFAULT_SERVICES_END_DATE                 = 'defaultServicesEndDate';
+	
 	/**
 	 * Constructor.
 	 *
@@ -43,19 +53,23 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$general_args  = array_merge(
 			$store_id_args,
 			array(
-				'sendOrderReportsPeriodicallyToSeQura' => $this->get_arg_bool(),
-				'showSeQuraCheckoutAsHostedPage'       => $this->get_arg_bool( false, false ),
-				'allowedIPAddresses'                   => $this->get_arg_ip_list( true, array() ),
-				'excludedProducts'                     => array(
+				self::PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA => $this->get_arg_bool(),
+				self::PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE => $this->get_arg_bool( false, false ),
+				self::PARAM_ALLOWED_IP_ADDRESSES      => $this->get_arg_ip_list( true, array() ),
+				self::PARAM_EXCLUDED_PRODUCTS         => array(
 					'required'          => true,
 					'validate_callback' => array( $this, 'validate_array_of_product_sku' ),
 					'sanitize_callback' => array( $this, 'sanitize_array_sanitize_text_field' ),
 				),
-				'excludedCategories'                   => array(
+				self::PARAM_EXCLUDED_CATEGORIES       => array(
 					'required'          => false,
 					'validate_callback' => array( $this, 'validate_array_of_product_cat' ),
 					'sanitize_callback' => array( $this, 'sanitize_array_of_ids' ),
 				),
+				self::PARAM_ENABLED_FOR_SERVICES      => $this->get_arg_bool( false, false ),
+				self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY => $this->get_arg_bool( false, true ),
+				self::PARAM_ALLOW_SERVICE_REG_ITEMS   => $this->get_arg_bool( false, true ),
+				self::PARAM_DEFAULT_SERVICES_END_DATE => $this->get_arg_string( false, 'P1Y', array( $this, 'validate_time_duration' ) ),
 			)
 		);
 
@@ -215,11 +229,15 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->saveGeneralSettings(
 				new GeneralSettingsRequest(
-					(bool) $request->get_param( 'sendOrderReportsPeriodicallyToSeQura' ),
-					(bool) $request->get_param( 'showSeQuraCheckoutAsHostedPage' ),
-					(array) $request->get_param( 'allowedIPAddresses' ),
-					(array) $request->get_param( 'excludedProducts' ),
-					(array) $request->get_param( 'excludedCategories' )
+					(bool) $request->get_param( self::PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA ),
+					(bool) $request->get_param( self::PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE ),
+					(array) $request->get_param( self::PARAM_ALLOWED_IP_ADDRESSES ),
+					(array) $request->get_param( self::PARAM_EXCLUDED_PRODUCTS ),
+					(array) $request->get_param( self::PARAM_EXCLUDED_CATEGORIES ),
+					(bool) $request->get_param( self::PARAM_ENABLED_FOR_SERVICES ),
+					(bool) $request->get_param( self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY ),
+					(bool) $request->get_param( self::PARAM_ALLOW_SERVICE_REG_ITEMS ),
+					strval( $request->get_param( self::PARAM_DEFAULT_SERVICES_END_DATE ) )
 				)
 			)
 			->toArray();

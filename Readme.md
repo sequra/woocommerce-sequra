@@ -58,6 +58,16 @@ This repo contains a group of utility scripts under ```bin/``` directory. The go
 | ```./bin/cp_sources``` | Copy WordPress Core and WooCommerce code to ```.devcontainer/``` |
 | ```./bin/publish_to_wordpress.sh``` | Handles the plugin publishing to WordPress.org |
 
+If you require a composer dependency from a GitHub repository, you need to create a `auth.json` file in the root of the repository. Set this as the file content, replacing `GITHUB_TOKEN` with your access token:
+
+```bash
+{
+    "github-oauth": {
+        "github.com": "GITHUB_TOKEN"
+    }
+}
+```
+
 ## Tests
 
 ### Setup
