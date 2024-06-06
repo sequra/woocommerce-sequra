@@ -237,7 +237,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 					(bool) $request->get_param( self::PARAM_ENABLED_FOR_SERVICES ),
 					(bool) $request->get_param( self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY ),
 					(bool) $request->get_param( self::PARAM_ALLOW_SERVICE_REG_ITEMS ),
-					(string) $request->get_param( self::PARAM_DEFAULT_SERVICES_END_DATE )
+					strval( $request->get_param( self::PARAM_DEFAULT_SERVICES_END_DATE ) )
 				)
 			)
 			->toArray();
