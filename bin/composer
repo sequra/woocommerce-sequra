@@ -1,3 +1,10 @@
 #!/bin/bash
+# export GITHUB_TOKEN=$GITHUB_TOKEN
 BASEDIR="$(dirname $(realpath $0))/.."
-docker run --rm -v "$(pwd)"/sequra:/app -w /app composer:latest composer $@
+
+# Check if auth.json exists
+if [ ! -f "$BASEDIR/auth.json" ]; then
+    docker run --rm -v "$BASEDIR/sequra":/app -w /app composer:latest composer $@
+else
+    docker run --rm -v "$BASEDIR/sequra":/app -v "$(pwd)"/auth.json:/tmp/auth.json -w /app composer:latest composer $@
+fi
