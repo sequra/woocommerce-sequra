@@ -154,6 +154,19 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	}
 
 	/**
+	 * Check dates (yyyy-mm-dd) and time durations (PnYnMnDTnHnMnS). ISO 8061 regex to validate the date format.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
+	 */
+	public function validate_time_duration( $param, $request, $key ): bool {
+		// phpcs:ignore Generic.Files.LineLength.TooLong
+		$regex = '/^(?:(?:\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8]))|(?:\d{4}-(?:0[13-9]|1[0-2])-(?:29|30))|(?:\d{2}(?:0[48]|[2468][048]|[13579][26])-(?:02)-29)|(?:\d{2}(?:[02468][048]|[13579][26])-(?:02)-29))(?:T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:Z|[+-][01]\d:[0-5]\d)?)?|P(?:\d+Y)?(?:\d+M)?(?:\d+W)?(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+S)?)?$/';
+		return is_string( $param ) && preg_match( $regex, $param ) === 1;
+	}
+
+	/**
 	 * Sanitize boolean.
 	 * 
 	 * @param mixed $param The parameter.
