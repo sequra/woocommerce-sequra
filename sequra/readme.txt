@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.5.3
-Stable tag: 2.0.11
+Stable tag: 2.0.12
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -78,7 +78,7 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 * PHP extensions enabled: cURL, JSON
 * WordPress 5.9 or greater
 * WooCommerce 6.0 or greater
-* Merchant account at seQura, [sign up here](https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg)
+* Merchant account at seQura, [sign up here](https://sqra.es/signupwen)
 
 = Automatic installation =
 
@@ -103,6 +103,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 2.0.12	=
+* Changed: Sign-up URLs.
 = 2.0.11	=
 * Fixed: Filter order to report by payment_method field instead of _payment_method order meta.
 = 2.0.10	=

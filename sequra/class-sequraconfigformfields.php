@@ -51,7 +51,7 @@ class SequraConfigFormFields {
 				'description' => sprintf(
 					// translators: %s: URL to seQura signup page.
 					__( 'Following information should be provided by seQura, you can sign-up <a href="%s">here</a> to get it.', 'sequra' ),
-					SEQURA_SIGNUP_URL
+					$this->get_signup_url()
 				),
 			),
 			'merchantref'              => array(
@@ -161,6 +161,19 @@ class SequraConfigFormFields {
 		 * @since 2.0.0
 		 */
 		$this->pm->form_fields = apply_filters( 'woocommerce_sequra_init_form_fields', $this->pm->form_fields, $this );
+	}
+
+	/**
+	 * Get signup URL
+	 *
+	 * @return string
+	 */
+	private function get_signup_url() {
+		$lang = substr( get_locale(), 0, 2 );
+		if ( in_array( $lang, array( 'es', 'pt', 'it', 'fr' ), true ) ) {
+			return 'https://sqra.es/signupw' . $lang;
+		}
+		return 'https://sqra.es/signupwen';
 	}
 
 	/**

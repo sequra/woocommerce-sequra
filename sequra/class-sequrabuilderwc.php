@@ -629,23 +629,23 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	public function getShippedOrderList() {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		$args = array(
-			'limit'      => -1,
+			'limit'          => -1,
 			'payment_method' => 'sequra',
-			'meta_query' => array(
+			'meta_query'     => array(
 				'relation' => 'AND',
 				array(
 					'key'     => '_sent_to_sequra',
 					'compare' => 'NOT EXISTS',
 				),
 			),
-			'type'       => 'shop_order',
+			'type'           => 'shop_order',
 			/**
 			 * Filter the order statuses to consider as shipped.
 			 *
 			 * @since 2.0.0
 			 */
-			'status'     => apply_filters( 'woocommerce_sequracheckout_sent_statuses', array( 'wc-completed' ) ),
-			'return'     => 'ids',
+			'status'         => apply_filters( 'woocommerce_sequracheckout_sent_statuses', array( 'wc-completed' ) ),
+			'return'         => 'ids',
 		);
 		// phpcs:enable
 		$this->shipped_ids = wc_get_orders( $args );
