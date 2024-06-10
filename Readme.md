@@ -21,6 +21,8 @@ Optionally, you can pass the following parameters to the setup script:
 | -------- | ------------------------------------------------------------------ |
 | ```--install=<0\|1>``` | Perform the installation of packages (1) or not (0). Default is 1 |
 
+Then, access to [plugin settings](http://localhost.sequrapi.com:8000/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra) and login with user `admin` and password `admin`, or browse the [frontend](http://localhost.sequrapi.com:8000/?post_type=product)
+
 ### Customization
 
 When the setup script runs, it takes the configuration from the ```.env``` file in the root of the repository. If the file doesn't exists, it will create a new one, copying the ```.env.sample``` template. In order to customize your environment before the setup occurs, you might create your ```.env``` file. To avoid errors, is important that you make a duplicate of ```.env.sample``` and then rename it to ```.env```
@@ -34,8 +36,6 @@ To stop the containers and perform the cleanup operations run:
 ```bash
 ./teardown.sh
 ```
-
-Then, access to [plugin settings](http://localhost.sequrapi.com:8000/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra) and login with user `admin` and password `admin`, or browse the [frontend](http://localhost.sequrapi.com:8000/?post_type=product)
 
 ### Configuration
 
