@@ -8,7 +8,8 @@ module.exports = (env, argv) => {
     const config = {
         module: {
             rules: []
-        }
+        },
+        stats: 'errors-only'
     };
 
     if (isProd) {

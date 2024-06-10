@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "autoprefix": "postcss assets/css/sequra-core.css --use=autoprefixer --output=assets/css/sequra-core.css",
-        "build": "webpack --mode production --progress && sass --style=compressed --no-source-map ./assets/css/scss:./assets/css/ && npm run autoprefix",
+        "build": "webpack --mode production && sass --style=compressed --no-source-map ./assets/css/scss:./assets/css/ && npm run autoprefix --no-update-notifier --silent --no-progress",
         "dev": "webpack --mode development --progress && sass ./assets/css/scss:./assets/css/"
     },
     "author": "seQura Tech",

@@ -29,7 +29,7 @@ jobs:
 
       - name: Install Composer dependencies
         if: steps.cache-composer.outputs.cache-hit != 'true'
-        run: ./bin/composer install
+        run: ./bin/composer install --quiet --no-interaction
 
       - name: Cache NPM dependencies
         if: github.event_name == 'pull_request'
@@ -43,7 +43,7 @@ jobs:
 
       - name: Install NPM dependencies
         if: github.event_name == 'pull_request' && steps.cache-npm.outputs.cache-hit != 'true'
-        run: ./bin/npm install --no-progress
+        run: ./bin/npm install --no-progress --silent --no-update-notifier
 
       - name: Cache Assets
         if: github.event_name == 'pull_request'
@@ -57,7 +57,7 @@ jobs:
 
       - name: Build Assets
         if: github.event_name == 'pull_request' && steps.cache-assets.outputs.cache-hit != 'true'
-        run: ./bin/npm run build
+        run: ./bin/npm run build --no-progress --silent --no-update-notifier
 
       - name: PHPCS
         if: github.event_name == 'push'
