@@ -96,8 +96,8 @@ if (!window.SequraFE) {
             excludedProducts: [],
             replacementPaymentMethod: useReplacementPaymentMethod ? '' : null,
             enabledForServices: false,
-            allowFirstServicePaymentDelay: true,
-            allowServiceRegItems: true,
+            allowFirstServicePaymentDelay: false,
+            allowServiceRegItems: false,
             defaultServicesEndDate: 'P1Y'
         };
 
@@ -210,7 +210,7 @@ if (!window.SequraFE) {
                         className: 'sq-service-related-field',
                         value: changedGeneralSettings.allowFirstServicePaymentDelay,
                         label: 'generalSettings.allowFirstServicePaymentDelay.label',
-                        // description: 'generalSettings.allowFirstServicePaymentDelay.description',
+                        description: 'generalSettings.allowFirstServicePaymentDelay.description',
                         onChange: (value) => handleGeneralSettingsChange('allowFirstServicePaymentDelay', value)
                     }),
                     generator.createToggleField({
@@ -218,7 +218,6 @@ if (!window.SequraFE) {
                         value: changedGeneralSettings.allowServiceRegItems,
                         label: 'generalSettings.allowServiceRegItems.label',
                         description: 'generalSettings.allowServiceRegItems.description',
-
                         onChange: (value) => handleGeneralSettingsChange('allowServiceRegItems', value)
                     }),
                     generator.createTextField({

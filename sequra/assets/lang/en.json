@@ -349,10 +349,12 @@
       "description": "Your contract must allow selling services. Only one product can be purchased at a time."
     },
     "allowFirstServicePaymentDelay": {
-      "label": "Allow first service payment delay"
+      "label": "Allow first service payment delay",
+      "description": "Do not enable except by indication of seQura"
     },
     "allowServiceRegItems": {
-      "label": "Allow registration items"
+      "label": "Allow registration items",
+      "description": "Allows configuring part of the product price to be paid in advance as registration. Do not enable except by indication of seQura"
     },
     "defaultServicesEndDate": {
       "label": "Default services end date",
