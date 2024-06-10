@@ -106,3 +106,10 @@ Add this configuration to project workspace's settings:
     }
 }
 ```
+## Hidden pages
+
+### Order status settings
+
+Append the anchor `#settings-order_status` to the settings page to access the hidden configuration page, like this:
+
+http://localhost.sequrapi.com:8000/wp-admin/options-general.php?page=sequra#settings-order_status
