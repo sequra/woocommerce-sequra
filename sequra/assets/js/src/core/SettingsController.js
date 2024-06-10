@@ -246,13 +246,13 @@ if (!window.SequraFE) {
                             icon: 'connection',
                             isActive: activePage === SequraFE.appPages.SETTINGS.CONNECTION
                         }
-                    case SequraFE.appPages.SETTINGS.ORDER_STATUS:
-                        return {
-                            label: 'sidebar.orderStatusSettings',
-                            href: '#settings-order_status',
-                            icon: 'order',
-                            isActive: activePage === SequraFE.appPages.SETTINGS.ORDER_STATUS
-                        }
+                    // case SequraFE.appPages.SETTINGS.ORDER_STATUS:
+                    //     return {
+                    //         label: 'sidebar.orderStatusSettings',
+                    //         href: '#settings-order_status',
+                    //         icon: 'order',
+                    //         isActive: activePage === SequraFE.appPages.SETTINGS.ORDER_STATUS,
+                    //     }
                     case SequraFE.appPages.SETTINGS.WIDGET:
                         return {
                             label: 'sidebar.widgetSettings',
@@ -260,6 +260,8 @@ if (!window.SequraFE) {
                             icon: 'widget',
                             isActive: activePage === SequraFE.appPages.SETTINGS.WIDGET
                         }
+                    default:
+                        return null
                 }
             });
         }

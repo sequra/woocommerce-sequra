@@ -648,7 +648,7 @@ if (!window.SequraFE) {
 
         wrapper.append(
             ...links.map((item) => {
-                return createElement('li', 'sq-sidebar-item' + (item.isActive ? ' sqs--active' : ''), '', null, [
+                return item ? createElement('li', 'sq-sidebar-item' + (item.isActive ? ' sqs--active' : ''), '', null, [
                     createElement(
                         'a',
                         'sq-sidebar-link' + ' sqm--' + item.icon,
@@ -658,7 +658,7 @@ if (!window.SequraFE) {
                         },
                         [createElement('span', '', item.label)]
                     )
-                ]);
+                ]) : '';
             })
         );
 
