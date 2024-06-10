@@ -23,8 +23,8 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	 */
 	protected function getDefaultStatusMappings(): array {
 		return array(
-			new OrderStatusMapping( OrderStates::STATE_APPROVED, 'wc-completed' ),
-			new OrderStatusMapping( OrderStates::STATE_NEEDS_REVIEW, 'wc-on-hold' ),
+			new OrderStatusMapping( OrderStates::STATE_APPROVED, 'wc-processing' ),
+			new OrderStatusMapping( OrderStates::STATE_NEEDS_REVIEW, 'wc-pending' ),
 			new OrderStatusMapping( OrderStates::STATE_CANCELLED, 'wc-cancelled' ),
 		);
 	}
