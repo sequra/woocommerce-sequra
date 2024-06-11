@@ -1,4 +1,14 @@
 @charset "UTF-8";
+%field {
+  outline-color: transparent !important;
+  box-shadow: none !important;
+  &:active,
+  &:focus {
+    border-color: #6fcf97 !important;
+    box-shadow: none !important;
+  }
+}
+
 html,
 body {
   margin: 0;
@@ -1257,11 +1267,12 @@ table tr th {
 
 .sq-text-input {
   width: 100%;
-  padding: 8px 16px;
-  font-size: 14px;
-  color: #000;
-  border: 1px solid #dce0e5;
-  border-radius: 6px;
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  color: #000 !important;
+  border: 1px solid #dce0e5 !important;
+  border-radius: 6px !important;
+  @extend %field;
 }
 .sq-text-input:focus,
 .sq-text-input:active {
@@ -1465,7 +1476,7 @@ table tr th {
   position: relative;
 }
 .sq-checkbox input {
-  opacity: 0!important;
+  opacity: 0 !important;
   // width: 0;
   // height: 0;
   width: 100%;
@@ -2294,20 +2305,12 @@ body {
       font-weight: 600;
     }
     &-field {
-      font-size: 13px;
       padding: 6px 16px !important;
       color: #000 !important;
       border: 1px solid #dce0e5 !important;
       border-radius: 6px !important;
-      // min-width: 80px !important;
-      outline-color: transparent !important;
-      box-shadow: none !important;
-      &:hover,&:active,&:focus {
-        border-color: #6fcf97 !important;
-        box-shadow: none !important;
-      }
+      @extend %field;
     }
-    
   }
 
   &__body {
@@ -2320,9 +2323,6 @@ body {
     }
   }
 }
-// .sq-table:not(:has(.sq-table__row)) .sq-table__header input[type="checkbox"] {
-//   opacity: 0.5;
-// }
 .sq-table:not(:has(input[type="checkbox"]:checked)) .sq-button.sq-remove {
   display: none;
 }
