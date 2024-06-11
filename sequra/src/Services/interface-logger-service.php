@@ -9,6 +9,7 @@
 namespace SeQura\WC\Services;
 
 use SeQura\Core\Infrastructure\Logger\LogContextData;
+use Throwable;
 
 /**
  * Logger service
@@ -54,6 +55,16 @@ interface Interface_Logger_Service {
 	 * @param LogContextData[] $context The context.
 	 */
 	public function log_error( $message, $func = null, $class_name = null, $context = array() ): void;
+
+	/**
+	 * Log a message with the severity "ERROR".
+	 *
+	 * @param Throwable      $throwable The throwable to log.
+	 * @param string|null $func The method name.
+	 * @param string|null $class_name The class name.
+	 * @param LogContextData[] $context Additional context.
+	 */
+	public function log_throwable( Throwable $throwable, $func = null, $class_name = null, $context = array() ): void;
 
 	/**
 	 * Get the content of the log file.
