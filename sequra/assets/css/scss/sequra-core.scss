@@ -214,7 +214,7 @@ table tr th {
 
   .sq-page-content {
     position: relative;
-    z-index: 2
+    z-index: 2;
   }
 }
 #sq-page-wrapper .sq-page-content-wrapper {
@@ -1459,14 +1459,25 @@ table tr th {
 .sq-checkbox {
   display: flex;
   justify-content: center;
+  align-items: center;
   width: 24px;
   height: 24px;
+  position: relative;
 }
 .sq-checkbox input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  display: none;
+  opacity: 0!important;
+  // width: 0;
+  // height: 0;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  &:disabled + .sqp-checkmark {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  // display: none;
 }
 .sq-checkbox .sqp-checkmark {
   cursor: pointer;
@@ -2192,4 +2203,126 @@ body {
     position: relative;
     left: 1rem;
   }
+}
+
+.sq-table {
+  width: 100%;
+  display: grid;
+  overflow: auto;
+  border-radius: 6px;
+  border: 1px solid #dce0e5;
+  padding: 14px;
+
+  input {
+    margin: 0;
+  }
+
+  %row {
+    display: grid;
+    grid-template-columns: 2.5rem auto;
+    gap: 0;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    border-style: solid;
+    border-color: #dce0e5;
+    border-width: 0 0 1px 0;
+    > *:not(:first-child) {
+      background-color: transparent;
+      max-width: unset;
+      min-width: 7rem;
+    }
+    > *:first-child {
+      justify-self: center;
+      align-self: center;
+    }
+  }
+
+  &__header,
+  &__row {
+    grid-template-columns: 2rem auto;
+  }
+
+  &__header {
+    @extend %row;
+    min-height: 2.5rem;
+    box-sizing: border-box;
+    border-width: 0 0 1px 0;
+    > *:not(:first-child) {
+      // font-size: 13px;
+      // font-weight: 600;
+      text-align-last: left;
+      margin-bottom: 0;
+      padding: 14px 0;
+    }
+  }
+
+  &__footer {
+    width: 100%;
+    padding: 14px 0 0 0;
+    // border: 1px solid #dfdfdf;
+    // border-width: 0 1px 1px 1px;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  &__row {
+    @extend %row;
+    border-width: 0 1px 1px 1px;
+    // > *:not(:first-child) {
+    //   border: 1px solid #dfdfdf;
+    //   border-radius: 0;
+    // }
+    &-content {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+    }
+    &-field-wrapper {
+      display: grid;
+      gap: 0.5rem;
+      &--grow {
+        flex-grow: 1;
+      }
+    }
+    &-field-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    &-field {
+      font-size: 13px;
+      padding: 6px 16px !important;
+      color: #000 !important;
+      border: 1px solid #dce0e5 !important;
+      border-radius: 6px !important;
+      // min-width: 80px !important;
+      outline-color: transparent !important;
+      box-shadow: none !important;
+      &:hover,&:active,&:focus {
+        border-color: #6fcf97 !important;
+        box-shadow: none !important;
+      }
+    }
+    
+  }
+
+  &__body {
+    display: grid;
+    width: 100%;
+    box-sizing: border-box;
+
+    .sq-table__row:not(:last-child) {
+      border-bottom-width: 1px;
+    }
+  }
+}
+// .sq-table:not(:has(.sq-table__row)) .sq-table__header input[type="checkbox"] {
+//   opacity: 0.5;
+// }
+.sq-table:not(:has(input[type="checkbox"]:checked)) .sq-button.sq-remove {
+  display: none;
 }

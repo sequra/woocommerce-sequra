@@ -1,3 +1,5 @@
+import { Repeater } from "./Repeater";
+
 if (!window.SequraFE) {
     window.SequraFE = {};
 }
@@ -10,6 +12,20 @@ if (!window.SequraFE) {
      */
 
     /**
+     * @typedef WidgetLocation
+     * @property {string|null} selForTarget
+     * @property {string|null} product
+     * @property {string|null} country
+     */
+
+    /**
+     * @typedef CountryPaymentMethod
+     * @property {string|null} countryCode
+     * @property {string|null} product
+     * @property {string|null} title
+     */
+
+    /**
      * @typedef WidgetSettings
      * @property {boolean} useWidgets
      * @property {string|null} assetsKey
@@ -18,6 +34,12 @@ if (!window.SequraFE) {
      * @property {boolean} showInstallmentAmountInCartPage
      * @property {WidgetLabels|null} widgetLabels
      * @property {string|null} widgetStyles
+     * @property {string|null} selForPrice
+     * @property {string|null} selForAltPrice
+     * @property {string|null} selForAltPriceTrigger
+     * @property {string|null} defaultLocationSel
+     * @property {WidgetLocation[]} locations
+     * @property {CountryPaymentMethod[]} allPaymentMethods
      */
 
     /**
@@ -27,11 +49,13 @@ if (!window.SequraFE) {
      * widgetSettings: WidgetSettings,
      * connectionSettings: ConnectionSettings,
      * countrySettings: CountrySettings[],
-     * paymentMethods: PaymentMethod[]
+     * paymentMethods: PaymentMethod[],
+     * allPaymentMethods: CountryPaymentMethod[],
      * }} data
      * @param {{
      * saveWidgetSettingsUrl: string,
      * getPaymentMethodsUrl: string,
+     * getAllPaymentMethodsUrl: string,
      * page: string,
      * appState: string,
      * }} configuration
@@ -83,6 +107,12 @@ if (!window.SequraFE) {
             widgetStyles: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
             showInstallmentAmountInProductListing: false,
             showInstallmentAmountInCartPage: false,
+            selForPrice: '.summary .price>.amount,.summary .price ins .amount',
+            selForAltPrice: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount',
+            selForAltPriceTrigger: '.variations',
+            defaultLocationSel: '.summary .price',
+            locations: [],
+            allPaymentMethods: data.allPaymentMethods
         };
 
         /**
@@ -132,6 +162,7 @@ if (!window.SequraFE) {
             renderAssetsKeyField();
             renderAdditionalSettings();
             renderControls();
+            maybeShowProductRelatedFields();
         }
 
         /**
@@ -189,6 +220,37 @@ if (!window.SequraFE) {
                     description: 'widgets.displayOnProductPage.description',
                     onChange: (value) => handleChange('displayWidgetOnProductPage', value)
                 }),
+                // Product widget related fields
+                generator.createTextField({
+                    value: changedSettings.selForPrice,
+                    className: 'sq-text-input sq-product-related-field',
+                    label: 'widgets.selForPrice.label',
+                    description: 'widgets.selForPrice.description',
+                    onChange: (value) => handleChange('selForPrice', value)
+                }),
+                generator.createTextField({
+                    value: changedSettings.selForAltPrice,
+                    className: 'sq-text-input sq-product-related-field',
+                    label: 'widgets.selForAltPrice.label',
+                    description: 'widgets.selForAltPrice.description',
+                    onChange: (value) => handleChange('selForAltPrice', value)
+                }),
+                generator.createTextField({
+                    value: changedSettings.selForAltPriceTrigger,
+                    className: 'sq-text-input sq-product-related-field',
+                    label: 'widgets.selForAltPriceTrigger.label',
+                    description: 'widgets.selForAltPriceTrigger.description',
+                    onChange: (value) => handleChange('selForAltPriceTrigger', value)
+                }),
+                generator.createTextField({
+                    value: changedSettings.defaultLocationSel,
+                    className: 'sq-text-input sq-product-related-field',
+                    label: 'widgets.defaultLocationSel.label',
+                    description: 'widgets.defaultLocationSel.description',
+                    onChange: (value) => handleChange('defaultLocationSel', value)
+                }),
+                generator.createElement('div', 'sq-field-wrapper sq-locations-container sq-product-related-field'),
+                // End of product widget related fields
                 generator.createToggleField({
                     value: changedSettings.showInstallmentAmountInCartPage,
                     label: 'widgets.showInCartPage.label',
@@ -214,6 +276,41 @@ if (!window.SequraFE) {
             )
 
             renderLabelsConfiguration();
+            renderLocations();
+        }
+
+
+        const maybeShowProductRelatedFields = () => {
+            const selector = '.sq-field-wrapper:has(.sq-product-related-field),.sq-field-wrapper.sq-product-related-field'
+            const hiddenClass = 'sqs--hidden';
+            document.querySelectorAll(selector).forEach((el) => {
+                if (changedSettings.displayWidgetOnProductPage) {
+                    el.classList.remove(hiddenClass)
+                } else {
+                    el.classList.add(hiddenClass)
+                }
+            });
+        }
+
+        const renderLocations = () => {
+            new Repeater({
+                containerSelector: '.sq-locations-container',
+                data: changedSettings.locations,
+                getHeaders: () => [
+                    SequraFE.translationService.translate('widgets.locations.header'),
+                ],
+                getRow: (data) => `
+                    <div class="sq-table__row-field-wrapper">
+                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
+                        <select class="sq-table__row-field">${changedSettings.allPaymentMethods.map(pm => `<option key="${pm.countryCode}_${pm.product}">${pm.title}</option>`)}</select>
+                    </div>
+                    <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
+                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.selector')}</label>
+                        <input class="sq-table__row-field" type="text">
+                    </div>`,
+                addRowText: 'widgets.locations.addRow',
+                removeSelectedRowsText: 'widgets.locations.removeSelectedRows',
+            });
         }
 
         const renderLabelsConfiguration = () => {
@@ -326,6 +423,10 @@ if (!window.SequraFE) {
                         );
                     })
                     .finally(utilities.hideLoader);
+            }
+
+            if (name === 'displayWidgetOnProductPage') {
+                maybeShowProductRelatedFields();
             }
         }
 
