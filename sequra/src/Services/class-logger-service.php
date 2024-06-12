@@ -123,7 +123,7 @@ class Logger_Service implements Interface_Logger_Service {
 	 * @param LogContextData[] $context Additional context.
 	 */
 	public function log_throwable( Throwable $throwable, $func = null, $class_name = null, $context = array() ): void {
-		$message       = $throwable::class;
+		$message       = get_class( $throwable );
 		$error_context = array(
 			new LogContextData( 'message', $throwable->getMessage() ),
 			new LogContextData( 'code', $throwable->getCode() ),
