@@ -317,8 +317,8 @@
       "description": "CSS selector to define the default container element for the widget"
     },
     "locations": {
-      "header": "Custom widget locations",
-      "removeSelectedRows": "Delete selected",
+      "headerTitle": "Custom widget locations",
+      "headerDescription": "Define alternative container elements for the widget",
       "addRow": "Add location",
       "paymentMethod":"Payment method",
       "selector": "Selector"

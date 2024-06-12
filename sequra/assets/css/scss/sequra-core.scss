@@ -2229,29 +2229,14 @@ body {
   }
 
   %row {
-    display: grid;
-    grid-template-columns: 2.5rem auto;
-    gap: 0;
+    display: flex;
+    gap: 14px;
     align-items: center;
     width: 100%;
     padding: 0;
     border-style: solid;
     border-color: #dce0e5;
     border-width: 0 0 1px 0;
-    > *:not(:first-child) {
-      background-color: transparent;
-      max-width: unset;
-      min-width: 7rem;
-    }
-    > *:first-child {
-      justify-self: center;
-      align-self: center;
-    }
-  }
-
-  &__header,
-  &__row {
-    grid-template-columns: 2rem auto;
   }
 
   &__header {
@@ -2259,20 +2244,14 @@ body {
     min-height: 2.5rem;
     box-sizing: border-box;
     border-width: 0 0 1px 0;
-    > *:not(:first-child) {
-      // font-size: 13px;
-      // font-weight: 600;
-      text-align-last: left;
-      margin-bottom: 0;
-      padding: 14px 0;
+    &-item{
+      margin-bottom: 14px;
     }
   }
 
   &__footer {
     width: 100%;
     padding: 14px 0 0 0;
-    // border: 1px solid #dfdfdf;
-    // border-width: 0 1px 1px 1px;
     box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
@@ -2282,13 +2261,34 @@ body {
   &__row {
     @extend %row;
     border-width: 0 1px 1px 1px;
-    // > *:not(:first-child) {
-    //   border: 1px solid #dfdfdf;
-    //   border-radius: 0;
-    // }
+    .sq-remove {
+      margin: 14px 0;
+      min-height: 30px;
+      padding: 6px 16px;
+      align-self: flex-end;
+      box-sizing: content-box;
+      color: #c00e0e;
+      background-color: #fff;
+      border-color: #fff;
+      &::before {
+        font-family: "sq-icons";
+        content: "\e90c";
+        line-height: 1;
+        font-weight: 500;
+        font-size: 16px;
+      }
+      &:hover,
+      &:focus {
+        color: #fff;
+        background-color: #c00e0e;
+        border-color: #c00e0e;
+      }
+    }
+
     &-content {
       display: flex;
       align-items: center;
+      flex-grow: 1;
       justify-content: flex-start;
       gap: 14px;
       padding: 14px 0;
@@ -2322,7 +2322,4 @@ body {
       border-bottom-width: 1px;
     }
   }
-}
-.sq-table:not(:has(input[type="checkbox"]:checked)) .sq-button.sq-remove {
-  display: none;
 }

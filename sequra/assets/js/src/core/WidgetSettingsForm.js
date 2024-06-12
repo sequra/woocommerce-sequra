@@ -297,19 +297,40 @@ if (!window.SequraFE) {
                 containerSelector: '.sq-locations-container',
                 data: changedSettings.locations,
                 getHeaders: () => [
-                    SequraFE.translationService.translate('widgets.locations.header'),
+                    {
+                        title: SequraFE.translationService.translate('widgets.locations.headerTitle'),
+                        description: SequraFE.translationService.translate('widgets.locations.headerDescription')
+                    },
                 ],
-                getRow: (data) => `
+                getRow: (data) => {
+                    return `
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
-                        <select class="sq-table__row-field">${changedSettings.allPaymentMethods.map(pm => `<option key="${pm.countryCode}_${pm.product}">${pm.title}</option>`)}</select>
+                        <select class="sq-table__row-field">${changedSettings.allPaymentMethods.map((pm, idx) => {
+                            const selected = data && data.product === pm.product && data.country === pm.country ? ' selected' : '';
+                            return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
+                        }).join('')}
+                        </select>
                     </div>
                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.selector')}</label>
-                        <input class="sq-table__row-field" type="text">
-                    </div>`,
+                        <input class="sq-table__row-field" type="text" value="${data ? data.selForTarget : ''}">
+                    </div>`
+                },
+                handleChange: table => {
+                    const locations = [];
+                    table.querySelectorAll('.sq-table__row-content').forEach(row => {
+                        const select = row.querySelector('select');
+                        const selForTarget = row.querySelector('input').value;
+                        const product = select.options[select.selectedIndex].dataset.product;
+                        const country = select.options[select.selectedIndex].dataset.countryCode;
+                        locations.push({ selForTarget, product, country });
+                    });
+                    changedSettings.locations = locations;
+                    console.log(changedSettings.locations)
+                },
                 addRowText: 'widgets.locations.addRow',
-                removeSelectedRowsText: 'widgets.locations.removeSelectedRows',
+                removeRowText: 'widgets.locations.removeRow',
             });
         }
 
