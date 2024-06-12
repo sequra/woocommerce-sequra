@@ -23,6 +23,24 @@ use WP_REST_Response;
  */
 class Onboarding_REST_Controller extends REST_Controller {
 	
+	private const PARAM_ENVIRONMENT                                = 'environment';
+	private const PARAM_USERNAME                                   = 'username';
+	private const PARAM_PASSWORD                                   = 'password';
+	private const PARAM_SEND_STATISTICAL_DATA                      = 'sendStatisticalData';
+	private const PARAM_USE_WIDGETS                                = 'useWidgets';
+	private const PARAM_ASSETS_KEY                                 = 'assetsKey';
+	private const PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE             = 'displayWidgetOnProductPage';
+	private const PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING = 'showInstallmentAmountInProductListing';
+	private const PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE       = 'showInstallmentAmountInCartPage';
+	private const PARAM_MINI_WIDGET_SELECTOR                       = 'miniWidgetSelector';
+	private const PARAM_WIDGET_STYLES                              = 'widgetStyles';
+	private const PARAM_WIDGET_LABELS                              = 'widgetLabels';
+	private const PARAM_SEL_FOR_PRICE                              = 'selForPrice';
+	private const PARAM_SEL_FOR_ALT_PRICE                          = 'selForAltPrice';
+	private const PARAM_SEL_FOR_ALT_PRICE_TRIGGER                  = 'selForAltPriceTrigger';
+	private const PARAM_SEL_FOR_DEFAULT_LOCATION                   = 'selForDefaultLocation';
+	private const PARAM_CUSTOM_LOCATIONS                           = 'customLocations';
+
 	/**
 	 * Constructor.
 	 *
@@ -45,13 +63,13 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$data_args = array_merge(
 			$store_id_args,
 			array(
-				'environment'         => array_merge(
+				self::PARAM_ENVIRONMENT           => array_merge(
 					$this->get_arg_string(),
 					array( 'enum' => array( 'sandbox', 'production' ) )
 				),
-				'username'            => $this->get_arg_string(),
-				'password'            => $this->get_arg_string(),
-				'sendStatisticalData' => $this->get_arg_bool(),
+				self::PARAM_USERNAME              => $this->get_arg_string(),
+				self::PARAM_PASSWORD              => $this->get_arg_string(),
+				self::PARAM_SEND_STATISTICAL_DATA => $this->get_arg_bool(),
 			)
 		);
 		
@@ -65,14 +83,14 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$widget_args = array_merge(
 			$store_id_args,
 			array(
-				'useWidgets'                            => $this->get_arg_bool(),
-				'assetsKey'                             => $this->get_arg_string(),
-				'displayWidgetOnProductPage'            => $this->get_arg_bool(),
-				'showInstallmentAmountInProductListing' => $this->get_arg_bool(),
-				'showInstallmentAmountInCartPage'       => $this->get_arg_bool(),
-				'miniWidgetSelector'                    => $this->get_arg_string( true, '', '__return_true' ), // TODO: Add this field to form in the UI.
-				'widgetStyles'                          => $this->get_arg_string(),
-				'widgetLabels'                          => array(
+				self::PARAM_USE_WIDGETS                    => $this->get_arg_bool(),
+				self::PARAM_ASSETS_KEY                     => $this->get_arg_string(),
+				self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE => $this->get_arg_bool(),
+				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING => $this->get_arg_bool(),
+				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE => $this->get_arg_bool(),
+				self::PARAM_MINI_WIDGET_SELECTOR           => $this->get_arg_string( true, '', '__return_true' ), // TODO: Add this field to form in the UI.
+				self::PARAM_WIDGET_STYLES                  => $this->get_arg_string(),
+				self::PARAM_WIDGET_LABELS                  => array(
 					'default'           => array(
 						'message'           => '',
 						'messageBelowLimit' => '',
@@ -81,6 +99,12 @@ class Onboarding_REST_Controller extends REST_Controller {
 					'validate_callback' => array( $this, 'validate_widget_labels' ),
 					'sanitize_callback' => array( $this, 'sanitize_widget_labels' ),
 				),
+				self::PARAM_SEL_FOR_PRICE                  => $this->get_arg_string( true, null, array( $this, 'validate_required_widget_selector' ) ),
+				self::PARAM_SEL_FOR_ALT_PRICE              => $this->get_arg_string( true, null, array( $this, 'validate_optional_widget_selector' ) ),
+				self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER      => $this->get_arg_string( true, null, array( $this, 'validate_optional_widget_selector' ) ),
+				self::PARAM_SEL_FOR_DEFAULT_LOCATION       => $this->get_arg_string( true, null, array( $this, 'validate_required_widget_selector' ) ),
+				self::PARAM_CUSTOM_LOCATIONS               => $this->get_arg_widget_location_list(),
+
 			)
 		);
 
@@ -128,15 +152,15 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->isConnectionDataValid(
 				new ConnectionRequest(
-					strval( $request->get_param( 'environment' ) ),
-					strval( $request->get_param( 'merchantId' ) ),
-					strval( $request->get_param( 'username' ) ),
-					strval( $request->get_param( 'password' ) )
+					strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
+					strval( $request->get_param( self::PARAM_MERCHANT_ID ) ),
+					strval( $request->get_param( self::PARAM_USERNAME ) ),
+					strval( $request->get_param( self::PARAM_PASSWORD ) )
 				)
 			);
 			$response = $response->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -157,11 +181,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->saveOnboardingData(
 				new OnboardingRequest(
-					strval( $request->get_param( 'environment' ) ),
-					strval( $request->get_param( 'username' ) ),
-					strval( $request->get_param( 'password' ) ),
-					(bool) $request->get_param( 'sendStatisticalData' ),
-					null === $request->get_param( 'merchantId' ) ? null : strval( $request->get_param( 'merchantId' ) )
+					strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
+					strval( $request->get_param( self::PARAM_USERNAME ) ),
+					strval( $request->get_param( self::PARAM_PASSWORD ) ),
+					(bool) $request->get_param( self::PARAM_SEND_STATISTICAL_DATA ),
+					null === $request->get_param( self::PARAM_MERCHANT_ID ) ? null : strval( $request->get_param( self::PARAM_MERCHANT_ID ) )
 				)
 			);
 
@@ -172,7 +196,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 				throw new \Exception( $response['errorMessage'] );
 			}
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -193,7 +217,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->disconnect()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -214,7 +238,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->getSellingCountries()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -235,7 +259,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->getCountryConfigurations()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -263,7 +287,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->saveCountryConfigurations( new CountryConfigurationRequest( $data ) )
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -285,16 +309,16 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->toArray();
 
 			if ( ! empty( $response ) ) {
-				$response['widgetLabels']['message']           = ! empty( $response['widgetLabels']['messages'] ) ?
-				reset( $response['widgetLabels']['messages'] ) : '';
-				$response['widgetLabels']['messageBelowLimit'] = ! empty( $response['widgetLabels']['messagesBelowLimit'] ) ?
-				reset( $response['widgetLabels']['messagesBelowLimit'] ) : '';
-				$response['widgetStyles']                      = $response['widgetConfiguration'];
-				unset( $response['widgetLabels']['messages'], $response['widgetLabels']['messagesBelowLimit'] );
+				$response[ self::PARAM_WIDGET_LABELS ]['message']           = ! empty( $response[ self::PARAM_WIDGET_LABELS ]['messages'] ) ?
+				reset( $response[ self::PARAM_WIDGET_LABELS ]['messages'] ) : '';
+				$response[ self::PARAM_WIDGET_LABELS ]['messageBelowLimit'] = ! empty( $response[ self::PARAM_WIDGET_LABELS ]['messagesBelowLimit'] ) ?
+				reset( $response[ self::PARAM_WIDGET_LABELS ]['messagesBelowLimit'] ) : '';
+				$response[ self::PARAM_WIDGET_STYLES ]                      = $response['widgetConfiguration'];
+				unset( $response[ self::PARAM_WIDGET_LABELS ]['messages'], $response[ self::PARAM_WIDGET_LABELS ]['messagesBelowLimit'] );
 				unset( $response['widgetConfiguration'] );
 			}
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -311,7 +335,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function save_widgets( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			// TODO: Add support to CSS selector.
 			// TODO: Add support to widget labels. See shopify example.
 			//phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
 			// $labels               = $request->get_param( 'widgetLabels' );
@@ -325,20 +348,25 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->widgetConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->setWidgetSettings(
 				new WidgetSettingsRequest(
-					(bool) $request->get_param( 'useWidgets' ),
-					null === $request->get_param( 'assetsKey' ) ? null : strval( $request->get_param( 'assetsKey' ) ),
-					(bool) $request->get_param( 'displayWidgetOnProductPage' ),
-					(bool) $request->get_param( 'showInstallmentAmountInProductListing' ),
-					(bool) $request->get_param( 'showInstallmentAmountInCartPage' ),
-					strval( $request->get_param( 'miniWidgetSelector' ) ),
-					strval( $request->get_param( 'widgetStyles' ) ),
+					(bool) $request->get_param( self::PARAM_USE_WIDGETS ),
+					null === $request->get_param( self::PARAM_ASSETS_KEY ) ? null : strval( $request->get_param( self::PARAM_ASSETS_KEY ) ),
+					(bool) $request->get_param( self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE ),
+					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING ),
+					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE ),
+					strval( $request->get_param( self::PARAM_MINI_WIDGET_SELECTOR ) ),
+					strval( $request->get_param( self::PARAM_WIDGET_STYLES ) ),
 					(array) $messages,
-					(array) $messages_below_limit
+					(array) $messages_below_limit,
+					strval( $request->get_param( self::PARAM_SEL_FOR_PRICE ) ),
+					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
+					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
+					strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
+					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
 				)
 			)
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -394,6 +422,36 @@ class Onboarding_REST_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Validate if required widget selector is valid.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
+	 */
+	public function validate_required_widget_selector( $param, $request, $key ): bool {
+		
+		$use_widgets = (bool) $request->get_param( self::PARAM_USE_WIDGETS );
+		if ( ! $use_widgets ) {
+			return null === $param || is_string( $param );
+		}
+		
+		return null !== $param 
+		&& is_string( $param )
+		&& '' !== trim( $param );
+	}
+
+	/**
+	 * Validate if optional widget selector is valid.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
+	 */
+	public function validate_optional_widget_selector( $param, $request, $key ): bool {
+		return null === $param || is_string( $param );
+	}
+
+	/**
 	 * Sanitize widget label.
 	 * 
 	 * @param mixed[] $param The parameter.
@@ -404,5 +462,67 @@ class Onboarding_REST_Controller extends REST_Controller {
 			'message'           => sanitize_text_field( strval( $param['message'] ) ),
 			'messageBelowLimit' => sanitize_text_field( strval( $param['messageBelowLimit'] ) ),
 		);
+	}
+
+	/**
+	 * Get argument structure for the widget location list.
+	 * 
+	 * @param bool $required      If the argument is required.
+	 * @param mixed $default_value The default value. Null will be ignored.
+	 * @param callable $validate The validate callback. Leave null to use the default.
+	 * @param callable $sanitize The sanitize callback. Leave null to use the default.
+	 * @return mixed[]
+	 */
+	protected function get_arg_widget_location_list( $required = true, $default_value = array(), $validate = null, $sanitize = null ): array {
+		return array_merge(
+			$this->get_arg( $required, $default_value ),
+			array(
+				'validate_callback' => null === $validate ? array( $this, 'validate_widget_location_list' ) : $validate,
+				'sanitize_callback' => null === $sanitize ? array( $this, 'sanitize_widget_location_list' ) : $sanitize,
+			)
+		);
+	}
+
+	/**
+	 * Validate if widget location list is valid.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
+	 */
+	public function validate_widget_location_list( $param, $request, $key ): bool {
+		if ( ! is_array( $param ) ) {
+			return false;
+		}
+		foreach ( $param as $location ) {
+			if ( ! isset( $location['selForTarget'], $location['product'], $location['country'] )
+				|| ! is_string( $location['selForTarget'] )
+				|| ! is_string( $location['product'] )
+				|| ! is_string( $location['country'] )
+				|| empty( $location['selForTarget'] )
+				|| empty( $location['product'] )
+				|| empty( $location['country'] )
+				) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Sanitize widget location list.
+	 * 
+	 * @param array<int, array<string, string>> $param The parameter.
+	 * @return array<int, array<string, string>>
+	 */
+	public function sanitize_widget_location_list( $param ): array {
+		foreach ( $param as &$location ) {
+			$location = array(
+				'selForTarget' => sanitize_text_field( strval( $location['selForTarget'] ) ),
+				'product'      => sanitize_text_field( strval( $location['product'] ) ),
+				'country'      => sanitize_text_field( strval( $location['country'] ) ),
+			);
+		}
+		return $param;
 	}
 }

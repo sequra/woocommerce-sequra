@@ -37,9 +37,8 @@ if (!window.SequraFE) {
      * @property {string|null} selForPrice
      * @property {string|null} selForAltPrice
      * @property {string|null} selForAltPriceTrigger
-     * @property {string|null} defaultLocationSel
-     * @property {WidgetLocation[]} locations
-     * @property {CountryPaymentMethod[]} allPaymentMethods
+     * @property {string|null} selForDefaultLocation
+     * @property {WidgetLocation[]} customLocations
      */
 
     /**
@@ -64,6 +63,8 @@ if (!window.SequraFE) {
     function WidgetSettingsForm(data, configuration) {
         /** @type AjaxServiceType */
         const api = SequraFE.ajaxService;
+
+        let allPaymentMethods = data.allPaymentMethods;
 
         const {
             elementGenerator: generator,
@@ -110,9 +111,8 @@ if (!window.SequraFE) {
             selForPrice: '.summary .price>.amount,.summary .price ins .amount',
             selForAltPrice: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount',
             selForAltPriceTrigger: '.variations',
-            defaultLocationSel: '.summary .price',
-            locations: [],
-            allPaymentMethods: data.allPaymentMethods
+            selForDefaultLocation: '.summary .price',
+            customLocations: [],
         };
 
         /**
@@ -223,6 +223,7 @@ if (!window.SequraFE) {
                 // Product widget related fields
                 generator.createTextField({
                     value: changedSettings.selForPrice,
+                    name: 'selForPrice',
                     className: 'sq-text-input sq-product-related-field',
                     label: 'widgets.selForPrice.label',
                     description: 'widgets.selForPrice.description',
@@ -230,6 +231,7 @@ if (!window.SequraFE) {
                 }),
                 generator.createTextField({
                     value: changedSettings.selForAltPrice,
+                    name: 'selForAltPrice',
                     className: 'sq-text-input sq-product-related-field',
                     label: 'widgets.selForAltPrice.label',
                     description: 'widgets.selForAltPrice.description',
@@ -237,17 +239,19 @@ if (!window.SequraFE) {
                 }),
                 generator.createTextField({
                     value: changedSettings.selForAltPriceTrigger,
+                    name: 'selForAltPriceTrigger',
                     className: 'sq-text-input sq-product-related-field',
                     label: 'widgets.selForAltPriceTrigger.label',
                     description: 'widgets.selForAltPriceTrigger.description',
                     onChange: (value) => handleChange('selForAltPriceTrigger', value)
                 }),
                 generator.createTextField({
-                    value: changedSettings.defaultLocationSel,
+                    value: changedSettings.selForDefaultLocation,
+                    name: 'selForDefaultLocation',
                     className: 'sq-text-input sq-product-related-field',
                     label: 'widgets.defaultLocationSel.label',
                     description: 'widgets.defaultLocationSel.description',
-                    onChange: (value) => handleChange('defaultLocationSel', value)
+                    onChange: (value) => handleChange('selForDefaultLocation', value)
                 }),
                 generator.createElement('div', 'sq-field-wrapper sq-locations-container sq-product-related-field'),
                 // End of product widget related fields
@@ -295,7 +299,7 @@ if (!window.SequraFE) {
         const renderLocations = () => {
             new Repeater({
                 containerSelector: '.sq-locations-container',
-                data: changedSettings.locations,
+                data: changedSettings.customLocations,
                 getHeaders: () => [
                     {
                         title: SequraFE.translationService.translate('widgets.locations.headerTitle'),
@@ -306,10 +310,10 @@ if (!window.SequraFE) {
                     return `
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
-                        <select class="sq-table__row-field">${changedSettings.allPaymentMethods.map((pm, idx) => {
-                            const selected = data && data.product === pm.product && data.country === pm.country ? ' selected' : '';
-                            return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
-                        }).join('')}
+                        <select class="sq-table__row-field">${allPaymentMethods.map((pm, idx) => {
+                        const selected = data && data.product === pm.product && data.country === pm.countryCode ? ' selected' : '';
+                        return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
+                    }).join('')}
                         </select>
                     </div>
                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
@@ -318,16 +322,15 @@ if (!window.SequraFE) {
                     </div>`
                 },
                 handleChange: table => {
-                    const locations = [];
+                    const customLocations = [];
                     table.querySelectorAll('.sq-table__row-content').forEach(row => {
                         const select = row.querySelector('select');
                         const selForTarget = row.querySelector('input').value;
                         const product = select.options[select.selectedIndex].dataset.product;
                         const country = select.options[select.selectedIndex].dataset.countryCode;
-                        locations.push({ selForTarget, product, country });
+                        customLocations.push({ selForTarget, product, country });
                     });
-                    changedSettings.locations = locations;
-                    console.log(changedSettings.locations)
+                    handleChange('customLocations', customLocations)
                 },
                 addRowText: 'widgets.locations.addRow',
                 removeRowText: 'widgets.locations.removeRow',
@@ -407,6 +410,31 @@ if (!window.SequraFE) {
             );
         }
 
+        const isCssSelectorValid = selector => {
+            try {
+                document.querySelector(selector);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        const isCustomLocationValid = value => {
+            try {
+                value.forEach(location => {
+                    if (!isCssSelectorValid(location.selForTarget)) {
+                        throw new Error('Invalid selector');
+                    }
+                    if (!allPaymentMethods.some(pm => pm.product === location.product && pm.countryCode === location.country)) {
+                        throw new Error('Invalid payment method');
+                    }
+                });
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
         /**
          * Handles the form input changes.
          *
@@ -448,6 +476,34 @@ if (!window.SequraFE) {
 
             if (name === 'displayWidgetOnProductPage') {
                 maybeShowProductRelatedFields();
+            }
+
+            if (name === 'selForPrice' || name === 'selForDefaultLocation') {
+                const isValid = isCssSelectorValid(value);
+                validator.validateField(
+                    document.querySelector(`[name="${name}"]`),
+                    !isValid,
+                    'validation.invalidField'
+                );
+                disableFooter(!isValid);
+            }
+            if (name === 'selForAltPrice' || name === 'selForAltPriceTrigger') {
+                const isValid = isCssSelectorValid(value) || '' === value || null === value
+                validator.validateField(
+                    document.querySelector(`[name="${name}"]`),
+                    !isValid,
+                    'validation.invalidField'
+                );
+                disableFooter(!isValid);
+            }
+            if (name === 'customLocations') {
+                const isValid = isCustomLocationValid(value);
+                validator.validateField(
+                    document.querySelector(`.sq-product-related-field .sq-table`),
+                    !isValid,
+                    'validation.invalidField'
+                );
+                disableFooter(!isValid);
             }
         }
 
