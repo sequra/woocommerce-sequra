@@ -12,6 +12,7 @@ use Exception;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\Logger\Logger;
 use SeQura\Core\Infrastructure\Logger\LoggerConfiguration;
+use Throwable;
 
 /**
  * Logger service
@@ -111,6 +112,26 @@ class Logger_Service implements Interface_Logger_Service {
 	 */
 	public function log_error( $message, $func = null, $class_name = null, $context = array() ): void {
 		Logger::logError( $this->format_msg( $message, $func, $class_name ), 'Plugin', $context );
+	}
+
+	/**
+	 * Log a message with the severity "ERROR".
+	 *
+	 * @param Throwable      $throwable The throwable to log.
+	 * @param string|null $func The method name.
+	 * @param string|null $class_name The class name.
+	 * @param LogContextData[] $context Additional context.
+	 */
+	public function log_throwable( Throwable $throwable, $func = null, $class_name = null, $context = array() ): void {
+		$message       = get_class( $throwable );
+		$error_context = array(
+			new LogContextData( 'message', $throwable->getMessage() ),
+			new LogContextData( 'code', $throwable->getCode() ),
+			new LogContextData( 'file', $throwable->getFile() ),
+			new LogContextData( 'line', $throwable->getLine() ),
+			new LogContextData( 'trace', $throwable->getTraceAsString() ),
+		);
+		Logger::logError( $this->format_msg( $message, $func, $class_name ), 'Plugin', array_merge( $context, $error_context ) );
 	}
 
 	/**

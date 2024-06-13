@@ -79,6 +79,7 @@ SequraFE.appPages = {
      * @property {ShopPaymentMethod[] | null} shopPaymentMethods
      * @property {TransactionLog[] | null} transactionLogs
      * @property {string[] | null} logs
+     * @property {CountryPaymentMethod[] | null} allPaymentMethods
      */
 
     /**
@@ -117,7 +118,8 @@ SequraFE.appPages = {
                 shopPaymentMethods: null,
                 transactionLogs: null,
                 logs: null,
-                logsSettingsRes: null
+                logsSettingsRes: null,
+                allPaymentMethods: null
             };
         }
 
@@ -363,6 +365,7 @@ SequraFE.appPages = {
          */
         this.setCredentialsChanged = () => {
             SequraFE.state.setData('paymentMethods', null);
+            SequraFE.state.setData('allPaymentMethods', null);
             localStorage.setItem('sq-password-changed', '1');
         }
 

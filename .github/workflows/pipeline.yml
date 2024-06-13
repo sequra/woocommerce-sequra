@@ -65,7 +65,7 @@ jobs:
 
       - name: PHPStan
         if: github.event_name == 'push'
-        run: ./bin/phpstan --error-format github --no-progress
+        run: ./bin/phpstan --error-format=github --no-progress
 
       - name: Setup Environment
         if: github.event_name == 'pull_request'

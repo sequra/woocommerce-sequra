@@ -274,7 +274,7 @@
     },
     "displayOnProductPage": {
       "label": "Display widget on product page",
-      "description": "Specify whether payment method icon should be displayed to customers on the checkout."
+      "description": "Specify whether payment method icon should be displayed to customers on the product page."
     },
     "configurator": {
       "label": "Widget Configurator",
@@ -299,6 +299,29 @@
     "messageBelowLimit": {
       "label": "Message below limit",
       "description": "Message below limit description"
+    },
+    "selForPrice": {
+      "label": "Price selector",
+      "description": "Define a CSS selector to retrieve the product price"
+    },
+    "selForAltPrice": {
+      "label": "Alternative price selector",
+      "description": "An alternative CSS selector to retrieve the product price for special product page layouts. Ex: variable products"
+    },
+    "selForAltPriceTrigger": {
+      "label": "Selector for alternative price detection",
+      "description": "A CSS selector that points an element that, when present, indicates that the alternative price selector should be used"
+    },
+    "defaultLocationSel": {
+      "label": "Default widget location selector",
+      "description": "CSS selector to define the default container element for the widget"
+    },
+    "locations": {
+      "headerTitle": "Custom widget locations",
+      "headerDescription": "Define alternative container elements for the widget",
+      "addRow": "Add location",
+      "paymentMethod":"Payment method",
+      "selector": "Selector"
     }
   },
   "orderStatusSettings": {

@@ -204,7 +204,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * @param mixed $default_value The default value. Null will be ignored.
 	 * @return mixed[]
 	 */
-	private function get_arg( $required = true, $default_value = null ): array {
+	protected function get_arg( $required = true, $default_value = null ): array {
 		$arg = array( 'required' => $required );
 		if ( null !== $default_value ) {
 			$arg['default'] = $default_value;
