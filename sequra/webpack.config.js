@@ -38,22 +38,22 @@ module.exports = (env, argv) => {
 
     const exports = [
         {
-            plugins: adminPlugins,
-            entry: "./assets/js/src/settings-page.js",
-            output: {
-                path: path.resolve(__dirname, './assets/js/dist'),
-                filename: "settings-page.min.js",
-            },
-        },
-        {
             ...wpExports,
             entry: {
-                "payment-gateway-block.min": "./assets/js/src/payment-gateway-block.js"
+                "payment-gateway.min": "./assets/js/src/block/payment-gateway.js",
             },
             output: {
                 ...wpExports.output,
-                path: path.resolve(__dirname, "./assets/js/dist")
+                path: path.resolve(__dirname, "./assets/js/dist/block")
             }
+        },
+        {
+            plugins: adminPlugins,
+            entry: "./assets/js/src/page/settings.js",
+            output: {
+                path: path.resolve(__dirname, './assets/js/dist/page'),
+                filename: "settings.min.js",
+            },
         },
         // Add more entries here for processing other files.
     ];
