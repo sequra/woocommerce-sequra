@@ -1,4 +1,5 @@
 const TerserPlugin = require("terser-webpack-plugin");
+const wpExports = require("@wordpress/scripts/config/webpack.config");
 const path = require('path');
 
 module.exports = (env, argv) => {
@@ -40,9 +41,19 @@ module.exports = (env, argv) => {
             plugins: adminPlugins,
             entry: "./assets/js/src/settings-page.js",
             output: {
-                path: path.resolve(__dirname, './assets/js'),
+                path: path.resolve(__dirname, './assets/js/dist'),
                 filename: "settings-page.min.js",
             },
+        },
+        {
+            ...wpExports,
+            entry: {
+                "payment-gateway-block.min": "./assets/js/src/payment-gateway-block.js"
+            },
+            output: {
+                ...wpExports.output,
+                path: path.resolve(__dirname, "./assets/js/dist")
+            }
         },
         // Add more entries here for processing other files.
     ];

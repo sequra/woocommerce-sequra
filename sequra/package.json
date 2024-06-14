@@ -25,6 +25,7 @@
         "bb >= 10"
     ],
     "devDependencies": {
+        "@wordpress/scripts": "^27.6.0",
         "@babel/core": "~7.17.0",
         "@babel/preset-env": "~7.16.0",
         "autoprefixer": "~10.4.0",
