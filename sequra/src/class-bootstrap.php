@@ -18,6 +18,7 @@ use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalDat
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\Services\CountryConfigurationService;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
@@ -31,6 +32,7 @@ use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
+use SeQura\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodsService;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
@@ -44,9 +46,11 @@ use SeQura\Core\Infrastructure\ServiceRegister as Reg;
 use SeQura\Core\Infrastructure\TaskExecution\Process;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\Core\Infrastructure\Utility\TimeProvider;
-use SeQura\WC\Controllers\Assets_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Assets_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Payment\Payment_Controller;
 use SeQura\WC\Controllers\I18n_Controller;
-use SeQura\WC\Controllers\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
@@ -74,14 +78,17 @@ use SeQura\WC\Services\Core\Selling_Countries_Service;
 use SeQura\WC\Services\Core\Shop_Logger_Adapter;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
-use SeQura\WC\Services\I18n;
-use SeQura\WC\Services\Interface_I18n;
+use SeQura\WC\Services\I18n\I18n;
+use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Log_File;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Interface_Migration_Manager;
 use SeQura\WC\Services\Log_File;
 use SeQura\WC\Services\Logger_Service;
 use SeQura\WC\Services\Migration_Manager;
+use SeQura\WC\Services\Payment\Interface_Payment_Service;
+use SeQura\WC\Services\Payment\Payment_Service;
+use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
 
 /**
  * Implementation for the core bootstrap class.
@@ -112,6 +119,7 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Interface_I18n_Controller::class ),
 					Reg::getService( Interface_Assets_Controller::class ),
 					Reg::getService( Interface_Settings_Controller::class ),
+					Reg::getService( Interface_Payment_Controller::class ),
 					Reg::getService( General_Settings_REST_Controller::class ),
 					Reg::getService( Onboarding_REST_Controller::class ),
 					Reg::getService( Payment_REST_Controller::class ),
@@ -422,7 +430,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_I18n::class ];
 			}
 		);
-
 		Reg::registerService(
 			Interface_Logger_Service::class,
 			static function () {
@@ -433,6 +440,27 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Interface_Logger_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Payment_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Payment_Service::class ] ) ) {
+					self::$cache[ Interface_Payment_Service::class ] = new Payment_Service(
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_I18n::class )
+					);
+				}
+				return self::$cache[ Interface_Payment_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Sequra_Payment_Gateway_Block_Support::class,
+			static function () {
+				if ( ! isset( self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] ) ) {
+					self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] = new Sequra_Payment_Gateway_Block_Support();
+				}
+				return self::$cache[ Sequra_Payment_Gateway_Block_Support::class ];
 			}
 		);
 	}
@@ -562,6 +590,18 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Controllers\Interface_Settings_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Payment_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Payment_Controller::class ] ) ) {
+					self::$cache[ Interface_Payment_Controller::class ] = new Payment_Controller(
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Payment_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Payment_Controller::class ];
 			}
 		);
 		Reg::registerService(

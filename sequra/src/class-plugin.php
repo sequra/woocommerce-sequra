@@ -7,8 +7,9 @@
 
 namespace SeQura\WC;
 
+use SeQura\WC\Controllers\Hooks\Payment\Payment_Controller;
 use SeQura\WC\Controllers\Interface_I18n_Controller;
-use SeQura\WC\Controllers\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
 use SeQura\WC\Services\Interface_Migration_Manager;
@@ -48,6 +49,7 @@ class Plugin {
 	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
 	 * @param Interface_Assets_Controller $assets_controller Assets controller.
 	 * @param Interface_Settings_Controller $settings_controller Settings controller.
+	 * @param Payment_Controller          $payment_controller Payment controller.
 	 * @param REST_Controller          $rest_settings_controller REST Settings controller.
 	 * @param REST_Controller          $rest_onboarding_controller REST Onboarding controller.
 	 * @param REST_Controller          $rest_payment_controller REST Payment controller.
@@ -60,6 +62,7 @@ class Plugin {
 		Interface_I18n_Controller $i18n_controller,
 		Interface_Assets_Controller $assets_controller,
 		Interface_Settings_Controller $settings_controller,
+		Payment_Controller $payment_controller,
 		REST_Controller $rest_settings_controller,
 		REST_Controller $rest_onboarding_controller,
 		REST_Controller $rest_payment_controller,
@@ -83,12 +86,15 @@ class Plugin {
 		add_filter( "plugin_action_links_{$base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
 		add_filter( 'admin_footer_text', array( $settings_controller, 'remove_footer_admin' ) );
 
-
 		// REST Controllers.
 		add_action( 'rest_api_init', array( $rest_settings_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_onboarding_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_payment_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_log_controller, 'register_routes' ) );
+
+		// Payment hooks.
+		add_filter( 'woocommerce_payment_gateways', array( $payment_controller, 'register_gateway_classes' ) );
+		add_action( 'woocommerce_blocks_loaded', array( $payment_controller, 'register_gateway_gutenberg_block' ) );
 	}
 
 	/**

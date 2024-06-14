@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Controllers
  */
 
-namespace SeQura\WC\Controllers;
+namespace SeQura\WC\Controllers\Hooks\Asset;
 
 /**
  * Define the assets related functionality
