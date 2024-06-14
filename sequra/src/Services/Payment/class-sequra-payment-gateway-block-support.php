@@ -30,6 +30,28 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	protected $name = 'sequra';
 
 	/**
+	 * Assets directory path.
+	 *
+	 * @var string
+	 */
+	private $assets_dir_path;
+
+	/**
+	 * Assets URL.
+	 *
+	 * @var string
+	 */
+	private $assets_url;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct( string $assets_dir_path, string $assets_url ) {
+		$this->assets_dir_path = $assets_dir_path;
+		$this->assets_url      = $assets_url;
+	}
+
+	/**
 	 * Initialization
 	 */
 	public function initialize() {
@@ -52,8 +74,8 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles(): array {
 
-		$asset_path = WC_SEQURA_PLG_PATH . 'assets/js/dist/index.asset.php';
-		$asset_url  = plugin_dir_url( __FILE__ ) . '/assets/js/dist/index.js';
+		$asset_path = "{$this->assets_dir_path}/js/dist/block/payment-gateway.min.asset.php";
+		$asset_url  = "{$this->assets_url}/js/dist/block/payment-gateway.min.js";
 	
 		$dependencies = array();
 		if ( ! file_exists( $asset_path ) ) {

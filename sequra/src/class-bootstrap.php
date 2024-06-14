@@ -236,6 +236,24 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache['plugin.templates_path'];
 			}
 		);
+		Reg::registerService(
+			'plugin.assets_path',
+			static function () {
+				if ( ! isset( self::$cache['plugin.assets_path'] ) ) {
+					self::$cache['plugin.assets_path'] = Reg::getService( 'plugin.dir_path' ) . 'assets';
+				}
+				return self::$cache['plugin.assets_path'];
+			}
+		);
+		Reg::registerService(
+			'plugin.assets_url',
+			static function () {
+				if ( ! isset( self::$cache['plugin.assets_url'] ) ) {
+					self::$cache['plugin.assets_url'] = Reg::getService( 'plugin.dir_url' ) . '/assets';
+				}
+				return self::$cache['plugin.assets_url'];
+			}
+		);
 	}
 
 	/**
@@ -458,7 +476,10 @@ class Bootstrap extends BootstrapComponent {
 			Sequra_Payment_Gateway_Block_Support::class,
 			static function () {
 				if ( ! isset( self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] ) ) {
-					self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] = new Sequra_Payment_Gateway_Block_Support();
+					self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] = new Sequra_Payment_Gateway_Block_Support(
+						Reg::getService( 'plugin.assets_path' ),
+						Reg::getService( 'plugin.assets_url' ),
+					);
 				}
 				return self::$cache[ Sequra_Payment_Gateway_Block_Support::class ];
 			}
@@ -568,8 +589,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Assets_Controller::class ] ) ) {
 					self::$cache[ Interface_Assets_Controller::class ] = new Assets_Controller(
-						Reg::getService( 'plugin.dir_url' ) . '/assets', 
-						Reg::getService( 'plugin.dir_path' ) . 'assets', 
+						Reg::getService( 'plugin.assets_url' ), 
+						Reg::getService( 'plugin.assets_path' ), 
 						Reg::getService( 'plugin.data' )['Version'],
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
