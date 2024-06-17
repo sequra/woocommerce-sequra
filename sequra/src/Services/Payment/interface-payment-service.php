@@ -25,6 +25,15 @@ interface Interface_Payment_Service {
 	public function get_payment_gateways(): array;
 
 	/**
+	 * Get payment methods
+	 * 
+	 * @throws Throwable
+	 * 
+	 * @return array<string, string>[]
+	 */
+	public function get_payment_methods(): array;
+
+	/**
 	 * Get the payment gateway class alias
 	 * 
 	 * @return string|null The payment gateway alias or null if not found

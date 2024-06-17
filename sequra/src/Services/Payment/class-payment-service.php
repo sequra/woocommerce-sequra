@@ -65,6 +65,34 @@ class Payment_Service implements Interface_Payment_Service {
 	}
 
 	/**
+	 * Get payment methods
+	 * 
+	 * @throws Throwable|Exception
+	 * 
+	 * @return array<string, string>[]
+	 */
+	public function get_payment_methods(): array {
+		
+		$store_id = $this->configuration->get_store_id();
+		
+		$countries       = AdminAPI::get()->countryConfiguration( $store_id )->getCountryConfigurations()->toArray();
+		$merchant        = null;
+		$current_country = $this->i18n->get_current_country();
+
+		foreach ( $countries as $country ) {
+			if ( $country['countryCode'] === $current_country ) {
+				$merchant = $country['merchantId'];
+				break;
+			}
+		}
+		if ( empty( $merchant ) ) {
+			throw new Exception( 'Merchant not found' );
+		}
+
+		return AdminAPI::get()->paymentMethods( $store_id )->getPaymentMethods( $merchant )->toArray();
+	}
+
+	/**
 	 * Get payment gateways as an array. Each element is an array with the following structure:
 	 * - product: string (e.g. 'pp3')
 	 * - title: string (e.g. 'Pay later')

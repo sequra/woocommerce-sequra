@@ -9,6 +9,8 @@
 namespace SeQura\WC\Services\Payment;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+use SeQura\WC\Services\Interface_Logger_Service;
+use Throwable;
 
 /**
  * Provide compatibility with Gutenberg blocks for the payment gateway
@@ -44,11 +46,33 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	private $assets_url;
 
 	/**
+	 * Payment service.
+	 *
+	 * @var Interface_Payment_Service
+	 */
+	private $payment_service;
+
+	/**
+	 * Logger service.
+	 *
+	 * @var Interface_Logger_Service
+	 */
+	private $logger;
+
+	/**
 	 * Constructor
 	 */
-	public function __construct( string $assets_dir_path, string $assets_url ) {
+	public function __construct( 
+		string $assets_dir_path, 
+		string $assets_url, 
+		Interface_Payment_Service $payment_service,
+		Interface_Logger_Service $logger
+	) {
 		$this->assets_dir_path = $assets_dir_path;
 		$this->assets_url      = $assets_url;
+		$this->payment_service = $payment_service;
+		$this->logger          = $logger;
+		$this->name            = 'sequra';
 	}
 
 	/**
@@ -101,10 +125,17 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	 * Provide all the necessary data to use on the front-end as an associative array.
 	 */
 	public function get_payment_method_data(): array {
+		$payment_methods = array();
+		try {
+			$payment_methods = $this->payment_service->get_payment_methods();
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
 		return array(
-			'title'       => 'seQura',
-			'description' => 'seQura payment gateway',
-			// 'icon'        => plugin_dir_url( __DIR__ ) . 'assets/icon.png',
+			'title'          => 'seQura',
+			'description'    => 'Select the payment method you want to use',
+			'paymentMethods' => $payment_methods,
+			'icon'           => 'https://cdn.prod.website-files.com/62b803c519da726951bd71c2/62b803c519da72c35fbd72a2_Logo.svg',
 		
 			// if $this->gateway was initialized on line 15
 			// 'supports'  => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] ),

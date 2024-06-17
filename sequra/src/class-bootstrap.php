@@ -479,6 +479,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] = new Sequra_Payment_Gateway_Block_Support(
 						Reg::getService( 'plugin.assets_path' ),
 						Reg::getService( 'plugin.assets_url' ),
+						Reg::getService( Interface_Payment_Service::class ),
+						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
 				return self::$cache[ Sequra_Payment_Gateway_Block_Support::class ];

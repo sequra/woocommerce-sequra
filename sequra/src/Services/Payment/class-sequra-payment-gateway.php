@@ -67,6 +67,18 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	
 	public function process_payment( $order_id ) { 
 		// TODO: Implement process_payment() method.
+		// get order by id
+		$order = wc_get_order( $order_id );
+		// return array(
+		// 'result'   => 'success',
+		// 'redirect' => $this->get_return_url( $order ),
+		// );
+
+		// force failure for testing.
+		return array(
+			'result'   => 'failure',
+			'redirect' => wc_get_checkout_url(),
+		);
 	}
 	
 	public function webhook() {

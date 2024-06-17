@@ -19,6 +19,7 @@ use SeQura\WC\Services\Interface_Logger_Service;
 class Assets_Controller extends Controller implements Interface_Assets_Controller {
 
 	private const HANDLE_SETTINGS_PAGE     = 'sequra-settings';
+	private const HANDLE_CHECKOUT          = 'sequra-checkout';
 	private const HANDLE_CORE              = 'sequra-core';
 	private const INTEGRATION_CORE_VERSION = '1.0.0';
 
@@ -210,6 +211,10 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	public function enqueue_front(): void {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+
+		if ( is_checkout() ) {
+			wp_enqueue_style( self::HANDLE_CHECKOUT, "{$this->assets_dir_url}/css/checkout.css", array(), $this->assets_version );
+		}
 	}
 
 	/**
