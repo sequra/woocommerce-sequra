@@ -32,4 +32,16 @@ interface Interface_Payment_Controller {
 	 * Register the payment gateway block class
 	 */
 	public function register_gateway_gutenberg_block_class( PaymentMethodRegistry $payment_method_registry ): void;
+	
+	/**
+	 * Checkout fields validation
+	 * Legacy shortcode only
+	 */
+	public function checkout_process(): void;
+
+	/**
+	 * Checkout fields
+	 * Legacy shortcode only
+	 */
+	public function checkout_fields( $fields ): array;
 }

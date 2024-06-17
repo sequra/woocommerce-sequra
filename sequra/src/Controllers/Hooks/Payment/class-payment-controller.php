@@ -15,7 +15,6 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
-use Throwable;
 
 /**
  * Respond to payment hooks
@@ -66,25 +65,26 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	 */
 	public function register_gateway_gutenberg_block_class( PaymentMethodRegistry $payment_method_registry ): void {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-
-		// try {
-		// 	$pm = $this->payment_service->get_payment_methods();
-		// 	array_pop( $pm ); // TODO: Remove last element (sequra), just to avoid error and keep the code running
-		// 	foreach ( $pm as $payment_method ) {
-		// 		$alias = 'Sequra_Payment_Gateway_Block_Support_' . $payment_method['product'] . ( empty( $payment_method['campaign'] ) ? '' : ':' . $payment_method['campaign'] );
-		// 		class_alias( Sequra_Payment_Gateway_Block_Support::class, $alias );
-		// 		$payment_method_registry->register( 
-		// 			new $alias(
-		// 				ServiceRegister::getService( 'plugin.assets_path' ),
-		// 				ServiceRegister::getService( 'plugin.assets_url' ),
-		// 				$payment_method
-		// 			)
-		// 		);
-		// 	}
-		// } catch ( Throwable $e ) {
-		// 	$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-		// }
-
 		$payment_method_registry->register( ServiceRegister::getService( Sequra_Payment_Gateway_Block_Support::class ) );
+	}
+
+	/**
+	 * Checkout fields validation
+	 * Legacy shortcode only
+	 */
+	public function checkout_process(): void {
+		// TODO: review this
+		if ( empty( $_POST['sequra_product_campaign'] ) ) {
+			wc_add_notice( __( 'Invalid <strong>sequra_product_campaign</strong>, please check ...' ), 'error' );
+		}
+	}
+
+	/**
+	 * Checkout fields
+	 * Legacy shortcode only
+	 */
+	public function checkout_fields( $fields ): array {
+		// TODO: review this
+		return $fields;
 	}
 }

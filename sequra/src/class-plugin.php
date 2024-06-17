@@ -95,6 +95,9 @@ class Plugin {
 		// Payment hooks.
 		add_filter( 'woocommerce_payment_gateways', array( $payment_controller, 'register_gateway_classes' ) );
 		add_action( 'woocommerce_blocks_loaded', array( $payment_controller, 'register_gateway_gutenberg_block' ) );
+		
+		add_action( 'woocommerce_checkout_process', array( $payment_controller, 'checkout_process' ) );
+		add_filter( 'woocommerce_checkout_fields', array( $payment_controller, 'checkout_fields' ) );
 	}
 
 	/**
