@@ -14,24 +14,20 @@ const Content = (props) => {
 
     useEffect(() => {
         const unsubscribe = onPaymentProcessing(async () => {
-            const checkedInput = document.querySelector('[name="sequra_product_campaign"]:checked')
-            const [product, campaign] = checkedInput ? checkedInput.value.split(':') : []
+            const checkedInput = document.querySelector('[name="sequra_payment_method_data"]:checked')
+            const data = checkedInput ? checkedInput.value : null;
 
-            if (product) {
+            if (!data) {
                 return {
-                    type: emitResponse.responseTypes.SUCCESS,
-                    meta: {
-                        paymentMethodData: {
-                            "sequra_product": product.trim(),
-                            "sequra_campaign": campaign ? campaign.trim() : '',
-                        },
-                    },
+                    type: emitResponse.responseTypes.ERROR,
+                    message: 'Please select a payment method.', // TODO: translate
                 };
             }
-
             return {
-                type: emitResponse.responseTypes.ERROR,
-                message: 'Please select a payment method.', // TODO: translate
+                type: emitResponse.responseTypes.SUCCESS,
+                meta: {
+                    paymentMethodData: { "sequra_payment_method_data": data },
+                },
             };
         });
         // Unsubscribes when this component is unmounted.

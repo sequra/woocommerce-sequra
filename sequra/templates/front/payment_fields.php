@@ -8,6 +8,8 @@
  * - payment_methods: array<string, mixed>
  */
 
+use SeQura\WC\Dto\Payment_Method_Data;
+
 defined( 'WPINC' ) || die;
 if ( ! isset( $args['description'], $args['payment_methods'] ) ) {
 	return;
@@ -17,13 +19,20 @@ if ( ! isset( $args['description'], $args['payment_methods'] ) ) {
 <span class="sequra-block__description"><?php echo wp_kses_post( wpautop( wptexturize( $args['description'] ) ) ); ?></span>
 <?php
 foreach ( (array) $args['payment_methods'] as $key => $pm ) :
-	$data_product  = $pm['product'];
-	$data_campaign = ! empty( $pm['campaign'] ) ? $pm['campaign'] : ''; 
-	$input_val     = $data_product . ( ! empty( $data_campaign ) ? ":$data_campaign" : '' );
-	$input_id      = "sequra_payment_method_{$key}";
+	/**
+	 * Dto
+	 *
+	 * @var Payment_Method_Data $dto
+	 */
+	$dto = Payment_Method_Data::from_array( $pm );
+	if ( ! $dto || ! $dto->is_valid() ) {
+		continue; 
+	}
+	
+	$input_id = "sequra_payment_method_{$key}";
 	?>
 	<div class="sequra-payment-method">
-		<input type="radio" name="sequra_product_campaign" value="<?php echo esc_attr( $input_val ); ?>" data-product="<?php echo esc_attr( $data_product ); ?>" data-campaign="<?php echo esc_attr( $data_campaign ); ?>" id="<?php echo esc_attr( $input_id ); ?>" class="sequra-payment-method__input wc-block-components-radio-control__input" />
+		<input type="radio" name="sequra_payment_method_data" value="<?php echo esc_attr( $dto->encode() ); ?>" id="<?php echo esc_attr( $input_id ); ?>" class="sequra-payment-method__input wc-block-components-radio-control__input" />
 		<label for="<?php echo esc_attr( $input_id ); ?>">
 			<div class="sequra-payment-method__description">
 				<span class="sequra-payment-method__name" style="width:100%"><?php echo esc_html( $pm['title'] ); ?></span>

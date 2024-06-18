@@ -9,6 +9,9 @@
 namespace SeQura\WC\Services\Payment;
 
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Dto\Payment_Method_Data;
+use Throwable;
+use WC_Order;
 use WC_Payment_Gateway;
 
 /**
@@ -16,9 +19,10 @@ use WC_Payment_Gateway;
  */
 class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
-	private const FORM_FIELD_ENABLED = 'enabled';
-	private const FORM_FIELD_TITLE   = 'title';
-	private const FORM_FIELD_DESC    = 'description';
+	private const FORM_FIELD_ENABLED          = 'enabled';
+	private const FORM_FIELD_TITLE            = 'title';
+	private const FORM_FIELD_DESC             = 'description';
+	private const POST_SQ_PAYMENT_METHOD_DATA = 'sequra_payment_method_data';
 
 	/**
 	 * Payment service
@@ -49,7 +53,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 		$this->payment_service = ServiceRegister::getService( Interface_Payment_Service::class );
 		$this->templates_path  = ServiceRegister::getService( 'plugin.templates_path' );
-		$this->id              = 'sequra';
+		$this->id              = $this->payment_service->get_payment_gateway_id();
 		// TODO: URL of the icon that will be displayed on checkout page near your gateway name.
 		$this->icon               = 'https://cdn.prod.website-files.com/62b803c519da726951bd71c2/62b803c519da72c35fbd72a2_Logo.svg'; 
 		$this->has_fields         = true;
@@ -67,6 +71,9 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->description = $this->get_form_field_value( self::FORM_FIELD_DESC ); // Description of the payment method shown on the checkout page.
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+
+		// TODO: Declare webhooks for IPN and other events.
+		// add_action( 'woocommerce_api_sequra_webhook', array( $this, 'webhook' ) );
 
 		/**
 		 * Action hook to allow plugins to run when the class is loaded.
@@ -130,15 +137,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function validate_fields() {
-		$prod     = $this->get_posted_product();
-		$campaign = $this->get_posted_campaign();
-
-		foreach ( $this->payment_service->get_payment_methods() as $pm ) {
-			if ( $pm['product'] === $prod && $pm['campaign'] === $campaign ) {
-				return true;
-			}
+		if ( ! $this->payment_service->is_payment_method_data_valid( $this->get_posted_data() ) ) {
+			wc_add_notice( __( 'Please select a valid <strong>seQura payment method</strong>', 'sequra' ), 'error' );
+			return false;
 		}
-		return false;
+		return true;
 	}
 	
 	/**
@@ -148,20 +151,16 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * 
 	 * @return array
 	 */
-	public function process_payment( $order_id ) { 
-		$response = array(
-			'result'   => 'failure',
-			'redirect' => wc_get_checkout_url(),
-		);
-
+	public function process_payment( $order_id ) {  
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			return $response;
+		if ( ! $order instanceof WC_Order
+		|| ! $this->payment_service->set_order_metadata( $order, $this->get_posted_data() ) 
+		) {
+			return array(
+				'result'   => 'failure',
+				'redirect' => wc_get_checkout_url(),
+			);
 		}
-		// TODO: review the meta keys names. Move this to the payment service.
-		$order->update_meta_data( '_sequra_product', $this->get_posted_product() );
-		$order->update_meta_data( '_sequra_campaign', $this->get_posted_campaign() );
-		$order->save();
 
 		return array(
 			'result'   => 'success',
@@ -170,21 +169,17 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Get seQura product from POST
+	 * Get payment method data from POST.
 	 */
-	private function get_posted_product(): ?string {
-		//phpcs:ignore WordPress.Security.NonceVerification.Missing
-		return ! isset( $_POST['sequra_product'] ) || ! is_string( $_POST['sequra_product'] ) ? null : trim( sanitize_text_field( $_POST['sequra_product'] ) );
+	private function get_posted_data(): ?Payment_Method_Data {
+		//phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( ! isset( $_POST[ self::POST_SQ_PAYMENT_METHOD_DATA ] ) || ! is_string( $_POST[ self::POST_SQ_PAYMENT_METHOD_DATA ] ) ) {
+			return null;
+		}
+		
+		return Payment_Method_Data::decode( sanitize_text_field( $_POST[ self::POST_SQ_PAYMENT_METHOD_DATA ] ) );
 	}
 
-	/**
-	 * Get seQura campaign from POST
-	 */
-	private function get_posted_campaign(): ?string {
-		//phpcs:ignore WordPress.Security.NonceVerification.Missing
-		return ! isset( $_POST['sequra_campaign'] ) || ! is_string( $_POST['sequra_campaign'] ) ? null : trim( sanitize_text_field( $_POST['sequra_campaign'] ) );
-	}
-	
 	/**
 	 * Webhook
 	 */
