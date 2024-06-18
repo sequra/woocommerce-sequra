@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Controllers
  */
 
-namespace SeQura\WC\Controllers;
+namespace SeQura\WC\Controllers\Hooks\I18n;
 
 /**
  * Define the internationalization functionality

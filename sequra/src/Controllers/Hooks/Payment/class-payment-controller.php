@@ -30,11 +30,9 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 
 	/**
 	 * Constructor
-	 *
-	 * @param Interface_Logger_Service $logger Logger service.
 	 */
-	public function __construct( Interface_Logger_Service $logger, Interface_Payment_Service $payment_service ) {
-		parent::__construct( $logger );
+	public function __construct( Interface_Logger_Service $logger, string $templates_path, Interface_Payment_Service $payment_service ) {
+		parent::__construct( $logger, $templates_path );
 		$this->payment_service = $payment_service;
 	}
 
@@ -86,5 +84,12 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	public function checkout_fields( $fields ): array {
 		// TODO: review this
 		return $fields;
+	}
+
+	/**
+	 * Append content to the bottom of the receipt page
+	 */
+	public function receipt_page( int $order_id ): void {
+		wc_get_template( 'front/receipt_page.php', $args, '', $this->templates_path );
 	}
 }

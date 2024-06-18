@@ -23,11 +23,17 @@ abstract class Controller {
 	protected $logger;
 
 	/**
-	 * Constructor.
+	 * Templates path.
 	 *
-	 * @param Interface_Logger_Service $logger         The logger service.
+	 * @var string
 	 */
-	public function __construct( Interface_Logger_Service $logger ) {
-		$this->logger = $logger;
+	protected $templates_path;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct( Interface_Logger_Service $logger, string $templates_path ) {
+		$this->logger         = $logger;
+		$this->templates_path = $templates_path;
 	}
 }

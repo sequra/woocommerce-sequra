@@ -16,6 +16,10 @@ use WC_Payment_Gateway;
  */
 class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
+	private const FORM_FIELD_ENABLED = 'enabled';
+	private const FORM_FIELD_TITLE   = 'title';
+	private const FORM_FIELD_DESC    = 'description';
+
 	/**
 	 * Payment service
 	 *
@@ -34,47 +38,83 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
+
+		/**
+		 * Action hook to allow plugins to run when the class is loaded.
+		 * TODO: is this still needed?
+		 *
+		 * @since 2.0.0
+		 */
+		do_action( 'woocommerce_sequra_before_load', $this );
+
 		$this->payment_service = ServiceRegister::getService( Interface_Payment_Service::class );
 		$this->templates_path  = ServiceRegister::getService( 'plugin.templates_path' );
-		$this->id              = 'sequra'; // payment gateway plugin ID.
-		$this->icon            = 'https://cdn.prod.website-files.com/62b803c519da726951bd71c2/62b803c519da72c35fbd72a2_Logo.svg'; // URL of the icon that will be displayed on checkout page near your gateway name.
-		$this->has_fields      = true; // in case you need a custom credit card form.
-		// BE.
-		$this->method_title       = 'seQura';
-		$this->method_description = 'seQura payment gateway';
-		// FE.
-		$this->title       = 'seQura';
-		$this->description = 'seQura payment gateway';
+		$this->id              = 'sequra';
+		// TODO: URL of the icon that will be displayed on checkout page near your gateway name.
+		$this->icon               = 'https://cdn.prod.website-files.com/62b803c519da726951bd71c2/62b803c519da72c35fbd72a2_Logo.svg'; 
+		$this->has_fields         = true;
+		$this->method_title       = __( 'seQura', 'sequra' );
+		$this->method_description = __( 'seQura payment method\'s configuration', 'sequra' );
 
 		$this->supports = array(
 			'products',
 		);
 
-		// Method with all the options fields.
 		$this->init_form_fields();
-
-		// Load the settings.
 		$this->init_settings();
-		$this->enabled = $this->get_option( 'enabled', 'no' );
+		$this->enabled     = $this->get_form_field_value( self::FORM_FIELD_ENABLED );
+		$this->title       = $this->get_form_field_value( self::FORM_FIELD_TITLE ); // Title of the payment method shown on the checkout page.
+		$this->description = $this->get_form_field_value( self::FORM_FIELD_DESC ); // Description of the payment method shown on the checkout page.
+
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+
+		/**
+		 * Action hook to allow plugins to run when the class is loaded.
+		 * TODO: is this still needed?
+		 * 
+		 * @since 2.0.0 
+		 */
+		do_action( 'woocommerce_sequra_loaded', $this );
+	}
+
+	/**
+	 * Helper to read the value of a field from the configuration form
+	 * or the default value if not set
+	 */
+	private function get_form_field_value( string $field_name ) {
+		$default = isset( $this->form_fields[ $field_name ]['default'] ) ? $this->form_fields[ $field_name ]['default'] : null;
+		return $this->get_option( $field_name, $default );
 	}
 	
 	/**
-	 * Plugin options, we deal with it in Step 3 too
+	 * Declare fields for the configuration form
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled' => array(
+			self::FORM_FIELD_ENABLED => array(
 				'title'       => 'Enable/Disable',
 				'label'       => 'Enable seQura',
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no',
 			),
+			self::FORM_FIELD_TITLE   => array(
+				'title'       => __( 'Title', 'sequra' ),
+				'type'        => 'text',
+				'description' => __( 'This controls the title which the user sees during checkout.', 'sequra' ),
+				'default'     => __( 'Flexible payment with seQura', 'sequra' ),
+			),
+			self::FORM_FIELD_DESC    => array(
+				'title'       => __( 'Description', 'sequra' ),
+				'type'        => 'text',
+				'description' => __( 'This controls the description which the user sees during checkout.', 'sequra' ),
+				'default'     => __( 'Please, select the payment method you want to use', 'sequra' ),
+			),
 		);
 	}
 
 	/**
-	 * Payment fields
+	 * Declare fields for the payment method in the checkout page
 	 */
 	public function payment_fields() {
 		$args = array(
@@ -85,9 +125,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Validate frontend fields.
-	 *
-	 * Validate payment fields on the frontend.
+	 * Validate fields for the payment method in the checkout page
 	 *
 	 * @return bool
 	 */

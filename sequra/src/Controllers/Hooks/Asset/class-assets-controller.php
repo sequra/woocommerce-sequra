@@ -60,23 +60,17 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 
 	/**
 	 * Constructor
-	 *
-	 * @param string $assets_dir_url URL to the assets directory.
-	 * @param string $assets_dir_path Path to the assets directory.
-	 * @param string $assets_version Version of the assets.
-	 * @param Interface_I18n $i18n I18n service.
-	 * @param Interface_Logger_Service $logger Logger service.
-	 * @param Configuration $configuration Configuration service.
 	 */
 	public function __construct( 
-		$assets_dir_url, 
-		$assets_dir_path, 
-		$assets_version, 
+		string $assets_dir_url, 
+		string $assets_dir_path, 
+		string $assets_version, 
 		Interface_I18n $i18n, 
-		Interface_Logger_Service $logger, 
+		Interface_Logger_Service $logger,
+		string $templates_path, 
 		Configuration $configuration 
 	) {
-		parent::__construct( $logger );
+		parent::__construct( $logger, $templates_path );
 		$this->assets_dir_url  = $assets_dir_url;
 		$this->assets_dir_path = $assets_dir_path;
 		$this->assets_version  = $assets_version;

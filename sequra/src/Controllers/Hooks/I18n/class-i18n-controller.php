@@ -6,8 +6,9 @@
  * @subpackage SeQura/WC/Controllers
  */
 
-namespace SeQura\WC\Controllers;
+namespace SeQura\WC\Controllers\Hooks\I18n;
 
+use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Services\Interface_Logger_Service;
 
 /**
@@ -33,13 +34,14 @@ class I18n_Controller extends Controller implements Interface_I18n_Controller {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param string $text_domain The text domain of the plugin.
-	 * @param string $domain_path The relative path to translation files from wp-content/plugins.
-	 * @param Interface_Logger_Service $logger The logger service.
 	 */
-	public function __construct( $text_domain, $domain_path, Interface_Logger_Service $logger ) {
-		parent::__construct( $logger );
+	public function __construct( 
+		string $text_domain, 
+		string $domain_path, 
+		Interface_Logger_Service $logger,
+		string $templates_path 
+	) {
+		parent::__construct( $logger, $templates_path );
 		$this->text_domain = $text_domain;
 		$this->domain_path = trailingslashit( $domain_path );
 	}

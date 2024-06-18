@@ -48,11 +48,12 @@ use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\Core\Infrastructure\Utility\TimeProvider;
 use SeQura\WC\Controllers\Hooks\Asset\Assets_Controller;
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\I18n\I18n_Controller;
+use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Payment_Controller;
-use SeQura\WC\Controllers\I18n_Controller;
-use SeQura\WC\Controllers\Interface_I18n_Controller;
-use SeQura\WC\Controllers\Interface_Settings_Controller;
+use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
+use SeQura\WC\Controllers\Hooks\Settings\Settings_Controller;
 use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
@@ -580,10 +581,11 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_I18n_Controller::class ] = new I18n_Controller( 
 						$domain . $data['DomainPath'],
 						$domain,
-						Reg::getService( Interface_Logger_Service::class ) 
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( 'plugin.templates_path' )
 					);
 				}
-				return self::$cache[ Controllers\Interface_I18n_Controller::class ];
+				return self::$cache[ Interface_I18n_Controller::class ];
 			}
 		);
 		Reg::registerService(
@@ -596,6 +598,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( 'plugin.data' )['Version'],
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( 'plugin.templates_path' ),
 						Reg::getService( Configuration::class )
 					);
 				}
@@ -612,7 +615,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
-				return self::$cache[ Controllers\Interface_Settings_Controller::class ];
+				return self::$cache[ Interface_Settings_Controller::class ];
 			}
 		);
 		Reg::registerService(
@@ -621,6 +624,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Payment_Controller::class ] ) ) {
 					self::$cache[ Interface_Payment_Controller::class ] = new Payment_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( 'plugin.templates_path' ),
 						Reg::getService( Interface_Payment_Service::class )
 					);
 				}

@@ -7,10 +7,10 @@
 
 namespace SeQura\WC;
 
-use SeQura\WC\Controllers\Hooks\Payment\Payment_Controller;
-use SeQura\WC\Controllers\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
-use SeQura\WC\Controllers\Interface_Settings_Controller;
+use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
 use SeQura\WC\Services\Interface_Migration_Manager;
 
@@ -41,28 +41,16 @@ class Plugin {
 	private $migration_manager;
 
 	/**
-	 * Construct the plugin. Bind hooks with controllers.
-	 *
-	 * @param array<string, string>                      $data            The plugin data.
-	 * @param string                      $base_name       The plugin base name.
-	 * @param Interface_Migration_Manager $migration_manager Migration manager.
-	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
-	 * @param Interface_Assets_Controller $assets_controller Assets controller.
-	 * @param Interface_Settings_Controller $settings_controller Settings controller.
-	 * @param Payment_Controller          $payment_controller Payment controller.
-	 * @param REST_Controller          $rest_settings_controller REST Settings controller.
-	 * @param REST_Controller          $rest_onboarding_controller REST Onboarding controller.
-	 * @param REST_Controller          $rest_payment_controller REST Payment controller.
-	 * @param REST_Controller          $rest_log_controller REST Log controller.
+	 * Construct the plugin and bind hooks with controllers.
 	 */
 	public function __construct(
-		$data,
-		$base_name,
+		array $data,
+		string $base_name,
 		Interface_Migration_Manager $migration_manager,
 		Interface_I18n_Controller $i18n_controller,
 		Interface_Assets_Controller $assets_controller,
 		Interface_Settings_Controller $settings_controller,
-		Payment_Controller $payment_controller,
+		Interface_Payment_Controller $payment_controller,
 		REST_Controller $rest_settings_controller,
 		REST_Controller $rest_onboarding_controller,
 		REST_Controller $rest_payment_controller,

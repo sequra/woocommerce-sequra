@@ -6,8 +6,9 @@
  * @subpackage SeQura/WC/Controllers
  */
 
-namespace SeQura\WC\Controllers;
+namespace SeQura\WC\Controllers\Hooks\Settings;
 
+use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Interface_Logger_Service;
 
@@ -15,13 +16,6 @@ use SeQura\WC\Services\Interface_Logger_Service;
  * Implementation for the settings controller.
  */
 class Settings_Controller extends Controller implements Interface_Settings_Controller {
-
-	/**
-	 * The templates path.
-	 *
-	 * @var string
-	 */
-	private $templates_path;
 
 	/**
 	 * Configuration service.
@@ -33,10 +27,13 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	/**
 	 * Constructor.
 	 */
-	public function __construct( string $templates_path, Configuration $configuration, Interface_Logger_Service $logger ) {
-		parent::__construct( $logger );
-		$this->templates_path = $templates_path;
-		$this->configuration  = $configuration;
+	public function __construct( 
+		string $templates_path, 
+		Configuration $configuration, 
+		Interface_Logger_Service $logger
+	) {
+		parent::__construct( $logger, $templates_path );
+		$this->configuration = $configuration;
 	}
 
 	/**
