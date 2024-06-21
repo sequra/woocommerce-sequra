@@ -12,6 +12,7 @@ use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Core\Configuration;
+use SeQura\WC\Services\Core\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use Throwable;
 use WC_Order;
@@ -40,37 +41,74 @@ class Payment_Service implements Interface_Payment_Service {
 	private $i18n;
 
 	/**
+	 * Create order request builder
+	 *
+	 * @var Interface_Create_Order_Request_Builder
+	 */
+	private $create_order_request_builder;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		Configuration $configuration,
-		Interface_I18n $i18n
+		Interface_I18n $i18n,
+		Interface_Create_Order_Request_Builder $create_order_request_builder
 	) {
-		$this->configuration = $configuration;
-		$this->i18n          = $i18n;
+		$this->configuration                = $configuration;
+		$this->i18n                         = $i18n;
+		$this->create_order_request_builder = $create_order_request_builder;
 	}
 
 	/**
 	 * Get payment gateway ID
-	 * 
-	 * @return string
 	 */
 	public function get_payment_gateway_id(): string {
 		return 'sequra';
 	}
 
 	/**
-	 * Get payment methods
-	 * 
-	 * @throws Throwable|Exception
-	 * 
-	 * @return array<string, string>[]
+	 * Get payment gateway webhook identifier
 	 */
-	public function get_payment_methods(): array {
-		
+	public function get_payment_gateway_webhook(): string {
+		return 'woocommerce_sequra';
+	}
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_notify_url( WC_Order $order ): string {
+		return add_query_arg(
+			array(
+				'order'  => '' . $order->get_id(),
+				'wc-api' => $this->get_payment_gateway_webhook(),
+			),
+			home_url( '/' )
+		);
+	}
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_return_url( WC_Order $order ): string {
+		return add_query_arg(
+			array( 'sq_product' => 'SQ_PRODUCT_CODE' ),
+			$this->get_notify_url( $order )
+		);
+	}
+
+
+	/**
+	 * Get current merchant ID
+	 */
+	public function get_merchant_id(): ?string {
 		$store_id = $this->configuration->get_store_id();
 		
-		$countries       = AdminAPI::get()->countryConfiguration( $store_id )->getCountryConfigurations()->toArray();
+		$countries = AdminAPI::get()
+		->countryConfiguration( $store_id )
+		->getCountryConfigurations()
+		->toArray();
+
 		$merchant        = null;
 		$current_country = $this->i18n->get_current_country();
 
@@ -80,11 +118,7 @@ class Payment_Service implements Interface_Payment_Service {
 				break;
 			}
 		}
-		if ( empty( $merchant ) ) {
-			throw new Exception( 'Merchant not found' );
-		}
-
-		return AdminAPI::get()->paymentMethods( $store_id )->getPaymentMethods( $merchant )->toArray();
+		return empty( $merchant ) ? null : $merchant;
 	}
 
 	/**
@@ -141,14 +175,9 @@ class Payment_Service implements Interface_Payment_Service {
 	}
 
 	/**
-	 * Check if the payment method data matches a valid payment method.
+	 * Sign the string using HASH_ALGO and merchant's password
 	 */
-	public function is_payment_method_data_valid( Payment_Method_Data $data ): bool {
-		foreach ( $this->get_payment_methods() as $pm ) {
-			if ( $pm['product'] === $data->product && $pm['campaign'] === $data->campaign ) {
-				return true;
-			}
-		}
-		return false;
+	public function sign( string $message ): string {
+		return hash_hmac( 'sha256', $message ?? '', $this->configuration->get_password() );
 	}
 }

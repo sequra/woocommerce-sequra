@@ -9,6 +9,7 @@
 namespace SeQura\WC\Controllers\Hooks\Payment;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use WC_Order;
 
 /**
  * Respond to payment hooks
@@ -34,14 +35,17 @@ interface Interface_Payment_Controller {
 	public function register_gateway_gutenberg_block_class( PaymentMethodRegistry $payment_method_registry ): void;
 	
 	/**
-	 * Checkout fields validation
-	 * Legacy shortcode only
+	 * Append content to the bottom of the receipt page
 	 */
-	public function checkout_process(): void;
+	public function receipt_page( int $order_id ): void;
 
 	/**
-	 * Checkout fields
-	 * Legacy shortcode only
+	 * Append text after the thank you message on the order received page
 	 */
-	public function checkout_fields( $fields ): array;
+	public function order_received_text( string $text, mixed $order ): string;
+
+	/**
+	 * Set the proper payment method description in the order
+	 */
+	public function order_get_payment_method_title( string $value, mixed $order ): string;
 }

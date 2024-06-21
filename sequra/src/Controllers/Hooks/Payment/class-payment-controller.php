@@ -15,6 +15,7 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
+use WC_Order;
 
 /**
  * Respond to payment hooks
@@ -67,29 +68,52 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	}
 
 	/**
-	 * Checkout fields validation
-	 * Legacy shortcode only
-	 */
-	public function checkout_process(): void {
-		// TODO: review this
-		if ( empty( $_POST['sequra_product_campaign'] ) ) {
-			wc_add_notice( __( 'Invalid <strong>sequra_product_campaign</strong>, please check ...' ), 'error' );
-		}
-	}
-
-	/**
-	 * Checkout fields
-	 * Legacy shortcode only
-	 */
-	public function checkout_fields( $fields ): array {
-		// TODO: review this
-		return $fields;
-	}
-
-	/**
 	 * Append content to the bottom of the receipt page
 	 */
 	public function receipt_page( int $order_id ): void {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof WC_Order ) {
+			$this->logger->log_error( 'Order not found', __FUNCTION__, __CLASS__ );
+			return;
+		}
+
+		/**
+		 * TODO: Check the current usage of this filter in the existent integrations because the current implementation doesn't save settings inside the payment gateway.
+		 * Filter the options to be sent to seQura if needed
+		 * 
+		 * @since 2.0.0
+		 * */
+		$args = apply_filters(
+			'wc_sequra_pumbaa_options', 
+			array(
+				'product'  => $this->payment_service->get_product( $order ),
+				'campaign' => $this->payment_service->get_campaign( $order ),
+			), 
+			$order,
+			array() 
+		);
+
+		// TODO: finish this.
 		wc_get_template( 'front/receipt_page.php', $args, '', $this->templates_path );
+	}
+
+	/**
+	 * Append text after the thank you message on the order received page
+	 */
+	public function order_received_text( string $text, mixed $order ): string {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$notices = wc_print_notices( true );
+		return $notices . $text;
+	}
+
+	/**
+	 * Set the proper payment method description in the order
+	 */
+	public function order_get_payment_method_title( string $value, mixed $order ): string {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+		return ! $order instanceof WC_Order ? $value : $this->payment_service->get_payment_method_title( $order ); 
 	}
 }

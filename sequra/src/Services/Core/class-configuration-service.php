@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Services\Core;
 
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use Throwable;
 use WP_Site;
 
 /**
@@ -136,5 +138,82 @@ class Configuration_Service extends Configuration {
 			$stores[] = $this->get_current_store();
 		}
 		return $stores;
+	}
+
+	/**
+	 * Get password from connection settings.
+	 */
+	public function get_password(): string {
+
+		try {
+			$config = AdminAPI::get()
+			->connection( $this->get_store_id() )
+			->getOnboardingData()
+			->toArray();
+
+			return $config['password'] ?? '';
+		} catch ( Throwable ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get enabledForServices from general settings.
+	 */
+	public function is_enabled_for_services(): bool {
+		try {
+			$config = $this->get_general_settings();
+			return ! empty( $config['enabledForServices'] );
+		} catch ( Throwable ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get allowFirstServicePaymentDelay from general settings.
+	 */
+	public function allow_first_service_payment_delay(): bool {
+		try {
+			$config = $this->get_general_settings();
+			return ! empty( $config['allowFirstServicePaymentDelay'] );
+		} catch ( Throwable ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get if registration items are allowed
+	 */
+	public function allow_service_reg_items(): bool {
+		try {
+			$config = $this->get_general_settings();
+			return ! empty( $config['allowServiceRegItems'] );
+		} catch ( Throwable ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get defaultServicesEndDate from general settings.
+	 */
+	public function get_default_services_end_date(): string {
+		try {
+			$config = $this->get_general_settings();
+			return $config['defaultServicesEndDate'] ?? 'PY1';
+		} catch ( Throwable ) {
+			return 'PY1';
+		}
+	}
+	
+	/**
+	 * Get general settings as array
+	 * 
+	 * @throws Throwable
+	 */
+	protected function get_general_settings(): array {
+		return AdminAPI::get()
+		->generalSettings( $this->get_store_id() )
+		->getGeneralSettings()
+		->toArray();
 	}
 }

@@ -52,6 +52,13 @@ abstract class Dto {
 	}
 
 	/**
+	 * Convert the DTO instance into an array.
+	 */
+	public function to_array(): array {
+		return (array) $this;
+	}
+
+	/**
 	 * Encode the DTO instance into a raw string. By default, returns a JSON string.
 	 */
 	public function encode(): string {

@@ -17,25 +17,16 @@ use WC_Order;
 interface Interface_Payment_Service {
 
 	/**
-	 * Get payment methods
-	 * 
-	 * @throws Throwable
-	 * 
-	 * @return array<string, string>[]
-	 */
-	public function get_payment_methods(): array;
-
-	/**
-	 * Check if the payment method data matches a valid payment method.
-	 */
-	public function is_payment_method_data_valid( Payment_Method_Data $data ): bool;
-
-	/**
 	 * Get payment gateway ID
 	 * 
 	 * @return string
 	 */
 	public function get_payment_gateway_id(): string;
+
+	/**
+	 * Get current merchant ID
+	 */
+	public function get_merchant_id(): ?string;
 
 	/**
 	 * Get the seQura payment method title for the order.
@@ -60,4 +51,23 @@ interface Interface_Payment_Service {
 	 * Returns true if the metadata was saved, false otherwise.
 	 */
 	public function set_order_metadata( WC_Order $order, ?Payment_Method_Data $data ): bool;
+
+	/**
+	 * Sign the string using HASH_ALGO and merchant's password
+	 */
+	public function sign( string $message ): string;
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_payment_gateway_webhook(): string;
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_notify_url( WC_Order $order ): string;
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_return_url( WC_Order $order ): string;
 }

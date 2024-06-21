@@ -28,6 +28,7 @@ use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountri
 use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Order\Builders\CreateOrderRequestBuilder;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
@@ -67,18 +68,24 @@ use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
+use SeQura\WC\Services\Cart\Cart_Service;
+use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Core\Category_Service;
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Core\Configuration_Service;
+use SeQura\WC\Services\Core\Create_Order_Request_Builder;
 use SeQura\WC\Services\Core\Default_Logger_Adapter;
 use SeQura\WC\Services\Core\Disconnect_Service;
 use SeQura\WC\Services\Core\Encryptor;
+use SeQura\WC\Services\Core\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Services\Core\Order_Status_Service;
 use SeQura\WC\Services\Core\Order_Status_Settings_Service;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
 use SeQura\WC\Services\Core\Shop_Logger_Adapter;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
+use SeQura\WC\Services\Shopper\Shopper_Service;
+use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use SeQura\WC\Services\I18n\I18n;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Log_File;
@@ -87,9 +94,16 @@ use SeQura\WC\Services\Interface_Migration_Manager;
 use SeQura\WC\Services\Log_File;
 use SeQura\WC\Services\Logger_Service;
 use SeQura\WC\Services\Migration_Manager;
+use SeQura\WC\Services\Order\Interface_Order_Service;
+use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
+use SeQura\WC\Services\Payment\Payment_Method_Service;
 use SeQura\WC\Services\Payment\Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
+use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use SeQura\WC\Services\Pricing\Pricing_Service;
+use SeQura\WC\Services\Product\Interface_Product_Service;
+use SeQura\WC\Services\Product\Product_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -225,6 +239,29 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache['plugin.data'] = $data;
 				}
 				return self::$cache['plugin.data'];
+			}
+		);
+
+		Reg::registerService(
+			'environment.data',
+			static function () {
+				if ( ! isset( self::$cache['environment.data'] ) ) {
+					/**
+					 * Database instance.
+					 *
+					 * @var \wpdb $wpdb
+					 */
+					$wpdb = Reg::getService( \wpdb::class );
+				
+					self::$cache['environment.data'] = array(
+						'php_version' => phpversion(),
+						'php_os'      => PHP_OS,
+						'uname'       => php_uname(),
+						'db_name'     => false === strpos( strtolower( $wpdb->db_server_info() ), 'mariadb' ) ? 'mysql' : 'mariadb',
+						'db_version'  => $wpdb->db_version() ?? '',
+					);
+				}
+				return self::$cache['environment.data'];
 			}
 		);
 
@@ -467,7 +504,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Payment_Service::class ] ) ) {
 					self::$cache[ Interface_Payment_Service::class ] = new Payment_Service(
 						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_I18n::class )
+						Reg::getService( Interface_I18n::class ),
+						Reg::getService( Interface_Create_Order_Request_Builder::class )
 					);
 				}
 				return self::$cache[ Interface_Payment_Service::class ];
@@ -479,12 +517,71 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] ) ) {
 					self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] = new Sequra_Payment_Gateway_Block_Support(
 						Reg::getService( 'plugin.assets_path' ),
-						Reg::getService( 'plugin.assets_url' ),
-						Reg::getService( Interface_Payment_Service::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( 'plugin.assets_url' )
 					);
 				}
 				return self::$cache[ Sequra_Payment_Gateway_Block_Support::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Create_Order_Request_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Create_Order_Request_Builder::class ] ) ) {
+					self::$cache[ Interface_Create_Order_Request_Builder::class ] = new Create_Order_Request_Builder(
+						Reg::getService( Interface_Payment_Service::class ),
+						Reg::getService( Interface_Cart_Service::class ),
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Product_Service::class ),
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_I18n::class ),
+						Reg::getService( Interface_Shopper_Service::class )
+					);
+				}
+				return self::$cache[ CreateOrderRequestBuilder::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Pricing_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Pricing_Service::class ] ) ) {
+					self::$cache[ Interface_Pricing_Service::class ] = new Pricing_Service();
+				}
+				return self::$cache[ Interface_Pricing_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Cart_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Cart_Service::class ] ) ) {
+					self::$cache[ Interface_Cart_Service::class ] = new Cart_Service(
+						Reg::getService( Interface_Product_Service::class ),
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Pricing_Service::class ),
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_Shopper_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Cart_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Product_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Product_Service::class ] ) ) {
+					self::$cache[ Interface_Product_Service::class ] = new Product_Service(
+						Reg::getService( Configuration::class )
+					);
+				}
+				return self::$cache[ Interface_Product_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Shopper_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Shopper_Service::class ] ) ) {
+					self::$cache[ Interface_Shopper_Service::class ] = new Shopper_Service();
+				}
+				return self::$cache[ Interface_Shopper_Service::class ];
 			}
 		);
 	}
@@ -677,6 +774,17 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Log_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Payment_Method_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Payment_Method_Service::class ] ) ) {
+					self::$cache[ Interface_Payment_Method_Service::class ] = new Payment_Method_Service(
+						Reg::getService( Configuration::class )
+					);
+				}
+				return self::$cache[ Interface_Payment_Method_Service::class ];
 			}
 		);
 	}

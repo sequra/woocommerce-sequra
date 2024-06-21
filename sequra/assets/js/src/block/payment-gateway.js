@@ -10,7 +10,7 @@ const label = decodeEntities(settings.title)
 
 const Content = (props) => {
     const { eventRegistration, emitResponse } = props;
-    const { onPaymentProcessing } = eventRegistration;
+    const { onPaymentProcessing, onCheckoutBeforeProcessing } = eventRegistration;
 
     useEffect(() => {
         const unsubscribe = onPaymentProcessing(async () => {
@@ -30,12 +30,21 @@ const Content = (props) => {
                 },
             };
         });
-        // Unsubscribes when this component is unmounted.
         return () => unsubscribe();
     }, [
         emitResponse.responseTypes.ERROR,
         emitResponse.responseTypes.SUCCESS,
         onPaymentProcessing,
+    ]);
+
+    useEffect(() => {
+        const unsubscribe = onCheckoutBeforeProcessing(async () => {
+            debugger
+            // TODO: add iframe to the checkout
+        });
+        return () => unsubscribe();
+    }, [
+        onCheckoutBeforeProcessing
     ]);
 
     return <div dangerouslySetInnerHTML={{ __html: decodeEntities(settings.description || '') }} />

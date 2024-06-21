@@ -71,4 +71,29 @@ abstract class Configuration extends \SeQura\Core\Infrastructure\Configuration\C
 	public function get_marketplace_url(): string {
 		return 'https://wordpress.org/plugins/sequra/';
 	}
+
+	/**
+	 * Get password from connection settings.
+	 */
+	abstract public function get_password(): string;
+
+	/**
+	 * Get enabledForServices from general settings.
+	 */
+	abstract public function is_enabled_for_services(): bool;
+
+	/**
+	 * Get allowFirstServicePaymentDelay from general settings.
+	 */
+	abstract public function allow_first_service_payment_delay(): bool;
+
+	/**
+	 * Get if registration items are allowed
+	 */
+	abstract public function allow_service_reg_items(): bool;
+
+	/**
+	 * Get defaultServicesEndDate from general settings.
+	 */
+	abstract public function get_default_services_end_date(): string;
 }
