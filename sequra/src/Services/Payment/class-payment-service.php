@@ -56,6 +56,13 @@ class Payment_Service implements Interface_Payment_Service {
 	public function get_payment_gateway_webhook(): string {
 		return 'woocommerce_sequra';
 	}
+	
+	/**
+	 * Get redirect to payment webhook identifier
+	 */
+	public function get_redirect_to_payment_webhook(): string {
+		return 'woocommerce_sequra_redirect_to_payment';
+	}
 
 	/**
 	 * Get current merchant ID

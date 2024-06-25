@@ -108,7 +108,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	/**
 	 * Set current order
 	 */
-	public function set_current_order( WC_Order $order ): void {
+	public function set_current_order( ?WC_Order $order ): void {
 		$this->current_order = $order;
 	}
 
@@ -151,7 +151,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get cart payload
 	 */
 	private function cart_with_items(): array {
-		$sequra_cart_info     = $this->cart_service->get_cart_info_from_session();
+		$sequra_cart_info     = $this->current_order ? $this->order_service->get_cart_info( $this->current_order ) : $this->cart_service->get_cart_info_from_session();
 		$items                = array_merge(
 			$this->cart_service->get_product_items(),
 			$this->cart_service->get_handling_items(), // TODO: order is always null here?
@@ -198,8 +198,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		$options = array(
 			'currency'             => get_woocommerce_currency(),
-			'cart_ref'             => $sequra_cart_info->ref,
-			'created_at'           => $sequra_cart_info->created_at,
+			'cart_ref'             => $sequra_cart_info ? $sequra_cart_info->ref : null,
+			'created_at'           => $sequra_cart_info ? $sequra_cart_info->created_at : null,
 			'updated_at'           => gmdate( 'c' ),
 			'gift'                 => false,
 			'items'                => $items,

@@ -8,8 +8,9 @@
 
 namespace SeQura\WC\Services\Payment;
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraForm;
 use SeQura\WC\Dto\Payment_Method_Data;
-use Throwable;
+use WC_Order;
 
 /**
  * Handle use cases related to payment methods
@@ -17,13 +18,16 @@ use Throwable;
 interface Interface_Payment_Method_Service {
 
 	/**
+	 * Get identification form
+	 */
+	public function get_identification_form( WC_Order $order ): ?SeQuraForm;
+
+	/**
 	 * Get payment methods
-	 * 
-	 * @throws Throwable
 	 * 
 	 * @return array<string, string>[]
 	 */
-	public function get_payment_methods(): array;
+	public function get_payment_methods( ?WC_Order $order = null ): array;
 
 	/**
 	 * Check if the payment method data matches a valid payment method.

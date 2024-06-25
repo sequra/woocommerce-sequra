@@ -14,7 +14,6 @@ use SeQura\WC\Dto\Discount_Item;
 use SeQura\WC\Dto\Fee_Item;
 use SeQura\WC\Dto\Handling_Item;
 use SeQura\WC\Services\Core\Configuration;
-use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use WC_Order;
@@ -23,6 +22,8 @@ use WC_Order;
  * Handle use cases related to cart
  */
 class Cart_Service implements Interface_Cart_Service {
+
+	private const SESSION_CART_INFO = 'sequra_cart_info';
 
 	/**
 	 * Product service
@@ -82,13 +83,23 @@ class Cart_Service implements Interface_Cart_Service {
 	 * Get seQura cart info data from session. If not exists, then initialize it.
 	 */
 	public function get_cart_info_from_session(): Cart_Info {
-		$raw_data = WC()->session->get( 'sequra_cart_info', null );
+		$_session = WC()->session;
+		$raw_data = $_session->get( self::SESSION_CART_INFO, null );
 		if ( $raw_data ) {
-			return new Cart_Info( $raw_data );
+			return Cart_Info::from_array( $raw_data );
 		}
 		$cart_info = new Cart_Info();
-		WC()->session->set( 'sequra_cart_info', $cart_info->to_array() );
+		$_session->set( self::SESSION_CART_INFO, $cart_info->to_array() );
 		return $cart_info;
+	}
+
+	/**
+	 * Attempt to clear seQura cart info data from session. 
+	 */
+	public function clear_cart_info_from_session(): void {
+		if ( WC()->session ) {
+			WC()->session->set( self::SESSION_CART_INFO, null );
+		}
 	}
 
 	/**

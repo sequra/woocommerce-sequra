@@ -34,4 +34,9 @@ interface Interface_Payment_Service {
 	 * Get payment gateway webhook identifier
 	 */
 	public function get_payment_gateway_webhook(): string;
+
+	/**
+	 * Get redirect to payment webhook identifier
+	 */
+	public function get_redirect_to_payment_webhook(): string;
 }

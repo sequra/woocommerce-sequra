@@ -20,7 +20,7 @@ interface Interface_Create_Order_Request_Builder extends CreateOrderRequestBuild
 	/**
 	 * Set current order
 	 */
-	public function set_current_order( WC_Order $order ): void;
+	public function set_current_order( ?WC_Order $order ): void;
 
 	/**
 	 * Check if the builder is allowed for the current settings 

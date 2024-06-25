@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Delivery_Method;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Dto\Previous_Order;
@@ -19,9 +20,11 @@ use WC_Order;
  */
 class Order_Service implements Interface_Order_Service {
 
-	private const META_KEY_METHOD_TITLE = '_sq_method_title';
-	private const META_KEY_PRODUCT      = '_sq_product';
-	private const META_KEY_CAMPAIGN     = '_sq_campaign';
+	private const META_KEY_METHOD_TITLE    = '_sq_method_title';
+	private const META_KEY_PRODUCT         = '_sq_product';
+	private const META_KEY_CAMPAIGN        = '_sq_campaign';
+	private const META_KEY_CART_REF        = '_sq_cart_ref';
+	private const META_KEY_CART_CREATED_AT = '_sq_cart_created_at';
 
 	/**
 	 * Payment service
@@ -300,6 +303,19 @@ class Order_Service implements Interface_Order_Service {
 	}
 
 	/**
+	 * Get the seQura cart info for the order.
+	 * If the value is not found null is returned.
+	 */
+	public function get_cart_info( WC_Order $order ): ?Cart_Info {
+		return Cart_Info::from_array(
+			array(
+				'ref'        => $this->get_order_meta( $order, self::META_KEY_CART_REF ),
+				'created_at' => $this->get_order_meta( $order, self::META_KEY_CART_CREATED_AT ),
+			)
+		);
+	}
+
+	/**
 	 * Get payment gateway webhook identifier
 	 */
 	public function get_notify_url( WC_Order $order ): string {
@@ -326,8 +342,12 @@ class Order_Service implements Interface_Order_Service {
 	 * Save required metadata for the order.
 	 * Returns true if the metadata was saved, false otherwise.
 	 */
-	public function set_order_metadata( WC_Order $order, ?Payment_Method_Data $dto ): bool {
+	public function set_order_metadata( WC_Order $order, ?Payment_Method_Data $dto, ?Cart_Info $cart_info ): bool {
 		if ( ! $dto ) {
+			return false;
+		}
+
+		if ( ! $cart_info ) {
 			return false;
 		}
 
@@ -336,6 +356,10 @@ class Order_Service implements Interface_Order_Service {
 			$order->update_meta_data( self::META_KEY_CAMPAIGN, $dto->campaign );
 		}
 		$order->update_meta_data( self::META_KEY_METHOD_TITLE, $dto->title );
+
+		$order->update_meta_data( self::META_KEY_CART_REF, $cart_info->ref );
+		$order->update_meta_data( self::META_KEY_CART_CREATED_AT, $cart_info->created_at );
+
 		$order->save();
 		return true;
 	}

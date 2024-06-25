@@ -731,7 +731,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Payment_Controller::class ] = new Payment_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( 'plugin.templates_path' ),
-						Reg::getService( Interface_Payment_Service::class )
+						Reg::getService( Interface_Payment_Service::class ),
+						Reg::getService( Interface_Order_Service::class ),
 					);
 				}
 				return self::$cache[ Interface_Payment_Controller::class ];
@@ -792,7 +793,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Payment_Method_Service::class ] = new Payment_Method_Service(
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Create_Order_Request_Builder::class ),
-						Reg::getService( Interface_Payment_Service::class )
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Payment_Method_Service::class ];

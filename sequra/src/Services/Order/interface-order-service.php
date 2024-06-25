@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Delivery_Method;
 use SeQura\WC\Dto\Payment_Method_Data;
 use WC_Order;
@@ -111,7 +112,13 @@ interface Interface_Order_Service {
 	 * Save required metadata for the order.
 	 * Returns true if the metadata was saved, false otherwise.
 	 */
-	public function set_order_metadata( WC_Order $order, ?Payment_Method_Data $data ): bool;
+	public function set_order_metadata( WC_Order $order, ?Payment_Method_Data $data, ?Cart_Info $cart_info ): bool;
+
+	/**
+	 * Get the seQura cart info for the order.
+	 * If the value is not found null is returned.
+	 */
+	public function get_cart_info( WC_Order $order ): ?Cart_Info;
 	
 	/**
 	 * Get payment gateway webhook identifier

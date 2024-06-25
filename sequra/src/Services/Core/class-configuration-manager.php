@@ -8,7 +8,6 @@
 
 namespace SeQura\WC\Services\Core;
 
-use PSpell\Config;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;

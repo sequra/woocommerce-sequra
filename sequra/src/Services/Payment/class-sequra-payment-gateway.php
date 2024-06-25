@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Services\Payment;
 
+use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
@@ -25,10 +26,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	private const FORM_FIELD_TITLE            = 'title';
 	private const FORM_FIELD_DESC             = 'description';
 	private const POST_SQ_PAYMENT_METHOD_DATA = 'sequra_payment_method_data';
-	private const WEBHOOK_SQ_IPN              = 'sequra-ipn';
-	private const GET_ORDER_ID                = 'order_id';
 	
-
 	/**
 	 * Payment service
 	 *
@@ -109,9 +107,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
+		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'redirect_to_payment' ) );
+
 		// TODO: Declare webhooks for IPN and other events. Use POST allways.
 		// add_action( 'woocommerce_api_sequra_webhook', array( $this, 'webhook' ) );
-		add_action( 'woocommerce_api_' . self::WEBHOOK_SQ_IPN, array( $this, 'handle_ipn_webhook' ) );
+		// add_action( 'woocommerce_api_' . $this->payment_service->get_redirect_to_payment_webhook(), array( $this, 'handle_redirect_to_payment_webhook' ) );
 
 		/**
 		 * Action hook to allow plugins to run when the class is loaded.
@@ -208,11 +208,13 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {  
-		$order = wc_get_order( $order_id );
-		$dto   = $this->get_posted_data();
+		$order              = wc_get_order( $order_id );
+		$payment_method_dto = $this->get_posted_data();
+		$cart_info_dto      = $this->cart_service->get_cart_info_from_session();
+
 		if ( ! $order instanceof WC_Order
-		|| ! $this->payment_method_service->is_payment_method_data_valid( $dto )
-		|| ! $this->order_service->set_order_metadata( $order, $dto )
+		|| ! $this->payment_method_service->is_payment_method_data_valid( $payment_method_dto )
+		|| ! $this->order_service->set_order_metadata( $order, $payment_method_dto, $cart_info_dto )
 		) {
 			return array(
 				'result'   => 'failure',
@@ -220,9 +222,12 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			);
 		}
 
+		// clear session data.
+		$this->cart_service->clear_cart_info_from_session();
+
 		return array(
 			'result'   => 'success',
-			'redirect' => home_url( sprintf( '/wc-api/%1$s?order_id=%2$s', self::WEBHOOK_SQ_IPN, $order_id ) ), // TODO: Redirect to IPN URL.
+			'redirect' => $order->get_checkout_payment_url( true ),
 		);
 	}
 
@@ -246,10 +251,29 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Handle sequra_ipn webhook
+	 * This method is called on order's receipt page to show seQura's payment form
 	 */
-	public function handle_ipn_webhook() {
-		// TODO: Implement webhook() method.
-		echo isset( $_GET[ self::GET_ORDER_ID ] ) ? $_GET[ self::GET_ORDER_ID ] : 'No order ID found';
+	public function redirect_to_payment( int $order_id ) {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof WC_Order ) {
+			$this->logger->log_error( 'Order not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
+			wc_print_notice( __( 'Order not found', 'sequra' ), 'error' );
+			return;
+		}
+
+		$response = $this->payment_method_service->get_identification_form( $order );
+
+		if ( ! $response ) {
+			wc_print_notice( __( 'Sorry, something went wrong. Please contact the merchant.', 'sequra' ), 'error' );
+			return;
+		}
+
+		$args = array(
+			'form' => $response->getForm(),
+		);
+		wc_get_template( 'front/receipt_page.php', $args, '', $this->templates_path );
 	}
 }

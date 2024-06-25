@@ -27,6 +27,11 @@ interface Interface_Cart_Service {
 	public function get_cart_info_from_session(): Cart_Info;
 
 	/**
+	 * Attempt to clear seQura cart info data from session. 
+	 */
+	public function clear_cart_info_from_session(): void;
+
+	/**
 	 * Get product items as an associative array
 	 *
 	 * @return array<string, mixed>

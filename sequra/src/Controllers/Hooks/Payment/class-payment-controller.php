@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
@@ -30,11 +31,24 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	private $payment_service;
 
 	/**
+	 * Order service
+	 *
+	 * @var Interface_Order_Service
+	 */
+	private $order_service;
+
+	/**
 	 * Constructor
 	 */
-	public function __construct( Interface_Logger_Service $logger, string $templates_path, Interface_Payment_Service $payment_service ) {
+	public function __construct( 
+		Interface_Logger_Service $logger, 
+		string $templates_path, 
+		Interface_Payment_Service $payment_service,
+		Interface_Order_Service $order_service 
+	) {
 		parent::__construct( $logger, $templates_path );
 		$this->payment_service = $payment_service;
+		$this->order_service   = $order_service;
 	}
 
 	/**
@@ -80,6 +94,19 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 			return;
 		}
 
+		// $options = $this->get_valid_product_campaign();
+		// // phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		// $identity_form = $this->helper->get_identity_form(
+		// 	// phpcs:enable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable 
+		// **
+		// * Filter the options to be sent to seQura if needed
+		// * 
+		// * @since 2.0.0
+		// * */
+		// apply_filters( 'wc_sequra_pumbaa_options', $options, $order, $this->settings ),
+		// $order
+		// );
+
 		/**
 		 * TODO: Check the current usage of this filter in the existent integrations because the current implementation doesn't save settings inside the payment gateway.
 		 * Filter the options to be sent to seQura if needed
@@ -89,12 +116,14 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 		$args = apply_filters(
 			'wc_sequra_pumbaa_options', 
 			array(
-				'product'  => $this->payment_service->get_product( $order ),
-				'campaign' => $this->payment_service->get_campaign( $order ),
+				'product'  => $this->order_service->get_product( $order ),
+				'campaign' => $this->order_service->get_campaign( $order ),
 			), 
 			$order,
 			array() 
 		);
+
+		$args['identity_form'] = $identity_form;
 
 		// TODO: finish this.
 		wc_get_template( 'front/receipt_page.php', $args, '', $this->templates_path );
@@ -114,6 +143,7 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	 */
 	public function order_get_payment_method_title( string $value, mixed $order ): string {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		return ! $order instanceof WC_Order ? $value : $this->payment_service->get_payment_method_title( $order ); 
+		$sequra_payment_method = $order instanceof WC_Order ? $this->order_service->get_payment_method_title( $order ) : null;
+		return empty( $sequra_payment_method ) ? $value : $sequra_payment_method;
 	}
 }
