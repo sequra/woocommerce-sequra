@@ -9,6 +9,7 @@
 namespace SeQura\WC\Services\Order;
 
 use SeQura\WC\Dto\Delivery_Method;
+use SeQura\WC\Dto\Payment_Method_Data;
 use WC_Order;
 
 /**
@@ -87,4 +88,37 @@ interface Interface_Order_Service {
 	 * @return array<array<string, mixed>>
 	 */
 	public function get_previous_orders( int $customer_id ): array;
+
+	/**
+	 * Get the seQura payment method title for the order.
+	 * If the order is not a seQura order an empty string is returned.
+	 */
+	public function get_payment_method_title( WC_Order $order ): string;
+
+	/**
+	 * Get the seQura product for the order.
+	 * If the value is not found an empty string is returned.
+	 */
+	public function get_product( WC_Order $order ): string;
+
+	/**
+	 * Get the seQura campaign for the order.
+	 * If the value is not found an empty string is returned.
+	 */
+	public function get_campaign( WC_Order $order ): string;
+
+	/**
+	 * Save required metadata for the order.
+	 * Returns true if the metadata was saved, false otherwise.
+	 */
+	public function set_order_metadata( WC_Order $order, ?Payment_Method_Data $data ): bool;
+	
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_notify_url( WC_Order $order ): string;
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_return_url( WC_Order $order ): string;
 }

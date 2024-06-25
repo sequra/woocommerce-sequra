@@ -11,6 +11,8 @@ namespace SeQura\WC\Services\Core;
 use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\CreateOrderRequest;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Registration_Item;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
@@ -116,6 +118,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * @throws Exception
 	 */
 	public function build(): CreateOrderRequest {
+		// TODO: Use DTOs from integration-core package instead of arrays to build the request.
 		$merchant = $this->get_merchant_data();
 		if ( empty( $merchant ) ) {
 			throw new Exception( 'Merchant ID is empty' );
@@ -182,7 +185,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 				$item['quantity'] * $registration_amount
 			) )->to_array();
 			
-			// Fix orginal item.
+			// Fix original item.
 			$item['total_with_tax'] = max(
 				0,
 				$item['total_with_tax'] - $item['quantity'] * $registration_amount
@@ -228,7 +231,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		);
 
 		if ( $this->current_order ) {
-			$notify_url = $this->payment_service->get_notify_url( $this->current_order );
+			$notify_url = $this->order_service->get_notify_url( $this->current_order );
 
 			$data = array_merge(
 				$data,
@@ -239,7 +242,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 						'signature' => $this->payment_service->sign( $this->current_order->get_id() ),
 						'result'    => '0',
 					),
-					'return_url'              => $this->payment_service->get_return_url( $this->current_order ),
+					'return_url'              => $this->order_service->get_return_url( $this->current_order ),
 					'events_webhook'          => array(
 						'url'        => $notify_url,
 						'parameters' => array(
@@ -263,13 +266,15 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	/**
 	 * Get the merchant options.
 	 */
-	private function get_merchant_options(): array {
-		$options = array();
+	private function get_merchant_options(): ?array {
+		$options = null;
 
 		if ( $this->configuration->allow_first_service_payment_delay() ) {
 			$desired_first_charge_on = $this->cart_service->get_desired_first_charge_on();
 			if ( $desired_first_charge_on ) {
-				$options['desired_first_charge_on'] = $desired_first_charge_on;
+				$options = array(
+					'desired_first_charge_on' => $desired_first_charge_on,
+				);
 			}
 		}
 
@@ -412,68 +417,68 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 */
 	public function is_allowed_for( GeneralSettingsResponse $general_settings_response ): bool {
 		return true; // TODO: implement this method
-		try {
-			$generalSettings = $generalSettingsResponse->toArray();
-			$stateService    = ServiceRegister::getService( UIStateService::class );
-			$isOnboarding    = StoreContext::doWithStore( $this->storeId, array( $stateService, 'isOnboardingState' ), array( true ) );
-			$this->quote     = $this->quoteRepository->getActive( $this->cartId );
-			$merchantId      = $this->getMerchantId();
+		// try {
+		// $generalSettings = $generalSettingsResponse->toArray();
+		// $stateService    = ServiceRegister::getService( UIStateService::class );
+		// $isOnboarding    = StoreContext::doWithStore( $this->storeId, array( $stateService, 'isOnboardingState' ), array( true ) );
+		// $this->quote     = $this->quoteRepository->getActive( $this->cartId );
+		// $merchantId      = $this->getMerchantId();
 
-			if ( ! $merchantId || $isOnboarding ) {
-				return false;
-			}
+		// if ( ! $merchantId || $isOnboarding ) {
+		// return false;
+		// }
 
-			if (
-				! empty( $generalSettings['allowedIPAddresses'] ) &&
-				! empty( $ipAddress = $this->getCustomerIpAddress() ) &&
-				! in_array( $ipAddress, $generalSettings['allowedIPAddresses'], true )
-			) {
-				return false;
-			}
+		// if (
+		// ! empty( $generalSettings['allowedIPAddresses'] ) &&
+		// ! empty( $ipAddress = $this->getCustomerIpAddress() ) &&
+		// ! in_array( $ipAddress, $generalSettings['allowedIPAddresses'], true )
+		// ) {
+		// return false;
+		// }
 
-			if (
-				empty( $generalSettings['excludedProducts'] ) &&
-				empty( $generalSettings['excludedCategories'] )
-			) {
-				return true;
-			}
+		// if (
+		// empty( $generalSettings['excludedProducts'] ) &&
+		// empty( $generalSettings['excludedCategories'] )
+		// ) {
+		// return true;
+		// }
 
-			$this->quote = $this->quoteRepository->getActive( $this->cartId );
-			foreach ( $this->quote->getAllVisibleItems() as $item ) {
-				if (
-					! empty( $generalSettings['excludedProducts'] ) &&
-					! empty( $item->getSku() ) &&
-					( in_array( $item->getProduct()->getData( 'sku' ), $generalSettings['excludedProducts'], true ) ||
-						in_array( $item->getProduct()->getSku(), $generalSettings['excludedProducts'], true ) )
-				) {
-					return false;
-				}
+		// $this->quote = $this->quoteRepository->getActive( $this->cartId );
+		// foreach ( $this->quote->getAllVisibleItems() as $item ) {
+		// if (
+		// ! empty( $generalSettings['excludedProducts'] ) &&
+		// ! empty( $item->getSku() ) &&
+		// ( in_array( $item->getProduct()->getData( 'sku' ), $generalSettings['excludedProducts'], true ) ||
+		// in_array( $item->getProduct()->getSku(), $generalSettings['excludedProducts'], true ) )
+		// ) {
+		// return false;
+		// }
 
-				if ( $item->getIsVirtual() ) {
-					return false;
-				}
+		// if ( $item->getIsVirtual() ) {
+		// return false;
+		// }
 
-				if (
-					! empty( $generalSettings['excludedCategories'] ) &&
-					! empty(
-						array_intersect(
-							$generalSettings['excludedCategories'],
-							$this->productService->getAllProductCategories( $item->getProduct()->getCategoryIds() )
-						)
-					)
-				) {
-					return false;
-				}
-			}
+		// if (
+		// ! empty( $generalSettings['excludedCategories'] ) &&
+		// ! empty(
+		// array_intersect(
+		// $generalSettings['excludedCategories'],
+		// $this->productService->getAllProductCategories( $item->getProduct()->getCategoryIds() )
+		// )
+		// )
+		// ) {
+		// return false;
+		// }
+		// }
 
-			return true;
-		} catch ( Throwable $exception ) {
-			Logger::logWarning(
-				'Unexpected error occurred while checking if SeQura payment methods are available.
-             Reason: ' . $exception->getMessage() . ' . Stack trace: ' . $exception->getTraceAsString()
-			);
+		// return true;
+		// } catch ( Throwable $exception ) {
+		// Logger::logWarning(
+		// 'Unexpected error occurred while checking if SeQura payment methods are available.
+		// Reason: ' . $exception->getMessage() . ' . Stack trace: ' . $exception->getTraceAsString()
+		// );
 
-			return false;
-		}
+		// return false;
+		// }
 	}
 }

@@ -95,6 +95,7 @@ use SeQura\WC\Services\Log_File;
 use SeQura\WC\Services\Logger_Service;
 use SeQura\WC\Services\Migration_Manager;
 use SeQura\WC\Services\Order\Interface_Order_Service;
+use SeQura\WC\Services\Order\Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Payment_Method_Service;
@@ -504,8 +505,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Payment_Service::class ] ) ) {
 					self::$cache[ Interface_Payment_Service::class ] = new Payment_Service(
 						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_I18n::class ),
-						Reg::getService( Interface_Create_Order_Request_Builder::class )
+						Reg::getService( Interface_I18n::class )
 					);
 				}
 				return self::$cache[ Interface_Payment_Service::class ];
@@ -537,7 +537,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Shopper_Service::class )
 					);
 				}
-				return self::$cache[ CreateOrderRequestBuilder::class ];
+				return self::$cache[ Interface_Create_Order_Request_Builder::class ];
 			}
 		);
 		Reg::registerService(
@@ -547,6 +547,17 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Pricing_Service::class ] = new Pricing_Service();
 				}
 				return self::$cache[ Interface_Pricing_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Service::class ] ) ) {
+					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
+						Reg::getService( Interface_Payment_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Order_Service::class ];
 			}
 		);
 		Reg::registerService(
@@ -781,7 +792,9 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Payment_Method_Service::class ] ) ) {
 					self::$cache[ Interface_Payment_Method_Service::class ] = new Payment_Method_Service(
-						Reg::getService( Configuration::class )
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Create_Order_Request_Builder::class ),
+						Reg::getService( Interface_Payment_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Payment_Method_Service::class ];

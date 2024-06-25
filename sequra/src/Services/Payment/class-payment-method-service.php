@@ -9,16 +9,18 @@
 namespace SeQura\WC\Services\Payment;
 
 use Exception;
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Core\Configuration;
+use SeQura\WC\Services\Core\Interface_Create_Order_Request_Builder;
 use Throwable;
 
 /**
  * Handle use cases related to payment methods
  */
 class Payment_Method_Service implements Interface_Payment_Method_Service {
-
+	
 	/**
 	 * Configuration
 	 *
@@ -34,10 +36,30 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	private $payment_methods;
 
 	/**
+	 * Create order request builder
+	 *
+	 * @var Interface_Create_Order_Request_Builder
+	 */
+	private $create_order_request_builder;
+
+	/**
+	 * Payment service
+	 *
+	 * @var Interface_Payment_Service
+	 */
+	private $payment_service;
+
+	/**
 	 * Constructor
 	 */
-	public function __construct( Configuration $configuration ) {
-		$this->configuration = $configuration;
+	public function __construct( 
+		Configuration $configuration,
+		Interface_Create_Order_Request_Builder $create_order_request_builder,
+		Interface_Payment_Service $payment_service
+	) {
+		$this->configuration                = $configuration;
+		$this->create_order_request_builder = $create_order_request_builder;
+		$this->payment_service              = $payment_service;
 	}
 
 	/**
@@ -56,7 +78,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		// TODO: add try catch block
 	
 		$settings = AdminAPI::get()->generalSettings( $this->configuration->get_store_id() )->getGeneralSettings();
-		if ( ! $settings->isSuccessful() || ! $builder->is_allowed_for( $settings ) ) {
+		if ( ! $settings->isSuccessful() || ! $this->create_order_request_builder->is_allowed_for( $settings ) ) {
 			return array();
 		}
 	
@@ -98,35 +120,36 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 
 		// return $response->toArray()['availablePaymentMethods'];
 
-		$c  = WC()->cart;
-		$s  = WC()->session;
-		$cu = WC()->customer;
+	// $c  = WC()->cart;
+	// $s  = WC()->session;
+	// $cu = WC()->customer;
 		
-		$store_id = $this->configuration->get_store_id();
-		$merchant = $this->get_merchant_id();
-	if ( empty( $merchant ) ) {
-		return array();
-	}
+	// $store_id = $this->configuration->get_store_id();
+	// $merchant = $this->get_merchant_id();
+	// if ( empty( $merchant ) ) {
+	// return array();
+	// }
 
-		return AdminAPI::get()->paymentMethods( $store_id )->getPaymentMethods( $merchant )->toArray();
-}
+	// return AdminAPI::get()->paymentMethods( $store_id )->getPaymentMethods( $merchant )->toArray();
+	// }
 
 	/**
 	 * Check if the payment method data matches a valid payment method.
 	 */
-public function is_payment_method_data_valid( Payment_Method_Data $data ): bool {
-	foreach ( $this->get_payment_methods() as $pm ) {
-		if ( $pm['product'] === $data->product && $pm['campaign'] === $data->campaign ) {
-			return true;
+	public function is_payment_method_data_valid( Payment_Method_Data $data ): bool {
+		foreach ( $this->get_payment_methods() as $pm ) {
+			if ( $pm['product'] === $data->product && $pm['campaign'] === $data->campaign ) {
+				return true;
+			}
 		}
+		return false;
 	}
-	return false;
-}
+
 	
 	/**
 	 * Get checkout form
 	 */
-public function get_checkout_form(): string {
-	return ''; // TODO: Implement get_checkout_form() method.
-}
+	public function get_checkout_form(): string {
+		return ''; // TODO: Implement get_checkout_form() method.
+	}
 }

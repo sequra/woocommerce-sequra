@@ -9,13 +9,33 @@
 namespace SeQura\WC\Services\Order;
 
 use SeQura\WC\Dto\Delivery_Method;
+use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Dto\Previous_Order;
+use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use WC_Order;
 
 /**
  * Handle use cases related to Order
  */
 class Order_Service implements Interface_Order_Service {
+
+	private const META_KEY_METHOD_TITLE = '_sq_method_title';
+	private const META_KEY_PRODUCT      = '_sq_product';
+	private const META_KEY_CAMPAIGN     = '_sq_campaign';
+
+	/**
+	 * Payment service
+	 *
+	 * @var Interface_Payment_Service
+	 */
+	private $payment_service;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct( Interface_Payment_Service $payment_service ) {
+		$this->payment_service = $payment_service;
+	}
 	
 	/**
 	 * Get delivery method
@@ -221,12 +241,15 @@ class Order_Service implements Interface_Order_Service {
 	 * @return string
 	 */
 	private function get_shipping_method_from_session() {
-		$shipping_methods = WC()->session->chosen_shipping_methods;
-
+		$session          = WC()->session;
+		$shipping_methods = $session ? WC()->session->chosen_shipping_methods : array();
+		
 		if ( ! $shipping_methods ) {
 			$shipping_methods = array();
 		}
-		$package = current( WC()->shipping->get_packages() );
+		$shipping = WC()->shipping;
+
+		$package = $shipping ? current( WC()->shipping->get_packages() ) : array();
 		if ( $package && isset( $package['rates'][ current( $shipping_methods ) ] ) ) {
 			$rate = $package['rates'][ current( $shipping_methods ) ];
 			return new Delivery_Method(
@@ -238,5 +261,82 @@ class Order_Service implements Interface_Order_Service {
 			'default',
 			'default'
 		);
+	}
+
+
+	/**
+	 * Get order meta value by key from a seQura order.
+	 * If the order is not a seQura order an empty string is returned.
+	 */
+	private function get_order_meta( WC_Order $order, $meta_key ): string {
+		if ( $order->get_payment_method() !== $this->payment_service->get_payment_gateway_id() ) {
+			return '';
+		}
+		return strval( $order->get_meta( $meta_key, true ) );
+	}
+
+	/**
+	 * Get the seQura payment method title for the order.
+	 * If the order is not a seQura order an empty string is returned.
+	 */
+	public function get_payment_method_title( WC_Order $order ): string {
+		return $this->get_order_meta( $order, self::META_KEY_METHOD_TITLE );
+	}
+
+	/**
+	 * Get the seQura product for the order.
+	 * If the value is not found an empty string is returned.
+	 */
+	public function get_product( WC_Order $order ): string {
+		return $this->get_order_meta( $order, self::META_KEY_PRODUCT );
+	}
+
+	/**
+	 * Get the seQura campaign for the order.
+	 * If the value is not found an empty string is returned.
+	 */
+	public function get_campaign( WC_Order $order ): string {
+		return $this->get_order_meta( $order, self::META_KEY_CAMPAIGN );
+	}
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_notify_url( WC_Order $order ): string {
+		return add_query_arg(
+			array(
+				'order'  => '' . $order->get_id(),
+				'wc-api' => $this->payment_service->get_payment_gateway_webhook(),
+			),
+			home_url( '/' )
+		);
+	}
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_return_url( WC_Order $order ): string {
+		return add_query_arg(
+			array( 'sq_product' => 'SQ_PRODUCT_CODE' ),
+			$this->get_notify_url( $order )
+		);
+	}
+
+	/**
+	 * Save required metadata for the order.
+	 * Returns true if the metadata was saved, false otherwise.
+	 */
+	public function set_order_metadata( WC_Order $order, ?Payment_Method_Data $dto ): bool {
+		if ( ! $dto ) {
+			return false;
+		}
+
+		$order->update_meta_data( self::META_KEY_PRODUCT, $dto->product );
+		if ( ! empty( $dto->campaign ) ) {
+			$order->update_meta_data( self::META_KEY_CAMPAIGN, $dto->campaign );
+		}
+		$order->update_meta_data( self::META_KEY_METHOD_TITLE, $dto->title );
+		$order->save();
+		return true;
 	}
 }

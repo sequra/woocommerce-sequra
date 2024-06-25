@@ -10,7 +10,7 @@ namespace SeQura\WC\Services\Payment;
 
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Payment_Method_Data;
-use Throwable;
+use SeQura\WC\Services\Order\Interface_Order_Service;
 use WC_Order;
 use WC_Payment_Gateway;
 
@@ -42,6 +42,13 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	private $payment_method_service;
 
 	/**
+	 * Order service
+	 *
+	 * @var Interface_Order_Service
+	 */
+	private $order_service;
+
+	/**
 	 * Templates path
 	 *
 	 * @var string
@@ -62,6 +69,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequra_before_load', $this );
 
 		$this->payment_service        = ServiceRegister::getService( Interface_Payment_Service::class );
+		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
 		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
 		$this->templates_path         = ServiceRegister::getService( 'plugin.templates_path' );
 		$this->id                     = $this->payment_service->get_payment_gateway_id();
@@ -179,8 +187,10 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {  
 		$order = wc_get_order( $order_id );
+		$dto   = $this->get_posted_data();
 		if ( ! $order instanceof WC_Order
-		|| ! $this->payment_service->set_order_metadata( $order, $this->get_posted_data() ) // TODO: Move this to a order service?
+		|| ! $this->payment_method_service->is_payment_method_data_valid( $dto )
+		|| ! $this->order_service->set_order_metadata( $order, $dto )
 		) {
 			return array(
 				'result'   => 'failure',
@@ -190,7 +200,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 		return array(
 			'result'   => 'success',
-			// 'redirect' => $this->get_return_url( $order ), // TODO: Redirect to IPN URL.
 			'redirect' => home_url( sprintf( '/wc-api/%1$s?order_id=%2$s', self::WEBHOOK_SQ_IPN, $order_id ) ), // TODO: Redirect to IPN URL.
 		);
 	}

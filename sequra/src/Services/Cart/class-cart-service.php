@@ -9,9 +9,11 @@
 namespace SeQura\WC\Services\Cart;
 
 use DateTime;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Discount_Item;
 use SeQura\WC\Dto\Fee_Item;
+use SeQura\WC\Dto\Handling_Item;
 use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
@@ -170,6 +172,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 */
 	public function get_handling_items( ?WC_Order $order = null ): array {
 		$shipping_total = 0;
+		$items          = array();
 
 		if ( ! $order && null !== WC()->cart ) {
 			$shipping_total = (float) WC()->cart->shipping_total + (float) WC()->cart->shipping_tax_total;
@@ -177,26 +180,11 @@ class Cart_Service implements Interface_Cart_Service {
 			$shipping_total = (float) $order->get_shipping_total() + (float) $order->get_shipping_tax();
 		}
 		
-		if ( ! $shipping_total ) {
-			return array();
+		if ( $shipping_total ) {
+			$items[] = ( new Handling_Item( $this->pricing_service->to_cents( $shipping_total ) ) )->to_array();
 		}
-
-		return array(
-			'type'           => 'handling',
-			'reference'      => 'handling',
-			'name'           => esc_attr__( 'Shipping cost', 'sequra' ),
-			'total_with_tax' => $this->pricing_service->to_cents( $shipping_total ),
-			'tax_rate'       => 0,
-		);
-
-		// Days is always an empty string.
-		// phpcs:disable
-		// $delivery = $this->order_service->get_delivery_method( $order );
-		// if ( $delivery->days ) {
-		// $handling['days'] = $delivery['days'];
-		// }
-		// return $handling;
-		// phpcs:enable
+		
+		return $items;
 	}
 	
 	/**
