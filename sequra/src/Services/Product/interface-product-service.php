@@ -31,11 +31,18 @@ interface Interface_Product_Service {
 	public function get_product_instance( $product ): ?WC_Product;
 
 	/**
-	 * Get product instance
+	 * Check if product is a service
 	 * 
 	 * @param int|WC_Product $product The product ID or product object
 	 */
 	public function is_service( $product ): bool;
+
+	/**
+	 * Check if product is banned
+	 * 
+	 * @param int|WC_Product $product The product ID or product object
+	 */
+	public function is_banned( $product ): bool;
 
 	/**
 	 * Get service date regex

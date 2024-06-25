@@ -20,6 +20,7 @@ class Product_Service implements Interface_Product_Service {
 
 	private const META_KEY_DESIRED_FIRST_CHARGE_DATE  = 'sequra_desired_first_charge_date';
 	private const META_KEY_IS_SEQURA_SERVICE          = 'is_sequra_service';
+	private const META_KEY_IS_SEQURA_BANNED           = 'is_sequra_banned';
 	private const META_KEY_SEQURA_SERVICE_END_DATE    = 'sequra_service_end_date';
 	private const META_KEY_SEQURA_REGISTRATION_AMOUNT = 'sequra_registration_amount';
 
@@ -73,7 +74,7 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
-	 * Get product instance
+	 * Check if product is a seQura service
 	 * 
 	 * @param int|WC_Product $product The product ID or product object
 	 */
@@ -83,6 +84,19 @@ class Product_Service implements Interface_Product_Service {
 			return false;
 		}
 		return 'no' !== $_product->get_meta( self::META_KEY_IS_SEQURA_SERVICE, true );
+	}
+
+	/**
+	 * Check if product is banned
+	 * 
+	 * @param int|WC_Product $product The product ID or product object
+	 */
+	public function is_banned( $product ): bool {
+		$_product = $this->get_product_instance( $product );
+		if ( ! $_product ) {
+			return false;
+		}
+		return 'yes' === $_product->get_meta( self::META_KEY_IS_SEQURA_BANNED, true );
 	}
 
 	/**

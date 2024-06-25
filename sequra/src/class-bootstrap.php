@@ -567,9 +567,7 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Cart_Service::class ] = new Cart_Service(
 						Reg::getService( Interface_Product_Service::class ),
 						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_Pricing_Service::class ),
-						Reg::getService( Interface_Order_Service::class ),
-						Reg::getService( Interface_Shopper_Service::class )
+						Reg::getService( Interface_Pricing_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Cart_Service::class ];

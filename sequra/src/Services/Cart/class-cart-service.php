@@ -9,7 +9,6 @@
 namespace SeQura\WC\Services\Cart;
 
 use DateTime;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Discount_Item;
 use SeQura\WC\Dto\Fee_Item;
@@ -18,7 +17,6 @@ use SeQura\WC\Services\Core\Configuration;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
-use WC_Cart_Fees;
 use WC_Order;
 
 /**
@@ -46,13 +44,6 @@ class Cart_Service implements Interface_Cart_Service {
 	 * @var Interface_Pricing_Service
 	 */
 	private $pricing_service;
-
-	/**
-	 * Order service
-	 *
-	 * @var Interface_Order_Service
-	 */
-	private $order_service;
 	
 	/**
 	 * Constructor
@@ -60,13 +51,11 @@ class Cart_Service implements Interface_Cart_Service {
 	public function __construct( 
 		Interface_Product_Service $product_service,
 		Configuration $configuration,
-		Interface_Pricing_Service $pricing_service,
-		Interface_Order_Service $order_service
+		Interface_Pricing_Service $pricing_service
 	) {
 		$this->product_service = $product_service;
 		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
-		$this->order_service   = $order_service;
 	}
 
 	/**
@@ -250,5 +239,100 @@ class Cart_Service implements Interface_Cart_Service {
 	 */
 	private function get_product_id_from_item( $cart_item ): int {
 		return isset( $cart_item['product_id'] ) ? (int) $cart_item['product_id'] : 0;
+	}
+
+	/**
+	 * Check if cart is eligible for service sale
+	 */
+	private function is_eligible_for_service_sale(): bool {
+		if ( ! WC()->cart ) {
+			return false;
+		}
+		$eligible       = false;
+		$services_count = 0;
+		foreach ( WC()->cart->cart_contents as $values ) {
+			if ( $this->product_service->is_service( $values['product_id'] ) ) {
+				$services_count += $values['quantity'];
+				$eligible        = ( 1 === $services_count );
+			}
+		}
+		/**
+		 * Filter if cart is eligible for service sale
+		 *
+		 * @since 2.0.0
+		 */
+		return apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $eligible );
+	}
+
+	/**
+	 * Check if cart is eligible for product sale
+	 */
+	private function is_eligible_for_product_sale(): bool {
+		global $wp;
+		if ( ! WC()->cart ) {
+			return false;
+		}
+		$eligible = true;
+		// Only reject if all products are virtual (don't need shipping).
+		if ( isset( $wp->query_vars['order-pay'] ) ) { // if paying an order.
+			$order = wc_get_order( $wp->query_vars['order-pay'] );
+			if ( ! $order->needs_shipping_address() ) {
+				// TODO: process outside this function
+				// $this->logger->log_debug( 'Order doesn\'t need shipping address seQura will not be offered.', __FUNCTION__, __CLASS__ );
+				$eligible = false;
+			}
+		} elseif ( ! WC()->cart->needs_shipping() ) { // If paying cart.
+			// TODO: process outside this function
+			// $this->logger->log_debug( 'Order doesn\'t need shipping seQura will not be offered.', __FUNCTION__, __CLASS__ );
+			$eligible = false;
+		}
+		/**
+		 * Filter if cart is eligible for product sale
+		 *
+		 * @since 2.0.0
+		 * @deprecated 3.0.0 Use woocommerce_cart_is_eligible_for_product_sale instead
+		 */
+		$eligible = apply_filters( 'woocommerce_cart_is_elegible_for_product_sale', $eligible );
+
+		/**
+		 * Filter if cart is eligible for product sale
+		 *
+		 * @since 3.0.0
+		 */
+		return apply_filters( 'woocommerce_cart_is_eligible_for_product_sale', $eligible );
+	}
+
+	/**
+	 * Check if conditions are met for showing seQura in checkout
+	 */
+	public function is_available_in_checkout(): bool {
+		$return = ! empty( WC()->cart ) && $this->configuration->is_available_for_ip();
+		if ( $return ) {
+			$is_enabled_for_services = $this->configuration->is_enabled_for_services();
+			if ( $is_enabled_for_services && ! $this->is_eligible_for_service_sale() ) {
+					// $this->logger->log_info( 'Order is not eligible for service sale.', __FUNCTION__, __CLASS__ );
+					$return = false;
+			}
+			if ( ! $is_enabled_for_services && ! $this->is_eligible_for_product_sale() ) {
+				// $this->logger->log_info( 'Order is not eligible for for product sale.', __FUNCTION__, __CLASS__ );
+				$return = false;
+			}
+			if ( $return ) {
+				foreach ( WC()->cart->get_cart_contents() as $values ) {
+					if ( $this->product_service->is_banned( $values['product_id'] ) ) {
+						// TODO: process outside this function
+						// $this->logger->log_debug( 'Banned product in the cart seQura will not be offered. Product Id :' . $values['product_id'], __FUNCTION__, __CLASS__ );
+						$return = false;
+						break;
+					}
+				}
+			}
+		}
+		/**
+		 * Filter seQura availability at checkout
+		 *
+		 * @since 2.0.0
+		 */
+		return apply_filters( 'woocommerce_cart_sq_is_available_in_checkout', $return );
 	}
 }

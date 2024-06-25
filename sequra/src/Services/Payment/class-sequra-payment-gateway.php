@@ -10,6 +10,8 @@ namespace SeQura\WC\Services\Payment;
 
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Payment_Method_Data;
+use SeQura\WC\Services\Cart\Interface_Cart_Service;
+use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use WC_Order;
 use WC_Payment_Gateway;
@@ -49,11 +51,25 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	private $order_service;
 
 	/**
+	 * Cart service
+	 *
+	 * @var Interface_Cart_Service
+	 */
+	private $cart_service;
+
+	/**
 	 * Templates path
 	 *
 	 * @var string
 	 */
 	private $templates_path;
+
+	/**
+	 * Logger
+	 *
+	 * @var Interface_Logger_Service
+	 */
+	private $logger;
 
 	/**
 	 * Constructor
@@ -69,9 +85,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		do_action( 'woocommerce_sequra_before_load', $this );
 
 		$this->payment_service        = ServiceRegister::getService( Interface_Payment_Service::class );
+		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
 		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
 		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
 		$this->templates_path         = ServiceRegister::getService( 'plugin.templates_path' );
+		$this->logger                 = ServiceRegister::getService( Interface_Logger_Service::class );
 		$this->id                     = $this->payment_service->get_payment_gateway_id();
 		// TODO: URL of the icon that will be displayed on checkout page near your gateway name.
 		$this->icon               = 'https://cdn.prod.website-files.com/62b803c519da726951bd71c2/62b803c519da72c35fbd72a2_Logo.svg'; 
@@ -114,7 +132,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		if ( ! $is_available ) {
 			return false;
 		}
-
+		if ( ! $this->cart_service->is_available_in_checkout() ) {
+			$this->logger->log_debug( 'Payment gateway is not available in checkout', __FUNCTION__, __CLASS__ );
+			return false;
+		}
+		
 		return ! empty( $this->payment_method_service->get_payment_methods() );
 	}
 

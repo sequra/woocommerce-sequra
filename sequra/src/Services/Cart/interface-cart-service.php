@@ -53,4 +53,9 @@ interface Interface_Cart_Service {
 	 * @return array<string, mixed>
 	 */
 	public function get_extra_items( ?WC_Order $order = null ): array;
+
+	/**
+	 * Check if conditions are met for showing seQura in checkout
+	 */
+	public function is_available_in_checkout(): bool;
 }

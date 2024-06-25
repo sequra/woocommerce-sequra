@@ -96,4 +96,9 @@ abstract class Configuration extends \SeQura\Core\Infrastructure\Configuration\C
 	 * Get defaultServicesEndDate from general settings.
 	 */
 	abstract public function get_default_services_end_date(): string;
+
+	/**
+	 * Check if current IP is allowed to use the payment gateway. 
+	 */
+	abstract public function is_available_for_ip(): bool;
 }

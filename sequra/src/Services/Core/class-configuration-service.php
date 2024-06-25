@@ -165,10 +165,27 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return ! empty( $config['enabledForServices'] );
 		} catch ( Throwable ) {
+			// TODO: Log error
 			return false;
 		}
 	}
-
+	
+	/**
+	 * Check if current IP is allowed to use the payment gateway. 
+	 */
+	public function is_available_for_ip(): bool {
+		try {
+			$config = $this->get_general_settings();
+			// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
+			$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+			return ! isset( $config['allowedIPAddresses'] ) 
+			|| 0 === count( $config['allowedIPAddresses'] ) 
+			|| in_array( $remote_addr, $config['allowedIPAddresses'], true );
+		} catch ( Throwable ) {
+			// TODO: Log error
+			return true;
+		}
+	}
 	/**
 	 * Get allowFirstServicePaymentDelay from general settings.
 	 */
@@ -177,6 +194,7 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return ! empty( $config['allowFirstServicePaymentDelay'] );
 		} catch ( Throwable ) {
+			// TODO: Log error
 			return false;
 		}
 	}
@@ -189,6 +207,7 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return ! empty( $config['allowServiceRegItems'] );
 		} catch ( Throwable ) {
+			// TODO: Log error
 			return false;
 		}
 	}
@@ -201,6 +220,7 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return $config['defaultServicesEndDate'] ?? 'PY1';
 		} catch ( Throwable ) {
+			// TODO: Log error
 			return 'PY1';
 		}
 	}
