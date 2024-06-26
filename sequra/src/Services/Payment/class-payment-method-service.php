@@ -84,15 +84,8 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	private function request_solicitation( ?WC_Order $order = null ): ?SolicitationResponse {
 		try {
 			$this->create_order_request_builder->set_current_order( $order );
-			$settings = AdminAPI::get()->generalSettings( $this->configuration->get_store_id() )->getGeneralSettings();
-			if ( ! $settings->isSuccessful() ) {
-				$ctx   = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
-				$ctx[] = new LogContextData( 'response', $settings->toArray() );
-				$this->logger->log_error( 'Settings response is not successful', __FUNCTION__, __CLASS__, $ctx );
-				return null;
-			}
-
-			if ( ! $this->create_order_request_builder->is_allowed_for( $settings ) ) {
+			
+			if ( ! $this->create_order_request_builder->is_allowed() ) {
 				$ctx = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
 				$this->logger->log_debug( 'Order is not allowed for solicitation', __FUNCTION__, __CLASS__, $ctx );
 				return null;

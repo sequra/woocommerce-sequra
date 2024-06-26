@@ -8,11 +8,14 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Delivery_Method;
 use SeQura\WC\Dto\Payment_Method_Data;
-use SeQura\WC\Dto\Previous_Order;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
+use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use WC_DateTime;
 use WC_Order;
 
 /**
@@ -34,26 +37,52 @@ class Order_Service implements Interface_Order_Service {
 	private $payment_service;
 
 	/**
+	 * Pricing service
+	 *
+	 * @var Interface_Pricing_Service
+	 */
+	private $pricing_service;
+
+	/**
 	 * Constructor
 	 */
-	public function __construct( Interface_Payment_Service $payment_service ) {
+	public function __construct( 
+		Interface_Payment_Service $payment_service,
+		Interface_Pricing_Service $pricing_service
+	) {
 		$this->payment_service = $payment_service;
+		$this->pricing_service = $pricing_service;
 	}
 	
 	/**
 	 * Get delivery method
 	 */
-	public function get_delivery_method( ?WC_Order $order ): Delivery_Method {
+	public function get_delivery_method( ?WC_Order $order ): DeliveryMethod {
+
 		if ( ! $order ) {
-			return $this->get_shipping_method_from_session();    
+			$session          = WC()->session;
+			$shipping_methods = $session ? WC()->session->chosen_shipping_methods : array();
+			
+			if ( ! $shipping_methods || empty( WC()->shipping->get_packages() ) ) {
+				return new DeliveryMethod( 'default', null, 'default' );
+			}
+			$package         = current( WC()->shipping->get_packages() );
+			$shipping_method = current( $shipping_methods );
+			
+			if ( ! isset( $package['rates'][ $shipping_method ] ) ) {
+				return new DeliveryMethod( 'default', null, 'default' );
+			}
+			
+			$rate = $package['rates'][ $shipping_method ];
+			return new DeliveryMethod( $rate->label, null, $rate->id );
 		}
 		
-		$shipping_methods = $order->get_shipping_methods();
-		$shipping_method  = current( $shipping_methods );
+		$shipping_methods = current( $order->get_shipping_methods() );
 
-		return new Delivery_Method(
-			! empty( $shipping_method['name'] ) ? $shipping_method['name'] : 'default',
-			! empty( $shipping_method['method_id'] ) ? $shipping_method['method_id'] : 'default'
+		return new DeliveryMethod(
+			$shipping_method['name'] ?? 'default',
+			null,
+			$shipping_method['method_id'] ?? 'default'
 		);
 	}
 
@@ -176,7 +205,7 @@ class Order_Service implements Interface_Order_Service {
 	/**
 	 * Get previous orders
 	 * 
-	 * @return array<array<string, mixed>>
+	 * @return PreviousOrder[]
 	 */
 	public function get_previous_orders( int $customer_id ): array {
 		$previous_orders = array();
@@ -196,7 +225,26 @@ class Order_Service implements Interface_Order_Service {
 
 		if ( is_array( $orders ) ) {
 			foreach ( $orders as $order ) {
-				$previous_orders[] = Previous_Order::from_order( $order )->to_array();
+				/**
+				 * Order date
+				 *
+				 * @var WC_DateTime $date
+				 */
+				$date     = $order->get_date_created( 'edit' );
+				$postcode = $this->get_postcode( $order );
+				$country  = $this->get_country( $order );
+
+				$previous_orders[] = new PreviousOrder(
+					$date ? $date->date( 'c' ) : '',
+					$this->pricing_service->to_cents( (float) $order->get_total( 'edit' ) ),
+					$order->get_currency(),
+					$order->get_status( 'edit' ),
+					wc_get_order_status_name( $order->get_status( 'edit' ) ),
+					$order->get_payment_method( 'edit' ),
+					$order->get_payment_method_title( 'edit' ),
+					$postcode ? $postcode : null,
+					$country ? $country : null
+				);
 			}
 		}
 		
@@ -237,35 +285,6 @@ class Order_Service implements Interface_Order_Service {
 	private function get_customer_from_session(): array {
 		return WC()->session ? WC()->session->get( 'customer' ) : array();
 	}
-
-	/**
-	 * Get shipping method from session.
-	 *
-	 * @return string
-	 */
-	private function get_shipping_method_from_session() {
-		$session          = WC()->session;
-		$shipping_methods = $session ? WC()->session->chosen_shipping_methods : array();
-		
-		if ( ! $shipping_methods ) {
-			$shipping_methods = array();
-		}
-		$shipping = WC()->shipping;
-
-		$package = $shipping ? current( WC()->shipping->get_packages() ) : array();
-		if ( $package && isset( $package['rates'][ current( $shipping_methods ) ] ) ) {
-			$rate = $package['rates'][ current( $shipping_methods ) ];
-			return new Delivery_Method(
-				$rate->label,
-				$rate->id
-			);
-		}
-		return new Delivery_Method(
-			'default',
-			'default'
-		);
-	}
-
 
 	/**
 	 * Get order meta value by key from a seQura order.

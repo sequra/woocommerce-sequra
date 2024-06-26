@@ -8,8 +8,9 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
 use SeQura\WC\Dto\Cart_Info;
-use SeQura\WC\Dto\Delivery_Method;
 use SeQura\WC\Dto\Payment_Method_Data;
 use WC_Order;
 
@@ -21,7 +22,7 @@ interface Interface_Order_Service {
 	/**
 	 * Get delivery method
 	 */
-	public function get_delivery_method( ?WC_Order $order ): Delivery_Method;
+	public function get_delivery_method( ?WC_Order $order ): DeliveryMethod;
 
 	/**
 	 * Get client first name. If the order is null, attempt to retrieve data from the session.
@@ -86,7 +87,7 @@ interface Interface_Order_Service {
 	/**
 	 * Get previous orders
 	 * 
-	 * @return array<array<string, mixed>>
+	 * @return PreviousOrder[]
 	 */
 	public function get_previous_orders( int $customer_id ): array;
 

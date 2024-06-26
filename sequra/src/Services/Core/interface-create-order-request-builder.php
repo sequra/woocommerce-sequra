@@ -8,7 +8,6 @@
 
 namespace SeQura\WC\Services\Core;
 
-use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
 use SeQura\Core\BusinessLogic\Domain\Order\Builders\CreateOrderRequestBuilder;
 use WC_Order;
 
@@ -25,5 +24,5 @@ interface Interface_Create_Order_Request_Builder extends CreateOrderRequestBuild
 	/**
 	 * Check if the builder is allowed for the current settings 
 	 */
-	public function is_allowed_for( GeneralSettingsResponse $general_settings_response ): bool;
+	public function is_allowed(): bool;
 }

@@ -10,10 +10,18 @@ namespace SeQura\WC\Services\Core;
 
 use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\CreateOrderRequest;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\EventsWebhook;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Gui;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
+use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Registration_Item;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
@@ -130,9 +138,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * @throws Exception
 	 */
 	public function build(): CreateOrderRequest {
-		// TODO: Use DTOs from integration-core package instead of arrays to build the request.
-		$merchant = $this->get_merchant_data();
-		if ( empty( $merchant ) ) {
+		$merchant = $this->get_merchant();
+		if ( ! $merchant ) {
 			throw new Exception( 'Merchant ID is empty' );
 		}
 
@@ -142,81 +149,39 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		$delivery_method = apply_filters( 'sequra_create_order_request_delivery_method_options', $this->order_service->get_delivery_method( $this->current_order )->to_array() );
+		$delivery_method = apply_filters( 'sequra_create_order_request_delivery_method_options', $this->order_service->get_delivery_method( $this->current_order ) );
 
-		return CreateOrderRequest::fromArray(
-			array(
-				'state'            => '',
-				'merchant'         => $merchant,
-				'cart'             => $this->cart_with_items(),
-				'delivery_method'  => $delivery_method,
-				'delivery_address' => $this->delivery_address(),
-				'invoice_address'  => $this->invoice_address(),
-				'customer'         => $this->customer(),
-				'gui'              => $this->gui(),
-				'platform'         => $this->platform(),
-			)
+		return new CreateOrderRequest(
+			'', // state.
+			$merchant,
+			$this->cart(),
+			$delivery_method,
+			$this->customer(),
+			$this->platform(),
+			$this->delivery_address(),
+			$this->invoice_address(),
+			$this->gui(),
+			null, // merchantReference.
+			null, // trackings.
 		);
 	}
 
 	/**
 	 * Get cart payload
 	 */
-	private function cart_with_items(): array {
-		$sequra_cart_info     = $this->current_order ? $this->order_service->get_cart_info( $this->current_order ) : $this->cart_service->get_cart_info_from_session();
-		$items                = array_merge(
-			$this->cart_service->get_product_items(),
-			$this->cart_service->get_handling_items(), // TODO: order is always null here?
-			$this->cart_service->get_discount_items(), // TODO: order is always null here?
-			$this->cart_service->get_extra_items(), // TODO: order is always null here?
-		);
-		$order_total_with_tax = 0;
-		$allow_service_reg    = $this->configuration->allow_service_reg_items();
-		$reg_items            = array();
-
-		foreach ( $items as &$item ) {
-			$order_total_with_tax += $item['total_with_tax'];
-
-			// Registration items.
-			if ( ! $allow_service_reg ) {
-				continue;
-			}
-
-			if ( empty( $item['product_id'] ) ) {
-				continue;
-			}
-
-			$registration_amount = $this->product_service->get_registration_amount( (int) $item['product_id'] );
-			if ( $registration_amount <= 0 ) {
-				continue;
-			}
-
-			$reg_items[] = ( new Registration_Item( 
-				$item['reference'], 
-				$item['name'], 
-				$item['quantity'] * $registration_amount
-			) )->to_array();
-			
-			// Fix original item.
-			$item['total_with_tax'] = max(
-				0,
-				$item['total_with_tax'] - $item['quantity'] * $registration_amount
-			);
-			$item['price_with_tax'] = max(
-				0,
-				$item['price_with_tax'] - $registration_amount
-			);
-		}
-
-		$options = array(
-			'currency'             => get_woocommerce_currency(),
-			'cart_ref'             => $sequra_cart_info ? $sequra_cart_info->ref : null,
-			'created_at'           => $sequra_cart_info ? $sequra_cart_info->created_at : null,
-			'updated_at'           => gmdate( 'c' ),
-			'gift'                 => false,
-			'items'                => $items,
-			'order_total_with_tax' => $order_total_with_tax,
-			'order_total_tax'      => 0,
+	private function cart(): Cart {
+		$cart_info = $this->current_order ? $this->order_service->get_cart_info( $this->current_order ) : $this->cart_service->get_cart_info_from_session();
+		
+		/**
+		 * List of items in the order.
+		 *
+		 * @var Item[] 
+		 */
+		$items = array_merge(
+			$this->cart_service->get_items( $this->current_order ),
+			$this->cart_service->get_handling_items( $this->current_order ),
+			$this->cart_service->get_discount_items( $this->current_order ),
+			$this->cart_service->get_registration_items( $this->current_order )
 		);
 
 		/**
@@ -225,44 +190,52 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_cart_options', $options );
+		return apply_filters(
+			'sequra_create_order_request_cart_options',
+			new Cart(
+				$this->current_order ? $this->current_order->get_currency( 'edit' ) : get_woocommerce_currency(),
+				false, // gift.
+				$items,
+				$cart_info->ref ?? null,
+				$cart_info->created_at ?? null,
+				gmdate( 'c' )
+			)
+		);
 	}
 
 	/**
-	 * Get the merchant data.
+	 * Get the merchant.
 	 */
-	private function get_merchant_data(): array {
+	private function get_merchant(): ?Merchant {
 		$merchant_id = $this->payment_service->get_merchant_id();
 		if ( ! $merchant_id ) {
-			return array();
+			return null;
 		}
 
-		$data = array(
-			'id'      => $merchant_id,
-			'options' => $this->get_merchant_options(),
-		);
+		$notify_url              = null;
+		$notification_parameters = null;
+		$return_url              = null;
+		$events_webhook          = null;
 
 		if ( $this->current_order ) {
 			$notify_url = $this->order_service->get_notify_url( $this->current_order );
+			$_order     = strval( $this->current_order->get_id() );
+			$_signature = $this->payment_service->sign( $this->current_order->get_id() );
 
-			$data = array_merge(
-				$data,
+			$notification_parameters = array(
+				'order'     => $_order,
+				'signature' => $_signature,
+				'result'    => '0',
+			);
+
+			$return_url = $this->order_service->get_return_url( $this->current_order );
+
+			$events_webhook = new EventsWebhook(
+				$notify_url,
 				array(
-					'notify_url'              => $notify_url,
-					'notification_parameters' => array(
-						'order'     => strval( $this->current_order->get_id() ),
-						'signature' => $this->payment_service->sign( $this->current_order->get_id() ),
-						'result'    => '0',
-					),
-					'return_url'              => $this->order_service->get_return_url( $this->current_order ),
-					'events_webhook'          => array(
-						'url'        => $notify_url,
-						'parameters' => array(
-							'signature' => $this->payment_service->sign( $this->current_order->get_id() ),
-							'order'     => '' . $this->current_order->get_id(),
-						),
-					),
-				)
+					'order'     => $_order,
+					'signature' => $_signature,
+				) 
 			);
 		}
 
@@ -272,10 +245,27 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_merchant_data', $data );
+		return apply_filters(
+			'sequra_create_order_request_merchant_data',
+			new Merchant(
+				$merchant_id,
+				$notify_url,
+				$notification_parameters,
+				$return_url,
+				null, // approved_callback.
+				null, // $edit_url.
+				null, // abort_url.
+				null, // rejected_callback.
+				null, // partpayment_details_getter.
+				null, // approved_url.
+				null, // TODO: 'desired_first_charge_on' is the only option. Also is not supported by integration-core, so skip it.
+				$events_webhook
+			)
+		);
 	}
 
 	/**
+	 * TODO: 'desired_first_charge_on' is the only option. Also is not supported by integration-core. This function is not used.
 	 * Get the merchant options.
 	 */
 	private function get_merchant_options(): ?array {
@@ -302,34 +292,21 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	/**
 	 * Get delivery address payload
 	 */
-	private function delivery_address(): array {
+	private function delivery_address(): Address {
 		return $this->address( true );
 	}
 	/**
 	 * Get invoice address payload
 	 */
-	private function invoice_address(): array {
+	private function invoice_address(): Address {
 		return $this->address( false );
 	}
 	
 	/**
 	 * Get delivery or invoice address payload
 	 */
-	private function address( bool $is_delivery ): array {
+	private function address( bool $is_delivery ): Address {
 		$country = $this->order_service->get_country( $this->current_order, $is_delivery );
-		$options = array(
-			'given_names'    => $this->order_service->get_first_name( $this->current_order, $is_delivery ),
-			'surnames'       => $this->order_service->get_last_name( $this->current_order, $is_delivery ),
-			'company'        => $this->order_service->get_company( $this->current_order, $is_delivery ),
-			'address_line_1' => $this->order_service->get_address_1( $this->current_order, $is_delivery ),
-			'address_line_2' => $this->order_service->get_address_2( $this->current_order, $is_delivery ),
-			'postal_code'    => $this->order_service->get_postcode( $this->current_order, $is_delivery ),
-			'city'           => $this->order_service->get_city( $this->current_order, $is_delivery ),
-			'country_code'   => $country ? $country : 'ES',
-			'state'          => $this->order_service->get_state( $this->current_order, $is_delivery ),
-			'mobile_phone'   => $this->order_service->get_phone( $this->current_order, $is_delivery ),
-			'vat_number'     => $this->order_service->get_vat( $this->current_order, $is_delivery ),
-		);
 
 		/**
 		 * Filter the address options.
@@ -337,41 +314,35 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options', $options );
+		return apply_filters(
+			'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options',
+			new Address(
+				$this->order_service->get_company( $this->current_order, $is_delivery ),
+				$this->order_service->get_address_1( $this->current_order, $is_delivery ),
+				$this->order_service->get_address_2( $this->current_order, $is_delivery ),
+				$this->order_service->get_postcode( $this->current_order, $is_delivery ),
+				$this->order_service->get_city( $this->current_order, $is_delivery ),
+				$country ? $country : 'ES',
+				$this->order_service->get_first_name( $this->current_order, $is_delivery ),
+				$this->order_service->get_last_name( $this->current_order, $is_delivery ),
+				null, // phone.
+				$this->order_service->get_phone( $this->current_order, $is_delivery ), // mobile phone.
+				$this->order_service->get_state( $this->current_order, $is_delivery ),
+				$this->current_order ? $this->current_order->get_customer_note( 'edit' ) : null, // extra.
+				$this->order_service->get_vat( $this->current_order, $is_delivery )
+			)
+		);
 	}
 
 	/**
 	 * Get customer payload
 	 */
-	private function customer(): array {
-
-
-		$is_user_logged_in = is_user_logged_in();
-		$current_user_id   = $is_user_logged_in ? get_current_user_id() : -1;
-		$data              = array(
-			'given_names' => $this->order_service->get_first_name( $this->current_order, true ),
-			'surnames'    => $this->order_service->get_last_name( $this->current_order, true ),
-			'email'       => $this->order_service->get_email( $this->current_order ),
-			'nin'         => $this->order_service->get_vat( $this->current_order, true ),
-			'company'     => $this->order_service->get_company( $this->current_order, true ),
-		);
-
-		if ( $current_user_id > 0 ) {
-			$data['previous_orders'] = $this->order_service->get_previous_orders( $current_user_id );
-			$data['ref']             = $current_user_id;
-		}
-
-		$data['language_code'] = $this->i18n->get_lang();
-		$ip                    = $this->shopper_service->get_ip();
-		if ( $ip ) {
-			$data['ip_number'] = $ip;
-		}
-		$user_agent = $this->shopper_service->get_user_agent();
-		if ( $user_agent ) {
-			$data['user_agent'] = $user_agent;
-		}
-		$data['logged_in'] = $is_user_logged_in;
-		
+	private function customer(): Customer {
+		$current_user_id = $this->current_order ? $this->current_order->get_customer_id() : get_current_user_id();
+		$logged_in       = $current_user_id > 0;
+		$ref             = $logged_in ? $current_user_id : null;
+		$ip              = $this->current_order ? $this->current_order->get_customer_ip_address( 'edit' ) : $this->shopper_service->get_ip();
+		$user_agent      = $this->current_order ? $this->current_order->get_customer_user_agent( 'edit' ) : $this->shopper_service->get_user_agent();
 
 		/**
 		 * Filter the customer options.
@@ -379,16 +350,37 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_customer_options', $data );
+		return apply_filters(
+			'sequra_create_order_request_customer_options',
+			new Customer(
+				$this->order_service->get_email( $this->current_order ),
+				$this->i18n->get_lang(),
+				$ip,
+				$user_agent,
+				$this->order_service->get_first_name( $this->current_order, true ),
+				$this->order_service->get_last_name( $this->current_order, true ),
+				null, // title.
+				$ref,
+				null, // dateOfBirth.
+				null, // TODO: nin.
+				$this->order_service->get_company( $this->current_order, true ),
+				$this->order_service->get_vat( $this->current_order, true ), // vatNumber.
+				null, // createdAt.
+				null, // updatedAt.
+				null, // rating.
+				null, // ninControl.
+				$this->order_service->get_previous_orders( $current_user_id ),
+				null, // vehicle.
+				$logged_in
+			) 
+		);
 	}
 
 	/**
 	 * Get GUI payload
 	 */
-	private function gui(): array {
-		$data = array(
-			'layout' => $this->shopper_service->is_using_mobile() ? 'mobile' : 'desktop',
-		);
+	private function gui(): Gui {
+		$gui = new Gui( $this->shopper_service->is_using_mobile() ? 'mobile' : 'desktop' );
 
 		/**
 		 * Filter the gui options.
@@ -396,24 +388,16 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_gui_options', $data );
+		return apply_filters( 'sequra_create_order_request_gui_options', $gui );
 	}
 
 	/**
 	 * Get platform payload
 	 */
-	public static function platform(): array {
+	public static function platform(): Platform {
 		$woo = ServiceRegister::getService( 'woocommerce.data' );
 		$sq  = ServiceRegister::getService( 'plugin.data' );
-		
-		$data = array_merge(
-			array(
-				'name'           => 'WooCommerce',
-				'version'        => empty( $woo['Version'] ) ? '' : $woo['Version'],
-				'plugin_version' => empty( $sq['Version'] ) ? '' : $sq['Version'],
-			),
-			ServiceRegister::getService( 'environment.data' )
-		);
+		$env = ServiceRegister::getService( 'environment.data' );
 
 		/**
 		 * Filter the platform options.
@@ -421,28 +405,24 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_platform_options', $data );
+		return apply_filters(
+			'sequra_create_order_request_platform_options',
+			new Platform(
+				'WooCommerce',
+				$woo['Version'] ?? '',
+				$env['uname'],
+				$env['db_name'],
+				$env['db_version'],
+				$sq['Version'] ?? null,
+				$env['php_version']
+			) 
+		);
 	}
 
 	/**
 	 * Check if the builder is allowed for the current settings 
 	 */
-	public function is_allowed_for( GeneralSettingsResponse $general_settings_response ): bool {
-		return true; // TODO: implement this method
-
-		ProductItem::fromArray(
-			array(
-				'reference'   => 'ref',
-				'name'        => 'name',
-				'quantity'    => 1,
-				'price'       => 1,
-				'price_with_tax' => 1,
-				'total'       => 1,
-				'total_with_tax' => 1,
-				'categories'  => '1, 2',
-			)
-		);
-		
+	public function is_allowed(): bool {
 		if ( ! $this->payment_service->get_merchant_id() ) {
 			$this->logger->log_debug( 'Merchant ID is empty', __FUNCTION__, __CLASS__ );
 			return false;
@@ -460,80 +440,49 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			return true;
 		}
 
-		$items = $this->current_order ? $this->current_order->get_items() : $this->cart_service->get_product_items();
-
-		foreach ( $items as $item ) {
-			$ref        = null;
-			$prod_id    = null;
-			$categories = array();
-
-			if ( $this->current_order ) {
-				$_prod      = $item->get_product();
-				$ref        = $_prod->get_sku() ? $_prod->get_sku() : strval( $_prod->get_id() );
-				$categories = wc_get_product_cat_ids( $_prod->get_id() );
-			} else {
-				// Reference contains the product SKU or the ID if the SKU is empty.
-				$ref        = $item['reference'];
-				$categories = array_map( 'absint', explode( ', ', $item['categories'] ) );
+		/**
+		 * Product
+		 *
+		 * @var WC_Product $product
+		 */
+		foreach ( $this->cart_service->get_products( $this->current_order ) as $product ) {
+			if ( in_array( $product->get_sku(), $excluded_products, true ) 
+				|| in_array( strval( $product->get_id() ), $excluded_products, true ) 
+			) {
+				$this->logger->log_debug(
+					'Payment gateway is not available for this product',
+					__FUNCTION__,
+					__CLASS__,
+					array( 
+						new LogContextData( 'product_id', $product->get_id() ),
+						new LogContextData( 'product_sku', $product->get_sku() ),
+						new LogContextData( 'excluded_products', $excluded_products ), 
+					) 
+				);
+				return false;
 			}
 
-			if ( in_array( $ref, $excluded_products, true ) || array_intersect( $excluded_categories, $categories ) ) {
+			if ( $this->product_service->is_banned( $product ) ) {
+				$this->logger->log_debug( 'Payment gateway is not available: product is banned', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $product->get_id() ) ) );
+				return false;
+			}
+
+			if ( ! empty( $excluded_categories ) && ! empty(
+				array_intersect( $excluded_categories, $product->get_category_ids() )
+			) ) {
+				$this->logger->log_debug(
+					'Payment gateway is not available for category',
+					__FUNCTION__,
+					__CLASS__,
+					array( 
+						new LogContextData( 'product_categories', $product->get_category_ids() ), 
+						new LogContextData( 'excluded_categories', $excluded_categories ), 
+					) 
+				);
 				return false;
 			}
 		}
 
-
-		// try {
-		// $generalSettings = $generalSettingsResponse->toArray();
-		// $stateService    = ServiceRegister::getService( UIStateService::class );
-		// $isOnboarding    = StoreContext::doWithStore( $this->storeId, array( $stateService, 'isOnboardingState' ), array( true ) );
-		// $this->quote     = $this->quoteRepository->getActive( $this->cartId );
-		// $merchantId      = $this->getMerchantId();
-
-
-		// if (
-		// empty( $generalSettings['excludedProducts'] ) &&
-		// empty( $generalSettings['excludedCategories'] )
-		// ) {
-		// return true;
-		// }
-
-		// $this->quote = $this->quoteRepository->getActive( $this->cartId );
-		// foreach ( $this->quote->getAllVisibleItems() as $item ) {
-		// if (
-		// ! empty( $generalSettings['excludedProducts'] ) &&
-		// ! empty( $item->getSku() ) &&
-		// ( in_array( $item->getProduct()->getData( 'sku' ), $generalSettings['excludedProducts'], true ) ||
-		// in_array( $item->getProduct()->getSku(), $generalSettings['excludedProducts'], true ) )
-		// ) {
-		// return false;
-		// }
-
-		// if ( $item->getIsVirtual() ) {
-		// return false;
-		// }
-
-		// if (
-		// ! empty( $generalSettings['excludedCategories'] ) &&
-		// ! empty(
-		// array_intersect(
-		// $generalSettings['excludedCategories'],
-		// $this->productService->getAllProductCategories( $item->getProduct()->getCategoryIds() )
-		// )
-		// )
-		// ) {
-		// return false;
-		// }
-		// }
-
-		// return true;
-		// } catch ( Throwable $exception ) {
-		// Logger::logWarning(
-		// 'Unexpected error occurred while checking if SeQura payment methods are available.
-		// Reason: ' . $exception->getMessage() . ' . Stack trace: ' . $exception->getTraceAsString()
-		// );
-
-		// return false;
-		// }
+		return true;
 	}
 }

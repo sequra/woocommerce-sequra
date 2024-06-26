@@ -9,14 +9,24 @@
 namespace SeQura\WC\Services\Cart;
 
 use DateTime;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
+use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Dto\Cart_Info;
-use SeQura\WC\Dto\Discount_Item;
-use SeQura\WC\Dto\Fee_Item;
-use SeQura\WC\Dto\Handling_Item;
 use SeQura\WC\Services\Core\Configuration;
+use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
+use WC_Coupon;
 use WC_Order;
+use WC_Order_Item_Coupon;
+use WC_Order_Item_Fee;
+use WC_Order_Item_Product;
+use WC_Product;
 
 /**
  * Handle use cases related to cart
@@ -45,6 +55,13 @@ class Cart_Service implements Interface_Cart_Service {
 	 * @var Interface_Pricing_Service
 	 */
 	private $pricing_service;
+
+	/**
+	 * Logger
+	 *
+	 * @var Interface_Logger_Service
+	 */
+	private $logger;
 	
 	/**
 	 * Constructor
@@ -52,11 +69,13 @@ class Cart_Service implements Interface_Cart_Service {
 	public function __construct( 
 		Interface_Product_Service $product_service,
 		Configuration $configuration,
-		Interface_Pricing_Service $pricing_service
+		Interface_Pricing_Service $pricing_service,
+		Interface_Logger_Service $logger
 	) {
 		$this->product_service = $product_service;
 		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
+		$this->logger          = $logger;
 	}
 
 	/**
@@ -103,141 +122,372 @@ class Cart_Service implements Interface_Cart_Service {
 	}
 
 	/**
-	 * Get product items as an associative array
-	 *
-	 * @return array<string, mixed>
+	 * Get registration item instance
 	 */
-	public function get_product_items(): array {
-		if ( null === WC()->cart ) {
-			return array();
+	private function get_registration_item( WC_Product $product, int $qty ): ?OtherPaymentItem {
+		$registration_amount = $this->product_service->get_registration_amount( $product->get_id() );
+		if ( $registration_amount <= 0 ) {
+			return null;
 		}
-		$items = array();
-		foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
-			$product_id = $this->get_product_id_from_item( $cart_item );
-			$product    = $this->product_service->get_product_instance( $product_id );
-			if ( ! $product ) {
-				continue;
-			}
 
-			$item = array();
-			if (
-				$this->configuration->is_enabled_for_services()
-				&& $this->product_service->is_service( $product )
-			) {
-				$item['type'] = 'service';
-				
-				/**
-				* Filter the service end date.
-				*
-				* @since 2.0.0
-				*/
-				$service_end_date = apply_filters(
-					'woocommerce_sequra_add_service_end_date',
-					$this->product_service->get_service_end_date( $product->get_parent_id() ? $product->get_parent_id() : $product->get_id() ),
-					$product,
+		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
+		$name = wp_strip_all_tags( $product->get_title() );
+
+		return new OtherPaymentItem(
+			"$ref-reg",
+			"Reg. $name",
+			// TODO: Check if registration amount came already in cents.
+			$this->pricing_service->to_cents( $registration_amount ) * $qty
+		);
+	}
+	/**
+	 * Get item instance
+	 *
+	 * @return <ProductItem|ServiceItem>
+	 */
+	private function get_item( WC_Product $product, float $total_price, int $qty, mixed $item ): Item {
+		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
+		$name = wp_strip_all_tags( $product->get_title() );
+		if ( $this->configuration->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
+			/**
+			* Filter the service end date.
+			*
+			* @since 2.0.0
+			*/
+			$service_end_date = apply_filters(
+				'woocommerce_sequra_add_service_end_date',
+				$this->product_service->get_service_end_date( $product->get_parent_id() ? $product->get_parent_id() : $product->get_id() ),
+				$product,
+				$item
+			);
+
+			$is_duration = 0 === strpos( $service_end_date, 'P' );
+
+			return new ServiceItem(
+				$ref,
+				$name,
+				$this->pricing_service->to_cents( $total_price / $qty ),
+				$qty,
+				$product->is_downloadable(),
+				$this->pricing_service->to_cents( $total_price ),
+				! $is_duration ? $service_end_date : null,
+				$is_duration ? $service_end_date : null,
+				null, // supplier.
+				null // rendered.
+			);
+		} 
+		return new ProductItem(
+			$ref,
+			$name,
+			$this->pricing_service->to_cents( $total_price / $qty ),
+			$qty,
+			$this->pricing_service->to_cents( $total_price ),
+			$product->is_downloadable(),
+			null, // perishable.
+			null, // personalized.
+			null, // restockable.
+			wc_get_product_category_list( $product->get_id() ),
+			$product->get_description(),
+			null, // manufacturer.
+			null, // supplier.
+			$product->get_id(),
+			$product->get_permalink(),
+			null // tracking reference.
+		);
+	}
+
+	/**
+	 * Get items in cart
+	 *
+	 * @return array<ProductItem|ServiceItem>
+	 */
+	public function get_items( ?WC_Order $order ): array {
+
+		$items = array();
+		
+		if ( ! $order && null !== WC()->cart ) {
+			// Cart items.
+			foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
+				$product = $this->product_service->get_product_instance( $this->get_product_id_from_item( $cart_item ) );
+				if ( ! $product ) {
+					continue;
+				}
+
+				$items[] = $this->get_item(
+					$product, 
+					(float) $cart_item['line_subtotal'] + (float) $cart_item['line_subtotal_tax'], 
+					(int) $cart_item['quantity'], 
 					$cart_item
 				);
-				
-				if ( 0 === strpos( $service_end_date, 'P' ) ) {
-					$item['ends_in'] = $service_end_date;
-				} else {
-					$item['ends_on'] = $service_end_date;
-				}
-			} else {
-				$item['type'] = 'product';
 			}
-			$item['reference'] = $product->get_sku() ? $product->get_sku() : $product->get_id();
-			$item['name']      = wp_strip_all_tags( $product->get_title() );
-			$item['quantity']  = isset( $cart_item['quantity'] ) ? (int) $cart_item['quantity'] : 1;
-			
-			$total_price            = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
-			$item['total_with_tax'] = $this->pricing_service->to_cents( $total_price );
-			$item['price_with_tax'] = $this->pricing_service->to_cents( $total_price / $item['quantity'] );
-			$item['downloadable']   = $product->is_downloadable();
+		} elseif ( $order ) {
+			/**
+			 * Order item
+			 *
+			 * @var WC_Order_Item_Product $item
+			 */
+			foreach ( $order->get_items() as $item ) {
+				if ( ! $item instanceof WC_Order_Item_Product ) {
+					continue;
+				}
+				$product = $item->get_product();
+				if ( ! $product ) {
+					continue;
+				}
 
-			// OPTIONAL.
-			$item['description'] = $product->get_description();
-			$item['product_id']  = $product->get_id();
-			$item['url']         = (string) get_permalink( $product->get_id() );
-			$item['category']    = wc_get_product_category_list( $product->get_id() );
-			$items[]             = $item;
+				$items[] = $this->get_item(
+					$product, 
+					(float) $item->get_subtotal( 'edit' ) + (float) $item->get_subtotal_tax( 'edit' ), 
+					(int) $item->get_quantity( 'edit' ), 
+					$item
+				);
+			}
 		}
+
 		return $items;
 	}
 
 	/**
-	 * Get handling items as an associative array
+	 * Get products in cart
 	 *
-	 * @return array<string, mixed>
+	 * @return array<WC_Product>
+	 */
+	public function get_products( ?WC_Order $order ): array {
+		$items = array();
+		
+		if ( ! $order && null !== WC()->cart ) {
+			// Cart items.
+			foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
+				$product = $this->product_service->get_product_instance( $this->get_product_id_from_item( $cart_item ) );
+				if ( ! $product ) {
+					continue;
+				}
+
+				$items[] = $product;
+			}
+		} elseif ( $order ) {
+			/**
+			 * Order item
+			 *
+			 * @var WC_Order_Item_Product $item
+			 */
+			foreach ( $order->get_items() as $item ) {
+				if ( ! $item instanceof WC_Order_Item_Product ) {
+					continue;
+				}
+				$product = $item->get_product();
+				if ( ! $product ) {
+					continue;
+				}
+
+				$items[] = $product;
+			}
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Get handling items
+	 *
+	 * @return HandlingItem[]
 	 */
 	public function get_handling_items( ?WC_Order $order = null ): array {
-		$shipping_total = 0;
-		$items          = array();
-
+		$items                   = array();
+		$shipping_total_with_tax = 0;
+		
 		if ( ! $order && null !== WC()->cart ) {
-			$shipping_total = (float) WC()->cart->shipping_total + (float) WC()->cart->shipping_tax_total;
+			$shipping_total_with_tax = (float) WC()->cart->shipping_total + (float) WC()->cart->shipping_tax_total;
+
+			/**
+			 * Handling fee. Must contain at least props: name, total
+			 *
+			 * @var object $fee
+			 */
+			foreach ( WC()->cart->get_fees() as $fee ) {
+				$total_with_tax = (float) ( $fee->total ?? 0 );
+				if ( $total_with_tax <= 0 ) {
+					// Fees with negative total are discount items.
+					continue;
+				}
+
+				$items[] = new HandlingItem(
+					$fee->name,
+					esc_html__( 'Handling cost', 'sequra' ),
+					$this->pricing_service->to_cents( $total_with_tax )
+				);
+			}
 		} elseif ( $order ) {
-			$shipping_total = (float) $order->get_shipping_total() + (float) $order->get_shipping_tax();
+			$shipping_total_with_tax = (float) $order->get_shipping_total() + (float) $order->get_shipping_tax();
+
+			/**
+			 * Handling fee order item
+			 *
+			 * @var WC_Order_Item_Fee $fee
+			 */
+			foreach ( $order->get_items( 'fee' ) as $fee ) {
+				if ( ! $fee instanceof WC_Order_Item_Fee ) {
+					continue;
+				}
+
+				$total_with_tax = (float) ( $fee->get_total() ?? 0 );
+				if ( $total_with_tax <= 0 ) {
+					// Fees with negative total are discount items.
+					continue;
+				}
+
+				$items[] = new HandlingItem(
+					$fee->get_name(),
+					esc_html__( 'Handling cost', 'sequra' ),
+					$this->pricing_service->to_cents( $total_with_tax )
+				);
+			}
 		}
 		
-		if ( $shipping_total ) {
-			$items[] = ( new Handling_Item( $this->pricing_service->to_cents( $shipping_total ) ) )->to_array();
+		if ( $shipping_total_with_tax ) {
+			$items[] = new HandlingItem(
+				'handling',
+				esc_html__( 'Shipping cost', 'sequra' ),
+				$this->pricing_service->to_cents( $shipping_total_with_tax )
+			);
 		}
-		
+
 		return $items;
 	}
 	
 	/**
-	 * Get discount items as an associative array
+	 * Get discount items
 	 *
-	 * @return array<string, mixed>
+	 * @return DiscountItem[]
 	 */
 	public function get_discount_items( ?WC_Order $order = null ): array {
 		$items = array();
 		if ( ! $order && null !== WC()->cart ) {
 			$cart = WC()->cart;
-			foreach ( $cart->coupon_discount_amounts as $key => $val ) {
-				$amount  = (float) $val + (float) $cart->coupon_discount_tax_amounts[ $key ];
-				$amount  = $this->pricing_service->to_cents( $amount );
-				$items[] = ( new Discount_Item( $key, $amount ) )->to_array();
+			/**
+			 * Coupon cart object.
+			 *
+			 * @var WC_Coupon $coupon
+			 */
+			foreach ( $cart->get_coupons() as $coupon ) {
+				$items[] = new DiscountItem(
+					$coupon->get_code(),
+					esc_html__( 'Discount', 'sequra' ),
+					// TODO: check if -1 is needed.
+					-1 * $this->pricing_service->to_cents( 
+						$cart->get_coupon_discount_amount( $coupon->get_code(), false ) 
+					)
+				);
+			}
+
+			/**
+			 * Fee cart object. Must contain at least props: name, total
+			 *
+			 * @var object $fee
+			 */
+			foreach ( $cart->get_fees() as $fee ) {
+				$total_with_tax = (float) ( $fee->total ?? 0 );
+				if ( $total_with_tax >= 0 ) {
+					// Fees with positive total are handling items.
+					continue;
+				}
+
+				$items[] = new DiscountItem(
+					$fee->name,
+					esc_html__( 'Discount', 'sequra' ),
+					$this->pricing_service->to_cents( $total_with_tax )
+				);
 			}
 		} elseif ( $order ) {
-			foreach ( $order->get_items( 'coupon' ) as $key => $val ) {
-				$amount  = (float) $val['discount_amount'] + (float) $val['discount_amount_tax'];
-				$amount  = $this->pricing_service->to_cents( $amount );
-				$items[] = ( new Discount_Item( $val['name'], $amount ) )->to_array();
+			/**
+			 * Coupon order item
+			 *
+			 * @var WC_Order_Item_Coupon $coupon
+			 */
+			foreach ( $order->get_items( 'coupon' ) as $coupon ) {
+				if ( ! $coupon instanceof WC_Order_Item_Coupon ) {
+					continue;
+				}
+
+				$items[] = new DiscountItem(
+					$coupon->get_code(),
+					$coupon->get_name(),
+					// TODO: check if -1 is needed.
+					-1 * $this->pricing_service->to_cents(
+						(float) $coupon->get_discount( 'edit' ) + (float) $coupon->get_discount_tax( 'edit' )
+					)
+				);
+			}
+
+			/**
+			 * Fee order item
+			 *
+			 * @var WC_Order_Item_Fee $fee
+			 */
+			foreach ( $order->get_items( 'fee' ) as $fee ) {
+				if ( ! $fee instanceof WC_Order_Item_Fee ) {
+					continue;
+				}
+
+				$total_with_tax = (float) ( $fee->get_total() ?? 0 );
+				if ( $total_with_tax >= 0 ) {
+					// Fees with positive total are handling items.
+					continue;
+				}
+
+				$items[] = new DiscountItem(
+					$fee->get_name(),
+					esc_html__( 'Discount', 'sequra' ),
+					$this->pricing_service->to_cents( $total_with_tax )
+				);
 			}
 		}
 		return $items;
 	}
 
 	/**
-	 * Get extra items as an associative array
+	 * Get registration items
 	 *
-	 * @return array<string, mixed>
+	 * @return OtherPaymentItem[]
 	 */
-	public function get_extra_items( ?WC_Order $order = null ): array {
+	public function get_registration_items( ?WC_Order $order = null ): array {
 		$items = array();
+		if ( ! $this->configuration->allow_service_reg_items() ) {
+			return $items;
+		}
+
 		if ( ! $order && null !== WC()->cart ) {
-			/**
-			 * Fee cart object. Must contain at least props: name, amount, tax
-			 *
-			 * @var object $fee
-			 */
-			foreach ( WC()->cart->get_fees() as $fee ) {
-				$total_with_tax_in_cents = (float) $fee->amount + ( isset( $fee->tax ) ? (float) $fee->tax : 0 );
-				$items[]                 = ( new Fee_Item( 
-					$fee->name, 
-					$this->pricing_service->to_cents( $total_with_tax_in_cents )
-				) )->to_array();
+			// Cart items.
+			foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
+				$product = $this->product_service->get_product_instance( $this->get_product_id_from_item( $cart_item ) );
+				if ( ! $product ) {
+					continue;
+				}
+
+				$reg_item = $this->get_registration_item( $product, (int) $cart_item['quantity'] );
+				if ( $reg_item ) {
+					$items[] = $reg_item;
+				}
 			}
 		} elseif ( $order ) {
-			foreach ( $order->get_fees() as $fee ) {
-				$total_with_tax_in_cents = (float) $fee->get_total( 'edit' ) + (float) $fee->get_total_tax( 'edit' );
-				$items[]                 = ( new Fee_Item( 
-					$fee->get_name( 'edit' ), 
-					$this->pricing_service->to_cents( $total_with_tax_in_cents )
-				) )->to_array();
+			/**
+			 * Order item
+			 *
+			 * @var WC_Order_Item_Product $item
+			 */
+			foreach ( $order->get_items() as $item ) {
+				if ( ! $item instanceof WC_Order_Item_Product ) {
+					continue;
+				}
+				$product = $item->get_product();
+				if ( ! $product ) {
+					continue;
+				}
+
+				$reg_item = $this->get_registration_item( $product, (int) $item->get_quantity( 'edit' ) );
+				if ( $reg_item ) {
+					$items[] = $reg_item;
+				}
 			}
 		}
 		return $items;
@@ -279,22 +529,21 @@ class Cart_Service implements Interface_Cart_Service {
 	 * Check if cart is eligible for product sale
 	 */
 	private function is_eligible_for_product_sale(): bool {
-		global $wp;
-		if ( ! WC()->cart ) {
-			return false;
-		}
 		$eligible = true;
-		// Only reject if all products are virtual (don't need shipping).
-		if ( isset( $wp->query_vars['order-pay'] ) ) { // if paying an order.
-			$order = wc_get_order( $wp->query_vars['order-pay'] );
-			if ( ! $order->needs_shipping_address() ) {
-				// TODO: process outside this function
-				// $this->logger->log_debug( 'Order doesn\'t need shipping address seQura will not be offered.', __FUNCTION__, __CLASS__ );
+		if ( WC()->cart ) {
+			global $wp;
+			// Only reject if all products are virtual (don't need shipping).
+			if ( isset( $wp->query_vars['order-pay'] ) ) { // if paying an order.
+				$order = wc_get_order( $wp->query_vars['order-pay'] );
+				if ( ! $order->needs_shipping_address() ) {
+					$this->logger->log_debug( 'Order doesn\'t need shipping address seQura will not be offered.', __FUNCTION__, __CLASS__ );
+					$eligible = false;
+				}
+			} elseif ( ! WC()->cart->needs_shipping() ) { // If paying cart.
+				$this->logger->log_debug( 'Order doesn\'t need shipping seQura will not be offered.', __FUNCTION__, __CLASS__ );
 				$eligible = false;
 			}
-		} elseif ( ! WC()->cart->needs_shipping() ) { // If paying cart.
-			// TODO: process outside this function
-			// $this->logger->log_debug( 'Order doesn\'t need shipping seQura will not be offered.', __FUNCTION__, __CLASS__ );
+		} else {
 			$eligible = false;
 		}
 		/**
@@ -303,7 +552,7 @@ class Cart_Service implements Interface_Cart_Service {
 		 * @since 2.0.0
 		 * @deprecated 3.0.0 Use woocommerce_cart_is_eligible_for_product_sale instead
 		 */
-		$eligible = apply_filters_deprecated( 'woocommerce_cart_is_elegible_for_product_sale', $eligible, '3.0.0', 'woocommerce_cart_is_eligible_for_product_sale' );
+		$eligible = apply_filters_deprecated( 'woocommerce_cart_is_elegible_for_product_sale', array( $eligible ), '3.0.0', 'woocommerce_cart_is_eligible_for_product_sale' );
 
 		/**
 		 * Filter if cart is eligible for product sale
@@ -330,9 +579,8 @@ class Cart_Service implements Interface_Cart_Service {
 			}
 			if ( $return ) {
 				foreach ( WC()->cart->get_cart_contents() as $values ) {
-					if ( $this->product_service->is_banned( $values['product_id'] ) ) {
-						// TODO: process outside this function
-						// $this->logger->log_debug( 'Banned product in the cart seQura will not be offered. Product Id :' . $values['product_id'], __FUNCTION__, __CLASS__ );
+					if ( $this->product_service->is_banned( (int) $values['product_id'] ) ) {
+						$this->logger->log_debug( 'Banned product in the cart seQura will not be offered', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $values['product_id'] ) ) );
 						$return = false;
 						break;
 					}

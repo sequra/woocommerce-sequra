@@ -165,7 +165,6 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return ! empty( $config['enabledForServices'] );
 		} catch ( Throwable ) {
-			// TODO: Log error
 			return false;
 		}
 	}
@@ -182,7 +181,6 @@ class Configuration_Service extends Configuration {
 			|| 0 === count( $config['allowedIPAddresses'] ) 
 			|| in_array( $remote_addr, $config['allowedIPAddresses'], true );
 		} catch ( Throwable ) {
-			// TODO: Log error
 			return true;
 		}
 	}
@@ -194,7 +192,6 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return ! empty( $config['allowFirstServicePaymentDelay'] );
 		} catch ( Throwable ) {
-			// TODO: Log error
 			return false;
 		}
 	}
@@ -207,7 +204,6 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return ! empty( $config['allowServiceRegItems'] );
 		} catch ( Throwable ) {
-			// TODO: Log error
 			return false;
 		}
 	}
@@ -220,7 +216,6 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			return $config['defaultServicesEndDate'] ?? 'PY1';
 		} catch ( Throwable ) {
-			// TODO: Log error
 			return 'PY1';
 		}
 	}

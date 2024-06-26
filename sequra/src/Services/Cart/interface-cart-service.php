@@ -8,8 +8,10 @@
 
 namespace SeQura\WC\Services\Cart;
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\WC\Dto\Cart_Info;
 use WC_Order;
+use WC_Product;
 
 /**
  * Handle use cases related to cart
@@ -32,32 +34,39 @@ interface Interface_Cart_Service {
 	public function clear_cart_info_from_session(): void;
 
 	/**
-	 * Get product items as an associative array
+	 * Get items in cart
 	 *
-	 * @return array<string, mixed>
+	 * @return array<ProductItem|ServiceItem>
 	 */
-	public function get_product_items(): array;
+	public function get_items( ?WC_Order $order ): array;
 
 	/**
-	 * Get handling items as an associative array
+	 * Get products in cart
 	 *
-	 * @return array<string, mixed>
+	 * @return array<WC_Product>
+	 */
+	public function get_products( ?WC_Order $order ): array;
+
+	/**
+	 * Get handling items
+	 *
+	 * @return HandlingItem[]
 	 */
 	public function get_handling_items( ?WC_Order $order = null ): array;
 	
 	/**
-	 * Get discount items as an associative array
+	 * Get discount items
 	 *
-	 * @return array<string, mixed>
+	 * @return DiscountItem[]
 	 */
 	public function get_discount_items( ?WC_Order $order = null ): array;
 
 	/**
-	 * Get extra items as an associative array
+	 * Get registration items
 	 *
-	 * @return array<string, mixed>
+	 * @return OtherPaymentItem[]
 	 */
-	public function get_extra_items( ?WC_Order $order = null ): array;
+	public function get_registration_items( ?WC_Order $order = null ): array;
 
 	/**
 	 * Check if conditions are met for showing seQura in checkout
