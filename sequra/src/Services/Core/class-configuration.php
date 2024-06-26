@@ -101,4 +101,18 @@ abstract class Configuration extends \SeQura\Core\Infrastructure\Configuration\C
 	 * Check if current IP is allowed to use the payment gateway. 
 	 */
 	abstract public function is_available_for_ip(): bool;
+
+	/**
+	 * Get excludedProducts from general settings.
+	 * 
+	 * @return array<string>
+	 */
+	abstract public function get_excluded_products(): array;
+
+	/**
+	 * Get excludedCategories from general settings.
+	 * 
+	 * @return array<int>
+	 */
+	abstract public function get_excluded_categories(): array;
 }

@@ -11,17 +11,20 @@ namespace SeQura\WC\Services\Core;
 use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\CreateOrderRequest;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Registration_Item;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
+use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Order;
+use WC_Order_Item;
 
 /**
  * Wrapper to ease the read and write of configuration values.
@@ -85,6 +88,13 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private $shopper_service;
 
 	/**
+	 * Logger
+	 *
+	 * @var Interface_Logger_Service
+	 */
+	private $logger;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
@@ -94,7 +104,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		Interface_Product_Service $product_service,
 		Interface_Order_Service $order_service,
 		Interface_I18n $i18n,
-		Interface_Shopper_Service $shopper_service
+		Interface_Shopper_Service $shopper_service,
+		Interface_Logger_Service $logger
 	) {
 		$this->payment_service = $payment_service;
 		$this->cart_service    = $cart_service;
@@ -103,6 +114,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		$this->order_service   = $order_service;
 		$this->i18n            = $i18n;
 		$this->shopper_service = $shopper_service;
+		$this->logger          = $logger;
 	}
 
 	/**
@@ -417,6 +429,60 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 */
 	public function is_allowed_for( GeneralSettingsResponse $general_settings_response ): bool {
 		return true; // TODO: implement this method
+
+		ProductItem::fromArray(
+			array(
+				'reference'   => 'ref',
+				'name'        => 'name',
+				'quantity'    => 1,
+				'price'       => 1,
+				'price_with_tax' => 1,
+				'total'       => 1,
+				'total_with_tax' => 1,
+				'categories'  => '1, 2',
+			)
+		);
+		
+		if ( ! $this->payment_service->get_merchant_id() ) {
+			$this->logger->log_debug( 'Merchant ID is empty', __FUNCTION__, __CLASS__ );
+			return false;
+		}
+
+		if ( ! $this->configuration->is_available_for_ip() ) {
+			$this->logger->log_debug( 'Payment gateway is not available for this IP', __FUNCTION__, __CLASS__ );
+			return false;
+		}
+
+		$excluded_products   = $this->configuration->get_excluded_products();
+		$excluded_categories = $this->configuration->get_excluded_categories();
+
+		if ( empty( $excluded_products ) && empty( $excluded_categories ) ) {
+			return true;
+		}
+
+		$items = $this->current_order ? $this->current_order->get_items() : $this->cart_service->get_product_items();
+
+		foreach ( $items as $item ) {
+			$ref        = null;
+			$prod_id    = null;
+			$categories = array();
+
+			if ( $this->current_order ) {
+				$_prod      = $item->get_product();
+				$ref        = $_prod->get_sku() ? $_prod->get_sku() : strval( $_prod->get_id() );
+				$categories = wc_get_product_cat_ids( $_prod->get_id() );
+			} else {
+				// Reference contains the product SKU or the ID if the SKU is empty.
+				$ref        = $item['reference'];
+				$categories = array_map( 'absint', explode( ', ', $item['categories'] ) );
+			}
+
+			if ( in_array( $ref, $excluded_products, true ) || array_intersect( $excluded_categories, $categories ) ) {
+				return false;
+			}
+		}
+
+
 		// try {
 		// $generalSettings = $generalSettingsResponse->toArray();
 		// $stateService    = ServiceRegister::getService( UIStateService::class );
@@ -424,17 +490,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		// $this->quote     = $this->quoteRepository->getActive( $this->cartId );
 		// $merchantId      = $this->getMerchantId();
 
-		// if ( ! $merchantId || $isOnboarding ) {
-		// return false;
-		// }
-
-		// if (
-		// ! empty( $generalSettings['allowedIPAddresses'] ) &&
-		// ! empty( $ipAddress = $this->getCustomerIpAddress() ) &&
-		// ! in_array( $ipAddress, $generalSettings['allowedIPAddresses'], true )
-		// ) {
-		// return false;
-		// }
 
 		// if (
 		// empty( $generalSettings['excludedProducts'] ) &&

@@ -224,6 +224,40 @@ class Configuration_Service extends Configuration {
 			return 'PY1';
 		}
 	}
+
+	/**
+	 * Get excludedProducts from general settings.
+	 * 
+	 * @return array<string>
+	 */
+	public function get_excluded_products(): array {
+		try {
+			$config = $this->get_general_settings();
+			if ( ! empty( $config['excludedProducts'] ) && is_array( $config['excludedProducts'] ) ) {
+				return $config['excludedProducts'];
+			}
+			return array();
+		} catch ( Throwable ) {
+			return array();
+		}
+	}
+
+	/**
+	 * Get excludedCategories from general settings.
+	 * 
+	 * @return array<int>
+	 */
+	public function get_excluded_categories(): array {
+		try {
+			$config = $this->get_general_settings();
+			if ( ! empty( $config['excludedCategories'] ) && is_array( $config['excludedCategories'] ) ) {
+				return array_map( 'absint', $config['excludedCategories'] );
+			}
+			return array();
+		} catch ( Throwable ) {
+			return array();
+		}
+	}
 	
 	/**
 	 * Get general settings as array
