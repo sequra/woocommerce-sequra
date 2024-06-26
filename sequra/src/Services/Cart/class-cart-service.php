@@ -303,7 +303,7 @@ class Cart_Service implements Interface_Cart_Service {
 		 * @since 2.0.0
 		 * @deprecated 3.0.0 Use woocommerce_cart_is_eligible_for_product_sale instead
 		 */
-		$eligible = apply_filters( 'woocommerce_cart_is_elegible_for_product_sale', $eligible );
+		$eligible = apply_filters_deprecated( 'woocommerce_cart_is_elegible_for_product_sale', $eligible, '3.0.0', 'woocommerce_cart_is_eligible_for_product_sale' );
 
 		/**
 		 * Filter if cart is eligible for product sale
