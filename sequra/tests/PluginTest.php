@@ -8,16 +8,16 @@
 
 namespace SeQura\WC\Tests;
 
-use SeQura\WC\Controllers\Interface_Assets_Controller;
-use SeQura\WC\Controllers\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Plugin;
-use SeQura\WC\Controllers\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
 use SeQura\WC\Services\Interface_Migration_Manager;
 use WP_UnitTestCase;
 
 class PluginTest extends WP_UnitTestCase {
-
 
 	private $plugin;
 	private $plugin_data;
@@ -25,6 +25,7 @@ class PluginTest extends WP_UnitTestCase {
 	private $i18n_controller;
 	private $asset_controller;
 	private $settings_controller;
+	private $payment_controller;
 	private $rest_settings_controller;
 	private $rest_onboarding_controller;
 	private $rest_payment_controller;
@@ -48,13 +49,14 @@ class PluginTest extends WP_UnitTestCase {
 		$this->migration_manager          = $this->createMock( Interface_Migration_Manager::class );
 		$this->asset_controller           = $this->createMock( Interface_Assets_Controller::class );
 		$this->settings_controller        = $this->createMock( Interface_Settings_Controller::class );
+		$this->payment_controller         = $this->createMock( Interface_Payment_Controller::class );
 		$this->rest_settings_controller   = $this->createMock( REST_Controller::class );
 		$this->rest_onboarding_controller = $this->createMock( REST_Controller::class );
 		$this->rest_payment_controller    = $this->createMock( REST_Controller::class );
 		$this->rest_log_controller        = $this->createMock( REST_Controller::class );
 	}
 
-	public function testConstructor_happyPath_hooksAreRegistered() {
+	private function setup_plugin_instance() {
 		$this->plugin = new Plugin( 
 			$this->plugin_data, 
 			$this->base_name,
@@ -62,11 +64,16 @@ class PluginTest extends WP_UnitTestCase {
 			$this->i18n_controller, 
 			$this->asset_controller,
 			$this->settings_controller,
+			$this->payment_controller,
 			$this->rest_settings_controller,
 			$this->rest_onboarding_controller,
 			$this->rest_payment_controller,
 			$this->rest_log_controller
 		);
+	}
+
+	public function testConstructor_happyPath_hooksAreRegistered() {
+		$this->setup_plugin_instance();
 
 		$this->assertEquals( 10, \has_action( 'plugins_loaded', array( $this->plugin, 'install' ) ) );
 		$this->assertEquals( 10, \has_action( 'plugins_loaded', array( $this->i18n_controller, 'load_text_domain' ) ) );
@@ -86,18 +93,7 @@ class PluginTest extends WP_UnitTestCase {
 		// A very high PHP version requirement to force the failure.
 		$this->plugin_data['RequiresPHP'] = '999';
 
-		$this->plugin = new Plugin( 
-			$this->plugin_data, 
-			$this->base_name,
-			$this->migration_manager,
-			$this->i18n_controller, 
-			$this->asset_controller,
-			$this->settings_controller,
-			$this->rest_settings_controller,
-			$this->rest_onboarding_controller,
-			$this->rest_payment_controller,
-			$this->rest_log_controller
-		);
+		$this->setup_plugin_instance();
 
 		$this->plugin->activate();
 
@@ -110,18 +106,7 @@ class PluginTest extends WP_UnitTestCase {
 		// A very high WP version requirement to force the failure.
 		$this->plugin_data['RequiresWP'] = '999';
 
-		$this->plugin = new Plugin( 
-			$this->plugin_data, 
-			$this->base_name,
-			$this->migration_manager,
-			$this->i18n_controller, 
-			$this->asset_controller,
-			$this->settings_controller,
-			$this->rest_settings_controller,
-			$this->rest_onboarding_controller,
-			$this->rest_payment_controller,
-			$this->rest_log_controller
-		);
+		$this->setup_plugin_instance();
 
 		$this->plugin->activate();
 
@@ -134,18 +119,7 @@ class PluginTest extends WP_UnitTestCase {
 		// A very high WP version requirement to force the failure.
 		$this->plugin_data['RequiresWC'] = '999';
 
-		$this->plugin = new Plugin( 
-			$this->plugin_data, 
-			$this->base_name,
-			$this->migration_manager,
-			$this->i18n_controller, 
-			$this->asset_controller,
-			$this->settings_controller,
-			$this->rest_settings_controller,
-			$this->rest_onboarding_controller,
-			$this->rest_payment_controller,
-			$this->rest_log_controller
-		);
+		$this->setup_plugin_instance();
 
 		$this->plugin->activate();
 
