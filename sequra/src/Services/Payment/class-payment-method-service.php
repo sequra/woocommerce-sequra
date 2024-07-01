@@ -207,12 +207,4 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		}
 		return false;
 	}
-
-	
-	/**
-	 * Get checkout form
-	 */
-	public function get_checkout_form(): string {
-		return ''; // TODO: Implement get_checkout_form() method.
-	}
 }

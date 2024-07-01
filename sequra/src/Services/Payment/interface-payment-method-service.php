@@ -33,9 +33,4 @@ interface Interface_Payment_Method_Service {
 	 * Check if the payment method data matches a valid payment method.
 	 */
 	public function is_payment_method_data_valid( Payment_Method_Data $data ): bool;
-	
-	/**
-	 * Get checkout form
-	 */
-	public function get_checkout_form(): string;
 }
