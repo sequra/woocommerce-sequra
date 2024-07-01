@@ -84,7 +84,6 @@ class Plugin {
 		add_filter( 'woocommerce_payment_gateways', array( $payment_controller, 'register_gateway_classes' ) );
 		add_action( 'woocommerce_blocks_loaded', array( $payment_controller, 'register_gateway_gutenberg_block' ) );
 		
-		// add_action( 'woocommerce_receipt_sequra', array( $payment_controller, 'receipt_page' ) );
 		add_action( 'woocommerce_thankyou_order_received_text', array( $payment_controller, 'order_received_text' ), 10, 2 );
 		add_filter( 'woocommerce_order_get_payment_method_title', array( $payment_controller, 'order_get_payment_method_title' ), 10, 2 );
 	}

@@ -82,38 +82,6 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	}
 
 	/**
-	 * Append content to the bottom of the receipt page
-	 */
-	public function receipt_page( int $order_id ): void {
-		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-
-		$order = wc_get_order( $order_id );
-
-		if ( ! $order instanceof WC_Order ) {
-			$this->logger->log_error( 'Order not found', __FUNCTION__, __CLASS__ );
-			return;
-		}
-
-		/**
-		 * TODO: Check the current usage of this filter in the existent integrations because the current implementation doesn't save settings inside the payment gateway.
-		 * Filter the options to be sent to seQura if needed
-		 * 
-		 * @since 2.0.0
-		 * */
-		$args = apply_filters(
-			'wc_sequra_pumbaa_options', 
-			array(
-				'product'  => $this->order_service->get_product( $order ),
-				'campaign' => $this->order_service->get_campaign( $order ),
-			), 
-			$order,
-			array() 
-		);
-
-		wc_get_template( 'front/receipt_page.php', $args, '', $this->templates_path );
-	}
-
-	/**
 	 * Append text after the thank you message on the order received page
 	 */
 	public function order_received_text( string $text, mixed $order ): string {

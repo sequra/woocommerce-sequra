@@ -33,11 +33,6 @@ interface Interface_Payment_Controller {
 	 * Register the payment gateway block class
 	 */
 	public function register_gateway_gutenberg_block_class( PaymentMethodRegistry $payment_method_registry ): void;
-	
-	/**
-	 * Append content to the bottom of the receipt page
-	 */
-	public function receipt_page( int $order_id ): void;
 
 	/**
 	 * Append text after the thank you message on the order received page

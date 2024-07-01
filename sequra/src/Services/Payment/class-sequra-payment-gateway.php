@@ -110,8 +110,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'redirect_to_payment' ) );
 
 		// TODO: Declare webhooks for IPN and other events. Use POST allways.
-		// add_action( 'woocommerce_api_sequra_webhook', array( $this, 'webhook' ) );
-		// add_action( 'woocommerce_api_' . $this->payment_service->get_redirect_to_payment_webhook(), array( $this, 'handle_redirect_to_payment_webhook' ) );
+		// add_action( 'woocommerce_api_sequra_webhook', array( $this, 'webhook' ) );.
 
 		/**
 		 * Action hook to allow plugins to run when the class is loaded.
