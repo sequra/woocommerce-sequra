@@ -94,19 +94,6 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 			return;
 		}
 
-		// $options = $this->get_valid_product_campaign();
-		// // phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		// $identity_form = $this->helper->get_identity_form(
-		// 	// phpcs:enable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable 
-		// **
-		// * Filter the options to be sent to seQura if needed
-		// * 
-		// * @since 2.0.0
-		// * */
-		// apply_filters( 'wc_sequra_pumbaa_options', $options, $order, $this->settings ),
-		// $order
-		// );
-
 		/**
 		 * TODO: Check the current usage of this filter in the existent integrations because the current implementation doesn't save settings inside the payment gateway.
 		 * Filter the options to be sent to seQura if needed
@@ -123,9 +110,6 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 			array() 
 		);
 
-		$args['identity_form'] = $identity_form;
-
-		// TODO: finish this.
 		wc_get_template( 'front/receipt_page.php', $args, '', $this->templates_path );
 	}
 
