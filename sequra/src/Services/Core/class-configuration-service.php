@@ -21,6 +21,13 @@ use WP_Site;
 class Configuration_Service extends Configuration {
 	
 	/**
+	 * Marketplace version.
+	 *
+	 * @var ?string
+	 */
+	private $marketplace_version;
+
+	/**
 	 * Retrieves the store ID.
 	 */
 	public function get_store_id(): string {
@@ -89,6 +96,11 @@ class Configuration_Service extends Configuration {
 	 * Version published in the marketplace.
 	 */
 	public function get_marketplace_version(): string {
+
+		if ( null !== $this->marketplace_version ) {
+			return $this->marketplace_version;
+		}
+
 		if ( ! function_exists( 'plugins_api' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 		}
@@ -103,7 +115,8 @@ class Configuration_Service extends Configuration {
 			return '';
 		}
 
-		return $response->version;
+		$this->marketplace_version = $response->version;
+		return $this->marketplace_version;
 	}
 
 	/**
@@ -125,7 +138,7 @@ class Configuration_Service extends Configuration {
 	 */
 	public function get_stores(): array {
 		$stores = array();
-		if ( function_exists( 'get_sites' ) && class_exists( 'WP_Site_Query' ) ) {
+		if ( function_exists( 'get_sites' ) ) {
 			/**
 			 * Available sites
 			 *

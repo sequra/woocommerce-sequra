@@ -184,8 +184,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			),
 			'integration'       => array(
 				'authToken'    => '', // TODO: Add the token?
-				'isMultistore' => false, // TODO: this must be true for multi-site installations.
-				'hasVersion'   => true, // TODO: this must be true if the current version is not the latest.
+				'isMultistore' => count( $this->configuration->get_stores() ) > 1,
+				'hasVersion'   => version_compare( $this->configuration->get_marketplace_version(), $this->configuration->get_module_version(), '>' ),
 			),
 			'generalSettings'   => array(
 				'useHostedPage'               => false,
