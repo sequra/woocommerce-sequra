@@ -9,7 +9,6 @@
 namespace SeQura\WC\Controllers\Hooks\Payment;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-use WC_Order;
 
 /**
  * Respond to payment hooks

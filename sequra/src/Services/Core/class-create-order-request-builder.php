@@ -395,8 +395,25 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get platform payload
 	 */
 	public static function platform(): Platform {
+		/**
+		 * WooCommerce data
+		 *
+		 * @var array<string, string>
+		 */
 		$woo = ServiceRegister::getService( 'woocommerce.data' );
-		$sq  = ServiceRegister::getService( 'plugin.data' );
+		
+		/**
+		 * Plugin data
+		 * 
+		 * @var array<string, string>
+		 */
+		$sq = ServiceRegister::getService( 'plugin.data' );
+		
+		/**
+		 * Environment data
+		 * 
+		 * @var array<string, string>
+		 */
 		$env = ServiceRegister::getService( 'environment.data' );
 
 		/**

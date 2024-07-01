@@ -168,7 +168,7 @@ class Configuration_Service extends Configuration {
 			->toArray();
 
 			return $config['password'] ?? '';
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return '';
 		}
 	}
@@ -181,8 +181,8 @@ class Configuration_Service extends Configuration {
 	public function get_order_statuses(): array {
 		try {
 			$order_status_service = ServiceRegister::getService( OrderStatusSettingsService::class );
-			return $order_status_service->getOrderStatusSettings();
-		} catch ( \Throwable ) {
+			return $order_status_service->getOrderStatusSettings(); // @phpstan-ignore-line
+		} catch ( \Throwable $e ) {
 			return array();
 		}
 	}
@@ -194,7 +194,7 @@ class Configuration_Service extends Configuration {
 		try {
 			$config = $this->get_general_settings();
 			return ! empty( $config['enabledForServices'] );
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return false;
 		}
 	}
@@ -207,10 +207,10 @@ class Configuration_Service extends Configuration {
 			$config = $this->get_general_settings();
 			// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
 			$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-			return ! isset( $config['allowedIPAddresses'] ) 
+			return ( ! isset( $config['allowedIPAddresses'] ) || ! is_array( $config['allowedIPAddresses'] ) ) 
 			|| 0 === count( $config['allowedIPAddresses'] ) 
 			|| in_array( $remote_addr, $config['allowedIPAddresses'], true );
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return true;
 		}
 	}
@@ -221,7 +221,7 @@ class Configuration_Service extends Configuration {
 		try {
 			$config = $this->get_general_settings();
 			return ! empty( $config['allowFirstServicePaymentDelay'] );
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return false;
 		}
 	}
@@ -233,7 +233,7 @@ class Configuration_Service extends Configuration {
 		try {
 			$config = $this->get_general_settings();
 			return ! empty( $config['allowServiceRegItems'] );
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return false;
 		}
 	}
@@ -245,7 +245,7 @@ class Configuration_Service extends Configuration {
 		try {
 			$config = $this->get_general_settings();
 			return $config['defaultServicesEndDate'] ?? 'PY1';
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return 'PY1';
 		}
 	}
@@ -262,7 +262,7 @@ class Configuration_Service extends Configuration {
 				return $config['excludedProducts'];
 			}
 			return array();
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return array();
 		}
 	}
@@ -279,7 +279,7 @@ class Configuration_Service extends Configuration {
 				return array_map( 'absint', $config['excludedCategories'] );
 			}
 			return array();
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return array();
 		}
 	}
@@ -288,6 +288,8 @@ class Configuration_Service extends Configuration {
 	 * Get general settings as array
 	 * 
 	 * @throws Throwable
+	 * 
+	 * @return array<string, mixed>
 	 */
 	protected function get_general_settings(): array {
 		return AdminAPI::get()

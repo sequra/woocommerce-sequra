@@ -7,7 +7,7 @@
 
 namespace SeQura\WC\Dto;
 
-use Throwable;
+use ValueError;
 
 /**
  * DTO.
@@ -16,17 +16,19 @@ abstract class Dto {
 
 	/**
 	 * Decode a raw string into a DTO instance. By default, assumes that the raw string is a JSON string.
+	 *
+	 * @return static|null
 	 */
-	public static function decode( string $raw ): ?self {
+	public static function decode( string $raw ) {
 		try {
 			$data = json_decode( $raw, true );
-		} catch ( Throwable ) {
+		} catch ( ValueError $e ) { // @phpstan-ignore-line
 			return null;
 		}
 		if ( ! is_array( $data ) ) {
 			return null;
 		}
-		$instance = new static();
+		$instance = new static(); // @phpstan-ignore-line
 		foreach ( $data as $key => $value ) {
 			if ( property_exists( $instance, $key ) ) {
 				$instance->$key = $value;
@@ -37,12 +39,15 @@ abstract class Dto {
 
 	/**
 	 * Create a DTO instance from an array.
+	 * 
+	 * @param array<string, mixed> $data
+	 * @return static|null
 	 */
-	public static function from_array( array $data ): ?self {
+	public static function from_array( array $data ) {
 		if ( ! is_array( $data ) ) {
 			return null;
 		}
-		$instance = new static();
+		$instance = new static(); // @phpstan-ignore-line
 		foreach ( $data as $key => $value ) {
 			if ( property_exists( $instance, $key ) ) {
 				$instance->$key = $value;
@@ -53,6 +58,8 @@ abstract class Dto {
 
 	/**
 	 * Convert the DTO instance into an array.
+	 * 
+	 * @return array<string, mixed>
 	 */
 	public function to_array(): array {
 		return (array) $this;

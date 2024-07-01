@@ -47,7 +47,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 * Get customer date of birth
 	 */
 	public function get_date_of_birth( int $customer_id ): string {
-		return (string) get_user_meta( $customer_id, self::META_KEY_DATE_OF_BIRTH, true );
+		return strval( get_user_meta( $customer_id, self::META_KEY_DATE_OF_BIRTH, true ) );
 	}
 
 	/**

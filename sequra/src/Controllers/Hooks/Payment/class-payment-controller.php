@@ -13,7 +13,6 @@ use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
 use WC_Order;
@@ -22,13 +21,6 @@ use WC_Order;
  * Respond to payment hooks
  */
 class Payment_Controller extends Controller implements Interface_Payment_Controller {
-
-	/**
-	 * Payment service
-	 *
-	 * @var Interface_Payment_Service
-	 */
-	private $payment_service;
 
 	/**
 	 * Order service
@@ -42,13 +34,11 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	 */
 	public function __construct( 
 		Interface_Logger_Service $logger, 
-		string $templates_path, 
-		Interface_Payment_Service $payment_service,
+		string $templates_path,
 		Interface_Order_Service $order_service 
 	) {
 		parent::__construct( $logger, $templates_path );
-		$this->payment_service = $payment_service;
-		$this->order_service   = $order_service;
+		$this->order_service = $order_service;
 	}
 
 	/**

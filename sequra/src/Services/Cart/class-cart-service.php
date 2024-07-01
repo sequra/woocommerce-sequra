@@ -11,7 +11,6 @@ namespace SeQura\WC\Services\Cart;
 use DateTime;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
@@ -101,7 +100,7 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get seQura cart info data from session. If not exists, then initialize it.
 	 */
-	public function get_cart_info_from_session(): Cart_Info {
+	public function get_cart_info_from_session(): ?Cart_Info {
 		$_session = WC()->session;
 		$raw_data = $_session->get( self::SESSION_CART_INFO, null );
 		if ( $raw_data ) {
@@ -143,9 +142,9 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get item instance
 	 *
-	 * @return <ProductItem|ServiceItem>
+	 * @return ProductItem|ServiceItem
 	 */
-	private function get_item( WC_Product $product, float $total_price, int $qty, mixed $item ): Item {
+	private function get_item( WC_Product $product, float $total_price, int $qty, mixed $item ) {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = wp_strip_all_tags( $product->get_title() );
 		if ( $this->configuration->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
@@ -312,7 +311,7 @@ class Cart_Service implements Interface_Cart_Service {
 				}
 
 				$items[] = new HandlingItem(
-					$fee->name,
+					$fee->name ?? 'handling',
 					esc_html__( 'Handling cost', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
@@ -393,7 +392,7 @@ class Cart_Service implements Interface_Cart_Service {
 				}
 
 				$items[] = new DiscountItem(
-					$fee->name,
+					$fee->name ?? 'discount',
 					esc_html__( 'Discount', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
@@ -499,7 +498,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 * @param array<string, mixed> $cart_item Cart item
 	 */
 	private function get_product_id_from_item( $cart_item ): int {
-		return isset( $cart_item['product_id'] ) ? (int) $cart_item['product_id'] : 0;
+		return isset( $cart_item['product_id'] ) ? intval( $cart_item['product_id'] ) : 0;
 	}
 
 	/**

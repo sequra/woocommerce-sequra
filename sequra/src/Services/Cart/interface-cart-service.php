@@ -8,7 +8,11 @@
 
 namespace SeQura\WC\Services\Cart;
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\WC\Dto\Cart_Info;
 use WC_Order;
 use WC_Product;
@@ -26,7 +30,7 @@ interface Interface_Cart_Service {
 	/**
 	 * Get seQura cart info data from session. If not exists, then initialize it.
 	 */
-	public function get_cart_info_from_session(): Cart_Info;
+	public function get_cart_info_from_session(): ?Cart_Info;
 
 	/**
 	 * Attempt to clear seQura cart info data from session. 

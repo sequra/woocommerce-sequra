@@ -19,7 +19,7 @@ interface Interface_Product_Service {
 	/**
 	 * Get desired first charge date for a product
 	 * 
-	 * @param int|WC_Product $product_id The product ID or product object
+	 * @param int|WC_Product $product The product ID or product object
 	 */
 	public function get_desired_first_charge_date( $product ): ?DateTime;
 

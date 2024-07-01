@@ -87,7 +87,7 @@ class Order_Service implements Interface_Order_Service {
 			return new DeliveryMethod( $rate->label, null, $rate->id );
 		}
 		
-		$shipping_methods = current( $order->get_shipping_methods() );
+		$shipping_method = current( $order->get_shipping_methods() );
 
 		return new DeliveryMethod(
 			$shipping_method['name'] ?? 'default',

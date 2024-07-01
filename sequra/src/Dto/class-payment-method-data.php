@@ -44,8 +44,10 @@ class Payment_Method_Data extends Dto {
 
 	/**
 	 * Decode a raw string into a DTO instance. Assumes that the raw string is a base64 encoded JSON string.
+	 * 
+	 * @return static|null
 	 */
-	public static function decode( string $raw ): ?self {
+	public static function decode( string $raw ): mixed {
 		$decoded = base64_decode( $raw );
 		if ( ! $decoded ) {
 			return null;

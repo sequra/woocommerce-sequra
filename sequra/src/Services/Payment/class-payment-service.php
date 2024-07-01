@@ -91,6 +91,6 @@ class Payment_Service implements Interface_Payment_Service {
 	 * Sign the string using HASH_ALGO and merchant's password
 	 */
 	public function sign( string $message ): string {
-		return hash_hmac( 'sha256', $message ?? '', $this->configuration->get_password() );
+		return hash_hmac( 'sha256', $message, $this->configuration->get_password() );
 	}
 }

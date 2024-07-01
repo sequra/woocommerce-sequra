@@ -3,7 +3,7 @@
  * Receipt page for seQura payment gateway.
  *
  * @package    SeQura/WC
- * @var array $args The arguments. Must contain:
+ * @var array<string, string> $args The arguments. Must contain:
  *  - string 'form' The identification form HTML code.
  */
 

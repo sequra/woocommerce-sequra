@@ -8,6 +8,10 @@
 
 namespace SeQura\WC\Services\Payment;
 
+if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+	return;
+}
+
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Payment_Method_Data;
@@ -88,7 +92,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
 		$this->templates_path         = ServiceRegister::getService( 'plugin.templates_path' );
 		$this->logger                 = ServiceRegister::getService( Interface_Logger_Service::class );
-		$this->id                     = $this->payment_service->get_payment_gateway_id();
+		$this->id                     = $this->payment_service->get_payment_gateway_id(); // @phpstan-ignore-line
 		// TODO: URL of the icon that will be displayed on checkout page near your gateway name.
 		$this->icon               = 'https://cdn.prod.website-files.com/62b803c519da726951bd71c2/62b803c519da72c35fbd72a2_Logo.svg'; 
 		$this->has_fields         = true;

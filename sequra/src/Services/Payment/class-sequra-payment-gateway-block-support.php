@@ -8,6 +8,10 @@
 
 namespace SeQura\WC\Services\Payment;
 
+if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+	return;
+}
+
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
 /**
@@ -44,15 +48,24 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	private $assets_url;
 
 	/**
+	 * Version.
+	 *
+	 * @var string
+	 */
+	private $version;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		string $assets_dir_path, 
-		string $assets_url
+		string $assets_url,
+		string $version
 	) {
 		$this->assets_dir_path = $assets_dir_path;
 		$this->assets_url      = $assets_url;
 		$this->name            = 'sequra';
+		$this->version         = $version;
 	}
 
 	/**
@@ -85,7 +98,7 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 		}
 		
 		$asset        = require $asset_path; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
-		$version      = isset( $asset['version'] ) ? $asset['version'] : $version;
+		$version      = isset( $asset['version'] ) ? $asset['version'] : $this->version;
 		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : $dependencies;
 	
 		wp_register_script( 
