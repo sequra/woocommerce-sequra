@@ -9,6 +9,9 @@
 namespace SeQura\WC\Services\Core;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Models\OrderStatusMapping;
+use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
+use SeQura\Core\Infrastructure\ServiceRegister;
 use Throwable;
 use WP_Site;
 
@@ -154,6 +157,20 @@ class Configuration_Service extends Configuration {
 			return $config['password'] ?? '';
 		} catch ( Throwable ) {
 			return '';
+		}
+	}
+
+	/**
+	 * Get order status mappings.
+	 *
+	 * @return OrderStatusMapping[]
+	 */
+	public function get_order_statuses(): array {
+		try {
+			$order_status_service = ServiceRegister::getService( OrderStatusSettingsService::class );
+			return $order_status_service->getOrderStatusSettings();
+		} catch ( \Throwable ) {
+			return array();
 		}
 	}
 

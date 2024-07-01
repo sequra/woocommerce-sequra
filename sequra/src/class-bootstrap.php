@@ -556,7 +556,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Order_Service::class ] ) ) {
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
 						Reg::getService( Interface_Payment_Service::class ),
-						Reg::getService( Interface_Pricing_Service::class )
+						Reg::getService( Interface_Pricing_Service::class ),
+						Reg::getService( OrderStatusSettingsService::class )
 					);
 				}
 				return self::$cache[ Interface_Order_Service::class ];

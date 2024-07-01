@@ -10,8 +10,9 @@ namespace SeQura\WC\Services\Order;
 
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
+use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
+use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\WC\Dto\Cart_Info;
-use SeQura\WC\Dto\Delivery_Method;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
@@ -44,14 +45,23 @@ class Order_Service implements Interface_Order_Service {
 	private $pricing_service;
 
 	/**
+	 * Order status service
+	 *
+	 * @var OrderStatusSettingsService
+	 */
+	private $order_status_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		Interface_Payment_Service $payment_service,
-		Interface_Pricing_Service $pricing_service
+		Interface_Pricing_Service $pricing_service,
+		OrderStatusSettingsService $order_status_service,
 	) {
-		$this->payment_service = $payment_service;
-		$this->pricing_service = $pricing_service;
+		$this->payment_service      = $payment_service;
+		$this->pricing_service      = $pricing_service;
+		$this->order_status_service = $order_status_service;
 	}
 	
 	/**
@@ -210,6 +220,20 @@ class Order_Service implements Interface_Order_Service {
 	public function get_previous_orders( int $customer_id ): array {
 		$previous_orders = array();
 
+		$order_statuses = $this->order_status_service->getOrderStatusSettings();
+
+		if ( ! $order_statuses ) {
+			return $previous_orders;
+		}
+
+		$statuses = array( 'wc-completed' );
+		foreach ( $order_statuses as $order_status ) {
+			if ( $order_status->getSequraStatus() === OrderStates::STATE_APPROVED ) {
+				// Use the default status if the shop status is not set.
+				$statuses[] = empty( $order_status->getShopStatus() ) ? 'wc-processing' : $order_status->getShopStatus();
+			}
+		}
+
 		/**
 		 * Get previous orders
 		 *
@@ -219,7 +243,7 @@ class Order_Service implements Interface_Order_Service {
 			array(
 				'limit'    => -1,
 				'customer' => $customer_id,
-				'status'   => array( 'wc-processing', 'wc-completed' ), // TODO: Does this should use the status from the plugin settings?
+				'status'   => $statuses,
 			) 
 		);
 
