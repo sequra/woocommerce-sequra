@@ -108,7 +108,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		$this->has_fields = true;
 		if ( ! self::$initialized ) {
 			// Hooks.
-			add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );// TODO: migrate this, is not working with Gutenberg based themes.
+			add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
 			add_action(
 				'woocommerce_update_options_payment_gateways_' . $this->id,
 				array(
