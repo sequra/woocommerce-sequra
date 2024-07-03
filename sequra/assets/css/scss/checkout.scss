@@ -39,29 +39,30 @@
         border-width: 1px;
     }
 
-    >label{
+    > label {
         display: flex;
         flex-wrap: nowrap;
         width: 100%;
         font-size: 0.9em;
     }
-    &__icon{
+    &__icon {
         order: 1;
-        height: 40px!important;
+        height: auto !important;
+        width: 64px !important;
     }
-    &__description{
+    &__description {
         display: grid;
         flex-grow: 1;
     }
-    &__name{
+    &__name {
         font-weight: 700;
     }
 }
-.sequra-block__description{
+.sequra-block__description {
     margin-bottom: 1em;
     display: block;
 
-    &+.sequra-payment-method::after{
+    & + .sequra-payment-method::after {
         display: none;
     }
 }
