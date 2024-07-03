@@ -120,9 +120,8 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 		$this->gateway->payment_fields();
 		$payment_fields = ob_get_clean();
 		return array(
-			'title'       => 'seQura',
+			'title'       => $this->gateway->get_title(),
 			'description' => $payment_fields,
-			'icon'        => $this->gateway->icon,
 		);
 	}
 }

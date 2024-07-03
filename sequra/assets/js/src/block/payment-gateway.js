@@ -10,7 +10,7 @@ const label = decodeEntities(settings.title)
 
 const Content = (props) => {
     const { eventRegistration, emitResponse } = props;
-    const { onPaymentProcessing, onCheckoutBeforeProcessing } = eventRegistration;
+    const { onPaymentProcessing } = eventRegistration;
 
     useEffect(() => {
         const unsubscribe = onPaymentProcessing(async () => {
@@ -37,16 +37,6 @@ const Content = (props) => {
         onPaymentProcessing,
     ]);
 
-    useEffect(() => {
-        const unsubscribe = onCheckoutBeforeProcessing(async () => {
-            debugger
-            // TODO: add iframe to the checkout
-        });
-        return () => unsubscribe();
-    }, [
-        onCheckoutBeforeProcessing
-    ]);
-
     return <div dangerouslySetInnerHTML={{ __html: decodeEntities(settings.description || '') }} />
 }
 
@@ -54,7 +44,7 @@ const Label = () => {
     return (
         <span style={{ width: '100%' }}>
             {label}
-            <img src={decodeEntities(settings.icon)} alt={label} style={{ float: 'right', marginRight: '20px' }} />
+            {/* <img src={decodeEntities(settings.icon)} alt={label} style={{ float: 'right', marginRight: '20px' }} /> */}
         </span>
     )
 }

@@ -101,11 +101,9 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->templates_path         = ServiceRegister::getService( 'plugin.templates_path' );
 		$this->logger                 = ServiceRegister::getService( Interface_Logger_Service::class );
 		$this->id                     = $this->payment_service->get_payment_gateway_id(); // @phpstan-ignore-line
-		// TODO: URL of the icon that will be displayed on checkout page near your gateway name.
-		$this->icon               = 'https://cdn.prod.website-files.com/62b803c519da726951bd71c2/62b803c519da72c35fbd72a2_Logo.svg'; 
-		$this->has_fields         = true;
-		$this->method_title       = __( 'seQura', 'sequra' );
-		$this->method_description = __( 'seQura payment method\'s configuration', 'sequra' );
+		$this->has_fields             = true;
+		$this->method_title           = __( 'seQura', 'sequra' );
+		$this->method_description     = __( 'seQura payment method\'s configuration', 'sequra' );
 
 		$this->supports = array(
 			'products',
