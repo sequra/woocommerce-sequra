@@ -1,4 +1,5 @@
 import { decodeEntities } from '@wordpress/html-entities';
+import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 
 const { registerPaymentMethod } = window.wc.wcBlocksRegistry
@@ -20,7 +21,7 @@ const Content = (props) => {
             if (!data) {
                 return {
                     type: emitResponse.responseTypes.ERROR,
-                    message: 'Please select a payment method.', // TODO: translate
+                    message: __('Please select a payment method.', 'sequra'),
                 };
             }
             return {
