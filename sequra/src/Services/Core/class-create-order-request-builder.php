@@ -9,21 +9,17 @@
 namespace SeQura\WC\Services\Core;
 
 use Exception;
-use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\CreateOrderRequest;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\EventsWebhook;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Gui;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
-use SeQura\WC\Dto\Registration_Item;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
@@ -32,7 +28,6 @@ use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Order;
-use WC_Order_Item;
 
 /**
  * Wrapper to ease the read and write of configuration values.
@@ -161,8 +156,29 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			$this->delivery_address(),
 			$this->invoice_address(),
 			$this->gui(),
-			null, // merchantReference.
+			$this->merchant_reference(),
 			null, // trackings.
+		);
+	}
+
+	/**
+	 * Get the merchant reference.
+	 */
+	private function merchant_reference(): ?MerchantReference {
+		$merchant_reference = null;
+		if ( $this->current_order ) {
+			$merchant_reference = new MerchantReference( $this->current_order->get_id() );
+		}
+
+		/**
+		* Filter the merchant_reference.
+		* TODO: document this hook
+		*
+		* @since 3.0.0
+		*/
+		return apply_filters(
+			'sequra_create_order_request_merchant_reference',
+			$merchant_reference
 		);
 	}
 
@@ -216,9 +232,10 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		$notification_parameters = null;
 		$return_url              = null;
 		$events_webhook          = null;
+		$store_id                = $this->configuration->get_store_id();
 
 		if ( $this->current_order ) {
-			$notify_url = $this->order_service->get_notify_url( $this->current_order );
+			$notify_url = $this->order_service->get_ipn_url( $this->current_order, $store_id );
 			$_order     = strval( $this->current_order->get_id() );
 			$_signature = $this->payment_service->sign( $this->current_order->get_id() );
 
@@ -226,15 +243,17 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 				'order'     => $_order,
 				'signature' => $_signature,
 				'result'    => '0',
+				'storeId'   => $store_id,
 			);
 
 			$return_url = $this->order_service->get_return_url( $this->current_order );
 
 			$events_webhook = new EventsWebhook(
-				$notify_url,
+				$this->order_service->get_event_url( $this->current_order, $store_id ),
 				array(
 					'order'     => $_order,
 					'signature' => $_signature,
+					'storeId'   => $store_id,
 				) 
 			);
 		}

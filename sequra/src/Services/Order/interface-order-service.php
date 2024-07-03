@@ -124,9 +124,15 @@ interface Interface_Order_Service {
 	/**
 	 * Get payment gateway webhook identifier
 	 */
-	public function get_notify_url( WC_Order $order ): string;
+	public function get_ipn_url( WC_Order $order, string $store_id ): string;
+
 	/**
 	 * Get payment gateway webhook identifier
 	 */
 	public function get_return_url( WC_Order $order ): string;
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_event_url( WC_Order $order, string $store_id ): string;
 }

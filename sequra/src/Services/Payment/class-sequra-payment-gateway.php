@@ -12,12 +12,14 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 	return;
 }
 
+use SeQura\Core\BusinessLogic\WebhookAPI\WebhookAPI;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
+use Throwable;
 use WC_Order;
 use WC_Payment_Gateway;
 
@@ -86,7 +88,13 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 */
 		do_action( 'woocommerce_sequra_before_load', $this );
 
-		$this->payment_service        = ServiceRegister::getService( Interface_Payment_Service::class );
+		/**
+		 * Payment service
+		 *
+		 * @var Interface_Payment_Service $payment_service
+		 */
+		$payment_service              = ServiceRegister::getService( Interface_Payment_Service::class );
+		$this->payment_service        = $payment_service;
 		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
 		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
 		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
@@ -114,7 +122,9 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'redirect_to_payment' ) );
 
 		// TODO: Declare webhooks for IPN and other events. Use POST always.
-		// add_action( 'woocommerce_api_sequra_webhook', array( $this, 'webhook' ) );.
+		add_action( 'woocommerce_api_' . $this->payment_service->get_ipn_webhook(), array( $this, 'process_ipn' ) );
+		add_action( 'woocommerce_api_' . $this->payment_service->get_event_webhook(), array( $this, 'process_event' ) );
+		add_action( 'woocommerce_api_' . $this->payment_service->get_return_webhook(), array( $this, 'handle_return' ) );
 
 		/**
 		 * Action hook to allow plugins to run when the class is loaded.
@@ -244,13 +254,147 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		}
 		
 		return Payment_Method_Data::decode( sanitize_text_field( $_POST[ self::POST_SQ_PAYMENT_METHOD_DATA ] ) );
+		//phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
-	 * Webhook
+	 * Webhook to process IPN callback
 	 */
-	public function webhook() {
-		// TODO: Implement webhook() method.
+	public function process_ipn() {
+		$this->handle_webhook( $this->payment_service->get_ipn_webhook() );
+	}
+
+	/**
+	 * Webhook to process handle return url
+	 */
+	public function handle_return() {
+		
+		//phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['order'] ) ) {
+			return;
+		}
+
+		$order      = wc_get_order( absint( $_GET['order'] ) );
+		$return_url = $order instanceof WC_Order ? $order->get_checkout_order_received_url() : wc_get_endpoint_url( 'order-received', '', wc_get_checkout_url() );
+		//phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		/**
+		 * Filter hook to allow plugins to modify the return URL.
+		 *
+		 * @since 2.0.0
+		 */
+		$url = apply_filters( 'woocommerce_get_return_url', $return_url, $order );
+
+		if ( ! $order->is_paid() ) {
+			wc_add_notice(
+				__(
+					'<p>seQura is processing your request.</p>
+					<p>After a few minutes <b>you will get an email with your request result</b>.
+					seQura might contact you to get some more information.</p>
+					<p><b>Thanks for choosing seQura!</b>',
+					'sequra'
+				),
+				'notice'
+			);
+		}
+		wp_safe_redirect( $url, 302 );
+		exit;
+	}
+
+	/**
+	 * Prepare payload for the webhook request
+	 */
+	private function prepare_payload(): array {
+
+		$payload = array(
+			'signature'          => null,
+			'order_ref'          => '',
+			'product_code'       => '',
+			'sq_state'           => '',
+			'order_ref_1'        => '',
+			'approved_since'     => null,
+			'needs_review_since' => null,
+			// Add this fields to simplify the code, but they are not used in the current implementation.
+			'storeId'            => null,
+			'order'              => null,
+		);
+
+		$prefix = 'm_';
+
+		foreach ( $_POST as $key => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$payload_key = 'event' === $key ? 'sq_state' : ( str_starts_with( $key, $prefix ) ? substr( $key, strlen( $prefix ) ) : $key );
+			if ( ! array_key_exists( $payload_key, $payload ) ) {
+				continue;
+			}
+			$payload[ $payload_key ] = in_array( $payload_key, array( 'approved_since', 'needs_review_since', 'order' ), true ) ? 
+			intval( wp_unslash( $value ) ) :
+			sanitize_text_field( wp_unslash( $value ) );
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Validate payload and exit if it is invalid, giving a proper response
+	 */
+	private function die_on_invalid_payload( array $payload ): void {
+		if ( null === $payload['order'] || null === $payload['signature'] || null === $payload['storeId'] ) {
+			$this->logger->log_error( 'Bad request', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
+			status_header( 400 );// TODO: review this status code.
+			die( 'Bad request' );
+		}
+
+		if ( $this->payment_service->sign( $payload['order'] ) !== $payload['signature'] ) {
+			$this->logger->log_error( 'Bad signature', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
+			status_header( 498 ); // TODO: review this status code.
+			die( 'Bad signature' );
+		}
+
+		$order = wc_get_order( $payload['order'] );
+		if ( ! $order instanceof WC_Order ) {
+			$this->logger->log_error( 'No order found', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
+			status_header( 404 );// TODO: review this status code.
+			die( 'No order found id:' . esc_html( $payload['order'] ) );
+		}
+	}
+
+	/**
+	 * Handle IPN and Event webhooks requests
+	 */
+	private function handle_webhook( string $webhook_identifier ) {
+		$payload = $this->prepare_payload();
+		$this->die_on_invalid_payload( $payload );
+
+		try {
+			$response = WebhookAPI::webhookHandler( $payload['storeId'] )->handleRequest( $payload );
+			if ( ! $response->isSuccessful() ) {
+				$error = $response->toArray();
+				$msg   = isset( $error['errorMessage'] ) ? $error['errorMessage'] : '';
+				$this->logger->log_error( $msg, __FUNCTION__, __CLASS__ );
+				
+				status_header( ( isset( $error['errorCode'] ) && 409 === $error['errorCode'] ) ? 409 : 410 );
+				die( esc_html( $msg ) );
+			}
+
+			/**
+			* Action hook fired when a webhook is processed.
+			* 
+			* @since 2.0.0
+			*/
+			do_action( $webhook_identifier . '_process_webhook', wc_get_order( $payload['order'] ), $this );
+			exit();
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			status_header( 500 );
+			die( 'Internal error' );
+		}
+	}
+
+	/**
+	 * Webhook to process events
+	 */
+	public function process_event() {
+		$this->handle_webhook( $this->payment_service->get_event_webhook() );
 	}
 
 	/**

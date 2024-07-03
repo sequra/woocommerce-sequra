@@ -31,12 +31,14 @@ use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface
 use SeQura\Core\BusinessLogic\Domain\Order\Builders\CreateOrderRequestBuilder;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
+use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodsService;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
+use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\Core\Infrastructure\Logger\Interfaces\DefaultLoggerAdapter;
@@ -82,6 +84,7 @@ use SeQura\WC\Services\Core\Order_Status_Service;
 use SeQura\WC\Services\Core\Order_Status_Settings_Service;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
 use SeQura\WC\Services\Core\Shop_Logger_Adapter;
+use SeQura\WC\Services\Core\Shop_Order_Service;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
 use SeQura\WC\Services\Shopper\Shopper_Service;
@@ -596,6 +599,21 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Shopper_Service::class ] = new Shopper_Service();
 				}
 				return self::$cache[ Interface_Shopper_Service::class ];
+			}
+		);
+
+		// "Service of type "SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService" is not registered."
+		Reg::registerService(
+			ShopOrderService::class,
+			static function () {
+				if ( ! isset( self::$cache[ ShopOrderService::class ] ) ) {
+					self::$cache[ ShopOrderService::class ] = new Shop_Order_Service(
+						Reg::getService( OrderStatusSettingsService::class ),
+						Reg::getService( SeQuraOrderRepositoryInterface::class ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ ShopOrderService::class ];
 			}
 		);
 	}

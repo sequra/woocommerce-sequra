@@ -31,12 +31,17 @@ interface Interface_Payment_Service {
 	public function sign( string $message ): string;
 
 	/**
-	 * Get payment gateway webhook identifier
+	 * Get IPN webhook identifier
 	 */
-	public function get_payment_gateway_webhook(): string;
+	public function get_ipn_webhook(): string;
 
 	/**
-	 * Get redirect to payment webhook identifier
+	 * Get return URL webhook identifier
 	 */
-	public function get_redirect_to_payment_webhook(): string;
+	public function get_return_webhook(): string;
+
+	/**
+	 * Get event webhook identifier
+	 */
+	public function get_event_webhook(): string;
 }

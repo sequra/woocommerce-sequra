@@ -57,7 +57,7 @@ class Order_Service implements Interface_Order_Service {
 	public function __construct( 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
-		OrderStatusSettingsService $order_status_service,
+		OrderStatusSettingsService $order_status_service
 	) {
 		$this->payment_service      = $payment_service;
 		$this->pricing_service      = $pricing_service;
@@ -359,13 +359,28 @@ class Order_Service implements Interface_Order_Service {
 	}
 
 	/**
-	 * Get payment gateway webhook identifier
+	 * Get IPN webhook identifier
 	 */
-	public function get_notify_url( WC_Order $order ): string {
+	public function get_ipn_url( WC_Order $order, string $store_id ): string {
 		return add_query_arg(
 			array(
-				'order'  => '' . $order->get_id(),
-				'wc-api' => $this->payment_service->get_payment_gateway_webhook(),
+				'order'    => strval( $order->get_id() ),
+				'wc-api'   => $this->payment_service->get_ipn_webhook(),
+				'store_id' => $store_id,
+			),
+			home_url( '/' )
+		);
+	}
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_event_url( WC_Order $order, string $store_id ): string {
+		return add_query_arg(
+			array(
+				'order'    => strval( $order->get_id() ),
+				'wc-api'   => $this->payment_service->get_event_webhook(),
+				'store_id' => $store_id,
 			),
 			home_url( '/' )
 		);
@@ -376,8 +391,12 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function get_return_url( WC_Order $order ): string {
 		return add_query_arg(
-			array( 'sq_product' => 'SQ_PRODUCT_CODE' ),
-			$this->get_notify_url( $order )
+			array(
+				'order'      => strval( $order->get_id() ),
+				'sq_product' => 'SQ_PRODUCT_CODE',
+				'wc-api'     => $this->payment_service->get_return_webhook(),
+			),
+			home_url( '/' )
 		);
 	}
 
