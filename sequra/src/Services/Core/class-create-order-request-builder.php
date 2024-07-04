@@ -301,7 +301,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 				*/
 				$addresses_may_be_missing = apply_filters( 'sequra_merchant_options_addresses_may_be_missing', null );
 
-				if ( ! is_bool( $addresses_may_be_missing ) || null !== $addresses_may_be_missing ) {
+				if ( ! is_bool( $addresses_may_be_missing ) && null !== $addresses_may_be_missing ) {
 					$addresses_may_be_missing = null;
 				}
 

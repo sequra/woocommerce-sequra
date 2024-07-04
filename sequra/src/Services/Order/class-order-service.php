@@ -282,7 +282,11 @@ class Order_Service implements Interface_Order_Service {
 		 * @var WP_User $shopper
 		 */
 		$shopper = get_user_by( 'id', $order->get_customer_id() );
-		return $shopper ? gmdate( 'c', strtotime( $shopper->user_registered ) ) : null;
+		if ( ! $shopper instanceof WP_User ) {
+			return null;
+		}
+		$timestamp = strtotime( $shopper->user_registered );
+		return $timestamp ? gmdate( 'c', $timestamp ) : null;
 	}
 
 	/**
@@ -310,7 +314,7 @@ class Order_Service implements Interface_Order_Service {
 		 * @since 3.0.0
 		 */
 		$rating = apply_filters( 'sequra_get_shopper_rating', null, $order );
-		return ( is_int( $rating ) && 0 >= $rating && 100 <= $rating ) || null === $rating ? $rating : null;
+		return ( is_int( $rating ) && 0 <= $rating && 100 >= $rating ) || null === $rating ? $rating : null;
 	}
 
 	/**

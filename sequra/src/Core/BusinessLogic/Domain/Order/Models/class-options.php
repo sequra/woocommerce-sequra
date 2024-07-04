@@ -47,13 +47,15 @@ class Options extends CoreOptions {
 	 *
 	 * @return Options Returns a new Options instance.
 	 */
-	public static function fromArray( array $data ): Options {
+	public static function fromArray( array $data ): CoreOptions {
+		$desired_first_charge_on = self::getDataValue( $data, 'desired_first_charge_on' );
+
 		return new self(
-			self::getDataValue( $data, 'has_jquery', false ),
-			self::getDataValue( $data, 'uses_shipped_cart', false ),
-			self::getDataValue( $data, 'addresses_may_be_missing', false ),
-			self::getDataValue( $data, 'immutable_customer_data', false ),
-			self::getDataValue( $data, 'desired_first_charge_on', null )
+			boolval( self::getDataValue( $data, 'has_jquery' ) ),
+			boolval( self::getDataValue( $data, 'uses_shipped_cart' ) ),
+			boolval( self::getDataValue( $data, 'addresses_may_be_missing' ) ),
+			boolval( self::getDataValue( $data, 'immutable_customer_data' ) ),
+			empty( $desired_first_charge_on ) ? null : $desired_first_charge_on
 		);
 	}
 
