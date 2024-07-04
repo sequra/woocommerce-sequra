@@ -20,6 +20,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
@@ -277,24 +278,39 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 				null, // rejected_callback.
 				null, // partpayment_details_getter.
 				null, // approved_url.
-				null, // TODO: 'desired_first_charge_on' is the only option. Also is not supported by integration-core, so skip it.
+				$this->get_merchant_options(),
 				$events_webhook
 			)
 		);
 	}
 
 	/**
-	 * TODO: 'desired_first_charge_on' is the only option. Also is not supported by integration-core. This function is not used.
 	 * Get the merchant options.
 	 */
-	private function get_merchant_options(): ?array {
+	private function get_merchant_options(): ?Options {
 		$options = null;
 
 		if ( $this->configuration->allow_first_service_payment_delay() ) {
-			$desired_first_charge_on = $this->cart_service->get_desired_first_charge_on();
+			$desired_first_charge_on = $this->cart_service->get_desired_first_charge_on( $this->current_order );
 			if ( $desired_first_charge_on ) {
-				$options = array(
-					'desired_first_charge_on' => $desired_first_charge_on,
+				/**
+				* TODO: document this hook
+				* Allow modify the addresses_may_be_missing value.Accept null, true or false.
+				*
+				* @since 3.0.0
+				*/
+				$addresses_may_be_missing = apply_filters( 'sequra_merchant_options_addresses_may_be_missing', null );
+
+				if ( ! is_bool( $addresses_may_be_missing ) || null !== $addresses_may_be_missing ) {
+					$addresses_may_be_missing = null;
+				}
+
+				$options = new Options(
+					null, // has_jquery.
+					null, // uses_shipped_cart.
+					$addresses_may_be_missing, // addresses_may_be_missing.
+					null, // immutable_customer_data.
+					$desired_first_charge_on
 				);
 			}
 		}
@@ -378,15 +394,15 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 				$user_agent,
 				$this->order_service->get_first_name( $this->current_order, true ),
 				$this->order_service->get_last_name( $this->current_order, true ),
-				null, // title.
+				$this->order_service->get_shopper_title( $this->current_order ), // title.
 				$ref,
-				null, // dateOfBirth.
-				null, // TODO: nin.
+				$this->order_service->get_dob( $this->current_order ), // dateOfBirth.
+				$this->order_service->get_nin( $this->current_order ), // nin.
 				$this->order_service->get_company( $this->current_order, true ),
 				$this->order_service->get_vat( $this->current_order, true ), // vatNumber.
-				null, // createdAt.
-				null, // updatedAt.
-				null, // rating.
+				$this->order_service->get_shopper_created_at( $this->current_order, true ), // createdAt.
+				$this->order_service->get_shopper_updated_at( $this->current_order, true ), // updatedAt.
+				$this->order_service->get_shopper_rating( $this->current_order ), // rating.
 				null, // ninControl.
 				$this->order_service->get_previous_orders( $current_user_id ),
 				null, // vehicle.

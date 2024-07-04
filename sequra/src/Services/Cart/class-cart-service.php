@@ -11,8 +11,8 @@ namespace SeQura\WC\Services\Cart;
 use DateTime;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\RegistrationItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Dto\Cart_Info;
@@ -80,18 +80,38 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get closest desired first charge date from cart items
 	 */
-	public function get_desired_first_charge_on(): ?string {
-		if ( null === WC()->cart ) {
-			return null;
+	private function update_first_charge_on( int $product_id, ?string &$first_charge_on ) {
+		$date = $this->product_service->get_desired_first_charge_date( $product_id );
+		if ( $date ) {
+			$formatted_date  = $date->format( DateTime::ATOM );
+			$first_charge_on = $first_charge_on ? min( $first_charge_on, $formatted_date ) : $formatted_date;
 		}
+	}
 
+	/**
+	 * Get closest desired first charge date from cart items
+	 */
+	public function get_desired_first_charge_on( ?WC_Order $order = null ): ?string {
 		$first_charge_on = null;
-		foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
-			$product_id = $this->get_product_id_from_item( $cart_item );
-			$date       = $this->product_service->get_desired_first_charge_date( $product_id );
-			if ( $date ) {
-				$formatted_date  = $date->format( DateTime::ATOM );
-				$first_charge_on = $first_charge_on ? min( $first_charge_on, $formatted_date ) : $formatted_date;
+		if ( ! $order && null !== WC()->cart ) {
+			foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
+				$product_id = $this->get_product_id_from_item( $cart_item );
+				$this->update_first_charge_on( $product_id, $first_charge_on );
+			}
+		} elseif ( $order ) {
+			/**
+			 * Order item
+			 *
+			 * @var WC_Order_Item_Product $item
+			 */
+			foreach ( $order->get_items() as $item ) {
+				if ( ! $item instanceof WC_Order_Item_Product ) {
+					continue;
+				}
+				$product = $item->get_product();
+				if ( $product ) {
+					$this->update_first_charge_on( $product->get_id(), $first_charge_on );
+				}
 			}
 		}
 		return $first_charge_on;
@@ -123,7 +143,7 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get registration item instance
 	 */
-	private function get_registration_item( WC_Product $product, int $qty ): ?OtherPaymentItem {
+	private function get_registration_item( WC_Product $product, int $qty ): ?RegistrationItem {
 		$registration_amount = $this->product_service->get_registration_amount( $product->get_id() );
 		if ( $registration_amount <= 0 ) {
 			return null;
@@ -132,10 +152,9 @@ class Cart_Service implements Interface_Cart_Service {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = wp_strip_all_tags( $product->get_title() );
 
-		return new OtherPaymentItem(
+		return new RegistrationItem(
 			"$ref-reg",
 			"Reg. $name",
-			// TODO: Check if registration amount came already in cents.
 			$this->pricing_service->to_cents( $registration_amount ) * $qty
 		);
 	}
@@ -242,8 +261,14 @@ class Cart_Service implements Interface_Cart_Service {
 				);
 			}
 		}
-
-		return $items;
+		
+		/**
+		 * TODO: Document this filter
+		 * Filter cart items. Must return an array of ProductItem|ServiceItem
+		 *
+		 * @since 3.0.0
+		 */
+		return apply_filters( 'sequra_cart_service_get_items', $items, $order );
 	}
 
 	/**
@@ -372,7 +397,6 @@ class Cart_Service implements Interface_Cart_Service {
 				$items[] = new DiscountItem(
 					$coupon->get_code(),
 					esc_html__( 'Discount', 'sequra' ),
-					// TODO: check if -1 is needed.
 					-1 * $this->pricing_service->to_cents( 
 						$cart->get_coupon_discount_amount( $coupon->get_code(), false ) 
 					)
@@ -411,7 +435,6 @@ class Cart_Service implements Interface_Cart_Service {
 				$items[] = new DiscountItem(
 					$coupon->get_code(),
 					$coupon->get_name(),
-					// TODO: check if -1 is needed.
 					-1 * $this->pricing_service->to_cents(
 						(float) $coupon->get_discount( 'edit' ) + (float) $coupon->get_discount_tax( 'edit' )
 					)
@@ -447,7 +470,7 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get registration items
 	 *
-	 * @return OtherPaymentItem[]
+	 * @return RegistrationItem[]
 	 */
 	public function get_registration_items( ?WC_Order $order = null ): array {
 		$items = array();

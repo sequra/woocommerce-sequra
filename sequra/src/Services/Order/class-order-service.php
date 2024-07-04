@@ -18,6 +18,7 @@ use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use WC_DateTime;
 use WC_Order;
+use WP_User;
 
 /**
  * Handle use cases related to Order
@@ -197,7 +198,7 @@ class Order_Service implements Interface_Order_Service {
 
 	/**
 	 * TODO: Review this with Mikel. I need to know what is the origin of the VAT number field because it is not a default field in WooCommerce.
-	 * Get client vat number. If the order is null, attempt to retrieve data from the session.
+	 * Get shopper vat number. If the order is null, attempt to retrieve data from the session.
 	 */
 	public function get_vat( ?WC_Order $order, $is_delivery = true ): string {
 		$prefix = $is_delivery ? 'shipping' : 'billing';
@@ -210,6 +211,106 @@ class Order_Service implements Interface_Order_Service {
 		}
 		
 		return $vat;
+	}
+
+	/**
+	 * Get shopper NIN number. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_nin( ?WC_Order $order ): ?string {
+		/**
+		 * TODO: Document this filter
+		 * Get NIN number
+		 *
+		 * @since 3.0.0
+		 */
+		$nin = apply_filters( 'sequra_get_nin', null, $order );
+		return is_string( $nin ) || null === $nin ? $nin : null;
+	}
+
+	/**
+	 * Get date of birth. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_dob( ?WC_Order $order ): ?string {
+		/**
+		 * TODO: Document this filter
+		 * Get Date of Birth number
+		 *
+		 * @since 3.0.0
+		 */
+		$dob = apply_filters( 'sequra_get_dob', null, $order );
+		return is_string( $dob ) || null === $dob ? $dob : null;
+	}
+
+	/**
+	 * Get shopper title. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_title( ?WC_Order $order ): ?string {
+		/**
+		 * TODO: Document this filter
+		 * Get Shopper title
+		 *
+		 * @since 3.0.0
+		 */
+		$title = apply_filters( 'sequra_get_shopper_title', null, $order );
+		return is_string( $title ) || null === $title ? $title : null;
+	}
+
+	/**
+	 * Get shopper created at date. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_created_at( ?WC_Order $order ): ?string {
+		/**
+		 * TODO: Document this filter
+		 * Get Shopper created at date
+		 *
+		 * @since 3.0.0
+		 */
+		$date = apply_filters( 'sequra_get_shopper_created_at', $this->get_shopper_registration_date( $order ), $order );
+		return is_string( $date ) || null === $date ? $date : null;
+	}
+
+	/**
+	 * Get shopper registration date
+	 */
+	private function get_shopper_registration_date( ?WC_Order $order ): ?string {
+		if ( ! $order ) {
+			return null;
+		}
+		/**
+		 * Order user
+		 *
+		 * @var WP_User $shopper
+		 */
+		$shopper = get_user_by( 'id', $order->get_customer_id() );
+		return $shopper ? gmdate( 'c', strtotime( $shopper->user_registered ) ) : null;
+	}
+
+	/**
+	 * Get shopper updated at date. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_updated_at( ?WC_Order $order ): ?string {
+		/**
+		 * TODO: Document this filter
+		 * Get Shopper updated at date
+		 *
+		 * @since 3.0.0
+		 */
+		$date = apply_filters( 'sequra_get_shopper_updated_at', $this->get_shopper_registration_date( $order ), $order );
+		return is_string( $date ) || null === $date ? $date : null;
+	}
+
+	/**
+	 * Get shopper rating. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_rating( ?WC_Order $order ): ?int {
+		/**
+		 * TODO: Document this filter
+		 * Get Shopper rating. Must return an integer between 0 and 100 or null.
+		 *
+		 * @since 3.0.0
+		 */
+		$rating = apply_filters( 'sequra_get_shopper_rating', null, $order );
+		return ( is_int( $rating ) && 0 >= $rating && 100 <= $rating ) || null === $rating ? $rating : null;
 	}
 
 	/**

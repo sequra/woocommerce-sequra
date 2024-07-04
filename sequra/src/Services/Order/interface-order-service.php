@@ -85,6 +85,36 @@ interface Interface_Order_Service {
 	public function get_vat( ?WC_Order $order, $is_delivery = true ): string;
 
 	/**
+	 * Get client NIN number. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_nin( ?WC_Order $order ): ?string;
+	
+	/**
+	 * Get date of birth. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_dob( ?WC_Order $order ): ?string;
+
+	/**
+	 * Get shopper title. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_title( ?WC_Order $order ): ?string;
+
+	/**
+	 * Get shopper created at date. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_created_at( ?WC_Order $order ): ?string;
+
+	/**
+	 * Get shopper updated at date. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_updated_at( ?WC_Order $order ): ?string;
+
+	/**
+	 * Get shopper rating. If the order is null, attempt to retrieve data from the session.
+	 */
+	public function get_shopper_rating( ?WC_Order $order ): ?int;
+
+	/**
 	 * Get previous orders
 	 * 
 	 * @return PreviousOrder[]

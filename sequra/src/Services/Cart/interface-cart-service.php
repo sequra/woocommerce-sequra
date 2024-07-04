@@ -10,8 +10,8 @@ namespace SeQura\WC\Services\Cart;
 
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\RegistrationItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\WC\Dto\Cart_Info;
 use WC_Order;
@@ -25,7 +25,7 @@ interface Interface_Cart_Service {
 	/**
 	 * Get closest desired first charge date from cart items
 	 */
-	public function get_desired_first_charge_on(): ?string;
+	public function get_desired_first_charge_on( ?WC_Order $order = null ): ?string;
 
 	/**
 	 * Get seQura cart info data from session. If not exists, then initialize it.
@@ -68,7 +68,7 @@ interface Interface_Cart_Service {
 	/**
 	 * Get registration items
 	 *
-	 * @return OtherPaymentItem[]
+	 * @return RegistrationItem[]
 	 */
 	public function get_registration_items( ?WC_Order $order = null ): array;
 
