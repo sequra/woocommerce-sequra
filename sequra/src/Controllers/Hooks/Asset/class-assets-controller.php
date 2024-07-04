@@ -129,9 +129,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'settings'     => array_merge(
 				$onboarding_page_config,
 				array(
-					'getShopPaymentMethodsUrl'          => '', // TODO: Add the URL.
+					'getShopPaymentMethodsUrl'          => '', // Not used in this implementation.
 					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
-					'getShopProductsUrl'                => '', // TODO: Add the URL.
 					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
 					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
 					'getShopOrderStatusesUrl'           => get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
@@ -183,7 +182,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'advanced'   => array( 'debug' ),
 			),
 			'integration'       => array(
-				'authToken'    => '', // TODO: Add the token?
+				'authToken'    => '', // Not used in this implementation.
 				'isMultistore' => count( $this->configuration->get_stores() ) > 1,
 				'hasVersion'   => version_compare( $this->configuration->get_marketplace_version(), $this->configuration->get_module_version(), '>' ),
 			),

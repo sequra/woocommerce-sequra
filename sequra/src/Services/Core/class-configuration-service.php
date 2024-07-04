@@ -67,7 +67,7 @@ class Configuration_Service extends Configuration {
 	 * @return string Formatted URL of async process starter endpoint.
 	 */
 	public function getAsyncProcessUrl( $guid ) {
-		return ''; // TODO: What is this?
+		return ''; // TODO: Not used in this implementation. 
 	}
 
 	/**
