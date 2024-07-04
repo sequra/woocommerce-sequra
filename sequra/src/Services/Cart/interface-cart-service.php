@@ -40,7 +40,7 @@ interface Interface_Cart_Service {
 	/**
 	 * Get items in cart
 	 *
-	 * @return array<ProductItem|ServiceItem>
+	 * @return array<ProductItem|ServiceItem|RegistrationItem>
 	 */
 	public function get_items( ?WC_Order $order ): array;
 
@@ -64,13 +64,6 @@ interface Interface_Cart_Service {
 	 * @return DiscountItem[]
 	 */
 	public function get_discount_items( ?WC_Order $order = null ): array;
-
-	/**
-	 * Get registration items
-	 *
-	 * @return RegistrationItem[]
-	 */
-	public function get_registration_items( ?WC_Order $order = null ): array;
 
 	/**
 	 * Check if conditions are met for showing seQura in checkout

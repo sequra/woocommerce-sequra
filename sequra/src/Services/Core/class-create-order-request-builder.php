@@ -197,8 +197,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		$items = array_merge(
 			$this->cart_service->get_items( $this->current_order ),
 			$this->cart_service->get_handling_items( $this->current_order ),
-			$this->cart_service->get_discount_items( $this->current_order ),
-			$this->cart_service->get_registration_items( $this->current_order )
+			$this->cart_service->get_discount_items( $this->current_order )
 		);
 
 		/**

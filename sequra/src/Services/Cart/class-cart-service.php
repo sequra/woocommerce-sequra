@@ -163,7 +163,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 *
 	 * @return ProductItem|ServiceItem
 	 */
-	private function get_item( WC_Product $product, float $total_price, int $qty, mixed $item ) {
+	private function get_item( WC_Product $product, float $total_price, ?RegistrationItem $reg_item, int $qty, mixed $item ) {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = wp_strip_all_tags( $product->get_title() );
 		if ( $this->configuration->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
@@ -187,7 +187,7 @@ class Cart_Service implements Interface_Cart_Service {
 				$this->pricing_service->to_cents( $total_price / $qty ),
 				$qty,
 				$product->is_downloadable(),
-				$this->pricing_service->to_cents( $total_price ),
+				$this->pricing_service->to_cents( $total_price ) - ( $reg_item ? $reg_item->getTotalWithTax() : 0 ),
 				! $is_duration ? $service_end_date : null,
 				$is_duration ? $service_end_date : null,
 				null, // supplier.
@@ -217,7 +217,7 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get items in cart
 	 *
-	 * @return array<ProductItem|ServiceItem>
+	 * @return array<ProductItem|ServiceItem|RegistrationItem>
 	 */
 	public function get_items( ?WC_Order $order ): array {
 
@@ -231,9 +231,16 @@ class Cart_Service implements Interface_Cart_Service {
 					continue;
 				}
 
+				// Registration item.
+				$reg_item = $this->get_registration_item( $product, (int) $cart_item['quantity'] );
+				if ( $reg_item ) {
+					$items[] = $reg_item;
+				}
+
 				$items[] = $this->get_item(
 					$product, 
-					(float) $cart_item['line_subtotal'] + (float) $cart_item['line_subtotal_tax'], 
+					(float) $cart_item['line_subtotal'] + (float) $cart_item['line_subtotal_tax'],
+					$reg_item, 
 					(int) $cart_item['quantity'], 
 					$cart_item
 				);
@@ -253,9 +260,16 @@ class Cart_Service implements Interface_Cart_Service {
 					continue;
 				}
 
+				// Registration item.
+				$reg_item = $this->get_registration_item( $product, (int) $item->get_quantity( 'edit' ) );
+				if ( $reg_item ) {
+					$items[] = $reg_item;
+				}
+
 				$items[] = $this->get_item(
 					$product, 
-					(float) $item->get_subtotal( 'edit' ) + (float) $item->get_subtotal_tax( 'edit' ), 
+					(float) $item->get_subtotal( 'edit' ) + (float) $item->get_subtotal_tax( 'edit' ),
+					$reg_item, 
 					(int) $item->get_quantity( 'edit' ), 
 					$item
 				);
@@ -462,54 +476,6 @@ class Cart_Service implements Interface_Cart_Service {
 					esc_html__( 'Discount', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
-			}
-		}
-		return $items;
-	}
-
-	/**
-	 * Get registration items
-	 *
-	 * @return RegistrationItem[]
-	 */
-	public function get_registration_items( ?WC_Order $order = null ): array {
-		$items = array();
-		if ( ! $this->configuration->allow_service_reg_items() ) {
-			return $items;
-		}
-
-		if ( ! $order && null !== WC()->cart ) {
-			// Cart items.
-			foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
-				$product = $this->product_service->get_product_instance( $this->get_product_id_from_item( $cart_item ) );
-				if ( ! $product ) {
-					continue;
-				}
-
-				$reg_item = $this->get_registration_item( $product, (int) $cart_item['quantity'] );
-				if ( $reg_item ) {
-					$items[] = $reg_item;
-				}
-			}
-		} elseif ( $order ) {
-			/**
-			 * Order item
-			 *
-			 * @var WC_Order_Item_Product $item
-			 */
-			foreach ( $order->get_items() as $item ) {
-				if ( ! $item instanceof WC_Order_Item_Product ) {
-					continue;
-				}
-				$product = $item->get_product();
-				if ( ! $product ) {
-					continue;
-				}
-
-				$reg_item = $this->get_registration_item( $product, (int) $item->get_quantity( 'edit' ) );
-				if ( $reg_item ) {
-					$items[] = $reg_item;
-				}
 			}
 		}
 		return $items;
