@@ -57,6 +57,9 @@
     &__name {
         font-weight: 700;
     }
+    &__input{
+        display: inline-block!important;
+    }
 }
 .sequra-block__description {
     margin-bottom: 1em;
