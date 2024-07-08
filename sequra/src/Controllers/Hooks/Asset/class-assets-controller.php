@@ -204,9 +204,17 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	public function enqueue_front(): void {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$wp_version = get_bloginfo( 'version' );
 
 		if ( is_checkout() ) {
 			wp_enqueue_style( self::HANDLE_CHECKOUT, "{$this->assets_dir_url}/css/checkout.css", array(), $this->assets_version );
+			wp_enqueue_script( 
+				self::HANDLE_CHECKOUT,
+				"{$this->assets_dir_url}/js/dist/page/checkout.min.js",
+				array(),
+				$this->assets_version,
+				version_compare( $wp_version, '6.3', '>=' ) ? array( 'strategy' => 'defer' ) : false
+			);
 		}
 	}
 

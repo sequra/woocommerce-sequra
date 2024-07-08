@@ -36,9 +36,9 @@ foreach ( (array) $args['payment_methods'] as $key => $pm ) :
 		<label for="<?php echo esc_attr( $input_id ); ?>">
 			<div class="sequra-payment-method__description">
 				<span class="sequra-payment-method__name" style="width:100%"><?php echo esc_html( $pm['title'] ); ?></span>
-				<span class="sequra-payment-method_claim" style="width:100%"><?php echo esc_html( $pm['claim'] ); ?></span>
+				<span class="sequra-payment-method__claim" style="width:100%"><?php echo esc_html( $pm['claim'] ); ?></span>
 				<?php if ( ! empty( $pm['costDescription'] ) ) : ?>
-					<span class="sequra-payment-method_cost-desc" style="width:100%"><?php echo esc_html( $pm['costDescription'] ); ?></span>
+					<span class="sequra-payment-method__cost-desc" style="width:100%"><?php echo esc_html( $pm['costDescription'] ); ?></span>
 				<?php endif; ?>
 			</div>
 			<?php if ( ! empty( $pm['icon'] ) ) : ?>

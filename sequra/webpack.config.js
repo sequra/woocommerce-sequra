@@ -55,6 +55,14 @@ module.exports = (env, argv) => {
                 filename: "settings.min.js",
             },
         },
+        {
+            plugins: frontPlugins,
+            entry: "./assets/js/src/page/checkout.js",
+            output: {
+                path: path.resolve(__dirname, './assets/js/dist/page'),
+                filename: "checkout.min.js",
+            },
+        },
         // Add more entries here for processing other files.
     ];
 
