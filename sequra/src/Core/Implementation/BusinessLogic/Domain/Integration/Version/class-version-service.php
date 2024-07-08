@@ -1,19 +1,17 @@
 <?php
 /**
- * Wrapper to ease the read and write of configuration values.
- * Delegate to the ConfigurationManager instance to access the data in the database.
+ * Version Service
  *
  * @package SeQura\WC
  */
 
 namespace SeQura\WC\Services\Core;
 
-use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Version\Models\Version;
 
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Version Service
  */
 class Version_Service implements VersionServiceInterface {
 	
@@ -29,7 +27,7 @@ class Version_Service implements VersionServiceInterface {
 	 * 
 	 * @param string $version The current version.
 	 */
-	public function __construct( $version ) {
+	public function __construct( string $version ) {
 		$this->version = $version;
 	}
 

@@ -9,9 +9,8 @@
 namespace SeQura\WC\Services\Payment;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
-use SeQura\WC\Services\Core\Configuration;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\I18n\Interface_I18n;
-use WC_Order;
 
 /**
  * Handle use cases related to payments

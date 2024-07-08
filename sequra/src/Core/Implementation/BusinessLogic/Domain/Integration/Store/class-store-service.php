@@ -1,7 +1,6 @@
 <?php
 /**
- * Wrapper to ease the read and write of configuration values.
- * Delegate to the ConfigurationManager instance to access the data in the database.
+ * Store Service
  *
  * @package SeQura\WC
  */
@@ -13,7 +12,7 @@ use SeQura\Core\BusinessLogic\Domain\Stores\Models\Store;
 use WP_Site;
 
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Store Service
  */
 class Store_Service implements StoreServiceInterface {
 

@@ -5,7 +5,7 @@
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces;
 
 use SeQura\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\LogData;

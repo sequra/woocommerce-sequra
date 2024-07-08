@@ -1,25 +1,25 @@
 <?php
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Extends the Configuration class.
  * Delegate to the ConfigurationManager instance to access the data in the database.
  *
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Extension\Infrastructure\Configuration;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
-use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Models\OrderStatusMapping;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
+use SeQura\Core\Infrastructure\Configuration\Configuration as CoreConfiguration;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use Throwable;
 use WP_Site;
 
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Extends the Configuration class. Wrapper to ease the read and write of configuration values.
  */
-class Configuration_Service extends Configuration {
-	
+class Configuration extends CoreConfiguration {
+
 	/**
 	 * Marketplace version.
 	 *
@@ -296,5 +296,12 @@ class Configuration_Service extends Configuration {
 		->generalSettings( $this->get_store_id() )
 		->getGeneralSettings()
 		->toArray();
+	}
+	
+	/**
+	 * URL to the marketplace's plugin page.
+	 */
+	public function get_marketplace_url(): string {
+		return 'https://wordpress.org/plugins/sequra/';
 	}
 }

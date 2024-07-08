@@ -1,12 +1,11 @@
 <?php
 /**
- * Wrapper to ease the read and write of configuration values.
- * Delegate to the ConfigurationManager instance to access the data in the database.
+ * Implementation of the Create Order Request Builder.
  *
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Order\Builders;
 
 use Exception;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
@@ -21,6 +20,8 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
@@ -31,7 +32,7 @@ use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Order;
 
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Implementation of the Create Order Request Builder.
  */
 class Create_Order_Request_Builder implements Interface_Create_Order_Request_Builder {
 

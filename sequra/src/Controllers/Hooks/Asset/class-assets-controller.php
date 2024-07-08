@@ -9,7 +9,7 @@
 namespace SeQura\WC\Controllers\Hooks\Asset;
 
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Services\Core\Configuration;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
 

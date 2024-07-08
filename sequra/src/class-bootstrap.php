@@ -61,6 +61,18 @@ use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration_Manager;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Category\Category_Service;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Disconnect\Disconnect_Service;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\ShopOrderStatuses\Shop_Order_Status_Service;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Order\Builders\Create_Order_Request_Builder;
+use SeQura\WC\Core\Implementation\BusinessLogic\Utility\Encryptor;
+use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Service;
+use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Default_Logger_Adapter;
+use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Shop_Logger_Adapter;
 use SeQura\WC\Controllers\Settings_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Settings_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
@@ -72,19 +84,7 @@ use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Cart\Cart_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
-use SeQura\WC\Services\Core\Category_Service;
-use SeQura\WC\Services\Core\Configuration;
-use SeQura\WC\Services\Core\Configuration_Service;
-use SeQura\WC\Services\Core\Create_Order_Request_Builder;
-use SeQura\WC\Services\Core\Default_Logger_Adapter;
-use SeQura\WC\Services\Core\Disconnect_Service;
-use SeQura\WC\Services\Core\Encryptor;
-use SeQura\WC\Services\Core\Interface_Create_Order_Request_Builder;
-use SeQura\WC\Services\Core\Order_Status_Service;
-use SeQura\WC\Services\Core\Order_Status_Settings_Service;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
-use SeQura\WC\Services\Core\Shop_Logger_Adapter;
-use SeQura\WC\Services\Core\Shop_Order_Service;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
 use SeQura\WC\Services\Shopper\Shopper_Service;
@@ -304,6 +304,77 @@ class Bootstrap extends BootstrapComponent {
 	protected static function initServices(): void {
 		parent::initServices();
 
+		// Core Default.
+		Reg::registerService(
+			LoggerConfiguration::class, 
+			static function () {
+				return LoggerConfiguration::getInstance();
+			}
+		);
+
+		// Core Extension.
+		Reg::registerService(
+			Order_Status_Settings_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Order_Status_Settings_Service::class ] ) ) {
+					self::$cache[ Order_Status_Settings_Service::class ] = new Order_Status_Settings_Service(
+						Reg::getService( OrderStatusSettingsRepositoryInterface::class ),
+						Reg::getService( ShopOrderStatusesServiceInterface::class )
+					);
+				}
+				return self::$cache[ Order_Status_Settings_Service::class ];
+			}
+		);
+		Reg::registerService(
+			OrderStatusSettingsService::class,
+			static function () {
+				return Reg::getService( Order_Status_Settings_Service::class );
+			}
+		);
+		Reg::registerService(
+			ConfigurationManager::CLASS_NAME,
+			static function () {
+				if ( ! isset( self::$cache[ ConfigurationManager::CLASS_NAME ] ) ) {
+					self::$cache[ ConfigurationManager::CLASS_NAME ] = Configuration_Manager::getInstance();
+				}
+				return self::$cache[ ConfigurationManager::CLASS_NAME ];
+			}
+		);
+		Reg::registerService(
+			Configuration::class,
+			static function () {
+				if ( ! isset( self::$cache[ Configuration::class ] ) ) {
+					self::$cache[ Configuration::class ] = Configuration::getInstance();
+				}
+				return self::$cache[ Configuration::class ];
+			}
+		);
+		Reg::registerService(
+			\SeQura\Core\Infrastructure\Configuration\Configuration::CLASS_NAME,
+			static function () {
+				return Reg::getService( Configuration::class );
+			}
+		);
+		Reg::registerService(
+			Interface_Create_Order_Request_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Create_Order_Request_Builder::class ] ) ) {
+					self::$cache[ Interface_Create_Order_Request_Builder::class ] = new Create_Order_Request_Builder(
+						Reg::getService( Interface_Payment_Service::class ),
+						Reg::getService( Interface_Cart_Service::class ),
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Product_Service::class ),
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_I18n::class ),
+						Reg::getService( Interface_Shopper_Service::class ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Create_Order_Request_Builder::class ];
+			}
+		);
+
+		// Core Implementation.
 		Reg::registerService(
 			EncryptorInterface::class,
 			static function () {
@@ -313,7 +384,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ EncryptorInterface::class ];
 			}
 		);
-
 		Reg::registerService(
 			DisconnectServiceInterface::class,
 			static function () {
@@ -331,7 +401,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ DisconnectServiceInterface::class ];
 			}
 		);
-
 		Reg::registerService(
 			SellingCountriesServiceInterface::class,
 			static function () {
@@ -341,7 +410,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ SellingCountriesServiceInterface::class ];
 			}
 		);
-
 		Reg::registerService(
 			StoreServiceInterface::class,
 			static function () {
@@ -351,7 +419,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ StoreServiceInterface::class ];
 			}
 		);
-
 		Reg::registerService(
 			VersionServiceInterface::class,
 			static function () {
@@ -363,7 +430,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ VersionServiceInterface::class ];
 			}
 		);
-
 		Reg::registerService(
 			CategoryServiceInterface::class,
 			static function () {
@@ -373,40 +439,13 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ CategoryServiceInterface::class ];
 			}
 		);
-
 		Reg::registerService(
 			ShopOrderStatusesServiceInterface::class,
 			static function () {
 				if ( ! isset( self::$cache[ ShopOrderStatusesServiceInterface::class ] ) ) {
-					self::$cache[ ShopOrderStatusesServiceInterface::class ] = new Order_Status_Service();
+					self::$cache[ ShopOrderStatusesServiceInterface::class ] = new Shop_Order_Status_Service();
 				}
 				return self::$cache[ ShopOrderStatusesServiceInterface::class ];
-			}
-		);
-
-		// Override OrderStatusSettingsService service to use the WC order statuses.
-		Reg::registerService(
-			OrderStatusSettingsService::class,
-			static function () {
-				if ( ! isset( self::$cache[ OrderStatusSettingsService::class ] ) ) {
-					self::$cache[ OrderStatusSettingsService::class ] = new Order_Status_Settings_Service(
-						Reg::getService( OrderStatusSettingsRepositoryInterface::class ),
-						Reg::getService( ShopOrderStatusesServiceInterface::class )
-					);
-				}
-				return self::$cache[ OrderStatusSettingsService::class ];
-			}
-		);
-
-		Reg::registerService(
-			Interface_Log_File::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Log_File::class ] ) ) {
-					self::$cache[ Interface_Log_File::class ] = new Log_File(
-						Reg::getService( 'plugin.log_file_path' )
-					);
-				}
-				return self::$cache[ Interface_Log_File::class ];
 			}
 		);
 		Reg::registerService(
@@ -431,40 +470,18 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 
-		Reg::registerService(
-			LoggerConfiguration::class, 
-			static function () {
-				return LoggerConfiguration::getInstance();
-			}
-		);
-
-		Reg::registerService(
-			ConfigurationManager::CLASS_NAME,
-			static function () {
-				if ( ! isset( self::$cache[ ConfigurationManager::CLASS_NAME ] ) ) {
-					self::$cache[ ConfigurationManager::CLASS_NAME ] = Services\Core\Configuration_Manager::getInstance();
-				}
-				return self::$cache[ ConfigurationManager::CLASS_NAME ];
-			}
-		);
-
-		Reg::registerService(
-			Configuration::class,
-			static function () {
-				if ( ! isset( self::$cache[ Configuration::class ] ) ) {
-					self::$cache[ Configuration::class ] = Configuration_Service::getInstance();
-				}
-				return self::$cache[ Configuration::class ];
-			}
-		);
-		Reg::registerService(
-			\SeQura\Core\Infrastructure\Configuration\Configuration::CLASS_NAME,
-			static function () {
-				return Reg::getService( Configuration::class );
-			}
-		);
-
 		// Plugin services.
+		Reg::registerService(
+			Interface_Log_File::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Log_File::class ] ) ) {
+					self::$cache[ Interface_Log_File::class ] = new Log_File(
+						Reg::getService( 'plugin.log_file_path' )
+					);
+				}
+				return self::$cache[ Interface_Log_File::class ];
+			}
+		);
 		Reg::registerService(
 			Interface_Migration_Manager::class,
 			static function () {
@@ -480,7 +497,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Migration_Manager::class ];
 			}
 		);
-
 		Reg::registerService(
 			Interface_I18n::class,
 			static function () {
@@ -525,24 +541,6 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Sequra_Payment_Gateway_Block_Support::class ];
-			}
-		);
-		Reg::registerService(
-			Interface_Create_Order_Request_Builder::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Create_Order_Request_Builder::class ] ) ) {
-					self::$cache[ Interface_Create_Order_Request_Builder::class ] = new Create_Order_Request_Builder(
-						Reg::getService( Interface_Payment_Service::class ),
-						Reg::getService( Interface_Cart_Service::class ),
-						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_Product_Service::class ),
-						Reg::getService( Interface_Order_Service::class ),
-						Reg::getService( Interface_I18n::class ),
-						Reg::getService( Interface_Shopper_Service::class ),
-						Reg::getService( Interface_Logger_Service::class )
-					);
-				}
-				return self::$cache[ Interface_Create_Order_Request_Builder::class ];
 			}
 		);
 		Reg::registerService(
@@ -601,8 +599,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Shopper_Service::class ];
 			}
 		);
-
-		// "Service of type "SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService" is not registered."
 		Reg::registerService(
 			ShopOrderService::class,
 			static function () {

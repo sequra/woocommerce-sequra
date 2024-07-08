@@ -1,7 +1,6 @@
 <?php
 /**
- * Wrapper to ease the read and write of configuration values.
- * Delegate to the ConfigurationManager instance to access the data in the database.
+ * Selling Countries Service
  *
  * @package SeQura\WC
  */
@@ -11,7 +10,7 @@ namespace SeQura\WC\Services\Core;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Selling Countries Service
  */
 class Selling_Countries_Service implements SellingCountriesServiceInterface {
 

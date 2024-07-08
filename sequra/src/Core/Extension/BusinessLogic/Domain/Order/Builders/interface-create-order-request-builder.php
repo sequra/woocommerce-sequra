@@ -6,7 +6,7 @@
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders;
 
 use SeQura\Core\BusinessLogic\Domain\Order\Builders\CreateOrderRequestBuilder;
 use WC_Order;

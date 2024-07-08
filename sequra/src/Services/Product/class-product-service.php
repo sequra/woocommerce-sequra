@@ -10,7 +10,7 @@ namespace SeQura\WC\Services\Product;
 
 use DateInterval;
 use DateTime;
-use SeQura\WC\Services\Core\Configuration;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use WC_Product;
 
 /**

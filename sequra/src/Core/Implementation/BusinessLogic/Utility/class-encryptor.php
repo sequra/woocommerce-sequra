@@ -1,17 +1,16 @@
 <?php
 /**
- * Logger service.
+ * Encryptor implementation.
  *
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\BusinessLogic\Utility;
 
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
+
 /**
- * Class Encryptor
- *
- * @package Sequra\Core\Services\BusinessLogic\Utility
+ * Encryptor implementation.
  */
 class Encryptor implements EncryptorInterface {
 

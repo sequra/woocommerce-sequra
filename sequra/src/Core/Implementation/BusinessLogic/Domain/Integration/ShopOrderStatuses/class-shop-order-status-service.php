@@ -1,19 +1,19 @@
 <?php
 /**
- * Order Status Service
+ * Shop Order Status Service
  *
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\ShopOrderStatuses;
 
 use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatus\Models\OrderStatus;
 
 /**
- * Order Status Service
+ * Shop Order Status Service
  */
-class Order_Status_Service implements ShopOrderStatusesServiceInterface {
+class Shop_Order_Status_Service implements ShopOrderStatusesServiceInterface {
 	
 	/**
 	 * Returns all order statuses of the shop system.

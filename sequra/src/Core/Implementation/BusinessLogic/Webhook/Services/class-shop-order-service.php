@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Services
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services;
 
 use DateTime;
 use Exception;
@@ -15,10 +15,10 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderRequestStatusMapping;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use Throwable;
 use WC_Order;
@@ -38,7 +38,7 @@ class Shop_Order_Service implements ShopOrderService {
 	/**
 	 * Order status service
 	 * 
-	 * @var OrderStatusSettingsService
+	 * @var Order_Status_Settings_Service
 	 */
 	private $order_status_service;
 
@@ -53,7 +53,7 @@ class Shop_Order_Service implements ShopOrderService {
 	 * Constructor
 	 */
 	public function __construct(
-		OrderStatusSettingsService $order_status_service,
+		Order_Status_Settings_Service $order_status_service,
 		SeQuraOrderRepositoryInterface $sequra_order_repository,
 		Interface_Logger_Service $logger
 	) {
@@ -67,32 +67,23 @@ class Shop_Order_Service implements ShopOrderService {
 	 *
 	 * @return mixed
 	 */
-	public function updateStatus( Webhook $webhook, string $status, ?int $reason_code = null, ?string $message = null ) {
-		$order_status          = null;
-		$order_status_settings = $this->order_status_service->getOrderStatusSettings();
-		if ( is_array( $order_status_settings ) ) {
-			foreach ( $order_status_settings as $st ) {
-				if ( $st->getShopStatus() === $status ) {
-					$order_status = $st;
-					break;
-				}
-			}
-		}
+	public function updateStatus( Webhook $webhook, string $wc_status, ?int $reason_code = null, ?string $message = null ) {
+		$sq_status = $this->order_status_service->map_status_from_shop_to_sequra( $wc_status );
 
-		if ( ! $order_status ) {
+		if ( ! $sq_status ) {
 			// TODO: error? cancel order?
-			$this->logger->log_debug( 'Order status not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'status', $status ) ) );
+			$this->logger->log_debug( 'Order status not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'status', $wc_status ) ) );
 			return;
 		}
 		
 		try {
-			switch ( $order_status->getSequraStatus() ) {
+			switch ( $sq_status ) {
 				case OrderStates::STATE_APPROVED:
 				case OrderStates::STATE_NEEDS_REVIEW:
-					$this->update_order_to_status( $webhook, $status );
+					$this->update_order_to_status( $webhook, $wc_status );
 					break;
 				case OrderStates::STATE_CANCELLED: // TODO: what happen with other statuses? should cancel it too?
-					$this->cancel_order( $webhook, $status );
+					$this->cancel_order( $webhook, $wc_status );
 					break;
 			}
 		} catch ( Throwable $e ) {

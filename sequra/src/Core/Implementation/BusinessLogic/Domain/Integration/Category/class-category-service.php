@@ -1,19 +1,18 @@
 <?php
 /**
- * Wrapper to ease the read and write of configuration values.
- * Delegate to the ConfigurationManager instance to access the data in the database.
+ * Implementation of the Category service.
  *
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Category;
 
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\Category;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use WP_Term;
 
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Implementation of the Category service.
  */
 class Category_Service implements CategoryServiceInterface {
 
@@ -63,7 +62,7 @@ class Category_Service implements CategoryServiceInterface {
 	 *
 	 * @return string
 	 */
-	private function get_category_name( $term_id, $terms ) {
+	private function get_category_name( int $term_id, array $terms ) {
 		$filtered = array_filter(
 			$terms,
 			function ( $cat ) use ( $term_id ) {

@@ -5,7 +5,7 @@
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces;
 
 use SeQura\Core\Infrastructure\Logger\Interfaces\DefaultLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\LogData;
@@ -35,9 +35,6 @@ class Default_Logger_Adapter implements DefaultLoggerAdapter {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param Interface_Log_File $log_file The log file.
-	 * @param TimeProvider $time_provider The time provider.
 	 */
 	public function __construct( Interface_Log_File $log_file, TimeProvider $time_provider ) {
 		$this->log_file      = $log_file;
@@ -49,7 +46,7 @@ class Default_Logger_Adapter implements DefaultLoggerAdapter {
 	 * 
 	 * @param int $level The level.
 	 */
-	private function get_level_name( $level ): string {
+	private function get_level_name( int $level ): string {
 		switch ( $level ) {
 			case Logger::DEBUG:
 				return 'DEBUG';

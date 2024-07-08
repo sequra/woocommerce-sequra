@@ -5,7 +5,7 @@
  * @package SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest
  */
 
-namespace SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest;
+namespace SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Models\OrderRequest;
 
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options as CoreOptions;
 

@@ -9,7 +9,7 @@
 namespace SeQura\WC\Controllers\Hooks\Settings;
 
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Services\Core\Configuration;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Interface_Logger_Service;
 
 /**

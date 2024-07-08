@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Repositories
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Extension\Infrastructure\Configuration;
 
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;

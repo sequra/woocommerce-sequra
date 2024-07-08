@@ -236,7 +236,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			'result'   => 'success',
 			'redirect' => $order->get_checkout_payment_url( true ),
 		);
-	}
+	} 
 
 	/**
 	 * Get payment method data from POST.
@@ -264,12 +264,28 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	public function handle_return() {
 		
 		//phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$return_url = wc_get_checkout_url();
 		if ( ! isset( $_GET['order'] ) ) {
-			return;
+			wp_safe_redirect( $return_url, 302 );
+			exit;
 		}
 
-		$order      = wc_get_order( absint( $_GET['order'] ) );
-		$return_url = $order instanceof WC_Order ? $order->get_checkout_order_received_url() : wc_get_endpoint_url( 'order-received', '', wc_get_checkout_url() );
+		$order = wc_get_order( absint( $_GET['order'] ) );
+		if ( $order instanceof WC_Order && in_array( $order->get_status(), array( 'on-hold', 'processing' ), true ) ) {
+			$return_url = $order->get_checkout_order_received_url();
+			if ( ! $order->is_paid() ) {
+				wc_add_notice(
+					__(
+						'<p>seQura is processing your request.</p>
+							<p>After a few minutes <b>you will get an email with your request result</b>.
+							seQura might contact you to get some more information.</p>
+							<p><b>Thanks for choosing seQura!</b>',
+						'sequra'
+					),
+					'notice'
+				);
+			}
+		}
 		//phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		/**
@@ -279,18 +295,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 */
 		$url = apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 
-		if ( ! $order->is_paid() ) {
-			wc_add_notice(
-				__(
-					'<p>seQura is processing your request.</p>
-					<p>After a few minutes <b>you will get an email with your request result</b>.
-					seQura might contact you to get some more information.</p>
-					<p><b>Thanks for choosing seQura!</b>',
-					'sequra'
-				),
-				'notice'
-			);
-		}
 		wp_safe_redirect( $url, 302 );
 		exit;
 	}
@@ -358,15 +362,30 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	private function handle_webhook( string $webhook_identifier ) {
 		$payload = $this->prepare_payload();
 		$this->die_on_invalid_payload( $payload );
-
 		try {
 			$response = WebhookAPI::webhookHandler( $payload['storeId'] )->handleRequest( $payload );
 			if ( ! $response->isSuccessful() ) {
 				$error = $response->toArray();
-				$msg   = isset( $error['errorMessage'] ) ? $error['errorMessage'] : '';
-				$this->logger->log_error( $msg, __FUNCTION__, __CLASS__ );
+
+				$this->logger->log_error(
+					'Webhook request failed',
+					__FUNCTION__,
+					__CLASS__,
+					array( 
+						new LogContextData( 'webhook', $webhook_identifier ),
+						new LogContextData( 'payload', $payload ),
+						new LogContextData( 'response', $error ),
+					) 
+				);
+
+				$msg = isset( $error['errorMessage'] ) ? $error['errorMessage'] : 'Request failed';
 				
-				status_header( ( isset( $error['errorCode'] ) && 409 === $error['errorCode'] ) ? 409 : 410 );
+				$order = wc_get_order( $payload['order'] );
+				if ( $order instanceof WC_Order ) {
+					$order->set_status( 'pending', $msg );
+				}
+				
+				status_header( 410 ); // Set 410 status to trigger a refund for the order.
 				die( esc_html( $msg ) );
 			}
 

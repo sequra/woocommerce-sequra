@@ -1,18 +1,17 @@
 <?php
 /**
- * Wrapper to ease the read and write of configuration values.
- * Delegate to the ConfigurationManager instance to access the data in the database.
+ * Implementation of the Disconnect service.
  *
  * @package SeQura\WC
  */
 
-namespace SeQura\WC\Services\Core;
+namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Disconnect;
 
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
 
 /**
- * Wrapper to ease the read and write of configuration values.
+ * Implementation of the Disconnect service.
  */
 class Disconnect_Service implements DisconnectServiceInterface {
 	
@@ -28,7 +27,7 @@ class Disconnect_Service implements DisconnectServiceInterface {
 	 * 
 	 * @param Interface_Deletable_Repository[] $repositories The repositories.
 	 */
-	public function __construct( $repositories ) {
+	public function __construct( array $repositories ) {
 		$this->repositories = $repositories;
 	}
 
