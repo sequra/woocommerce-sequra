@@ -5,10 +5,9 @@
  * @package SeQura\WC
  */
 
-namespace Sequra\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Responses;
+namespace SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Responses;
 
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\GeneralSettings\Models\General_Settings;
 
 /**

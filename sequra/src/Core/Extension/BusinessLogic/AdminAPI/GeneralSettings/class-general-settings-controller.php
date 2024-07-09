@@ -10,9 +10,7 @@ namespace SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\GeneralSettingsController;
 
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
-use Sequra\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Responses\General_Settings_Response;
+use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Responses\General_Settings_Response;
 
 /**
  * Extension of the GeneralSettingsController.
