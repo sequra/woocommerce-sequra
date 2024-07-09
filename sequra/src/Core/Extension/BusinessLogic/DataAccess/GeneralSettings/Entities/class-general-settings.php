@@ -35,6 +35,15 @@ class General_Settings extends GeneralSettings {
 	}
 
 	/**
+	 * Returns full class name.
+	 *
+	 * @return string Fully qualified class name.
+	 */
+	public static function getClassName() {
+		return __CLASS__;
+	}
+
+	/**
 	 * Transforms entity to its array format representation.
 	 *
 	 * @return array Entity in array format.
