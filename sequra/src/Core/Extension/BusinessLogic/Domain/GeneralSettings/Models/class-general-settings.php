@@ -44,6 +44,16 @@ class General_Settings extends GeneralSettings {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param bool $send_order_reports_periodically_to_sequra Send order reports periodically to Sequra.
+	 * @param bool|null $show_sequra_checkout_as_hosted_page Show Sequra checkout as hosted page.
+	 * @param string[]|null $allowed_ip_addresses Allowed IP addresses.
+	 * @param string[]|null $excluded_products Excluded products.
+	 * @param string[]|null $excluded_categories Excluded categories.
+	 * @param bool $enabled_for_services Is enabled for services.
+	 * @param bool $allow_first_service_payment_delay Allow first service payment delay.
+	 * @param bool $allow_service_reg_items Allow service registration items.
+	 * @param string $default_services_end_date Default services end date.
 	 */
 	public function __construct(
 		bool $send_order_reports_periodically_to_sequra,

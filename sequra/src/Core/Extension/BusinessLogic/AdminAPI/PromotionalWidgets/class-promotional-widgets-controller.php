@@ -7,7 +7,9 @@
 
 namespace SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets;
 
+use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\PromotionalWidgetsController;
+use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Responses\WidgetSettingsResponse;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Responses\Widget_Settings_Response;
 
 /**
@@ -22,7 +24,7 @@ class Promotional_Widgets_Controller extends PromotionalWidgetsController {
 	 *
 	 * @throws Exception
 	 */
-	public function getWidgetSettings(): Widget_Settings_Response {
+	public function getWidgetSettings(): WidgetSettingsResponse {
         // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		return new Widget_Settings_Response( $this->widgetSettingsService->getWidgetSettings() );
 	}

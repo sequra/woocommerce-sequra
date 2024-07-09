@@ -28,23 +28,27 @@ class Widget_Settings extends WidgetSettings {
 	/**
 	 * Sets raw array data to this entity instance properties.
 	 *
-	 * @param array $data Raw array data with keys for class fields. @see self::$fields for field names.
+	 * @param array<string, mixed> $data Raw array data with keys for class fields. @see self::$fields for field names.
+	 * @return void
 	 */
 	public function inflate( array $data ) {
 		parent::inflate( $data );
-		$data_widget_settings = $data['widgetSettings'] ?? array();
-        // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		$this->widgetSettings = Domain_Widget_Settings::from_parent( 
-			$this->widgetSettings,
-			Widget_Location_Config::from_array( (array) self::getArrayValue( $data_widget_settings, 'widgetLocationConfiguration', array() ) )
-		);
-        // phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$data_widget_settings       = isset( $data['widgetSettings'] ) ? (array) $data['widgetSettings'] : array();
+		$raw_widget_location_config = self::getArrayValue( $data_widget_settings, 'widgetLocationConfiguration', array() );
+
+		$widget_location_config = null;
+		if ( is_array( $raw_widget_location_config ) ) {
+			$widget_location_config = Widget_Location_Config::from_array( $raw_widget_location_config );
+		}
+
+        // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$this->widgetSettings = Domain_Widget_Settings::from_parent( $this->widgetSettings, $widget_location_config );
 	}
 
 	/**
 	 * Transforms entity to its array format representation.
 	 *
-	 * @return array Entity in array format.
+	 * @return array<string, mixed> Entity in array format.
 	 */
 	public function toArray(): array {
 		$data = parent::toArray();

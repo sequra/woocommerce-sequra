@@ -50,6 +50,12 @@ class Widget_Location_Config {
 
 	/**
 	 * Constructor.
+	 * 
+	 * @param string $sel_for_price CSS selector for retrieving the price element.
+	 * @param string $sel_for_alt_price CSS selector for retrieving the price element from an alternative location.
+	 * @param string $sel_for_alt_price_trigger CSS Selector for detecting when to use the alternative price selector.
+	 * @param string $sel_for_default_location CSS Selector for retrieving the container element where the widget should be inserted.
+	 * @param Widget_Location[] $custom_locations The locations where the widget should be displayed.
 	 */
 	public function __construct( 
 		string $sel_for_price, 
@@ -141,6 +147,8 @@ class Widget_Location_Config {
 
 	/**
 	 * Create a WidgetLocationConfig object from an array.
+	 * 
+	 * @param array<string, mixed> $data Array containing the data.
 	 */
 	public static function from_array( array $data ): ?Widget_Location_Config {
 		if (
@@ -154,24 +162,28 @@ class Widget_Location_Config {
 		}
 
 		$locations = array();
-		foreach ( $data['custom_locations'] as $location ) {
-			$location = Widget_Location::from_array( $location );
-			if ( $location ) {
-				$locations[] = $location;
+		if ( is_array( $data['custom_locations'] ) ) {
+			foreach ( $data['custom_locations'] as $location ) {
+				$location = Widget_Location::from_array( $location );
+				if ( $location ) {
+					$locations[] = $location;
+				}
 			}
 		}
 
 		return new self(
-			$data['sel_for_price'],
-			$data['sel_for_alt_price'],
-			$data['sel_for_alt_price_trigger'],
-			$data['sel_for_default_location'],
+			strval( $data['sel_for_price'] ),
+			strval( $data['sel_for_alt_price'] ),
+			strval( $data['sel_for_alt_price_trigger'] ),
+			strval( $data['sel_for_default_location'] ),
 			$locations
 		);
 	}
 
 	/**
 	 * Convert the WidgetLocationConfig object to an array.
+	 * 
+	 * @return array<string, mixed>
 	 */
 	public function to_array(): array {
 		$locations = array();

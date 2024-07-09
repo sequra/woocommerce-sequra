@@ -19,7 +19,7 @@ class General_Settings_Response extends GeneralSettingsResponse {
 	/**
 	 * General settings
 	 * 
-	 * @var GeneralSettings
+	 * @var ?GeneralSettings
 	 */
 	protected $general_settings;
 
@@ -27,23 +27,17 @@ class General_Settings_Response extends GeneralSettingsResponse {
 	 * Constructor
 	 */
 	public function __construct( ?GeneralSettings $general_settings ) {
+		parent::__construct( $general_settings );
 		$this->general_settings = $general_settings;
 	}
 
 	/**
 	 * To array
+	 * 
+	 * @return array<string, mixed>
 	 */
 	public function toArray(): array {
-		if ( ! $this->general_settings ) {
-			return array();
-		}
-		$data = array(
-			'sendOrderReportsPeriodicallyToSeQura' => $this->general_settings->isSendOrderReportsPeriodicallyToSeQura(),
-			'showSeQuraCheckoutAsHostedPage'       => $this->general_settings->isShowSeQuraCheckoutAsHostedPage(),
-			'allowedIPAddresses'                   => $this->general_settings->getAllowedIPAddresses(),
-			'excludedProducts'                     => $this->general_settings->getExcludedProducts(),
-			'excludedCategories'                   => $this->general_settings->getExcludedCategories(),
-		);
+		$data = parent::toArray();
 		if ( $this->general_settings instanceof General_Settings ) { 
 			$data['enabledForServices']            = $this->general_settings->is_enabled_for_services();
 			$data['allowFirstServicePaymentDelay'] = $this->general_settings->is_allow_first_service_payment_delay();

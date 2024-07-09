@@ -365,7 +365,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
-					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
+					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ) // @phpstan-ignore-line
 				)
 			)
 			->toArray();

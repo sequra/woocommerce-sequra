@@ -18,18 +18,18 @@ class General_Settings extends GeneralSettings {
 	/**
 	 * Sets raw array data to this entity instance properties.
 	 *
-	 * @param array $data Raw array data with keys for class fields. @see self::$fields for field names.
+	 * @param array<string, mixed> $data Raw array data with keys for class fields. @see self::$fields for field names.
 	 */
 	public function inflate( array $data ): void {
 		parent::inflate( $data );
-		$data_general_settings = $data['generalSettings'] ?? array();
+		$data_general_settings = isset( $data['generalSettings'] ) ? (array) $data['generalSettings'] : array();
         // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$this->generalSettings = Domain_General_Settings::from_parent( 
 			$this->generalSettings,
-			static::getDataValue( $data_general_settings, 'enabledForServices', false ),
-			static::getDataValue( $data_general_settings, 'allowFirstServicePaymentDelay', true ),
-			static::getDataValue( $data_general_settings, 'allowServiceRegItems', true ),
-			static::getDataValue( $data_general_settings, 'defaultServicesEndDate', 'P1Y' )
+			boolval( static::getDataValue( $data_general_settings, 'enabledForServices', false ) ), // @phpstan-ignore-line
+			boolval( static::getDataValue( $data_general_settings, 'allowFirstServicePaymentDelay', true ) ), // @phpstan-ignore-line
+			boolval( static::getDataValue( $data_general_settings, 'allowServiceRegItems', true ) ), // @phpstan-ignore-line
+			strval( static::getDataValue( $data_general_settings, 'defaultServicesEndDate', 'P1Y' ) )
 		);
         // phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	}
@@ -46,7 +46,7 @@ class General_Settings extends GeneralSettings {
 	/**
 	 * Transforms entity to its array format representation.
 	 *
-	 * @return array Entity in array format.
+	 * @return array<string, mixed> Entity in array format.
 	 */
 	public function toArray(): array {
 		$data = parent::toArray();

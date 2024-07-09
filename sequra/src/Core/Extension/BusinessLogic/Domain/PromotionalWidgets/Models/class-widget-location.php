@@ -22,14 +22,14 @@ class Widget_Location {
 	/**
 	 * The seQura product identifier.
 	 *
-	 * @var string
+	 * @var ?string
 	 */
 	private $product;
 
 	/**
 	 * The country identifier.
 	 *
-	 * @var string
+	 * @var ?string
 	 */
 	private $country;
 
@@ -52,14 +52,14 @@ class Widget_Location {
 	/**
 	 * Getter
 	 */
-	public function get_product(): string {
+	public function get_product(): ?string {
 		return $this->product;
 	}
 
 	/**
 	 * Getter
 	 */
-	public function get_country(): string {
+	public function get_country(): ?string {
 		return $this->country;
 	}
 
@@ -86,6 +86,8 @@ class Widget_Location {
 
 	/**
 	 * Create a WidgetLocation object from an array.
+	 * 
+	 * @param array<string, mixed> $data Array containing the data.
 	 */
 	public static function from_array( array $data ): ?Widget_Location {
 		if ( ! isset( $data['sel_for_target'] ) ) {
@@ -93,14 +95,16 @@ class Widget_Location {
 		}
 
 		return new self(
-			$data['sel_for_target'],
-			isset( $data['product'] ) ? $data['product'] : null,
-			isset( $data['country'] ) ? $data['country'] : null
+			strval( $data['sel_for_target'] ),
+			isset( $data['product'] ) ? strval( $data['product'] ) : null,
+			isset( $data['country'] ) ? strval( $data['country'] ) : null
 		);
 	}
 
 	/**
 	 * Convert the WidgetLocation object to an array.
+	 * 
+	 * @return array<string, string|null> Array containing the data.
 	 */
 	public function to_array(): array {
 		return array(
