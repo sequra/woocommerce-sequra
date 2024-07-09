@@ -13,7 +13,7 @@ if (!window.SequraFE) {
 
     /**
      * @typedef WidgetLocation
-     * @property {string|null} selForTarget
+     * @property {string|null} sel_for_target
      * @property {string|null} product
      * @property {string|null} country
      */
@@ -318,17 +318,17 @@ if (!window.SequraFE) {
                     </div>
                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.selector')}</label>
-                        <input class="sq-table__row-field" type="text" value="${data ? data.selForTarget : ''}">
+                        <input class="sq-table__row-field" type="text" value="${data ? data.sel_for_target : ''}">
                     </div>`
                 },
                 handleChange: table => {
                     const customLocations = [];
                     table.querySelectorAll('.sq-table__row-content').forEach(row => {
                         const select = row.querySelector('select');
-                        const selForTarget = row.querySelector('input').value;
+                        const sel_for_target = row.querySelector('input').value;
                         const product = select.options[select.selectedIndex].dataset.product;
                         const country = select.options[select.selectedIndex].dataset.countryCode;
-                        customLocations.push({ selForTarget, product, country });
+                        customLocations.push({ sel_for_target, product, country });
                     });
                     handleChange('customLocations', customLocations)
                 },
@@ -422,7 +422,7 @@ if (!window.SequraFE) {
         const isCustomLocationValid = value => {
             try {
                 value.forEach(location => {
-                    if (!isCssSelectorValid(location.selForTarget)) {
+                    if (!isCssSelectorValid(location.sel_for_target)) {
                         throw new Error('Invalid selector');
                     }
                     if (!allPaymentMethods.some(pm => pm.product === location.product && pm.countryCode === location.country)) {

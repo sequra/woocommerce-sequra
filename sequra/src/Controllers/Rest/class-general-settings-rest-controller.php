@@ -9,9 +9,9 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
-use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\OrderStatusSettings\Requests\OrderStatusSettingsRequest;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
+use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
 use SeQura\WC\Services\Interface_Logger_Service;
 use WP_Error;
 use WP_REST_Request;
@@ -228,7 +228,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			$response = AdminAPI::get()
 			->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->saveGeneralSettings(
-				new GeneralSettingsRequest(
+				new General_Settings_Request(
 					(bool) $request->get_param( self::PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA ),
 					(bool) $request->get_param( self::PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE ),
 					(array) $request->get_param( self::PARAM_ALLOWED_IP_ADDRESSES ),

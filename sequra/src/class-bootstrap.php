@@ -7,6 +7,8 @@
 
 namespace SeQura\WC;
 
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\GeneralSettingsController;
+use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\PromotionalWidgetsController;
 use SeQura\Core\BusinessLogic\BootstrapComponent;
 use SeQura\Core\BusinessLogic\DataAccess\ConnectionData\Entities\ConnectionData;
 use SeQura\Core\BusinessLogic\DataAccess\OrderSettings\Entities\OrderStatusSettings;
@@ -16,15 +18,21 @@ use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalDat
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
+use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
+use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
@@ -46,6 +54,10 @@ use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
 use SeQura\WC\Controllers\Settings_Controller;
+use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Settings_Controller;
+use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
+use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
+use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Queue_Item_Repository;
@@ -443,6 +455,28 @@ class Bootstrap extends BootstrapComponent {
 
 		parent::initRepositories();
 
+		// Extend GeneralSettingsRepository.
+		Reg::registerService(
+			GeneralSettingsRepositoryInterface::class,
+			static function () {
+				return new General_Settings_Repository(
+					RepositoryRegistry::getRepository( GeneralSettings::getClassName() ),
+					Reg::getService( StoreContext::class )
+				);
+			}
+		);
+
+		// Extend WidgetSettingsRepository.
+		Reg::registerService(
+			WidgetSettingsRepositoryInterface::class,
+			static function () {
+				return new Widget_Settings_Repository(
+					RepositoryRegistry::getRepository( WidgetSettings::getClassName() ),
+					Reg::getService( StoreContext::class )
+				);
+			}
+		);
+
 		RepositoryRegistry::registerRepository( ConfigEntity::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( QueueItem::class, Queue_Item_Repository::class );
 		RepositoryRegistry::registerRepository( Process::class, Entity_Repository::class );
@@ -463,6 +497,27 @@ class Bootstrap extends BootstrapComponent {
 	 */
 	protected static function initControllers(): void {
 		parent::initControllers();
+
+		// Extend GeneralSettingsController.
+		Reg::registerService(
+			GeneralSettingsController::class,
+			static function () {
+				return new General_Settings_Controller(
+					Reg::getService( GeneralSettingsService::class ),
+					Reg::getService( CategoryService::class )
+				);
+			}
+		);
+
+		// Extend PromotionalWidgetsController.
+		Reg::registerService(
+			PromotionalWidgetsController::class,
+			static function () {
+				return new Promotional_Widgets_Controller(
+					Reg::getService( WidgetSettingsService::class )
+				);
+			}
+		);
 
 		// Plugin controllers.
 		Reg::registerService(

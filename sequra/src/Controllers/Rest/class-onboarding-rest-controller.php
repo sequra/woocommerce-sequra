@@ -12,7 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
-use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
+use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
 use SeQura\WC\Services\Interface_Logger_Service;
 use WP_Error;
 use WP_REST_Request;
@@ -40,6 +40,10 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_SEL_FOR_ALT_PRICE_TRIGGER                  = 'selForAltPriceTrigger';
 	private const PARAM_SEL_FOR_DEFAULT_LOCATION                   = 'selForDefaultLocation';
 	private const PARAM_CUSTOM_LOCATIONS                           = 'customLocations';
+
+	private const PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET = 'sel_for_target';
+	private const PARAM_CUSTOM_LOCATION_COUNTRY        = 'country';
+	private const PARAM_CUSTOM_LOCATION_PRODUCT        = 'product';
 
 	/**
 	 * Constructor.
@@ -347,7 +351,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$response = AdminAPI::get()
 			->widgetConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->setWidgetSettings(
-				new WidgetSettingsRequest(
+				new Widget_Settings_Request(
 					(bool) $request->get_param( self::PARAM_USE_WIDGETS ),
 					null === $request->get_param( self::PARAM_ASSETS_KEY ) ? null : strval( $request->get_param( self::PARAM_ASSETS_KEY ) ),
 					(bool) $request->get_param( self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE ),
@@ -361,7 +365,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
-					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
+					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ) // @phpstan-ignore-line
 				)
 			)
 			->toArray();
@@ -495,13 +499,13 @@ class Onboarding_REST_Controller extends REST_Controller {
 			return false;
 		}
 		foreach ( $param as $location ) {
-			if ( ! isset( $location['selForTarget'], $location['product'], $location['country'] )
-				|| ! is_string( $location['selForTarget'] )
-				|| ! is_string( $location['product'] )
-				|| ! is_string( $location['country'] )
-				|| empty( $location['selForTarget'] )
-				|| empty( $location['product'] )
-				|| empty( $location['country'] )
+			if ( ! isset( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ], $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
+				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] )
+				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
+				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
+				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] )
+				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
+				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
 				) {
 				return false;
 			}
@@ -511,16 +515,16 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 	/**
 	 * Sanitize widget location list.
-	 * 
+	 *
 	 * @param array<int, array<string, string>> $param The parameter.
 	 * @return array<int, array<string, string>>
 	 */
 	public function sanitize_widget_location_list( $param ): array {
 		foreach ( $param as &$location ) {
 			$location = array(
-				'selForTarget' => sanitize_text_field( strval( $location['selForTarget'] ) ),
-				'product'      => sanitize_text_field( strval( $location['product'] ) ),
-				'country'      => sanitize_text_field( strval( $location['country'] ) ),
+				self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] ) ),
+				self::PARAM_CUSTOM_LOCATION_PRODUCT        => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] ) ),
+				self::PARAM_CUSTOM_LOCATION_COUNTRY        => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] ) ),
 			);
 		}
 		return $param;
