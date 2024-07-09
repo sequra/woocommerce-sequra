@@ -20,29 +20,12 @@ use Sequra\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Responses\Ge
 class General_Settings_Controller extends GeneralSettingsController {
 
 	/**
-	 * General settings service.
-	 *
-	 * @var GeneralSettingsService
-	 */
-	private $general_settings_service;
-
-	/**
-	 * Constructor
-	 */
-	public function __construct(
-		GeneralSettingsService $general_settings_service,
-		CategoryService $category_service
-	) {
-		parent::__construct( $general_settings_service, $category_service );
-		$this->general_settings_service = $general_settings_service;
-	}
-
-	/**
 	 * Gets active general settings.
 	 *
 	 * @return GeneralSettingsResponse
 	 */
 	public function getGeneralSettings(): GeneralSettingsResponse {
-		return new General_Settings_Response( $this->general_settings_service->getGeneralSettings() );
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		return new General_Settings_Response( $this->generalSettingsService->getGeneralSettings() );
 	}
 }

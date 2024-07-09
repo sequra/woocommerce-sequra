@@ -26,9 +26,9 @@ class General_Settings extends GeneralSettings {
         // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$this->generalSettings = Domain_General_Settings::from_parent( 
 			$this->generalSettings,
-			boolval( static::getDataValue( $data_general_settings, 'enabledForServices', false ) ), // @phpstan-ignore-line
-			boolval( static::getDataValue( $data_general_settings, 'allowFirstServicePaymentDelay', true ) ), // @phpstan-ignore-line
-			boolval( static::getDataValue( $data_general_settings, 'allowServiceRegItems', true ) ), // @phpstan-ignore-line
+			boolval( static::getDataValue( $data_general_settings, 'enabledForServices', false ) ),
+			boolval( static::getDataValue( $data_general_settings, 'allowFirstServicePaymentDelay', true ) ),
+			boolval( static::getDataValue( $data_general_settings, 'allowServiceRegItems', true ) ),
 			strval( static::getDataValue( $data_general_settings, 'defaultServicesEndDate', 'P1Y' ) )
 		);
         // phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase

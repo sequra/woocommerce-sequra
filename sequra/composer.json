@@ -25,7 +25,7 @@
         ]
     },
     "require": {
-        "sequra/integration-core": "v1.0.13"
+        "sequra/integration-core": "v1.0.14"
     },
     "require-dev": {
         "phpunit/phpunit": ">5.0",
