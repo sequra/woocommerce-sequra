@@ -12,9 +12,9 @@ use DateTime;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\RegistrationItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
+use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Registration_Item;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Services\Interface_Logger_Service;
@@ -143,7 +143,7 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get registration item instance
 	 */
-	private function get_registration_item( WC_Product $product, int $qty ): ?RegistrationItem {
+	private function get_registration_item( WC_Product $product, int $qty ): ?Registration_Item {
 		$registration_amount = $this->product_service->get_registration_amount( $product->get_id() );
 		if ( $registration_amount <= 0 ) {
 			return null;
@@ -152,7 +152,7 @@ class Cart_Service implements Interface_Cart_Service {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = wp_strip_all_tags( $product->get_title() );
 
-		return new RegistrationItem(
+		return new Registration_Item(
 			"$ref-reg",
 			"Reg. $name",
 			$this->pricing_service->to_cents( $registration_amount ) * $qty
@@ -163,7 +163,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 *
 	 * @return ProductItem|ServiceItem
 	 */
-	private function get_item( WC_Product $product, float $total_price, ?RegistrationItem $reg_item, int $qty, mixed $item ) {
+	private function get_item( WC_Product $product, float $total_price, ?Registration_Item $reg_item, int $qty, mixed $item ) {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = wp_strip_all_tags( $product->get_title() );
 		if ( $this->configuration->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {

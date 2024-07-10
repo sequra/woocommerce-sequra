@@ -18,7 +18,6 @@ use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalDat
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
-use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\Services\CountryConfigurationService;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
@@ -28,13 +27,12 @@ use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountri
 use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
-use SeQura\Core\BusinessLogic\Domain\Order\Builders\CreateOrderRequestBuilder;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\AbstractItemFactory;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
-use SeQura\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodsService;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
@@ -61,6 +59,7 @@ use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
+use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item_Factory;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
@@ -73,7 +72,6 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Utility\Encryptor;
 use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Service;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Default_Logger_Adapter;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Shop_Logger_Adapter;
-use SeQura\WC\Controllers\Settings_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Settings_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
@@ -371,6 +369,15 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Interface_Create_Order_Request_Builder::class ];
+			}
+		);
+		Reg::registerService(
+			AbstractItemFactory::class,
+			static function () {
+				if ( ! isset( self::$cache[ AbstractItemFactory::class ] ) ) {
+					self::$cache[ AbstractItemFactory::class ] = new Item_Factory();
+				}
+				return self::$cache[ AbstractItemFactory::class ];
 			}
 		);
 
