@@ -271,19 +271,24 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		}
 
 		$order = wc_get_order( absint( $_GET['order'] ) );
-		if ( $order instanceof WC_Order && in_array( $order->get_status(), array( 'on-hold', 'processing' ), true ) ) {
-			$return_url = $order->get_checkout_order_received_url();
-			if ( ! $order->is_paid() ) {
-				wc_add_notice(
-					__(
-						'<p>seQura is processing your request.</p>
+		if ( $order instanceof WC_Order ) {
+			if ( in_array( $order->get_status(), array( 'on-hold', 'processing' ), true ) ) {
+				$return_url = $order->get_checkout_order_received_url();
+				if ( ! $order->is_paid() ) {
+					wc_add_notice(
+						__(
+							'<p>seQura is processing your request.</p>
 							<p>After a few minutes <b>you will get an email with your request result</b>.
 							seQura might contact you to get some more information.</p>
 							<p><b>Thanks for choosing seQura!</b>',
-						'sequra'
-					),
-					'notice'
-				);
+							'sequra'
+						),
+						'notice'
+					);
+				}
+			} else {
+				wc_add_notice( __( 'Error has occurred, please try again.', 'sequra' ), 'error' );
+				$return_url = $order->get_checkout_payment_url();
 			}
 		}
 		//phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -382,7 +387,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 				
 				$order = wc_get_order( $payload['order'] );
 				if ( $order instanceof WC_Order ) {
-					$order->set_status( 'pending', $msg ); // TODO: Add message to explain the status change.
+					$order->set_status( 'pending', $msg );
 					$order->save();
 				}
 				
