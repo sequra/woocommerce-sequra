@@ -382,7 +382,8 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 				
 				$order = wc_get_order( $payload['order'] );
 				if ( $order instanceof WC_Order ) {
-					$order->set_status( 'pending', $msg );
+					$order->set_status( 'pending', $msg ); // TODO: Add message to explain the status change.
+					$order->save();
 				}
 				
 				status_header( 410 ); // Set 410 status to trigger a refund for the order.
