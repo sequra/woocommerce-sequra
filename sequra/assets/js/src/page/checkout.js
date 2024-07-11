@@ -50,6 +50,7 @@
                         paymentMethod.dispatchEvent(new Event('change'));
                     }
                 })
+                jQuery( document.body ).trigger( 'payment_method_selected' );
             }))
 
         },

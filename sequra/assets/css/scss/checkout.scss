@@ -101,4 +101,8 @@
             }
         }
     }
+
+    > .wc_payment_method:not(.payment_method_sequra) > input[type="radio"]:not(:checked) ~ .payment_box {
+        display: none!important;
+    }
 }
