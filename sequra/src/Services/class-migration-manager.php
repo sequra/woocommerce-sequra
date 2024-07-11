@@ -8,8 +8,8 @@
 
 namespace SeQura\WC\Services;
 
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Repositories\Migrations\Migration;
-use SeQura\WC\Services\Core\Configuration;
 
 /**
  * Run migrations to make changes to the database.

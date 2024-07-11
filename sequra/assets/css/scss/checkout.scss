@@ -1,0 +1,108 @@
+.sequra-payment-method {
+    display: flex;
+    width: 100%;
+    position: relative;
+    padding-left: 3.5em;
+    padding-right: 0.75em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    box-sizing: border-box;
+
+    &::after {
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        background: hsla(0, 0%, 7%, 0.11);
+        content: "";
+        height: 1px;
+        left: 1px;
+        position: absolute;
+        right: 1px;
+        top: 0;
+    }
+    &:last-child::after {
+        border-width: 1px;
+    }
+
+    > label {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        font-size: 0.9em;
+    }
+    &__icon {
+        order: 1;
+        height: auto !important;
+        width: 64px !important;
+    }
+    &__description {
+        display: grid;
+        flex-grow: 1;
+    }
+    &__name {
+        font-weight: 700;
+    }
+    &__input {
+        display: inline-block !important;
+    }
+}
+.sequra-block__description {
+    margin-bottom: 1em;
+    display: block;
+
+    & + .sequra-payment-method::after {
+        display: none;
+    }
+}
+
+// Classic checkout
+.wc_payment_methods {
+    > .wc_payment_method.payment_method_sequra {
+        #payment_method_sequra,
+        [for="payment_method_sequra"],
+        .payment_box::before,
+        .sequra-block__description {
+            display: none !important;
+        }
+        .payment_box {
+            background-color: inherit !important;
+            display: block !important;
+            margin: 0.25em 0 !important;
+        }
+        .payment_box,
+        .sequra-payment-method {
+            padding: 0 !important;
+        }
+        .sequra-payment-method {
+            margin-bottom: 0.5em!important;
+            &::after {
+               display: none;
+            }
+            
+            &__name {
+                font-weight: inherit;
+                color: var(--wp--preset--color--contrast, #000);
+                font-size: var(--wp--preset--font-size--medium, 1em);
+            }
+
+            &__input {
+                margin-right: 1.4em !important;
+            }
+
+            &_claim {
+                font-size: 0.92em;
+            }
+
+            & > label {
+                font-size: inherit;
+                margin-bottom: 0!important;
+            }
+            &__icon {
+                width: 80px !important;
+            }
+        }
+    }
+
+    > .wc_payment_method:not(.payment_method_sequra) > input[type="radio"]:not(:checked) ~ .payment_box {
+        display: none!important;
+    }
+}

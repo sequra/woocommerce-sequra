@@ -84,7 +84,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		 *
 		 * @since 2.0.0
 		 */
-		do_action( 'woocommerce_sequra_before_load', $this );
+		do_action( 'woocommerce_sequra_before_load', $this ); // OK.
 		$this->id = 'sequra';
 
 		$this->method_title       = __( 'seQura', 'sequra' );
@@ -116,16 +116,16 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 					'process_admin_options',
 				)
 			);
-			add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_response' ) );
-			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
-			add_filter( 'woocommerce_order_get_payment_method_title', array( $this, 'order_get_payment_method_title' ), 10, 2 );
+			add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_response' ) ); // OK.
+			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 ); // OK.
+			add_filter( 'woocommerce_order_get_payment_method_title', array( $this, 'order_get_payment_method_title' ), 10, 2 ); // OK.
 			add_action( 'woocommerce_after_checkout_form', array( $this, 'jscript_checkout' ) );
 			/**
 			 * Action hook to allow plugins to run when the class is loaded.
 			 *
 			 * @since 2.0.0 
 			 */
-			do_action( 'woocommerce_sequra_loaded', $this );
+			do_action( 'woocommerce_sequra_loaded', $this ); // OK.
 			self::$initialized = true;
 		}
 	}

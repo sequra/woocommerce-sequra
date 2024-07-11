@@ -1061,13 +1061,12 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	}
 
 	/**
-	 * Undocumented function
-	 *
-	 * @return array
+	 * Get platform info payload
 	 */
-	public static function platform() {
+	public static function platform(): array {
 		$sql = "show variables like 'version';";
 		global $wpdb;
+		$wpdb->get_version();
 		// phpcs:disable
 		$db_version = $wpdb->get_var($sql);
 		// phpcs:enable

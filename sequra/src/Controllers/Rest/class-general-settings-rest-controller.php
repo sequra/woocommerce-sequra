@@ -103,7 +103,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getCurrentStore()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -124,7 +124,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getVersion()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -145,7 +145,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getStores()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -166,7 +166,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getUIState( true ) // Pass false if the Onboarding does not configure widgets. 
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -187,7 +187,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getGeneralSettings()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -208,7 +208,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getShopName()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -242,7 +242,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			)
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -263,7 +263,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getShopCategories()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -284,7 +284,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getShopOrderStatuses()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -305,7 +305,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			->getOrderStatusSettings()
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
@@ -332,7 +332,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			)
 			->toArray();
 		} catch ( \Throwable $e ) {
-			// TODO: Log error.
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );

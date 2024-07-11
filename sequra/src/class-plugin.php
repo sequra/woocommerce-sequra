@@ -7,9 +7,10 @@
 
 namespace SeQura\WC;
 
-use SeQura\WC\Controllers\Interface_I18n_Controller;
-use SeQura\WC\Controllers\Interface_Assets_Controller;
-use SeQura\WC\Controllers\Interface_Settings_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
 use SeQura\WC\Services\Interface_Migration_Manager;
 
@@ -40,26 +41,16 @@ class Plugin {
 	private $migration_manager;
 
 	/**
-	 * Construct the plugin. Bind hooks with controllers.
-	 *
-	 * @param array<string, string>                      $data            The plugin data.
-	 * @param string                      $base_name       The plugin base name.
-	 * @param Interface_Migration_Manager $migration_manager Migration manager.
-	 * @param Interface_I18n_Controller   $i18n_controller I18n controller.
-	 * @param Interface_Assets_Controller $assets_controller Assets controller.
-	 * @param Interface_Settings_Controller $settings_controller Settings controller.
-	 * @param REST_Controller          $rest_settings_controller REST Settings controller.
-	 * @param REST_Controller          $rest_onboarding_controller REST Onboarding controller.
-	 * @param REST_Controller          $rest_payment_controller REST Payment controller.
-	 * @param REST_Controller          $rest_log_controller REST Log controller.
+	 * Construct the plugin and bind hooks with controllers.
 	 */
 	public function __construct(
-		$data,
-		$base_name,
+		array $data,
+		string $base_name,
 		Interface_Migration_Manager $migration_manager,
 		Interface_I18n_Controller $i18n_controller,
 		Interface_Assets_Controller $assets_controller,
 		Interface_Settings_Controller $settings_controller,
+		Interface_Payment_Controller $payment_controller,
 		REST_Controller $rest_settings_controller,
 		REST_Controller $rest_onboarding_controller,
 		REST_Controller $rest_payment_controller,
@@ -83,12 +74,18 @@ class Plugin {
 		add_filter( "plugin_action_links_{$base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
 		add_filter( 'admin_footer_text', array( $settings_controller, 'remove_footer_admin' ) );
 
-
 		// REST Controllers.
 		add_action( 'rest_api_init', array( $rest_settings_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_onboarding_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_payment_controller, 'register_routes' ) );
 		add_action( 'rest_api_init', array( $rest_log_controller, 'register_routes' ) );
+
+		// Payment hooks.
+		add_filter( 'woocommerce_payment_gateways', array( $payment_controller, 'register_gateway_classes' ) );
+		add_action( 'woocommerce_blocks_loaded', array( $payment_controller, 'register_gateway_gutenberg_block' ) );
+		
+		add_filter( 'woocommerce_thankyou_order_received_text', array( $payment_controller, 'order_received_text' ), 10, 2 );
+		add_filter( 'woocommerce_order_get_payment_method_title', array( $payment_controller, 'order_get_payment_method_title' ), 10, 2 );
 	}
 
 	/**

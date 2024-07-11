@@ -117,7 +117,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * @return void
 	 */
 	public function batchStatusUpdate( array $ids, $status ) {
-		// TODO: Implement batchStatusUpdate() method.
+		// Not used in this implementation.
 	}
 
 	/**

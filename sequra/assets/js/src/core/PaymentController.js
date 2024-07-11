@@ -27,7 +27,7 @@ if (!window.SequraFE) {
      * @constructor
      */
     function PaymentController(configuration) {
-        const {templateService, elementGenerator: generator, components, utilities} = SequraFE;
+        const { templateService, elementGenerator: generator, components, utilities } = SequraFE;
         /** @type AjaxServiceType */
         const api = SequraFE.ajaxService;
         /** @type string */
@@ -50,7 +50,7 @@ if (!window.SequraFE) {
          *
          * @param {{ state?: string, storeId: string }} config
          */
-        this.display = ({storeId}) => {
+        this.display = ({ storeId }) => {
             currentStoreId = storeId;
             templateService.clearMainPage();
 
@@ -103,7 +103,7 @@ if (!window.SequraFE) {
                             },
                             mode: connectionSettings.environment === 'live' ? connectionSettings.environment : 'test',
                             activeStore: currentStoreId,
-                            stores: stores.map((store) => ({label: store.storeName, value: store.storeId})),
+                            stores: stores.map((store) => ({ label: store.storeName, value: store.storeId })),
                             onChange: (storeId) => {
                                 if (storeId !== SequraFE.state.getStoreId()) {
                                     SequraFE.state.setStoreId(storeId);
@@ -154,11 +154,11 @@ if (!window.SequraFE) {
          */
         const getTableHeaders = () => {
             return [
-                {label: 'payments.paymentMethods', className: 'sqp-payment-method-header-cell sqm--text-left'},
-                {label: 'payments.minimumAmount'},
-                {label: 'payments.maximumAmount'},
-                {label: 'payments.availableFrom'},
-                {label: 'payments.availableTo'},
+                { label: 'payments.paymentMethods', className: 'sqp-payment-method-header-cell sqm--text-left' },
+                { label: 'payments.minimumAmount' },
+                { label: 'payments.maximumAmount' },
+                { label: 'payments.availableFrom' },
+                { label: 'payments.availableTo' },
             ];
         }
 
@@ -173,8 +173,9 @@ if (!window.SequraFE) {
                     {
                         className: 'sqp-payment-method-cell sqm--text-left',
                         renderer: (cell) => {
+                            const icon = method.icon ? method.icon : (SequraFE.imagesProvider.icons.payment || '');
                             cell.prepend(
-                                generator.createElementFromHTML(SequraFE.imagesProvider.icons.payment || ''),
+                                generator.createElementFromHTML(icon),
                                 generator.createElement('div', '', '', null, [
                                     generator.createElement('h3', 'sqp-payment-method-title', method.title),
                                     generator.createElement(
@@ -186,10 +187,10 @@ if (!window.SequraFE) {
                             )
                         }
                     },
-                    {label: method?.minAmount ? formatAmount(method.minAmount) : '/'},
-                    {label: method?.maxAmount ? formatAmount(method.maxAmount) : '/'},
-                    {label: method?.startsAt ? formatDate(method.startsAt) : '/'},
-                    {label: method?.endsAt ? formatDate(method.endsAt) : '/'}
+                    { label: method?.minAmount ? formatAmount(method.minAmount) : '/' },
+                    { label: method?.maxAmount ? formatAmount(method.maxAmount) : '/' },
+                    { label: method?.startsAt ? formatDate(method.startsAt) : '/' },
+                    { label: method?.endsAt ? formatDate(method.endsAt) : '/' }
                 ];
             });
         }
@@ -236,7 +237,7 @@ if (!window.SequraFE) {
          * @returns {string}
          */
         const formatAmount = (amount) => {
-            return (amount / 100).toLocaleString('es', {minimumFractionDigits: 2}) + ' EUR';
+            return (amount / 100).toLocaleString('es', { minimumFractionDigits: 2 }) + ' EUR';
         }
     }
 

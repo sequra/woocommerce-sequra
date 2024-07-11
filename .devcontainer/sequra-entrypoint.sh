@@ -97,7 +97,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     # curl "http://127.0.0.1/?post_type=product&RESET_SEQURA_ACTIVE_METHODS=true" > /dev/null
 
     wp plugin deactivate --allow-root wordpress-importer --uninstall
-    wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name)
+    wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v sequra | tr "\n" " ")
 
     touch /var/www/html/.post-install-complete
     
