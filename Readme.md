@@ -57,6 +57,7 @@ This repo contains a group of utility scripts under ```bin/``` directory. The go
 | ```./bin/phpstan``` | Run PHPStan on the project files |
 | ```./bin/cp_sources``` | Copy WordPress Core and WooCommerce code to ```.devcontainer/``` |
 | ```./bin/publish_to_wordpress.sh``` | Handles the plugin publishing to WordPress.org |
+| ```./bin/playwright``` | Run E2E in `sequra/tests-e2e` directory tests using Playwright using a Docker container |
 
 If you require a composer dependency from a GitHub repository, you need to create a `auth.json` file in the root of the repository. Set this as the file content, replacing `GITHUB_TOKEN` with your access token:
 
@@ -68,7 +69,7 @@ If you require a composer dependency from a GitHub repository, you need to creat
 }
 ```
 
-## Tests
+## Unit and Integration Tests
 
 ### Setup
 
@@ -106,6 +107,44 @@ Add this configuration to project workspace's settings:
     }
 }
 ```
+## End to end Tests
+
+You can use the provided utility `bin/playwright` to run E2E tests defined in `sequra/tests-e2e` directory. This utility will run tests in a headless mode inside of a Docker container of the official image provided by the Playwright team.
+
+Also, you can pass additional arguments to the utility to configure test execution, like this:
+
+ ```bash
+ bin/playwright --shard=1/10 --project=chromium
+ ```
+
+Some examples of arguments you can append to the command above:
+
+| Argument | Description |
+| -------- | ------------------------------------------------------------------ |
+| `---workers 3` | Runs 3 workers in parallel |
+| `---project=chromium` | Execute on specific browser |
+| `./tests-e2e/example.spec.js` | Execute specific test file. Supports multiple file paths space separated. Also supports file name without extension and path like this: `example` |
+
+More info at: https://playwright.dev/docs/intro
+
+### Running using headed mode
+
+It is possible to run Playwright in headed mode. This will open a browser window to execute the tests. For now, it is not possible by using the utility, so you need to install nvm on your local machine. Then, install npm (See system requirements at: https://playwright.dev/docs/intro#system-requirements).
+
+Then, install browsers using this command:
+
+```bash
+npx playwright install
+```
+
+To run the tests in headed mode, run the following command in the `sequra` directory:
+
+```bash
+npx playwright test
+```
+
+Note: append many arguments as needed to the command.
+
 ## Hidden pages
 
 ### Order status settings
