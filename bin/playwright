@@ -1,0 +1,3 @@
+#!/bin/bash
+BASEDIR="$(dirname $(realpath $0))/.."
+docker run -it --rm -v "${BASEDIR}"/sequra:/app -w /app mcr.microsoft.com/playwright:v1.45.0-jammy bash -c "npx playwright test $@"
