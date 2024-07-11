@@ -88,7 +88,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$store_id_args,
 			array(
 				self::PARAM_USE_WIDGETS                    => $this->get_arg_bool(),
-				self::PARAM_ASSETS_KEY                     => $this->get_arg_string(),
+				self::PARAM_ASSETS_KEY                     => $this->get_arg_string( true, '', array( $this, 'validate_assets_key' ) ),
 				self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE => $this->get_arg_bool(),
 				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING => $this->get_arg_bool(),
 				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE => $this->get_arg_bool(),
@@ -168,6 +168,18 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Check if the assets key is valid.
+	 * 
+	 * @param mixed $param The parameter.
+	 * @param WP_REST_Request $request The request.
+	 * @param string $key The key.
+	 */
+	public function validate_assets_key( $param, $request, $key ): bool {
+		return is_string( $param ) 
+		&& ( ! boolval( $request->get_param( self::PARAM_USE_WIDGETS ) ) || '' !== trim( $param ) );
 	}
 
 	/**
