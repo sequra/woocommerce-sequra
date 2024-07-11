@@ -401,7 +401,8 @@ class Bootstrap extends BootstrapComponent {
 							RepositoryRegistry::getRepository( StatisticalData::class ),
 							RepositoryRegistry::getRepository( SendReport::class ),
 							RepositoryRegistry::getRepository( QueueItem::class ),
-							RepositoryRegistry::getRepository( SeQuraOrder::class ), // TODO: why is this here?
+							//phpcs:ignore
+							// RepositoryRegistry::getRepository( SeQuraOrder::class ),
 						)
 					);
 				}

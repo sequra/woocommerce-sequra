@@ -54,7 +54,6 @@ class I18n implements Interface_I18n {
 	public function get_current_country(): string {
 		$country = null;
 		if ( function_exists( 'WC' ) ) {
-			// TODO: Check if this get the country from the checkout form.
 			$customer = WC()->customer;
 			$country  = $customer ? $customer->get_shipping_country() : null;
 			if ( empty( $country ) ) {

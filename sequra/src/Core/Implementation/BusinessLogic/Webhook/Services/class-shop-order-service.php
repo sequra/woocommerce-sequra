@@ -67,27 +67,15 @@ class Shop_Order_Service implements ShopOrderService {
 	 *
 	 * @return mixed
 	 */
-	public function updateStatus( Webhook $webhook, string $wc_status, ?int $reason_code = null, ?string $message = null ) {
-		$sq_status = $this->order_status_service->map_status_from_shop_to_sequra( $wc_status );
-
-		if ( ! $sq_status ) {
-			// TODO: error? cancel order?
-			$this->logger->log_debug( 'Order status not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'status', $wc_status ) ) );
-			return;
-		}
-		
-		try {
-			switch ( $sq_status ) {
-				case OrderStates::STATE_APPROVED:
-				case OrderStates::STATE_NEEDS_REVIEW:
-					$this->update_order_to_status( $webhook, $wc_status );
-					break;
-				case OrderStates::STATE_CANCELLED: // TODO: what happen with other statuses? should cancel it too?
-					$this->cancel_order( $webhook, $wc_status );
-					break;
-			}
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+	public function updateStatus( Webhook $webhook, string $wc_status, ?int $reason_code = null, ?string $message = null ) {    
+		switch ( $webhook->getSqState() ) {
+			case OrderStates::STATE_CANCELLED:
+				$this->cancel_order( $webhook, $wc_status );
+				break;
+			default:
+				// OrderStates::STATE_APPROVED, OrderStates::STATE_NEEDS_REVIEW. Others will throw an exception.
+				$this->update_order_to_status( $webhook, $wc_status );
+				break;
 		}
 	}
 
@@ -100,7 +88,7 @@ class Shop_Order_Service implements ShopOrderService {
 	 * @return string[] | int[]
 	 */
 	public function getReportOrderIds( int $page, int $limit = 5000 ): array {
-		return array(); // TODO: should this remain unimplemented?
+		return array();
 	}
 
 	/**
@@ -129,7 +117,6 @@ class Shop_Order_Service implements ShopOrderService {
 	 * @return string
 	 */
 	public function getOrderUrl( string $merchant_reference ): string {
-		// TODO: Does $merchant_reference correspond to the WC order ID?
 		$order = wc_get_order( absint( $merchant_reference ) );
 		return $order instanceof WC_Order ? $order->get_view_order_url() : '';
 	}
@@ -143,7 +130,6 @@ class Shop_Order_Service implements ShopOrderService {
 		$order = $this->get_order( $webhook );
 
 		if ( ! $order ) {
-			// TODO: Order must exist in the shop system at this point. What to do?
 			throw new Exception( 'WC Order not found' );
 		} 
 		

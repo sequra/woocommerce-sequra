@@ -8,7 +8,6 @@
 // phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
 ?>
 <script>
-	// TODO change display and visibility to CSS implementation
 	jQuery('.payment_method_sequra').show();
 	if (typeof window.sq_product_campaign === 'undefined') {
 		window.sq_product_campaign = jQuery('input[name=sq_product_campaign]:first').val()
@@ -29,5 +28,5 @@
 		jQuery('.payment_method_sequra').show();
 		jQuery('#payment_method_sequra').removeClass('input-radio').hide();
 	});
-	Sequra.onLoad(function () { Sequra.refreshComponents(); }); // TODO: this is not required.
+	Sequra.onLoad(function () { Sequra.refreshComponents(); });
 </script>

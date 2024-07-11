@@ -18,7 +18,7 @@ class Encryptor implements EncryptorInterface {
 	 * Get key used for encryption and decryption.
 	 */
 	private function get_key(): string {
-		return hash( 'sha256', AUTH_KEY, true ); // TODO: Review this!
+		return hash( 'sha256', AUTH_KEY, true );
 	}
 
 	/**

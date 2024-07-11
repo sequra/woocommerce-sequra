@@ -341,22 +341,19 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Validate payload and exit if it is invalid, giving a proper response
 	 */
 	private function die_on_invalid_payload( array $payload ): void {
-		if ( null === $payload['order'] || null === $payload['signature'] || null === $payload['storeId'] ) {
-			$this->logger->log_error( 'Bad request', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
-			status_header( 400 );// TODO: review this status code.
-			die( 'Bad request' );
-		}
-
-		if ( $this->payment_service->sign( $payload['order'] ) !== $payload['signature'] ) {
+		if ( null === $payload['order'] 
+			|| null === $payload['signature'] 
+			|| null === $payload['storeId']
+			|| $this->payment_service->sign( $payload['order'] ) !== $payload['signature'] ) {
 			$this->logger->log_error( 'Bad signature', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
-			status_header( 498 ); // TODO: review this status code.
+			status_header( 498 );
 			die( 'Bad signature' );
 		}
 
 		$order = wc_get_order( $payload['order'] );
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_error( 'No order found', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
-			status_header( 404 );// TODO: review this status code.
+			status_header( 404 );
 			die( 'No order found id:' . esc_html( $payload['order'] ) );
 		}
 	}

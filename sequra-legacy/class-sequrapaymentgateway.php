@@ -119,7 +119,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			add_action( 'woocommerce_api_woocommerce_' . $this->id, array( $this, 'check_response' ) ); // OK.
 			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 ); // OK.
 			add_filter( 'woocommerce_order_get_payment_method_title', array( $this, 'order_get_payment_method_title' ), 10, 2 ); // OK.
-			add_action( 'woocommerce_after_checkout_form', array( $this, 'jscript_checkout' ) ); // TODO: Migrate this. Add a filter to allow merchants to disable this behavior.
+			add_action( 'woocommerce_after_checkout_form', array( $this, 'jscript_checkout' ) );
 			/**
 			 * Action hook to allow plugins to run when the class is loaded.
 			 *
