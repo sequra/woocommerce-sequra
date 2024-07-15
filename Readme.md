@@ -121,8 +121,9 @@ Some examples of arguments you can append to the command above:
 
 | Argument | Description |
 | -------- | ------------------------------------------------------------------ |
-| `---workers 3` | Runs 3 workers in parallel |
-| `---project=chromium` | Execute on specific browser |
+| `--workers 3` | Runs 3 workers in parallel |
+| `--debug` | Runs tests in debug mode |
+| `--project=chromium` | Execute on specific browser. Options are: `chromium`, `firefox`, `webkit`  |
 | `./tests-e2e/example.spec.js` | Execute specific test file. Supports multiple file paths space separated. Also supports file name without extension and path like this: `example` |
 
 More info at: https://playwright.dev/docs/intro
@@ -140,7 +141,7 @@ npx playwright install
 To run the tests in headed mode, run the following command in the `sequra` directory:
 
 ```bash
-npx playwright test
+npx playwright test --headed
 ```
 
 Note: append many arguments as needed to the command.
