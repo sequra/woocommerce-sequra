@@ -26,14 +26,23 @@ test.describe('Checkout', () => {
     await checkout.waitForOrderSuccess({ page });
   });
 
-  test.only('Make a 🍊 payment with "Review test approve" names', async ({ page, cart, checkout }) => {
+  test('Make a 🍊 payment with "Review test approve" names', async ({ page, cart, checkout }) => {
     await cart.add({ page, product: 'sunglasses', quantity: 1 });
     await checkout.open({ page });
     await checkout.expectI1ToBeVisible({ page });
-    await checkout.fillWithReviewTestApprove({ page });
-    await checkout.placeOrderUsingI1AndReviewTestApprove({ page });
+    await checkout.fillWithReviewTest({ page, approve: true });
+    await checkout.placeOrderUsingI1({ page, approve: true });
     await checkout.waitForOrderOnHold({ page });
-    await checkout.expectOrderChangeToProcessing({ page });
-    await page.pause();
+    await checkout.expectOrderChangeTo({ page, toStatus: 'wc-processing' });
+  });
+
+  test('Make a 🍊 payment with "Review test cancel" names', async ({ page, cart, checkout }) => {
+    await cart.add({ page, product: 'sunglasses', quantity: 1 });
+    await checkout.open({ page });
+    await checkout.expectI1ToBeVisible({ page });
+    await checkout.fillWithReviewTest({ page, approve: false });
+    await checkout.placeOrderUsingI1({ page, approve: false });
+    await checkout.waitForOrderOnHold({ page });
+    await checkout.expectOrderChangeTo({ page, toStatus: 'wc-cancelled' });
   });
 });

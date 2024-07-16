@@ -136,29 +136,18 @@ class Checkout {
         await page.goto('./?page_id=7');
     }
 
-    async fillWithReviewTestApprove({ page }) {
-        await page.fill(this.selector.email, this.shopper.approve.email);
-        await page.fill(this.selector.country, this.shopper.approve.country);
-        await page.fill(this.selector.firstName, this.shopper.approve.firstName);
-        await page.fill(this.selector.lastName, this.shopper.approve.lastName);
-        await page.fill(this.selector.address1, this.shopper.approve.address1);
-        await page.fill(this.selector.postcode, this.shopper.approve.postcode);
-        await page.fill(this.selector.city, this.shopper.approve.city);
-        await page.fill(this.selector.state, this.shopper.approve.state);
-        await page.fill(this.selector.phone, this.shopper.approve.phone);
-        await page.waitForSelector(this.selector.placeOrder);
-    }
+    async fillWithReviewTest({ page, approve = true }) {
+        const shopper = approve ? this.shopper.approve : this.shopper.cancel;
 
-    async fillWithReviewTestCancel({ page }) {
-        await page.fill(this.selector.email, this.shopper.cancel.email);
-        await page.fill(this.selector.country, this.shopper.cancel.country);
-        await page.fill(this.selector.firstName, this.shopper.cancel.firstName);
-        await page.fill(this.selector.lastName, this.shopper.cancel.lastName);
-        await page.fill(this.selector.address1, this.shopper.cancel.address1);
-        await page.fill(this.selector.postcode, this.shopper.cancel.postcode);
-        await page.fill(this.selector.city, this.shopper.cancel.city);
-        await page.fill(this.selector.state, this.shopper.cancel.state);
-        await page.fill(this.selector.phone, this.shopper.cancel.phone);
+        await page.fill(this.selector.email, shopper.email);
+        await page.fill(this.selector.country, shopper.country);
+        await page.fill(this.selector.firstName, shopper.firstName);
+        await page.fill(this.selector.lastName, shopper.lastName);
+        await page.fill(this.selector.address1, shopper.address1);
+        await page.fill(this.selector.postcode, shopper.postcode);
+        await page.fill(this.selector.city, shopper.city);
+        await page.fill(this.selector.state, shopper.state);
+        await page.fill(this.selector.phone, shopper.phone);
         await page.waitForSelector(this.selector.placeOrder);
     }
 
@@ -198,7 +187,7 @@ class Checkout {
         await mainIframe.locator(this.selector.sqPayBtn).click();
     }
 
-    async placeOrderUsingI1AndReviewTestApprove({ page }) {
+    async placeOrderUsingI1({ page, approve = true }) {
         await page.click(this.selector.paymentMethodI1);
         await page.click(this.selector.placeOrder);
         await page.waitForURL(/page_id=7&order-pay=/);
@@ -206,24 +195,28 @@ class Checkout {
         await page.waitForSelector(this.selector.sqIframeI1, { state: 'attached', timeout: 10000 });
         const iframe = page.frameLocator(this.selector.sqIframeI1);
 
+        const shopper = approve ? this.shopper.approve : this.shopper.cancel;
+
         // First name, last name, and mobile phone came already filled.
         await iframe.locator(this.selector.sqI1DateOfBirth).click();
-        await iframe.locator(this.selector.sqI1DateOfBirth).fill(this.shopper.approve.dateOfBirth);
+        await iframe.locator(this.selector.sqI1DateOfBirth).fill(shopper.dateOfBirth);
         await iframe.locator(this.selector.sqI1Nin).click();
-        await iframe.locator(this.selector.sqI1Nin).fill(this.shopper.approve.dni);
+        await iframe.locator(this.selector.sqI1Nin).fill(shopper.dni);
         await iframe.locator(this.selector.sqI1AcceptPrivacyPolicy).click();
         await iframe.locator(this.selector.sqI1Btn).click();
 
-        this.fillOtp({ iframe });
+        this.fillOtp({ iframe, approve });
     }
 
-    async fillOtp({ iframe }) {
+    async fillOtp({ iframe, approve = true }) {
+        const shopper = approve ? this.shopper.approve : this.shopper.cancel;
+
         await iframe.locator(this.selector.sqOtp1).waitFor({ state: 'attached', timeout: 10000 });
-        await iframe.locator(this.selector.sqOtp1).fill(this.shopper.approve.otp[0]);
-        await iframe.locator(this.selector.sqOtp2).fill(this.shopper.approve.otp[1]);
-        await iframe.locator(this.selector.sqOtp3).fill(this.shopper.approve.otp[2]);
-        await iframe.locator(this.selector.sqOtp4).fill(this.shopper.approve.otp[3]);
-        await iframe.locator(this.selector.sqOtp5).fill(this.shopper.approve.otp[4]);
+        await iframe.locator(this.selector.sqOtp1).fill(shopper.otp[0]);
+        await iframe.locator(this.selector.sqOtp2).fill(shopper.otp[1]);
+        await iframe.locator(this.selector.sqOtp3).fill(shopper.otp[2]);
+        await iframe.locator(this.selector.sqOtp4).fill(shopper.otp[3]);
+        await iframe.locator(this.selector.sqOtp5).fill(shopper.otp[4]);
 
         await iframe.locator(this.selector.sqI1Btn).click();
     }
@@ -245,13 +238,13 @@ class Checkout {
         login({ page });
     }
 
-    async expectOrderChangeToProcessing({ page }) {
+    async expectOrderChangeTo({ page, toStatus, fromStatus = 'wc-on-hold' }) {
         this.gotoAdminOrder({ page });
 
         const retries = 60;
         for (let i = 0; i < retries; i++) {
             try {
-                await expect(page.locator(this.selector.adminOrderStatus)).toHaveValue("wc-on-hold");
+                await expect(page.locator(this.selector.adminOrderStatus)).toHaveValue(fromStatus);
                 if (i < retries - 1) {
                     await page.waitForTimeout(1000);
                     await page.reload();
@@ -262,7 +255,7 @@ class Checkout {
             }
         }
 
-        await expect(page.locator(this.selector.adminOrderStatus)).toHaveValue("wc-processing");
+        await expect(page.locator(this.selector.adminOrderStatus)).toHaveValue(toStatus);
     }
 
     async expectFp1ToBeVisible({ page }) {

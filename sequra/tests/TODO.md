@@ -10,7 +10,7 @@
 - [X] **E2E**: Make a successful payment using any shopper name
 - [ ] **E2E**: Make a successful payment using any shopper name (using services)
 - [X] **E2E**: Make a 🍊 payment with "Review test approve" names
-- [ ] **E2E**: Make a 🍊 payment with "Review test cancel" names
+- [X] **E2E**: Make a 🍊 payment with "Review test cancel" names
 - [ ] **E2E**: Make a payment attempt forcing a failure in the update order in timon step, by changing the order payload amounts so it differs with the approved one.
 
 ### Unit: Payload is correctly generated
