@@ -69,6 +69,26 @@ If you require a composer dependency from a GitHub repository, you need to creat
 }
 ```
 
+## seQura Helper plugin
+
+This plugin is intended to provide helper functions to setup data or ease common development tasks.
+
+### Configure for "dummy" merchant
+
+This functionality set up the required data in the database to use the dummy merchant. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=dummy_config'
+```
+
+### Configure for "dummy_services" merchant
+
+This functionality set up the required data in the database to use the dummy_services merchant. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=dummy_services_config'
+```
+
 ## Unit and Integration Tests
 
 ### Setup
