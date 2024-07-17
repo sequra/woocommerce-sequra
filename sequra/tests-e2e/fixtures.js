@@ -73,7 +73,7 @@ class Checkout {
             postcode: '08010',
             country: 'Spain',
             phone: '666666666',
-            dateOfBirth: '23/12/2000',
+            dateOfBirth: '01/01/2000',
             dni: '23232323T',
             creditCard: {
                 number: '4716773077339777',

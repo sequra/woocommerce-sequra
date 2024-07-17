@@ -1,10 +1,13 @@
 import { test, expect } from './fixtures';
 
-test.beforeEach('Restore state', async ({ page }) => {
-  // TODO: restore the database to a known state
-  // console.log('Restore state');
+test.beforeAll('Setup', async ({ request }) => {
+  const response = await request.post('./?sq-webhook=dummy_config');
+  expect(response.status()).toBe(200);
+  const json = await response.json();
+  expect(json.success).toBe(true);
 });
 
+test.describe.configure({ mode: 'parallel' });
 test.describe('Checkout', () => {
 
   test('All available seQura products appear in the checkout', async ({ page, cart, checkout }) => {
@@ -37,12 +40,17 @@ test.describe('Checkout', () => {
   });
 
   test('Make a 🍊 payment with "Review test cancel" names', async ({ page, cart, checkout }) => {
-    await cart.add({ page, product: 'sunglasses', quantity: 1 });
-    await checkout.open({ page });
-    await checkout.expectI1ToBeVisible({ page });
-    await checkout.fillWithReviewTest({ page, approve: false });
-    await checkout.placeOrderUsingI1({ page, approve: false });
-    await checkout.waitForOrderOnHold({ page });
-    await checkout.expectOrderChangeTo({ page, toStatus: 'wc-cancelled' });
+    try {
+      await cart.add({ page, product: 'sunglasses', quantity: 1 });
+      await checkout.open({ page });
+      await checkout.expectI1ToBeVisible({ page });
+      await checkout.fillWithReviewTest({ page, approve: false });
+      await checkout.placeOrderUsingI1({ page, approve: false });
+      await checkout.waitForOrderOnHold({ page });
+      await checkout.expectOrderChangeTo({ page, toStatus: 'wc-cancelled' });
+    } catch (e) {
+      await page.pause();
+      throw e;
+    }
   });
 });
