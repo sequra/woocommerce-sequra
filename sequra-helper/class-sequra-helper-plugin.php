@@ -151,6 +151,21 @@ class SeQura_Helper_Plugin {
 				'data'    => '{"class_name":"SeQura\\\\WC\\\\Core\\\\Extension\\\\BusinessLogic\\\\DataAccess\\\\PromotionalWidgets\\\\Entities\\\\Widget_Settings","id":null,"storeId":"1","widgetSettings":{"enabled":false,"assetsKey":"","displayOnProductPage":false,"showInstallmentsInProductListing":false,"showInstallmentsInCartPage":false,"miniWidgetSelector":"","widgetConfiguration":"{\"alignment\":\"center\",\"amount-font-bold\":\"true\",\"amount-font-color\":\"#1C1C1C\",\"amount-font-size\":\"15\",\"background-color\":\"white\",\"border-color\":\"#B1AEBA\",\"border-radius\":\"\",\"class\":\"\",\"font-color\":\"#1C1C1C\",\"link-font-color\":\"#1C1C1C\",\"link-underline\":\"true\",\"no-costs-claim\":\"\",\"size\":\"M\",\"starting-text\":\"only\",\"type\":\"banner\"}","widgetLabels":{"messages":[],"messagesBelowLimit":[]},"widgetLocationConfiguration":{"sel_for_price":".summary .price>.amount,.summary .price ins .amount","sel_for_alt_price":".woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount","sel_for_alt_price_trigger":".variations","sel_for_default_location":".summary .price","custom_locations":[]}}}',
 			)
 		);
+		$wpdb->insert(
+			$table_name,
+			array(
+				'id'      => 5,
+				'type'    => 'GeneralSettings',
+				'index_1' => '1',
+				'index_2' => null,
+				'index_3' => null,
+				'index_4' => null,
+				'index_5' => null,
+				'index_6' => null,
+				'index_7' => null,
+				'data'    => '{"class_name":"SeQura\\\\WC\\\\Core\\\\Extension\\\\BusinessLogic\\\\DataAccess\\\\GeneralSettings\\\\Entities\\\\General_Settings","id":null,"storeId":"1","generalSettings":{"sendOrderReportsPeriodicallyToSeQura":false,"showSeQuraCheckoutAsHostedPage":false,"allowedIPAddresses":[],"excludedProducts":[],"excludedCategories":[],"enabledForServices":true,"allowFirstServicePaymentDelay":false,"allowServiceRegItems":true,"defaultServicesEndDate":"P1Y"}}',
+			)
+		);
 	}
 	/**
 	 * Set configuration for dummy merchant
