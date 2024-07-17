@@ -93,6 +93,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp wc shipping_zone_method create 0 --method_id="${WC_SHIPPING_ZONE_METHOD_ID}" --settings="${WC_SHIPPING_ZONE_METHOD_SETTINGS}" --user=admin --allow-root
     
     wp plugin activate --allow-root sequra
+    wp plugin activate --allow-root sequra-helper
     # wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Fraccionar pago","merchantref":"dummy","user":"dummy","password":"ZqbjrN6bhPYVIyram3wcuQgHUmP1C4","assets_secret":"ADc3ZdOLh4","enable_for_virtual":"no","default_service_end_date":"P1Y","allow_payment_delay":"no","allow_registration_items":"no","env":"1","test_ips":"","debug":"yes","active_methods_info":"","communication_fields":"","price_css_sel":".summary .price&gt;.amount,.summary .price ins .amount"}'
     # curl "http://127.0.0.1/?post_type=product&RESET_SEQURA_ACTIVE_METHODS=true" > /dev/null
 
