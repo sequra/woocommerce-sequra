@@ -77,7 +77,8 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     fi
 
     wp plugin install --allow-root wordpress-importer --activate
-    wp import --allow-root wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=create
+    # wp import --allow-root wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=create
+    wp import --allow-root wp-content/plugins/sequra-helper/sample-data/sample_products.xml --authors=create
 
     # Setup WooCommerce options
     wp option update --allow-root woocommerce_store_address "${WC_STORE_ADDRESS}"
@@ -94,8 +95,8 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     
     wp plugin activate --allow-root sequra
     wp plugin activate --allow-root sequra-helper
-    # wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Fraccionar pago","merchantref":"dummy","user":"dummy","password":"ZqbjrN6bhPYVIyram3wcuQgHUmP1C4","assets_secret":"ADc3ZdOLh4","enable_for_virtual":"no","default_service_end_date":"P1Y","allow_payment_delay":"no","allow_registration_items":"no","env":"1","test_ips":"","debug":"yes","active_methods_info":"","communication_fields":"","price_css_sel":".summary .price&gt;.amount,.summary .price ins .amount"}'
-    # curl "http://127.0.0.1/?post_type=product&RESET_SEQURA_ACTIVE_METHODS=true" > /dev/null
+    
+    wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Flexible payment with seQura","description":"Please, select the payment method you want to use"}' --allow-root
 
     wp plugin deactivate --allow-root wordpress-importer --uninstall
     wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v sequra | tr "\n" " ")
