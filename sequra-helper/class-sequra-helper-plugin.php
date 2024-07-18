@@ -35,13 +35,17 @@ class SeQura_Helper_Plugin {
 
 		switch ( sanitize_text_field( $_GET['sq-webhook'] ) ) {
 			case 'dummy_services_config':
-				$this->recreate_tables_in_database();
-				$this->set_dummy_services_config();
+				if ( ! $this->is_dummy_service_config_in_use() ) {
+					$this->recreate_tables_in_database();
+					$this->set_dummy_services_config();
+				}
 				wp_send_json_success( array( 'message' => 'Merchant "dummy_services" configuration applied' ) );
 				break;
 			case 'dummy_config':
-				$this->recreate_tables_in_database();
-				$this->set_dummy_config();
+				if ( ! $this->is_dummy_config_in_use() ) {
+					$this->recreate_tables_in_database();
+					$this->set_dummy_config();
+				}
 				wp_send_json_success( array( 'message' => 'Merchant "dummy" configuration applied' ) );
 				break;
 			default:
@@ -83,6 +87,28 @@ class SeQura_Helper_Plugin {
             PRIMARY KEY  (id)
             ) $charset_collate" 
 		);
+	}
+
+	/**
+	 * Check if dummy merchant configuration is in use
+	 */
+	private function is_dummy_config_in_use(): bool {
+		global $wpdb;
+		$table_name = $this->get_sequra_entity_table_name();
+		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%dummy%'";
+		$result     = $wpdb->get_results( $query );
+		return is_array( $result ) && ! empty( $result );
+	}
+
+	/**
+	 * Check if dummy_services merchant configuration is in use
+	 */
+	private function is_dummy_service_config_in_use(): bool {
+		global $wpdb;
+		$table_name = $this->get_sequra_entity_table_name();
+		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%dummy_services%'";
+		$result     = $wpdb->get_results( $query );
+		return is_array( $result ) && ! empty( $result );
 	}
 
 	/**
