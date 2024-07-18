@@ -48,4 +48,13 @@ test.describe('Product checkout', () => {
     await checkout.waitForOrderOnHold({ page });
     await checkout.expectOrderChangeTo({ page, toStatus: 'wc-cancelled' });
   });
+
+  test('Make a payment attempt forcing a failure by changing the order payload amounts so it differs with the approved one.', async ({ page, cart, checkout, request }) => {
+    await cart.add({ page, product: 'sunglasses', quantity: 1 });
+    await checkout.open({ page });
+    await checkout.expectFp1ToBeVisible({ page });
+    await checkout.fillWithNonSpecialShopperName({ page });
+    await checkout.placeOrderUsingFp1({ page, forceFailure: true, request });
+    await checkout.waitForOrderFailure({ page });
+  });
 });

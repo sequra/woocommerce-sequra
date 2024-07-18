@@ -185,7 +185,7 @@ class Checkout {
         await page.waitForSelector(this.selector.placeOrder);
     }
 
-    async placeOrderUsingFp1({ page }) {
+    async placeOrderUsingFp1({ page, forceFailure = false, request = null }) {
         await page.click(this.selector.paymentMethodFp1);
         await page.click(this.selector.placeOrder);
         await page.waitForURL(/page_id=7&order-pay=/, { timeout: 5000 });
@@ -195,6 +195,16 @@ class Checkout {
         const innerIframe = mainIframe.frameLocator(this.selector.sqIframeMufasa);
 
         await innerIframe.locator(this.selector.sqCCNumber).waitFor({ state: 'attached', timeout: 10000 });
+
+        if (forceFailure) {
+            const url = new URL(page.url());
+            const orderId = url.searchParams.get('order-pay');
+
+            const response = await request.post('./?sq-webhook=force_order_failure&order_id=' + orderId);
+            expect(response.status(), 'The webhook response should have status 200').toBe(200);
+            const json = await response.json();
+            expect(json.success, 'The webhook response payload should have success:true').toBe(true);
+        }
 
         await innerIframe.locator(this.selector.sqCCNumber).click();
         await innerIframe.locator(this.selector.sqCCNumber).type(this.shopper.nonSpecial.creditCard.number);
@@ -297,6 +307,11 @@ class Checkout {
     async waitForOrderOnHold({ page }) {
         await page.waitForURL(/page_id=7&order-received=/, { timeout: 30000 });
         await expect(page.getByText('seQura is processing your request.')).toBeVisible();
+    }
+
+    async waitForOrderFailure({ page }) {
+        await page.waitForSelector('.woocommerce-notices-wrapper .is-error', { timeout: 30000 });
+        await expect(page.locator('#place_order')).toBeVisible();
     }
 
     async gotoAdminOrder({ page }) {
