@@ -15,7 +15,7 @@ class Cart {
         await page.fill('[name="quantity"]', `${quantity || 1}`);
         await page.click('[name="add-to-cart"]');
 
-        await page.waitForURL(url, { timeout: 5000 });
+        await page.waitForURL(url, { timeout: 5000, waitUntil: 'commit' });
     }
 }
 
@@ -291,7 +291,7 @@ class Checkout {
     }
 
     async waitForOrderSuccess({ page }) {
-        await page.waitForURL(/page_id=7&order-received=/, { timeout: 30000 });
+        await page.waitForURL(/page_id=7&order-received=/, { timeout: 30000, waitUntil: 'commit' });
     }
 
     async waitForOrderOnHold({ page }) {
@@ -328,7 +328,7 @@ class Checkout {
     }
 
     async expectPaymentMethodToBeVisible({ page, methodName }) {
-        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 100 });
+        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 3000 });
     }
 
     async expectFp1ToBeVisible({ page }) {
