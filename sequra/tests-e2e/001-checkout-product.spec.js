@@ -8,7 +8,7 @@ test.beforeAll('Setup', async ({ request }) => {
 });
 
 test.describe.configure({ mode: 'parallel' });
-test.describe('Checkout', () => {
+test.describe('Product checkout', () => {
 
   test('All available seQura products appear in the checkout', async ({ page, cart, checkout }) => {
     await cart.add({ page, product: 'sunglasses', quantity: 1 });
@@ -33,24 +33,19 @@ test.describe('Checkout', () => {
     await cart.add({ page, product: 'sunglasses', quantity: 1 });
     await checkout.open({ page });
     await checkout.expectI1ToBeVisible({ page });
-    await checkout.fillWithReviewTest({ page, approve: true });
-    await checkout.placeOrderUsingI1({ page, approve: true });
+    await checkout.fillWithReviewTest({ page, shopper: 'approve' });
+    await checkout.placeOrderUsingI1({ page, shopper: 'approve' });
     await checkout.waitForOrderOnHold({ page });
     await checkout.expectOrderChangeTo({ page, toStatus: 'wc-processing' });
   });
 
   test('Make a 🍊 payment with "Review test cancel" names', async ({ page, cart, checkout }) => {
-    try {
-      await cart.add({ page, product: 'sunglasses', quantity: 1 });
-      await checkout.open({ page });
-      await checkout.expectI1ToBeVisible({ page });
-      await checkout.fillWithReviewTest({ page, approve: false });
-      await checkout.placeOrderUsingI1({ page, approve: false });
-      await checkout.waitForOrderOnHold({ page });
-      await checkout.expectOrderChangeTo({ page, toStatus: 'wc-cancelled' });
-    } catch (e) {
-      await page.pause();
-      throw e;
-    }
+    await cart.add({ page, product: 'sunglasses', quantity: 1 });
+    await checkout.open({ page });
+    await checkout.expectI1ToBeVisible({ page });
+    await checkout.fillWithReviewTest({ page, shopper: 'cancel' });
+    await checkout.placeOrderUsingI1({ page, shopper: 'cancel' });
+    await checkout.waitForOrderOnHold({ page });
+    await checkout.expectOrderChangeTo({ page, toStatus: 'wc-cancelled' });
   });
 });

@@ -25,17 +25,31 @@ class Checkout {
 
         this.selector = {
             email: '#email',
-            country: '#shipping-country .components-combobox-control__input',
-            state: '#shipping-state .components-combobox-control__input',
-            firstName: '#shipping-first_name',
-            lastName: '#shipping-last_name',
-            address1: '#shipping-address_1',
-            postcode: '#shipping-postcode',
-            city: '#shipping-city',
-            phone: '#shipping-phone',
+
+            shipping: {
+                country: '#shipping-country .components-combobox-control__input',
+                state: '#shipping-state .components-combobox-control__input',
+                firstName: '#shipping-first_name',
+                lastName: '#shipping-last_name',
+                address1: '#shipping-address_1',
+                postcode: '#shipping-postcode',
+                city: '#shipping-city',
+                phone: '#shipping-phone'
+            },
+            billing: {
+                country: '#billing-country .components-combobox-control__input',
+                state: '#billing-state .components-combobox-control__input',
+                firstName: '#billing-first_name',
+                lastName: '#billing-last_name',
+                address1: '#billing-address_1',
+                postcode: '#billing-postcode',
+                city: '#billing-city',
+                phone: '#billing-phone'
+            },
 
             paymentMethodFp1: '.sequra-payment-method:has([alt="Paga con tarjeta"]) [name="sequra_payment_method_data"]',
             paymentMethodI1: '.sequra-payment-method:has([alt="Paga Después"]) [name="sequra_payment_method_data"]',
+            paymentMethodPp3: '.sequra-payment-method:has([alt="Paga Fraccionado"]) [name="sequra_payment_method_data"]',
             placeOrder: '.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])',
 
             sqPaymentMethodName: '.sequra-payment-method__name',
@@ -49,12 +63,17 @@ class Checkout {
             sqIframeI1: '#sq-identification-i1',
             sqI1GivenNames: '[name="given_names"]',
             sqI1Surnames: '[name="surnames"]',
-            sqI1DateOfBirth: '[name="date_of_birth"]',
-            sqI1Nin: '[name="nin"]',
+            sqDateOfBirth: '[name="date_of_birth"]',
+            sqNin: '[name="nin"]',
             sqI1MobilePhone: '[name="mobile_phone"]',
-            // sqI1AcceptPrivacyPolicy: '#sequra_privacy_policy_accepted',
-            sqI1AcceptPrivacyPolicy: '[for="sequra_privacy_policy_accepted"]',
-            sqI1Btn: '.actions-section button:not([disabled])',
+            sqAcceptPrivacyPolicy: '[for="sequra_privacy_policy_accepted"]',
+            sqAcceptServiceDuration: '[for="sequra_service_duration_accepted"]',
+            sqIframeBtn: '.actions-section button:not([disabled])',
+
+            sqIframePp3: '#sq-identification-pp3',
+            sqPp3RegistrationFee: '.first-payment-sentence-confirmation',
+            sqPp3CartTotal: '.credit-agreement-summary-details-row:nth-child(1) > span:nth-child(2)',
+
             sqOtp1: '[aria-label="Please enter OTP character 1"]',
             sqOtp2: '[aria-label="Please enter OTP character 2"]',
             sqOtp3: '[aria-label="Please enter OTP character 3"]',
@@ -62,6 +81,7 @@ class Checkout {
             sqOtp5: '[aria-label="Please enter OTP character 5"]',
 
             sqPayBtn: '.full-payment-btn-container button:not([disabled])',
+            sqPayBtnAlt: '.payment-btn-container button:not([disabled])',
             adminOrderStatus: '#order_status',
         }
 
@@ -97,8 +117,8 @@ class Checkout {
 
             },
             nonSpecial: {
-                firstName: 'John',
-                lastName: 'Doe',
+                firstName: 'Fulano',
+                lastName: 'De Tal',
                 ...defaultShopperData
             }
         }
@@ -136,31 +156,32 @@ class Checkout {
         await page.goto('./?page_id=7');
     }
 
-    async fillWithReviewTest({ page, approve = true }) {
-        const shopper = approve ? this.shopper.approve : this.shopper.cancel;
+    async fillWithReviewTest({ page, shopper = 'approve' }) {
+        const shopperData = this.shopper[shopper]
 
-        await page.fill(this.selector.email, shopper.email);
-        await page.fill(this.selector.country, shopper.country);
-        await page.fill(this.selector.firstName, shopper.firstName);
-        await page.fill(this.selector.lastName, shopper.lastName);
-        await page.fill(this.selector.address1, shopper.address1);
-        await page.fill(this.selector.postcode, shopper.postcode);
-        await page.fill(this.selector.city, shopper.city);
-        await page.fill(this.selector.state, shopper.state);
-        await page.fill(this.selector.phone, shopper.phone);
+        await page.fill(this.selector.email, shopperData.email);
+        await page.fill(this.selector.country, shopperData.country);
+        await page.fill(this.selector.firstName, shopperData.firstName);
+        await page.fill(this.selector.lastName, shopperData.lastName);
+        await page.fill(this.selector.address1, shopperData.address1);
+        await page.fill(this.selector.postcode, shopperData.postcode);
+        await page.fill(this.selector.city, shopperData.city);
+        await page.fill(this.selector.state, shopperData.state);
+        await page.fill(this.selector.phone, shopperData.phone);
         await page.waitForSelector(this.selector.placeOrder);
     }
 
-    async fillWithNonSpecialShopperName({ page }) {
+    async fillWithNonSpecialShopperName({ page, fieldGroup = 'shipping' }) {
         await page.fill(this.selector.email, this.shopper.nonSpecial.email);
-        await page.fill(this.selector.country, this.shopper.nonSpecial.country);
-        await page.fill(this.selector.firstName, this.shopper.nonSpecial.firstName);
-        await page.fill(this.selector.lastName, this.shopper.nonSpecial.lastName);
-        await page.fill(this.selector.address1, this.shopper.nonSpecial.address1);
-        await page.fill(this.selector.postcode, this.shopper.nonSpecial.postcode);
-        await page.fill(this.selector.city, this.shopper.nonSpecial.city);
-        await page.fill(this.selector.state, this.shopper.nonSpecial.state);
-        await page.fill(this.selector.phone, this.shopper.nonSpecial.phone);
+        await page.fill(this.selector[fieldGroup].country, this.shopper.nonSpecial.country);
+        await page.fill(this.selector[fieldGroup].firstName, this.shopper.nonSpecial.firstName);
+        await page.fill(this.selector[fieldGroup].lastName, this.shopper.nonSpecial.lastName);
+        await page.fill(this.selector[fieldGroup].address1, this.shopper.nonSpecial.address1);
+        await page.fill(this.selector[fieldGroup].postcode, this.shopper.nonSpecial.postcode);
+        await page.fill(this.selector[fieldGroup].city, this.shopper.nonSpecial.city);
+        await page.fill(this.selector[fieldGroup].state, this.shopper.nonSpecial.state);
+        await page.fill(this.selector[fieldGroup].phone, this.shopper.nonSpecial.phone);
+
         await page.waitForSelector(this.selector.placeOrder);
     }
 
@@ -187,7 +208,7 @@ class Checkout {
         await mainIframe.locator(this.selector.sqPayBtn).click();
     }
 
-    async placeOrderUsingI1({ page, approve = true }) {
+    async placeOrderUsingI1({ page, shopper = 'approve' }) {
         await page.click(this.selector.paymentMethodI1);
         await page.click(this.selector.placeOrder);
         await page.waitForURL(/page_id=7&order-pay=/);
@@ -195,30 +216,78 @@ class Checkout {
         await page.waitForSelector(this.selector.sqIframeI1, { state: 'attached', timeout: 10000 });
         const iframe = page.frameLocator(this.selector.sqIframeI1);
 
-        const shopper = approve ? this.shopper.approve : this.shopper.cancel;
+        const shopperData = this.shopper[shopper]
 
         // First name, last name, and mobile phone came already filled.
-        await iframe.locator(this.selector.sqI1DateOfBirth).click();
-        await iframe.locator(this.selector.sqI1DateOfBirth).fill(shopper.dateOfBirth);
-        await iframe.locator(this.selector.sqI1Nin).click();
-        await iframe.locator(this.selector.sqI1Nin).fill(shopper.dni);
-        await iframe.locator(this.selector.sqI1AcceptPrivacyPolicy).click();
-        await iframe.locator(this.selector.sqI1Btn).click();
+        await iframe.locator(this.selector.sqDateOfBirth).click();
+        await iframe.locator(this.selector.sqDateOfBirth).fill(shopperData.dateOfBirth);
+        await iframe.locator(this.selector.sqNin).click();
+        await iframe.locator(this.selector.sqNin).fill(shopperData.dni);
+        await iframe.locator(this.selector.sqAcceptPrivacyPolicy).click();
+        await iframe.locator(this.selector.sqIframeBtn).click();
 
-        this.fillOtp({ iframe, approve });
+        await this.fillOtp({ iframe, shopper });
     }
 
-    async fillOtp({ iframe, approve = true }) {
-        const shopper = approve ? this.shopper.approve : this.shopper.cancel;
+    async placeOrderUsingPp3({ page, shopper = 'nonSpecial' }) {
+        await page.click(this.selector.paymentMethodPp3);
+        await page.click(this.selector.placeOrder);
+        await page.waitForURL(/page_id=7&order-pay=/);
+
+        await page.waitForSelector(this.selector.sqIframePp3, { state: 'attached', timeout: 10000 });
+        const iframe = page.frameLocator(this.selector.sqIframePp3);
+
+        const cartTotal = iframe.locator(this.selector.sqPp3CartTotal)
+
+        await cartTotal.waitFor({ state: 'attached', timeout: 10000 });
+        await expect(cartTotal, 'The checkout popup should show the service price as the cart amount').toHaveText('50,00 €');
+        await expect(iframe.locator(this.selector.sqPp3RegistrationFee), 'The checkout popup should show the registration amount').toHaveText('Confirma la compra pagando hoy el pago de registro de 15,90 €');
+
+        await iframe.locator(this.selector.sqIframeBtn).click();
+
+        const shopperData = this.shopper[shopper]
+        // First name, last name, and mobile phone came already filled.
+        await iframe.locator(this.selector.sqDateOfBirth).click();
+        await iframe.locator(this.selector.sqDateOfBirth).fill(shopperData.dateOfBirth);
+        await iframe.locator(this.selector.sqNin).click();
+        await iframe.locator(this.selector.sqNin).fill(shopperData.dni);
+        await iframe.locator(this.selector.sqAcceptPrivacyPolicy).click();
+        await iframe.locator(this.selector.sqAcceptServiceDuration).click();
+        await iframe.locator(this.selector.sqIframeBtn).click();
+
+        await this.fillOtp({ iframe, shopper });
+
+        // Set card details
+        const newCCBtn = iframe.getByRole('button', { name: 'Nueva tarjeta' });
+        await newCCBtn.waitFor({ state: 'attached', timeout: 10000 });
+        await newCCBtn.click();
+
+        const innerIframe = iframe.frameLocator(this.selector.sqIframeMufasa);
+        await innerIframe.locator(this.selector.sqCCNumber).waitFor({ state: 'attached', timeout: 10000 });
+
+        await innerIframe.locator(this.selector.sqCCNumber).click();
+        await innerIframe.locator(this.selector.sqCCNumber).type(this.shopper.nonSpecial.creditCard.number);
+
+        await innerIframe.locator(this.selector.sqCCExp).click();
+        await innerIframe.locator(this.selector.sqCCExp).type(this.shopper.nonSpecial.creditCard.exp);
+
+        await innerIframe.locator(this.selector.sqCCCsc).click();
+        await innerIframe.locator(this.selector.sqCCCsc).type(this.shopper.nonSpecial.creditCard.cvc);
+
+        await iframe.locator(this.selector.sqPayBtnAlt).click();
+    }
+
+    async fillOtp({ iframe, shopper = 'approve' }) {
+        const shopperData = this.shopper[shopper]
 
         await iframe.locator(this.selector.sqOtp1).waitFor({ state: 'attached', timeout: 10000 });
-        await iframe.locator(this.selector.sqOtp1).fill(shopper.otp[0]);
-        await iframe.locator(this.selector.sqOtp2).fill(shopper.otp[1]);
-        await iframe.locator(this.selector.sqOtp3).fill(shopper.otp[2]);
-        await iframe.locator(this.selector.sqOtp4).fill(shopper.otp[3]);
-        await iframe.locator(this.selector.sqOtp5).fill(shopper.otp[4]);
+        await iframe.locator(this.selector.sqOtp1).fill(shopperData.otp[0]);
+        await iframe.locator(this.selector.sqOtp2).fill(shopperData.otp[1]);
+        await iframe.locator(this.selector.sqOtp3).fill(shopperData.otp[2]);
+        await iframe.locator(this.selector.sqOtp4).fill(shopperData.otp[3]);
+        await iframe.locator(this.selector.sqOtp5).fill(shopperData.otp[4]);
 
-        await iframe.locator(this.selector.sqI1Btn).click();
+        await iframe.locator(this.selector.sqIframeBtn).click();
     }
 
     async waitForOrderSuccess({ page }) {
@@ -255,27 +324,31 @@ class Checkout {
             }
         }
 
-        await expect(page.locator(this.selector.adminOrderStatus)).toHaveValue(toStatus);
+        await expect(page.locator(this.selector.adminOrderStatus), 'The order status should be: ' + toStatus).toHaveValue(toStatus);
+    }
+
+    async expectPaymentMethodToBeVisible({ page, methodName }) {
+        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 100 });
     }
 
     async expectFp1ToBeVisible({ page }) {
-        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: this.sqProduct.fp1.es.name })).toBeVisible({ timeout: 100 });
-    }
+        await this.expectPaymentMethodToBeVisible({ page, methodName: this.sqProduct.fp1.es.name });
+    } 
 
     async expectI1ToBeVisible({ page }) {
-        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: this.sqProduct.i1.es.name })).toBeVisible({ timeout: 100 });
+        await this.expectPaymentMethodToBeVisible({ page, methodName: this.sqProduct.i1.es.name });
     }
 
     async expectSp1ToBeVisible({ page }) {
-        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: this.sqProduct.sp1.es.name })).toBeVisible({ timeout: 100 });
+        await this.expectPaymentMethodToBeVisible({ page, methodName: this.sqProduct.sp1.es.name });
     }
 
     async expectPp3ToBeVisible({ page }) {
-        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: this.sqProduct.pp3.es.name })).toBeVisible({ timeout: 100 });
+        await this.expectPaymentMethodToBeVisible({ page, methodName: this.sqProduct.pp3.es.name });
     }
 
     async expectPp3DecombinedToBeVisible({ page }) {
-        await expect(page.locator(this.selector.sqPaymentMethodName, { hasText: this.sqProduct.pp3Decombined.es.name })).toBeVisible({ timeout: 100 });
+        await this.expectPaymentMethodToBeVisible({ page, methodName: this.sqProduct.pp3Decombined.es.name });
     }
 }
 

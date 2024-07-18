@@ -9,5 +9,16 @@ test.beforeAll('Setup', async ({ request }) => {
 
 
 test.describe.configure({ mode: 'parallel' });
-test.describe('Checkout', () => {
+test.describe('Service checkout', () => {
+
+
+  test('Make a successful payment using any shopper name', async ({ page, cart, checkout }) => {
+    await cart.add({ page, product: 'album', quantity: 1 });
+    await checkout.open({ page });
+    await checkout.expectPp3ToBeVisible({ page });
+    await checkout.fillWithNonSpecialShopperName({ page, fieldGroup: 'billing' });
+    await checkout.placeOrderUsingPp3({ page });
+    await checkout.waitForOrderSuccess({ page });
+  });
+
 });
