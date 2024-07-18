@@ -95,7 +95,7 @@ class SeQura_Helper_Plugin {
 	private function is_dummy_config_in_use(): bool {
 		global $wpdb;
 		$table_name = $this->get_sequra_entity_table_name();
-		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%dummy%'";
+		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%\"username\":\"dummy\"%'";
 		$result     = $wpdb->get_results( $query );
 		return is_array( $result ) && ! empty( $result );
 	}
@@ -106,7 +106,7 @@ class SeQura_Helper_Plugin {
 	private function is_dummy_service_config_in_use(): bool {
 		global $wpdb;
 		$table_name = $this->get_sequra_entity_table_name();
-		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%dummy_services%'";
+		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%\"username\":\"dummy_services\"%'";
 		$result     = $wpdb->get_results( $query );
 		return is_array( $result ) && ! empty( $result );
 	}
