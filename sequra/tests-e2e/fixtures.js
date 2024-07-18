@@ -15,7 +15,7 @@ class Cart {
         await page.fill('[name="quantity"]', `${quantity || 1}`);
         await page.click('[name="add-to-cart"]');
 
-        await page.waitForURL(url);
+        await page.waitForURL(url, { timeout: 5000 });
     }
 }
 
@@ -156,18 +156,18 @@ class Checkout {
         await page.goto('./?page_id=7');
     }
 
-    async fillWithReviewTest({ page, shopper = 'approve' }) {
+    async fillWithReviewTest({ page, shopper = 'approve', fieldGroup = 'shipping' }) {
         const shopperData = this.shopper[shopper]
 
         await page.fill(this.selector.email, shopperData.email);
-        await page.fill(this.selector.country, shopperData.country);
-        await page.fill(this.selector.firstName, shopperData.firstName);
-        await page.fill(this.selector.lastName, shopperData.lastName);
-        await page.fill(this.selector.address1, shopperData.address1);
-        await page.fill(this.selector.postcode, shopperData.postcode);
-        await page.fill(this.selector.city, shopperData.city);
-        await page.fill(this.selector.state, shopperData.state);
-        await page.fill(this.selector.phone, shopperData.phone);
+        await page.fill(this.selector[fieldGroup].country, shopperData.country);
+        await page.fill(this.selector[fieldGroup].firstName, shopperData.firstName);
+        await page.fill(this.selector[fieldGroup].lastName, shopperData.lastName);
+        await page.fill(this.selector[fieldGroup].address1, shopperData.address1);
+        await page.fill(this.selector[fieldGroup].postcode, shopperData.postcode);
+        await page.fill(this.selector[fieldGroup].city, shopperData.city);
+        await page.fill(this.selector[fieldGroup].state, shopperData.state);
+        await page.fill(this.selector[fieldGroup].phone, shopperData.phone);
         await page.waitForSelector(this.selector.placeOrder);
     }
 
@@ -188,7 +188,7 @@ class Checkout {
     async placeOrderUsingFp1({ page }) {
         await page.click(this.selector.paymentMethodFp1);
         await page.click(this.selector.placeOrder);
-        await page.waitForURL(/page_id=7&order-pay=/);
+        await page.waitForURL(/page_id=7&order-pay=/, { timeout: 5000 });
 
         await page.waitForSelector(this.selector.sqIframeFp1, { state: 'attached', timeout: 10000 });
         const mainIframe = page.frameLocator(this.selector.sqIframeFp1);
@@ -211,7 +211,7 @@ class Checkout {
     async placeOrderUsingI1({ page, shopper = 'approve' }) {
         await page.click(this.selector.paymentMethodI1);
         await page.click(this.selector.placeOrder);
-        await page.waitForURL(/page_id=7&order-pay=/);
+        await page.waitForURL(/page_id=7&order-pay=/, { timeout: 5000 });
 
         await page.waitForSelector(this.selector.sqIframeI1, { state: 'attached', timeout: 10000 });
         const iframe = page.frameLocator(this.selector.sqIframeI1);
@@ -232,7 +232,7 @@ class Checkout {
     async placeOrderUsingPp3({ page, shopper = 'nonSpecial' }) {
         await page.click(this.selector.paymentMethodPp3);
         await page.click(this.selector.placeOrder);
-        await page.waitForURL(/page_id=7&order-pay=/);
+        await page.waitForURL(/page_id=7&order-pay=/, { timeout: 5000 });
 
         await page.waitForSelector(this.selector.sqIframePp3, { state: 'attached', timeout: 10000 });
         const iframe = page.frameLocator(this.selector.sqIframePp3);
@@ -291,11 +291,11 @@ class Checkout {
     }
 
     async waitForOrderSuccess({ page }) {
-        await page.waitForURL(/page_id=7&order-received=/);
+        await page.waitForURL(/page_id=7&order-received=/, { timeout: 30000 });
     }
 
     async waitForOrderOnHold({ page }) {
-        await page.waitForURL(/page_id=7&order-received=/);
+        await page.waitForURL(/page_id=7&order-received=/, { timeout: 30000 });
         await expect(page.getByText('seQura is processing your request.')).toBeVisible();
     }
 
@@ -319,7 +319,7 @@ class Checkout {
                     await page.reload();
                 }
             } catch (err) {
-                console.log('Order has changed from on-hold');
+                // console.log('Order has changed from on-hold');
                 break;
             }
         }
@@ -333,7 +333,7 @@ class Checkout {
 
     async expectFp1ToBeVisible({ page }) {
         await this.expectPaymentMethodToBeVisible({ page, methodName: this.sqProduct.fp1.es.name });
-    } 
+    }
 
     async expectI1ToBeVisible({ page }) {
         await this.expectPaymentMethodToBeVisible({ page, methodName: this.sqProduct.i1.es.name });
