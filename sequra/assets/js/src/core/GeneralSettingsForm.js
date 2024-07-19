@@ -255,7 +255,8 @@ if (!window.SequraFE) {
          */
         const getPaymentMethodOptions = () => {
             const options = [{ label: "None", value: "" }];
-            data.shopPaymentMethods.map((shopPaymentMethod) => {
+            const paymentMethods = data.shopPaymentMethods ? data.shopPaymentMethods : [];
+            paymentMethods.map((shopPaymentMethod) => {
                 options.push({
                     label: shopPaymentMethod.name.charAt(0).toUpperCase() + shopPaymentMethod.name.slice(1),
                     value: shopPaymentMethod.code

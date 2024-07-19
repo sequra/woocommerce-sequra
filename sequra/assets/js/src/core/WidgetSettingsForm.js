@@ -310,10 +310,10 @@ if (!window.SequraFE) {
                     return `
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
-                        <select class="sq-table__row-field">${allPaymentMethods.map((pm, idx) => {
+                        <select class="sq-table__row-field">${allPaymentMethods ? allPaymentMethods.map((pm, idx) => {
                         const selected = data && data.product === pm.product && data.country === pm.countryCode ? ' selected' : '';
                         return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
-                    }).join('')}
+                    }).join('') : ''}
                         </select>
                     </div>
                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
@@ -326,8 +326,8 @@ if (!window.SequraFE) {
                     table.querySelectorAll('.sq-table__row-content').forEach(row => {
                         const select = row.querySelector('select');
                         const sel_for_target = row.querySelector('input').value;
-                        const product = select.options[select.selectedIndex].dataset.product;
-                        const country = select.options[select.selectedIndex].dataset.countryCode;
+                        const product = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.product;
+                        const country = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.countryCode;
                         customLocations.push({ sel_for_target, product, country });
                     });
                     handleChange('customLocations', customLocations)
