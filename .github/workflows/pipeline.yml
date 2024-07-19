@@ -39,7 +39,7 @@ jobs:
           path: |
             sequra/node_modules
             sequra/package-lock.json
-          key: npm-${{ hashFiles('sequra/package.json') }}
+          key: npm-${{ hashFiles('sequra/package-lock.json') }}
 
       - name: Install NPM dependencies
         if: github.event_name == 'pull_request' && steps.cache-npm.outputs.cache-hit != 'true'
@@ -52,8 +52,8 @@ jobs:
         with:
           path: |
             sequra/assets/css/*.css
-            sequra/assets/js/*.js
-          key: assets-${{ hashFiles('sequra/assets/css/*.css', 'sequra/assets/js/*.js') }}
+            sequra/assets/js/dist
+          key: assets-${{ hashFiles('sequra/assets/css/scss/*.scss', 'sequra/assets/js/src/**/*.js') }}
 
       - name: Build Assets
         if: github.event_name == 'pull_request' && steps.cache-assets.outputs.cache-hit != 'true'
