@@ -48,6 +48,10 @@ class SeQura_Helper_Plugin {
 				}
 				wp_send_json_success( array( 'message' => 'Merchant "dummy" configuration applied' ) );
 				break;
+			case 'clear_config':
+				$this->recreate_tables_in_database();
+				wp_send_json_success( array( 'message' => 'Configuration cleared' ) );
+				break;
 			case 'force_order_failure':
 				if ( isset( $_GET['order_id'] ) ) {
 					$order_id = absint( $_GET['order_id'] );
