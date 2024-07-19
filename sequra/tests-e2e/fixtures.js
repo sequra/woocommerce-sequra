@@ -7,6 +7,17 @@ const login = async ({ page }) => {
     await page.waitForNavigation();
 }
 
+const loginIfRequired = async ({ page }) => {
+    try {
+        await expect(page.locator('#loginform')).toBeVisible({ timeout: 0 });
+        await login({ page });
+    }
+    catch {
+        return;
+    }
+
+}
+
 class Cart {
     async add({ page, product, quantity }) {
         const url = `./?product=${product}`;
@@ -367,9 +378,107 @@ class Checkout {
     }
 }
 
+class Configuration {
+
+    constructor() {
+
+        this.selector = {
+            environment: {
+                sandbox: 'label:has([value="sandbox"])',
+            },
+            username: '[name="username-input"]',
+            password: '[name="password-input"]',
+            primaryBtn: '.sq-button.sqt--primary',
+            multiSelect: '.sq-multi-item-selector',
+            dropdownListItem: '.sqp-dropdown-list-item',
+            yesOption: '.sq-radio-input:has([type="radio"][value="true"])',
+            assetsKey: '[name="assets-key-input"]',
+            headerNavbar: '.sqp-header-top > .sqp-menu-items',
+
+            onboarding: {
+                completedStepConnect: '.sqp-step.sqs--completed[href="#onboarding-connect"]',
+                completedStepCountries: '.sqp-step.sqs--completed[href="#onboarding-countries"]',
+            }
+        }
+
+        this.merchant = {
+            dummy: {
+                username: 'dummy',
+                password: 'READ-FROM-ENV',
+                assetsKey: 'READ-FROM-ENV',
+                ref: {
+                    ES: 'dummy',
+                    FR: 'dummy_fr',
+                    IT: 'dummy_it',
+                    PT: 'dummy_pt',
+                    CO: 'dummy_co',
+                    PE: 'dummy_pe',
+                }
+            }
+        }
+
+        this.countries = {
+            default: {
+                ES: 'Spain',
+                FR: 'France',
+                IT: 'Italy',
+                PT: 'Portugal',
+                CO: 'Colombia',
+                PE: 'Peru',
+            }
+        }
+
+    }
+
+    async goto({ page, configurationPage = '' }) {
+        await page.goto(`./wp-admin/options-general.php?page=sequra${configurationPage ? `#${configurationPage}` : ''}`, { waitUntil: 'domcontentloaded' });
+        await loginIfRequired({ page });
+    }
+
+    async fillOnboardingConnectForm({ page, merchant = 'dummy', env = 'sandbox' }) {
+        await page.locator(this.selector.environment[env]).click();
+        await page.locator(this.selector.username).type(this.merchant[merchant].username);
+        await page.locator(this.selector.password).type(this.merchant[merchant].password);
+        await page.locator(this.selector.primaryBtn).click();
+        await page.waitForSelector(this.selector.onboarding.completedStepConnect, { timeout: 5000 });
+    }
+
+    async fillOnboardingCountriesForm({ page, merchant = 'dummy', env = 'sandbox', countries = ['ES'] }) {
+        await page.locator(this.selector.multiSelect).click();
+        await page.waitForSelector(this.selector.dropdownListItem, { timeout: 1000 });
+
+        expect(countries.length, 'At least one country should be selected').toBeGreaterThan(0);
+
+        for (const country of countries) {
+            await page.locator(this.selector.dropdownListItem, { hasText: this.countries.default[country] }).click();
+        }
+        for (const country of countries) {
+            const merchantRefInput = `[name="country_${country}"]`;
+            await page.locator(merchantRefInput).click();
+            await page.locator(merchantRefInput).type(this.merchant.dummy.ref[country]);
+        }
+
+        await page.locator(this.selector.primaryBtn).click();
+
+        await page.waitForSelector(this.selector.onboarding.completedStepCountries, { timeout: 5000 });
+    }
+
+    async fillOnboardingWidgetsForm({ page, merchant = 'dummy', env = 'sandbox' }) {
+        await page.locator(this.selector.yesOption).click();
+        await page.waitForSelector(this.selector.assetsKey, { timeout: 1000 });
+        await page.locator(this.selector.assetsKey).click();
+        await page.locator(this.selector.assetsKey).type(this.merchant[merchant].assetsKey);
+        await page.locator(this.selector.primaryBtn).click();
+        // TODO: maybe in this point might be interesting to fill some widget configuration.
+        await page.locator(this.selector.primaryBtn).click();
+        await page.waitForSelector(this.selector.headerNavbar, { timeout: 5000 });
+    }
+}
+
 export const test = baseTest.extend({
     cart: async ({ }, use) => await use(new Cart()),
-    checkout: async ({ }, use) => await use(new Checkout())
+    checkout: async ({ }, use) => await use(new Checkout()),
+    configuration: async ({ }, use) => await use(new Configuration())
 });
 
 export { expect };
