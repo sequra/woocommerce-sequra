@@ -1,8 +1,8 @@
 import { test as baseTest, expect } from '@playwright/test';
 
 const login = async ({ page }) => {
-    await page.fill('#user_login', 'admin');
-    await page.fill('#user_pass', 'admin');
+    await page.fill('#user_login', process.env.WP_ADMIN_USER);
+    await page.fill('#user_pass', process.env.WP_ADMIN_PASSWORD);
     await page.click('#wp-submit');
     await page.waitForNavigation();
 }
@@ -404,8 +404,8 @@ class Configuration {
         this.merchant = {
             dummy: {
                 username: 'dummy',
-                password: 'READ-FROM-ENV',
-                assetsKey: 'READ-FROM-ENV',
+                password: process.env.DUMMY_PASSWORD,
+                assetsKey: process.env.DUMMY_ASSETS_KEY,
                 ref: {
                     ES: 'dummy',
                     FR: 'dummy_fr',

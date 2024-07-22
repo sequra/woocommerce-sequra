@@ -141,9 +141,9 @@ Some examples of arguments you can append to the command above:
 
 | Argument | Description |
 | -------- | ------------------------------------------------------------------ |
-| `--workers 3` | Runs 3 workers in parallel |
+| `--workers 4` | Runs 4 workers in parallel. Each worker will execute a test case. This is the default value. |
 | `--debug` | Runs tests in debug mode |
-| `--project=chromium` | Execute on specific browser. Options are: `chromium`, `firefox`, `webkit`  |
+| `--project=configuration-onboarding` | Execute an specific tests group. Options are defined in the `playwright.config.js` in the `projects` property. See the `name` property of each element of the array   |
 | `./tests-e2e/example.spec.js` | Execute specific test file. Supports multiple file paths space separated. Also supports file name without extension and path like this: `example` |
 
 More info at: https://playwright.dev/docs/intro
@@ -158,10 +158,10 @@ Then, install browsers using this command:
 npx playwright install
 ```
 
-To run the tests in headed mode, run the following command in the `sequra` directory:
+To run the tests in headed mode, run the following command in the repository root directory:
 
 ```bash
-npx playwright test --headed
+bin/playwright --headed
 ```
 
 Note: append many arguments as needed to the command.
