@@ -88,6 +88,13 @@ This functionality set up the required data in the database to use the dummy_ser
 ```bash
 curl --location --request POST '<WP_URL>/?sq-webhook=dummy_services_config'
 ```
+### Clear plugin configuration
+
+This functionality removes data in the database relative to plugin's configuration. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=clear_config'
+```
 
 ## Unit and Integration Tests
 
