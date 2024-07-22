@@ -10,4 +10,9 @@ test.beforeAll('Setup', async ({ request }) => {
 test.describe.configure({ mode: 'parallel' });
 test.describe('Configuration', () => {
   // TODO: Implement tests for each configuration page.
+
+  test('Payment methods', async ({ page, configuration }) => {
+    await configuration.goto({ page, configurationPage: '#payment-methods' });
+    await configuration.expectAvailablePaymentMethodsAreVisible({ page, merchant: 'dummy', countries: ['ES', 'FR', 'PT', 'IT'] });
+  });
 });

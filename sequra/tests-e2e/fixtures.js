@@ -413,6 +413,26 @@ class Configuration {
                     PT: 'dummy_pt',
                     CO: 'dummy_co',
                     PE: 'dummy_pe',
+                },
+                paymentMethods: {
+                    ES: [
+                        'Paga con tarjeta',
+                        'Paga Después',
+                        'Divide tu pago en 3',
+                        'Paga Fraccionado',
+                        'Divide en 3 0,00 €/mes (DECOMBINED)'
+                    ],
+                    FR: [
+                        'Payez en plusieurs fois'
+                    ],
+                    PT: [
+                        'Divida seu pagamento em 3'
+                    ],
+                    IT: [
+                        'Dividi il tuo pagamento in 3'
+                    ],
+                    CO: [],
+                    PE: []
                 }
             }
         }
@@ -472,6 +492,39 @@ class Configuration {
         // TODO: maybe in this point might be interesting to fill some widget configuration.
         await page.locator(this.selector.primaryBtn).click();
         await page.waitForSelector(this.selector.headerNavbar, { timeout: 5000 });
+    }
+
+    async expectLoadingShowAndHide({ page }) {
+        await page.locator('.sq-page-loader:not(.sqs--hidden)').waitFor({ state: 'attached', timeout: 10000 });
+        await page.locator('.sq-page-loader.sqs--hidden').waitFor({ state: 'attached', timeout: 10000 });
+    }
+
+
+    async expectAvailablePaymentMethodsAreVisible({ page, merchant = 'dummy', countries = ['ES', 'FR', 'PT', 'IT'] }) {
+
+        const countryName = this.countries.default[countries[0]];
+        const countrySelectedLocator = page.locator('span.sqs--selected', { hasText: countryName })
+        await expect(countrySelectedLocator, `The default country "${countryName}" is shown as selected`).toBeVisible();
+
+        if (countries.length === 1) {
+            return;
+        }
+
+        countries = countries.reverse(); // reverse because the first country is already selected.
+        for (const country of countries) {
+
+            const countryName = this.countries.default[country];
+            await page.locator('.sqp-dropdown-button').click();
+            await page.locator('.sqp-dropdown-button + .sqp-dropdown-list .sqp-dropdown-list-item:not(.sqs--selected)', { hasText: countryName }).click();
+            await expect(page.locator('.sqp-dropdown-button > .sqs--selected', { hasText: countryName }), `The country "${countryName}" is shown as selected`).toBeVisible();
+
+            await this.expectLoadingShowAndHide({ page });
+
+            for (const pm of this.merchant[merchant].paymentMethods[country]) {
+                await expect(page.locator('.sqp-payment-method-title', { hasText: pm }), `The payment method "${pm}" is visible`).toBeVisible();
+            }
+
+        }
     }
 }
 
