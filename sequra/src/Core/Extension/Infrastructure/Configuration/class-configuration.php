@@ -20,6 +20,8 @@ use WP_Site;
  */
 class Configuration extends CoreConfiguration {
 
+	private const CONF_DB_VERSION = 'dbVersion';
+
 	/**
 	 * Marketplace version.
 	 *
@@ -303,5 +305,19 @@ class Configuration extends CoreConfiguration {
 	 */
 	public function get_marketplace_url(): string {
 		return 'https://wordpress.org/plugins/sequra/';
+	}
+
+	/**
+	 * Saves dbVersion in integration database.
+	 */
+	public function save_db_version( string $db_version ): void {
+		$this->saveConfigValue( self::CONF_DB_VERSION, $db_version );
+	}
+
+	/**
+	 * Retrieves dbVersion from integration database.
+	 */
+	public function get_db_version(): string {
+		return $this->getConfigValue( self::CONF_DB_VERSION, '' );
 	}
 }
