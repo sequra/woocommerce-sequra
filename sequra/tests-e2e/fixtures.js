@@ -9,6 +9,7 @@ const login = async ({ page }) => {
 
 const loginIfRequired = async ({ page }) => {
     try {
+        // TODO: check cookie to avoid login.
         await page.goto('./wp-admin', { waitUntil: 'domcontentloaded' });
         await expect(page.locator('#loginform')).toBeVisible({ timeout: 0 });
         await login({ page });
