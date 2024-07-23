@@ -43,30 +43,29 @@ module.exports = defineConfig({
       testMatch: '001-configuration-onboarding.spec.js',
     },
     {
-      name: 'configuration',
+      name: 'configuration-payment-methods',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '002-configuration.spec.js',
+      testMatch: '002A-configuration-payment-methods.spec.js',
+      dependencies: ['configuration-onboarding'],
+    },
+    {
+      name: 'configuration-advanced',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '002B-configuration-advanced.spec.js',
       dependencies: ['configuration-onboarding'],
     },
     {
       name: 'checkout-product',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '003-checkout-product.spec.js',
-      dependencies: ['configuration'],
+      testMatch: '099-checkout-product.spec.js',
+      dependencies: ['configuration-payment-methods', 'configuration-advanced'],
     },
     {
       name: 'checkout-service',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '004-checkout-service.spec.js',
+      testMatch: '100-checkout-service.spec.js',
       dependencies: ['checkout-product'],
     }
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
 });
 

@@ -10,7 +10,7 @@ test.beforeAll('Setup', async ({ request }) => {
 test.describe.configure({ mode: 'parallel' });
 test.describe('Configuration Onboarding', () => {
   test('Configure using dummy', async ({ page, configuration }) => {
-    await configuration.goto({ page, configurationPage: '#onboarding-connect' });
+    await configuration.goto({ page, configurationPage: 'onboarding-connect' });
     await configuration.fillOnboardingConnectForm({ page });
     await configuration.fillOnboardingCountriesForm({ page, merchant: 'dummy', countries: ['ES', 'FR', 'PT', 'IT'] });
     await configuration.fillOnboardingWidgetsForm({ page, merchant: 'dummy' });

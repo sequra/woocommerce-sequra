@@ -9,6 +9,7 @@ const login = async ({ page }) => {
 
 const loginIfRequired = async ({ page }) => {
     try {
+        await page.goto('./wp-admin', { waitUntil: 'domcontentloaded' });
         await expect(page.locator('#loginform')).toBeVisible({ timeout: 0 });
         await login({ page });
     }
@@ -451,8 +452,8 @@ class Configuration {
     }
 
     async goto({ page, configurationPage = '' }) {
-        await page.goto(`./wp-admin/options-general.php?page=sequra${configurationPage ? `#${configurationPage}` : ''}`, { waitUntil: 'domcontentloaded' });
         await loginIfRequired({ page });
+        await page.goto(`./wp-admin/options-general.php?page=sequra${configurationPage ? `#${configurationPage}` : ''}`, { waitUntil: 'domcontentloaded' });
     }
 
     async fillOnboardingConnectForm({ page, merchant = 'dummy', env = 'sandbox' }) {
