@@ -45,7 +45,7 @@ class Task {
 	protected function recreate_tables_in_database(): void {
 		global $wpdb;
 		$table_name      = $this->get_sequra_entity_table_name();
-		$charset_collate = $wpdb->collate;
+		$charset_collate = $wpdb->get_charset_collate();
 		
 		$wpdb->query( "DROP TABLE IF EXISTS $table_name" );
 		
@@ -63,7 +63,7 @@ class Task {
             `index_7` VARCHAR(127),
             `data` LONGTEXT,
             PRIMARY KEY  (id)
-            ) $charset_collate" 
+            ) $charset_collate"
 		);
 	}
 }
