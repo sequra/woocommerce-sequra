@@ -25,5 +25,10 @@
 
 defined( 'WPINC' ) || die;
 
-require_once __DIR__ . '/class-sequra-helper-plugin.php';
-new SeQura_Helper_Plugin();
+require_once __DIR__ . '/src/Task/class-task.php';
+require_once __DIR__ . '/src/Task/class-configure-dummy-service-task.php';
+require_once __DIR__ . '/src/Task/class-configure-dummy-task.php';
+require_once __DIR__ . '/src/Task/class-clear-configuration-task.php';
+require_once __DIR__ . '/src/Task/class-force-order-failure-task.php';
+require_once __DIR__ . '/src/class-plugin.php';
+new SeQura\Helper\Plugin();
