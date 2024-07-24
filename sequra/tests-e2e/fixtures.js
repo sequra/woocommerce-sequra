@@ -528,6 +528,31 @@ class Configuration {
 
         }
     }
+
+    async expectLogIsEmpty({ page }) {
+        await page.getByRole('cell', { name: 'No entries found' }).waitFor({ state: 'visible', timeout: 5000 });
+    }
+
+    async enableLogs({ page, enable = true }) {
+        const enableLogsCheckbox = page.locator('input.sqp-toggle-input');
+        await expect(enableLogsCheckbox, '"Enable logs" toggle is ' + (enable ? 'OFF' : 'ON')).toBeChecked({ checked: !enable });
+        await page.locator('.sq-toggle').click();
+
+        await this.expectLoadingShowAndHide({ page });
+    }
+
+    async reloadLogs({ page }) {
+        await page.getByRole('button', { name: 'Reload' }).click();
+        await this.expectLoadingShowAndHide({ page });
+    }
+
+    async expectLogHasContent({ page }) {
+        await expect(page.locator('.sqm--log').first(), 'Log datatable has content').toBeVisible();
+    }
+
+    async expectLogPaginationIsVisible({ page }) {
+        await expect(page.locator('.datatable-pagination-list-item.sq-datatable__active'), 'Logs pagination is visible').toBeVisible();
+    }
 }
 
 export const test = baseTest.extend({

@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures';
 
-test.beforeAll('Setup', async ({ request }) => {
+test.beforeEach('Setup', async ({ request }) => {
   // 1. Clear configuration to disable logs.
   // 2. Configure the plugin with dummy merchant.
   // 3. Remove Log file.
@@ -21,21 +21,21 @@ test.beforeAll('Setup', async ({ request }) => {
 
 test.describe.configure({ mode: 'serial' });
 test.describe('Configuration', () => {
+
   test('Enable logs', async ({ page, configuration }) => {
     await configuration.goto({ page, configurationPage: 'advanced-debug' });
-    await page.getByRole('cell', { name: 'No entries found' }).waitFor({ state: 'visible', timeout: 5000 });
-    const enableLogsCheckbox = page.locator('input.sqp-toggle-input');
-    await expect(enableLogsCheckbox, '"Enable logs" toggle is OFF').toBeChecked({ checked: false });
-    await page.locator('.sq-toggle').click();
-    await configuration.expectLoadingShowAndHide({ page });
+    await configuration.expectLogIsEmpty({ page });
+    await configuration.enableLogs({ page });
     await page.reload();
-    await expect(page.locator('.sqm--log').first(), 'Log datatable has content').toBeVisible();
-    await expect(page.locator('.datatable-pagination-list-item.sq-datatable__active'), 'Logs pagination is visible').toBeVisible();
+    await configuration.expectLogHasContent({ page });
   });
 
   test('Reload logs', async ({ page, configuration }) => {
     await configuration.goto({ page, configurationPage: 'advanced-debug' });
-    // TODO:
+    await configuration.expectLogIsEmpty({ page });
+    await configuration.enableLogs({ page });
+    await configuration.reloadLogs({ page });
+    await configuration.expectLogHasContent({ page });
   });
 
   test('Remove logs', async ({ page, configuration }) => {
