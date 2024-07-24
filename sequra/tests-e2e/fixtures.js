@@ -559,12 +559,34 @@ class Configuration {
         await this.expectLoadingShowAndHide({ page });
     }
 
-    async expectLogHasContent({ page }) {
+    async expectLogHasContent({ page, expectedLogs = [], nonExpectedLogs = [] }) {
         await expect(page.locator('.sqm--log').first(), 'Log datatable has content').toBeVisible();
+        for (const log of expectedLogs) {
+            const { level, message } = log;
+            await expect(page.locator('.sqm--log.sqm--log-' + level.toLowerCase(), { hasText: message }), `Log of severity "${level}" found with message: ${message}`).toBeVisible();
+        }
+        for (const log of nonExpectedLogs) {
+            const { level, message } = log;
+            await expect(page.locator('.sqm--log.sqm--log-' + level.toLowerCase(), { hasText: message }), `Log of severity "${level}" not found with message: ${message}`).toHaveCount(0);
+        }
     }
 
     async expectLogPaginationIsVisible({ page }) {
         await expect(page.locator('.datatable-pagination-list-item.sq-datatable__active'), 'Logs pagination is visible').toBeVisible();
+    }
+
+    async printLogs({ request }) {
+        const response = await request.post('./?sq-webhook=print_logs');
+        expect(response.status(), 'The webhook response should have status 200').toBe(200);
+        const json = await response.json();
+        expect(json.success, 'The webhook response payload should have success:true').toBe(true);
+    }
+
+    async setSeverityLevel({ page, severityLevel }) {
+        await page.locator('.sq-single-select-dropdown button').click();
+        await page.waitForSelector('.sqp-dropdown-button + .sqp-dropdown-list .sqp-dropdown-list-item', { timeout: 1000 });
+        await page.locator('.sqp-dropdown-button + .sqp-dropdown-list .sqp-dropdown-list-item', { hasText: severityLevel }).click();
+        await this.expectLoadingShowAndHide({ page });
     }
 }
 

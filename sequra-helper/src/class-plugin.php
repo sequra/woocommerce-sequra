@@ -11,6 +11,7 @@ use SeQura\Helper\Task\Clear_Configuration_Task;
 use SeQura\Helper\Task\Configure_Dummy_Service_Task;
 use SeQura\Helper\Task\Configure_Dummy_Task;
 use SeQura\Helper\Task\Force_Order_Failure_Task;
+use SeQura\Helper\Task\Print_Logs_Task;
 use SeQura\Helper\Task\Remove_Log_Task;
 use SeQura\Helper\Task\Task;
 
@@ -39,6 +40,7 @@ class Plugin {
 			'clear_config'          => Clear_Configuration_Task::class,
 			'force_order_failure'   => Force_Order_Failure_Task::class,
 			'remove_log'            => Remove_Log_Task::class,
+			'print_logs'            => Print_Logs_Task::class,
 		);
 
 		return ! isset( $map[ $webhook ] ) ? new Task() : new $map[ $webhook ]();

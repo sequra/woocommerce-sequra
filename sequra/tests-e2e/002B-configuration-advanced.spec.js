@@ -51,8 +51,60 @@ test.describe('Configuration', () => {
     await configuration.expectLogIsEmpty({ page });
   });
 
-  test('Change minimum severity level', async ({ page, configuration }) => {
+  test('Change minimum severity level', async ({ page, request, configuration }) => {
+
+    const logs = [
+      {
+        level: 'DEBUG',
+        message: 'Log with severity level of DEBUG',
+      },
+      {
+        level: 'INFO',
+        message: 'Log with severity level of INFO',
+      },
+      {
+        level: 'WARNING',
+        message: 'Log with severity level of WARNING',
+      },
+      {
+        level: 'ERROR',
+        message: 'Log with severity level of ERROR',
+      },
+    ];
+    const severityLevels = [
+      {
+        name: 'DEBUG',
+        expectedLogs: logs,
+        nonExpectedLogs: [],
+      },
+      {
+        name: 'INFO',
+        expectedLogs: logs.slice(1),
+        nonExpectedLogs: [logs[0]],
+      },
+      {
+        name: 'WARNING',
+        expectedLogs: logs.slice(2),
+        nonExpectedLogs: logs.slice(0, 2),
+      },
+      {
+        name: 'ERROR',
+        expectedLogs: logs.slice(3),
+        nonExpectedLogs: logs.slice(0, 3),
+      },
+    ]
+
     await configuration.goto({ page, configurationPage: 'advanced-debug' });
-    // TODO:
+    await configuration.expectLogIsEmpty({ page });
+
+    for (const { name, expectedLogs, nonExpectedLogs } of severityLevels) {
+      await configuration.setSeverityLevel({ page, severityLevel: name });
+      await configuration.enableLogs({ page });
+      await configuration.printLogs({ request });
+      await configuration.enableLogs({ page, enable: false });
+      await page.reload();
+      await configuration.expectLoadingShowAndHide({ page });
+      await configuration.expectLogHasContent({ page, expectedLogs, nonExpectedLogs });
+    }
   });
 });
