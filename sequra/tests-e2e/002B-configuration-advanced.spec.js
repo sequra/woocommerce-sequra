@@ -40,7 +40,15 @@ test.describe('Configuration', () => {
 
   test('Remove logs', async ({ page, configuration }) => {
     await configuration.goto({ page, configurationPage: 'advanced-debug' });
-    // TODO:
+    await configuration.expectLogIsEmpty({ page });
+    await configuration.enableLogs({ page });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await configuration.expectLogHasContent({ page });
+    await configuration.enableLogs({ page, enable: false });
+    await configuration.removeLogs({ page });
+    await configuration.expectLogIsEmpty({ page });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await configuration.expectLogIsEmpty({ page });
   });
 
   test('Change minimum severity level', async ({ page, configuration }) => {

@@ -546,6 +546,14 @@ class Configuration {
         await this.expectLoadingShowAndHide({ page });
     }
 
+    async removeLogs({ page }) {
+        await page.getByRole('button', { name: 'Remove' }).click();
+        const confirmRemoveBtn = page.locator('.sqp-footer .sq-button.sqt--danger');
+        await confirmRemoveBtn.waitFor({ state: 'visible' });
+        await confirmRemoveBtn.click();
+        await this.expectLoadingShowAndHide({ page });
+    }
+
     async expectLogHasContent({ page }) {
         await expect(page.locator('.sqm--log').first(), 'Log datatable has content').toBeVisible();
     }
