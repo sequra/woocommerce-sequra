@@ -36,6 +36,12 @@ export default class WpAdmin {
         }
     }
 
+    async logout() {
+        // await this.page.goto(`${this.baseURL}/wp-login.php?action=logout`);
+        // logout by clearing cookies
+        await this.page.context().clearCookies({name: /wordpress_logged_in.*/});
+    }
+
     /**
      * Navigate to SeQura settings page
      * 

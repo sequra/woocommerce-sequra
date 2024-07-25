@@ -4,6 +4,7 @@ import PaymentMethodsSettingsPage from "./PaymentMethodsSettingsPage";
 import OnboardingSettingsPage from "./OnboardingSettingsPage";
 import ProductPage from "./ProductPage";
 import CheckoutPage from "./CheckoutPage";
+import GeneralSettingsPage from "./GeneralSettingsPage";
 
 export const test = baseTest.extend({
     advancedSettingsPage: async ({ page, baseURL, request }, use) => {
@@ -34,6 +35,15 @@ export const test = baseTest.extend({
 
         // Provide the fixture to the test
         await use(onboardingSettingsPage);
+    },
+
+    generalSettingsPage: async ({ page, baseURL, request }, use) => {
+        const generalSettingsPage = new GeneralSettingsPage(page, baseURL, expect, request);
+
+        await generalSettingsPage.setup();
+
+        // Provide the fixture to the test
+        await use(generalSettingsPage);
     },
 
     productPage: async ({ page }, use) => await use(new ProductPage(page)),

@@ -13,6 +13,7 @@ export default class SettingsPage {
     constructor(page, baseURL, pageHash, expect, request) {
         this.page = page;
         this.expect = expect;
+        this.request = request;
         this.wpAdmin = new WpAdmin(page, baseURL, expect);
         this.helper = new SeQuraHelper(request, expect);
         this.pageHash = pageHash
@@ -21,6 +22,7 @@ export default class SettingsPage {
             username: '[name="username-input"]',
             password: '[name="password-input"]',
             primaryBtn: '.sq-button.sqt--primary',
+            saveBtn: '.sq-button.sqp-save:not([disabled])',
             multiSelect: '.sq-multi-item-selector',
             dropdownListItem: '.sqp-dropdown-list-item',
             yesOption: '.sq-radio-input:has([type="radio"][value="true"])',
@@ -39,5 +41,14 @@ export default class SettingsPage {
     async expectLoadingShowAndHide() {
         await this.page.locator('.sq-page-loader:not(.sqs--hidden)').waitFor({ state: 'attached', timeout: 10000 });
         await this.page.locator('.sq-page-loader.sqs--hidden').waitFor({ state: 'attached', timeout: 10000 });
+    }
+
+    async save() {
+        await this.page.locator(this.selector.saveBtn).click();
+        await this.expectLoadingShowAndHide();
+    }
+
+    async logout() {
+        await this.wpAdmin.logout();
     }
 }

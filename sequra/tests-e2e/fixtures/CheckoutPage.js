@@ -46,6 +46,7 @@ export default class CheckoutPage {
             placeOrder: '.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])',
 
             sqPaymentMethodName: '.sequra-payment-method__name',
+            sqPaymentMethod: '.sequra-payment-method',
 
             sqIframeFp1: '#sq-identification-fp1',
             sqIframeMufasa: '#mufasa-iframe',
@@ -273,6 +274,15 @@ export default class CheckoutPage {
         }
 
         await this.expect(this.page.locator(this.selector.adminOrderStatus), 'The order status should be: ' + toStatus).toHaveValue(toStatus);
+    }
+
+    async expectAnyPaymentMethod({ available = true }) {
+        const locator = this.page.locator(this.selector.sqPaymentMethod);
+        if (available) {
+            await this.expect(locator.first(), `"seQura payment methods should be available`).toBeVisible({ timeout: 3000 });
+        } else {
+            await this.expect(locator, `"seQura payment methods should not be available`).toHaveCount(0, { timeout: 3000 });
+        }
     }
 
     async expectPaymentMethodToBeVisible({ methodName }) {

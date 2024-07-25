@@ -55,10 +55,16 @@ module.exports = defineConfig({
       dependencies: ['configuration-payment-methods'],
     },
     {
+      name: 'configuration-general',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '004-configuration-general.spec.js',
+      dependencies: ['configuration-advanced'],
+    },
+    {
       name: 'checkout-product',
       use: { ...devices['Desktop Chrome'] },
       testMatch: '099-checkout-product.spec.js',
-      dependencies: ['configuration-advanced'],
+      dependencies: ['configuration-general'],
     },
     {
       name: 'checkout-service',

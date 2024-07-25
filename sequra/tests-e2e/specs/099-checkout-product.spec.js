@@ -50,7 +50,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectOrderChangeTo({ toStatus: 'wc-cancelled' });
   });
 
-  test.only('Make a payment attempt forcing a failure by changing the order payload amounts so it differs with the approved one.', async ({ productPage, checkoutPage }) => {
+  test('Make a payment attempt forcing a failure by changing the order payload amounts so it differs with the approved one.', async ({ productPage, checkoutPage }) => {
     await checkoutPage.setupForPhysicalProducts();
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
