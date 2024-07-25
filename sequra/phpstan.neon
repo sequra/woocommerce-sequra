@@ -10,7 +10,6 @@ parameters:
         - '#Method .+ has parameter \$\w+ with generic class .+ but does not specify its types: T#'
         - '#Parameter .+ \$var of function .+ expects bool\|float\|int\|resource\|string\|null, mixed given#'
         - '#Parameter .+ \$var of function .+ expects array\|bool\|float\|int\|resource\|string\|null, mixed given#'
-        - '#Parameter .+ \$\w+ .+ expects array\<\w+\>\|null, array given#'
         - '#Function str_starts_with|wc_get_endpoint_url|wc_get_product|wc_print_notice|wc_add_notice|wc_get_checkout_url|wc_get_order_status_name|wc_get_orders|get_woocommerce_currency|wc_get_template|wc_get_order_statuses|is_checkout|wc_print_notices|WC|wc_get_product_category_list|wc_get_order not found#'
         - '#Constant AUTH_KEY not found#'
         - '#Automattic\\WooCommerce\\Blocks\\Payments\\PaymentMethodRegistry#'
