@@ -11,7 +11,7 @@ const { defineConfig, devices } = require('@playwright/test');
  * @see https://playwright.dev/docs/test-configuration
  */
 module.exports = defineConfig({
-  testDir: './tests-e2e',
+  testDir: './tests-e2e/specs',
   timeout: 5 * 60 * 1000, // 5 minutes
   /* Run tests in files in parallel */
   // fullyParallel: true,
@@ -45,20 +45,20 @@ module.exports = defineConfig({
     {
       name: 'configuration-payment-methods',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '002A-configuration-payment-methods.spec.js',
+      testMatch: '002-configuration-payment-methods.spec.js',
       dependencies: ['configuration-onboarding'],
     },
     {
       name: 'configuration-advanced',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '002B-configuration-advanced.spec.js',
-      dependencies: ['configuration-onboarding'],
+      testMatch: '003-configuration-advanced.spec.js',
+      dependencies: ['configuration-payment-methods'],
     },
     {
       name: 'checkout-product',
       use: { ...devices['Desktop Chrome'] },
       testMatch: '099-checkout-product.spec.js',
-      dependencies: ['configuration-payment-methods', 'configuration-advanced'],
+      dependencies: ['configuration-advanced'],
     },
     {
       name: 'checkout-service',
