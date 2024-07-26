@@ -20,6 +20,7 @@ export default class GeneralSettingsPage extends SettingsPage {
                 input: '[name="allowedIPAddresses-selector"] + .sq-multi-input',
                 hiddenInput: '[name="allowedIPAddresses-selector"]',
             },
+            selectedItemRemoveButton: '.sqp-selected-item > .sqp-remove-button',
             ...this.selector
         }
     }
@@ -30,6 +31,24 @@ export default class GeneralSettingsPage extends SettingsPage {
 
     async expectAllowedIPAddressesToBeEmpty() {
         await this.expect(this.page.locator(this.selector.allowedIPAddresses.hiddenInput), '"Allowed IP addresses" should be empty').toHaveValue('');
+    }
+
+    async expectExcludedProductsToBeEmpty() {
+        await this.expect(this.#getExcludedProductsHiddenInputLocator(), '"Excluded products" should be empty').toHaveValue('');
+    }
+
+    /**
+     * @returns {import('@playwright/test').Locator}
+     */
+    #getExcludedProductsLocator() {
+        return this.page.locator('.sq-field-wrapper').filter({ hasText: 'Excluded products' }).first().locator('.sq-label-wrapper + div').first();
+    }
+
+    /**
+     * @returns {import('@playwright/test').Locator}
+     */
+    #getExcludedProductsHiddenInputLocator() {
+        return this.#getExcludedProductsLocator().locator('.sqp-hidden-input');
     }
 
     /**
@@ -83,13 +102,43 @@ export default class GeneralSettingsPage extends SettingsPage {
     }
 
     /**
+     * @param {string[]} values
+     */
+    async fillExcludedProducts(values) {
+
+        const containerLocator = this.#getExcludedProductsLocator();
+        const inputLocator = containerLocator.locator('.sq-multi-input');
+        const hiddenInputLocator = this.#getExcludedProductsHiddenInputLocator();
+
+        // Clear previous values
+        const itemsRmBtnLocator = containerLocator.locator(this.selector.selectedItemRemoveButton);
+        while ((await itemsRmBtnLocator.count()) > 0) {
+            await itemsRmBtnLocator.first().click();
+        }
+
+        await this.expectExcludedProductsToBeEmpty();
+
+        let value = '';
+        if (values) {
+            for (const v of values) {
+                await inputLocator.focus();
+                await inputLocator.fill(v);
+                await this.page.keyboard.press('Enter');
+                value += '' === value ? v : ',' + v;
+                await this.expect(hiddenInputLocator, '"Excluded products" should have value "' + value + '"').toHaveValue(value);
+                await this.expect(inputLocator, '"Excluded products" input field should be empty').toHaveValue('');
+            }
+        }
+    }
+
+    /**
      * @param {string[]} excludedCategories
      */
     async selectExcludedCategories(excludedCategories) {
         const selectLocator = this.#getExcludedCategoriesLocator();
 
         // Clear previous values
-        const itemsRmBtnLocator = selectLocator.locator('.sqp-selected-item > .sqp-remove-button');
+        const itemsRmBtnLocator = selectLocator.locator(this.selector.selectedItemRemoveButton);
 
         while ((await itemsRmBtnLocator.count()) > 0) {
             await itemsRmBtnLocator.first().click();

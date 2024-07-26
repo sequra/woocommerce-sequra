@@ -63,7 +63,7 @@ test.describe('Configuration', () => {
     }
   });
 
-  test('Change excluded categories', async ({ page, generalSettingsPage, productPage, checkoutPage }) => {
+  test('Change excluded categories', async ({ generalSettingsPage, productPage, checkoutPage }) => {
 
     await checkoutPage.setupForPhysicalProducts();
 
@@ -109,6 +109,60 @@ test.describe('Configuration', () => {
 
     for (const categories of allowedCategoriesMatrix) {
       await fillAndAssert(categories, true);
+    }
+  });
+
+  test('Change excluded products', async ({ generalSettingsPage, productPage, checkoutPage }) => {
+
+    await checkoutPage.setupForPhysicalProducts();
+
+    const allowedValuesMatrix = [
+      [],
+      ['14']
+      ['woo-sunglasses-2'],
+      ['14', 'woo-sunglasses-2'],
+    ];
+
+    const notAllowedValuesMatrix = [
+      ['woo-sunglasses'], // The product SKU.
+      ['13'], // The product ID.
+      ['woo-sunglasses', 'woo-sunglasses-2'],
+      ['woo-sunglasses', '14'],
+      ['13', '14'],
+      ['13', 'woo-sunglasses-2'],
+    ];
+
+    // Test cancellation of the changes
+    await generalSettingsPage.goto();
+    await generalSettingsPage.expectLoadingShowAndHide();
+    await generalSettingsPage.fillExcludedProducts(notAllowedValuesMatrix[0]);
+    await generalSettingsPage.cancel();
+    await generalSettingsPage.expectExcludedProductsToBeEmpty();
+
+
+    const fillAndAssert = async (values, available) => {
+      await generalSettingsPage.fillExcludedProducts(values);
+      if (values) {
+        await generalSettingsPage.save({});
+      }
+
+      await generalSettingsPage.logout();
+
+      await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+
+      await checkoutPage.goto();
+      await checkoutPage.expectAnyPaymentMethod({ available });
+
+      await generalSettingsPage.goto();
+      await generalSettingsPage.expectLoadingShowAndHide();
+    }
+
+    for (const values of notAllowedValuesMatrix) {
+      await fillAndAssert(values, false);
+    }
+
+    for (const values of allowedValuesMatrix) {
+      await fillAndAssert(values, true);
     }
   });
 });
