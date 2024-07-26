@@ -1,16 +1,34 @@
-import { test } from '../fixtures/test';
+import { test, expect } from '../fixtures/test';
 
 test.describe.configure({ mode: 'serial' });
 test.describe('Configuration', () => {
 
-  test('Change allowed IP addresses', async ({ generalSettingsPage, productPage, checkoutPage }) => {
+  test('Change allowed IP addresses', async ({ page, generalSettingsPage, productPage, checkoutPage }) => {
 
     await checkoutPage.setupForPhysicalProducts();
 
-    // TODO: test cancellation of the changes
+    // Test cancellation of the changes
+    await generalSettingsPage.goto();
+    await generalSettingsPage.expectLoadingShowAndHide();
+    await generalSettingsPage.fillAllowedIPAddresses(['8.8.8.8']);
+    await generalSettingsPage.cancel();
+    await generalSettingsPage.expectAllowedIPAddressesToBeEmpty();
 
-    // TODO: test with invalid IP addresses
+    // Test with invalid IP addresses
+    const badIPAddressesMatrix = [
+      ['a.b.c.d'],
+      ['a.b.c.d', '1.1.1.256'],
+      ['a.b.c.d', '1.1.1.256', 'lorem ipsum']
+    ]
+    for (const ipAddresses of badIPAddressesMatrix) { 
+      await generalSettingsPage.fillAllowedIPAddresses(ipAddresses);
+      await generalSettingsPage.save({ expectLoadingShowAndHide: false });
+      await expect(page.getByText('This field must contain only valid IP addresses.'), 'The error message under "Allowed IP addresses" field should be visible').toBeVisible();
+      await page.reload();
+      await generalSettingsPage.expectLoadingShowAndHide(); 
+    }
 
+    // Test with valid IP addresses
     const publicIP = await generalSettingsPage.getPublicIP();
     const notAllowedIPAddressesMatrix = [
       ['8.8.8.8']
@@ -22,10 +40,8 @@ test.describe('Configuration', () => {
     ]
 
     const fillAndAssert = async (ipAddresses, available) => {
-      await generalSettingsPage.goto();
-      await generalSettingsPage.expectLoadingShowAndHide();
       await generalSettingsPage.fillAllowedIPAddresses(ipAddresses);
-      await generalSettingsPage.save();
+      await generalSettingsPage.save({});
 
       await generalSettingsPage.logout();
 
@@ -33,6 +49,9 @@ test.describe('Configuration', () => {
 
       await checkoutPage.goto();
       await checkoutPage.expectAnyPaymentMethod({ available });
+
+      await generalSettingsPage.goto();
+      await generalSettingsPage.expectLoadingShowAndHide();
     }
 
     for (const ipAddresses of notAllowedIPAddressesMatrix) {

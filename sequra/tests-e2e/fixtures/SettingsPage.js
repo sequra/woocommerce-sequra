@@ -23,6 +23,7 @@ export default class SettingsPage {
             password: '[name="password-input"]',
             primaryBtn: '.sq-button.sqt--primary',
             saveBtn: '.sq-button.sqp-save:not([disabled])',
+            cancelBtn: '.sq-button.sqp-cancel:not([disabled])',
             multiSelect: '.sq-multi-item-selector',
             dropdownListItem: '.sqp-dropdown-list-item',
             yesOption: '.sq-radio-input:has([type="radio"][value="true"])',
@@ -43,9 +44,15 @@ export default class SettingsPage {
         await this.page.locator('.sq-page-loader.sqs--hidden').waitFor({ state: 'attached', timeout: 10000 });
     }
 
-    async save() {
+    async save({expectLoadingShowAndHide = true}) {
         await this.page.locator(this.selector.saveBtn).click();
-        await this.expectLoadingShowAndHide();
+        if (expectLoadingShowAndHide) {
+            await this.expectLoadingShowAndHide();
+        }
+    }
+
+    async cancel() {
+        await this.page.locator(this.selector.cancelBtn).click();
     }
 
     async logout() {

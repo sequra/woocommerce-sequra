@@ -29,7 +29,7 @@ export default class GeneralSettingsPage extends SettingsPage {
     }
 
     async expectAllowedIPAddressesToBeEmpty() {
-        await this.expect(this.page.locator(this.selector.allowedIPAddresses.hiddenInput)).toHaveValue('');
+        await this.expect(this.page.locator(this.selector.allowedIPAddresses.hiddenInput), '"Allowed IP addresses" should be empty').toHaveValue('');
     }
 
     async getPublicIP() {
@@ -59,8 +59,8 @@ export default class GeneralSettingsPage extends SettingsPage {
             await inputLocator.fill(address);
             await this.page.keyboard.press('Enter');
             value += '' === value ? address : ',' + address;
-            await this.expect(hiddenInputLocator).toHaveValue(value);
-            await this.expect(inputLocator).toHaveValue('');
+            await this.expect(hiddenInputLocator, '"Allowed IP addresses" should have value "' + value + '"').toHaveValue(value);
+            await this.expect(inputLocator, '"Allowed IP addresses" input field should be empty').toHaveValue('');
         }
     }
 
