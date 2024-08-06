@@ -139,7 +139,6 @@ test.describe('Configuration', () => {
     await generalSettingsPage.cancel();
     await generalSettingsPage.expectExcludedProductsToBeEmpty();
 
-
     const fillAndAssert = async (values, available) => {
       await generalSettingsPage.fillExcludedProducts(values);
       if (values) {
@@ -163,6 +162,72 @@ test.describe('Configuration', () => {
 
     for (const values of allowedValuesMatrix) {
       await fillAndAssert(values, true);
+    }
+  });
+
+  test('Change enabled for services', async ({ page, generalSettingsPage, checkoutPage }) => {
+
+    await checkoutPage.setupForPhysicalProducts();
+    await generalSettingsPage.goto();
+    await generalSettingsPage.expectLoadingShowAndHide();
+
+    // Test cancellation of the changes
+    await generalSettingsPage.expectEnabledForServicesToBe(false);
+    await generalSettingsPage.enableEnabledForServices();
+    await generalSettingsPage.cancel();
+    await generalSettingsPage.expectEnabledForServicesToBe(false);
+
+    // Test fields validation.
+    await generalSettingsPage.enableEnabledForServices();
+    await generalSettingsPage.save({ expectLoadingShowAndHide: true });
+
+    await generalSettingsPage.enableAllowFirstServicePaymentDelay();
+    await generalSettingsPage.enableAllowRegistrationItems();
+    await generalSettingsPage.save({ expectLoadingShowAndHide: true });
+    await page.reload();
+    await generalSettingsPage.expectLoadingShowAndHide();
+    await generalSettingsPage.expectAllowFirstServicePaymentDelayToBe(true);
+    await generalSettingsPage.expectAllowRegistrationItemsToBe(true);
+
+    const fillDefaultServiceEndDateAndAssert = async (value, isValid) => {
+      await generalSettingsPage.fillDefaultServicesEndDate(value);
+      await generalSettingsPage.save({ expectLoadingShowAndHide: isValid });
+      if (!isValid) {
+        await expect(page.getByText('This field must contain only dates as 2017-08-31 or time duration as P3M15D (3 months and 15 days). Check ISO 8601'), 'The error message under "Default services end date" field should be visible').toBeVisible();
+      }
+      await page.reload();
+      await generalSettingsPage.expectLoadingShowAndHide();
+    }
+
+    const notAllowedValues = [
+      '',
+      'abc',
+      '2017/08/31',
+      '2023-02-29',
+      '2023-02-30',
+      '2023-02-31',
+      '2023-01-32',
+      '2023-04-31',
+      '2023-00-00',
+      '2023-01-31abc',
+      'P1Y23',
+      'P',
+      'P1Y2M3MT',
+      '2023-01-31P1Y',
+    ];
+    const allowedValues = [
+      '2030-12-31',
+      '2024-02-29',
+      'P5Y',
+      'P2Y3M',
+    ];
+
+    for (const value of notAllowedValues) {
+      await fillDefaultServiceEndDateAndAssert(value, false);
+    }
+
+    for (const value of allowedValues) {
+      await fillDefaultServiceEndDateAndAssert(value, true);
     }
   });
 });

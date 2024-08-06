@@ -157,5 +157,94 @@ export default class GeneralSettingsPage extends SettingsPage {
         }
     }
 
+    /**
+     * 
+     * @param {object} options 
+     * @param {boolean} options.locate Use 'input' to locate the checkbox input element, 'label' to locate the label element with the .sq-toggle class.
+     */
+    #enabledForServicesToggleLocator(options = { locate: 'input' }) {
+        return this.page.getByRole('heading', { name: 'Enabled for services' }).locator(options.locate === 'label' ? '.sq-toggle' : '.sqp-toggle-input');
+    }
+    #allowFirstServicePaymentDelayToggleLocator(options = { locate: 'input' }) {
+        return this.page.getByRole('heading', { name: 'Allow first service payment delay' }).locator(options.locate === 'label' ? '.sq-toggle' : '.sqp-toggle-input');
+    }
+    #allowRegistrationItemsToggleLocator(options = { locate: 'input' }) {
+        return this.page.getByRole('heading', { name: 'Allow registration items' }).locator(options.locate === 'label' ? '.sq-toggle' : '.sqp-toggle-input');
+    }
+    #defaultServicesEndDateInputLocator() {
+        // return this.page.getByRole('heading', { name: 'Default services end date' }).locator('.sq-text-input.sq-default-services-end-date');
+        return this.page.locator('.sq-text-input.sq-default-services-end-date');
+    }
+
+    /**
+     * @param {boolean} value 
+     */
+    async expectEnabledForServicesToBe(value) {
+        const enabledForServicesToggleLocator = this.#enabledForServicesToggleLocator();
+        const allowFirstServicePaymentDelayToggleLocator = this.#allowFirstServicePaymentDelayToggleLocator({ locate: 'label' });
+        const allowRegistrationItemsToggleLocator = this.#allowRegistrationItemsToggleLocator({ locate: 'label' });
+        const defaultServicesEndDateInputLocator = this.#defaultServicesEndDateInputLocator();
+        await this.expect(enabledForServicesToggleLocator, 'Enable for service toggle should be ' + (value ? 'ON' : 'OFF')).toBeChecked({ checked: value });
+        await this.expect(allowFirstServicePaymentDelayToggleLocator, 'Allow first service payment delay toggle should be ' + (value ? 'visible' : 'hidden')).toBeVisible({ visible: value });
+        await this.expect(allowRegistrationItemsToggleLocator, 'Allow registration items toggle should be ' + (value ? 'visible' : 'hidden')).toBeVisible({ visible: value });
+        await this.expect(defaultServicesEndDateInputLocator, 'Default services end date input should be ' + (value ? 'visible' : 'hidden')).toBeVisible({ visible: value });
+    }
+
+    /**
+     * @param {boolean} value 
+     */
+    async expectAllowFirstServicePaymentDelayToBe(value) {
+        const locator = this.#allowFirstServicePaymentDelayToggleLocator();
+        await this.expect(locator, 'Allow First Service Payment Delay toggle should be ' + (value ? 'ON' : 'OFF')).toBeChecked({ checked: value });
+    }
+
+    /**
+     * @param {boolean} value 
+     */
+    async expectAllowRegistrationItemsToBe(value) {
+        const locator = this.#allowRegistrationItemsToggleLocator();
+        await this.expect(locator, 'Allow Registration Items toggle should be ' + (value ? 'ON' : 'OFF')).toBeChecked({ checked: value });
+    }
+
+    /**
+     * @param {object} options 
+     * @param {boolean} options.enabled
+     */
+    async enableEnabledForServices(options = { enabled: true }) {
+        const { enabled } = options;
+        const enabledForServicesToggleLocator = this.#enabledForServicesToggleLocator({ locate: 'label' });
+        await this.expect(enabledForServicesToggleLocator.locator('.sqp-toggle-input'), 'Enable for service toggle should be ' + (enabled ? 'OFF' : 'ON')).toBeChecked({ checked: !enabled });
+        await enabledForServicesToggleLocator.click();
+        await this.expectEnabledForServicesToBe(enabled);
+    }
+
+    /**
+     * @param {object} options 
+     * @param {boolean} options.enabled 
+     */
+    async enableAllowFirstServicePaymentDelay(options = { enabled: true }) {
+        const { enabled } = options;
+        const locator = this.#allowFirstServicePaymentDelayToggleLocator({ locate: 'label' });
+        await this.expect(locator.locator('.sqp-toggle-input'), 'Allow First Service Payment Delay toggle should be ' + (enabled ? 'OFF' : 'ON')).toBeChecked({ checked: !enabled });
+        await locator.click();
+    }
+
+    /**
+     * @param {object} options 
+     * @param {boolean} options.enabled 
+     */
+    async enableAllowRegistrationItems(options = { enabled: true }) {
+        const { enabled } = options;
+        const locator = this.#allowRegistrationItemsToggleLocator({ locate: 'label' });
+        await this.expect(locator.locator('.sqp-toggle-input'), 'Allow Registration Items toggle should be ' + (enabled ? 'OFF' : 'ON')).toBeChecked({ checked: !enabled });
+        await locator.click();
+    }
+
+    async fillDefaultServicesEndDate(value) {
+        const defaultServicesEndDateInputLocator = this.#defaultServicesEndDateInputLocator();
+        await defaultServicesEndDateInputLocator.fill(value);
+        await defaultServicesEndDateInputLocator.blur();
+    }
+
 
 }
