@@ -97,6 +97,10 @@ export const merchant = {
             CO: [],
             PE: []
         }
+    },
+    dummyServices: {
+        username: 'dummy_services',
+        password: process.env.DUMMY_SERVICE_PASSWORD,
     }
 }
 
