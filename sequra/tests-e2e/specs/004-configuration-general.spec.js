@@ -230,4 +230,42 @@ test.describe('Configuration', () => {
       await fillDefaultServiceEndDateAndAssert(value, true);
     }
   });
+
+  test('Change available countries', async ({ page, generalSettingsPage, checkoutPage }) => {
+
+    await checkoutPage.setupForPhysicalProducts();
+    await generalSettingsPage.goto();
+    await generalSettingsPage.expectLoadingShowAndHide();
+
+    const defaultCountriesRef = [
+      { country: 'ES', ref: 'dummy' },
+      { country: 'FR', ref: 'dummy_fr' },
+      { country: 'IT', ref: 'dummy_it' },
+      { country: 'PT', ref: 'dummy_pt' },
+    ];
+
+    await generalSettingsPage.expectAvailableCountries(defaultCountriesRef);
+    
+    // Test cancellation of the changes
+    await generalSettingsPage.fillAvailableCountries([defaultCountriesRef[0]]);
+    await generalSettingsPage.cancel();
+    await generalSettingsPage.expectAvailableCountries(defaultCountriesRef);
+
+    // Test wrong values.
+    await generalSettingsPage.fillAvailableCountries([
+      { country: 'ES', ref: 'dummy_wrong' }
+    ]);
+
+    // await page.pause();
+    await generalSettingsPage.save({ expectLoadingShowAndHide: false });
+    const errorMsgLocator = page.locator('.sq-country-field-wrapper .sqp-input-error').filter({hasText: 'This field is invalid.'});
+    await expect(errorMsgLocator).toBeVisible();
+
+    // Test valid values.
+    await generalSettingsPage.fillAvailableCountries(defaultCountriesRef);
+    await generalSettingsPage.save({ expectLoadingShowAndHide: true });
+    await page.reload();
+    await generalSettingsPage.expectLoadingShowAndHide();
+    await generalSettingsPage.expectAvailableCountries(defaultCountriesRef);
+  });
 });

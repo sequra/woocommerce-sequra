@@ -1,5 +1,5 @@
 import SettingsPage from './SettingsPage';
-// import { countries as dataCountries, merchant as dataMerchant } from './data';
+import { countries as dataCountries } from './data';
 
 export default class GeneralSettingsPage extends SettingsPage {
 
@@ -21,6 +21,8 @@ export default class GeneralSettingsPage extends SettingsPage {
                 hiddenInput: '[name="allowedIPAddresses-selector"]',
             },
             selectedItemRemoveButton: '.sqp-selected-item > .sqp-remove-button',
+            countriesMultiSelect: '.sq-multi-item-selector:has([name="countries-selector"])',
+            dropdownListVisible: '.sqp-dropdown-list.sqs--show',
             ...this.selector
         }
     }
@@ -172,7 +174,6 @@ export default class GeneralSettingsPage extends SettingsPage {
         return this.page.getByRole('heading', { name: 'Allow registration items' }).locator(options.locate === 'label' ? '.sq-toggle' : '.sqp-toggle-input');
     }
     #defaultServicesEndDateInputLocator() {
-        // return this.page.getByRole('heading', { name: 'Default services end date' }).locator('.sq-text-input.sq-default-services-end-date');
         return this.page.locator('.sq-text-input.sq-default-services-end-date');
     }
 
@@ -246,5 +247,56 @@ export default class GeneralSettingsPage extends SettingsPage {
         await defaultServicesEndDateInputLocator.blur();
     }
 
+    /**
+     * @typedef {Object} CountryRef
+     * @property {string} country
+     * @property {string} ref
+     */
+
+    /**
+     * 
+     * @param {Array<CountryRef>} countryRefs 
+     */
+    async expectAvailableCountries(countryRefs) {
+        let value = '';
+        for (const countryRef of countryRefs) {
+            value += '' === value ? countryRef.country : ',' + countryRef.country;
+
+            const country = dataCountries.default[countryRef.country];
+            const ref = countryRef.ref;
+
+            const selectedItemLocator = this.page.locator('.sqp-selected-item').filter({ hasText: country });
+            const inputLocator = this.page.locator(`[name="country_${countryRef.country}"]`);
+
+            this.expect(selectedItemLocator, `Country "${country}" should show as selected`).toBeVisible();
+            this.expect(inputLocator, `Country Ref input "${country}" should be visible`).toBeVisible();
+            this.expect(inputLocator, `Country Ref input "${country}" should have value "${ref}"`).toHaveValue(ref);
+        }
+
+        this.expect(this.page.locator('[name="countries-selector"]'), `"countries-selector" input should have value "${value}"`).toHaveValue(value);
+    }
+
+    /**
+    * 
+    * @param {Array<CountryRef>} countryRefs 
+    */
+    async fillAvailableCountries(countryRefs) {
+        const multiSelectLocator = this.page.locator(this.selector.countriesMultiSelect);
+        const itemsRmBtnLocator = multiSelectLocator.locator(this.selector.selectedItemRemoveButton);
+
+        // Clear previous values
+        while ((await itemsRmBtnLocator.count()) > 0) {
+            await itemsRmBtnLocator.first().click();
+        }
+
+        await this.expectAvailableCountries([]);
+
+        await multiSelectLocator.click();
+        await this.page.waitForSelector(this.selector.dropdownListVisible, { timeout: 1000 });
+        for (const countryRef of countryRefs) {
+            await this.page.locator(this.selector.dropdownListItem, { hasText: dataCountries.default[countryRef.country] }).click();
+            await this.page.locator(`[name="country_${countryRef.country}"]`).fill(countryRef.ref);
+        }
+    }
 
 }
