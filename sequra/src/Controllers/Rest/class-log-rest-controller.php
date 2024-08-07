@@ -66,7 +66,7 @@ class Log_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = $this->logger->get_content(
-				$request->get_param( self::PARAM_STORE_ID ) // @phpstan-ignore-line
+				$request->get_param( self::PARAM_STORE_ID )
 			);
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );
@@ -85,7 +85,7 @@ class Log_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$this->logger->clear(
-				$request->get_param( self::PARAM_STORE_ID ) // @phpstan-ignore-line
+				$request->get_param( self::PARAM_STORE_ID )
 			);
 			$response = array();
 		} catch ( \Throwable $e ) {
@@ -119,8 +119,8 @@ class Log_REST_Controller extends REST_Controller {
 	public function save_configuration( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			$this->logger->enable( $request->get_param( self::PARAM_IS_ENABLED ) ); // @phpstan-ignore-line
-			$this->logger->set_min_log_level( $request->get_param( self::PARAM_LOG_LEVEL ) ); // @phpstan-ignore-line
+			$this->logger->enable( $request->get_param( self::PARAM_IS_ENABLED ) );
+			$this->logger->set_min_log_level( $request->get_param( self::PARAM_LOG_LEVEL ) );
 			$response = $this->get_config_response();
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );

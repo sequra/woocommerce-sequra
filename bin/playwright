@@ -1,3 +1,17 @@
 #!/bin/bash
 BASEDIR="$(dirname $(realpath $0))/.."
-docker run -it --rm -v "${BASEDIR}"/sequra:/app -w /app mcr.microsoft.com/playwright:v1.45.0-jammy bash -c "npx playwright test $@"
+
+# Check if --headed is passed
+if [[ "$@" == *"--headed"* ]]; then
+
+    cd "${BASEDIR}"
+    set -o allexport
+    source .env
+    set +o allexport
+
+    cd sequra && npx playwright test $@
+else
+    docker run \
+    --env-file "${BASEDIR}"/.env \
+    -it --rm -v "${BASEDIR}"/sequra:/app -w /app mcr.microsoft.com/playwright:v1.45.0-jammy bash -c "npx playwright test $@"
+fi

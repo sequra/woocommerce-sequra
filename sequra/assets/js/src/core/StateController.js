@@ -357,6 +357,16 @@ SequraFE.appPages = {
          * @returns {string}
          */
         this.getPage = () => {
+            if (window.location.hash) {
+                let page = window.location.hash.substring(1);
+                if (page) {
+                    page = page.split('-')[1];
+                    if (page) {
+                        setPage(page);
+                        return page;
+                    }
+                }
+            }
             return localStorage.getItem('sq-page');
         }
 
@@ -416,7 +426,6 @@ SequraFE.appPages = {
         };
 
         this.getData = (key) => {
-            // debugger
             if (!Object.keys(dataStore).includes(key)) {
                 return null;
             }

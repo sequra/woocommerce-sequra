@@ -306,7 +306,14 @@ class Bootstrap extends BootstrapComponent {
 		Reg::registerService(
 			LoggerConfiguration::class, 
 			static function () {
-				return LoggerConfiguration::getInstance();
+				if ( ! isset( self::$cache[ LoggerConfiguration::class ] ) ) {
+					$loggerConfig = LoggerConfiguration::getInstance();
+					if ( ! $loggerConfig->isDefaultLoggerEnabled() ) {
+						$loggerConfig->setIsDefaultLoggerEnabled( false );
+					}
+					self::$cache[ LoggerConfiguration::class ] = $loggerConfig;
+				}
+				return self::$cache[ LoggerConfiguration::class ];
 			}
 		);
 
@@ -327,15 +334,6 @@ class Bootstrap extends BootstrapComponent {
 			OrderStatusSettingsService::class,
 			static function () {
 				return Reg::getService( Order_Status_Settings_Service::class );
-			}
-		);
-		Reg::registerService(
-			ConfigurationManager::CLASS_NAME,
-			static function () {
-				if ( ! isset( self::$cache[ ConfigurationManager::CLASS_NAME ] ) ) {
-					self::$cache[ ConfigurationManager::CLASS_NAME ] = Configuration_Manager::getInstance();
-				}
-				return self::$cache[ ConfigurationManager::CLASS_NAME ];
 			}
 		);
 		Reg::registerService(
