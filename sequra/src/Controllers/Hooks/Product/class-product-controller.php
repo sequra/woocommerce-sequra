@@ -94,7 +94,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * - alt_price: An alternative CSS selector to retrieve the product price for special product page layouts. Optional.
 	 * - is_alt_price: A CSS selector to determine if the product has an alternative price. Optional.
 	 * - reg_amount: The registration amount. Optional.
-	 * - theme: The theme to use. Accepted values are: L, R, legacy, legacyL, legacyR, minimal, minimalL, minimalR. Optional.
+	 * - theme: The theme to use. Accepted values are: L, R, legacy, legacyL, legacyR, minimal, minimalL, minimalR or JSON formatted string. Optional.
 	 * 
 	 * @param array<string, string> $atts The shortcode attributes
 	 */
@@ -132,7 +132,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'product'      => '',
 				'campaign'     => '',
 				'product_id'   => '',
-				'theme'        => '',
+				'theme'        => $this->configuration->get_widget_theme(),
 				'reverse'      => 0,
 				'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
 				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'] ?? null, $this->i18n->get_current_country() ),
@@ -189,7 +189,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		try {
 			$store_id = $this->configuration->get_store_id();
 			$merchant = $this->payment_service->get_merchant_id();
-			$methods  = $this->payment_method_service->get_all_payment_methods( $store_id, $merchant );
+			$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, $merchant );
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return;

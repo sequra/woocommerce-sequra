@@ -214,12 +214,13 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * @return array<string, string>[]
 	 */
 	public function get_all_widget_compatible_payment_methods( string $store_id, string $merchant ): array {
-		return array_filter(
-			$this->get_all_payment_methods( $store_id, $merchant ),
-			function ( $method ) {
-				return $this->is_widget_compatible( $method );
-			} 
-		);
+		$methods = array();
+		foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
+			if ( $this->is_widget_compatible( $method ) ) {
+				$methods[] = $method;
+			}
+		}
+		return $methods;
 	}
 
 	/**

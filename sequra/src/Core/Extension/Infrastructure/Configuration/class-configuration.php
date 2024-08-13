@@ -409,6 +409,18 @@ class Configuration extends CoreConfiguration {
 	}
 
 	/**
+	 * Get widget theme
+	 */
+	public function get_widget_theme(): string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['widgetConfiguration'] ?? '';
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
 	 * Get asset key
 	 */
 	public function get_assets_key(): ?string {
