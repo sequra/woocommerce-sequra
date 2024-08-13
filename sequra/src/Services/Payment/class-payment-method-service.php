@@ -214,14 +214,21 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * @return array<string, string>[]
 	 */
 	public function get_all_widget_compatible_payment_methods( string $store_id, string $merchant ): array {
-		$methods  = $this->get_all_payment_methods( $store_id, $merchant );
-		$filtered = array();
-		foreach ( $methods as $method ) {
-			if ( isset( $method['product'] ) && in_array( $method['product'], array( 'i1', 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true ) ) {
-				$filtered[] = $method;
-			}
-		}
-		return $filtered;
+		return array_filter(
+			$this->get_all_payment_methods( $store_id, $merchant ),
+			function ( $method ) {
+				return $this->is_widget_compatible( $method );
+			} 
+		);
+	}
+
+	/**
+	 * Check if the payment method can be displayed in the widget
+	 * 
+	 * @param array<string, string> $method the payment method. Must contain 'product' at least.
+	 */
+	private function is_widget_compatible( array $method ): bool {
+		return isset( $method['product'] ) && in_array( $method['product'], array( 'i1', 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
 	}
 
 	/**
