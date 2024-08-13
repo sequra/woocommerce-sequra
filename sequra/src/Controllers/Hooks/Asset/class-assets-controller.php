@@ -10,8 +10,10 @@ namespace SeQura\WC\Controllers\Hooks\Asset;
 
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
+use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 
 /**
  * Define the assets related functionality
@@ -20,8 +22,10 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 
 	private const HANDLE_SETTINGS_PAGE     = 'sequra-settings';
 	private const HANDLE_CHECKOUT          = 'sequra-checkout';
+	private const HANDLE_PRODUCT           = 'sequra-product';
 	private const HANDLE_CORE              = 'sequra-core';
 	private const INTEGRATION_CORE_VERSION = '1.0.0';
+	private const STRATEGY_DEFER           = 'defer';
 
 	/**
 	 * URL to the assets directory
@@ -59,6 +63,20 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	private $configuration;
 
 	/**
+	 * Assets service
+	 *
+	 * @var Interface_Assets
+	 */
+	private $assets;
+
+	/**
+	 * Payment method service
+	 * 
+	 * @var Interface_Payment_Method_Service
+	 */
+	private $payment_method_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -68,15 +86,19 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		Interface_I18n $i18n, 
 		Interface_Logger_Service $logger,
 		string $templates_path, 
-		Configuration $configuration 
+		Configuration $configuration,
+		Interface_Assets $assets,
+		Interface_Payment_Method_Service $payment_method_service
 	) {
 		parent::__construct( $logger, $templates_path );
-		$this->assets_dir_url  = $assets_dir_url;
-		$this->assets_dir_path = $assets_dir_path;
-		$this->assets_version  = $assets_version;
-		$this->i18n            = $i18n;
-		$this->logger          = $logger;
-		$this->configuration   = $configuration;
+		$this->assets_dir_url         = $assets_dir_url;
+		$this->assets_dir_path        = $assets_dir_path;
+		$this->assets_version         = $assets_version;
+		$this->i18n                   = $i18n;
+		$this->logger                 = $logger;
+		$this->configuration          = $configuration;
+		$this->assets                 = $assets;
+		$this->payment_method_service = $payment_method_service;
 	}
 
 	/**
@@ -200,21 +222,94 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	}
 
 	/**
+	 * Get the SequraProduct object
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function get_sequra_product_l10n(): array {
+		$merchant = $this->configuration->get_merchant_ref( $this->i18n->get_current_country() );
+		$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $this->configuration->get_store_id(), $merchant );
+		return array(
+			'scriptUri'         => $this->assets->get_cdn_resource_uri( $this->configuration->get_env(), 'sequra-checkout.min.js' ),
+			'thousandSeparator' => wc_get_price_thousand_separator(),
+			'decimalSeparator'  => wc_get_price_decimal_separator(),
+			'locale'            => $this->i18n->get_locale(),
+			'merchant'          => $merchant,
+			'assetKey'          => $this->configuration->get_assets_key(),
+			'products'          => array_column( $methods, 'product' ),
+			'widgets'           => array(),
+		);
+	}
+
+	/**
+	 * Get the script arguments to enqueue based on the WP version
+	 * 
+	 * @return array<string, string>|bool
+	 */
+	private function get_script_args( string $strategy, bool $in_footer ) {
+		$wp_version = get_bloginfo( 'version' );
+		if ( version_compare( $wp_version, '6.3', '>=' ) ) {
+			return array(
+				'strategy'  => $strategy,
+				'in_footer' => $in_footer,
+			);
+		}
+		return $in_footer;
+	}
+
+	/**
+	 * Enqueue styles and scripts in Front-End for the checkout page
+	 */
+	private function enqueue_front_checkout(): void {
+		wp_enqueue_style( self::HANDLE_CHECKOUT, "{$this->assets_dir_url}/css/checkout.css", array(), $this->assets_version );
+		wp_enqueue_script( 
+			self::HANDLE_CHECKOUT,
+			"{$this->assets_dir_url}/js/dist/page/checkout.min.js",
+			array(),
+			$this->assets_version,
+			$this->get_script_args( self::STRATEGY_DEFER, true )
+		);
+	}
+
+	/**
+	 * Enqueue styles and scripts in Front-End for the product page
+	 */
+	private function enqueue_front_product(): void {
+		
+		wp_enqueue_style( self::HANDLE_PRODUCT, "{$this->assets_dir_url}/css/product.css", array(), $this->assets_version );
+		wp_register_script( 
+			self::HANDLE_PRODUCT, 
+			"{$this->assets_dir_url}/js/dist/page/product.min.js",
+			array(),
+			$this->assets_version,
+			$this->get_script_args( self::STRATEGY_DEFER, false )
+		);
+		wp_localize_script( self::HANDLE_PRODUCT, 'SequraProduct', $this->get_sequra_product_l10n() );
+		wp_enqueue_script( self::HANDLE_PRODUCT );
+	}
+
+	/**
+	 * Check if the current post has the widget shortcode in its content
+	 */
+	private function has_widget_shortcode(): bool {
+		if ( is_checkout() || is_cart() || ! is_singular() ) {
+			return false;
+		}
+		global $post;
+		return has_shortcode( $post->post_content, 'sequra_widget' );
+	}
+
+	/**
 	 * Enqueue styles and scripts in Front-End
 	 */
 	public function enqueue_front(): void {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-		$wp_version = get_bloginfo( 'version' );
-
 		if ( is_checkout() ) {
-			wp_enqueue_style( self::HANDLE_CHECKOUT, "{$this->assets_dir_url}/css/checkout.css", array(), $this->assets_version );
-			wp_enqueue_script( 
-				self::HANDLE_CHECKOUT,
-				"{$this->assets_dir_url}/js/dist/page/checkout.min.js",
-				array(),
-				$this->assets_version,
-				version_compare( $wp_version, '6.3', '>=' ) ? array( 'strategy' => 'defer' ) : false
-			);
+			$this->enqueue_front_checkout();
+		} 
+		
+		if ( is_product() || $this->has_widget_shortcode() ) {
+			$this->enqueue_front_product();
 		}
 	}
 

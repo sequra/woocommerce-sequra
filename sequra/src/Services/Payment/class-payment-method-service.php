@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Services\Payment;
 
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\Solicitation\Response\SolicitationResponse;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraForm;
@@ -191,6 +192,36 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 			
 		$this->payment_methods = $response->toArray()['availablePaymentMethods'];
 		return $this->payment_methods;
+	}
+
+	/**
+	 * Get a list of all payment methods defined for store and merchant
+	 * 
+	 * @throws Throwable
+	 * 
+	 * @return array<string, string>[]
+	 */
+	public function get_all_payment_methods( string $store_id, string $merchant ): array {
+		return AdminAPI::get()
+			->paymentMethods( $store_id )
+			->getPaymentMethods( strval( $merchant ) )
+			->toArray();
+	}
+
+	/**
+	 * Look for available payment methods which can be used with the widget
+	 * 
+	 * @return array<string, string>[]
+	 */
+	public function get_all_widget_compatible_payment_methods( string $store_id, string $merchant ): array {
+		$methods  = $this->get_all_payment_methods( $store_id, $merchant );
+		$filtered = array();
+		foreach ( $methods as $method ) {
+			if ( isset( $method['product'] ) && in_array( $method['product'], array( 'i1', 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true ) ) {
+				$filtered[] = $method;
+			}
+		}
+		return $filtered;
 	}
 
 	/**

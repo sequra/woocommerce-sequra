@@ -11,6 +11,8 @@ namespace SeQura\WC\Services\Product;
 use DateInterval;
 use DateTime;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
+use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
+use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use WC_Product;
 
 /**
@@ -32,12 +34,21 @@ class Product_Service implements Interface_Product_Service {
 	private $configuration;
 
 	/**
+	 * Pricing service
+	 *
+	 * @var Interface_Pricing_Service
+	 */
+	private $pricing_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
-		Configuration $configuration
+		Configuration $configuration,
+		Interface_Pricing_Service $pricing_service
 	) {
-		$this->configuration = $configuration;
+		$this->configuration   = $configuration;
+		$this->pricing_service = $pricing_service;
 	}
 
 	/**
@@ -125,8 +136,86 @@ class Product_Service implements Interface_Product_Service {
 	 *
 	 * @param WC_Product|int $product the product we are building item info for.
 	 */
-	public function get_registration_amount( $product ): float {
+	public function get_registration_amount( $product, bool $to_cents = false ): float {
 		$product = $this->get_product_instance( $product );
-		return (float) $product->get_meta( self::META_KEY_SEQURA_REGISTRATION_AMOUNT, true );
+		$value   = (float) $product->get_meta( self::META_KEY_SEQURA_REGISTRATION_AMOUNT, true );
+		return $to_cents ? $this->pricing_service->to_cents( $value ) : $value;
+	}
+
+	/**
+	 * Check if we can display widgets for a product
+	 *
+	 * @param WC_Product|int $product the product.
+	 */
+	public function can_display_widgets( $product ): bool {
+		if ( ! function_exists( 'WC' ) ) {
+			return false;
+		}
+		
+		/**
+		 * Payment gateway
+		 * 
+		 * @var Sequra_Payment_Gateway
+		 */
+		$gateway = null;
+		foreach ( WC()->payment_gateways()->get_available_payment_gateways() as $g ) {
+			if ( $g instanceof Sequra_Payment_Gateway ) {
+				$gateway = $g;
+				break;
+			}
+		}
+
+		if ( ! $gateway ) {
+			return false;
+		}
+
+		$product = $this->get_product_instance( $product );
+		if ( ! $product ) {
+			return false;
+		}
+
+		if ( ! $this->configuration->is_enabled_for_services() && ! $product->needs_shipping() ) {
+			return false;
+		}
+
+		if ( $this->is_banned( $product ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if we can display widget of a payment method for a product
+	 * 
+	 * @param WC_Product|int $product the product.
+	 * @param array<string, string> $method the payment method. See PaymentMethodsResponse::toArray() output
+	 */
+	public function can_display_widget_for_method( $product, $method ): bool {
+		$product = $this->get_product_instance( $product );
+		if ( ! $product ) {
+			return false;
+		}
+		// Check if price is too high.
+		if ( ! empty( $method['maxAmount'] ) && $method['maxAmount'] < $this->pricing_service->to_cents( (float) $product->get_price( 'edit' ) ) ) {
+			return false;
+		}
+
+		// Check if is too early to display the widget.
+		if ( ! empty( $method['startsAt'] ) && time() < strtotime( $method['startsAt'] ) ) {
+			return false;
+		}
+
+		// Check if is too late to display the widget.
+		if ( ! empty( $method['endsAt'] ) && strtotime( $method['endsAt'] ) < time() ) {
+			return false;
+		}
+
+		// TODO: Check if the seQura payment method can display the widget based on the configuration.
+		// $sq_product = $sequra->get_remote_config()->build_unique_product_code( $method );
+		// isset( $sequra->settings[ 'enabled_in_product_' . $sq_product ] ) &&
+		// 'yes' === $sequra->settings[ 'enabled_in_product_' . $sq_product ]
+
+		return true;            
 	}
 }

@@ -8,6 +8,7 @@
 namespace SeQura\WC;
 
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
@@ -54,7 +55,8 @@ class Plugin {
 		REST_Controller $rest_settings_controller,
 		REST_Controller $rest_onboarding_controller,
 		REST_Controller $rest_payment_controller,
-		REST_Controller $rest_log_controller
+		REST_Controller $rest_log_controller,
+		Interface_Product_Controller $product_controller
 	) {
 		$this->data              = $data;
 		$this->base_name         = $base_name;
@@ -86,6 +88,11 @@ class Plugin {
 		
 		add_filter( 'woocommerce_thankyou_order_received_text', array( $payment_controller, 'order_received_text' ), 10, 2 );
 		add_filter( 'woocommerce_order_get_payment_method_title', array( $payment_controller, 'order_get_payment_method_title' ), 10, 2 );
+		
+		// Product widget.
+		add_action( 'woocommerce_after_main_content', array( $product_controller, 'add_widget_shortcode_to_product_page' ) );
+		add_action( 'wp_footer', array( $product_controller, 'add_widget_shortcode_to_product_page' ) );
+		add_shortcode( 'sequra_widget', array( $product_controller, 'do_widget_shortcode' ) );
 	}
 
 	/**

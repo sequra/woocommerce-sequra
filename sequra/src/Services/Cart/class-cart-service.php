@@ -144,7 +144,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 * Get registration item instance
 	 */
 	private function get_registration_item( WC_Product $product, int $qty ): ?Registration_Item {
-		$registration_amount = $this->product_service->get_registration_amount( $product->get_id() );
+		$registration_amount = $this->product_service->get_registration_amount( $product, true );
 		if ( $registration_amount <= 0 ) {
 			return null;
 		}
@@ -155,7 +155,7 @@ class Cart_Service implements Interface_Cart_Service {
 		return new Registration_Item(
 			"$ref-reg",
 			"Reg. $name",
-			$this->pricing_service->to_cents( $registration_amount ) * $qty
+			$registration_amount * $qty
 		);
 	}
 	/**

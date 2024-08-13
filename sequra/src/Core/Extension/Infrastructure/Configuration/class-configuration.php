@@ -320,4 +320,142 @@ class Configuration extends CoreConfiguration {
 	public function get_db_version(): string {
 		return $this->getConfigValue( self::CONF_DB_VERSION, '' );
 	}
+
+	/**
+	 * Get general settings as array
+	 * 
+	 * @throws Throwable
+	 * 
+	 * @return array<string, mixed>
+	 */
+	protected function get_widget_settings(): array {
+		return AdminAPI::get()
+		->widgetConfiguration( $this->get_store_id() )
+		->getWidgetSettings()
+		->toArray();
+	}
+
+	/**
+	 * Check if the widget is enabled.
+	 */
+	public function is_widget_enabled(): bool {
+		try {
+			$config = $this->get_widget_settings();
+			return ! empty( $config['useWidgets'] ) && ! empty( $config['displayWidgetOnProductPage'] );
+		} catch ( Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get the widget location selector
+	 */
+	public function get_widget_dest_css_sel( ?string $payment_method = null, ?string $country = null ): string {
+		try {
+			$config = $this->get_widget_settings();
+			$sel    = $config['selForDefaultLocation'];
+			if ( ! empty( $payment_method ) && ! empty( $country ) ) {
+				foreach ( $config['customLocations'] as $location ) {
+					if ( isset( $location['product'] ) 
+						&& $location['product'] === $payment_method 
+						&& isset( $location['country'] ) 
+						&& $location['country'] === $country ) {
+						$sel = $location['sel_for_target'];
+						break;
+					}
+				}
+			}
+
+			return $sel;
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the widget price selector
+	 */
+	public function get_widget_price_css_sel(): string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['selForPrice'] ?? '';
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the widget alt price selector
+	 */
+	public function get_widget_alt_price_css_sel(): string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['selForAltPrice'] ?? '';
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the selector used to check when the alt price should be displayed
+	 */
+	public function get_widget_is_alt_price_css_sel(): string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['selForAltPriceTrigger'] ?? '';
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get asset key
+	 */
+	public function get_assets_key(): ?string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['assetsKey'] ?? null;
+		} catch ( Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Get merchant ref
+	 */
+	public function get_merchant_ref( $country ): ?string {
+		try {
+			$countries_conf = AdminAPI::get()
+			->countryConfiguration( $this->get_store_id() )
+			->getCountryConfigurations()
+			->toArray();
+
+			foreach ( $countries_conf as $country_conf ) {
+				if ( $country_conf['countryCode'] === $country ) {
+					return $country_conf['merchantId'] ?? null;
+				}
+			}
+			return null;
+		} catch ( Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Get connection settings as array
+	 */
+	private function get_connection_settings(): array {
+		return AdminAPI::get()
+		->connection( $this->get_store_id() )
+		->getConnectionSettings()
+		->toArray();
+	}
+
+	/**
+	 * Get the environment
+	 */
+	public function get_env(): ?string {
+		$conn = $this->get_connection_settings();
+		return $conn['environment'] ?? null;
+	}
 }

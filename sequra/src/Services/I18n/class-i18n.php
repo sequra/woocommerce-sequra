@@ -20,27 +20,39 @@ class I18n implements Interface_I18n {
 	 */
 	public function get_lang( $locale = null ): string {
 		if ( null === $locale ) {
-			/**
-			 * Filters the current language using WPML.
-			 *
-			 * @since 3.0.0
-			 */
-			$locale = apply_filters( 'wpml_current_language', null );
-
-			if ( empty( $locale ) && function_exists( 'pll_current_language' ) ) {
-				// Get the language using Polylang function.
-				$locale = pll_current_language( 'slug' );
-			}
-			if ( empty( $locale ) && function_exists( 'qtrans_getLanguage' ) ) {
-				// Get the language using qTranslate function.
-				$locale = qtrans_getLanguage();
-			}
-			if ( empty( $locale ) ) {
-				// Falling back to the default locale.
-				$locale = get_user_locale();
-			}
+			$locale = $this->get_locale( '_' );
 		}
 		return strtolower( explode( '_', $locale )[0] );
+	}
+
+	/**
+	 * Get locale.
+	 */
+	public function get_locale( string $separator = '-' ): string {
+		/**
+		 * Filters the current language using WPML.
+		 *
+		 * @since 3.0.0
+		 */
+		$locale = apply_filters( 'wpml_current_language', null );
+
+		if ( empty( $locale ) && function_exists( 'pll_current_language' ) ) {
+			// Get the language using Polylang function.
+			$locale = pll_current_language( 'slug' );
+		}
+		if ( empty( $locale ) && function_exists( 'qtrans_getLanguage' ) ) {
+			// Get the language using qTranslate function.
+			$locale = qtrans_getLanguage();
+		}
+		if ( empty( $locale ) ) {
+			// Falling back to the default locale.
+			$locale = get_user_locale();
+		}
+
+		if ( '_' !== $separator ) {
+			$locale = str_replace( '_', $separator, $locale );
+		}
+		return $locale;
 	}
 
 	/**

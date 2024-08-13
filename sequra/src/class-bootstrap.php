@@ -49,6 +49,8 @@ use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\Core\Infrastructure\Utility\TimeProvider;
 use SeQura\WC\Controllers\Hooks\Asset\Assets_Controller;
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Interface_Product_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\I18n_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
@@ -80,6 +82,8 @@ use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
+use SeQura\WC\Services\Assets\Assets;
+use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\Cart\Cart_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
@@ -140,7 +144,8 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( General_Settings_REST_Controller::class ),
 					Reg::getService( Onboarding_REST_Controller::class ),
 					Reg::getService( Payment_REST_Controller::class ),
-					Reg::getService( Log_REST_Controller::class )
+					Reg::getService( Log_REST_Controller::class ),
+					Reg::getService( Interface_Product_Controller::class )
 				);
 			}
 		);
@@ -590,7 +595,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Product_Service::class ] ) ) {
 					self::$cache[ Interface_Product_Service::class ] = new Product_Service(
-						Reg::getService( Configuration::class )
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Pricing_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Product_Service::class ];
@@ -616,6 +622,15 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ ShopOrderService::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Assets::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Assets::class ] ) ) {
+					self::$cache[ Interface_Assets::class ] = new Assets();
+				}
+				return self::$cache[ Interface_Assets::class ];
 			}
 		);
 	}
@@ -730,7 +745,9 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( 'plugin.templates_path' ),
-						Reg::getService( Configuration::class )
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Assets::class ),
+						Reg::getService( Interface_Payment_Method_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Assets_Controller::class ];
@@ -763,6 +780,23 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
+			Interface_Product_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Product_Controller::class ] ) ) {
+					self::$cache[ Interface_Product_Controller::class ] = new Product_Controller(
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( 'plugin.templates_path' ),
+						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Product_Service::class ),
+						Reg::getService( Interface_Payment_Service::class ),
+						Reg::getService( Interface_Payment_Method_Service::class ),
+						Reg::getService( Interface_I18n::class )
+					);
+				}
+				return self::$cache[ Interface_Product_Controller::class ];
+			}
+		);
+		Reg::registerService(
 			Onboarding_REST_Controller::class,
 			static function () {
 				if ( ! isset( self::$cache[ Onboarding_REST_Controller::class ] ) ) {
@@ -780,7 +814,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Payment_REST_Controller::class ] ) ) {
 					self::$cache[ Payment_REST_Controller::class ] = new Payment_REST_Controller(
 						Reg::getService( 'plugin.rest_namespace' ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Payment_Method_Service::class )
 					);
 				}
 				return self::$cache[ Payment_REST_Controller::class ];
