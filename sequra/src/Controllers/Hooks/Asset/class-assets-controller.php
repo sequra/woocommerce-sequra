@@ -244,7 +244,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	/**
 	 * Get the script arguments to enqueue based on the WP version
 	 * 
-	 * @return array<string, string>|bool
+	 * @return array|bool
 	 */
 	private function get_script_args( string $strategy, bool $in_footer ) {
 		$wp_version = get_bloginfo( 'version' );

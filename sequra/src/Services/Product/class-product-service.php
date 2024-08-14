@@ -211,11 +211,6 @@ class Product_Service implements Interface_Product_Service {
 			return false;
 		}
 
-		// TODO: Check if the seQura payment method can display the widget based on the configuration.
-		// $sq_product = $sequra->get_remote_config()->build_unique_product_code( $method );
-		// isset( $sequra->settings[ 'enabled_in_product_' . $sq_product ] ) &&
-		// 'yes' === $sequra->settings[ 'enabled_in_product_' . $sq_product ]
-
 		return true;            
 	}
 }

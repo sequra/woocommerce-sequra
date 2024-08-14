@@ -104,7 +104,7 @@ class Payment_REST_Controller extends REST_Controller {
 					continue;
 				}
 
-				$payment_methods = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, strval( $country['merchantId'] )  );
+				$payment_methods = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, strval( $country['merchantId'] ) );
 
 				foreach ( $payment_methods as $payment_method ) {
 					if ( ! isset( $country['countryCode'], $payment_method['product'], $payment_method['title'] ) ) {

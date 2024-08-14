@@ -422,7 +422,7 @@ class Configuration extends CoreConfiguration {
 	 */
 	private function get_widget_custom_location( ?string $payment_method = null, ?string $country = null ): array {
 		$config = $this->get_widget_settings();
-		if ( ! empty( $payment_method ) && ! empty( $country ) ) {
+		if ( ! empty( $payment_method ) && ! empty( $country ) && isset( $config['customLocations'] ) && is_array( $config['customLocations'] ) ) {
 			foreach ( $config['customLocations'] as $location ) {
 				if ( isset( $location['product'] ) 
 					&& $location['product'] === $payment_method 
