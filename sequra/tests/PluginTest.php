@@ -9,6 +9,7 @@
 namespace SeQura\WC\Tests;
 
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
+use SeQura\WC\Controllers\Hooks\Asset\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
@@ -31,6 +32,7 @@ class PluginTest extends WP_UnitTestCase {
 	private $rest_payment_controller;
 	private $rest_log_controller;
 	private $migration_manager;
+	private $product_controller;
 
 	public function set_up() {
 
@@ -54,6 +56,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->rest_onboarding_controller = $this->createMock( REST_Controller::class );
 		$this->rest_payment_controller    = $this->createMock( REST_Controller::class );
 		$this->rest_log_controller        = $this->createMock( REST_Controller::class );
+		$this->product_controller         = $this->createMock( Interface_Product_Controller::class );
 	}
 
 	private function setup_plugin_instance() {
@@ -68,7 +71,8 @@ class PluginTest extends WP_UnitTestCase {
 			$this->rest_settings_controller,
 			$this->rest_onboarding_controller,
 			$this->rest_payment_controller,
-			$this->rest_log_controller
+			$this->rest_log_controller,
+			$this->product_controller
 		);
 	}
 

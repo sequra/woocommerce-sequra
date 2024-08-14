@@ -141,8 +141,8 @@ class Widget_Location {
 
 		return new self(
 			isset( $data['display_widget'] ) ? boolval( $data['display_widget'] ) : false,
-			strval( $data['sel_for_target'] ),
-			strval( $data['widget_styles'] ),
+			isset( $data['sel_for_target'] ) ? strval( $data['sel_for_target'] ) : null,
+			isset( $data['widget_styles'] ) ? strval( $data['widget_styles'] ) : null,
 			isset( $data['product'] ) ? strval( $data['product'] ) : null,
 			isset( $data['country'] ) ? strval( $data['country'] ) : null
 		);
