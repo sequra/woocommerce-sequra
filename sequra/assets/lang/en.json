@@ -317,11 +317,14 @@
       "description": "CSS selector to define the default container element for the widget"
     },
     "locations": {
-      "headerTitle": "Custom widget locations",
-      "headerDescription": "Define alternative container elements for the widget",
-      "addRow": "Add location",
+      "headerTitle": "Customize widgets",
+      "headerDescription": "Define alternative configuration per payment method",
+      "addRow": "Add new",
+      "removeRow": "Remove",
       "paymentMethod":"Payment method",
-      "selector": "Selector"
+      "selector": "Location CSS selector",
+      "leaveEmptyToUseDefault": "Leave empty to use default value",
+      "showWidget": "Display widget"
     }
   },
   "orderStatusSettings": {

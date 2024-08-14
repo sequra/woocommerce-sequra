@@ -21,6 +21,11 @@ interface Interface_I18n {
 	public function get_lang( $locale = null ): string;
 
 	/**
+	 * Get locale.
+	 */
+	public function get_locale( string $separator = '-' ): string;
+
+	/**
 	 * Get the current country. ISO-3166-1 alpha-2 code.
 	 */
 	public function get_current_country(): string;

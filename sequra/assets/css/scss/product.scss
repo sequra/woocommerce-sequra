@@ -1,0 +1,18 @@
+.sequra-educational-popup {
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/**Minimize jump due to height resize**/
+.sequra-promotion-widget {
+    &[data-type="text"] {
+        height: 20px;
+    }
+    // &[data-type="banner"] {
+    //     height: 123px;
+    // }
+    &[data-type="legacy"] {
+        height: 101px;
+        max-width: 320px;
+    }
+}

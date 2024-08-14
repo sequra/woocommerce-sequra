@@ -61,5 +61,20 @@ interface Interface_Product_Service {
 	 *
 	 * @param WC_Product|int $product the product we are building item info for.
 	 */
-	public function get_registration_amount( $product ): float;
+	public function get_registration_amount( $product, bool $to_cents = false ): float;
+
+	/**
+	 * Check if we can display widgets for a product
+	 *
+	 * @param WC_Product|int $product the product.
+	 */
+	public function can_display_widgets( $product ): bool;
+
+	/**
+	 * Check if we can display widget of a payment method for a product
+	 * 
+	 * @param WC_Product|int $product the product.
+	 * @param array<string, string> $method the payment method. See PaymentMethodsResponse::toArray() output
+	 */
+	public function can_display_widget_for_method( $product, $method ): bool;
 }

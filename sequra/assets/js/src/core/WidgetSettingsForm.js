@@ -296,6 +296,8 @@ if (!window.SequraFE) {
             });
         }
 
+
+
         const renderLocations = () => {
             new Repeater({
                 containerSelector: '.sq-locations-container',
@@ -306,7 +308,33 @@ if (!window.SequraFE) {
                         description: SequraFE.translationService.translate('widgets.locations.headerDescription')
                     },
                 ],
-                getRow: (data) => {
+                getRowContent: (data) => {
+                    let displayWidget = true;
+                    if (data && 'undefined' !== typeof data.display_widget) {
+                        displayWidget = data.display_widget;
+                    }
+
+                    return `
+                    <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow sq-table__row-field-wrapper--space-between">
+                       <h3 class="sqp-field-title">${SequraFE.translationService.translate('widgets.displayOnProductPage.label')}
+                       <label class="sq-toggle"><input class="sqp-toggle-input" type="checkbox" ${displayWidget ? 'checked' : ''}><span class="sqp-toggle-round"></span></label>
+                       </h3>
+                       <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.displayOnProductPage.description')}</span>
+                    </div>
+                 
+                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
+                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.selector')}</label>
+                        <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.locations.leaveEmptyToUseDefault')}</span>
+                        <input class="sq-table__row-field" type="text" value="${data && 'undefined' !== typeof data.sel_for_target ? data.sel_for_target : ''}">
+                    </div>
+                    <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
+                    <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.configurator.label')}</label>
+                    <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.configurator.description.start')}<a class="sq-link-button" href="https://live.sequracdn.com/assets/static/simulator.html" target="_blank"><span>${SequraFE.translationService.translate('widgets.configurator.description.link')}</span></a><span>${SequraFE.translationService.translate('widgets.configurator.description.end')} ${SequraFE.translationService.translate('widgets.locations.leaveEmptyToUseDefault')}</span></span>
+                    <textarea class="sqp-field-component sq-text-input sq-text-area" rows="5">${data && 'undefined' !== typeof data.widget_styles ? data.widget_styles : ''}</textarea>
+                    </div>
+                    `
+                },
+                getRowHeader: (data) => {
                     return `
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
@@ -316,19 +344,18 @@ if (!window.SequraFE) {
                     }).join('') : ''}
                         </select>
                     </div>
-                    <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
-                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.selector')}</label>
-                        <input class="sq-table__row-field" type="text" value="${data ? data.sel_for_target : ''}">
-                    </div>`
+                   `
                 },
                 handleChange: table => {
                     const customLocations = [];
-                    table.querySelectorAll('.sq-table__row-content').forEach(row => {
+                    table.querySelectorAll('.sq-table__row').forEach(row => {
                         const select = row.querySelector('select');
-                        const sel_for_target = row.querySelector('input').value;
+                        const sel_for_target = row.querySelector('input[type="text"]').value;
+                        const widget_styles = row.querySelector('textarea').value;
+                        const display_widget = row.querySelector('input[type="checkbox"]').checked;
                         const product = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.product;
                         const country = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.countryCode;
-                        customLocations.push({ sel_for_target, product, country });
+                        customLocations.push({ sel_for_target, product, country, widget_styles, display_widget });
                     });
                     handleChange('customLocations', customLocations)
                 },
@@ -422,11 +449,18 @@ if (!window.SequraFE) {
         const isCustomLocationValid = value => {
             try {
                 value.forEach(location => {
-                    if (!isCssSelectorValid(location.sel_for_target)) {
+                    if ('' !== location.sel_for_target && !isCssSelectorValid(location.sel_for_target)) {
+                        throw new Error('Invalid selector');
+                    }
+                    if ('' !== location.widget_styles && !isJSONValid(location.widget_styles)) {
                         throw new Error('Invalid selector');
                     }
                     if (!allPaymentMethods.some(pm => pm.product === location.product && pm.countryCode === location.country)) {
                         throw new Error('Invalid payment method');
+                    }
+                    // Check if exists other location with the same product and country
+                    if (value.filter(l => l.product === location.product && l.country === location.country).length > 1) {
+                        throw new Error('Duplicated entry found');
                     }
                 });
                 return true;

@@ -20,6 +20,20 @@ class Widget_Location {
 	private $sel_for_target;
 
 	/**
+	 * Widget styles.
+	 *
+	 * @var string
+	 */
+	private $widget_styles;
+
+	/**
+	 * Display widget.
+	 *
+	 * @var bool
+	 */
+	private $display_widget;
+
+	/**
 	 * The seQura product identifier.
 	 *
 	 * @var ?string
@@ -36,7 +50,9 @@ class Widget_Location {
 	/**
 	 * Constructor.
 	 */
-	public function __construct( string $sel_for_target, ?string $product = null, ?string $country = null ) {
+	public function __construct( bool $display_widget, string $sel_for_target, string $widget_styles, ?string $product = null, ?string $country = null ) {
+		$this->display_widget = $display_widget;
+		$this->widget_styles  = $widget_styles;
 		$this->sel_for_target = $sel_for_target;
 		$this->product        = $product;
 		$this->country        = $country;
@@ -85,6 +101,35 @@ class Widget_Location {
 	}
 
 	/**
+	 * Getter
+	 */
+	public function get_widget_styles(): string {
+		return $this->widget_styles;
+	}
+
+	/**
+	 * Setter
+	 */
+	public function set_widget_styles( string $widget_styles ): void {
+		$this->widget_styles = $widget_styles;
+	}
+
+	/**
+	 * Getter
+	 */
+	public function get_display_widget(): bool {
+		return $this->display_widget;
+	}
+
+	/**
+	 * Setter
+	 */
+	public function set_display_widget( bool $display_widget ): void {
+		$this->display_widget = $display_widget;
+	}
+
+
+	/**
 	 * Create a WidgetLocation object from an array.
 	 * 
 	 * @param array<string, mixed> $data Array containing the data.
@@ -95,7 +140,9 @@ class Widget_Location {
 		}
 
 		return new self(
-			strval( $data['sel_for_target'] ),
+			isset( $data['display_widget'] ) ? boolval( $data['display_widget'] ) : false,
+			isset( $data['sel_for_target'] ) ? strval( $data['sel_for_target'] ) : null,
+			isset( $data['widget_styles'] ) ? strval( $data['widget_styles'] ) : null,
 			isset( $data['product'] ) ? strval( $data['product'] ) : null,
 			isset( $data['country'] ) ? strval( $data['country'] ) : null
 		);
@@ -108,16 +155,11 @@ class Widget_Location {
 	 */
 	public function to_array(): array {
 		return array(
+			'display_widget' => $this->display_widget,
+			'widget_styles'  => $this->widget_styles,
 			'sel_for_target' => $this->sel_for_target,
 			'product'        => $this->product,
 			'country'        => $this->country,
 		);
-	}
-
-	/**
-	 * Check if the location is the default one.
-	 */
-	public function is_default_location(): bool {
-		return null === $this->product && null === $this->country;
 	}
 }

@@ -320,4 +320,187 @@ class Configuration extends CoreConfiguration {
 	public function get_db_version(): string {
 		return $this->getConfigValue( self::CONF_DB_VERSION, '' );
 	}
+
+	/**
+	 * Get general settings as array
+	 * 
+	 * @throws Throwable
+	 * 
+	 * @return array<string, mixed>
+	 */
+	protected function get_widget_settings(): array {
+		return AdminAPI::get()
+		->widgetConfiguration( $this->get_store_id() )
+		->getWidgetSettings()
+		->toArray();
+	}
+
+	/**
+	 * Check if the widget is enabled.
+	 */
+	public function is_widget_enabled( ?string $payment_method = null, ?string $country = null ): bool {
+		try {
+			$config = $this->get_widget_settings();
+			return ! empty( $config['useWidgets'] ) && ! empty( $config['displayWidgetOnProductPage'] ) && $this->is_widget_enabled_in_custom_locations( $payment_method, $country );
+		} catch ( Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Check if the widget is enabled in custom locations.
+	 */
+	private function is_widget_enabled_in_custom_locations( ?string $payment_method = null, ?string $country = null ): bool {
+		try {
+			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
+			if ( isset( $custom_location['display_widget'] ) ) {
+				return $custom_location['display_widget'];
+			}
+			return true;
+		} catch ( Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get the widget location selector
+	 */
+	public function get_widget_dest_css_sel( ?string $payment_method = null, ?string $country = null ): string {
+		try {
+			$config          = $this->get_widget_settings();
+			$sel             = $config['selForDefaultLocation'];
+			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
+			if ( isset( $custom_location['sel_for_target'] ) ) {
+				$sel = $custom_location['sel_for_target'];
+			}
+			return $sel;
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the widget price selector
+	 */
+	public function get_widget_price_css_sel(): string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['selForPrice'] ?? '';
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the widget alt price selector
+	 */
+	public function get_widget_alt_price_css_sel(): string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['selForAltPrice'] ?? '';
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the selector used to check when the alt price should be displayed
+	 */
+	public function get_widget_is_alt_price_css_sel(): string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['selForAltPriceTrigger'] ?? '';
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the widget custom location
+	 * 
+	 * @return array<string, mixed>
+	 */
+	private function get_widget_custom_location( ?string $payment_method = null, ?string $country = null ): array {
+		$config = $this->get_widget_settings();
+		if ( ! empty( $payment_method ) && ! empty( $country ) && isset( $config['customLocations'] ) && is_array( $config['customLocations'] ) ) {
+			foreach ( $config['customLocations'] as $location ) {
+				if ( isset( $location['product'] ) 
+					&& $location['product'] === $payment_method 
+					&& isset( $location['country'] ) 
+					&& $location['country'] === $country ) {
+					return $location;
+				}
+			}
+		}
+		return array();
+	}
+
+	/**
+	 * Get widget theme
+	 */
+	public function get_widget_theme( ?string $payment_method = null, ?string $country = null ): string {
+		try {
+			$config = $this->get_widget_settings();
+			$style  = $config['widgetConfiguration'] ?? '';
+
+			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
+			if ( isset( $custom_location['widget_styles'] ) ) {
+				$style = $custom_location['widget_styles'] ?? $style;
+			}
+			return $style;
+		} catch ( Throwable $e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get asset key
+	 */
+	public function get_assets_key(): ?string {
+		try {
+			$config = $this->get_widget_settings();
+			return $config['assetsKey'] ?? null;
+		} catch ( Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Get merchant ref
+	 */
+	public function get_merchant_ref( $country ): ?string {
+		try {
+			$countries_conf = AdminAPI::get()
+			->countryConfiguration( $this->get_store_id() )
+			->getCountryConfigurations()
+			->toArray();
+
+			foreach ( $countries_conf as $country_conf ) {
+				if ( $country_conf['countryCode'] === $country ) {
+					return $country_conf['merchantId'] ?? null;
+				}
+			}
+			return null;
+		} catch ( Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Get connection settings as array
+	 */
+	private function get_connection_settings(): array {
+		return AdminAPI::get()
+		->connection( $this->get_store_id() )
+		->getConnectionSettings()
+		->toArray();
+	}
+
+	/**
+	 * Get the environment
+	 */
+	public function get_env(): ?string {
+		$conn = $this->get_connection_settings();
+		return $conn['environment'] ?? null;
+	}
 }

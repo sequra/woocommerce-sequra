@@ -63,6 +63,14 @@ module.exports = (env, argv) => {
                 filename: "checkout.min.js",
             },
         },
+        {
+            plugins: frontPlugins,
+            entry: "./assets/js/src/page/product.js",
+            output: {
+                path: path.resolve(__dirname, './assets/js/dist/page'),
+                filename: "product.min.js",
+            },
+        },
         // Add more entries here for processing other files.
     ];
 
