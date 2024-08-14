@@ -3,7 +3,8 @@
 * @property {string} containerSelector
 * @property {array} data
 * @property {function} getHeaders
-* @property {function} getRow
+* @property {function} getRowContent
+* @property {function} getRowHeader
 * @property {function|null} handleChange
 * @property {string} addRowText
 */
@@ -40,11 +41,13 @@ export class Repeater {
         }
         const clone = this.template.cloneNode(true);
         const row = clone.content.querySelector('.sq-table__row');
-        row.querySelector('.sq-table__row-content').innerHTML = this.adapter.getRow(data);
+        row.querySelector('.sq-table__row-header').innerHTML = this.adapter.getRowHeader(data);
+        row.querySelector('.sq-table__row-content').innerHTML = this.adapter.getRowContent(data);
         row.querySelector('.sq-remove').addEventListener('click', this.#deleteRow);
         this.body.appendChild(row);
 
-        row.querySelector('.sq-table__row-content').querySelectorAll('input,textarea,select').forEach(elem => {
+        // row.querySelector('.sq-table__row-content').querySelectorAll('input,textarea,select').forEach(elem => {
+        row.querySelectorAll('input,textarea,select').forEach(elem => {
             elem.addEventListener('change', () => {
                 if (this.adapter.handleChange) {
                     this.adapter.handleChange(this.elem.querySelector('.sq-table'))
@@ -82,18 +85,18 @@ export class Repeater {
         repeater.innerHTML = `
             <header class="sq-table__header">
                 ${this.adapter.getHeaders().map(header => `<div class="sq-table__header-item"><h3 class="sqp-field-title">${header.title}</h3><span class="sqp-field-subtitle">${header.description}</span></div>`).join('')}
+                <button class="sq-button sq-add sqm--small" type="button">${SequraFE.translationService.translate(this.adapter.addRowText)}</button>
 			</header>
 			<div class="sq-table__body sqs--hidden">
 				<template>
-					<div class="sq-table__row">
+					<details class="sq-table__row">
+                        <summary class="sq-table__row-header"></summary>
 						<div class="sq-table__row-content"></div>	
-                        <button class="sq-button sq-remove sqm--small" type="button"></button>
-					</div>
+                        <button class="sq-button sq-remove sqm--small" type="button">${SequraFE.translationService.translate(this.adapter.removeRowText)}</button>
+					</details>
 				</template>
 			</div>
-			<footer class="sq-table__footer">
-				<button class="sq-button sq-add sqm--small" type="button">${SequraFE.translationService.translate(this.adapter.addRowText)}</button>
-			</footer>`.trim();
+			`.trim();
 
         this.elem.appendChild(repeater);
     }
