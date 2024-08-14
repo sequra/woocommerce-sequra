@@ -338,10 +338,25 @@ class Configuration extends CoreConfiguration {
 	/**
 	 * Check if the widget is enabled.
 	 */
-	public function is_widget_enabled(): bool {
+	public function is_widget_enabled( ?string $payment_method = null, ?string $country = null ): bool {
 		try {
 			$config = $this->get_widget_settings();
-			return ! empty( $config['useWidgets'] ) && ! empty( $config['displayWidgetOnProductPage'] );
+			return ! empty( $config['useWidgets'] ) && ! empty( $config['displayWidgetOnProductPage'] ) && $this->is_widget_enabled_in_custom_locations( $payment_method, $country );
+		} catch ( Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Check if the widget is enabled in custom locations.
+	 */
+	private function is_widget_enabled_in_custom_locations( ?string $payment_method = null, ?string $country = null ): bool {
+		try {
+			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
+			if ( isset( $custom_location['display_widget'] ) ) {
+				return $custom_location['display_widget'];
+			}
+			return true;
 		} catch ( Throwable $e ) {
 			return false;
 		}
@@ -352,20 +367,12 @@ class Configuration extends CoreConfiguration {
 	 */
 	public function get_widget_dest_css_sel( ?string $payment_method = null, ?string $country = null ): string {
 		try {
-			$config = $this->get_widget_settings();
-			$sel    = $config['selForDefaultLocation'];
-			if ( ! empty( $payment_method ) && ! empty( $country ) ) {
-				foreach ( $config['customLocations'] as $location ) {
-					if ( isset( $location['product'] ) 
-						&& $location['product'] === $payment_method 
-						&& isset( $location['country'] ) 
-						&& $location['country'] === $country ) {
-						$sel = $location['sel_for_target'];
-						break;
-					}
-				}
+			$config          = $this->get_widget_settings();
+			$sel             = $config['selForDefaultLocation'];
+			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
+			if ( isset( $custom_location['sel_for_target'] ) ) {
+				$sel = $custom_location['sel_for_target'];
 			}
-
 			return $sel;
 		} catch ( Throwable $e ) {
 			return '';
@@ -409,12 +416,38 @@ class Configuration extends CoreConfiguration {
 	}
 
 	/**
+	 * Get the widget custom location
+	 * 
+	 * @return array<string, mixed>
+	 */
+	private function get_widget_custom_location( ?string $payment_method = null, ?string $country = null ): array {
+		$config = $this->get_widget_settings();
+		if ( ! empty( $payment_method ) && ! empty( $country ) ) {
+			foreach ( $config['customLocations'] as $location ) {
+				if ( isset( $location['product'] ) 
+					&& $location['product'] === $payment_method 
+					&& isset( $location['country'] ) 
+					&& $location['country'] === $country ) {
+					return $location;
+				}
+			}
+		}
+		return array();
+	}
+
+	/**
 	 * Get widget theme
 	 */
-	public function get_widget_theme(): string {
+	public function get_widget_theme( ?string $payment_method = null, ?string $country = null ): string {
 		try {
 			$config = $this->get_widget_settings();
-			return $config['widgetConfiguration'] ?? '';
+			$style  = $config['widgetConfiguration'] ?? '';
+
+			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
+			if ( isset( $custom_location['widget_styles'] ) ) {
+				$style = $custom_location['widget_styles'] ?? $style;
+			}
+			return $style;
 		} catch ( Throwable $e ) {
 			return '';
 		}

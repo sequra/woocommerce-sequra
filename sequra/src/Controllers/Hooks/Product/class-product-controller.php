@@ -101,7 +101,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	public function do_widget_shortcode( array $atts ): string {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
 
-		if ( ! $this->configuration->is_widget_enabled() ) {
+		$current_country = $this->i18n->get_current_country();
+
+		if ( ! $this->configuration->is_widget_enabled( $atts['product'] ?? null, $current_country ) ) {
 			$this->logger->log_info( 'Widget is disabled', __FUNCTION__, __CLASS__ );
 			return '';
 		}
@@ -132,10 +134,10 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'product'      => '',
 				'campaign'     => '',
 				'product_id'   => '',
-				'theme'        => $this->configuration->get_widget_theme(),
+				'theme'        => $this->configuration->get_widget_theme( $atts['product'] ?? null, $current_country ),
 				'reverse'      => 0,
 				'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
-				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'] ?? null, $this->i18n->get_current_country() ),
+				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'] ?? null, $current_country ),
 				'price'        => $this->configuration->get_widget_price_css_sel(),
 				'alt_price'    => $this->configuration->get_widget_alt_price_css_sel(),
 				'is_alt_price' => $this->configuration->get_widget_is_alt_price_css_sel(),
