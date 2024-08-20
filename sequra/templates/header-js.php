@@ -50,7 +50,7 @@
 		},
 		drawnWidgets: [],
 		getText: function(selector) {
-			return selector && document.querySelector(selector) ? document.querySelector(selector).innerText : "0";
+			return selector && document.querySelector(selector) ? document.querySelector(selector).textContent : "0";
 		},
 
 		selectorToCents: function(selector) {
