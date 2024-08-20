@@ -404,10 +404,10 @@ function woocommerce_sequra_init() {
 			) {
 				sequra_widget(
 					array(
-						'product'  => isset( $method['product'] ) ? $method['product'] : '',
-						'campaign' => isset( $method['campaign'] ) ? $method['campaign'] : '',
-						'price'    => trim( $sequra->settings['price_css_sel'] ),
-						'dest'     => trim( $sequra->settings[ 'dest_css_sel_' . $sq_product ] ),
+						'product'    => isset( $method['product'] ) ? $method['product'] : '',
+						'campaign'   => isset( $method['campaign'] ) ? $method['campaign'] : '',
+						'price'      => trim( $sequra->settings['price_css_sel'] ),
+						'dest'       => trim( $sequra->settings[ 'dest_css_sel_' . $sq_product ] ),
 						'product_id' => $product->get_id(),
 					)
 				);
@@ -421,7 +421,7 @@ function woocommerce_sequra_init() {
 	 * SeQura widget short code
 	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' dest='.price_container' product_id='1234'].
 	 *
-	 * @param array    $atts       Attributes.
+	 * @param array $atts       Attributes.
 	 * @return void
 	 */
 	function sequra_widget( $atts ) {
@@ -430,9 +430,9 @@ function woocommerce_sequra_init() {
 			( new SequraLogger() )->log_error( '"product" attribute is required', __FUNCTION__ );
 			return;
 		}
-		$sequra = SequraPaymentGateway::get_instance();
+		$sequra              = SequraPaymentGateway::get_instance();
 		$registration_amount = 0;
-		if ( !empty( $atts['product_id'] ) ) {
+		if ( ! empty( $atts['product_id'] ) ) {
 			$product_id = (int) $atts['product_id'];
 			
 			if ( ! $sequra->is_available( $product_id ) ) {
@@ -441,7 +441,7 @@ function woocommerce_sequra_init() {
 			// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 			$registration_amount = get_post_meta( $product_id, 'sequra_registration_amount', true );
 			if ( $registration_amount ) {
-				$registration_amount = $sequra->helper->get_builder()->integerPrice($registration_amount);
+				$registration_amount = $sequra->helper->get_builder()->integerPrice( $registration_amount );
 			}
 		}
 		$product         = $atts['product'];
