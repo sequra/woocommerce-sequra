@@ -408,8 +408,8 @@ function woocommerce_sequra_init() {
 						'campaign' => isset( $method['campaign'] ) ? $method['campaign'] : '',
 						'price'    => trim( $sequra->settings['price_css_sel'] ),
 						'dest'     => trim( $sequra->settings[ 'dest_css_sel_' . $sq_product ] ),
-					),
-					$product->get_id()
+						'product_id' => $product->get_id(),
+					)
 				);
 			}
 		}
@@ -419,28 +419,31 @@ function woocommerce_sequra_init() {
 	}
 	/**
 	 * SeQura widget short code
-	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' dest='.price_container']
+	 * usage: [sequra_widget product='pp5' campaign='temporary' price='#product_price' dest='.price_container' product_id='1234'].
 	 *
 	 * @param array    $atts       Attributes.
-	 * @param int|null $product_id Product id.
 	 * @return void
 	 */
-	function sequra_widget( $atts, $product_id = null ) {
+	function sequra_widget( $atts ) {
 		( new SequraLogger() )->log_info( 'Shortcode called', __FUNCTION__ );
 		if ( ! isset( $atts['product'] ) ) {
 			( new SequraLogger() )->log_error( '"product" attribute is required', __FUNCTION__ );
 			return;
 		}
+		if ( empty( $atts['product_id'] ) ) {
+			( new SequraLogger() )->log_error( '"product_id" attribute is required', __FUNCTION__ );
+			return;
+		}
+		$product_id = (int) $atts['product_id'];
 		$sequra = SequraPaymentGateway::get_instance();
 		if ( ! $sequra->is_available( $product_id ) ) {
 			return;
 		}
 		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$registration_amount = 0;
-		if ( ! is_null( $product_id ) && get_post_meta( $product_id, 'sequra_registration_amount', true ) ) {
-			$registration_amount = $sequra->helper->get_builder()->integerPrice(
-				get_post_meta( $product_id, 'sequra_registration_amount', true )
-			);
+		$registration_amount = get_post_meta( $product_id, 'sequra_registration_amount', true );
+		if ( $registration_amount ) {
+			$registration_amount = $sequra->helper->get_builder()->integerPrice($registration_amount);
 		}
 		$product         = $atts['product'];
 		$dest            = $atts['dest'];
