@@ -72,7 +72,7 @@ module.exports = defineConfig({
       name: 'checkout-product',
       use: { ...devices['Desktop Chrome'] },
       testMatch: '099-checkout-product.spec.js',
-      dependencies: ['configuration-general'],
+      dependencies: ['configuration-connection'],
     },
     {
       name: 'checkout-service',

@@ -13,6 +13,7 @@ use DateTime;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use SeQura\WC\Services\Regex\Interface_Regex;
 use WC_Product;
 
 /**
@@ -41,14 +42,23 @@ class Product_Service implements Interface_Product_Service {
 	private $pricing_service;
 
 	/**
+	 * RegEx service
+	 *
+	 * @var Interface_Regex
+	 */
+	private $regex;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
 		Configuration $configuration,
-		Interface_Pricing_Service $pricing_service
+		Interface_Pricing_Service $pricing_service,
+		Interface_Regex $regex
 	) {
 		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
+		$this->regex           = $regex;
 	}
 
 	/**
@@ -111,13 +121,6 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
-	 * Get service date regex
-	 */
-	public function get_service_date_regex(): string {
-		return '^((\d{4})-([0-1]\d)-([0-3]\d))+$|P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$';
-	}
-
-	/**
 	 * Get product service end date
 	 *
 	 * @param WC_Product|int $product the product we are building item info for.
@@ -125,7 +128,7 @@ class Product_Service implements Interface_Product_Service {
 	public function get_service_end_date( $product ): string {
 		$product          = $this->get_product_instance( $product );
 		$service_end_date = $product->get_meta( self::META_KEY_SEQURA_SERVICE_END_DATE, true );
-		if ( ! preg_match( '/' . $this->get_service_date_regex() . '/', $service_end_date ) ) {
+		if ( ! preg_match( $this->regex->date_or_duration(), $service_end_date ) ) {
 			$service_end_date = $this->configuration->get_default_services_end_date();
 		}
 		return $service_end_date;

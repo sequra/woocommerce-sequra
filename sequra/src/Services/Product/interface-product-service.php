@@ -45,11 +45,6 @@ interface Interface_Product_Service {
 	public function is_banned( $product ): bool;
 
 	/**
-	 * Get service date regex
-	 */
-	public function get_service_date_regex(): string;
-
-	/**
 	 * Get product service end date
 	 *
 	 * @param WC_Product|int $product the product we are building item info for.

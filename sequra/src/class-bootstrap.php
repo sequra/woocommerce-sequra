@@ -38,7 +38,6 @@ use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsS
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
-use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\Core\Infrastructure\Logger\Interfaces\DefaultLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\LoggerConfiguration;
@@ -65,7 +64,6 @@ use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item_Fact
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration_Manager;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Category\Category_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Disconnect\Disconnect_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\ShopOrderStatuses\Shop_Order_Status_Service;
@@ -110,6 +108,8 @@ use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Pricing\Pricing_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Product\Product_Service;
+use SeQura\WC\Services\Regex\Interface_Regex;
+use SeQura\WC\Services\Regex\Regex;
 
 /**
  * Implementation for the core bootstrap class.
@@ -518,6 +518,15 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
+			Interface_Regex::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Regex::class ] ) ) {
+					self::$cache[ Interface_Regex::class ] = new Regex();
+				}
+				return self::$cache[ Interface_Regex::class ];
+			}
+		);
+		Reg::registerService(
 			Interface_Logger_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Logger_Service::class ] ) ) {
@@ -596,7 +605,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Product_Service::class ] ) ) {
 					self::$cache[ Interface_Product_Service::class ] = new Product_Service(
 						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_Pricing_Service::class )
+						Reg::getService( Interface_Pricing_Service::class ),
+						Reg::getService( Interface_Regex::class )
 					);
 				}
 				return self::$cache[ Interface_Product_Service::class ];
@@ -747,7 +757,8 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( 'plugin.templates_path' ),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Assets::class ),
-						Reg::getService( Interface_Payment_Method_Service::class )
+						Reg::getService( Interface_Payment_Method_Service::class ),
+						Reg::getService( Interface_Regex::class )
 					);
 				}
 				return self::$cache[ Interface_Assets_Controller::class ];

@@ -14,6 +14,7 @@ use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
+use SeQura\WC\Services\Regex\Interface_Regex;
 
 /**
  * Define the assets related functionality
@@ -77,6 +78,13 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	private $payment_method_service;
 
 	/**
+	 * Regex service
+	 * 
+	 * @var Interface_Regex
+	 */
+	private $regex;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -88,7 +96,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		string $templates_path, 
 		Configuration $configuration,
 		Interface_Assets $assets,
-		Interface_Payment_Method_Service $payment_method_service
+		Interface_Payment_Method_Service $payment_method_service,
+		Interface_Regex $regex
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->assets_dir_url         = $assets_dir_url;
@@ -99,6 +108,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$this->configuration          = $configuration;
 		$this->assets                 = $assets;
 		$this->payment_method_service = $payment_method_service;
+		$this->regex                  = $regex;
 	}
 
 	/**
@@ -216,6 +226,11 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'isPromotional'     => false,
 			'_state_controller' => $state_controller,
 			'customHeader'      => array( 'X-WP-Nonce' => wp_create_nonce( 'wp_rest' ) ),
+
+			'regex'             => array(
+				'ip'             => $this->regex->ip( false ),
+				'dateOrDuration' => $this->regex->date_or_duration( false ),
+			),
 		);
 
 		return $sequra_fe;

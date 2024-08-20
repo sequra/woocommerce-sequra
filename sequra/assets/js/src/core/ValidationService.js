@@ -112,6 +112,46 @@ if (!window.SequraFE) {
     };
 
     /**
+     * Validates if the value is a valid date or duration following ISO 8601 format.
+     *
+     * @param {string} str
+     * @return {boolean}
+     */
+    const validateDateOrDuration = (str) => {
+        const regex = new RegExp(SequraFE.regex.dateOrDuration);
+        return regex.test(str) && 'P' !== str && !str.endsWith('T');
+    };
+
+    /**
+     * Validates if the value is a valid IP address
+     *
+     * @param {string} ip
+     * @return {boolean}
+     */
+    const validateIP = (ip) => {
+        const regex = new RegExp(SequraFE.regex.ip);
+        return regex.test(ip);
+    };
+
+    /**
+     * Validates if the value is a valid IP address
+     *
+     * @param {string[]} ipList
+     * @return {boolean}
+     */
+    const validateIPList = (ipList) => {
+
+        let isValid = true;
+        for (const ip of ipList) {
+            if (!validateIP(ip)) {
+                isValid = false;
+                break;
+            }
+        }
+        return isValid;
+    };
+
+    /**
      * Validates if the input is a valid URL. If not, adds an error class to the input element.
      *
      * @param {HTMLInputElement} input
@@ -239,6 +279,9 @@ if (!window.SequraFE) {
         setError,
         removeError,
         validateEmail,
+        validateDateOrDuration,
+        validateIP,
+        validateIPList,
         validateNumber,
         validateUrl,
         validateMaxLength,

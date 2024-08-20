@@ -418,59 +418,25 @@ if (!window.SequraFE) {
             maybeShowServiceRelatedFields();
         }
 
-        /**
-         * Check if a given string is a valid IP address.
-         *
-         * @param {string} str
-         *
-         * @returns {boolean}
-         */
-        const checkIfValidIP = (str) => {
-            const regexExp = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
-
-            return regexExp.test(str);
-        }
-
-        /**
-         * Check if a given string is a valid IP address.
-         *
-         * @param {string} str
-         *
-         * @returns {boolean}
-         */
-        const checkIfValidTimeDuration = (str) => {
-            // const regexExp = /^(?:(?:\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8]))|(?:\d{4}-(?:0[13-9]|1[0-2])-(?:29|30))|(?:\d{2}(?:0[48]|[2468][048]|[13579][26])-(?:02)-29)|(?:\d{2}(?:[02468][048]|[13579][26])-(?:02)-29))(?:T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:Z|[+-][01]\d:[0-5]\d)?)?|P(?:\d+Y)?(?:\d+M)?(?:\d+W)?(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+S)?)?$/gi;
-            const regexExp = /^((?:\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8]))|(?:\d{4}-(?:0[13-9]|1[0-2])-(?:29|30))|(?:\d{4}-(?:0[13578]|1[012])-(?:31))|(?:\d{2}(?:[02468][048]|[13579][26])-(?:02)-29)|(P(?:\d+Y)?(?:\d+M)?(?:\d+W)?(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+S)?)?))$/;
-            return regexExp.test(str) && 'P' !== str && !str.endsWith('T');
-        }
-
         const areIPAddressesValid = () => {
-            let hasError = false;
-
-            changedGeneralSettings.allowedIPAddresses?.forEach((address) => {
-                if (!checkIfValidIP(address)) {
-                    hasError = true;
-                }
-            });
-
+            const valid = validator.validateIPList(changedGeneralSettings.allowedIPAddresses);
             validator.validateField(
                 document.querySelector(`[name="allowedIPAddresses-selector"]`),
-                hasError,
+                !valid,
                 'validation.invalidIPAddress'
             );
-
-            return !hasError;
+            return valid;
         }
 
         const isValidTimeDuration = () => {
-            const hasError = !checkIfValidTimeDuration(changedGeneralSettings.defaultServicesEndDate);
+            const valid = validator.validateDateOrDuration(changedGeneralSettings.defaultServicesEndDate);
             validator.validateField(
                 document.querySelector('.sq-default-services-end-date'),
-                hasError,
+                !valid,
                 'validation.invalidTimeDuration'
             );
 
-            return !hasError;
+            return valid;
         }
 
         /**
