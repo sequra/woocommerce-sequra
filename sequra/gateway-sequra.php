@@ -430,20 +430,19 @@ function woocommerce_sequra_init() {
 			( new SequraLogger() )->log_error( '"product" attribute is required', __FUNCTION__ );
 			return;
 		}
-		if ( empty( $atts['product_id'] ) ) {
-			( new SequraLogger() )->log_error( '"product_id" attribute is required', __FUNCTION__ );
-			return;
-		}
-		$product_id = (int) $atts['product_id'];
 		$sequra = SequraPaymentGateway::get_instance();
-		if ( ! $sequra->is_available( $product_id ) ) {
-			return;
-		}
-		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$registration_amount = 0;
-		$registration_amount = get_post_meta( $product_id, 'sequra_registration_amount', true );
-		if ( $registration_amount ) {
-			$registration_amount = $sequra->helper->get_builder()->integerPrice($registration_amount);
+		if ( !empty( $atts['product_id'] ) ) {
+			$product_id = (int) $atts['product_id'];
+			
+			if ( ! $sequra->is_available( $product_id ) ) {
+				return;
+			}
+			// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+			$registration_amount = get_post_meta( $product_id, 'sequra_registration_amount', true );
+			if ( $registration_amount ) {
+				$registration_amount = $sequra->helper->get_builder()->integerPrice($registration_amount);
+			}
 		}
 		$product         = $atts['product'];
 		$dest            = $atts['dest'];
