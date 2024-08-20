@@ -21,10 +21,10 @@ class Force_Order_Failure_Task extends Task {
 	 */
 	public function execute( array $args = array() ): void {
 
-		if ( ! isset( $_GET['order_id'] ) ) {
+		if ( ! isset( $args['order_id'] ) ) {
 			throw new \Exception( 'Invalid order ID', 400 );
 		} 
-		$order_id = absint( $_GET['order_id'] );
+		$order_id = absint( $args['order_id'] );
 		
 		if ( ! $this->force_order_failure( $order_id ) ) {
 			throw new \Exception( 'Failed to update order ' . $order_id . ' payload', 500 );
