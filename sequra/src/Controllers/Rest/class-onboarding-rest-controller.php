@@ -47,6 +47,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET = 'display_widget';
 	private const PARAM_CUSTOM_LOCATION_COUNTRY        = 'country';
 	private const PARAM_CUSTOM_LOCATION_PRODUCT        = 'product';
+	private const PARAM_CUSTOM_LOCATION_TITLE          = 'title';
 
 	/**
 	 * Constructor.
@@ -514,7 +515,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			return false;
 		}
 		foreach ( $param as $location ) {
-			if ( ! isset( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ], $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ], $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ], $location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ] )
+			if ( ! isset( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ], $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ], $location[ self::PARAM_CUSTOM_LOCATION_TITLE ], $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ], $location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ] )
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] )
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
@@ -523,19 +524,22 @@ class Onboarding_REST_Controller extends REST_Controller {
 				// || empty( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] )
 				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
 				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
+				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_TITLE ] )
 				) {
 				return false;
 			}
 
-			// check if exists another location with the same country and product.
+			// check if exists another location with the same country title and product.
 			$country = $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ];
 			$product = $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ];
+			$title   = $location[ self::PARAM_CUSTOM_LOCATION_TITLE ];
 			$found   = array_filter(
 				$param,
-				function ( $loc ) use ( $country, $product ) {
-					return isset( $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], $loc[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
+				function ( $loc ) use ( $country, $product, $title ) {
+					return isset( $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], $loc[ self::PARAM_CUSTOM_LOCATION_COUNTRY ], $loc[ self::PARAM_CUSTOM_LOCATION_TITLE ] )
 					&& $loc[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] === $country 
-					&& $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] === $product;
+					&& $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] === $product
+					&& $loc[ self::PARAM_CUSTOM_LOCATION_TITLE ] === $title;
 				}
 			);
 			if ( count( $found ) > 1 ) {
@@ -557,6 +561,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 				self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] ) ),
 				self::PARAM_CUSTOM_LOCATION_PRODUCT        => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] ) ),
 				self::PARAM_CUSTOM_LOCATION_COUNTRY        => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] ) ),
+				self::PARAM_CUSTOM_LOCATION_TITLE          => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_TITLE ] ) ),
 				self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES  => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ] ) ),
 				self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET => (bool) $location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ],
 			);
