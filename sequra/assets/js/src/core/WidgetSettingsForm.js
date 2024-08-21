@@ -210,8 +210,7 @@ if (!window.SequraFE) {
                         label: 'widgets.configurator.label',
                         description: 'widgets.configurator.description.start',
                         value: changedSettings.widgetStyles,
-                        // onChange: (value) => handleChange('widgetStyles', value),
-                        onChange: (value) => handleChange('widgetConfiguration', value),
+                        onChange: (value) => handleChange('widgetStyles', value),
                         rows: 10
                     }
                 ),
@@ -485,7 +484,7 @@ if (!window.SequraFE) {
                 refreshForm();
             }
 
-            if (name === 'widgetConfiguration') {
+            if (name === 'widgetStyles') {
                 const isValid = validator.validateJson(
                     document.querySelector('[name="widget-styles"]'),
                     value,
@@ -514,19 +513,18 @@ if (!window.SequraFE) {
             }
 
             if (name === 'selForPrice' || name === 'selForDefaultLocation') {
-                const isValid = isCssSelectorValid(value);
-                validator.validateField(
+                debugger
+                const isValid = validator.validateCssSelector(
                     document.querySelector(`[name="${name}"]`),
-                    !isValid,
+                    true,
                     'validation.invalidField'
                 );
                 disableFooter(!isValid);
             }
             if (name === 'selForAltPrice' || name === 'selForAltPriceTrigger') {
-                const isValid = isCssSelectorValid(value) || '' === value || null === value
-                validator.validateField(
+                const isValid = validator.validateCssSelector(
                     document.querySelector(`[name="${name}"]`),
-                    !isValid,
+                    false,
                     'validation.invalidField'
                 );
                 disableFooter(!isValid);
@@ -581,6 +579,30 @@ if (!window.SequraFE) {
                     !valid,
                     'validation.invalidJSON'
                 );
+
+                if (changedSettings.displayWidgetOnProductPage) {
+                    for (const name of ['selForPrice', 'selForDefaultLocation']) {
+                        valid = validator.validateCssSelector(
+                            document.querySelector(`[name="${name}"]`),
+                            true,
+                            'validation.invalidField'
+                        ) && valid;
+                    }
+                    for (const name of ['selForAltPrice', 'selForAltPriceTrigger']) {
+                        valid = validator.validateCssSelector(
+                            document.querySelector(`[name="${name}"]`),
+                            false,
+                            'validation.invalidField'
+                        ) && valid;
+                    }
+
+                    valid = isCustomLocationValid(changedSettings.customLocations) && valid;
+                    validator.validateField(
+                        document.querySelector(`.sq-product-related-field .sq-table`),
+                        !isValid,
+                        'validation.invalidField'
+                    );
+                }
 
                 if (changedSettings.showInstallmentAmountInProductListing) {
                     valid = validator.validateRequiredField(

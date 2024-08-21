@@ -112,6 +112,26 @@ if (!window.SequraFE) {
     };
 
     /**
+     * Validates if the input is a valid email. If not, adds the error class to the input element.
+     *
+     * @param {HTMLInputElement} input
+     * @param {boolean} required
+     * @param {string?} message
+     * @return {boolean}
+     */
+    const validateCssSelector = (input, required, message) => {
+        let isValid = false;
+        try {
+            document.querySelector(input.value);
+            isValid = true;
+        } catch {
+            isValid = !required && !input.value;
+        }
+
+        return validateField(input, !isValid, message);
+    };
+
+    /**
      * Validates if the value is a valid date or duration following ISO 8601 format.
      *
      * @param {string} str
@@ -286,6 +306,7 @@ if (!window.SequraFE) {
         validateUrl,
         validateMaxLength,
         validateJson,
+        validateCssSelector,
         validateField,
         validateRequiredField,
         handleValidationErrors
