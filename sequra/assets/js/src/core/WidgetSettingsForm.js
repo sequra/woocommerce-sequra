@@ -210,7 +210,8 @@ if (!window.SequraFE) {
                         label: 'widgets.configurator.label',
                         description: 'widgets.configurator.description.start',
                         value: changedSettings.widgetStyles,
-                        onChange: (value) => handleChange('widgetStyles', value),
+                        // onChange: (value) => handleChange('widgetStyles', value),
+                        onChange: (value) => handleChange('widgetConfiguration', value),
                         rows: 10
                     }
                 ),
@@ -485,13 +486,12 @@ if (!window.SequraFE) {
             }
 
             if (name === 'widgetConfiguration') {
-                if (validator.validateJson(
+                const isValid = validator.validateJson(
                     document.querySelector('[name="widget-styles"]'),
                     value,
                     'validation.invalidJson'
-                )) {
-                    disableFooter(true);
-                }
+                );
+                disableFooter(!isValid);
             }
 
             if (name === 'assetsKey') {
