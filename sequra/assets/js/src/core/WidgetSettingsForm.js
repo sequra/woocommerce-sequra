@@ -596,7 +596,8 @@ if (!window.SequraFE) {
                         ) && valid;
                     }
 
-                    valid = isCustomLocationValid(changedSettings.customLocations) && valid;
+                    const isValid = isCustomLocationValid(changedSettings.customLocations);
+                    valid = isValid && valid;
                     validator.validateField(
                         document.querySelector(`.sq-product-related-field .sq-table`),
                         !isValid,
