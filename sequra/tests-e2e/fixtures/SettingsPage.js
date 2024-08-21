@@ -45,6 +45,7 @@ export default class SettingsPage {
     }
 
     async save({expectLoadingShowAndHide = true}) {
+        // await this.page.locator(this.selector.saveBtn).click({timeout: 1000});
         await this.page.locator(this.selector.saveBtn).click();
         if (expectLoadingShowAndHide) {
             await this.expectLoadingShowAndHide();
@@ -57,5 +58,11 @@ export default class SettingsPage {
 
     async logout() {
         await this.wpAdmin.logout();
+    }
+
+    async expectErrorMessageToBeVisible() {
+        await this.expect(this.page.locator('.sqp-input-error')).toBeVisible({ timeout: 100 });
+        await this.expect(this.page.locator(this.selector.saveBtn)).toHaveCount(0, { timeout: 100 });
+        await this.expect(this.page.locator(this.selector.cancelBtn)).toHaveCount(0, { timeout: 100 });
     }
 }

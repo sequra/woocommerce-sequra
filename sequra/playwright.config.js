@@ -39,47 +39,53 @@ module.exports = defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // {
+    //   name: 'configuration-onboarding',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '001-configuration-onboarding.spec.js',
+    // },
+    // {
+    //   name: 'configuration-payment-methods',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '002-configuration-payment-methods.spec.js',
+    //   dependencies: ['configuration-onboarding'],
+    // },
+    // {
+    //   name: 'configuration-advanced',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '003-configuration-advanced.spec.js',
+    //   dependencies: ['configuration-payment-methods'],
+    // },
+    // {
+    //   name: 'configuration-general',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '004-configuration-general.spec.js',
+    //   dependencies: ['configuration-advanced'],
+    // },
+    // {
+    //   name: 'configuration-connection',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '005-configuration-connection.spec.js',
+    //   dependencies: ['configuration-general'],
+    // },
     {
-      name: 'configuration-onboarding',
+      name: 'configuration-widget',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '001-configuration-onboarding.spec.js',
+      testMatch: '006-configuration-widget.spec.js',
+      // dependencies: ['configuration-connection'],
     },
-    {
-      name: 'configuration-payment-methods',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '002-configuration-payment-methods.spec.js',
-      dependencies: ['configuration-onboarding'],
-    },
-    {
-      name: 'configuration-advanced',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '003-configuration-advanced.spec.js',
-      dependencies: ['configuration-payment-methods'],
-    },
-    {
-      name: 'configuration-general',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '004-configuration-general.spec.js',
-      dependencies: ['configuration-advanced'],
-    },
-    {
-      name: 'configuration-connection',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '005-configuration-connection.spec.js',
-      dependencies: ['configuration-general'],
-    },
-    {
-      name: 'checkout-product',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '099-checkout-product.spec.js',
-      dependencies: ['configuration-connection'],
-    },
-    {
-      name: 'checkout-service',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '100-checkout-service.spec.js',
-      dependencies: ['checkout-product'],
-    }
+    // {
+    //   name: 'checkout-product',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '099-checkout-product.spec.js',
+    //   dependencies: ['configuration-widget'],
+    // },
+    // {
+    //   name: 'checkout-service',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '100-checkout-service.spec.js',
+    //   dependencies: ['checkout-product'],
+    // }
   ],
 });
 

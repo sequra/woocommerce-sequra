@@ -6,6 +6,7 @@ import ProductPage from "./ProductPage";
 import CheckoutPage from "./CheckoutPage";
 import GeneralSettingsPage from "./GeneralSettingsPage";
 import ConnectionSettingsPage from "./ConnectionSettingsPage";
+import WidgetSettingsPage from "./WidgetSettingsPage";
 
 export const test = baseTest.extend({
     advancedSettingsPage: async ({ page, baseURL, request }, use) => {
@@ -54,6 +55,15 @@ export const test = baseTest.extend({
 
         // Provide the fixture to the test
         await use(connectionSettingsPage);
+    },
+
+    widgetSettingsPage: async ({ page, baseURL, request }, use) => {
+        const widgetSettingsPage = new WidgetSettingsPage(page, baseURL, expect, request);
+
+        await widgetSettingsPage.setup();
+
+        // Provide the fixture to the test
+        await use(widgetSettingsPage);
     },
 
     productPage: async ({ page }, use) => await use(new ProductPage(page)),
