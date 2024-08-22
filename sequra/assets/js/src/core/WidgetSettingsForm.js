@@ -109,7 +109,7 @@ if (!window.SequraFE) {
             showInstallmentAmountInProductListing: false,
             showInstallmentAmountInCartPage: false,
             selForPrice: '.summary .price>.amount,.summary .price ins .amount',
-            selForAltPrice: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount',
+            selForAltPrice: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
             selForAltPriceTrigger: '.variations',
             selForDefaultLocation: '.summary .price',
             customLocations: [],
