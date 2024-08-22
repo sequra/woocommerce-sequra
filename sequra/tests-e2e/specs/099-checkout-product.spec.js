@@ -1,6 +1,7 @@
 import { test } from '../fixtures/test';
 
-test.describe.configure({ mode: 'parallel' });
+// test.describe.configure({ mode: 'parallel' }); // The tests sometimes fail in parallel mode.
+test.describe.configure({ mode: 'serial' });
 test.describe('Product checkout', () => {
 
   test('All available seQura products appear in the checkout', async ({ productPage, checkoutPage }) => {
