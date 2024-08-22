@@ -35,4 +35,21 @@ export default class ProductPage {
         await this.page.click('[name="add-to-cart"]');
         await this.page.waitForURL(url, { timeout: 5000, waitUntil: 'commit' });
     }
+
+    async expectWidgetToBeVisible({ locationSel, widgetConfig, product, amount, registrationAmount, campaign = null }) {
+        let containerSel = `${locationSel} ~ .sequra-promotion-widget.sequra-promotion-widget--${product}`;
+        // [data-amount="9000"][data-registration-amount="0"]
+        const styles = JSON.parse(widgetConfig);
+        Object.keys(styles).forEach(key => {
+            containerSel += '' !== styles[key] ? `[data-${key}="${styles[key]}"]` : `[data-${key}]`;
+        });
+        containerSel += `[data-amount="${amount}"][data-registration-amount="${registrationAmount}"][data-loaded="1"]`;
+        if (campaign) {
+            containerSel += `[data-campaign="${campaign}"]`;
+        }
+
+        const iframeSel = `${containerSel} iframe.Sequra__PromotionalWidget`;
+
+        await this.page.locator(iframeSel).waitFor({ timeout: 5000 });
+    }
 }

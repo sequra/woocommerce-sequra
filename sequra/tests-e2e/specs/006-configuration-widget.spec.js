@@ -3,20 +3,12 @@ import { test } from '../fixtures/test';
 test.describe.configure({ mode: 'serial' });
 test.describe('Widget settings', () => {
 
-  test.only('Change settings', async ({ page, widgetSettingsPage }) => {
+  test('Change settings', async ({ page, widgetSettingsPage }) => {
     await widgetSettingsPage.setup({ widgets: false });
     await widgetSettingsPage.goto();
     await widgetSettingsPage.expectLoadingShowAndHide();
 
-    const defaultSettings = {
-      enabled: false,
-      priceSel: ".summary .price>.amount,.summary .price ins .amount",
-      altPriceSel: ".woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount",
-      altPriceTriggerSel: ".variations",
-      locationSel: ".summary .price",
-      widgetConfig: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
-      customLocations: []
-    }
+    const defaultSettings = widgetSettingsPage.getDefaultSettings();
 
     const newSettings = {
       enabled: true,
@@ -57,7 +49,7 @@ test.describe('Widget settings', () => {
     const invalidJSON = "{";
 
     // Invalid values
-    const invalidSettings  = [
+    const invalidSettings = [
       { ...defaultSettings, widgetConfig: emptyStr },
       { ...defaultSettings, widgetConfig: invalidJSON },
       { ...defaultSettings, enabled: true, priceSel: emptyStr },
@@ -87,8 +79,44 @@ test.describe('Widget settings', () => {
     await widgetSettingsPage.expectConfigurationMatches(newSettings);
   });
 
-  test('Show widget with single location', async ({ productPage, widgetSettingsPage }) => {
+  test.only('Show widget with single location', async ({ page, productPage, widgetSettingsPage }) => {
     // TODO: Show widget with single location. Test both Gutenberg and Classic editor. Test both simple and variable products.
+
+    const defaultSettings = {
+      ...widgetSettingsPage.getDefaultSettings(),
+      enabled: true
+    };
+    const gutenbergBlocksSettings = {
+      ...defaultSettings,
+      priceSel: ".wc-block-components-product-price>.amount,.wc-block-components-product-price ins .amount",
+      locationSel: ".wc-block-components-product-price"
+    };
+
+    // Gutenberg blocks
+    await widgetSettingsPage.goto();
+    await widgetSettingsPage.expectLoadingShowAndHide();
+    // await page.pause();
+    await widgetSettingsPage.fill(gutenbergBlocksSettings);
+    await widgetSettingsPage.save({ expectLoadingShowAndHide: true, skipIfDisabled: true });
+
+    // -- Test for simple product.
+    await productPage.goto({ slug: 'sunglasses' });
+    let opt = { ...gutenbergBlocksSettings, amount: 9000, registrationAmount: 0 };
+    await productPage.expectWidgetToBeVisible({ ...opt, product: 'pp3' });
+    await productPage.expectWidgetToBeVisible({ ...opt, product: 'sp1', campaign: 'permanente' });
+    await productPage.expectWidgetToBeVisible({ ...opt, product: 'i1' });
+    
+    // -- Test for variable product.
+    await productPage.goto({ slug: 'hoodie' });
+    opt = { ...gutenbergBlocksSettings, amount: 8000, registrationAmount: 0 };
+    await productPage.expectWidgetToBeVisible({ ...opt, product: 'pp3' });
+    await productPage.expectWidgetToBeVisible({ ...opt, product: 'sp1', campaign: 'permanente' });
+    await productPage.expectWidgetToBeVisible({ ...opt, product: 'i1' });
+
+    //TODO: Select first variation having regular price and test again.
+    //TODO: Select second variation having sale price and test again.
+    //TODO: Clear variations and test again.
+    
   });
 
   test('Show widget with alternative locations', async ({ productPage, widgetSettingsPage }) => {

@@ -44,9 +44,19 @@ export default class SettingsPage {
         await this.page.locator('.sq-page-loader.sqs--hidden').waitFor({ state: 'attached', timeout: 10000 });
     }
 
-    async save({expectLoadingShowAndHide = true}) {
+    async save({ expectLoadingShowAndHide = true, skipIfDisabled = false }) {
+
+        try {
+            await this.page.locator(this.selector.saveBtn).waitFor({ timeout: 1500 });
+        } catch (e) {
+            if (skipIfDisabled) {
+                return;
+            }
+            throw e;
+        }
+
         // await this.page.locator(this.selector.saveBtn).click({timeout: 1000});
-        await this.page.locator(this.selector.saveBtn).click();
+        await this.page.locator(this.selector.saveBtn).click({ timeout: 1 });
         if (expectLoadingShowAndHide) {
             await this.expectLoadingShowAndHide();
         }

@@ -1,4 +1,3 @@
-import { time } from 'console';
 import SettingsPage from './SettingsPage';
 
 export default class WidgetSettingsPage extends SettingsPage {
@@ -63,24 +62,29 @@ export default class WidgetSettingsPage extends SettingsPage {
         }
 
         const widgetStylesLocator = this.page.locator(this.selector.widgetStyles);
-        await widgetStylesLocator.fill(widgetConfig);
+        await widgetStylesLocator.fill('');
+        await widgetStylesLocator.pressSequentially(widgetConfig);
         await widgetStylesLocator.blur();
 
         if (enabled) {
             const selForPrice = this.page.locator(this.selector.selForPrice);
-            await selForPrice.fill(priceSel);
+            await selForPrice.fill('');
+            await selForPrice.pressSequentially(priceSel);
             await selForPrice.blur();
 
             const selForAltPrice = this.page.locator(this.selector.selForAltPrice);
-            await selForAltPrice.fill(altPriceSel);
+            await selForAltPrice.fill('');
+            await selForAltPrice.pressSequentially(altPriceSel);
             await selForAltPrice.blur();
 
             const selForAltPriceTrigger = this.page.locator(this.selector.selForAltPriceTrigger);
-            await selForAltPriceTrigger.fill(altPriceTriggerSel);
+            await selForAltPriceTrigger.fill('');
+            await selForAltPriceTrigger.pressSequentially(altPriceTriggerSel);
             await selForAltPriceTrigger.blur();
 
             const selForDefaultLocation = this.page.locator(this.selector.selForDefaultLocation);
-            await selForDefaultLocation.fill(locationSel);
+            await selForDefaultLocation.fill('');
+            await selForDefaultLocation.pressSequentially(locationSel);
             await selForDefaultLocation.blur();
 
             // Remove custom locations if any to start clean
@@ -103,11 +107,13 @@ export default class WidgetSettingsPage extends SettingsPage {
                     await toggle.blur();
                 }
                 const locationSel = details.locator('input[type="text"]');
-                await locationSel.fill(customLocation.locationSel);
+                await locationSel.fill('');
+                await locationSel.pressSequentially(customLocation.locationSel);
                 await locationSel.blur();
 
                 const textarea = details.locator('textarea');
-                await textarea.fill(customLocation.widgetConfig);
+                await textarea.fill('');
+                await textarea.pressSequentially(customLocation.widgetConfig);
                 await textarea.blur();
             }
         }
@@ -138,6 +144,18 @@ export default class WidgetSettingsPage extends SettingsPage {
                 await this.expect(details.locator('input[type="text"]')).toHaveValue(customLocation.locationSel);
                 await this.expect(details.locator('textarea')).toHaveValue(customLocation.widgetConfig);
             }
+        }
+    }
+
+    getDefaultSettings() {
+        return {
+            enabled: false,
+            priceSel: ".summary .price>.amount,.summary .price ins .amount",
+            altPriceSel: ".woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount",
+            altPriceTriggerSel: ".variations",
+            locationSel: ".summary .price",
+            widgetConfig: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
+            customLocations: []
         }
     }
 }
