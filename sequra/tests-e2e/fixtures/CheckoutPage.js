@@ -20,8 +20,11 @@ export default class CheckoutPage {
             email: '#email',
 
             shipping: {
-                country: '#shipping-country .components-combobox-control__input',
-                state: '#shipping-state .components-combobox-control__input',
+                // !Since Woo 9.2.0 this now is a native select instead of an input
+                // country: '#shipping-country .components-combobox-control__input',
+                // state: '#shipping-state .components-combobox-control__input',
+                country: '#shipping-country',
+                state: '#shipping-state',
                 firstName: '#shipping-first_name',
                 lastName: '#shipping-last_name',
                 address1: '#shipping-address_1',
@@ -30,8 +33,11 @@ export default class CheckoutPage {
                 phone: '#shipping-phone'
             },
             billing: {
-                country: '#billing-country .components-combobox-control__input',
-                state: '#billing-state .components-combobox-control__input',
+                // !Since Woo 9.2.0 this now is a native select instead of an input
+                // country: '#billing-country .components-combobox-control__input',
+                // state: '#billing-state .components-combobox-control__input',
+                country: '#billing-country',
+                state: '#billing-state',
                 firstName: '#billing-first_name',
                 lastName: '#billing-last_name',
                 address1: '#billing-address_1',
@@ -81,7 +87,7 @@ export default class CheckoutPage {
     }
 
     async goto() {
-        await this.page.goto('./?page_id=7');
+        await this.page.goto('./checkout/');
     }
 
     async setupForServices() {
@@ -96,26 +102,42 @@ export default class CheckoutPage {
         const shopperData = dataShopper[shopper]
 
         await this.page.fill(this.selector.email, shopperData.email);
-        await this.page.fill(this.selector[fieldGroup].country, shopperData.country);
+
+        // !Since Woo 9.2.0 this now is a native select instead of an input
+        // await this.page.fill(this.selector[fieldGroup].country, shopperData.country);
+        await this.page.locator(this.selector[fieldGroup].country).selectOption({ label: shopperData.country });
+
         await this.page.fill(this.selector[fieldGroup].firstName, shopperData.firstName);
         await this.page.fill(this.selector[fieldGroup].lastName, shopperData.lastName);
         await this.page.fill(this.selector[fieldGroup].address1, shopperData.address1);
         await this.page.fill(this.selector[fieldGroup].postcode, shopperData.postcode);
         await this.page.fill(this.selector[fieldGroup].city, shopperData.city);
-        await this.page.fill(this.selector[fieldGroup].state, shopperData.state);
+        
+        // !Since Woo 9.2.0 this now is a native select instead of an input
+        // await this.page.fill(this.selector[fieldGroup].state, shopperData.state);
+        await this.page.locator(this.selector[fieldGroup].state).selectOption({ label: shopperData.state });
+
         await this.page.fill(this.selector[fieldGroup].phone, shopperData.phone);
         await this.page.waitForSelector(this.selector.placeOrder);
     }
 
     async fillWithNonSpecialShopperName({ fieldGroup = 'shipping' }) {
         await this.page.fill(this.selector.email, dataShopper.nonSpecial.email);
-        await this.page.fill(this.selector[fieldGroup].country, dataShopper.nonSpecial.country);
+
+        // !Since Woo 9.2.0 this now is a native select instead of an input
+        // await this.page.fill(this.selector[fieldGroup].country, dataShopper.nonSpecial.country);
+        await this.page.locator(this.selector[fieldGroup].country).selectOption({ label: dataShopper.nonSpecial.country });
+
         await this.page.fill(this.selector[fieldGroup].firstName, dataShopper.nonSpecial.firstName);
         await this.page.fill(this.selector[fieldGroup].lastName, dataShopper.nonSpecial.lastName);
         await this.page.fill(this.selector[fieldGroup].address1, dataShopper.nonSpecial.address1);
         await this.page.fill(this.selector[fieldGroup].postcode, dataShopper.nonSpecial.postcode);
         await this.page.fill(this.selector[fieldGroup].city, dataShopper.nonSpecial.city);
-        await this.page.fill(this.selector[fieldGroup].state, dataShopper.nonSpecial.state);
+        
+        // !Since Woo 9.2.0 this now is a native select instead of an input
+        // await this.page.fill(this.selector[fieldGroup].state, dataShopper.nonSpecial.state);
+        await this.page.locator(this.selector[fieldGroup].state).selectOption({ label: dataShopper.nonSpecial.state });
+
         await this.page.fill(this.selector[fieldGroup].phone, dataShopper.nonSpecial.phone);
 
         await this.page.waitForSelector(this.selector.placeOrder);
@@ -124,7 +146,7 @@ export default class CheckoutPage {
     async placeOrderUsingFp1({ forceFailure = false }) {
         await this.page.click(this.selector.paymentMethodFp1);
         await this.page.click(this.selector.placeOrder);
-        await this.page.waitForURL(/page_id=7&order-pay=/, { timeout: 5000 });
+        await this.page.waitForURL(/\/checkout\/order-pay\//, { timeout: 5000 });
 
         await this.page.waitForSelector(this.selector.sqIframeFp1, { state: 'attached', timeout: 10000 });
         const mainIframe = this.page.frameLocator(this.selector.sqIframeFp1);
@@ -134,7 +156,8 @@ export default class CheckoutPage {
 
         if (forceFailure) {
             const url = new URL(this.page.url());
-            const orderId = url.searchParams.get('order-pay');
+            // const orderId = url.searchParams.get('order-pay');
+            const orderId = url.pathname.split('/order-pay/')[1].replace('/', '')
 
             this.helper.executeWebhook({
                 webhook: this.helper.webhooks.FORCE_ORDER_FAILURE,
@@ -157,7 +180,7 @@ export default class CheckoutPage {
     async placeOrderUsingI1({ shopper = 'approve' }) {
         await this.page.click(this.selector.paymentMethodI1);
         await this.page.click(this.selector.placeOrder);
-        await this.page.waitForURL(/page_id=7&order-pay=/, { timeout: 5000 });
+        await this.page.waitForURL(/\/checkout\/order-pay\//, { timeout: 5000 });
 
         await this.page.waitForSelector(this.selector.sqIframeI1, { state: 'attached', timeout: 10000 });
         const iframe = this.page.frameLocator(this.selector.sqIframeI1);
@@ -178,7 +201,7 @@ export default class CheckoutPage {
     async placeOrderUsingPp3({ shopper = 'nonSpecial' }) {
         await this.page.click(this.selector.paymentMethodPp3);
         await this.page.click(this.selector.placeOrder);
-        await this.page.waitForURL(/page_id=7&order-pay=/, { timeout: 5000 });
+        await this.page.waitForURL(/\/checkout\/order-pay\//, { timeout: 5000 });
 
         await this.page.waitForSelector(this.selector.sqIframePp3, { state: 'attached', timeout: 10000 });
         const iframe = this.page.frameLocator(this.selector.sqIframePp3);
@@ -237,11 +260,11 @@ export default class CheckoutPage {
     }
 
     async waitForOrderSuccess() {
-        await this.page.waitForURL(/page_id=7&order-received=/, { timeout: 30000, waitUntil: 'commit' });
+        await this.page.waitForURL(/\/checkout\/order-received\//, { timeout: 30000, waitUntil: 'commit' });
     }
 
     async waitForOrderOnHold() {
-        await this.page.waitForURL(/page_id=7&order-received=/, { timeout: 30000 });
+        await this.page.waitForURL(/\/checkout\/order-received\//, { timeout: 30000});
         await this.expect(this.page.getByText('seQura is processing your request.')).toBeVisible();
     }
 
@@ -258,7 +281,9 @@ export default class CheckoutPage {
      */
     async expectOrderChangeTo({ toStatus, fromStatus = 'wc-on-hold', waitFor = 60 }) {
         const url = new URL(this.page.url());
-        this.wpAdmin.gotoOrder({ orderId: url.searchParams.get('order-received') });
+        const orderId = url.pathname.split('/order-received/')[1].replace('/', '')
+        // this.wpAdmin.gotoOrder({ orderId: url.searchParams.get('order-received') });
+        this.wpAdmin.gotoOrder({ orderId });
 
         for (let i = 0; i < waitFor; i++) {
             try {

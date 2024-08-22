@@ -20,7 +20,8 @@ export default class ProductPage {
     }
 
     getProductUrl(slug) {
-        return `./?product=${slug}`;
+        // return `./?product=${slug}`;
+        return `./product/${slug}/`;
     }
 
     /**

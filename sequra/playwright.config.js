@@ -40,9 +40,22 @@ module.exports = defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'checkout-product',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '099-checkout-product.spec.js',
+      // dependencies: ['configuration-connection'],
+    },
+    {
+      name: 'checkout-service',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '100-checkout-service.spec.js',
+      dependencies: ['checkout-product'],
+    },
+    {
       name: 'configuration-onboarding',
       use: { ...devices['Desktop Chrome'] },
       testMatch: '001-configuration-onboarding.spec.js',
+      dependencies: ['checkout-product', 'checkout-service'],
     },
     {
       name: 'configuration-payment-methods',
@@ -68,18 +81,6 @@ module.exports = defineConfig({
       testMatch: '005-configuration-connection.spec.js',
       dependencies: ['configuration-general'],
     },
-    {
-      name: 'checkout-product',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '099-checkout-product.spec.js',
-      dependencies: ['configuration-connection'],
-    },
-    {
-      name: 'checkout-service',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '100-checkout-service.spec.js',
-      dependencies: ['checkout-product'],
-    }
   ],
 });
 
