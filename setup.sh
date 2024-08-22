@@ -40,7 +40,7 @@ while [ $(($(date +%s) - $start)) -lt $retry ]; do
         seconds=$(($(date +%s) - $start))
         echo "✅ Done in ${seconds} seconds."
         echo "🔗 Access seQura settings at ${WP_URL}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra"
-        echo "🔗 Or browse products at ${WP_URL}/?post_type=product"
+        echo "🔗 Or browse products at ${WP_URL}/shop/"
         echo "User: $WP_ADMIN_USER"
         echo "Password: $WP_ADMIN_PASSWORD"
         exit 0

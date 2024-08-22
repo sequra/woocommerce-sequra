@@ -70,15 +70,13 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
         exit 1
     fi
 
+    wp plugin install --allow-root wordpress-importer --activate
+
     # Install theme
     if [ -n "${WP_THEME}" ]; then
         theme_version=$(get_pkg_and_version "${WP_THEME}")
         wp theme install --allow-root $theme_version --activate
     fi
-
-    wp plugin install --allow-root wordpress-importer --activate
-    # wp import --allow-root wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=create
-    wp import --allow-root wp-content/plugins/sequra-helper/sample-data/sample_products.xml --authors=create
 
     # Setup WooCommerce options
     wp option update --allow-root woocommerce_store_address "${WC_STORE_ADDRESS}"
@@ -97,6 +95,13 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp plugin activate --allow-root sequra-helper
     
     wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Flexible payment with seQura","description":"Please, select the payment method you want to use"}' --allow-root
+
+    wp import --allow-root wp-content/plugins/sequra-helper/sample-data/sample_products.xml --authors=create
+
+    wp option set permalink_structure '/%postname%/' --allow-root
+
+    # Set AUTOINCREMENT to UNIX TIMESTAMP to guarantee a unique order number for each environment.
+    wp db query "ALTER TABLE wp_posts AUTO_INCREMENT = $(date +%s)" --allow-root
 
     wp plugin deactivate --allow-root wordpress-importer --uninstall
     wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v sequra | tr "\n" " ")
