@@ -161,8 +161,8 @@ class Product_Service implements Interface_Product_Service {
 		 * @var Sequra_Payment_Gateway
 		 */
 		$gateway = null;
-		foreach ( WC()->payment_gateways()->get_available_payment_gateways() as $g ) {
-			if ( $g instanceof Sequra_Payment_Gateway ) {
+		foreach ( WC()->payment_gateways()->payment_gateways() as $g ) {
+			if ( $g instanceof Sequra_Payment_Gateway && 'yes' === $g->enabled ) {
 				$gateway = $g;
 				break;
 			}
@@ -199,6 +199,11 @@ class Product_Service implements Interface_Product_Service {
 		if ( ! $product ) {
 			return false;
 		}
+
+		if ( ! $this->can_display_widgets( $product ) ) {
+			return false;
+		}
+
 		// Check if price is too high.
 		if ( ! empty( $method['maxAmount'] ) && $method['maxAmount'] < $this->pricing_service->to_cents( (float) $product->get_price( 'edit' ) ) ) {
 			return false;
