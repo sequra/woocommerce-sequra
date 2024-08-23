@@ -8,7 +8,6 @@
 
 namespace SeQura\WC\Controllers\Hooks\Asset;
 
-use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
@@ -17,14 +16,21 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
+use SeQura\WC\Services\Regex\Regex;
 use WC_Product;
-
-use function PHPUnit\Framework\returnSelf;
+use WP_Post;
 
 /**
  * Product Controller implementation
  */
 class Product_Controller extends Controller implements Interface_Product_Controller {
+
+	private const FIELD_NAME_IS_BANNED                         = 'is_sequra_banned';
+	private const FIELD_NAME_IS_SERVICE                        = 'is_sequra_service';
+	private const FIELD_NAME_SERVICE_END_DATE                  = 'sequra_service_end_date';
+	private const FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE = 'sequra_desired_first_charge_date';
+	private const FIELD_NAME_REGISTRATION_AMOUNT               = 'sequra_registration_amount';
+	private const NONCE_SEQURA_PRODUCT                         = '_sequra_product_nonce';
 
 	/**
 	 * I18n service
@@ -62,6 +68,13 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	private $payment_method_service;
 
 	/**
+	 * RegEx service
+	 *
+	 * @var Regex
+	 */
+	private $regex;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -71,7 +84,8 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		Interface_Product_Service $product_service,
 		Interface_Payment_Service $payment_service,
 		Interface_Payment_Method_Service $payment_method_service,
-		Interface_I18n $i18n
+		Interface_I18n $i18n,
+		Regex $regex
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->logger                 = $logger;
@@ -80,6 +94,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		$this->payment_service        = $payment_service;
 		$this->payment_method_service = $payment_method_service;
 		$this->i18n                   = $i18n;
+		$this->regex                  = $regex;
 	}
 
 	/**
@@ -217,5 +232,55 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		
 			echo do_shortcode( "[sequra_widget $atts_str]" );
 		}
+	}
+
+	/**
+	 * Add meta boxes to the product edit page
+	 */
+	public function add_meta_boxes(): void {
+		add_meta_box( 'sequra_settings', esc_html__( 'seQura settings', 'sequra' ), array( $this, 'render_meta_boxes' ), 'product', 'side', 'default' );
+	}
+
+	/**
+	 * Render the meta boxes
+	 */
+	public function render_meta_boxes( WP_Post $post ): void {
+		$args = array(
+			'is_banned'                                    => $this->product_service->is_banned( $post->ID ),
+			'is_banned_field_name'                         => self::FIELD_NAME_IS_BANNED,
+			'enabled_for_services'                         => $this->configuration->is_enabled_for_services(),
+			'is_service'                                   => $this->product_service->is_service( $post->ID ),
+			'is_service_field_name'                        => self::FIELD_NAME_IS_SERVICE,
+			'service_end_date_default'                     => $this->configuration->get_default_services_end_date(),
+			'service_end_date'                             => $this->product_service->get_service_end_date( $post->ID, true ),
+			'service_end_date_field_name'                  => self::FIELD_NAME_SERVICE_END_DATE,
+			'allow_payment_delay'                          => $this->configuration->allow_first_service_payment_delay(),
+			'service_desired_first_charge_date'            => $this->product_service->get_desired_first_charge_date( $post->ID, true ) ?? '',
+			'service_desired_first_charge_date_field_name' => self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE,
+			'date_or_duration_regex'                       => $this->regex->date_or_duration( false ),
+			'allow_registration_items'                     => $this->configuration->allow_service_reg_items(),
+			'service_registration_amount'                  => $this->product_service->get_registration_amount( $post->ID ),
+			'service_registration_amount_field_name'       => self::FIELD_NAME_REGISTRATION_AMOUNT,
+			'nonce_name'                                   => self::NONCE_SEQURA_PRODUCT,
+		);
+		wc_get_template( 'admin/product_metabox.php', $args, '', $this->templates_path );
+	}
+
+	/**
+	 * Save product meta
+	 */
+	public function save_product_meta( int $post_id ): void {
+		if ( ! isset( $_POST[ self::NONCE_SEQURA_PRODUCT ] ) 
+		|| ! wp_verify_nonce( $_POST[ self::NONCE_SEQURA_PRODUCT ], -1 ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		|| ! current_user_can( 'edit_post', $post_id )
+		|| wp_doing_ajax( $post_id ) ) {
+			return;
+		}
+
+		$this->product_service->set_is_banned( $post_id, isset( $_POST[ self::FIELD_NAME_IS_BANNED ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_IS_BANNED ] ) ) : null );
+		$this->product_service->set_is_service( $post_id, isset( $_POST[ self::FIELD_NAME_IS_SERVICE ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_IS_SERVICE ] ) ) : null );
+		$this->product_service->set_service_end_date( $post_id, ! empty( $_POST[ self::FIELD_NAME_SERVICE_END_DATE ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_SERVICE_END_DATE ] ) ) : null );
+		$this->product_service->set_desired_first_charge_date( $post_id, ! empty( $_POST[ self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE ] ) ) : null );
+		$this->product_service->set_registration_amount( $post_id, ! empty( $_POST[ self::FIELD_NAME_REGISTRATION_AMOUNT ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_REGISTRATION_AMOUNT ] ) ) : null );
 	}
 }

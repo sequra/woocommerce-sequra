@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Controllers\Hooks\Asset;
 
+use WP_Post;
+
 /**
  * Product Controller interface
  */
@@ -22,4 +24,19 @@ interface Interface_Product_Controller {
 	 * Add [sequra_widget] to product page automatically
 	 */
 	public function add_widget_shortcode_to_product_page(): void;
+
+	/**
+	 * Add meta boxes to the product edit page
+	 */
+	public function add_meta_boxes(): void;
+
+	/**
+	 * Render the meta boxes
+	 */
+	public function render_meta_boxes( WP_Post $post ): void;
+
+	/**
+	 * Save product meta
+	 */
+	public function save_product_meta( int $post_id ): void;
 }
