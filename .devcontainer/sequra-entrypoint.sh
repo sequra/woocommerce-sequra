@@ -74,8 +74,11 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
 
     # Install theme
     if [ -n "${WP_THEME}" ]; then
-        theme_version=$(get_pkg_and_version "${WP_THEME}")
-        wp theme install --allow-root $theme_version --activate
+        IFS=',' read -ra themes <<< "${WP_THEME}"
+        for theme in "${themes[@]}"; do
+            theme_version=$(get_pkg_and_version "${theme}")
+            wp theme install --allow-root $theme_version --activate
+        done
     fi
 
     # Setup WooCommerce options
