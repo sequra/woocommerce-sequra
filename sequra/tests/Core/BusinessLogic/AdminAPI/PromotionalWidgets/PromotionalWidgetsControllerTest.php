@@ -99,14 +99,16 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'selector-for-location',
 						'widget-styles-es',
 						'pp3',
-						'ES'
+						'ES',
+						'pp3 title'
 					),
 					new Widget_Location(
 						true,
 						'selector-for-location2',
 						'widget-styles-it',
 						'i1',
-						'IT'
+						'IT',
+						'i1 title'
 					),
 				)
 			)
@@ -139,6 +141,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'sel_for_target' => 'selector-for-location',
 						'widget_styles'  => 'widget-styles-es',
 						'display_widget' => true,
+						'title'          => 'pp3 title',
 					),
 					array(
 						'product'        => 'i1',
@@ -146,6 +149,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'sel_for_target' => 'selector-for-location2',
 						'widget_styles'  => 'widget-styles-it',
 						'display_widget' => true,
+						'title'          => 'i1 title',
 					),
 				),
 			),

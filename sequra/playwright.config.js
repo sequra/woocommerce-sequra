@@ -81,6 +81,12 @@ module.exports = defineConfig({
       testMatch: '005-configuration-connection.spec.js',
       dependencies: ['configuration-general'],
     },
+    {
+      name: 'configuration-widget',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '006-configuration-widget.spec.js',
+      dependencies: ['configuration-connection'],
+    },
   ],
 });
 

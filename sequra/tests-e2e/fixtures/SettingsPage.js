@@ -44,8 +44,19 @@ export default class SettingsPage {
         await this.page.locator('.sq-page-loader.sqs--hidden').waitFor({ state: 'attached', timeout: 10000 });
     }
 
-    async save({expectLoadingShowAndHide = true}) {
-        await this.page.locator(this.selector.saveBtn).click();
+    async save({ expectLoadingShowAndHide = true, skipIfDisabled = false }) {
+
+        try {
+            await this.page.locator(this.selector.saveBtn).waitFor({ timeout: 1500 });
+        } catch (e) {
+            if (skipIfDisabled) {
+                return;
+            }
+            throw e;
+        }
+
+        // await this.page.locator(this.selector.saveBtn).click({timeout: 1000});
+        await this.page.locator(this.selector.saveBtn).click({ timeout: 500 });
         if (expectLoadingShowAndHide) {
             await this.expectLoadingShowAndHide();
         }
@@ -57,5 +68,11 @@ export default class SettingsPage {
 
     async logout() {
         await this.wpAdmin.logout();
+    }
+
+    async expectErrorMessageToBeVisible() {
+        await this.expect(this.page.locator('.sqp-input-error')).toBeVisible({ timeout: 100 });
+        await this.expect(this.page.locator(this.selector.saveBtn)).toHaveCount(0, { timeout: 100 });
+        await this.expect(this.page.locator(this.selector.cancelBtn)).toHaveCount(0, { timeout: 100 });
     }
 }

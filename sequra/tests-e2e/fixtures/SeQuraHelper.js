@@ -14,6 +14,7 @@ export default class SeQuraHelper {
             REMOVE_LOG: 'remove_log',
             PRINT_LOGS: 'print_logs',
             FORCE_ORDER_FAILURE: 'force_order_failure',
+            SET_THEME: 'set_theme',
         };
     }
 

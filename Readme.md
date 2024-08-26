@@ -96,6 +96,14 @@ This functionality removes data in the database relative to plugin's configurati
 curl --location --request POST '<WP_URL>/?sq-webhook=clear_config'
 ```
 
+### Set active theme
+
+This functionality set the active theme. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` and `<THEME>` with a value present in your `.env` file):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=set_theme&theme=<THEME>'
+```
+
 ## Unit and Integration Tests
 
 ### Setup

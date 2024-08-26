@@ -48,14 +48,22 @@ class Widget_Location {
 	private $country;
 
 	/**
+	 * The title of the payment method.
+	 *
+	 * @var string
+	 */
+	private $title;
+
+	/**
 	 * Constructor.
 	 */
-	public function __construct( bool $display_widget, string $sel_for_target, string $widget_styles, ?string $product = null, ?string $country = null ) {
+	public function __construct( bool $display_widget, string $sel_for_target, string $widget_styles, ?string $product = null, ?string $country = null, ?string $title = null ) {
 		$this->display_widget = $display_widget;
 		$this->widget_styles  = $widget_styles;
 		$this->sel_for_target = $sel_for_target;
 		$this->product        = $product;
 		$this->country        = $country;
+		$this->title          = $title;
 	}
 
 	/**
@@ -80,6 +88,13 @@ class Widget_Location {
 	}
 
 	/**
+	 * Getter
+	 */
+	public function get_title(): string {
+		return $this->title;
+	}
+
+	/**
 	 * Setter
 	 */
 	public function set_sel_for_target( string $sel_for_target ): void {
@@ -98,6 +113,13 @@ class Widget_Location {
 	 */
 	public function set_country( string $country ): void {
 		$this->country = $country;
+	}
+
+	/**
+	 * Setter
+	 */
+	public function set_title( string $title ): void {
+		$this->title = $title;
 	}
 
 	/**
@@ -144,7 +166,8 @@ class Widget_Location {
 			isset( $data['sel_for_target'] ) ? strval( $data['sel_for_target'] ) : null,
 			isset( $data['widget_styles'] ) ? strval( $data['widget_styles'] ) : null,
 			isset( $data['product'] ) ? strval( $data['product'] ) : null,
-			isset( $data['country'] ) ? strval( $data['country'] ) : null
+			isset( $data['country'] ) ? strval( $data['country'] ) : null,
+			isset( $data['title'] ) ? strval( $data['title'] ) : null
 		);
 	}
 
@@ -160,6 +183,7 @@ class Widget_Location {
 			'sel_for_target' => $this->sel_for_target,
 			'product'        => $this->product,
 			'country'        => $this->country,
+			'title'          => $this->title,
 		);
 	}
 }

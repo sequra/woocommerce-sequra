@@ -93,6 +93,9 @@ class Plugin {
 		add_action( 'woocommerce_after_main_content', array( $product_controller, 'add_widget_shortcode_to_product_page' ) );
 		add_action( 'wp_footer', array( $product_controller, 'add_widget_shortcode_to_product_page' ) );
 		add_shortcode( 'sequra_widget', array( $product_controller, 'do_widget_shortcode' ) );
+		
+		add_action( 'add_meta_boxes', array( $product_controller, 'add_meta_boxes' ) );
+		add_action( 'woocommerce_process_product_meta', array( $product_controller, 'save_product_meta' ) );
 	}
 
 	/**

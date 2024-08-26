@@ -65,8 +65,9 @@ class Product_Service implements Interface_Product_Service {
 	 * Get desired first charge date for a product
 	 * 
 	 * @param int|WC_Product $product The product ID or product object
+	 * @return DateTime|null|string
 	 */
-	public function get_desired_first_charge_date( $product ): ?DateTime {
+	public function get_desired_first_charge_date( $product, bool $raw_value = false ) {
 		$_product = $this->get_product_instance( $product );
 		if ( ! $_product ) {
 			return null;
@@ -75,6 +76,11 @@ class Product_Service implements Interface_Product_Service {
 		if ( ! $raw_date ) {
 			return null;
 		}
+
+		if ( $raw_value ) {
+			return $raw_date;
+		}
+
 		if ( 'P' === substr( $raw_date, 0, 1 ) ) {
 			return ( new DateTime() )->add( new DateInterval( $raw_date ) );
 		} 
@@ -125,9 +131,12 @@ class Product_Service implements Interface_Product_Service {
 	 *
 	 * @param WC_Product|int $product the product we are building item info for.
 	 */
-	public function get_service_end_date( $product ): string {
+	public function get_service_end_date( $product, bool $raw_value = false ): string {
 		$product          = $this->get_product_instance( $product );
 		$service_end_date = $product->get_meta( self::META_KEY_SEQURA_SERVICE_END_DATE, true );
+		if ( $raw_value ) {
+			return $service_end_date;
+		}
 		if ( ! preg_match( $this->regex->date_or_duration(), $service_end_date ) ) {
 			$service_end_date = $this->configuration->get_default_services_end_date();
 		}
@@ -161,8 +170,8 @@ class Product_Service implements Interface_Product_Service {
 		 * @var Sequra_Payment_Gateway
 		 */
 		$gateway = null;
-		foreach ( WC()->payment_gateways()->get_available_payment_gateways() as $g ) {
-			if ( $g instanceof Sequra_Payment_Gateway ) {
+		foreach ( WC()->payment_gateways()->payment_gateways() as $g ) {
+			if ( $g instanceof Sequra_Payment_Gateway && 'yes' === $g->enabled ) {
 				$gateway = $g;
 				break;
 			}
@@ -199,6 +208,11 @@ class Product_Service implements Interface_Product_Service {
 		if ( ! $product ) {
 			return false;
 		}
+
+		if ( ! $this->can_display_widgets( $product ) ) {
+			return false;
+		}
+
 		// Check if price is too high.
 		if ( ! empty( $method['maxAmount'] ) && $method['maxAmount'] < $this->pricing_service->to_cents( (float) $product->get_price( 'edit' ) ) ) {
 			return false;
@@ -215,5 +229,60 @@ class Product_Service implements Interface_Product_Service {
 		}
 
 		return true;            
+	}
+
+	/**
+	 * Update is service value
+	 */
+	public function set_is_service( int $product_id, ?string $value ): void {
+		if ( null === $value ) {
+			delete_post_meta( $product_id, self::META_KEY_IS_SEQURA_SERVICE );
+		} else {
+			update_post_meta( $product_id, self::META_KEY_IS_SEQURA_SERVICE, 'yes' === $value ? 'yes' : 'no' );
+		}
+	}
+
+	/**
+	 * Update is banned value
+	 */
+	public function set_is_banned( int $product_id, ?string $value ): void {
+		if ( null === $value ) {
+			delete_post_meta( $product_id, self::META_KEY_IS_SEQURA_BANNED );
+		} else {
+			update_post_meta( $product_id, self::META_KEY_IS_SEQURA_BANNED, 'yes' === $value ? 'yes' : 'no' );
+		}
+	}
+
+	/**
+	 * Update service end date value
+	 */
+	public function set_service_end_date( int $product_id, ?string $value ): void {
+		if ( null === $value ) {
+			delete_post_meta( $product_id, self::META_KEY_SEQURA_SERVICE_END_DATE );
+		} else {
+			update_post_meta( $product_id, self::META_KEY_SEQURA_SERVICE_END_DATE, $value );
+		}
+	}
+
+	/**
+	 * Update desired_first_charge_date value
+	 */
+	public function set_desired_first_charge_date( int $product_id, ?string $value ): void {
+		if ( null === $value ) {
+			delete_post_meta( $product_id, self::META_KEY_DESIRED_FIRST_CHARGE_DATE );
+		} else {
+			update_post_meta( $product_id, self::META_KEY_DESIRED_FIRST_CHARGE_DATE, $value );
+		}
+	}
+
+	/**
+	 * Update registration amount value
+	 */
+	public function set_registration_amount( int $product_id, ?float $value ): void {
+		if ( null === $value ) {
+			delete_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT );
+		} else {
+			update_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT, $value );
+		}
 	}
 }

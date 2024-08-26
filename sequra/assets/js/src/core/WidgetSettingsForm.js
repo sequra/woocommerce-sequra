@@ -109,9 +109,9 @@ if (!window.SequraFE) {
             showInstallmentAmountInProductListing: false,
             showInstallmentAmountInCartPage: false,
             selForPrice: '.summary .price>.amount,.summary .price ins .amount',
-            selForAltPrice: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount,.woocommerce-variation-price .price .amount',
+            selForAltPrice: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
             selForAltPriceTrigger: '.variations',
-            selForDefaultLocation: '.summary .price',
+            selForDefaultLocation: '.summary>.price',
             customLocations: [],
         };
 
@@ -339,7 +339,7 @@ if (!window.SequraFE) {
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
                         <select class="sq-table__row-field">${allPaymentMethods ? allPaymentMethods.map((pm, idx) => {
-                        const selected = data && data.product === pm.product && data.country === pm.countryCode ? ' selected' : '';
+                        const selected = data && data.product === pm.product && data.country === pm.countryCode && data.title === pm.title ? ' selected' : '';
                         return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
                     }).join('') : ''}
                         </select>
@@ -355,7 +355,8 @@ if (!window.SequraFE) {
                         const display_widget = row.querySelector('input[type="checkbox"]').checked;
                         const product = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.product;
                         const country = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.countryCode;
-                        customLocations.push({ sel_for_target, product, country, widget_styles, display_widget });
+                        const title = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].textContent;
+                        customLocations.push({ sel_for_target, product, country, title, widget_styles, display_widget });
                     });
                     handleChange('customLocations', customLocations)
                 },
@@ -455,11 +456,11 @@ if (!window.SequraFE) {
                     if ('' !== location.widget_styles && !isJSONValid(location.widget_styles)) {
                         throw new Error('Invalid selector');
                     }
-                    if (!allPaymentMethods.some(pm => pm.product === location.product && pm.countryCode === location.country)) {
+                    if (!allPaymentMethods.some(pm => pm.product === location.product && pm.countryCode === location.country && pm.title === location.title)) {
                         throw new Error('Invalid payment method');
                     }
                     // Check if exists other location with the same product and country
-                    if (value.filter(l => l.product === location.product && l.country === location.country).length > 1) {
+                    if (value.filter(l => l.product === location.product && l.country === location.country && l.title === location.title).length > 1) {
                         throw new Error('Duplicated entry found');
                     }
                 });
@@ -483,14 +484,13 @@ if (!window.SequraFE) {
                 refreshForm();
             }
 
-            if (name === 'widgetConfiguration') {
-                if (validator.validateJson(
+            if (name === 'widgetStyles') {
+                const isValid = validator.validateJson(
                     document.querySelector('[name="widget-styles"]'),
                     value,
                     'validation.invalidJson'
-                )) {
-                    disableFooter(true);
-                }
+                );
+                disableFooter(!isValid);
             }
 
             if (name === 'assetsKey') {
@@ -513,19 +513,18 @@ if (!window.SequraFE) {
             }
 
             if (name === 'selForPrice' || name === 'selForDefaultLocation') {
-                const isValid = isCssSelectorValid(value);
-                validator.validateField(
+                debugger
+                const isValid = validator.validateCssSelector(
                     document.querySelector(`[name="${name}"]`),
-                    !isValid,
+                    true,
                     'validation.invalidField'
                 );
                 disableFooter(!isValid);
             }
             if (name === 'selForAltPrice' || name === 'selForAltPriceTrigger') {
-                const isValid = isCssSelectorValid(value) || '' === value || null === value
-                validator.validateField(
+                const isValid = validator.validateCssSelector(
                     document.querySelector(`[name="${name}"]`),
-                    !isValid,
+                    false,
                     'validation.invalidField'
                 );
                 disableFooter(!isValid);
@@ -580,6 +579,31 @@ if (!window.SequraFE) {
                     !valid,
                     'validation.invalidJSON'
                 );
+
+                if (changedSettings.displayWidgetOnProductPage) {
+                    for (const name of ['selForPrice', 'selForDefaultLocation']) {
+                        valid = validator.validateCssSelector(
+                            document.querySelector(`[name="${name}"]`),
+                            true,
+                            'validation.invalidField'
+                        ) && valid;
+                    }
+                    for (const name of ['selForAltPrice', 'selForAltPriceTrigger']) {
+                        valid = validator.validateCssSelector(
+                            document.querySelector(`[name="${name}"]`),
+                            false,
+                            'validation.invalidField'
+                        ) && valid;
+                    }
+
+                    const isValid = isCustomLocationValid(changedSettings.customLocations);
+                    valid = isValid && valid;
+                    validator.validateField(
+                        document.querySelector(`.sq-product-related-field .sq-table`),
+                        !isValid,
+                        'validation.invalidField'
+                    );
+                }
 
                 if (changedSettings.showInstallmentAmountInProductListing) {
                     valid = validator.validateRequiredField(
