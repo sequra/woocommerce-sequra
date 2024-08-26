@@ -1,4 +1,5 @@
-import { test } from '../fixtures/test';
+import SeQuraHelper from '../fixtures/SeQuraHelper';
+import { test, expect } from '../fixtures/test';
 
 test.describe.configure({ mode: 'serial' });
 test.describe('Widget settings', () => {
@@ -79,9 +80,7 @@ test.describe('Widget settings', () => {
     await widgetSettingsPage.expectConfigurationMatches(newSettings);
   });
 
-  test.only('Show widget with single location', async ({ page, productPage, widgetSettingsPage }) => {
-    // TODO: Show widget with single location. Test both Gutenberg and Classic editor. Test both simple and variable products.
-
+  test('Show widget', async ({ productPage, widgetSettingsPage, request }) => {
     const defaultSettings = {
       ...widgetSettingsPage.getDefaultSettings(),
       enabled: true
@@ -92,35 +91,68 @@ test.describe('Widget settings', () => {
       locationSel: ".wc-block-components-product-price"
     };
 
-    // Gutenberg blocks
-    await widgetSettingsPage.goto();
-    await widgetSettingsPage.expectLoadingShowAndHide();
-    // await page.pause();
-    await widgetSettingsPage.fill(gutenbergBlocksSettings);
-    await widgetSettingsPage.save({ expectLoadingShowAndHide: true, skipIfDisabled: true });
+    const expectWidgetsAreVisible = async (opt) => {
 
-    // -- Test for simple product.
-    await productPage.goto({ slug: 'sunglasses' });
-    let opt = { ...gutenbergBlocksSettings, amount: 9000, registrationAmount: 0 };
-    await productPage.expectWidgetToBeVisible({ ...opt, product: 'pp3' });
-    await productPage.expectWidgetToBeVisible({ ...opt, product: 'sp1', campaign: 'permanente' });
-    await productPage.expectWidgetToBeVisible({ ...opt, product: 'i1' });
-    
-    // -- Test for variable product.
-    await productPage.goto({ slug: 'hoodie' });
-    opt = { ...gutenbergBlocksSettings, amount: 8000, registrationAmount: 0 };
-    await productPage.expectWidgetToBeVisible({ ...opt, product: 'pp3' });
-    await productPage.expectWidgetToBeVisible({ ...opt, product: 'sp1', campaign: 'permanente' });
-    await productPage.expectWidgetToBeVisible({ ...opt, product: 'i1' });
+      let i1Loc = opt.locationSel;
+      let i1WidgetConfig = opt.widgetConfig;
+      const i1CustomLoc = opt.customLocations.find(loc => loc.paymentMethod === "Paga Después")
+      if (i1CustomLoc) {
+        i1Loc = i1CustomLoc.locationSel;
+        i1WidgetConfig = i1CustomLoc.widgetConfig;
+      }
+      await productPage.expectWidgetToBeVisible({ ...opt, product: 'pp3' });
+      await productPage.expectWidgetToBeVisible({ ...opt, product: 'sp1', campaign: 'permanente' });
+      await productPage.expectWidgetToBeVisible({ ...opt, locationSel: i1Loc, widgetConfig: i1WidgetConfig, product: 'i1' });
+    }
 
-    //TODO: Select first variation having regular price and test again.
-    //TODO: Select second variation having sale price and test again.
-    //TODO: Clear variations and test again.
-    
+    const customLocations = [
+      {
+        paymentMethod: "Paga Después",
+        display: true,
+        locationSel: ".single_add_to_cart_button",
+        widgetConfig: '{"alignment":"right","amount-font-bold":"true","amount-font-color":"#000000","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"5","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner","branding":"black"}'
+      }
+    ]
+
+    const themes = [
+      { theme: 'storefront', settings: defaultSettings }, // For classic editor with default location
+      { theme: 'storefront', settings: { ...defaultSettings, customLocations } }, // For classic editor with custom locations
+      { theme: 'twentytwentyfour', settings: gutenbergBlocksSettings }, // For gutenberg blocks with default location
+      { theme: 'twentytwentyfour', settings: { ...gutenbergBlocksSettings, customLocations } }, // For gutenberg blocks with custom locations
+    ];
+
+    const helper = new SeQuraHelper(request, expect);
+
+    for (const { theme, settings } of themes) {
+      await widgetSettingsPage.goto();
+      await widgetSettingsPage.expectLoadingShowAndHide();
+      await widgetSettingsPage.fill(settings);
+      // await page.pause();
+      await widgetSettingsPage.save({ expectLoadingShowAndHide: true, skipIfDisabled: true });
+
+      await helper.executeWebhook({ webhook: helper.webhooks.SET_THEME, args: [{ name: 'theme', value: theme }] });
+
+      // -- Test for simple product.
+      await productPage.goto({ slug: 'sunglasses' });
+      await expectWidgetsAreVisible({ ...settings, amount: 9000, registrationAmount: 0 });
+
+      // -- Test for variable product.
+      await productPage.goto({ slug: 'hoodie' });
+      await expectWidgetsAreVisible({ ...settings, amount: 8000, registrationAmount: 0 });
+
+      let variationOptions = [
+        { attributeName: 'logo', value: 'Yes', opt: { ...settings, amount: 8500, registrationAmount: 0 } }, // Variation having regular price.
+        { attributeName: 'logo', value: 'No', opt: { ...settings, amount: 8000, registrationAmount: 0 } } // Variation having sale price.
+      ];
+
+      for (const variationOpt of variationOptions) {
+        await productPage.selectVariation(variationOpt);
+        await expectWidgetsAreVisible(variationOpt.opt);
+      }
+
+      // -- Clear variations and test again.
+      await productPage.clearVariations();
+      await expectWidgetsAreVisible({ ...settings, amount: 8000, registrationAmount: 0 });
+    }
   });
-
-  test('Show widget with alternative locations', async ({ productPage, widgetSettingsPage }) => {
-    // TODO: Show widget with multiple locations. Test both Gutenberg and Classic editor. Test both simple and variable products.
-  });
-
 });

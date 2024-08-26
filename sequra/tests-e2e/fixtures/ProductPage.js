@@ -20,7 +20,6 @@ export default class ProductPage {
     }
 
     getProductUrl(slug) {
-        // return `./?product=${slug}`;
         return `./product/${slug}/`;
     }
 
@@ -38,7 +37,6 @@ export default class ProductPage {
 
     async expectWidgetToBeVisible({ locationSel, widgetConfig, product, amount, registrationAmount, campaign = null }) {
         let containerSel = `${locationSel} ~ .sequra-promotion-widget.sequra-promotion-widget--${product}`;
-        // [data-amount="9000"][data-registration-amount="0"]
         const styles = JSON.parse(widgetConfig);
         Object.keys(styles).forEach(key => {
             containerSel += '' !== styles[key] ? `[data-${key}="${styles[key]}"]` : `[data-${key}]`;
@@ -47,9 +45,15 @@ export default class ProductPage {
         if (campaign) {
             containerSel += `[data-campaign="${campaign}"]`;
         }
-
         const iframeSel = `${containerSel} iframe.Sequra__PromotionalWidget`;
-
         await this.page.locator(iframeSel).waitFor({ timeout: 5000 });
+    }
+
+    async selectVariation({ attributeName, value }) {
+        await this.page.locator(`select[name="attribute_${attributeName}"]`, value).selectOption(value);
+    }
+
+    async clearVariations() {
+        await this.page.click('.reset_variations');
     }
 }

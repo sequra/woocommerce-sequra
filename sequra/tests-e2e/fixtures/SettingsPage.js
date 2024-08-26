@@ -56,7 +56,7 @@ export default class SettingsPage {
         }
 
         // await this.page.locator(this.selector.saveBtn).click({timeout: 1000});
-        await this.page.locator(this.selector.saveBtn).click({ timeout: 1 });
+        await this.page.locator(this.selector.saveBtn).click({ timeout: 500 });
         if (expectLoadingShowAndHide) {
             await this.expectLoadingShowAndHide();
         }
