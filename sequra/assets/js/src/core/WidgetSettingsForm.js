@@ -111,7 +111,7 @@ if (!window.SequraFE) {
             selForPrice: '.summary .price>.amount,.summary .price ins .amount',
             selForAltPrice: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
             selForAltPriceTrigger: '.variations',
-            selForDefaultLocation: '.summary .price',
+            selForDefaultLocation: '.summary>.price',
             customLocations: [],
         };
 
