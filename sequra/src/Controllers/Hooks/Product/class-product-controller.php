@@ -273,7 +273,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		if ( ! isset( $_POST[ self::NONCE_SEQURA_PRODUCT ] ) 
 		|| ! wp_verify_nonce( $_POST[ self::NONCE_SEQURA_PRODUCT ], -1 ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		|| ! current_user_can( 'edit_post', $post_id )
-		|| wp_doing_ajax( $post_id ) ) {
+		|| wp_doing_ajax() ) {
 			return;
 		}
 

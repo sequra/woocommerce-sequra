@@ -82,7 +82,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 */
 	private function update_first_charge_on( int $product_id, ?string &$first_charge_on ) {
 		$date = $this->product_service->get_desired_first_charge_date( $product_id );
-		if ( $date ) {
+		if ( $date instanceof DateTime ) {
 			$formatted_date  = $date->format( DateTime::ATOM );
 			$first_charge_on = $first_charge_on ? min( $first_charge_on, $formatted_date ) : $formatted_date;
 		}
