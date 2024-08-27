@@ -1,19 +1,24 @@
-import { test } from '../fixtures/test';
+import SeQuraHelper from '../fixtures/SeQuraHelper';
+import { test, expect } from '../fixtures/test';
 
 // test.describe.configure({ mode: 'parallel' }); // The tests sometimes fail in parallel mode.
 test.describe.configure({ mode: 'serial' });
 test.describe('Product checkout', () => {
 
-  test('All available seQura products appear in the checkout', async ({ productPage, checkoutPage }) => {
+  test.only('All available seQura products appear in the checkout', async ({ productPage, checkoutPage, request }) => {
     await checkoutPage.setupForPhysicalProducts();
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
-    await checkoutPage.goto();
-    await checkoutPage.expectFp1ToBeVisible();
-    await checkoutPage.expectI1ToBeVisible();
-    await checkoutPage.expectSp1ToBeVisible();
-    await checkoutPage.expectPp3ToBeVisible();
-    await checkoutPage.expectPp3DecombinedToBeVisible();
+    const helper = new SeQuraHelper(request, expect);
+    for (const version of ['classic', 'blocks']) {
+      await helper.executeWebhook({ webhook: helper.webhooks.CHECKOUT_VERSION, args: [{ name: 'version', value: version }] });
+      await checkoutPage.goto();
+      await checkoutPage.expectFp1ToBeVisible();
+      await checkoutPage.expectI1ToBeVisible();
+      await checkoutPage.expectSp1ToBeVisible();
+      await checkoutPage.expectPp3ToBeVisible();
+      await checkoutPage.expectPp3DecombinedToBeVisible();
+    }
   });
 
   test('Make a successful payment using any shopper name', async ({ productPage, checkoutPage }) => {

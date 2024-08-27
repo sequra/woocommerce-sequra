@@ -33,5 +33,8 @@ require_once __DIR__ . '/src/Task/class-force-order-failure-task.php';
 require_once __DIR__ . '/src/Task/class-remove-log-task.php';
 require_once __DIR__ . '/src/Task/class-print-logs-task.php';
 require_once __DIR__ . '/src/Task/class-set-theme-task.php';
+require_once __DIR__ . '/src/Task/class-wc-ui-version-task.php';
+require_once __DIR__ . '/src/Task/class-cart-version-task.php';
+require_once __DIR__ . '/src/Task/class-checkout-version-task.php';
 require_once __DIR__ . '/src/class-plugin.php';
 new SeQura\Helper\Plugin();
