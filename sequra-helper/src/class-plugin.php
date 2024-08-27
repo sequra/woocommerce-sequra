@@ -7,6 +7,8 @@
 
 namespace SeQura\Helper;
 
+use SeQura\Helper\Task\Cart_Version_Task;
+use SeQura\Helper\Task\Checkout_Version_Task;
 use SeQura\Helper\Task\Clear_Configuration_Task;
 use SeQura\Helper\Task\Configure_Dummy_Service_Task;
 use SeQura\Helper\Task\Configure_Dummy_Task;
@@ -43,6 +45,9 @@ class Plugin {
 			'remove_log'            => Remove_Log_Task::class,
 			'print_logs'            => Print_Logs_Task::class,
 			'set_theme'             => Set_Theme_Task::class,
+			'cart_version'          => Cart_Version_Task::class,
+			'checkout_version'      => Checkout_Version_Task::class,
+
 		);
 
 		return ! isset( $map[ $webhook ] ) ? new Task() : new $map[ $webhook ]();

@@ -104,6 +104,22 @@ This functionality set the active theme. To used it you must do a POST request t
 curl --location --request POST '<WP_URL>/?sq-webhook=set_theme&theme=<THEME>'
 ```
 
+### Set cart page version
+
+This functionality changes the Cart page content to use Classic or Block based layout. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file and `<VERSION>` with `classic` or `blocks`):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=cart_version&version=<VERSION>'
+```
+
+### Set checkout page version
+
+This functionality changes the Checkout page content to use Classic or Block based layout. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file and `<VERSION>` with `classic` or `blocks`):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=checkout_version&version=<VERSION>'
+```
+
 ## Unit and Integration Tests
 
 ### Setup
