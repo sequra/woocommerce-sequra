@@ -96,6 +96,30 @@ This functionality removes data in the database relative to plugin's configurati
 curl --location --request POST '<WP_URL>/?sq-webhook=clear_config'
 ```
 
+### Force failure on seQura checkout
+
+This functionality set up an scenario when the order has been modified increasing its amount values, after passing successfully the solicitation step and indeed will be rejected by seQura due the difference between solicited cart amount and the current cart amount to be paid. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file and `<ID>` with the ID of the WC order):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=force_order_failure&order_id=<ID>'
+```
+
+### Clear the log
+
+This functionality clears the plugin's log file by deleting it. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=remove_log'
+```
+
+### Fill the log with sample data
+
+This functionality fill the plugin's log file with some entries, one for each severity level, using the same mechanism than the plugin. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=print_logs'
+```
+
 ### Set active theme
 
 This functionality set the active theme. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` and `<THEME>` with a value present in your `.env` file):
