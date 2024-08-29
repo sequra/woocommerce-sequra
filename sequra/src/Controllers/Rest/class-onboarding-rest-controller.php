@@ -8,7 +8,6 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
-use PhpParser\Node\Expr\Cast\Bool_;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
@@ -41,13 +40,26 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_SEL_FOR_ALT_PRICE_TRIGGER                  = 'selForAltPriceTrigger';
 	private const PARAM_SEL_FOR_DEFAULT_LOCATION                   = 'selForDefaultLocation';
 	private const PARAM_CUSTOM_LOCATIONS                           = 'customLocations';
+	private const PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET             = 'sel_for_target';
+	private const PARAM_CUSTOM_LOCATION_WIDGET_STYLES              = 'widget_styles';
+	private const PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET             = 'display_widget';
+	private const PARAM_CUSTOM_LOCATION_COUNTRY                    = 'country';
+	private const PARAM_CUSTOM_LOCATION_PRODUCT                    = 'product';
+	private const PARAM_CUSTOM_LOCATION_TITLE                      = 'title';
 
-	private const PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET = 'sel_for_target';
-	private const PARAM_CUSTOM_LOCATION_WIDGET_STYLES  = 'widget_styles';
-	private const PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET = 'display_widget';
-	private const PARAM_CUSTOM_LOCATION_COUNTRY        = 'country';
-	private const PARAM_CUSTOM_LOCATION_PRODUCT        = 'product';
-	private const PARAM_CUSTOM_LOCATION_TITLE          = 'title';
+	// Cart widget config.
+	private const PARAM_CART_SEL_FOR_PRICE            = 'selForCartPrice';
+	private const PARAM_CART_SEL_FOR_DEFAULT_LOCATION = 'selForCartDefaultLocation';
+	private const PARAM_CART_MINI_WIDGETS             = 'cartMiniWidgets';
+
+	// Mini widget expected fields.
+	private const PARAM_MINI_WIDGET_SEL_FOR_PRICE       = 'selForPrice';
+	private const PARAM_MINI_WIDGET_SEL_FOR_LOCATION    = 'selForLocation';
+	private const PARAM_MINI_WIDGET_MESSAGE             = 'message';
+	private const PARAM_MINI_WIDGET_MESSAGE_BELOW_LIMIT = 'messageBelowLimit';
+	private const PARAM_MINI_WIDGET_COUNTRY             = 'countryCode';
+	private const PARAM_MINI_WIDGET_PRODUCT             = 'product';
+	private const PARAM_MINI_WIDGET_TITLE               = 'title';
 
 	/**
 	 * Constructor.
@@ -113,6 +125,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 				self::PARAM_SEL_FOR_DEFAULT_LOCATION       => $this->get_arg_string( true, null, array( $this, 'validate_required_widget_selector' ) ),
 				self::PARAM_CUSTOM_LOCATIONS               => $this->get_arg_widget_location_list(),
 
+				self::PARAM_CART_SEL_FOR_PRICE             => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
+				self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION  => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
+				self::PARAM_CART_MINI_WIDGETS              => $this->get_arg_cart_mini_widgets(),
 			)
 		);
 
@@ -381,7 +396,10 @@ class Onboarding_REST_Controller extends REST_Controller {
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
-					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
+					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ),
+					strval( $request->get_param( self::PARAM_CART_SEL_FOR_PRICE ) ),
+					strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
+					(array) $request->get_param( self::PARAM_CART_MINI_WIDGETS )
 				)
 			)
 			->toArray();
@@ -442,15 +460,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Validate if required widget selector is valid.
-	 * 
-	 * @param mixed $param The parameter.
-	 * @param WP_REST_Request $request The request.
-	 * @param string $key The key.
+	 * Validate if required selector is valid.
 	 */
-	public function validate_required_widget_selector( $param, $request, $key ): bool {
+	private function validate_required_selector( string $dependant_param_key, mixed $param, WP_REST_Request $request, string $key ): bool {
 		
-		$use_widgets = (bool) $request->get_param( self::PARAM_USE_WIDGETS );
+		$use_widgets = (bool) $request->get_param( $dependant_param_key );
 		if ( ! $use_widgets ) {
 			return null === $param || is_string( $param );
 		}
@@ -458,6 +472,20 @@ class Onboarding_REST_Controller extends REST_Controller {
 		return null !== $param 
 		&& is_string( $param )
 		&& '' !== trim( $param );
+	}
+
+	/**
+	 * Validate if required widget selector is valid.
+	 */
+	public function validate_required_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+		return $this->validate_required_selector( self::PARAM_USE_WIDGETS, $param, $request, $key );
+	}
+
+	/**
+	 * Validate if required cart widget selector is valid.
+	 */
+	public function validate_required_cart_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE, $param, $request, $key );
 	}
 
 	/**
@@ -501,6 +529,83 @@ class Onboarding_REST_Controller extends REST_Controller {
 				'sanitize_callback' => null === $sanitize ? array( $this, 'sanitize_widget_location_list' ) : $sanitize,
 			)
 		);
+	}
+
+	/**
+	 * Get argument structure for the widget location list.
+	 * 
+	 * @return mixed[]
+	 */
+	protected function get_arg_cart_mini_widgets( bool $required = true, mixed $default_value = array(), callable $validate = null, callable $sanitize = null ): array {
+		return array_merge(
+			$this->get_arg( $required, $default_value ),
+			array(
+				'validate_callback' => null === $validate ? array( $this, 'validate_mini_widgets' ) : $validate,
+				'sanitize_callback' => null === $sanitize ? array( $this, 'sanitize_mini_widgets' ) : $sanitize,
+			)
+		);
+	}
+
+	/**
+	 * Validate if mini widgets list is valid.
+	 */
+	public function validate_mini_widgets( mixed $param, WP_REST_Request $request, string $key ): bool {
+		if ( ! is_array( $param ) ) {
+			return false;
+		}
+		foreach ( $param as $mini_widget ) {
+			if ( ! isset( 
+				$mini_widget[ self::PARAM_MINI_WIDGET_MESSAGE ],
+				$mini_widget[ self::PARAM_MINI_WIDGET_MESSAGE_BELOW_LIMIT ], 
+				$mini_widget[ self::PARAM_MINI_WIDGET_SEL_FOR_PRICE ],
+				$mini_widget[ self::PARAM_MINI_WIDGET_SEL_FOR_LOCATION ] 
+			)
+				|| ! is_string( $mini_widget[ self::PARAM_MINI_WIDGET_SEL_FOR_PRICE ] )
+				|| ! is_string( $mini_widget[ self::PARAM_MINI_WIDGET_SEL_FOR_LOCATION ] )
+				|| ! is_string( $mini_widget[ self::PARAM_MINI_WIDGET_MESSAGE ] )
+				|| ! is_string( $mini_widget[ self::PARAM_MINI_WIDGET_MESSAGE_BELOW_LIMIT ] )
+				|| empty( $mini_widget[ self::PARAM_MINI_WIDGET_MESSAGE ] )
+				) {
+				return false;
+			}
+
+			if ( isset( $mini_widget[ self::PARAM_MINI_WIDGET_COUNTRY ], $mini_widget[ self::PARAM_MINI_WIDGET_PRODUCT ], $mini_widget[ self::PARAM_MINI_WIDGET_TITLE ] ) ) {
+				// check if exists another mini widget with the same country title and product.
+				$count = 0;
+				foreach ( $param as $mw ) {
+					if ( isset( $mw[ self::PARAM_MINI_WIDGET_COUNTRY ], $mw[ self::PARAM_MINI_WIDGET_PRODUCT ], $mw[ self::PARAM_MINI_WIDGET_TITLE ] )
+					&& $mw[ self::PARAM_MINI_WIDGET_COUNTRY ] === $mini_widget[ self::PARAM_MINI_WIDGET_COUNTRY ]
+					&& $mw[ self::PARAM_MINI_WIDGET_PRODUCT ] === $mini_widget[ self::PARAM_MINI_WIDGET_PRODUCT ]
+					&& $mw[ self::PARAM_MINI_WIDGET_TITLE ] === $mini_widget[ self::PARAM_MINI_WIDGET_TITLE ]
+					&& ++$count > 1 ) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Sanitize mini widget list.
+	 *
+	 * @param array<int, array<string, string>> $param The parameter.
+	 * @return array<int, array<string, string>>
+	 */
+	public function sanitize_mini_widgets( $param ): array {
+		foreach ( $param as &$mini_widget ) {
+			$mini_widget = array(
+				self::PARAM_MINI_WIDGET_MESSAGE          => trim( sanitize_text_field( strval( $mini_widget[ self::PARAM_MINI_WIDGET_MESSAGE ] ) ) ),
+				self::PARAM_MINI_WIDGET_MESSAGE_BELOW_LIMIT => trim( sanitize_text_field( strval( $mini_widget[ self::PARAM_MINI_WIDGET_MESSAGE_BELOW_LIMIT ] ) ) ),
+				self::PARAM_MINI_WIDGET_SEL_FOR_PRICE    => trim( sanitize_text_field( strval( $mini_widget[ self::PARAM_MINI_WIDGET_SEL_FOR_PRICE ] ) ) ),
+				self::PARAM_MINI_WIDGET_SEL_FOR_LOCATION => trim( sanitize_text_field( strval( $mini_widget[ self::PARAM_MINI_WIDGET_SEL_FOR_LOCATION ] ) ) ),
+
+				self::PARAM_MINI_WIDGET_COUNTRY          => isset( $mini_widget[ self::PARAM_MINI_WIDGET_COUNTRY ] ) ? trim( sanitize_text_field( strval( $mini_widget[ self::PARAM_MINI_WIDGET_COUNTRY ] ) ) ) : null,
+				self::PARAM_MINI_WIDGET_PRODUCT          => isset( $mini_widget[ self::PARAM_MINI_WIDGET_PRODUCT ] ) ? trim( sanitize_text_field( strval( $mini_widget[ self::PARAM_MINI_WIDGET_PRODUCT ] ) ) ) : null,
+				self::PARAM_MINI_WIDGET_TITLE            => isset( $mini_widget[ self::PARAM_MINI_WIDGET_TITLE ] ) ? trim( sanitize_text_field( strval( $mini_widget[ self::PARAM_MINI_WIDGET_TITLE ] ) ) ) : null,
+			);
+		}
+		return $param;
 	}
 
 	/**

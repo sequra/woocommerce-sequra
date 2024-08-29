@@ -23,6 +23,13 @@ class Widget_Settings extends WidgetSettings {
 	protected $location_config;
 
 	/**
+	 * Mini Widget Config
+	 *
+	 * @var ?Mini_Widget_Config
+	 */
+	protected $cart_mini_widget_config;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct(
@@ -34,7 +41,8 @@ class Widget_Settings extends WidgetSettings {
 		string $mini_widget_selector = '',
 		?string $widget_config = null,
 		?WidgetLabels $widget_labels = null,
-		?Widget_Location_Config $location_config = null
+		?Widget_Location_Config $location_config = null,
+		?Mini_Widget_Config $cart_mini_widget_config = null
 	) {
 		parent::__construct(
 			$enabled,
@@ -46,15 +54,17 @@ class Widget_Settings extends WidgetSettings {
 			$widget_config,
 			$widget_labels
 		);
-		$this->location_config = $location_config;
+		$this->location_config         = $location_config;
+		$this->cart_mini_widget_config = $cart_mini_widget_config;
 	}
 
 	/**
-	 * Create a new General_Settings instance from a GeneralSettings instance.
+	 * Create a new Widget_Settings instance from a WidgetSettings instance.
 	 */
 	public static function from_parent(
 		WidgetSettings $instance,
-		?Widget_Location_Config $location_config = null
+		?Widget_Location_Config $location_config = null,
+		?Mini_Widget_Config $cart_mini_widget_config = null
 	): Widget_Settings {
 		return new self(
 			$instance->isEnabled(),
@@ -65,7 +75,8 @@ class Widget_Settings extends WidgetSettings {
 			$instance->getMiniWidgetSelector(),
 			$instance->getWidgetConfig(),
 			$instance->getWidgetLabels(),
-			$location_config
+			$location_config,
+			$cart_mini_widget_config
 		);
 	}
 
@@ -81,5 +92,19 @@ class Widget_Settings extends WidgetSettings {
 	 */
 	public function set_location_config( ?Widget_Location_Config $location_config ): void {
 		$this->location_config = $location_config;
+	}
+
+	/**
+	 * Getter
+	 */
+	public function get_cart_mini_widget_config(): ?Mini_Widget_Config {
+		return $this->cart_mini_widget_config;
+	}
+
+	/**
+	 * Setter
+	 */
+	public function set_cart_mini_widget_config( ?Mini_Widget_Config $cart_mini_widget_config ): void {
+		$this->cart_mini_widget_config = $cart_mini_widget_config;
 	}
 }

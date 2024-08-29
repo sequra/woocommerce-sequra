@@ -25,6 +25,11 @@ use WC_Order;
  * Handle use cases related to payment methods
  */
 class Payment_Method_Service implements Interface_Payment_Method_Service {
+
+	/**
+	 * Part payment
+	 */
+	const PART_PAYMENT = 'part_payment';
 	
 	/**
 	 * Configuration
@@ -202,10 +207,17 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * @return array<string, string>[]
 	 */
 	public function get_all_payment_methods( string $store_id, string $merchant ): array {
-		return AdminAPI::get()
+		$payment_methods = AdminAPI::get()
 			->paymentMethods( $store_id )
 			->getPaymentMethods( strval( $merchant ) )
 			->toArray();
+
+		foreach ( $payment_methods as &$method ) {
+			$method['supportsWidgets']             = $this->supports_widgets( $method );
+			$method['supportsInstallmentPayments'] = $this->supports_installment_payments( $method );
+		}
+
+		return $payment_methods;
 	}
 
 	/**
@@ -214,16 +226,12 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * @return array<string, string>[]
 	 */
 	public function get_all_widget_compatible_payment_methods( string $store_id, ?string $merchant ): array {
-		$methods = array();
-		if ( ! $merchant ) {
-			return $methods;
-		}
-		foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
-			if ( $this->is_widget_compatible( $method ) ) {
-				$methods[] = $method;
-			}
-		}
-		return $methods;
+		return array_filter(
+			$this->get_all_payment_methods( $store_id, $merchant ),
+			function ( $method ) {
+				return $method['supportsWidgets'];
+			} 
+		);
 	}
 
 	/**
@@ -231,8 +239,17 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * 
 	 * @param array<string, string> $method the payment method. Must contain 'product' at least.
 	 */
-	private function is_widget_compatible( array $method ): bool {
+	private function supports_widgets( array $method ): bool {
 		return isset( $method['product'] ) && in_array( $method['product'], array( 'i1', 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
+	}
+
+	/**
+	 * Check if the payment method represents a part payment
+	 * 
+	 * @param array<string, string> $method the payment method. Must contain 'product' at least.
+	 */
+	private function supports_installment_payments( array $method ): bool {
+		return isset( $method['product'] ) && in_array( $method['product'], array( 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
 	}
 
 	/**
