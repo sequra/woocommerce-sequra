@@ -294,11 +294,11 @@
     },
     "teaserMessage": {
       "label": "Teaser message",
-      "description": "Teaser message description"
+      "description": "Use %s as a placeholder for the price"
     },
     "messageBelowLimit": {
       "label": "Message below limit",
-      "description": "Message below limit description"
+      "description": "Use %s as a placeholder for the price. Leave empty to hide the widget when the price is below the limit"
     },
     "selForPrice": {
       "label": "Price selector",
@@ -321,10 +321,27 @@
       "headerDescription": "Define alternative configuration per payment method",
       "addRow": "Add new",
       "removeRow": "Remove",
-      "paymentMethod":"Payment method",
+      "paymentMethod": "Payment method",
       "selector": "Location CSS selector",
       "leaveEmptyToUseDefault": "Leave empty to use default value",
       "showWidget": "Display widget"
+    },
+    "selForCartPrice": {
+      "label": "Cart price selector",
+      "description": "Define a CSS selector to retrieve the cart total price"
+    },
+    "cartDefaultLocationSel": {
+      "label": "Default cart widget location selector",
+      "description": "CSS selector to define the default container element for the cart widget"
+    },
+    "cartConfig": {
+      "headerTitle": "Customize widgets",
+      "headerDescription": "Define custom selectors, messages and availability per country for the cart widget",
+      "paymentMethod": "Payment method to promote",
+      "disable": "None (won't show the widget)",
+      "locationSelector": "Location CSS selector",
+      "leaveEmptyToUseDefault": "Leave empty to use default value",
+      "locationSelLabel": "Location CSS selector"
     }
   },
   "orderStatusSettings": {
