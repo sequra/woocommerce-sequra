@@ -77,7 +77,7 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 	 * @param string|null $sel_for_alt_price_trigger Selector for alternative price trigger.
 	 * @param string|null $sel_for_default_location Selector for default location.
 	 * @param array<array<string, string>> $custom_locations Custom locations.
-	 * @param array<array<string, string>> $cart_mini_widget_config Cart mini widget configuration.
+	 * @param array<array<string, string>> $cart_mini_widgets Cart mini widget configuration.
 	 */
 	public function __construct(
 		bool $enabled,
