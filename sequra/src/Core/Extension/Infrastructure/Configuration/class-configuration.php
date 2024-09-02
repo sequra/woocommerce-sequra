@@ -350,7 +350,7 @@ class Configuration extends CoreConfiguration {
 	/**
 	 * Look for the mini widget configuration for a country
 	 * 
-	 * @param array<string, mixed> $mini_widgets Mini widgets configuration
+	 * @param array<string, string> $mini_widgets Mini widgets configuration
 	 */
 	protected function get_mini_widget( string $country, array $mini_widgets ): ?array {
 		foreach ( $mini_widgets as $mini_widget ) {
