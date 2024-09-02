@@ -370,7 +370,7 @@ class Configuration extends CoreConfiguration {
 			$config          = $this->get_widget_settings();
 			$sel             = $config['selForDefaultLocation'];
 			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
-			if ( isset( $custom_location['sel_for_target'] ) ) {
+			if ( ! empty( $custom_location['sel_for_target'] ) ) {
 				$sel = $custom_location['sel_for_target'];
 			}
 			return $sel;
@@ -444,7 +444,7 @@ class Configuration extends CoreConfiguration {
 			$style  = $config['widgetConfiguration'] ?? '';
 
 			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
-			if ( isset( $custom_location['widget_styles'] ) ) {
+			if ( ! empty( $custom_location['widget_styles'] ) ) {
 				$style = $custom_location['widget_styles'] ?? $style;
 			}
 			return $style;

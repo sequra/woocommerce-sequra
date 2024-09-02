@@ -106,20 +106,17 @@ if (SequraWidgetFacade) {
                  * @returns {array} Array of objects containing the target elements and a reference to the widget
                  */
                 getWidgetTargets: function (parentElem, widget, observedAt) {
-
-                    if (!widget.dest) {
-                        widget.dest = '.single_add_to_cart_button';
-                    }
-
                     const targets = [];
-                    const children = parentElem.querySelectorAll(widget.dest);
-                    const productObservedAttr = 'data-sequra-observed-' + widget.product;
-                    for (const child of children) {
-                        if (child.getAttribute(productObservedAttr) == observedAt) {
-                            continue;// skip elements that are already observed in this mutation.
+                    if (widget.dest) {
+                        const children = parentElem.querySelectorAll(widget.dest);
+                        const productObservedAttr = 'data-sequra-observed-' + widget.product;
+                        for (const child of children) {
+                            if (child.getAttribute(productObservedAttr) == observedAt) {
+                                continue;// skip elements that are already observed in this mutation.
+                            }
+                            child.setAttribute(productObservedAttr, observedAt);
+                            targets.push({ elem: child, widget: widget });
                         }
-                        child.setAttribute(productObservedAttr, observedAt);
-                        targets.push({ elem: child, widget: widget });
                     }
                     return targets;
                 },
