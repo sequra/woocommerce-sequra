@@ -348,6 +348,73 @@ class Configuration extends CoreConfiguration {
 	}
 
 	/**
+	 * Look for the mini widget configuration for a country
+	 * 
+	 * @param array<string, mixed> $mini_widgets Mini widgets configuration
+	 */
+	protected function get_mini_widget( string $country, array $mini_widgets ): ?array {
+		foreach ( $mini_widgets as $mini_widget ) {
+			if ( isset( $mini_widget['countryCode'] ) && $mini_widget['countryCode'] === $country ) {
+				return $mini_widget;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Check if the cart widget is enabled.
+	 */
+	public function is_cart_widget_enabled( string $country ): bool {
+		try {
+			$config   = $this->get_widget_settings();
+			$is_valid = ! empty( $config['useWidgets'] ) 
+			&& ! empty( $config['showInstallmentAmountInCartPage'] ) 
+			&& isset(
+				$config['selForCartPrice'], 
+				$config['selForCartLocation'], 
+				$config['cartMiniWidgets'] 
+			)
+			&& is_array( $config['cartMiniWidgets'] );
+
+			if ( $is_valid ) {
+				$mini_widget = $this->get_mini_widget( $country, $config['cartMiniWidgets'] );
+				return isset( $mini_widget['message'], $mini_widget['product'], $mini_widget['title'] );
+			}
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		}
+		return false;
+	}
+
+	/**
+	 * Get the cart widget configuration for a country as an array
+	 * 
+	 * @return null|array<string, mixed> Contains the following keys:
+	 * - selForPrice: string
+	 * - selForLocation: string
+	 * - message: string
+	 * - messageBelowLimit: string
+	 * - product: string
+	 * - title: string
+	 */
+	public function get_cart_widget_config( string $country ): ?array {
+		try {
+			$config      = $this->get_widget_settings();
+			$mini_widget = $this->get_mini_widget( $country, $config['cartMiniWidgets'] );
+			
+			return array(
+				'selForPrice'       => empty( $mini_widget['selForPrice'] ) ? ( $config['selForCartPrice'] ?? '' ) : $mini_widget['selForPrice'],
+				'selForLocation'    => empty( $mini_widget['selForLocation'] ) ? ( $config['selForCartLocation'] ?? '' ) : $mini_widget['selForLocation'],
+				'message'           => $mini_widget['message'] ?? '',
+				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? null,
+				'product'           => $mini_widget['product'] ?? null,
+				'title'             => $mini_widget['title'] ?? null,
+			);
+		} catch ( Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
 	 * Check if the widget is enabled in custom locations.
 	 */
 	private function is_widget_enabled_in_custom_locations( ?string $payment_method = null, ?string $country = null ): bool {

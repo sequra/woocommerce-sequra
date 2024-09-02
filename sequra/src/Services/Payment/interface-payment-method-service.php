@@ -47,4 +47,13 @@ interface Interface_Payment_Method_Service {
 	 * @return array<string, string>[]
 	 */
 	public function get_all_widget_compatible_payment_methods( string $store_id, ?string $merchant ): array;
+
+	/**
+	 * Look for available payment methods that can be used with part payments
+	 * 
+	 * @throws Throwable
+	 * 
+	 * @return array<string, string>[]
+	 */
+	public function get_all_mini_widget_compatible_payment_methods( string $store_id, ?string $merchant ): array;
 }

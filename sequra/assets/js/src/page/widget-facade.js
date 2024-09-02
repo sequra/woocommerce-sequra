@@ -8,6 +8,10 @@ if (SequraWidgetFacade) {
         }
 
         SequraWidgetFacade = {
+            ...{
+                widgets: [],
+                miniWidgets: [],
+            },
             ...SequraWidgetFacade,
             ...{
                 mutationObserver: null,
@@ -134,6 +138,11 @@ if (SequraWidgetFacade) {
                         const widgetTargets = this.getWidgetTargets(parentElem, widget, observedAt);
                         targets.push(...widgetTargets);
                     }
+                    // TODO: add support to miniwidgets
+                    for (const miniWidget of this.miniWidgets) {
+                        const widgetTargets = this.getWidgetTargets(parentElem, miniWidget, observedAt);
+                        targets.push(...widgetTargets);
+                    }
                     return targets;
                 },
 
@@ -158,7 +167,7 @@ if (SequraWidgetFacade) {
                  * @param {boolean} forcePriceSelector If true, the price selector will be forced to the simple product price selector.
                  */
                 drawWidgetsOnPage: function (forcePriceSelector = true) {
-                    if (!this.widgets.length) {
+                    if (!this.widgets.length && !this.miniWidgets.length) {
                         return;
                     }
 
@@ -166,7 +175,9 @@ if (SequraWidgetFacade) {
 
                     // First, draw the widgets in the page for the first time.
                     const widgetsTargets = this.getAllWidgetTargets(document, this.widgets, this.getObservedAt());
-                    widgetsTargets.forEach(({ elem, widget }) => this.drawWidgetOnElement(widget, elem));
+                    widgetsTargets.forEach(({ elem, widget }) => {
+                        this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem) : this.drawWidgetOnElement(widget, elem);
+                    });
 
                     if (this.mutationObserver) {
                         this.mutationObserver.disconnect();
@@ -188,12 +199,77 @@ if (SequraWidgetFacade) {
 
                         this.mutationObserver.disconnect();// disable the observer to avoid multiple calls to the same function.
 
-                        targets.forEach(({ elem, widget }) => this.drawWidgetOnElement(widget, elem)); // draw the widgets.
+                        targets.forEach(({ elem, widget }) => {
+                            this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem) : this.drawWidgetOnElement(widget, elem);
+                        });
 
                         this.mutationObserver.observe(document, { childList: true, subtree: true }); // enable the observer again.
                     });
 
                     this.mutationObserver.observe(document, { childList: true, subtree: true });
+                },
+
+                isMiniWidget: function (widget) {
+                    return this.miniWidgets.indexOf(widget) !== -1;
+                },
+
+                drawMiniWidgetOnElement: function (widget, element) {
+                    const priceSrc = this.getPriceSelector(widget);
+                    const priceElem = document.querySelector(priceSrc);
+                    if (!priceElem) {
+                        console.error(priceSrc + ' is not a valid css selector to read the price from, for seQura mini-widget.');
+                        return;
+                    }
+                    const cents = this.nodeToCents(priceElem);
+
+                    if (widget.maxAmount && widget.maxAmount < cents) {
+                        return;
+                    }
+
+                    const className = 'sequra-educational-popup';
+                    const modifierClassName = className + '--' + widget.product;
+
+                    const oldWidget = element.parentNode.querySelector('.' + className + '.' + modifierClassName);
+                    if (oldWidget) {
+                        if (cents == oldWidget.getAttribute('data-amount')) {
+                            return; // no need to update the widget, the price is the same.
+                        }
+
+                        oldWidget.remove();// remove the old widget to draw a new one.
+                    }
+
+                    const widgetNode = document.createElement('small');
+                    widgetNode.className = className + ' ' + modifierClassName;
+                    widgetNode.setAttribute('data-amount', cents);
+                    widgetNode.setAttribute('data-product', widget.product);
+
+                    const creditAgreements = Sequra.computeCreditAgreements({ amount: cents, product: widget.product })[widget.product];
+
+                    console.log('creditAgreements', creditAgreements);
+                    let creditAgreement = null
+                    do {
+                        creditAgreement = creditAgreements.pop();
+                    } while (cents < creditAgreement.min_amount.value && creditAgreements.length > 1);
+                    if (cents < creditAgreement.min_amount.value && !widget.messageBelowLimit) {
+                        return;
+                    }
+
+                    if (cents >= creditAgreement.min_amount.value) {
+                        widgetNode.innerText = widget.message.replace('%s', creditAgreement.instalment_total.string);
+                    } else {
+                        if (!widget.messageBelowLimit) {
+                            return;
+                        }
+                        widgetNode.innerText = widget.messageBelowLimit.replace('%s', creditAgreement.min_amount.string);
+                    }
+
+                    if (element.nextSibling) {//Insert after
+                        element.parentNode.insertBefore(widgetNode, element.nextSibling);
+                        this.refreshComponents();
+                    } else {
+                        element.parentNode.appendChild(widgetNode);
+                    }
+
                 },
 
                 drawWidgetOnElement: function (widget, element) {
@@ -252,7 +328,6 @@ if (SequraWidgetFacade) {
         SequraWidgetFacade.init()
         Sequra.onLoad(() => {
             SequraWidgetFacade.drawWidgetsOnPage();
-            // TODO: review following code and remove it if not needed
             if ('undefined' !== typeof jQuery) {
                 const variationForm = jQuery('.variations_form');
                 if (variationForm.length) {

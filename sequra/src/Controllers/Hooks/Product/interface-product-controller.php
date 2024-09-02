@@ -19,11 +19,17 @@ interface Interface_Product_Controller {
 	 * Handle the widget shortcode callback
 	 */
 	public function do_widget_shortcode( array $atts ): string;
+
+	/**
+	 * Handle the cart widget shortcode callback
+	 */
+	public function do_cart_widget_shortcode( array $atts ): string;
 	
 	/**
 	 * Add [sequra_widget] to product page automatically
+	 * Add [sequra_cart_widget] to cart page automatically
 	 */
-	public function add_widget_shortcode_to_product_page(): void;
+	public function add_widget_shortcode_to_page(): void;
 
 	/**
 	 * Add meta boxes to the product edit page

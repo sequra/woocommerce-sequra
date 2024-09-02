@@ -238,6 +238,40 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	}
 
 	/**
+	 * Look for available payment methods that can be used with part payments
+	 * 
+	 * @throws Throwable
+	 * 
+	 * @return array<string, string>[]
+	 */
+	public function get_all_mini_widget_compatible_payment_methods( string $store_id, ?string $merchant ): array {
+		$compatible_payment_methods = array();
+		foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
+			if ( $method['supportsInstallmentPayments'] ) {
+				$compatible_payment_methods[] = $method;
+			}
+		}
+		return $compatible_payment_methods;
+	}
+
+	/**
+	 * Look for available payment methods which can be used with the widget
+	 * 
+	 * @throws Throwable
+	 * 
+	 * @return array<string, string>[]
+	 */
+	public function get_cart_widget( string $store_id, ?string $merchant ): array {
+		$compatible_payment_methods = array();
+		foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
+			if ( $method['supportsWidgets'] ) {
+				$compatible_payment_methods[] = $method;
+			}
+		}
+		return $compatible_payment_methods;
+	}
+
+	/**
 	 * Check if the payment method can be displayed in the widget
 	 * 
 	 * @param array<string, string> $method the payment method. Must contain 'product' at least.

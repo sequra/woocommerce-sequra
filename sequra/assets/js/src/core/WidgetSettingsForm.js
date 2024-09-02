@@ -98,16 +98,16 @@ if (!window.SequraFE) {
 
         const miniWidgetLabels = {
             messages: {
-                "ES": "Desde %s/mes",
-                "FR": "À partir de %s/mois",
-                "IT": "Da %s/mese",
-                "PT": "De %s/mês"
+                "ES": "Desde %s/mes con seQura",
+                "FR": "À partir de %s/mois avec seQura",
+                "IT": "Da %s/mese con seQura",
+                "PT": "De %s/mês com seQura"
             },
             messagesBelowLimit: {
-                "ES": "Fracciona a partir de %s",
-                "FR": "Fraction de %s",
-                "IT": "Frazione da %s",
-                "PT": "Fração de %s"
+                "ES": "Fracciona con seQura a partir de %s",
+                "FR": "Fraction avec seQura à partir de %s",
+                "IT": "Frazione con seQura da %s",
+                "PT": "Fração com seQura a partir de %s"
             }
         }
 
@@ -117,8 +117,8 @@ if (!window.SequraFE) {
             assetsKey: '',
             displayWidgetOnProductPage: false,
             widgetLabels: {
-                message: 'Desde %s/mes',
-                messageBelowLimit: 'Fracciona a partir de %s'
+                message: miniWidgetLabels.messages['ES'],
+                messageBelowLimit: miniWidgetLabels.messagesBelowLimit['ES']
             },
             widgetStyles: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
             showInstallmentAmountInProductListing: false,
@@ -493,7 +493,12 @@ if (!window.SequraFE) {
                         const title = !select.selectedIndex ? null : select.options[select.selectedIndex].textContent;
                         const selForPrice = row.querySelector('[data-field="selForPrice"]').value;
                         const selForLocation = row.querySelector('[data-field="selForLocation"]').value;
-                        const message = row.querySelector('[data-field="message"]').value;
+                        let message = row.querySelector('[data-field="message"]').value;
+                        if (!message) {
+                            // Required field. If empty, set default value.
+                            message = miniWidgetLabels.messages[countryCode];
+                            row.querySelector('[data-field="message"]').value = message;
+                        }
                         const messageBelowLimit = row.querySelector('[data-field="messageBelowLimit"]').value;
 
                         cartMiniWidgets.push({ countryCode, product, title, selForPrice, selForLocation, message, messageBelowLimit });
