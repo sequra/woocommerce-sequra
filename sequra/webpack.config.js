@@ -65,10 +65,10 @@ module.exports = (env, argv) => {
         },
         {
             plugins: frontPlugins,
-            entry: "./assets/js/src/page/product.js",
+            entry: "./assets/js/src/page/widget-facade.js",
             output: {
                 path: path.resolve(__dirname, './assets/js/dist/page'),
-                filename: "product.min.js",
+                filename: "widget-facade.min.js",
             },
         },
         // Add more entries here for processing other files.
