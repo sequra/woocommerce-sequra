@@ -2,7 +2,7 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.5.3
+Tested up to: 6.6.1
 Stable tag: 2.0.12
 Requires PHP: 7.3
 License: GPLv2 or later
@@ -105,6 +105,8 @@ Contributors:
 == Changelog ==
 = 2.0.12	=
 * Changed: Sign-up URLs.
+* Fixed: Widget's javscript to read prices from product pages.
+* Changed: ISO 8061 date format regular expresion used for validations.
 = 2.0.11	=
 * Fixed: Filter order to report by payment_method field instead of _payment_method order meta.
 = 2.0.10	=

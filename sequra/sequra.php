@@ -7,7 +7,7 @@
  * Author: "seQura Tech" <wordpress@sequra.com>
  * Author URI: https://sequra.com/
  * WC requires at least: 4.0
- * WC tested up to: 8.9.1
+ * WC tested up to: 9.2.3
  * Text Domain: sequra
  * Domain Path: /i18n/languages/
  * Requires at least: 5.9
