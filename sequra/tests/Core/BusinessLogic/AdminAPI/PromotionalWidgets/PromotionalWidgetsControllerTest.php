@@ -26,6 +26,8 @@ use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widg
 use SeQura\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
 use SeQura\Core\BusinessLogic\DataAccess\PromotionalWidgets\Entities\WidgetSettings;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget_Config;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Settings;
 
 class PromotionalWidgetsControllerTest extends BaseTestCase {
@@ -111,6 +113,21 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'i1 title'
 					),
 				)
+			),
+			new Mini_Widget_Config(
+				'cart-mini-widget-sel-for-price',
+				'cart-mini-widget-sel-for-location',
+				array(
+					new Mini_Widget(
+						'cart-mini-widget-sel-for-price-es',
+						'cart-mini-widget-sel-for-location-es',
+						'message-es',
+						'message-below-limit-es',
+						'pp3',
+						'ES',
+						'pp3 title'
+					),
+				)
 			)
 		);
 		StoreContext::doWithStore( 'store1', array( $this->widgetSettingsRepository, 'setWidgetSettings' ), array( $settings ) );
@@ -152,6 +169,20 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'title'          => 'i1 title',
 					),
 				),
+				'selForCartPrice'                       => 'cart-mini-widget-sel-for-price',
+				'selForCartLocation'                    => 'cart-mini-widget-sel-for-location',
+				'cartMiniWidgets'                       => array(
+					array(
+						'selForPrice'       => 'cart-mini-widget-sel-for-price-es',
+						'selForLocation'    => 'cart-mini-widget-sel-for-location-es',
+						'message'           => 'message-es',
+						'messageBelowLimit' => 'message-below-limit-es',
+						'product'           => 'pp3',
+						'countryCode'       => 'ES',
+						'title'             => 'pp3 title',
+					),
+				),
+				
 			),
 			$result->toArray()
 		);
