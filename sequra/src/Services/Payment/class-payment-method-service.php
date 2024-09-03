@@ -286,7 +286,9 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * @param array<string, string> $method the payment method. Must contain 'product' at least.
 	 */
 	private function supports_installment_payments( array $method ): bool {
-		return isset( $method['product'] ) && in_array( $method['product'], array( 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
+		// phpcs:ignore
+		// return isset( $method['product'] ) && in_array( $method['product'], array( 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
+		return isset( $method['product'] ) && in_array( $method['product'], array( 'pp3' ), true );
 	}
 
 	/**
