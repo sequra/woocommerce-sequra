@@ -24,6 +24,11 @@ interface Interface_Product_Controller {
 	 * Handle the cart widget shortcode callback
 	 */
 	public function do_cart_widget_shortcode( array $atts ): string;
+
+	/**
+	 * Handle the product listing widget shortcode callback
+	 */
+	public function do_product_listing_widget_shortcode( array $atts ): string;
 	
 	/**
 	 * Add [sequra_widget] to product page automatically

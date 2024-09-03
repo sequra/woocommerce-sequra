@@ -385,6 +385,29 @@ class Configuration extends CoreConfiguration {
 	}
 
 	/**
+	 * Check if the product listing widget is enabled.
+	 */
+	public function is_product_listing_widget_enabled( string $country ): bool {
+		try {
+			$config   = $this->get_widget_settings();
+			$is_valid = ! empty( $config['useWidgets'] ) 
+			&& ! empty( $config['showInstallmentAmountInProductListing'] ) 
+			&& isset(
+				$config['selForListingPrice'], 
+				$config['selForListingLocation']
+			);
+
+			if ( $is_valid && isset( $config['listingMiniWidgets'] ) ) {
+				$mini_widget = $this->get_mini_widget( $country, (array) $config['listingMiniWidgets'] );
+				$is_valid    = isset( $mini_widget['message'], $mini_widget['product'] );
+			}
+			return $is_valid;
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			return false;
+		}
+	}
+
+	/**
 	 * Get the cart widget configuration for a country as an array
 	 * 
 	 * @return null|array<string, mixed> Contains the following keys:
@@ -403,6 +426,35 @@ class Configuration extends CoreConfiguration {
 			return array(
 				'selForPrice'       => empty( $mini_widget['selForPrice'] ) ? ( $config['selForCartPrice'] ?? '' ) : $mini_widget['selForPrice'],
 				'selForLocation'    => empty( $mini_widget['selForLocation'] ) ? ( $config['selForCartLocation'] ?? '' ) : $mini_widget['selForLocation'],
+				'message'           => $mini_widget['message'] ?? $this->get_mini_widget_default_message( $country ),
+				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? $this->get_mini_widget_default_message_below_limit( $country ),
+				'product'           => $mini_widget['product'] ?? 'pp3',
+				// 'title'             => $mini_widget['title'] ?? null,
+			);
+		} catch ( Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Get the product listing widget configuration for a country as an array
+	 * 
+	 * @return null|array<string, mixed> Contains the following keys:
+	 * - selForPrice: string
+	 * - selForLocation: string
+	 * - message: string
+	 * - messageBelowLimit: string
+	 * - product: string
+	 * - title: string
+	 */
+	public function get_product_listing_widget_config( string $country ): ?array {
+		try {
+			$config      = $this->get_widget_settings();
+			$mini_widget = $this->get_mini_widget( $country, $config['listingMiniWidgets'] ?? array() );
+			
+			return array(
+				'selForPrice'       => empty( $mini_widget['selForPrice'] ) ? ( $config['selForListingPrice'] ?? '' ) : $mini_widget['selForPrice'],
+				'selForLocation'    => empty( $mini_widget['selForLocation'] ) ? ( $config['selForListingLocation'] ?? '' ) : $mini_widget['selForLocation'],
 				'message'           => $mini_widget['message'] ?? $this->get_mini_widget_default_message( $country ),
 				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? $this->get_mini_widget_default_message_below_limit( $country ),
 				'product'           => $mini_widget['product'] ?? 'pp3',

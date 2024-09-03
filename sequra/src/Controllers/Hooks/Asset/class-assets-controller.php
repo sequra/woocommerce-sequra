@@ -328,6 +328,17 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	}
 
 	/**
+	 * Check if the current post has the cart widget shortcode in its content
+	 */
+	private function has_product_listing_widget_shortcode(): bool {
+		if ( is_checkout() || is_product() || is_cart() || ! is_page() ) {
+			return false;
+		}
+		global $post;
+		return has_shortcode( $post->post_content, 'sequra_product_listing_widget' );
+	}
+
+	/**
 	 * Enqueue styles and scripts in Front-End
 	 */
 	public function enqueue_front(): void {
@@ -336,7 +347,14 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			$this->enqueue_front_checkout();
 		} 
 		
-		if ( is_product() || $this->has_widget_shortcode() || is_cart() || $this->has_cart_widget_shortcode() ) {
+		if ( is_product() 
+		|| $this->has_widget_shortcode() 
+		|| is_cart() 
+		|| $this->has_cart_widget_shortcode()
+		|| is_product_category() 
+		|| is_product_tag() 
+		|| is_shop()
+		|| $this->has_product_listing_widget_shortcode() ) {
 			$this->enqueue_front_widgets();
 		}
 	}

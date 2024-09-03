@@ -126,6 +126,33 @@ if (SequraWidgetFacade) {
                 },
 
                 /**
+                 * Search for child elements in the parentElem that are targets of the widget
+                 * @param {object} parentElem DOM element that may contains the widget's targets
+                 * @param {object} widget  Widget object
+                 * @param {string} observedAt Unique identifier to avoid fetch the same element multiple times
+                 * @returns {array} Array of objects containing the target elements and a reference to the widget
+                 */
+                getMiniWidgetTargets: function (parentElem, widget, observedAt) {
+                    const targets = [];
+                    if (widget.dest) {
+                        const children = parentElem.querySelectorAll(widget.dest);
+                        const prices = parentElem.querySelectorAll(widget.priceSel);
+                        const productObservedAttr = 'data-sequra-observed-' + widget.product;
+
+                        for (let i = 0; i < children.length; i++) {
+                            const child = children[i];
+                            const priceElem = 'undefined' !== typeof prices[i] ? prices[i] : null;
+                            if (child.getAttribute(productObservedAttr) == observedAt) {
+                                continue;// skip elements that are already observed in this mutation.
+                            }
+                            child.setAttribute(productObservedAttr, observedAt);
+                            targets.push({ elem: child, priceElem, widget: widget });
+                        }
+                    }
+                    return targets;
+                },
+
+                /**
                  * Search for all the targets of the widgets in a parent element
                  * @param {object} parentElem DOM element that may contains the widget's targets
                  * @param {array} widgets List of widgets to be drawn in the page
@@ -138,9 +165,9 @@ if (SequraWidgetFacade) {
                         const widgetTargets = this.getWidgetTargets(parentElem, widget, observedAt);
                         targets.push(...widgetTargets);
                     }
-                    // TODO: add support to miniwidgets
+                    // debugger
                     for (const miniWidget of this.miniWidgets) {
-                        const widgetTargets = this.getWidgetTargets(parentElem, miniWidget, observedAt);
+                        const widgetTargets = this.getMiniWidgetTargets(parentElem, miniWidget, observedAt);
                         targets.push(...widgetTargets);
                     }
                     return targets;
@@ -175,8 +202,9 @@ if (SequraWidgetFacade) {
 
                     // First, draw the widgets in the page for the first time.
                     const widgetsTargets = this.getAllWidgetTargets(document, this.widgets, this.getObservedAt());
-                    widgetsTargets.forEach(({ elem, widget }) => {
-                        this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem) : this.drawWidgetOnElement(widget, elem);
+                    widgetsTargets.forEach((target) => {
+                        const { elem, widget } = target;
+                        this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, target.priceElem) : this.drawWidgetOnElement(widget, elem);
                     });
 
                     if (this.mutationObserver) {
@@ -199,8 +227,9 @@ if (SequraWidgetFacade) {
 
                         this.mutationObserver.disconnect();// disable the observer to avoid multiple calls to the same function.
 
-                        targets.forEach(({ elem, widget }) => {
-                            this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem) : this.drawWidgetOnElement(widget, elem);
+                        targets.forEach((target) => {
+                            const { elem, widget } = target;
+                            this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, priceElem) : this.drawWidgetOnElement(widget, elem);
                         });
 
                         this.mutationObserver.observe(document, { childList: true, subtree: true }); // enable the observer again.
@@ -213,12 +242,14 @@ if (SequraWidgetFacade) {
                     return this.miniWidgets.indexOf(widget) !== -1;
                 },
 
-                drawMiniWidgetOnElement: function (widget, element) {
-                    const priceSrc = this.getPriceSelector(widget);
-                    const priceElem = document.querySelector(priceSrc);
+                drawMiniWidgetOnElement: function (widget, element, priceElem) {
                     if (!priceElem) {
-                        console.error(priceSrc + ' is not a valid css selector to read the price from, for seQura mini-widget.');
-                        return;
+                        const priceSrc = this.getPriceSelector(widget);
+                        priceElem = document.querySelector(priceSrc);
+                        if (!priceElem) {
+                            console.error(priceSrc + ' is not a valid css selector to read the price from, for seQura mini-widget.');
+                            return;
+                        }
                     }
                     const cents = this.nodeToCents(priceElem);
 
@@ -244,8 +275,6 @@ if (SequraWidgetFacade) {
                     widgetNode.setAttribute('data-product', widget.product);
 
                     const creditAgreements = Sequra.computeCreditAgreements({ amount: cents, product: widget.product })[widget.product];
-
-                    console.log('creditAgreements', creditAgreements);
                     let creditAgreement = null
                     do {
                         creditAgreement = creditAgreements.pop();
