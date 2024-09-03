@@ -103,8 +103,8 @@ class Payment_REST_Controller extends REST_Controller {
 					$this->logger->log_debug( 'Merchant ID not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'countryConfiguration', $country ) ) );
 					continue;
 				}
-
-				$payment_methods = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, strval( $country['merchantId'] ) );
+				
+				$payment_methods = $this->payment_method_service->get_all_payment_methods( $store_id, strval( $country['merchantId'] ) );
 
 				foreach ( $payment_methods as $payment_method ) {
 					if ( ! isset( $country['countryCode'], $payment_method['product'], $payment_method['title'] ) ) {
@@ -113,9 +113,12 @@ class Payment_REST_Controller extends REST_Controller {
 					}
 
 					$response[] = array(
-						'countryCode' => $country['countryCode'],
-						'product'     => $payment_method['product'],
-						'title'       => $payment_method['title'],
+						'countryCode'                 => $country['countryCode'],
+						'product'                     => $payment_method['product'],
+						'title'                       => $payment_method['title'],
+						'campaign'                    => $payment_method['campaign'] ?? null,
+						'supportsWidgets'             => $payment_method['supportsWidgets'],
+						'supportsInstallmentPayments' => $payment_method['supportsInstallmentPayments'],
 					);
 				}
 			}

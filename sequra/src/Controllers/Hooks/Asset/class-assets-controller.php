@@ -23,7 +23,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 
 	private const HANDLE_SETTINGS_PAGE     = 'sequra-settings';
 	private const HANDLE_CHECKOUT          = 'sequra-checkout';
-	private const HANDLE_PRODUCT           = 'sequra-product';
+	private const HANDLE_WIDGET            = 'sequra-widget';
 	private const HANDLE_CORE              = 'sequra-core';
 	private const INTEGRATION_CORE_VERSION = '1.0.0';
 	private const STRATEGY_DEFER           = 'defer';
@@ -206,11 +206,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			),
 			'pages'             => array(
 				'onboarding' => array( 'connect', 'countries', 'widgets' ),
-				// 'onboarding'   => array( 'connect', 'countries' ),
-				// 'settings'     => array( 'general', 'connection', 'order_status' ),
 				'settings'   => array( 'general', 'connection', 'order_status', 'widget' ),
 				'payment'    => $pages_payment,
-				// 'transactions' => array( 'logs' ),
 				'advanced'   => array( 'debug' ),
 			),
 			'integration'       => array(
@@ -231,17 +228,21 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'ip'             => $this->regex->ip( false ),
 				'dateOrDuration' => $this->regex->date_or_duration( false ),
 			),
+			'miniWidgetLabels'  => array(
+				'messages'           => $this->configuration->get_mini_widget_default_messages(),
+				'messagesBelowLimit' => $this->configuration->get_mini_widget_default_messages_below_limit(),
+			),
 		);
 
 		return $sequra_fe;
 	}
 
 	/**
-	 * Get the SequraProduct object
+	 * Get the SequraWidgetFacade object
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function get_sequra_product_l10n(): array {
+	private function get_sequra_widget_facade_l10n(): array {
 		$merchant = $this->configuration->get_merchant_ref( $this->i18n->get_current_country() );
 		$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $this->configuration->get_store_id(), $merchant );
 		return array(
@@ -253,6 +254,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'assetKey'          => $this->configuration->get_assets_key(),
 			'products'          => array_column( $methods, 'product' ),
 			'widgets'           => array(),
+			'miniWidgets'       => array(),
 		);
 	}
 
@@ -287,20 +289,20 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	}
 
 	/**
-	 * Enqueue styles and scripts in Front-End for the product page
+	 * Enqueue styles and scripts in Front-End for the widgets
 	 */
-	private function enqueue_front_product(): void {
+	private function enqueue_front_widgets(): void {
 		
-		wp_enqueue_style( self::HANDLE_PRODUCT, "{$this->assets_dir_url}/css/product.css", array(), $this->assets_version );
+		wp_enqueue_style( self::HANDLE_WIDGET, "{$this->assets_dir_url}/css/widget.css", array(), $this->assets_version );
 		wp_register_script( 
-			self::HANDLE_PRODUCT, 
-			"{$this->assets_dir_url}/js/dist/page/product.min.js",
+			self::HANDLE_WIDGET, 
+			"{$this->assets_dir_url}/js/dist/page/widget-facade.min.js",
 			array(),
 			$this->assets_version,
 			$this->get_script_args( self::STRATEGY_DEFER, false )
 		);
-		wp_localize_script( self::HANDLE_PRODUCT, 'SequraProduct', $this->get_sequra_product_l10n() );
-		wp_enqueue_script( self::HANDLE_PRODUCT );
+		wp_localize_script( self::HANDLE_WIDGET, 'SequraWidgetFacade', $this->get_sequra_widget_facade_l10n() );
+		wp_enqueue_script( self::HANDLE_WIDGET );
 	}
 
 	/**
@@ -315,6 +317,17 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	}
 
 	/**
+	 * Check if the current post has the cart widget shortcode in its content
+	 */
+	private function has_cart_widget_shortcode(): bool {
+		if ( is_checkout() || is_product() || ! is_page() ) {
+			return false;
+		}
+		global $post;
+		return has_shortcode( $post->post_content, 'sequra_cart_widget' );
+	}
+
+	/**
 	 * Enqueue styles and scripts in Front-End
 	 */
 	public function enqueue_front(): void {
@@ -323,8 +336,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			$this->enqueue_front_checkout();
 		} 
 		
-		if ( is_product() || $this->has_widget_shortcode() ) {
-			$this->enqueue_front_product();
+		if ( is_product() || $this->has_widget_shortcode() || is_cart() || $this->has_cart_widget_shortcode() ) {
+			$this->enqueue_front_widgets();
 		}
 	}
 

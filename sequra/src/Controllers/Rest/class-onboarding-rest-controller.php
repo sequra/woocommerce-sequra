@@ -8,12 +8,12 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
-use PhpParser\Node\Expr\Cast\Bool_;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget;
 use SeQura\WC\Services\Interface_Logger_Service;
 use WP_Error;
 use WP_REST_Request;
@@ -41,13 +41,16 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_SEL_FOR_ALT_PRICE_TRIGGER                  = 'selForAltPriceTrigger';
 	private const PARAM_SEL_FOR_DEFAULT_LOCATION                   = 'selForDefaultLocation';
 	private const PARAM_CUSTOM_LOCATIONS                           = 'customLocations';
+	private const PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET             = 'sel_for_target';
+	private const PARAM_CUSTOM_LOCATION_WIDGET_STYLES              = 'widget_styles';
+	private const PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET             = 'display_widget';
+	private const PARAM_CUSTOM_LOCATION_COUNTRY                    = 'country';
+	private const PARAM_CUSTOM_LOCATION_PRODUCT                    = 'product';
+	private const PARAM_CUSTOM_LOCATION_TITLE                      = 'title';
 
-	private const PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET = 'sel_for_target';
-	private const PARAM_CUSTOM_LOCATION_WIDGET_STYLES  = 'widget_styles';
-	private const PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET = 'display_widget';
-	private const PARAM_CUSTOM_LOCATION_COUNTRY        = 'country';
-	private const PARAM_CUSTOM_LOCATION_PRODUCT        = 'product';
-	private const PARAM_CUSTOM_LOCATION_TITLE          = 'title';
+	// Cart widget config.
+	private const PARAM_CART_SEL_FOR_PRICE            = 'selForCartPrice';
+	private const PARAM_CART_SEL_FOR_DEFAULT_LOCATION = 'selForCartLocation';
 
 	/**
 	 * Constructor.
@@ -113,6 +116,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 				self::PARAM_SEL_FOR_DEFAULT_LOCATION       => $this->get_arg_string( true, null, array( $this, 'validate_required_widget_selector' ) ),
 				self::PARAM_CUSTOM_LOCATIONS               => $this->get_arg_widget_location_list(),
 
+				self::PARAM_CART_SEL_FOR_PRICE             => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
+				self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION  => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
 			)
 		);
 
@@ -355,7 +360,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function save_widgets( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			// TODO: Add support to widget labels. See shopify example.
 			//phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
 			// $labels               = $request->get_param( 'widgetLabels' );
 			// $messages             = $labels['message'] ? array( $storeConfig->getLocale() => $labels['message'] ) : array();
@@ -364,8 +368,29 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$messages             = array();
 			$messages_below_limit = array();
 
+			$store_id = strval( $request->get_param( self::PARAM_STORE_ID ) );
+
+			/**
+			 * Filter the cart mini widgets.
+			 * 
+			 * @since 3.0.0
+			 * @var Mini_Widget[] $cart_mini_widgets The cart mini widgets.
+			 */
+			$cart_mini_widgets = apply_filters( 'sequra_widget_settings_cart_mini_widgets', array(), $store_id );
+			if ( ! is_array( $cart_mini_widgets ) ) {
+				$this->logger->log_debug( 'Invalid cart mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+				$cart_mini_widgets = array();
+			}
+			foreach ( $cart_mini_widgets as $mini_widget ) {
+				if ( ! $mini_widget instanceof Mini_Widget ) {
+					$this->logger->log_debug( 'Invalid cart mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+					$cart_mini_widgets = array();
+					break;
+				}
+			}
+
 			$response = AdminAPI::get()
-			->widgetConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->widgetConfiguration( $store_id )
 			->setWidgetSettings(
 				new Widget_Settings_Request(
 					(bool) $request->get_param( self::PARAM_USE_WIDGETS ),
@@ -381,7 +406,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
-					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
+					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ),
+					strval( $request->get_param( self::PARAM_CART_SEL_FOR_PRICE ) ),
+					strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
+					$cart_mini_widgets
+					// (array) $request->get_param( self::PARAM_CART_MINI_WIDGETS )
 				)
 			)
 			->toArray();
@@ -442,15 +471,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Validate if required widget selector is valid.
-	 * 
-	 * @param mixed $param The parameter.
-	 * @param WP_REST_Request $request The request.
-	 * @param string $key The key.
+	 * Validate if required selector is valid.
 	 */
-	public function validate_required_widget_selector( $param, $request, $key ): bool {
+	private function validate_required_selector( string $dependant_param_key, mixed $param, WP_REST_Request $request, string $key ): bool {
 		
-		$use_widgets = (bool) $request->get_param( self::PARAM_USE_WIDGETS );
+		$use_widgets = (bool) $request->get_param( $dependant_param_key );
 		if ( ! $use_widgets ) {
 			return null === $param || is_string( $param );
 		}
@@ -458,6 +483,20 @@ class Onboarding_REST_Controller extends REST_Controller {
 		return null !== $param 
 		&& is_string( $param )
 		&& '' !== trim( $param );
+	}
+
+	/**
+	 * Validate if required widget selector is valid.
+	 */
+	public function validate_required_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+		return $this->validate_required_selector( self::PARAM_USE_WIDGETS, $param, $request, $key );
+	}
+
+	/**
+	 * Validate if required cart widget selector is valid.
+	 */
+	public function validate_required_cart_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE, $param, $request, $key );
 	}
 
 	/**
@@ -521,7 +560,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ] )
 				|| ! is_bool( $location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ] )
-				// || empty( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] )
 				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
 				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
 				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_TITLE ] )

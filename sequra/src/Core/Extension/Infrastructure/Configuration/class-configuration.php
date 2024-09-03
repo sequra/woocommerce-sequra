@@ -69,7 +69,7 @@ class Configuration extends CoreConfiguration {
 	 * @return string Formatted URL of async process starter endpoint.
 	 */
 	public function getAsyncProcessUrl( $guid ) {
-		return ''; // TODO: Not used in this implementation. 
+		return ''; // Not used in this implementation. 
 	}
 
 	/**
@@ -348,6 +348,127 @@ class Configuration extends CoreConfiguration {
 	}
 
 	/**
+	 * Look for the mini widget configuration for a country
+	 * 
+	 * @param array<string, string> $mini_widgets Mini widgets configuration
+	 */
+	protected function get_mini_widget( string $country, array $mini_widgets ): ?array {
+		foreach ( $mini_widgets as $mini_widget ) {
+			if ( isset( $mini_widget['countryCode'] ) && $mini_widget['countryCode'] === $country ) {
+				return $mini_widget;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Check if the cart widget is enabled.
+	 */
+	public function is_cart_widget_enabled( string $country ): bool {
+		try {
+			$config   = $this->get_widget_settings();
+			$is_valid = ! empty( $config['useWidgets'] ) 
+			&& ! empty( $config['showInstallmentAmountInCartPage'] ) 
+			&& isset(
+				$config['selForCartPrice'], 
+				$config['selForCartLocation']
+			);
+
+			if ( $is_valid && isset( $config['cartMiniWidgets'] ) ) {
+				$mini_widget = $this->get_mini_widget( $country, (array) $config['cartMiniWidgets'] );
+				$is_valid    = isset( $mini_widget['message'], $mini_widget['product'] );
+			}
+			return $is_valid;
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			return false;
+		}
+	}
+
+	/**
+	 * Get the cart widget configuration for a country as an array
+	 * 
+	 * @return null|array<string, mixed> Contains the following keys:
+	 * - selForPrice: string
+	 * - selForLocation: string
+	 * - message: string
+	 * - messageBelowLimit: string
+	 * - product: string
+	 * - title: string
+	 */
+	public function get_cart_widget_config( string $country ): ?array {
+		try {
+			$config      = $this->get_widget_settings();
+			$mini_widget = $this->get_mini_widget( $country, $config['cartMiniWidgets'] ?? array() );
+			
+			return array(
+				'selForPrice'       => empty( $mini_widget['selForPrice'] ) ? ( $config['selForCartPrice'] ?? '' ) : $mini_widget['selForPrice'],
+				'selForLocation'    => empty( $mini_widget['selForLocation'] ) ? ( $config['selForCartLocation'] ?? '' ) : $mini_widget['selForLocation'],
+				'message'           => $mini_widget['message'] ?? $this->get_mini_widget_default_message( $country ),
+				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? $this->get_mini_widget_default_message_below_limit( $country ),
+				'product'           => $mini_widget['product'] ?? 'pp3',
+				// 'title'             => $mini_widget['title'] ?? null,
+			);
+		} catch ( Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_message( string $country ): string {
+		return $this->get_mini_widget_default_messages()[ $country ] ?? '';
+	}
+
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_message_below_limit( string $country ): string {
+		return $this->get_mini_widget_default_messages_below_limit()[ $country ] ?? '';
+	}
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_messages(): array {
+		/**
+		 * Filter the default message below limit for the mini widget.
+		 *
+		 * @since 3.0.0
+		 * @return string The default message below limit for the mini widget.
+		 */
+		return apply_filters(
+			'sequra_mini_widget_default_message',
+			array(
+				'ES' => 'Desde %s/mes con seQura',
+				'FR' => 'À partir de %s/mois avec seQura',
+				'IT' => 'Da %s/mese con seQura',
+				'PT' => 'De %s/mês com seQura',
+			) 
+		);
+	}
+
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_messages_below_limit(): array {
+		/**
+		 * Filter the default message below limit for the mini widget.
+		 *
+		 * @since 3.0.0
+		 * @return string The default message below limit for the mini widget.
+		 */
+		return apply_filters(
+			'sequra_mini_widget_default_message_below_limit',
+			array(
+				'ES' => 'Fracciona con seQura a partir de %s',
+				'FR' => 'Fraction avec seQura à partir de %s',
+				'IT' => 'Frazione con seQura da %s',
+				'PT' => 'Fração com seQura a partir de %s',
+			) 
+		);
+	}
+
+	/**
 	 * Check if the widget is enabled in custom locations.
 	 */
 	private function is_widget_enabled_in_custom_locations( ?string $payment_method = null, ?string $country = null ): bool {
@@ -370,7 +491,7 @@ class Configuration extends CoreConfiguration {
 			$config          = $this->get_widget_settings();
 			$sel             = $config['selForDefaultLocation'];
 			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
-			if ( isset( $custom_location['sel_for_target'] ) ) {
+			if ( ! empty( $custom_location['sel_for_target'] ) ) {
 				$sel = $custom_location['sel_for_target'];
 			}
 			return $sel;
@@ -444,7 +565,7 @@ class Configuration extends CoreConfiguration {
 			$style  = $config['widgetConfiguration'] ?? '';
 
 			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
-			if ( isset( $custom_location['widget_styles'] ) ) {
+			if ( ! empty( $custom_location['widget_styles'] ) ) {
 				$style = $custom_location['widget_styles'] ?? $style;
 			}
 			return $style;

@@ -149,10 +149,10 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'product'      => '',
 				'campaign'     => '',
 				'product_id'   => '',
-				'theme'        => $this->configuration->get_widget_theme( $atts['product'] ?? null, $current_country ),
+				'theme'        => $this->configuration->get_widget_theme( $atts['product'], $current_country ),
 				'reverse'      => 0,
 				'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
-				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'] ?? null, $current_country ),
+				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'], $current_country ),
 				'price'        => $this->configuration->get_widget_price_css_sel(),
 				'alt_price'    => $this->configuration->get_widget_alt_price_css_sel(),
 				'is_alt_price' => $this->configuration->get_widget_is_alt_price_css_sel(),
@@ -180,28 +180,79 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	}
 
 	/**
-	 * Add [sequra_widget] to product page automatically
+	 * Handle the cart widget shortcode callback
 	 */
-	public function add_widget_shortcode_to_product_page(): void {
-		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-		if ( did_action( 'before_woocommerce_sequra_add_widget_to_product_page' ) || ! is_product() ) {
-			return;
+	public function do_cart_widget_shortcode( array $atts ): string {
+		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+
+		$current_country = $this->i18n->get_current_country();
+
+		if ( ! $this->configuration->is_cart_widget_enabled( $current_country ) ) {
+			$this->logger->log_info( 'Cart Widget is disabled', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
+			return '';
+		}
+		if ( ! $this->product_service->can_display_mini_widgets() ) {
+			$this->logger->log_info( 'SeQura payment gateway is disabled', __FUNCTION__, __CLASS__ );
+			return '';
 		}
 
-		/**
-		 * Fires before the SeQura widget is added to the product page to prevent multiple executions.
-		 *
-		 * @since 2.1.0.
-		 */
-		do_action( 'before_woocommerce_sequra_add_widget_to_product_page' );
+		try {
+			$store_id = $this->configuration->get_store_id();
+			$merchant = $this->payment_service->get_merchant_id();
+			$methods  = $this->payment_method_service->get_all_mini_widget_compatible_payment_methods( $store_id, $merchant );
 
+			$config = $this->configuration->get_cart_widget_config( $current_country );
+			if ( ! $config ) {
+				$this->logger->log_info( 'Cart Widget configuration not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
+				return '';
+			}
+
+
+
+			foreach ( $methods as $method ) {
+				if ( $method['product'] !== $config['product'] ) {
+					continue;
+				}
+
+				$atts = shortcode_atts(
+					array(
+						'product'             => $method['product'] ?? '',
+						'campaign'            => $method['campaign'] ?? '',
+						'dest'                => $config['selForLocation'],
+						'price'               => $config['selForPrice'],
+						'message'             => $config['message'],
+						'message_below_limit' => $config['messageBelowLimit'],
+						'min_amount'          => $method['minAmount'] ?? 0,
+						'max_amount'          => $method['maxAmount'] ?? null,
+					),
+					$atts,
+					'sequra_cart_widget'
+				);
+	
+				ob_start();
+				wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
+				return ob_get_clean();
+			}
+		} catch ( \Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+		return '';
+	}
+
+	/**
+	 * Add [sequra_widget] to product page automatically
+	 */
+	private function add_widget_shortcode_to_product_page(): void {
+		if ( ! is_product() ) {
+			return;
+		}
 		/**
 		 * The current product.
 		 *
 		 * @var WC_Product $product
 		 */
 		global $product;
-		
+	
 		$methods = array();
 		try {
 			$store_id = $this->configuration->get_store_id();
@@ -227,11 +278,39 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			foreach ( $atts as $key => $value ) {
 				$atts_str .= " $key=\"$value\"";
 			}
-			
-			// $att_dest       = trim( $sequra->settings[ 'dest_css_sel_' . $sq_product ] );
-		
 			echo do_shortcode( "[sequra_widget $atts_str]" );
 		}
+	}
+
+	/**
+	 * Add [sequra_cart_widget] to product page automatically
+	 */
+	private function add_widget_shortcode_to_cart_page(): void {
+		if ( ! is_cart() ) {
+			return;
+		}
+		echo do_shortcode( '[sequra_cart_widget]' );
+	}
+
+	/**
+	 * Add [sequra_widget] to product page automatically
+	 * Add [sequra_cart_widget] to cart page automatically
+	 */
+	public function add_widget_shortcode_to_page(): void {
+		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		if ( did_action( 'before_woocommerce_sequra_add_widget_to_page' ) ) {
+			return;
+		}
+
+		/**
+		 * Fires before the SeQura widget is added to the page to prevent multiple executions.
+		 *
+		 * @since 3.0.0
+		 */
+		do_action( 'before_woocommerce_sequra_add_widget_to_page' );
+
+		$this->add_widget_shortcode_to_product_page();
+		$this->add_widget_shortcode_to_cart_page();
 	}
 
 	/**

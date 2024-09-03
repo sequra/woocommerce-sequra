@@ -155,11 +155,9 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
-	 * Check if we can display widgets for a product
-	 *
-	 * @param WC_Product|int $product the product.
+	 * Check if we can display mini widgets
 	 */
-	public function can_display_widgets( $product ): bool {
+	public function can_display_mini_widgets(): bool {
 		if ( ! function_exists( 'WC' ) ) {
 			return false;
 		}
@@ -178,6 +176,18 @@ class Product_Service implements Interface_Product_Service {
 		}
 
 		if ( ! $gateway ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Check if we can display widgets for a product
+	 *
+	 * @param WC_Product|int $product the product.
+	 */
+	public function can_display_widgets( $product ): bool {
+		if ( ! $this->can_display_mini_widgets() ) {
 			return false;
 		}
 

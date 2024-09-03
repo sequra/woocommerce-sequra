@@ -85,6 +85,11 @@ interface Interface_Product_Service {
 	public function set_registration_amount( int $product_id, ?float $value ): void;
 
 	/**
+	 * Check if we can display mini widgets
+	 */
+	public function can_display_mini_widgets(): bool;
+
+	/**
 	 * Check if we can display widgets for a product
 	 *
 	 * @param WC_Product|int $product the product.

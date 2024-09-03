@@ -19,6 +19,17 @@ if (!window.SequraFE) {
      */
 
     /**
+     * @typedef MiniWidget
+     * @property {string|null} selForPrice
+     * @property {string|null} selForLocation
+     * @property {string} message
+     * @property {string|null} messageBelowLimit
+     * @property {string|null} product
+     * @property {string|null} country
+     * @property {string|null} title
+     */
+
+    /**
      * @typedef CountryPaymentMethod
      * @property {string|null} countryCode
      * @property {string|null} product
@@ -39,6 +50,9 @@ if (!window.SequraFE) {
      * @property {string|null} selForAltPriceTrigger
      * @property {string|null} selForDefaultLocation
      * @property {WidgetLocation[]} customLocations
+     * 
+     * @property {string|null} selForCartPrice
+     * @property {string|null} selForCartLocation
      */
 
     /**
@@ -81,29 +95,14 @@ if (!window.SequraFE) {
         /** @type boolean */
         let isAssetKeyValid = false;
 
-        const miniWidgetLabels = {
-            messages: {
-                "ES": "Desde %s/mes",
-                "FR": "À partir de %s/mois",
-                "IT": "Da %s/mese",
-                "PT": "De %s/mês"
-            },
-            messagesBelowLimit: {
-                "ES": "Fracciona a partir de %s",
-                "FR": "Fraction de %s",
-                "IT": "Frazione da %s",
-                "PT": "Fração de %s"
-            }
-        }
-
         /** @type WidgetSettings */
         const defaultFormData = {
             useWidgets: false,
             assetsKey: '',
             displayWidgetOnProductPage: false,
             widgetLabels: {
-                message: 'Desde %s/mes',
-                messageBelowLimit: 'Fracciona a partir de %s'
+                message: SequraFE.miniWidgetLabels.messages['ES'],
+                messageBelowLimit: SequraFE.miniWidgetLabels.messagesBelowLimit['ES']
             },
             widgetStyles: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
             showInstallmentAmountInProductListing: false,
@@ -113,6 +112,8 @@ if (!window.SequraFE) {
             selForAltPriceTrigger: '.variations',
             selForDefaultLocation: '.summary>.price',
             customLocations: [],
+            selForCartPrice: '.order-total .amount',
+            selForCartLocation: '.order-total'
         };
 
         /**
@@ -162,7 +163,9 @@ if (!window.SequraFE) {
             renderAssetsKeyField();
             renderAdditionalSettings();
             renderControls();
-            maybeShowProductRelatedFields();
+            // maybeShowProductRelatedFields();
+            maybeShowRelatedFields('.sq-product-related-field', changedSettings.displayWidgetOnProductPage);
+            maybeShowRelatedFields('.sq-cart-related-field', changedSettings.showInstallmentAmountInCartPage);
         }
 
         /**
@@ -261,6 +264,25 @@ if (!window.SequraFE) {
                     description: 'widgets.showInCartPage.description',
                     onChange: (value) => handleChange('showInstallmentAmountInCartPage', value)
                 }),
+
+                generator.createTextField({
+                    value: changedSettings.selForCartPrice,
+                    name: 'selForCartPrice',
+                    className: 'sq-text-input sq-cart-related-field',
+                    label: 'widgets.selForCartPrice.label',
+                    description: 'widgets.selForCartPrice.description',
+                    onChange: (value) => handleChange('selForCartPrice', value)
+                }),
+                generator.createTextField({
+                    value: changedSettings.selForCartLocation,
+                    name: 'selForCartLocation',
+                    className: 'sq-text-input sq-cart-related-field',
+                    label: 'widgets.cartDefaultLocationSel.label',
+                    description: 'widgets.cartDefaultLocationSel.description',
+                    onChange: (value) => handleChange('selForCartLocation', value)
+                }),
+
+                // End of cart widget related fields
                 generator.createToggleField({
                     value: changedSettings.showInstallmentAmountInProductListing,
                     label: 'widgets.showInProductListing.label',
@@ -283,20 +305,17 @@ if (!window.SequraFE) {
             renderLocations();
         }
 
-
-        const maybeShowProductRelatedFields = () => {
-            const selector = '.sq-field-wrapper:has(.sq-product-related-field),.sq-field-wrapper.sq-product-related-field'
+        const maybeShowRelatedFields = (relatedFieldClass, show) => {
+            const selector = `.sq-field-wrapper:has(${relatedFieldClass}),.sq-field-wrapper${relatedFieldClass}`;
             const hiddenClass = 'sqs--hidden';
             document.querySelectorAll(selector).forEach((el) => {
-                if (changedSettings.displayWidgetOnProductPage) {
+                if (show) {
                     el.classList.remove(hiddenClass)
                 } else {
                     el.classList.add(hiddenClass)
                 }
             });
         }
-
-
 
         const renderLocations = () => {
             new Repeater({
@@ -339,9 +358,13 @@ if (!window.SequraFE) {
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
                         <select class="sq-table__row-field">${allPaymentMethods ? allPaymentMethods.map((pm, idx) => {
+                        if (!pm.supportsWidgets) {
+                            return '';
+                        }
                         const selected = data && data.product === pm.product && data.country === pm.countryCode && data.title === pm.title ? ' selected' : '';
                         return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
-                    }).join('') : ''}
+                    }).join('') : ''
+                        }
                         </select>
                     </div>
                    `
@@ -456,7 +479,7 @@ if (!window.SequraFE) {
                     if ('' !== location.widget_styles && !isJSONValid(location.widget_styles)) {
                         throw new Error('Invalid selector');
                     }
-                    if (!allPaymentMethods.some(pm => pm.product === location.product && pm.countryCode === location.country && pm.title === location.title)) {
+                    if (!allPaymentMethods.some(pm => pm.supportsWidgets && pm.product === location.product && pm.countryCode === location.country && pm.title === location.title)) {
                         throw new Error('Invalid payment method');
                     }
                     // Check if exists other location with the same product and country
@@ -509,11 +532,13 @@ if (!window.SequraFE) {
             }
 
             if (name === 'displayWidgetOnProductPage') {
-                maybeShowProductRelatedFields();
+                maybeShowRelatedFields('.sq-product-related-field', value);
+            }
+            if (name === 'showInstallmentAmountInCartPage') {
+                maybeShowRelatedFields('.sq-cart-related-field', value);
             }
 
             if (name === 'selForPrice' || name === 'selForDefaultLocation') {
-                debugger
                 const isValid = validator.validateCssSelector(
                     document.querySelector(`[name="${name}"]`),
                     true,
@@ -605,6 +630,16 @@ if (!window.SequraFE) {
                     );
                 }
 
+                if (changedSettings.showInstallmentAmountInCartPage) {
+                    for (const name of ['selForCartPrice', 'selForCartLocation']) {
+                        valid = validator.validateCssSelector(
+                            document.querySelector(`[name="${name}"]`),
+                            true,
+                            'validation.invalidField'
+                        ) && valid;
+                    }
+                }
+
                 if (changedSettings.showInstallmentAmountInProductListing) {
                     valid = validator.validateRequiredField(
                         document.querySelector('[name="labels-message"]'),
@@ -625,7 +660,6 @@ if (!window.SequraFE) {
             utilities.showLoader();
             api.post(configuration.saveWidgetSettingsUrl, changedSettings, SequraFE.customHeader)
                 .then(() => {
-                    //debugger
                     if (configuration.appState === SequraFE.appStates.ONBOARDING) {
                         const index = SequraFE.pages.onboarding.indexOf(SequraFE.appPages.ONBOARDING.WIDGETS)
                         SequraFE.pages.onboarding.length > index + 1 ?

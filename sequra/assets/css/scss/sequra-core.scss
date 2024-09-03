@@ -2284,13 +2284,15 @@ body {
       position: relative;
       &::after {
         font-family: "sq-icons";
-        content: "\e90d";
+        // content: "\e90d";
+        content: "\e907";
         line-height: 1;
         position: absolute;
         // right: 1rem;
         right: 0;
         top: 50%;
-        transform: rotate(0);
+        // transform: rotate(0);
+        transform: translateY(-50%) rotate(90deg);
         transition: transform 0.2s;
         transform-origin: center;
         cursor: pointer;
@@ -2301,7 +2303,7 @@ body {
     }
     &[open] {
       summary::after {
-        transform: rotate(180deg);
+        transform: translateY(-50%) rotate(-90deg);
       }
     }
 
@@ -2387,6 +2389,20 @@ body {
         border-top-right-radius: 0;
       }
       // margin-bottom: 1rem;
+    }
+  }
+}
+
+.sq-mini-widgets-config-wrapper {
+  summary {
+    display: flex;
+    align-items: center;
+    svg {
+      width: 20px;
+    }
+    .sqp-field-title {
+      margin-bottom: 0;
+      margin-left: .5rem;
     }
   }
 }

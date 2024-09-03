@@ -34,7 +34,7 @@ if ( ! isset(
 ?>
 
 <script type='text/javascript'>
-	SequraProduct.widgets && SequraProduct.widgets.push({
+	SequraWidgetFacade.widgets && SequraWidgetFacade.widgets.push({
 		product: "<?php echo esc_js( $args['product'] ); ?>",
 		dest: "<?php echo esc_js( $args['dest'] ); ?>",
 		theme: "<?php echo esc_js( $args['theme'] ); ?>",

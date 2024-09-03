@@ -8,6 +8,7 @@
 namespace SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests;
 
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget_Config;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location_Config;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Settings;
@@ -53,6 +54,13 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 	protected $custom_locations;
 
 	/**
+	 * Cart mini widget configuration.
+	 *
+	 * @var ?Mini_Widget_Config
+	 */
+	protected $cart_mini_widget_config;
+
+	/**
 	 * Constructor.
 	 * 
 	 * @param bool $enabled Is enabled.
@@ -69,6 +77,7 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 	 * @param string|null $sel_for_alt_price_trigger Selector for alternative price trigger.
 	 * @param string|null $sel_for_default_location Selector for default location.
 	 * @param array<array<string, string>> $custom_locations Custom locations.
+	 * @param array<array<string, string>> $cart_mini_widgets Cart mini widget configuration.
 	 */
 	public function __construct(
 		bool $enabled,
@@ -84,7 +93,10 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 		?string $sel_for_alt_price = null,
 		?string $sel_for_alt_price_trigger = null,
 		?string $sel_for_default_location = null,
-		array $custom_locations = array()
+		array $custom_locations = array(),
+		?string $sel_for_cart_price = null,
+		?string $sel_for_cart_default_location = null,
+		array $cart_mini_widgets = array()
 	) {
 		parent::__construct(
 			$enabled,
@@ -110,6 +122,14 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 				$this->custom_locations[] = $instance;
 			}
 		}
+
+		$this->cart_mini_widget_config = Mini_Widget_Config::from_array(
+			array(
+				Mini_Widget_Config::SEL_FOR_PRICE => $sel_for_cart_price,
+				Mini_Widget_Config::SEL_FOR_DEFAULT_LOCATION => $sel_for_cart_default_location,
+				Mini_Widget_Config::MINI_WIDGETS  => $cart_mini_widgets,
+			)
+		);
 	}
 
 	/**
@@ -137,7 +157,8 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 		
 		return Widget_Settings::from_parent(
 			parent::transformToDomainModel(),
-			$location_config
+			$location_config,
+			$this->cart_mini_widget_config
 		);
 	}
 }
