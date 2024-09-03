@@ -376,12 +376,12 @@ class Configuration extends CoreConfiguration {
 
 			if ( $is_valid && isset( $config['cartMiniWidgets'] ) ) {
 				$mini_widget = $this->get_mini_widget( $country, (array) $config['cartMiniWidgets'] );
-				return isset( $mini_widget['message'], $mini_widget['product'] );
+				$is_valid    = $is_valid && isset( $mini_widget['message'], $mini_widget['product'] );
 			}
-			return true;
+			return $is_valid;
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			return false;
 		}
-		return false;
 	}
 
 	/**
