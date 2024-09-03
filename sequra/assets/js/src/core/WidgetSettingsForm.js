@@ -53,6 +53,9 @@ if (!window.SequraFE) {
      * 
      * @property {string|null} selForCartPrice
      * @property {string|null} selForCartLocation
+     * 
+     * @property {string|null} selForListingPrice
+     * @property {string|null} selForListingLocation
      */
 
     /**
@@ -113,7 +116,10 @@ if (!window.SequraFE) {
             selForDefaultLocation: '.summary>.price',
             customLocations: [],
             selForCartPrice: '.order-total .amount',
-            selForCartLocation: '.order-total'
+            selForCartLocation: '.order-total',
+
+            selForListingPrice: '.product .price>.amount,.product .price ins .amount',
+            selForListingLocation: '.product .price',
         };
 
         /**
@@ -166,6 +172,7 @@ if (!window.SequraFE) {
             // maybeShowProductRelatedFields();
             maybeShowRelatedFields('.sq-product-related-field', changedSettings.displayWidgetOnProductPage);
             maybeShowRelatedFields('.sq-cart-related-field', changedSettings.showInstallmentAmountInCartPage);
+            maybeShowRelatedFields('.sq-listing-related-field', changedSettings.showInstallmentAmountInProductListing);
         }
 
         /**
@@ -288,6 +295,23 @@ if (!window.SequraFE) {
                     label: 'widgets.showInProductListing.label',
                     description: 'widgets.showInProductListing.description',
                     onChange: (value) => handleChange('showInstallmentAmountInProductListing', value)
+                }),
+
+                generator.createTextField({
+                    value: changedSettings.selForListingPrice,
+                    name: 'selForListingPrice',
+                    className: 'sq-text-input sq-listing-related-field',
+                    label: 'widgets.selForListingPrice.label',
+                    description: 'widgets.selForListingPrice.description',
+                    onChange: (value) => handleChange('selForListingPrice', value)
+                }),
+                generator.createTextField({
+                    value: changedSettings.selForListingLocation,
+                    name: 'selForListingLocation',
+                    className: 'sq-text-input sq-listing-related-field',
+                    label: 'widgets.selForListingLocation.label',
+                    description: 'widgets.selForListingLocation.description',
+                    onChange: (value) => handleChange('selForListingLocation', value)
                 })
             )
 
@@ -301,7 +325,7 @@ if (!window.SequraFE) {
                 generator.createElement('span', '', 'widgets.configurator.description.end'),
             )
 
-            renderLabelsConfiguration();
+            // renderLabelsConfiguration();
             renderLocations();
         }
 
@@ -537,6 +561,9 @@ if (!window.SequraFE) {
             if (name === 'showInstallmentAmountInCartPage') {
                 maybeShowRelatedFields('.sq-cart-related-field', value);
             }
+            if (name === 'showInstallmentAmountInProductListing') {
+                maybeShowRelatedFields('.sq-listing-related-field', value);
+            }
 
             if (name === 'selForPrice' || name === 'selForDefaultLocation') {
                 const isValid = validator.validateCssSelector(
@@ -641,15 +668,23 @@ if (!window.SequraFE) {
                 }
 
                 if (changedSettings.showInstallmentAmountInProductListing) {
-                    valid = validator.validateRequiredField(
-                        document.querySelector('[name="labels-message"]'),
-                        'validation.requiredField'
-                    ) && valid;
+                    // valid = validator.validateRequiredField(
+                    //     document.querySelector('[name="labels-message"]'),
+                    //     'validation.requiredField'
+                    // ) && valid;
 
-                    valid = validator.validateRequiredField(
-                        document.querySelector('[name="labels-message-below-limit"]'),
-                        'validation.requiredField'
-                    ) && valid;
+                    // valid = validator.validateRequiredField(
+                    //     document.querySelector('[name="labels-message-below-limit"]'),
+                    //     'validation.requiredField'
+                    // ) && valid;
+
+                    for (const name of ['selForListingPrice', 'selForListingLocation']) {
+                        valid = validator.validateCssSelector(
+                            document.querySelector(`[name="${name}"]`),
+                            true,
+                            'validation.invalidField'
+                        ) && valid;
+                    }
                 }
 
                 if (!valid) {

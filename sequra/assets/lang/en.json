@@ -331,8 +331,8 @@
       "description": "Define a CSS selector to retrieve the cart total price"
     },
     "cartDefaultLocationSel": {
-      "label": "Default cart widget location selector",
-      "description": "CSS selector to define the default container element for the cart widget"
+      "label": "Cart widget location selector",
+      "description": "CSS selector to define the container element for the cart widget"
     },
     "cartConfig": {
       "headerTitle": "Customize widgets",
@@ -342,6 +342,14 @@
       "locationSelector": "Location CSS selector",
       "leaveEmptyToUseDefault": "Leave empty to use default value",
       "locationSelLabel": "Location CSS selector"
+    },
+    "selForListingPrice": {
+      "label": "Product listing price selector",
+      "description": "Define a CSS selector to retrieve the product price in the listing"
+    },
+    "selForListingLocation": {
+      "label": "Product listing widget location selector",
+      "description": "CSS selector to define the container element for the product listing widget"
     }
   },
   "orderStatusSettings": {

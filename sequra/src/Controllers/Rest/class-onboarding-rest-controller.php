@@ -51,6 +51,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 	// Cart widget config.
 	private const PARAM_CART_SEL_FOR_PRICE            = 'selForCartPrice';
 	private const PARAM_CART_SEL_FOR_DEFAULT_LOCATION = 'selForCartLocation';
+	// Product listing widget config.
+	private const PARAM_LISTING_SEL_FOR_PRICE    = 'selForListingPrice';
+	private const PARAM_LISTING_SEL_FOR_LOCATION = 'selForListingLocation';
 
 	/**
 	 * Constructor.
@@ -118,6 +121,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 				self::PARAM_CART_SEL_FOR_PRICE             => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
 				self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION  => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
+
+				self::PARAM_LISTING_SEL_FOR_PRICE          => $this->get_arg_string( true, null, array( $this, 'validate_required_listing_widget_selector' ) ),
+				self::PARAM_LISTING_SEL_FOR_LOCATION       => $this->get_arg_string( true, null, array( $this, 'validate_required_listing_widget_selector' ) ),
 			)
 		);
 
@@ -409,7 +415,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ),
 					strval( $request->get_param( self::PARAM_CART_SEL_FOR_PRICE ) ),
 					strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
-					$cart_mini_widgets
+					$cart_mini_widgets,
+					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_PRICE ) ),
+					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) )
 					// (array) $request->get_param( self::PARAM_CART_MINI_WIDGETS )
 				)
 			)
@@ -497,6 +505,13 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 */
 	public function validate_required_cart_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
 		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE, $param, $request, $key );
+	}
+
+	/**
+	 * Validate if required listing widget selector is valid.
+	 */
+	public function validate_required_listing_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING, $param, $request, $key );
 	}
 
 	/**
