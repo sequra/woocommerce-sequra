@@ -116,6 +116,7 @@ class Payment_REST_Controller extends REST_Controller {
 						'countryCode'                 => $country['countryCode'],
 						'product'                     => $payment_method['product'],
 						'title'                       => $payment_method['title'],
+						'campaign'                    => $payment_method['campaign'] ?? null,
 						'supportsWidgets'             => $payment_method['supportsWidgets'],
 						'supportsInstallmentPayments' => $payment_method['supportsInstallmentPayments'],
 					);

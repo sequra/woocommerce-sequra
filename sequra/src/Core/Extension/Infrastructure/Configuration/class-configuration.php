@@ -69,7 +69,7 @@ class Configuration extends CoreConfiguration {
 	 * @return string Formatted URL of async process starter endpoint.
 	 */
 	public function getAsyncProcessUrl( $guid ) {
-		return ''; // TODO: Not used in this implementation. 
+		return ''; // Not used in this implementation. 
 	}
 
 	/**
@@ -371,15 +371,14 @@ class Configuration extends CoreConfiguration {
 			&& ! empty( $config['showInstallmentAmountInCartPage'] ) 
 			&& isset(
 				$config['selForCartPrice'], 
-				$config['selForCartLocation'], 
-				$config['cartMiniWidgets'] 
-			)
-			&& is_array( $config['cartMiniWidgets'] );
+				$config['selForCartLocation']
+			);
 
-			if ( $is_valid ) {
-				$mini_widget = $this->get_mini_widget( $country, $config['cartMiniWidgets'] );
-				return isset( $mini_widget['message'], $mini_widget['product'], $mini_widget['title'] );
+			if ( $is_valid && isset( $config['cartMiniWidgets'] ) ) {
+				$mini_widget = $this->get_mini_widget( $country, (array) $config['cartMiniWidgets'] );
+				return isset( $mini_widget['message'], $mini_widget['product'] );
 			}
+			return true;
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 		}
 		return false;
@@ -399,19 +398,74 @@ class Configuration extends CoreConfiguration {
 	public function get_cart_widget_config( string $country ): ?array {
 		try {
 			$config      = $this->get_widget_settings();
-			$mini_widget = $this->get_mini_widget( $country, $config['cartMiniWidgets'] );
+			$mini_widget = $this->get_mini_widget( $country, $config['cartMiniWidgets'] ?? array() );
 			
 			return array(
 				'selForPrice'       => empty( $mini_widget['selForPrice'] ) ? ( $config['selForCartPrice'] ?? '' ) : $mini_widget['selForPrice'],
 				'selForLocation'    => empty( $mini_widget['selForLocation'] ) ? ( $config['selForCartLocation'] ?? '' ) : $mini_widget['selForLocation'],
-				'message'           => $mini_widget['message'] ?? '',
-				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? null,
-				'product'           => $mini_widget['product'] ?? null,
-				'title'             => $mini_widget['title'] ?? null,
+				'message'           => $mini_widget['message'] ?? $this->get_mini_widget_default_message( $country ),
+				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? $this->get_mini_widget_default_message_below_limit( $country ),
+				'product'           => $mini_widget['product'] ?? 'pp3',
+				// 'title'             => $mini_widget['title'] ?? null,
 			);
 		} catch ( Throwable $e ) {
 			return null;
 		}
+	}
+
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_message( string $country ): string {
+		return $this->get_mini_widget_default_messages()[ $country ] ?? '';
+	}
+
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_message_below_limit( string $country ): string {
+		return $this->get_mini_widget_default_messages_below_limit()[ $country ] ?? '';
+	}
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_messages(): array {
+		/**
+		 * Filter the default message below limit for the mini widget.
+		 *
+		 * @since 3.0.0
+		 * @return string The default message below limit for the mini widget.
+		 */
+		return apply_filters(
+			'sequra_mini_widget_default_message',
+			array(
+				'ES' => 'Desde %s/mes con seQura',
+				'FR' => 'À partir de %s/mois avec seQura',
+				'IT' => 'Da %s/mese con seQura',
+				'PT' => 'De %s/mês com seQura',
+			) 
+		);
+	}
+
+	/**
+	 * Get the mini widget message
+	 */
+	public function get_mini_widget_default_messages_below_limit(): array {
+		/**
+		 * Filter the default message below limit for the mini widget.
+		 *
+		 * @since 3.0.0
+		 * @return string The default message below limit for the mini widget.
+		 */
+		return apply_filters(
+			'sequra_mini_widget_default_message_below_limit',
+			array(
+				'ES' => 'Fracciona con seQura a partir de %s',
+				'FR' => 'Fraction avec seQura à partir de %s',
+				'IT' => 'Frazione con seQura da %s',
+				'PT' => 'Fração com seQura a partir de %s',
+			) 
+		);
 	}
 
 	/**

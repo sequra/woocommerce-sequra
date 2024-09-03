@@ -206,11 +206,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			),
 			'pages'             => array(
 				'onboarding' => array( 'connect', 'countries', 'widgets' ),
-				// 'onboarding'   => array( 'connect', 'countries' ),
-				// 'settings'     => array( 'general', 'connection', 'order_status' ),
 				'settings'   => array( 'general', 'connection', 'order_status', 'widget' ),
 				'payment'    => $pages_payment,
-				// 'transactions' => array( 'logs' ),
 				'advanced'   => array( 'debug' ),
 			),
 			'integration'       => array(
@@ -230,6 +227,10 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'regex'             => array(
 				'ip'             => $this->regex->ip( false ),
 				'dateOrDuration' => $this->regex->date_or_duration( false ),
+			),
+			'miniWidgetLabels'  => array(
+				'messages'           => $this->configuration->get_mini_widget_default_messages(),
+				'messagesBelowLimit' => $this->configuration->get_mini_widget_default_messages_below_limit(),
 			),
 		);
 

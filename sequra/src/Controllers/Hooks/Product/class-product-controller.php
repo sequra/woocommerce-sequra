@@ -210,7 +210,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 
 
 			foreach ( $methods as $method ) {
-				if ( $method['product'] !== $config['product'] || $method['title'] !== $config['title'] ) {
+				if ( $method['product'] !== $config['product'] ) {
 					continue;
 				}
 

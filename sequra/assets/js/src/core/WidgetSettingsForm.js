@@ -52,8 +52,7 @@ if (!window.SequraFE) {
      * @property {WidgetLocation[]} customLocations
      * 
      * @property {string|null} selForCartPrice
-     * @property {string|null} selForCartDefaultLocation
-     * @property {MiniWidget[]} cartMiniWidgets
+     * @property {string|null} selForCartLocation
      */
 
     /**
@@ -96,29 +95,14 @@ if (!window.SequraFE) {
         /** @type boolean */
         let isAssetKeyValid = false;
 
-        const miniWidgetLabels = {
-            messages: {
-                "ES": "Desde %s/mes con seQura",
-                "FR": "À partir de %s/mois avec seQura",
-                "IT": "Da %s/mese con seQura",
-                "PT": "De %s/mês com seQura"
-            },
-            messagesBelowLimit: {
-                "ES": "Fracciona con seQura a partir de %s",
-                "FR": "Fraction avec seQura à partir de %s",
-                "IT": "Frazione con seQura da %s",
-                "PT": "Fração com seQura a partir de %s"
-            }
-        }
-
         /** @type WidgetSettings */
         const defaultFormData = {
             useWidgets: false,
             assetsKey: '',
             displayWidgetOnProductPage: false,
             widgetLabels: {
-                message: miniWidgetLabels.messages['ES'],
-                messageBelowLimit: miniWidgetLabels.messagesBelowLimit['ES']
+                message: SequraFE.miniWidgetLabels.messages['ES'],
+                messageBelowLimit: SequraFE.miniWidgetLabels.messagesBelowLimit['ES']
             },
             widgetStyles: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
             showInstallmentAmountInProductListing: false,
@@ -129,16 +113,7 @@ if (!window.SequraFE) {
             selForDefaultLocation: '.summary>.price',
             customLocations: [],
             selForCartPrice: '.order-total .amount',
-            selForCartDefaultLocation: '.order-total',
-            cartMiniWidgets: [...new Set(allPaymentMethods.map(pm => pm.countryCode))].map(countryCode => ({
-                countryCode,
-                product: null,
-                title: null,
-                selForPrice: null,
-                selForLocation: null,
-                message: miniWidgetLabels.messages[countryCode],
-                messageBelowLimit: miniWidgetLabels.messagesBelowLimit[countryCode]
-            }))
+            selForCartLocation: '.order-total'
         };
 
         /**
@@ -299,14 +274,13 @@ if (!window.SequraFE) {
                     onChange: (value) => handleChange('selForCartPrice', value)
                 }),
                 generator.createTextField({
-                    value: changedSettings.selForCartDefaultLocation,
-                    name: 'selForCartDefaultLocation',
+                    value: changedSettings.selForCartLocation,
+                    name: 'selForCartLocation',
                     className: 'sq-text-input sq-cart-related-field',
                     label: 'widgets.cartDefaultLocationSel.label',
                     description: 'widgets.cartDefaultLocationSel.description',
-                    onChange: (value) => handleChange('selForCartDefaultLocation', value)
+                    onChange: (value) => handleChange('selForCartLocation', value)
                 }),
-                generator.createElement('div', 'sq-field-wrapper sq-mini-widgets-config-wrapper sq-cart-related-field'),
 
                 // End of cart widget related fields
                 generator.createToggleField({
@@ -329,7 +303,6 @@ if (!window.SequraFE) {
 
             renderLabelsConfiguration();
             renderLocations();
-            renderCartWidgetConfigurator();
         }
 
         const maybeShowRelatedFields = (relatedFieldClass, show) => {
@@ -412,100 +385,6 @@ if (!window.SequraFE) {
                 },
                 addRowText: 'widgets.locations.addRow',
                 removeRowText: 'widgets.locations.removeRow',
-            });
-        }
-
-        const renderCartWidgetConfigurator = () => {
-
-            const miniWidgets = changedSettings.cartMiniWidgets;
-
-            new Repeater({
-                canAdd: false,
-                canRemove: false,
-                name: 'cartWidgetConfigurator',
-                containerSelector: '.sq-mini-widgets-config-wrapper.sq-cart-related-field',
-                data: [...new Set(allPaymentMethods.map(pm => pm.countryCode))],
-                getHeaders: () => [
-                    {
-                        title: SequraFE.translationService.translate('widgets.cartConfig.headerTitle'),
-                        description: SequraFE.translationService.translate('widgets.cartConfig.headerDescription')
-                    },
-                ],
-                getRowContent: (countryCode) => {
-                    const data = miniWidgets.find(miniWidget => miniWidget.countryCode === countryCode);
-                    let message = miniWidgetLabels.messages[countryCode];
-                    if (data && 'undefined' !== typeof data.message && data.message) {
-                        message = data.message;
-                    }
-
-                    let messageBelowLimit = miniWidgetLabels.messagesBelowLimit[countryCode];
-                    if (data && 'undefined' !== typeof data.messageBelowLimit && null !== data.messageBelowLimit) {
-                        messageBelowLimit = data.messageBelowLimit;
-                    }
-
-                    return `
-                    <div class="sq-table__row-field-wrapper">
-                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.cartConfig.paymentMethod')}</label>
-                        <select class="sq-table__row-field" data-field="paymentMethod" data-country-code="${countryCode}">
-                            <option key="-1" data-country-code="" data-product="">${SequraFE.translationService.translate('widgets.cartConfig.disable')}</option>
-                            ${allPaymentMethods ? allPaymentMethods.map((pm, idx) => {
-                        if (countryCode !== pm.countryCode || !pm.supportsInstallmentPayments) {
-                            return '';
-                        }
-                        const selected = data && data.product === pm.product && data.title === pm.title ? ' selected' : '';
-                        return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
-                    }).join('') : ''}
-                        </select>
-                    </div>
-                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
-                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.selForCartPrice.label')}</label>
-                        <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.cartConfig.leaveEmptyToUseDefault')}</span>
-                        <input class="sq-table__row-field" data-field="selForPrice" type="text" value="${data && 'undefined' !== typeof data.selForPrice ? data.selForPrice : ''}">
-                    </div>
-                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
-                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.cartConfig.locationSelLabel')}</label>
-                        <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.cartConfig.leaveEmptyToUseDefault')}</span>
-                        <input class="sq-table__row-field" data-field="selForLocation" type="text" value="${data && 'undefined' !== typeof data.selForLocation ? data.selForLocation : ''}">
-                    </div>
-
-                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
-                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.teaserMessage.label')}</label>
-                        <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.teaserMessage.description')}</span>
-                        <input class="sq-table__row-field" data-field="message" type="text" value="${message}">
-                    </div>
-                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
-                        <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.messageBelowLimit.label')}</label>
-                        <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.messageBelowLimit.description')}</span>
-                        <input class="sq-table__row-field" data-field="messageBelowLimit" type="text" value="${messageBelowLimit}">
-                    </div>
-                   `
-                },
-                getRowHeader: (countryCode) => {
-                    const flag = SequraFE.imagesProvider.flags[countryCode] || '';
-                    return `${flag} <span class="sqp-field-title">${SequraFE.translationService.translate(`countries.${countryCode}.label`)}</span>`
-                },
-                handleChange: table => {
-                    const cartMiniWidgets = [];
-                    table.querySelectorAll('.sq-table__row').forEach(row => {
-                        const select = row.querySelector('[data-field="paymentMethod"]');
-                        const countryCode = select.dataset.countryCode;
-                        const product = !select.selectedIndex ? null : select.options[select.selectedIndex].dataset.product;
-                        const title = !select.selectedIndex ? null : select.options[select.selectedIndex].textContent;
-                        const selForPrice = row.querySelector('[data-field="selForPrice"]').value;
-                        const selForLocation = row.querySelector('[data-field="selForLocation"]').value;
-                        let message = row.querySelector('[data-field="message"]').value;
-                        if (!message) {
-                            // Required field. If empty, set default value.
-                            message = miniWidgetLabels.messages[countryCode];
-                            row.querySelector('[data-field="message"]').value = message;
-                        }
-                        const messageBelowLimit = row.querySelector('[data-field="messageBelowLimit"]').value;
-
-                        cartMiniWidgets.push({ countryCode, product, title, selForPrice, selForLocation, message, messageBelowLimit });
-                    });
-                    handleChange('cartMiniWidgets', cartMiniWidgets);
-
-                }
             });
         }
 
@@ -614,32 +493,6 @@ if (!window.SequraFE) {
             }
         }
 
-        const areMiniWidgetsValid = values => {
-            try {
-                values.forEach(miniWidget => {
-                    const { countryCode, title, product } = miniWidget;
-                    if (!countryCode) {
-                        throw new Error('Invalid country code');
-                    }
-                    if ('' !== miniWidget.selForPrice && !isCssSelectorValid(miniWidget.selForPrice)) {
-                        throw new Error('Invalid selector');
-                    }
-                    if ('' !== miniWidget.selForLocation && !isCssSelectorValid(miniWidget.selForLocation)) {
-                        throw new Error('Invalid selector');
-                    }
-                    if (!miniWidget.message) {
-                        throw new Error('Invalid selector');
-                    }
-                    if (title && product && !allPaymentMethods.some(pm => pm.supportsInstallmentPayments && pm.product === product && pm.countryCode === countryCode && pm.title === title)) {
-                        throw new Error('Invalid payment method');
-                    }
-                });
-                return true;
-            } catch {
-                return false;
-            }
-        }
-
         /**
          * Handles the form input changes.
          *
@@ -705,17 +558,6 @@ if (!window.SequraFE) {
                 const isValid = isCustomLocationValid(value);
                 validator.validateField(
                     document.querySelector(`.sq-product-related-field .sq-table`),
-                    !isValid,
-                    'validation.invalidField'
-                );
-                disableFooter(!isValid);
-            }
-
-
-            if (name === 'cartMiniWidgets') {
-                const isValid = areMiniWidgetsValid(value);
-                validator.validateField(
-                    document.querySelector(`.sq-cart-related-field .sq-table`),
                     !isValid,
                     'validation.invalidField'
                 );
@@ -789,21 +631,13 @@ if (!window.SequraFE) {
                 }
 
                 if (changedSettings.showInstallmentAmountInCartPage) {
-                    for (const name of ['selForCartPrice', 'selForCartDefaultLocation']) {
+                    for (const name of ['selForCartPrice', 'selForCartLocation']) {
                         valid = validator.validateCssSelector(
                             document.querySelector(`[name="${name}"]`),
                             true,
                             'validation.invalidField'
                         ) && valid;
                     }
-
-                    const isValid = areMiniWidgetsValid(changedSettings.cartMiniWidgets);
-                    valid = isValid && valid;
-                    validator.validateField(
-                        document.querySelector(`.sq-cart-related-field .sq-table`),
-                        !isValid,
-                        'validation.invalidField'
-                    );
                 }
 
                 if (changedSettings.showInstallmentAmountInProductListing) {
