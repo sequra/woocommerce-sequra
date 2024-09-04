@@ -128,6 +128,21 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'pp3 title'
 					),
 				)
+			),
+			new Mini_Widget_Config(
+				'listing-mini-widget-sel-for-price',
+				'listing-mini-widget-sel-for-location',
+				array(
+					new Mini_Widget(
+						'listing-mini-widget-sel-for-price-es',
+						'listing-mini-widget-sel-for-location-es',
+						'message-es',
+						'message-below-limit-es',
+						'pp3',
+						'ES',
+						'pp3 title'
+					),
+				)
 			)
 		);
 		StoreContext::doWithStore( 'store1', array( $this->widgetSettingsRepository, 'setWidgetSettings' ), array( $settings ) );
@@ -175,6 +190,19 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 					array(
 						'selForPrice'       => 'cart-mini-widget-sel-for-price-es',
 						'selForLocation'    => 'cart-mini-widget-sel-for-location-es',
+						'message'           => 'message-es',
+						'messageBelowLimit' => 'message-below-limit-es',
+						'product'           => 'pp3',
+						'countryCode'       => 'ES',
+						'title'             => 'pp3 title',
+					),
+				),
+				'selForListingPrice'                    => 'listing-mini-widget-sel-for-price',
+				'selForListingLocation'                 => 'listing-mini-widget-sel-for-location',
+				'listingMiniWidgets'                    => array(
+					array(
+						'selForPrice'       => 'listing-mini-widget-sel-for-price-es',
+						'selForLocation'    => 'listing-mini-widget-sel-for-location-es',
 						'message'           => 'message-es',
 						'messageBelowLimit' => 'message-below-limit-es',
 						'product'           => 'pp3',
