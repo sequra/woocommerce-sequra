@@ -10,6 +10,7 @@ module.exports = (env, argv) => {
         module: {
             rules: []
         },
+        devtool: 'source-map',
         stats: 'errors-only'
     };
 
