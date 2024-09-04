@@ -229,7 +229,7 @@ if (SequraWidgetFacade) {
 
                         targets.forEach((target) => {
                             const { elem, widget } = target;
-                            this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, priceElem) : this.drawWidgetOnElement(widget, elem);
+                            this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, target.priceElem) : this.drawWidgetOnElement(widget, elem);
                         });
 
                         this.mutationObserver.observe(document, { childList: true, subtree: true }); // enable the observer again.
