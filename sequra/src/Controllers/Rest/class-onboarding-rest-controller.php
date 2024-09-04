@@ -395,6 +395,25 @@ class Onboarding_REST_Controller extends REST_Controller {
 				}
 			}
 
+			/**
+			 * Filter the product listing mini widgets.
+			 * 
+			 * @since 3.0.0
+			 * @var Mini_Widget[] $listing_mini_widgets The product listing mini widgets.
+			 */
+			$listing_mini_widgets = apply_filters( 'sequra_widget_settings_product_listing_mini_widgets', array(), $store_id );
+			if ( ! is_array( $listing_mini_widgets ) ) {
+				$this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+				$listing_mini_widgets = array();
+			}
+			foreach ( $listing_mini_widgets as $mini_widget ) {
+				if ( ! $mini_widget instanceof Mini_Widget ) {
+					$this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+					$listing_mini_widgets = array();
+					break;
+				}
+			}
+
 			$response = AdminAPI::get()
 			->widgetConfiguration( $store_id )
 			->setWidgetSettings(
@@ -417,8 +436,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 					strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
 					$cart_mini_widgets,
 					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_PRICE ) ),
-					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) )
-					// (array) $request->get_param( self::PARAM_CART_MINI_WIDGETS )
+					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) ),
+					$listing_mini_widgets
 				)
 			)
 			->toArray();
