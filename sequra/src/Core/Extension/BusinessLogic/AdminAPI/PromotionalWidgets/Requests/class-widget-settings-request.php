@@ -61,6 +61,13 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 	protected $cart_mini_widget_config;
 
 	/**
+	 * Product listing mini widget configuration.
+	 *
+	 * @var ?Mini_Widget_Config
+	 */
+	protected $listing_mini_widget_config;
+
+	/**
 	 * Constructor.
 	 * 
 	 * @param bool $enabled Is enabled.
@@ -78,6 +85,8 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 	 * @param string|null $sel_for_default_location Selector for default location.
 	 * @param array<array<string, string>> $custom_locations Custom locations.
 	 * @param array<array<string, string>> $cart_mini_widgets Cart mini widget configuration.
+	 * @param string|null $sel_for_listing_price Selector for listing price.
+	 * @param string|null $sel_for_listing_location Selector for listing location.
 	 */
 	public function __construct(
 		bool $enabled,
@@ -96,7 +105,10 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 		array $custom_locations = array(),
 		?string $sel_for_cart_price = null,
 		?string $sel_for_cart_default_location = null,
-		array $cart_mini_widgets = array()
+		array $cart_mini_widgets = array(),
+		?string $sel_for_listing_price = null,
+		?string $sel_for_listing_location = null,
+		array $listing_mini_widgets = array()
 	) {
 		parent::__construct(
 			$enabled,
@@ -130,6 +142,14 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 				Mini_Widget_Config::MINI_WIDGETS  => $cart_mini_widgets,
 			)
 		);
+
+		$this->listing_mini_widget_config = Mini_Widget_Config::from_array(
+			array(
+				Mini_Widget_Config::SEL_FOR_PRICE => $sel_for_listing_price,
+				Mini_Widget_Config::SEL_FOR_DEFAULT_LOCATION => $sel_for_listing_location,
+				Mini_Widget_Config::MINI_WIDGETS  => $listing_mini_widgets,
+			)
+		);
 	}
 
 	/**
@@ -158,7 +178,8 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 		return Widget_Settings::from_parent(
 			parent::transformToDomainModel(),
 			$location_config,
-			$this->cart_mini_widget_config
+			$this->cart_mini_widget_config,
+			$this->listing_mini_widget_config
 		);
 	}
 }

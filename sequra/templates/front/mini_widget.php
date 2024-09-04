@@ -28,15 +28,16 @@ if ( ! isset(
 ) ) {
 	return;
 }
-
+	
+//phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
 
 <script type='text/javascript'>
 	SequraWidgetFacade.miniWidgets && SequraWidgetFacade.miniWidgets.push({
 		product: "<?php echo esc_js( $args['product'] ); ?>",
-		dest: "<?php echo esc_js( $args['dest'] ); ?>",
+		dest: "<?php echo wp_strip_all_tags( $args['dest'] ); ?>",
+		priceSel: "<?php echo wp_strip_all_tags( $args['price'] ); ?>",
 		campaign: "<?php echo esc_js( $args['campaign'] ); ?>",
-		priceSel: "<?php echo esc_js( $args['price'] ); ?>",
 		message: "<?php echo esc_js( $args['message'] ); ?>",
 		messageBelowLimit: "<?php echo esc_js( $args['message_below_limit'] ); ?>",
 		minAmount: <?php echo esc_js( $args['min_amount'] ); ?>,

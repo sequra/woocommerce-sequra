@@ -51,6 +51,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 	// Cart widget config.
 	private const PARAM_CART_SEL_FOR_PRICE            = 'selForCartPrice';
 	private const PARAM_CART_SEL_FOR_DEFAULT_LOCATION = 'selForCartLocation';
+	// Product listing widget config.
+	private const PARAM_LISTING_SEL_FOR_PRICE    = 'selForListingPrice';
+	private const PARAM_LISTING_SEL_FOR_LOCATION = 'selForListingLocation';
 
 	/**
 	 * Constructor.
@@ -118,6 +121,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 				self::PARAM_CART_SEL_FOR_PRICE             => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
 				self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION  => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
+
+				self::PARAM_LISTING_SEL_FOR_PRICE          => $this->get_arg_string( true, null, array( $this, 'validate_required_listing_widget_selector' ) ),
+				self::PARAM_LISTING_SEL_FOR_LOCATION       => $this->get_arg_string( true, null, array( $this, 'validate_required_listing_widget_selector' ) ),
 			)
 		);
 
@@ -389,6 +395,25 @@ class Onboarding_REST_Controller extends REST_Controller {
 				}
 			}
 
+			/**
+			 * Filter the product listing mini widgets.
+			 * 
+			 * @since 3.0.0
+			 * @var Mini_Widget[] $listing_mini_widgets The product listing mini widgets.
+			 */
+			$listing_mini_widgets = apply_filters( 'sequra_widget_settings_product_listing_mini_widgets', array(), $store_id );
+			if ( ! is_array( $listing_mini_widgets ) ) {
+				$this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+				$listing_mini_widgets = array();
+			}
+			foreach ( $listing_mini_widgets as $mini_widget ) {
+				if ( ! $mini_widget instanceof Mini_Widget ) {
+					$this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+					$listing_mini_widgets = array();
+					break;
+				}
+			}
+
 			$response = AdminAPI::get()
 			->widgetConfiguration( $store_id )
 			->setWidgetSettings(
@@ -409,8 +434,10 @@ class Onboarding_REST_Controller extends REST_Controller {
 					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ),
 					strval( $request->get_param( self::PARAM_CART_SEL_FOR_PRICE ) ),
 					strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
-					$cart_mini_widgets
-					// (array) $request->get_param( self::PARAM_CART_MINI_WIDGETS )
+					$cart_mini_widgets,
+					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_PRICE ) ),
+					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) ),
+					$listing_mini_widgets
 				)
 			)
 			->toArray();
@@ -497,6 +524,13 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 */
 	public function validate_required_cart_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
 		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE, $param, $request, $key );
+	}
+
+	/**
+	 * Validate if required listing widget selector is valid.
+	 */
+	public function validate_required_listing_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING, $param, $request, $key );
 	}
 
 	/**

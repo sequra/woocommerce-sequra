@@ -34,9 +34,10 @@ class Widget_Settings extends WidgetSettings {
 	 */
 	public function inflate( array $data ) {
 		parent::inflate( $data );
-		$data_widget_settings        = isset( $data['widgetSettings'] ) ? (array) $data['widgetSettings'] : array();
-		$raw_widget_location_config  = self::getArrayValue( $data_widget_settings, 'widgetLocationConfiguration', array() );
-		$raw_cart_mini_widget_config = self::getArrayValue( $data_widget_settings, 'cartMiniWidgetConfiguration', array() );
+		$data_widget_settings           = isset( $data['widgetSettings'] ) ? (array) $data['widgetSettings'] : array();
+		$raw_widget_location_config     = self::getArrayValue( $data_widget_settings, 'widgetLocationConfiguration', array() );
+		$raw_cart_mini_widget_config    = self::getArrayValue( $data_widget_settings, 'cartMiniWidgetConfiguration', array() );
+		$raw_listing_mini_widget_config = self::getArrayValue( $data_widget_settings, 'listingMiniWidgetConfiguration', array() );
 
 		$widget_location_config = null;
 		if ( is_array( $raw_widget_location_config ) ) {
@@ -48,9 +49,13 @@ class Widget_Settings extends WidgetSettings {
 			$cart_mini_widget_config = Mini_Widget_Config::from_array( $raw_cart_mini_widget_config );
 		}
 
+		$listing_mini_widget_config = null;
+		if ( is_array( $raw_listing_mini_widget_config ) ) {
+			$listing_mini_widget_config = Mini_Widget_Config::from_array( $raw_listing_mini_widget_config );
+		}
 
         // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		$this->widgetSettings = Domain_Widget_Settings::from_parent( $this->widgetSettings, $widget_location_config, $cart_mini_widget_config );
+		$this->widgetSettings = Domain_Widget_Settings::from_parent( $this->widgetSettings, $widget_location_config, $cart_mini_widget_config, $listing_mini_widget_config );
 	}
 
 	/**
@@ -68,6 +73,9 @@ class Widget_Settings extends WidgetSettings {
 
 			$cart_mini_widget_config                               = $this->widgetSettings->get_cart_mini_widget_config();
 			$data['widgetSettings']['cartMiniWidgetConfiguration'] = $cart_mini_widget_config ? $cart_mini_widget_config->to_array() : array();
+
+			$listing_mini_widget_config                               = $this->widgetSettings->get_listing_mini_widget_config();
+			$data['widgetSettings']['listingMiniWidgetConfiguration'] = $listing_mini_widget_config ? $listing_mini_widget_config->to_array() : array();
 		}
         // phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		return $data;

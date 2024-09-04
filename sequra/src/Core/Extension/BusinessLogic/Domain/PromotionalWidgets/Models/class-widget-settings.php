@@ -30,6 +30,13 @@ class Widget_Settings extends WidgetSettings {
 	protected $cart_mini_widget_config;
 
 	/**
+	 * Mini Widget Config
+	 *
+	 * @var ?Mini_Widget_Config
+	 */
+	protected $listing_mini_widget_config;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct(
@@ -42,7 +49,8 @@ class Widget_Settings extends WidgetSettings {
 		?string $widget_config = null,
 		?WidgetLabels $widget_labels = null,
 		?Widget_Location_Config $location_config = null,
-		?Mini_Widget_Config $cart_mini_widget_config = null
+		?Mini_Widget_Config $cart_mini_widget_config = null,
+		?Mini_Widget_Config $listing_mini_widget_config = null
 	) {
 		parent::__construct(
 			$enabled,
@@ -54,8 +62,9 @@ class Widget_Settings extends WidgetSettings {
 			$widget_config,
 			$widget_labels
 		);
-		$this->location_config         = $location_config;
-		$this->cart_mini_widget_config = $cart_mini_widget_config;
+		$this->location_config            = $location_config;
+		$this->cart_mini_widget_config    = $cart_mini_widget_config;
+		$this->listing_mini_widget_config = $listing_mini_widget_config;
 	}
 
 	/**
@@ -64,7 +73,8 @@ class Widget_Settings extends WidgetSettings {
 	public static function from_parent(
 		WidgetSettings $instance,
 		?Widget_Location_Config $location_config = null,
-		?Mini_Widget_Config $cart_mini_widget_config = null
+		?Mini_Widget_Config $cart_mini_widget_config = null,
+		?Mini_Widget_Config $listing_mini_widget_config = null
 	): Widget_Settings {
 		return new self(
 			$instance->isEnabled(),
@@ -76,7 +86,8 @@ class Widget_Settings extends WidgetSettings {
 			$instance->getWidgetConfig(),
 			$instance->getWidgetLabels(),
 			$location_config,
-			$cart_mini_widget_config
+			$cart_mini_widget_config,
+			$listing_mini_widget_config
 		);
 	}
 
@@ -106,5 +117,19 @@ class Widget_Settings extends WidgetSettings {
 	 */
 	public function set_cart_mini_widget_config( ?Mini_Widget_Config $cart_mini_widget_config ): void {
 		$this->cart_mini_widget_config = $cart_mini_widget_config;
+	}
+
+	/**
+	 * Getter
+	 */
+	public function get_listing_mini_widget_config(): ?Mini_Widget_Config {
+		return $this->listing_mini_widget_config;
+	}
+
+	/**
+	 * Setter
+	 */
+	public function set_listing_mini_widget_config( ?Mini_Widget_Config $listing_mini_widget_config ): void {
+		$this->listing_mini_widget_config = $listing_mini_widget_config;
 	}
 }

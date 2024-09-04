@@ -240,6 +240,64 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	}
 
 	/**
+	 * Handle the product listing widget shortcode callback
+	 */
+	public function do_product_listing_widget_shortcode( array $atts ): string {
+		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+
+		$current_country = $this->i18n->get_current_country();
+		
+		if ( ! $this->configuration->is_product_listing_widget_enabled( $current_country ) ) {
+			$this->logger->log_info( 'Product listing Widget is disabled', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
+			return '';
+		}
+		if ( ! $this->product_service->can_display_mini_widgets() ) {
+			$this->logger->log_info( 'SeQura payment gateway is disabled', __FUNCTION__, __CLASS__ );
+			return '';
+		}
+		
+		try {
+			$store_id = $this->configuration->get_store_id();
+			$merchant = $this->payment_service->get_merchant_id();
+			$methods  = $this->payment_method_service->get_all_mini_widget_compatible_payment_methods( $store_id, $merchant );
+
+			$config = $this->configuration->get_product_listing_widget_config( $current_country );
+			if ( ! $config ) {
+				$this->logger->log_info( 'Product listing Widget configuration not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
+				return '';
+			}
+
+			foreach ( $methods as $method ) {
+				if ( $method['product'] !== $config['product'] ) {
+					continue;
+				}
+
+				$atts = shortcode_atts(
+					array(
+						'product'             => $method['product'] ?? '',
+						'campaign'            => $method['campaign'] ?? '',
+						'dest'                => $config['selForLocation'],
+						'price'               => $config['selForPrice'],
+						'message'             => $config['message'],
+						'message_below_limit' => $config['messageBelowLimit'],
+						'min_amount'          => $method['minAmount'] ?? 0,
+						'max_amount'          => $method['maxAmount'] ?? null,
+					),
+					$atts,
+					'sequra_product_listing_widget'
+				);
+	
+				ob_start();
+				wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
+				return ob_get_clean();
+			}
+		} catch ( \Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+		return '';
+	}
+
+	/**
 	 * Add [sequra_widget] to product page automatically
 	 */
 	private function add_widget_shortcode_to_product_page(): void {
@@ -293,6 +351,16 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	}
 
 	/**
+	 * Add [sequra_product_listing_widget] to product archive automatically
+	 */
+	private function add_widget_shortcode_to_product_listing_page(): void {
+		if ( ! is_product_category() && ! is_product_tag() && ! is_shop() ) {
+			return;
+		}
+		echo do_shortcode( '[sequra_product_listing_widget]' );
+	}
+
+	/**
 	 * Add [sequra_widget] to product page automatically
 	 * Add [sequra_cart_widget] to cart page automatically
 	 */
@@ -311,6 +379,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 
 		$this->add_widget_shortcode_to_product_page();
 		$this->add_widget_shortcode_to_cart_page();
+		$this->add_widget_shortcode_to_product_listing_page();
 	}
 
 	/**

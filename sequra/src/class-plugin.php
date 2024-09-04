@@ -95,6 +95,7 @@ class Plugin {
 
 		add_shortcode( 'sequra_widget', array( $product_controller, 'do_widget_shortcode' ) );
 		add_shortcode( 'sequra_cart_widget', array( $product_controller, 'do_cart_widget_shortcode' ) );
+		add_shortcode( 'sequra_product_listing_widget', array( $product_controller, 'do_product_listing_widget_shortcode' ) );
 		
 		add_action( 'add_meta_boxes', array( $product_controller, 'add_meta_boxes' ) );
 		add_action( 'woocommerce_process_product_meta', array( $product_controller, 'save_product_meta' ) );
