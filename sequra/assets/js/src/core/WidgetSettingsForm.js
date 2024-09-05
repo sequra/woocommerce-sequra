@@ -117,8 +117,7 @@ if (!window.SequraFE) {
             customLocations: [],
             selForCartPrice: '.order-total .amount',
             selForCartLocation: '.order-total',
-
-            selForListingPrice: '.product .price>.amount,.product .price ins .amount',
+            selForListingPrice: '.product .price>.amount:first-child,.product .price ins .amount',
             selForListingLocation: '.product .price',
         };
 
@@ -565,22 +564,16 @@ if (!window.SequraFE) {
                 maybeShowRelatedFields('.sq-listing-related-field', value);
             }
 
-            if (name === 'selForPrice' || name === 'selForDefaultLocation') {
+            if(['selForPrice', 'selForDefaultLocation', 'selForAltPrice', 'selForAltPriceTrigger', 'selForCartPrice', 'selForCartLocation', 'selForListingPrice', 'selForListingLocation'].includes(name)){
+                const required = ['selForPrice', 'selForDefaultLocation', 'selForCartPrice', 'selForCartLocation', 'selForListingPrice', 'selForListingLocation'];
                 const isValid = validator.validateCssSelector(
                     document.querySelector(`[name="${name}"]`),
-                    true,
+                    required.includes(name),
                     'validation.invalidField'
                 );
                 disableFooter(!isValid);
             }
-            if (name === 'selForAltPrice' || name === 'selForAltPriceTrigger') {
-                const isValid = validator.validateCssSelector(
-                    document.querySelector(`[name="${name}"]`),
-                    false,
-                    'validation.invalidField'
-                );
-                disableFooter(!isValid);
-            }
+
             if (name === 'customLocations') {
                 const isValid = isCustomLocationValid(value);
                 validator.validateField(
