@@ -93,6 +93,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp option update --allow-root woocommerce_price_decimal_sep "${WC_PRICE_DECIMAL_SEPARATOR}"
 
     wp wc shipping_zone_method create 0 --method_id="${WC_SHIPPING_ZONE_METHOD_ID}" --settings="${WC_SHIPPING_ZONE_METHOD_SETTINGS}" --user=admin --allow-root
+    wp wc shop_coupon create --code=FREE --amount=100 --discount_type=percent --user=admin --allow-root
     
     wp plugin activate --allow-root sequra
     wp plugin activate --allow-root sequra-helper
