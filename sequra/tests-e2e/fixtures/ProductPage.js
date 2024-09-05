@@ -2,7 +2,6 @@ export default class ProductPage {
 
     /**
      * @param {import('@playwright/test').Page} page
-     * @param {string} slug
      */
     constructor(page) {
         this.page = page;

@@ -7,6 +7,8 @@ import CheckoutPage from "./CheckoutPage";
 import GeneralSettingsPage from "./GeneralSettingsPage";
 import ConnectionSettingsPage from "./ConnectionSettingsPage";
 import WidgetSettingsPage from "./WidgetSettingsPage";
+import CartPage from "./CartPage";
+import ShopPage from "./ShopPage";
 
 export const test = baseTest.extend({
     advancedSettingsPage: async ({ page, baseURL, request }, use) => {
@@ -67,6 +69,8 @@ export const test = baseTest.extend({
     },
 
     productPage: async ({ page }, use) => await use(new ProductPage(page)),
+    cartPage: async ({ page }, use) => await use(new CartPage(page, expect)),
+    shopPage: async ({ page }, use) => await use(new ShopPage(page, expect)),
     checkoutPage: async ({ page, baseURL, request }, use) => await use(new CheckoutPage(page, baseURL, expect, request))
 });
 

@@ -12,6 +12,7 @@ test.describe('Widget settings', () => {
     const defaultSettings = widgetSettingsPage.getDefaultSettings();
 
     const newSettings = {
+      ...defaultSettings,
       enabled: true,
       priceSel: ".priceSel",
       altPriceSel: ".altPriceSel",
