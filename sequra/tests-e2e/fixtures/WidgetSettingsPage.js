@@ -22,10 +22,12 @@ export default class WidgetSettingsPage extends SettingsPage {
                 details: ".sq-locations-container details",
                 add: ".sq-locations-container .sq-add",
                 summary: "summary",
-                removeBtn: ".sq-remove",
-
-                // removeBtn: ".sq-locations-container details .sq-remove",
-            }
+                removeBtn: ".sq-remove"
+            },
+            selForCartPrice: "[name=\"selForCartPrice\"]",
+            selForCartLocation: "[name=\"selForCartLocation\"]",
+            selForProductListingPrice: "[name=\"selForListingPrice\"]",
+            selForProductListingLocation: "[name=\"selForListingLocation\"]",
         }
     }
 
@@ -36,6 +38,12 @@ export default class WidgetSettingsPage extends SettingsPage {
 
     #displayWidgetsLocator(input = false) {
         return this.page.getByRole('heading', { name: 'Display widget on product page' }).first().locator(input ? 'input' : 'span');
+    }
+    #displayCartMiniWidgetsLocator(input = false) {
+        return this.page.getByRole('heading', { name: 'Show installment amount in cart page' }).first().locator(input ? 'input' : 'span');
+    }
+    #displayProductListingMiniWidgetsLocator(input = false) {
+        return this.page.getByRole('heading', { name: 'Show installment amount in product listing' }).first().locator(input ? 'input' : 'span');
     }
 
     async #openDetails(details) {
@@ -48,17 +56,42 @@ export default class WidgetSettingsPage extends SettingsPage {
         }
     }
 
-    async fill({ enabled, widgetConfig, priceSel, altPriceSel, altPriceTriggerSel, locationSel, customLocations }) {
+    async fill({ enabled, widgetConfig, priceSel, altPriceSel, altPriceTriggerSel, locationSel, customLocations, cartMiniWidget, productListingMiniWidget }) {
         let shouldChange = false;
         try {
             await this.expect(this.#displayWidgetsLocator(true)).toBeChecked({ checked: !enabled, timeout: 1 });
             shouldChange = true;
         } catch (e) {
             // Ignore, toggle is already in the desired state
+        } finally {
+            if (shouldChange) {
+                await this.#displayWidgetsLocator().click();
+                await this.#displayWidgetsLocator().blur();
+            }
         }
-        if (shouldChange) {
-            await this.#displayWidgetsLocator().click();
-            await this.#displayWidgetsLocator().blur();
+        try {
+            shouldChange = false;
+            await this.expect(this.#displayCartMiniWidgetsLocator(true)).toBeChecked({ checked: !cartMiniWidget.enabled, timeout: 1 });
+            shouldChange = true;
+        } catch (e) {
+            // Ignore, toggle is already in the desired state
+        } finally {
+            if (shouldChange) {
+                await this.#displayCartMiniWidgetsLocator().click();
+                await this.#displayCartMiniWidgetsLocator().blur();
+            }
+        }
+        try {
+            shouldChange = false;
+            await this.expect(this.#displayProductListingMiniWidgetsLocator(true)).toBeChecked({ checked: !productListingMiniWidget.enabled, timeout: 1 });
+            shouldChange = true;
+        } catch (e) {
+            // Ignore, toggle is already in the desired state
+        } finally {
+            if (shouldChange) {
+                await this.#displayProductListingMiniWidgetsLocator().click();
+                await this.#displayProductListingMiniWidgetsLocator().blur();
+            }
         }
 
         const widgetStylesLocator = this.page.locator(this.selector.widgetStyles);
@@ -117,9 +150,33 @@ export default class WidgetSettingsPage extends SettingsPage {
                 await textarea.blur();
             }
         }
+
+        if (cartMiniWidget.enabled) {
+            const selForCartPrice = this.page.locator(this.selector.selForCartPrice);
+            await selForCartPrice.fill('');
+            await selForCartPrice.pressSequentially(cartMiniWidget.priceSel);
+            await selForCartPrice.blur();
+
+            const selForCartLocation = this.page.locator(this.selector.selForCartLocation);
+            await selForCartLocation.fill('');
+            await selForCartLocation.pressSequentially(cartMiniWidget.locationSel);
+            await selForCartLocation.blur();
+        }
+
+        if (productListingMiniWidget.enabled) {
+            const selForProductListingPrice = this.page.locator(this.selector.selForProductListingPrice);
+            await selForProductListingPrice.fill('');
+            await selForProductListingPrice.pressSequentially(productListingMiniWidget.priceSel);
+            await selForProductListingPrice.blur();
+
+            const selForProductListingLocation = this.page.locator(this.selector.selForProductListingLocation);
+            await selForProductListingLocation.fill('');
+            await selForProductListingLocation.pressSequentially(productListingMiniWidget.locationSel);
+            await selForProductListingLocation.blur();
+        }
     }
 
-    async expectConfigurationMatches({ enabled, widgetConfig, priceSel, altPriceSel, altPriceTriggerSel, locationSel, customLocations }) {
+    async expectConfigurationMatches({ enabled, widgetConfig, priceSel, altPriceSel, altPriceTriggerSel, locationSel, customLocations, cartMiniWidget, productListingMiniWidget }) {
 
         await this.expect(this.#displayWidgetsLocator(true)).toBeChecked({ checked: enabled, timeout: 1 });
         await this.expect(this.page.locator(this.selector.widgetStyles)).toHaveValue(widgetConfig);
@@ -145,6 +202,17 @@ export default class WidgetSettingsPage extends SettingsPage {
                 await this.expect(details.locator('textarea')).toHaveValue(customLocation.widgetConfig);
             }
         }
+
+        await this.expect(this.#displayCartMiniWidgetsLocator(true)).toBeChecked({ checked: cartMiniWidget.enabled, timeout: 1 });
+        if (cartMiniWidget.enabled) {
+            await this.expect(this.page.locator(this.selector.selForCartPrice)).toHaveValue(cartMiniWidget.priceSel);
+            await this.expect(this.page.locator(this.selector.selForCartLocation)).toHaveValue(cartMiniWidget.locationSel);
+        }
+        await this.expect(this.#displayProductListingMiniWidgetsLocator(true)).toBeChecked({ checked: productListingMiniWidget.enabled, timeout: 1 });
+        if (productListingMiniWidget.enabled) {
+            await this.expect(this.page.locator(this.selector.selForProductListingPrice)).toHaveValue(productListingMiniWidget.priceSel);
+            await this.expect(this.page.locator(this.selector.selForProductListingLocation)).toHaveValue(productListingMiniWidget.locationSel);
+        }
     }
 
     getDefaultSettings() {
@@ -155,7 +223,17 @@ export default class WidgetSettingsPage extends SettingsPage {
             altPriceTriggerSel: ".variations",
             locationSel: ".summary>.price",
             widgetConfig: '{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1C1C1C","amount-font-size":"15","background-color":"white","border-color":"#B1AEBA","border-radius":"","class":"","font-color":"#1C1C1C","link-font-color":"#1C1C1C","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
-            customLocations: []
+            customLocations: [],
+            cartMiniWidget: {
+                enabled: false,
+                priceSel: ".order-total .amount",
+                locationSel: ".order-total",
+            },
+            productListingMiniWidget: {
+                enabled: false,
+                priceSel: ".product .price>.amount:first-child,.product .price ins .amount",
+                locationSel: ".product .price",
+            }
         }
     }
 }
