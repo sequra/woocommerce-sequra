@@ -206,7 +206,11 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * 
 	 * @return array<string, string>[]
 	 */
-	public function get_all_payment_methods( string $store_id, string $merchant ): array {
+	public function get_all_payment_methods( ?string $store_id, ?string $merchant ): array {
+		if ( ! $store_id || ! $merchant ) {
+			return array();
+		}
+		
 		$response = AdminAPI::get()
 			->paymentMethods( $store_id )
 			->getPaymentMethods( strval( $merchant ) );
