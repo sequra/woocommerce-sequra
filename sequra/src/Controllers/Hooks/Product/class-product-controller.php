@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Controllers
  */
 
-namespace SeQura\WC\Controllers\Hooks\Asset;
+namespace SeQura\WC\Controllers\Hooks\Product;
 
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Controller;

@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Controllers
  */
 
-namespace SeQura\WC\Controllers\Hooks\Asset;
+namespace SeQura\WC\Controllers\Hooks\Product;
 
 use WP_Post;
 
