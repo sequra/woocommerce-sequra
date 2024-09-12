@@ -8,9 +8,10 @@
 namespace SeQura\WC;
 
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
-use SeQura\WC\Controllers\Hooks\Asset\Interface_Product_Controller;
+use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
 use SeQura\WC\Services\Interface_Migration_Manager;
@@ -56,7 +57,8 @@ class Plugin {
 		REST_Controller $rest_onboarding_controller,
 		REST_Controller $rest_payment_controller,
 		REST_Controller $rest_log_controller,
-		Interface_Product_Controller $product_controller
+		Interface_Product_Controller $product_controller,
+		Interface_Async_Process_Controller $async_process_controller
 	) {
 		$this->data              = $data;
 		$this->base_name         = $base_name;
@@ -99,6 +101,11 @@ class Plugin {
 		
 		add_action( 'add_meta_boxes', array( $product_controller, 'add_meta_boxes' ) );
 		add_action( 'woocommerce_process_product_meta', array( $product_controller, 'save_product_meta' ) );
+
+		// Delivery report.
+		add_action( 'init', array( $async_process_controller, 'handle_async_process_webhook' ) );
+		add_action( 'sequra_resume_task_runner', array( $async_process_controller, 'resume_task_runner' ) );
+		add_action( 'sequra_halt_task_runner', array( $async_process_controller, 'halt_task_runner' ) );
 	}
 
 	/**
@@ -120,13 +127,23 @@ class Plugin {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires WooCommerce ' . $this->data['RequiresWC'] . ' or greater.' ) );
 		}
+
+		if ( ! wp_next_scheduled( 'sequra_halt_task_runner' ) ) {
+			wp_schedule_single_event( time(), 'sequra_resume_task_runner' );
+		}
 	}
 
 	/**
 	 * Handle deactivation of the plugin.
 	 */
 	public function deactivate(): void {
-		// TODO: Do something on deactivation.
+		wp_clear_scheduled_hook( 'sequra_resume_task_runner' );
+		/**
+		 * Halt the task runner.
+		 * 
+		 * @since 3.0.0
+		 */
+		do_action( 'sequra_halt_task_runner' );
 	}
 
 	/**
