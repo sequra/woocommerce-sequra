@@ -48,7 +48,7 @@ if (!window.SequraFE) {
             environment: 'sandbox',
             username: '',
             password: '',
-            sendStatisticalData: false
+            sendStatisticalData: true
         };
 
         /**
