@@ -88,4 +88,31 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 		$sequra_payment_method = $order instanceof WC_Order ? $this->order_service->get_payment_method_title( $order ) : null;
 		return empty( $sequra_payment_method ) ? $value : $sequra_payment_method;
 	}
+
+	/**
+	 * Add support to custom meta query vars for the order query
+	 *
+	 * @param array $wp_query_args Args for WP_Query.
+	 * @param array $query_vars Query vars from WC_Order_Query.
+	 * @param WC_Order_Data_Store_CPT $order_data_store WC_Order_Data_Store instance.
+	 * @return array modified $query
+	 */
+	public function handle_custom_query_vars( array $wp_query_args, array $query_vars, $order_data_store ): array {
+		$custom_query_vars = array( 
+			$this->order_service->get_sent_to_sequra_meta_key(),
+		);
+		foreach ( $query_vars as $key => $value ) {
+			if ( isset( $value['compare'] ) && in_array( $key, $custom_query_vars, true ) ) {
+				$arg = array(
+					'key'     => $key,
+					'compare' => $value['compare'],
+				);
+				if ( isset( $value['value'] ) ) {
+					$arg['value'] = $value['value'];
+				}
+				$wp_query_args['meta_query'][] = $arg;
+			}
+		}
+		return $wp_query_args;
+	}
 }

@@ -20,6 +20,7 @@ use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Order\Order_Service;
 use Throwable;
 use WC_Order;
 
@@ -50,16 +51,25 @@ class Shop_Order_Service implements ShopOrderService {
 	private $logger;
 
 	/**
+	 * Order service
+	 * 
+	 * @var Order_Service
+	 */
+	private $order_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
 		Order_Status_Settings_Service $order_status_service,
 		SeQuraOrderRepositoryInterface $sequra_order_repository,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		Order_Service $order_service
 	) {
 		$this->order_status_service    = $order_status_service;
 		$this->sequra_order_repository = $sequra_order_repository;
 		$this->logger                  = $logger;
+		$this->order_service           = $order_service;
 	}
 	
 	/**
@@ -88,7 +98,27 @@ class Shop_Order_Service implements ShopOrderService {
 	 * @return string[] | int[]
 	 */
 	public function getReportOrderIds( int $page, int $limit = 5000 ): array {
+		// TODO: check if we need to fill this or keep it empty.
+		// Now an 409 error is thrown when the delivery report is sent.
+		// Message is: {"errors":["orders.0.cart.items.0 is not allowed per your contract"]}.
 		return array();
+	
+		// $args = array(
+		// 	'payment_method' => 'sequra',
+		// 	$this->order_service->get_sent_to_sequra_meta_key() => array( 'compare' => 'NOT EXISTS' ),
+		// 	/**
+		// 	 * Filter the order statuses to consider as shipped.
+		// 	 *
+		// 	 * @since 2.0.0
+		// 	 */
+		// 	'status'         => apply_filters( 'woocommerce_sequracheckout_sent_statuses', array( $this->order_status_service->get_shop_status_completed() ) ),
+		// 	'limit'          => $limit,
+		// 	'return'         => 'ids',
+		// );
+		// if ( -1 !== $limit ) {
+		// 	$args['paged'] = $page + 1;
+		// }
+		// return wc_get_orders( $args );
 	}
 
 	/**
@@ -100,15 +130,18 @@ class Shop_Order_Service implements ShopOrderService {
 		$to_date   = new DateTime();
 		$from_date = clone $to_date;
 		$from_date->modify( '-7 days' );
+		$from_date_str = $from_date->format( 'Y-m-d H:i:s' );
+		$to_date_str   = $to_date->format( 'Y-m-d H:i:s' );
 
-		return wc_get_orders(
-			array(
-				'date_created' => $from_date->format( 'Y-m-d H:i:s' ) . '...' . $to_date->format( 'Y-m-d H:i:s' ),
-				'limit'        => $limit,
-				'paged'        => $page + 1,
-				'return'       => 'ids',
-			) 
+		$args = array(
+			'date_created' => $from_date_str . '...' . $to_date_str,
+			'limit'        => $limit,
+			'return'       => 'ids',
 		);
+		if ( -1 !== $limit ) {
+			$args['paged'] = $page + 1;
+		}
+		return wc_get_orders( $args );
 	}
 
 	/**

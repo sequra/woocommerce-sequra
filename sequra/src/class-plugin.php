@@ -42,6 +42,8 @@ class Plugin {
 	 */
 	private $migration_manager;
 
+	private const HOOK_DELIVERY_REPORT = 'sequra_delivery_report';
+
 	/**
 	 * Construct the plugin and bind hooks with controllers.
 	 */
@@ -103,9 +105,8 @@ class Plugin {
 		add_action( 'woocommerce_process_product_meta', array( $product_controller, 'save_product_meta' ) );
 
 		// Delivery report.
-		add_action( 'init', array( $async_process_controller, 'handle_async_process_webhook' ) );
-		add_action( 'sequra_resume_task_runner', array( $async_process_controller, 'resume_task_runner' ) );
-		add_action( 'sequra_halt_task_runner', array( $async_process_controller, 'halt_task_runner' ) );
+		add_action( self::HOOK_DELIVERY_REPORT, array( $async_process_controller, 'send_delivery_report' ) );
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $payment_controller, 'handle_custom_query_vars' ), 10, 3 );
 	}
 
 	/**
@@ -128,8 +129,11 @@ class Plugin {
 			wp_die( esc_html( 'This plugin requires WooCommerce ' . $this->data['RequiresWC'] . ' or greater.' ) );
 		}
 
-		if ( ! wp_next_scheduled( 'sequra_halt_task_runner' ) ) {
-			wp_schedule_single_event( time(), 'sequra_resume_task_runner' );
+		if ( ! wp_next_scheduled( self::HOOK_DELIVERY_REPORT ) ) {
+			$random_offset = wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
+			$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
+			$time          = $random_offset + strtotime( $tomorrow );
+			wp_schedule_event( $time, 'daily', self::HOOK_DELIVERY_REPORT );
 		}
 	}
 
@@ -137,13 +141,7 @@ class Plugin {
 	 * Handle deactivation of the plugin.
 	 */
 	public function deactivate(): void {
-		wp_clear_scheduled_hook( 'sequra_resume_task_runner' );
-		/**
-		 * Halt the task runner.
-		 * 
-		 * @since 3.0.0
-		 */
-		do_action( 'sequra_halt_task_runner' );
+		wp_clear_scheduled_hook( self::HOOK_DELIVERY_REPORT );
 	}
 
 	/**

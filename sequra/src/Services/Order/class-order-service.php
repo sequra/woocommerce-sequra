@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
@@ -30,6 +32,7 @@ class Order_Service implements Interface_Order_Service {
 	private const META_KEY_CAMPAIGN        = '_sq_campaign';
 	private const META_KEY_CART_REF        = '_sq_cart_ref';
 	private const META_KEY_CART_CREATED_AT = '_sq_cart_created_at';
+	private const META_KEY_SENT_TO_SEQURA  = '_sq_sent_to_sequra';
 
 	/**
 	 * Payment service
@@ -529,5 +532,75 @@ class Order_Service implements Interface_Order_Service {
 
 		$order->save();
 		return true;
+	}
+
+	/**
+	 * Get the meta key used to store the sent to seQura value.
+	 */
+	public function get_sent_to_sequra_meta_key(): string {
+		return self::META_KEY_SENT_TO_SEQURA;
+	}
+
+	/**
+	 * Set the order as sent to seQura
+	 */
+	public function set_as_sent_to_sequra( WC_Order $order ): void {
+		$order->update_meta_data( self::META_KEY_SENT_TO_SEQURA, 1 );
+		$order->save();
+	}
+
+	/**
+	 * Get customer for the order
+	 */
+	public function get_customer( ?WC_Order $order, string $lang, int $fallback_user_id = 0, string $fallback_ip = '', string $fallback_user_agent = '' ): Customer {
+		$current_user_id = $order ? $order->get_customer_id() : $fallback_user_id;
+		$logged_in       = $current_user_id > 0;
+		$ref             = $logged_in ? $current_user_id : null;
+		$ip              = $order ? $order->get_customer_ip_address( 'edit' ) : $fallback_ip;
+		$user_agent      = $order ? $order->get_customer_user_agent( 'edit' ) : $fallback_user_agent;
+
+		return new Customer(
+			$this->get_email( $order ),
+			$lang,
+			$ip,
+			$user_agent,
+			$this->get_first_name( $order, true ),
+			$this->get_last_name( $order, true ),
+			$this->get_shopper_title( $order ), // title.
+			$ref,
+			$this->get_dob( $order ), // dateOfBirth.
+			$this->get_nin( $order ), // nin.
+			$this->get_company( $order, true ),
+			$this->get_vat( $order, true ), // vatNumber.
+			$this->get_shopper_created_at( $order, true ), // createdAt.
+			$this->get_shopper_updated_at( $order, true ), // updatedAt.
+			$this->get_shopper_rating( $order ), // rating.
+			null, // ninControl.
+			$this->get_previous_orders( $current_user_id ),
+			null, // vehicle.
+			$logged_in
+		);
+	}
+
+	/**
+	 * Get delivery or invoice address
+	 */
+	public function get_address( ?WC_Order $order, bool $is_delivery ): Address {
+		$country = $this->get_country( $order, $is_delivery );
+		return new Address(
+			$this->get_company( $order, $is_delivery ),
+			$this->get_address_1( $order, $is_delivery ),
+			$this->get_address_2( $order, $is_delivery ),
+			$this->get_postcode( $order, $is_delivery ),
+			$this->get_city( $order, $is_delivery ),
+			$country ? $country : 'ES',
+			$this->get_first_name( $order, $is_delivery ),
+			$this->get_last_name( $order, $is_delivery ),
+			null, // phone.
+			$this->get_phone( $order, $is_delivery ), // mobile phone.
+			$this->get_state( $order, $is_delivery ),
+			$order ? $order->get_customer_note( 'edit' ) : null, // extra.
+			$this->get_vat( $order, $is_delivery )
+		);
 	}
 }

@@ -18,6 +18,7 @@ use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalDat
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
@@ -50,8 +51,6 @@ use SeQura\Core\Infrastructure\ORM\RepositoryRegistry;
 use SeQura\Core\Infrastructure\Serializer\Concrete\JsonSerializer;
 use SeQura\Core\Infrastructure\Serializer\Serializer;
 use SeQura\Core\Infrastructure\ServiceRegister as Reg;
-use SeQura\Core\Infrastructure\TaskExecution\Interfaces\AsyncProcessService;
-use SeQura\Core\Infrastructure\TaskExecution\Interfaces\TaskRunnerManager;
 use SeQura\Core\Infrastructure\TaskExecution\Process;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\Core\Infrastructure\Utility\TimeProvider;
@@ -87,7 +86,6 @@ use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Sett
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\StatisticalData\Services\Statistical_Data_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
@@ -428,21 +426,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ DisconnectServiceInterface::class ];
 			}
 		);
-		// Override statistical data service.
-		Reg::registerService(
-			StatisticalDataService::class,
-			static function () {
-				if ( ! isset( self::$cache[ StatisticalDataService::class ] ) ) {
-					self::$cache[ StatisticalDataService::class ] = new Statistical_Data_Service(
-						Reg::getService( StatisticalDataRepositoryInterface::class ),
-						Reg::getService( SendReportRepositoryInterface::class ),
-						Reg::getService( TimeProvider::class ),
-						Reg::getService( StoreService::class )
-					);
-				}
-				return self::$cache[ StatisticalDataService::class ];
-			}
-		);
 		Reg::registerService(
 			OrderReportServiceInterface::class,
 			static function () {
@@ -450,7 +433,11 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ OrderReportServiceInterface::class ] = new Order_Report_Service(
 						Reg::getService( Configuration::CLASS_NAME ),
 						Reg::getService( 'woocommerce.data' ),
-						Reg::getService( 'environment.data' )
+						Reg::getService( 'environment.data' ),
+						Reg::getService( Interface_Pricing_Service::class ),
+						Reg::getService( Interface_Cart_Service::class ),
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_I18n::class )
 					);
 				}
 				return self::$cache[ OrderReportServiceInterface::class ];
@@ -587,7 +574,11 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Report_Service::class ] ) ) {
 					self::$cache[ Interface_Report_Service::class ] = new Report_Service(
 						Reg::getService( Configuration::class ),
-						Reg::getService( TaskRunnerManager::CLASS_NAME )
+						Reg::getService( StoreService::class ),
+						Reg::getService( ShopOrderService::class ),
+						Reg::getService( StatisticalDataRepositoryInterface::class ),
+						Reg::getService( CountryConfigurationRepositoryInterface::class ),
+						Reg::getService( Interface_Order_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Report_Service::class ];
@@ -695,7 +686,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ ShopOrderService::class ] = new Shop_Order_Service(
 						Reg::getService( OrderStatusSettingsService::class ),
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Order_Service::class )
 					);
 				}
 				return self::$cache[ ShopOrderService::class ];
@@ -882,7 +874,6 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Async_Process_Controller::class ] = new Async_Process_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( 'plugin.templates_path' ),
-						Reg::getService( AsyncProcessService::CLASS_NAME ),
 						Reg::getService( Interface_Report_Service::class )
 					);
 				}

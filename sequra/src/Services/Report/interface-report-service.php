@@ -14,17 +14,9 @@ namespace SeQura\WC\Services\Report;
 interface Interface_Report_Service {
 
 	/**
-	 * Get webhook to process async reports
+	 * Get store id for current context
+	 *
+	 * @throws Throwable
 	 */
-	public function get_async_process_webhook(): string;
-
-	/**
-	 * Check if the task runner is halted and resume it
-	 */
-	public function resume_task_runner(): void;
-
-	/**
-	 * Halt the task runner
-	 */
-	public function halt_task_runner(): void;
+	public function send_delivery_report_for_current_store(): void;
 }

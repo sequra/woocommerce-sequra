@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
 use SeQura\WC\Dto\Cart_Info;
@@ -165,4 +167,24 @@ interface Interface_Order_Service {
 	 * Get payment gateway webhook identifier
 	 */
 	public function get_event_url( WC_Order $order, string $store_id ): string;
+
+	/**
+	 * Get the meta key used to store the sent to seQura value.
+	 */
+	public function get_sent_to_sequra_meta_key(): string;
+
+	/**
+	 * Get customer for the order
+	 */
+	public function get_customer( ?WC_Order $order, string $lang, int $fallback_user_id = 0, string $fallback_ip = '', string $fallback_user_agent = '' ): Customer;
+
+	/**
+	 * Get delivery or invoice address
+	 */
+	public function get_address( ?WC_Order $order, bool $is_delivery ): Address;
+
+	/**
+	 * Set the order as sent to seQura
+	 */
+	public function set_as_sent_to_sequra( WC_Order $order ): void;
 }

@@ -40,6 +40,13 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	}
 
 	/**
+	 * Returns WooCommerce status for cancelled orders.
+	 */
+	public function get_shop_status_completed(): string {
+		return 'wc-completed';
+	}
+
+	/**
 	 * Translate the order status from WC to SeQura using the current configuration.
 	 */
 	public function map_status_from_shop_to_sequra( string $shop_status ): ?string {

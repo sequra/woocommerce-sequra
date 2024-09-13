@@ -70,31 +70,8 @@ class Configuration extends CoreConfiguration {
 	 * @return string Formatted URL of async process starter endpoint.
 	 */
 	public function getAsyncProcessUrl( $guid ) {
-		// return ''; // Not used in this implementation. 
-		$report_service = ServiceRegister::getService( Interface_Report_Service::class );
-		return add_query_arg(
-			array(
-				// 'wc-api' => $report_service->get_async_process_webhook(),
-				'action' => $report_service->get_async_process_webhook(),
-				'guid'   => $guid,
-			),
-			home_url( '/' )
-		);
+		return ''; // Not used in this implementation.
 	}
-
-	/**
-	 * Automatic task runner wakeup delay in seconds. Task runner will sleep at the end of its lifecycle for this value
-	 * seconds before it sends wakeup signal for a new lifecycle. Return null to use default system value (10).
-	 *
-	 * @return int|null Task runner wakeup delay in seconds if set; otherwise, null.
-	 */
-	// public function getTaskRunnerWakeupDelay() {
-	// 	// TODO: remove this!
-	// 	if ( (bool) get_option( 'sequra_task_runner_on' ) ) {
-	// 		return 600;
-	// 	}
-	// 	return parent::getTaskRunnerWakeupDelay();
-	// }
 
 	/**
 	 * Check if the current page is the settings page.
