@@ -103,6 +103,7 @@ class Shop_Order_Service implements ShopOrderService {
 		// Message is: {"errors":["orders.0.cart.items.0 is not allowed per your contract"]}.
 		return array();
 	
+		//phpcs:disable
 		// $args = array(
 		// 	'payment_method' => 'sequra',
 		// 	$this->order_service->get_sent_to_sequra_meta_key() => array( 'compare' => 'NOT EXISTS' ),
@@ -119,6 +120,7 @@ class Shop_Order_Service implements ShopOrderService {
 		// 	$args['paged'] = $page + 1;
 		// }
 		// return wc_get_orders( $args );
+		//phpcs:enable
 	}
 
 	/**
