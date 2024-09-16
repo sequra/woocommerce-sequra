@@ -187,4 +187,9 @@ interface Interface_Order_Service {
 	 * Set the order as sent to seQura
 	 */
 	public function set_as_sent_to_sequra( WC_Order $order ): void;
+
+	/**
+	 * Call the Order Update API to sync the order status with SeQura
+	 */
+	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void;
 }

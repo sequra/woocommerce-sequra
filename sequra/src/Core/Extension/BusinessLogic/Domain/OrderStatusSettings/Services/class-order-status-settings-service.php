@@ -40,10 +40,22 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	}
 
 	/**
-	 * Returns WooCommerce status for cancelled orders.
+	 * Returns WooCommerce status for completed orders.
 	 */
 	public function get_shop_status_completed(): string {
-		return 'wc-completed';
+		/**
+		 * Filter the WooCommerce status for completed.
+		 *
+		 * @since 3.0.0
+		 */
+		return apply_filters( 'sequra_shop_status_completed', 'wc-completed' );
+	}
+
+	/**
+	 * Remove prefix from WooCommerce status.
+	 */
+	public function unprefixed_shop_status( string $shop_status ): string {
+		return str_replace( 'wc-', '', $shop_status );
 	}
 
 	/**

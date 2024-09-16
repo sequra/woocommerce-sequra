@@ -8,14 +8,20 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
-use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Payment_Method_Data;
+use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use WC_DateTime;
@@ -51,9 +57,30 @@ class Order_Service implements Interface_Order_Service {
 	/**
 	 * Order status service
 	 *
-	 * @var OrderStatusSettingsService
+	 * @var Order_Status_Settings_Service
 	 */
 	private $order_status_service;
+
+	/**
+	 * Configuration
+	 *
+	 * @var Configuration
+	 */
+	private $configuration;
+
+	/**
+	 * Core order service
+	 *
+	 * @var OrderService
+	 */
+	private $core_order_service;
+
+	/**
+	 * Cart service
+	 *
+	 * @var Interface_Cart_Service
+	 */
+	private $cart_service;
 
 	/**
 	 * Constructor
@@ -61,11 +88,17 @@ class Order_Service implements Interface_Order_Service {
 	public function __construct( 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
-		OrderStatusSettingsService $order_status_service
+		Order_Status_Settings_Service $order_status_service,
+		Configuration $configuration,
+		OrderService $core_order_service,
+		Interface_Cart_Service $cart_service
 	) {
 		$this->payment_service      = $payment_service;
 		$this->pricing_service      = $pricing_service;
 		$this->order_status_service = $order_status_service;
+		$this->configuration        = $configuration;
+		$this->core_order_service   = $core_order_service;
+		$this->cart_service         = $cart_service;
 	}
 	
 	/**
@@ -602,5 +635,39 @@ class Order_Service implements Interface_Order_Service {
 			$order ? $order->get_customer_note( 'edit' ) : null, // extra.
 			$this->get_vat( $order, $is_delivery )
 		);
+	}
+
+	/**
+	 * Call the Order Update API to sync the order status with SeQura
+	 */
+	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void {
+		if ( $this->order_status_service->unprefixed_shop_status( $this->order_status_service->get_shop_status_completed() ) === $new_store_status ) {
+			// TODO: call order update api and send shipped order.
+			$cart_info    = $this->get_cart_info( $order );
+			$shipped_cart = new Cart(
+				$order->get_currency( 'edit' ), // Currency.
+				false, // Gift.
+				array_merge(
+					$this->cart_service->get_items( $order ),
+					$this->cart_service->get_handling_items( $order ),
+					$this->cart_service->get_discount_items( $order )
+				), // Items.
+				$cart_info->ref ?? null,
+				$cart_info->created_at ?? null, // Created at.
+				$order->get_date_completed()->format( 'Y-m-d H:i:s' ) // Updated At.
+			);
+			$order_data   = new OrderUpdateData(
+				$order->get_id(),
+				$shipped_cart,
+				null, // Unshipped cart.
+				null,
+				null
+			);
+			$store_id     = $this->configuration->get_store_id();
+			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
+			return;
+		}
+
+		// TODO: implement refund handling.
 	}
 }

@@ -60,6 +60,8 @@ use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\Product\Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\I18n_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Hooks\Order\Interface_Order_Controller;
+use SeQura\WC\Controllers\Hooks\Order\Order_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Process\Async_Process_Controller;
@@ -159,7 +161,8 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Payment_REST_Controller::class ),
 					Reg::getService( Log_REST_Controller::class ),
 					Reg::getService( Interface_Product_Controller::class ),
-					Reg::getService( Interface_Async_Process_Controller::class )
+					Reg::getService( Interface_Async_Process_Controller::class ),
+					Reg::getService( Interface_Order_Controller::class )
 				);
 			}
 		);
@@ -876,6 +879,19 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Interface_Async_Process_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Controller::class ] ) ) {
+					self::$cache[ Interface_Order_Controller::class ] = new Order_Controller(
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( 'plugin.templates_path' ),
+						Reg::getService( Interface_Order_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Order_Controller::class ];
 			}
 		);
 		Reg::registerService(
