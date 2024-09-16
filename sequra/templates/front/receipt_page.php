@@ -17,7 +17,6 @@ if ( empty( $args['form'] ) ) {
 
 <p>
 <?php 
-// TODO: Review this text.
 echo wp_kses_post( __( 'Thank you for your order. Please fill the required data to pay with seQura...', 'sequra' ) );
 ?>
 </p>

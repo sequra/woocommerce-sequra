@@ -65,7 +65,6 @@ export default class OnboardingSettingsPage extends SettingsPage {
         await this.page.locator(this.selector.assetsKey).click();
         await this.page.locator(this.selector.assetsKey).type(dataMerchant[merchant].assetsKey);
         await this.page.locator(this.selector.primaryBtn).click();
-        // TODO: maybe in this point might be interesting to fill some widget configuration.
         await this.page.locator(this.selector.primaryBtn).click();
         await this.page.waitForSelector(this.selector.headerNavbar, { timeout: 5000 });
     }

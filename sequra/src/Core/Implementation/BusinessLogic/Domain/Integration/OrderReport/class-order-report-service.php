@@ -99,7 +99,6 @@ class Order_Report_Service implements OrderReportServiceInterface {
 	 * @return OrderReport[]
 	 */
 	public function getOrderReports( array $orderIds ): array { 
-		// TODO: implement this?
 		$order_reports = array();
 		foreach ( $orderIds as $order_id ) {
 			$order_id = (int) $order_id;
