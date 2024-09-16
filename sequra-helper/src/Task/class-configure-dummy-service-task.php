@@ -58,7 +58,7 @@ class Configure_Dummy_Service_Task extends Task {
 				'index_5' => null,
 				'index_6' => null,
 				'index_7' => null,
-				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\StatisticalData\\\\Entities\\\\StatisticalData","id":null,"storeId":"1","statisticalData":{"sendStatisticalData":false}}',
+				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\StatisticalData\\\\Entities\\\\StatisticalData","id":null,"storeId":"1","statisticalData":{"sendStatisticalData":true}}',
 			)
 		);
 		$wpdb->insert(

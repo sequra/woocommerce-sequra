@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\Infrastructure\Configuration\Configuration as CoreConfiguration;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Services\Report\Interface_Report_Service;
 use Throwable;
 use WP_Site;
 
@@ -69,7 +70,7 @@ class Configuration extends CoreConfiguration {
 	 * @return string Formatted URL of async process starter endpoint.
 	 */
 	public function getAsyncProcessUrl( $guid ) {
-		return ''; // Not used in this implementation. 
+		return ''; // Not used in this implementation.
 	}
 
 	/**

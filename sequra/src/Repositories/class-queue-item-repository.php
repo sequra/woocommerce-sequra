@@ -195,7 +195,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 		$filter->setLimit( 1 );
 		foreach ( $conditions as $column => $value ) {
 			if ( null === $value ) {
-				$filter->where( $column, 'IS NULL' );
+				$filter->where( $column, 'IS' );
 			} else {
 				$filter->where( $column, '=', $value );
 			}

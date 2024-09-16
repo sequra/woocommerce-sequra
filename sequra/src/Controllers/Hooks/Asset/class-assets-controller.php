@@ -219,6 +219,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'useHostedPage'               => false,
 				'useReplacementPaymentMethod' => false,
 				'useAllowedIPAddresses'       => true,
+				'useOrderReporting'           => false,
 			),
 			'isPromotional'     => false,
 			'_state_controller' => $state_controller,

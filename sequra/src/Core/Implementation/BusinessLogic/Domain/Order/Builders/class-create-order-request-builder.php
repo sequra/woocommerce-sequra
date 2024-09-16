@@ -19,7 +19,8 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
-use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Models\OrderRequest\Options as ExtendedOptions;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
@@ -305,7 +306,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 					$addresses_may_be_missing = null;
 				}
 
-				$options = new Options(
+				$options = new ExtendedOptions(
 					null, // has_jquery.
 					null, // uses_shipped_cart.
 					$addresses_may_be_missing, // addresses_may_be_missing.
@@ -341,8 +342,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get delivery or invoice address payload
 	 */
 	private function address( bool $is_delivery ): Address {
-		$country = $this->order_service->get_country( $this->current_order, $is_delivery );
-
 		/**
 		 * Filter the address options.
 		 * TODO: document this hook
@@ -351,21 +350,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 */
 		return apply_filters(
 			'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options',
-			new Address(
-				$this->order_service->get_company( $this->current_order, $is_delivery ),
-				$this->order_service->get_address_1( $this->current_order, $is_delivery ),
-				$this->order_service->get_address_2( $this->current_order, $is_delivery ),
-				$this->order_service->get_postcode( $this->current_order, $is_delivery ),
-				$this->order_service->get_city( $this->current_order, $is_delivery ),
-				$country ? $country : 'ES',
-				$this->order_service->get_first_name( $this->current_order, $is_delivery ),
-				$this->order_service->get_last_name( $this->current_order, $is_delivery ),
-				null, // phone.
-				$this->order_service->get_phone( $this->current_order, $is_delivery ), // mobile phone.
-				$this->order_service->get_state( $this->current_order, $is_delivery ),
-				$this->current_order ? $this->current_order->get_customer_note( 'edit' ) : null, // extra.
-				$this->order_service->get_vat( $this->current_order, $is_delivery )
-			)
+			$this->order_service->get_address( $this->current_order, $is_delivery )
 		);
 	}
 
@@ -373,12 +358,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get customer payload
 	 */
 	private function customer(): Customer {
-		$current_user_id = $this->current_order ? $this->current_order->get_customer_id() : get_current_user_id();
-		$logged_in       = $current_user_id > 0;
-		$ref             = $logged_in ? $current_user_id : null;
-		$ip              = $this->current_order ? $this->current_order->get_customer_ip_address( 'edit' ) : $this->shopper_service->get_ip();
-		$user_agent      = $this->current_order ? $this->current_order->get_customer_user_agent( 'edit' ) : $this->shopper_service->get_user_agent();
-
 		/**
 		 * Filter the customer options.
 		 * TODO: document this hook
@@ -387,27 +366,13 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 */
 		return apply_filters(
 			'sequra_create_order_request_customer_options',
-			new Customer(
-				$this->order_service->get_email( $this->current_order ),
+			$this->order_service->get_customer(
+				$this->current_order,
 				$this->i18n->get_lang(),
-				$ip,
-				$user_agent,
-				$this->order_service->get_first_name( $this->current_order, true ),
-				$this->order_service->get_last_name( $this->current_order, true ),
-				$this->order_service->get_shopper_title( $this->current_order ), // title.
-				$ref,
-				$this->order_service->get_dob( $this->current_order ), // dateOfBirth.
-				$this->order_service->get_nin( $this->current_order ), // nin.
-				$this->order_service->get_company( $this->current_order, true ),
-				$this->order_service->get_vat( $this->current_order, true ), // vatNumber.
-				$this->order_service->get_shopper_created_at( $this->current_order, true ), // createdAt.
-				$this->order_service->get_shopper_updated_at( $this->current_order, true ), // updatedAt.
-				$this->order_service->get_shopper_rating( $this->current_order ), // rating.
-				null, // ninControl.
-				$this->order_service->get_previous_orders( $current_user_id ),
-				null, // vehicle.
-				$logged_in
-			) 
+				get_current_user_id(),
+				$this->shopper_service->get_ip(),
+				$this->shopper_service->get_user_agent()
+			)
 		);
 	}
 

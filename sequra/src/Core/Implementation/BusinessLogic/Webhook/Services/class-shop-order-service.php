@@ -17,10 +17,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
-use Throwable;
 use WC_Order;
 
 /**
@@ -36,13 +33,6 @@ class Shop_Order_Service implements ShopOrderService {
 	private $sequra_order_repository;
 
 	/**
-	 * Order status service
-	 * 
-	 * @var Order_Status_Settings_Service
-	 */
-	private $order_status_service;
-
-	/**
 	 * Logger
 	 * 
 	 * @var Interface_Logger_Service
@@ -53,11 +43,9 @@ class Shop_Order_Service implements ShopOrderService {
 	 * Constructor
 	 */
 	public function __construct(
-		Order_Status_Settings_Service $order_status_service,
 		SeQuraOrderRepositoryInterface $sequra_order_repository,
 		Interface_Logger_Service $logger
 	) {
-		$this->order_status_service    = $order_status_service;
 		$this->sequra_order_repository = $sequra_order_repository;
 		$this->logger                  = $logger;
 	}
@@ -100,15 +88,18 @@ class Shop_Order_Service implements ShopOrderService {
 		$to_date   = new DateTime();
 		$from_date = clone $to_date;
 		$from_date->modify( '-7 days' );
+		$from_date_str = $from_date->format( 'Y-m-d H:i:s' );
+		$to_date_str   = $to_date->format( 'Y-m-d H:i:s' );
 
-		return wc_get_orders(
-			array(
-				'date_created' => $from_date->format( 'Y-m-d H:i:s' ) . '...' . $to_date->format( 'Y-m-d H:i:s' ),
-				'limit'        => $limit,
-				'paged'        => $page + 1,
-				'return'       => 'ids',
-			) 
+		$args = array(
+			'date_created' => $from_date_str . '...' . $to_date_str,
+			'limit'        => $limit,
+			'return'       => 'ids',
 		);
+		if ( -1 !== $limit ) {
+			$args['paged'] = $page + 1;
+		}
+		return wc_get_orders( $args );
 	}
 
 	/**

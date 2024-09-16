@@ -9,9 +9,10 @@
 namespace SeQura\WC\Tests;
 
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
-use SeQura\WC\Controllers\Hooks\Asset\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
+use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Plugin;
 use SeQura\WC\Controllers\Rest\REST_Controller;
@@ -33,6 +34,7 @@ class PluginTest extends WP_UnitTestCase {
 	private $rest_log_controller;
 	private $migration_manager;
 	private $product_controller;
+	private $async_process_controller;
 
 	public function set_up() {
 
@@ -57,6 +59,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->rest_payment_controller    = $this->createMock( REST_Controller::class );
 		$this->rest_log_controller        = $this->createMock( REST_Controller::class );
 		$this->product_controller         = $this->createMock( Interface_Product_Controller::class );
+		$this->async_process_controller   = $this->createMock( Interface_Async_Process_Controller::class );
 	}
 
 	private function setup_plugin_instance() {
@@ -72,24 +75,41 @@ class PluginTest extends WP_UnitTestCase {
 			$this->rest_onboarding_controller,
 			$this->rest_payment_controller,
 			$this->rest_log_controller,
-			$this->product_controller
+			$this->product_controller,
+			$this->async_process_controller
 		);
 	}
 
 	public function testConstructor_happyPath_hooksAreRegistered() {
 		$this->setup_plugin_instance();
 
-		$this->assertEquals( 10, \has_action( 'plugins_loaded', array( $this->plugin, 'install' ) ) );
-		$this->assertEquals( 10, \has_action( 'plugins_loaded', array( $this->i18n_controller, 'load_text_domain' ) ) );
-		$this->assertEquals( 10, \has_action( 'admin_enqueue_scripts', array( $this->asset_controller, 'enqueue_admin' ) ) );
-		$this->assertEquals( 10, \has_action( 'wp_enqueue_scripts', array( $this->asset_controller, 'enqueue_front' ) ) );
-		$this->assertEquals( 10, \has_action( 'admin_menu', array( $this->settings_controller, 'register_page' ) ) );
-		$this->assertEquals( 10, \has_filter( "plugin_action_links_{$this->base_name}", array( $this->settings_controller, 'add_action_link' ) ) );
-		$this->assertEquals( 10, \has_action( 'admin_footer_text', array( $this->settings_controller, 'remove_footer_admin' ) ) );
-		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_settings_controller, 'register_routes' ) ) );
-		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_onboarding_controller, 'register_routes' ) ) );
-		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_payment_controller, 'register_routes' ) ) );
-		$this->assertEquals( 10, \has_action( 'rest_api_init', array( $this->rest_log_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, has_action( 'plugins_loaded', array( $this->plugin, 'install' ) ) );
+		$this->assertEquals( 10, has_action( 'plugins_loaded', array( $this->i18n_controller, 'load_text_domain' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( $this->asset_controller, 'enqueue_admin' ) ) );
+		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $this->asset_controller, 'enqueue_front' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_menu', array( $this->settings_controller, 'register_page' ) ) );
+		$this->assertEquals( 10, has_filter( "plugin_action_links_{$this->base_name}", array( $this->settings_controller, 'add_action_link' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_footer_text', array( $this->settings_controller, 'remove_footer_admin' ) ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_settings_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_onboarding_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_payment_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_log_controller, 'register_routes' ) ) );
+		
+		$this->assertEquals( 10, has_filter( 'woocommerce_payment_gateways', array( $this->payment_controller, 'register_gateway_classes' ) ) );
+		$this->assertEquals( 10, has_action( 'woocommerce_blocks_loaded', array( $this->payment_controller, 'register_gateway_gutenberg_block' ) ) );
+		$this->assertEquals( 10, has_filter( 'woocommerce_thankyou_order_received_text', array( $this->payment_controller, 'order_received_text' ) ) );
+		$this->assertEquals( 10, has_filter( 'woocommerce_order_get_payment_method_title', array( $this->payment_controller, 'order_get_payment_method_title' ) ) );
+		$this->assertEquals( 10, has_action( 'woocommerce_after_main_content', array( $this->product_controller, 'add_widget_shortcode_to_page' ) ) );
+		$this->assertEquals( 10, has_action( 'wp_footer', array( $this->product_controller, 'add_widget_shortcode_to_page' ) ) );
+		
+		$this->assertEquals( true, shortcode_exists( 'sequra_widget' ) );
+		$this->assertEquals( true, shortcode_exists( 'sequra_cart_widget' ) );
+		$this->assertEquals( true, shortcode_exists( 'sequra_product_listing_widget' ) );
+		
+		$this->assertEquals( 10, has_action( 'woocommerce_process_product_meta', array( $this->product_controller, 'save_product_meta' ) ) );
+		$this->assertEquals( 10, has_action( 'add_meta_boxes', array( $this->product_controller, 'add_meta_boxes' ) ) );
+		$this->assertEquals( 10, has_action( 'sequra_delivery_report', array( $this->async_process_controller, 'send_delivery_report' ) ) );
+		$this->assertEquals( 10, has_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this->payment_controller, 'handle_custom_query_vars' ) ) );
 	}
 
 	public function testActivate_notMeetPhpRequirements_deactivateAndDie() {

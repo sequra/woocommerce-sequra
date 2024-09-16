@@ -8,9 +8,10 @@
 namespace SeQura\WC;
 
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
-use SeQura\WC\Controllers\Hooks\Asset\Interface_Product_Controller;
+use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
 use SeQura\WC\Services\Interface_Migration_Manager;
@@ -41,6 +42,8 @@ class Plugin {
 	 */
 	private $migration_manager;
 
+	private const HOOK_DELIVERY_REPORT = 'sequra_delivery_report';
+
 	/**
 	 * Construct the plugin and bind hooks with controllers.
 	 */
@@ -56,7 +59,8 @@ class Plugin {
 		REST_Controller $rest_onboarding_controller,
 		REST_Controller $rest_payment_controller,
 		REST_Controller $rest_log_controller,
-		Interface_Product_Controller $product_controller
+		Interface_Product_Controller $product_controller,
+		Interface_Async_Process_Controller $async_process_controller
 	) {
 		$this->data              = $data;
 		$this->base_name         = $base_name;
@@ -99,6 +103,10 @@ class Plugin {
 		
 		add_action( 'add_meta_boxes', array( $product_controller, 'add_meta_boxes' ) );
 		add_action( 'woocommerce_process_product_meta', array( $product_controller, 'save_product_meta' ) );
+
+		// Delivery report.
+		add_action( self::HOOK_DELIVERY_REPORT, array( $async_process_controller, 'send_delivery_report' ) );
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $payment_controller, 'handle_custom_query_vars' ), 10, 3 );
 	}
 
 	/**
@@ -120,13 +128,20 @@ class Plugin {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires WooCommerce ' . $this->data['RequiresWC'] . ' or greater.' ) );
 		}
+
+		if ( ! wp_next_scheduled( self::HOOK_DELIVERY_REPORT ) ) {
+			$random_offset = wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
+			$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
+			$time          = $random_offset + strtotime( $tomorrow );
+			wp_schedule_event( $time, 'daily', self::HOOK_DELIVERY_REPORT );
+		}
 	}
 
 	/**
 	 * Handle deactivation of the plugin.
 	 */
 	public function deactivate(): void {
-		// TODO: Do something on deactivation.
+		wp_clear_scheduled_hook( self::HOOK_DELIVERY_REPORT );
 	}
 
 	/**

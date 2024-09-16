@@ -18,11 +18,13 @@ use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalDat
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\OrderReport\OrderReportServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
@@ -35,6 +37,10 @@ use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\Ord
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
+use SeQura\Core\BusinessLogic\Domain\SendReport\RepositoryContracts\SendReportRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\StatisticalDataRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\StatisticalData\Services\StatisticalDataService;
+use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
@@ -42,18 +48,22 @@ use SeQura\Core\Infrastructure\Logger\Interfaces\DefaultLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\LoggerConfiguration;
 use SeQura\Core\Infrastructure\ORM\RepositoryRegistry;
+use SeQura\Core\Infrastructure\Serializer\Concrete\JsonSerializer;
+use SeQura\Core\Infrastructure\Serializer\Serializer;
 use SeQura\Core\Infrastructure\ServiceRegister as Reg;
 use SeQura\Core\Infrastructure\TaskExecution\Process;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\Core\Infrastructure\Utility\TimeProvider;
 use SeQura\WC\Controllers\Hooks\Asset\Assets_Controller;
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
-use SeQura\WC\Controllers\Hooks\Asset\Interface_Product_Controller;
-use SeQura\WC\Controllers\Hooks\Asset\Product_Controller;
+use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
+use SeQura\WC\Controllers\Hooks\Product\Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\I18n_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Payment_Controller;
+use SeQura\WC\Controllers\Hooks\Process\Async_Process_Controller;
+use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Settings_Controller;
 use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
@@ -76,6 +86,7 @@ use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Sett
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Queue_Item_Repository;
@@ -110,6 +121,8 @@ use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Product\Product_Service;
 use SeQura\WC\Services\Regex\Interface_Regex;
 use SeQura\WC\Services\Regex\Regex;
+use SeQura\WC\Services\Report\Interface_Report_Service;
+use SeQura\WC\Services\Report\Report_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -145,7 +158,8 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Onboarding_REST_Controller::class ),
 					Reg::getService( Payment_REST_Controller::class ),
 					Reg::getService( Log_REST_Controller::class ),
-					Reg::getService( Interface_Product_Controller::class )
+					Reg::getService( Interface_Product_Controller::class ),
+					Reg::getService( Interface_Async_Process_Controller::class )
 				);
 			}
 		);
@@ -413,6 +427,34 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
+			OrderReportServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ OrderReportServiceInterface::class ] ) ) {
+					self::$cache[ OrderReportServiceInterface::class ] = new Order_Report_Service(
+						Reg::getService( Configuration::CLASS_NAME ),
+						Reg::getService( 'woocommerce.data' ),
+						Reg::getService( 'environment.data' ),
+						Reg::getService( Interface_Pricing_Service::class ),
+						Reg::getService( Interface_Cart_Service::class ),
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_I18n::class )
+					);
+				}
+				return self::$cache[ OrderReportServiceInterface::class ];
+			}
+		);
+
+
+		Reg::registerService(
+			Serializer::class,
+			static function () {
+				if ( ! isset( self::$cache[ Serializer::class ] ) ) {
+					self::$cache[ Serializer::class ] = new JsonSerializer();
+				}
+				return self::$cache[ Serializer::class ];
+			}
+		);
+		Reg::registerService(
 			SellingCountriesServiceInterface::class,
 			static function () {
 				if ( ! isset( self::$cache[ SellingCountriesServiceInterface::class ] ) ) {
@@ -527,6 +569,22 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
+			Interface_Report_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Report_Service::class ] ) ) {
+					self::$cache[ Interface_Report_Service::class ] = new Report_Service(
+						Reg::getService( Configuration::class ),
+						Reg::getService( StoreService::class ),
+						Reg::getService( ShopOrderService::class ),
+						Reg::getService( StatisticalDataRepositoryInterface::class ),
+						Reg::getService( CountryConfigurationRepositoryInterface::class ),
+						Reg::getService( Interface_Order_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Report_Service::class ];
+			}
+		);
+		Reg::registerService(
 			Interface_Logger_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Logger_Service::class ] ) ) {
@@ -626,7 +684,6 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ ShopOrderService::class ] ) ) {
 					self::$cache[ ShopOrderService::class ] = new Shop_Order_Service(
-						Reg::getService( OrderStatusSettingsService::class ),
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
 						Reg::getService( Interface_Logger_Service::class )
 					);
@@ -806,6 +863,19 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Interface_Product_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Async_Process_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Async_Process_Controller::class ] ) ) {
+					self::$cache[ Interface_Async_Process_Controller::class ] = new Async_Process_Controller(
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( 'plugin.templates_path' ),
+						Reg::getService( Interface_Report_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Async_Process_Controller::class ];
 			}
 		);
 		Reg::registerService(

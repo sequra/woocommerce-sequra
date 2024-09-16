@@ -34,7 +34,7 @@ interface Interface_Payment_Method_Service {
 	 * 
 	 * @return array<string, string>[] See PaymentMethodsResponse::toArray() output
 	 */
-	public function get_all_payment_methods( string $store_id, string $merchant ): array;
+	public function get_all_payment_methods( ?string $store_id, ?string $merchant ): array;
 
 	/**
 	 * Check if the payment method data matches a valid payment method.
