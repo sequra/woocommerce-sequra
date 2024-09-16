@@ -17,11 +17,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
-use SeQura\WC\Services\Order\Order_Service;
-use Throwable;
 use WC_Order;
 
 /**
@@ -37,13 +33,6 @@ class Shop_Order_Service implements ShopOrderService {
 	private $sequra_order_repository;
 
 	/**
-	 * Order status service
-	 * 
-	 * @var Order_Status_Settings_Service
-	 */
-	private $order_status_service;
-
-	/**
 	 * Logger
 	 * 
 	 * @var Interface_Logger_Service
@@ -51,25 +40,14 @@ class Shop_Order_Service implements ShopOrderService {
 	private $logger;
 
 	/**
-	 * Order service
-	 * 
-	 * @var Order_Service
-	 */
-	private $order_service;
-
-	/**
 	 * Constructor
 	 */
 	public function __construct(
-		Order_Status_Settings_Service $order_status_service,
 		SeQuraOrderRepositoryInterface $sequra_order_repository,
-		Interface_Logger_Service $logger,
-		Order_Service $order_service
+		Interface_Logger_Service $logger
 	) {
-		$this->order_status_service    = $order_status_service;
 		$this->sequra_order_repository = $sequra_order_repository;
 		$this->logger                  = $logger;
-		$this->order_service           = $order_service;
 	}
 	
 	/**
@@ -98,29 +76,7 @@ class Shop_Order_Service implements ShopOrderService {
 	 * @return string[] | int[]
 	 */
 	public function getReportOrderIds( int $page, int $limit = 5000 ): array {
-		// TODO: check if we need to fill this or keep it empty.
-		// Now an 409 error is thrown when the delivery report is sent.
-		// Message is: {"errors":["orders.0.cart.items.0 is not allowed per your contract"]}.
 		return array();
-	
-		//phpcs:disable
-		// $args = array(
-		// 	'payment_method' => 'sequra',
-		// 	$this->order_service->get_sent_to_sequra_meta_key() => array( 'compare' => 'NOT EXISTS' ),
-		// 	/**
-		// 	 * Filter the order statuses to consider as shipped.
-		// 	 *
-		// 	 * @since 2.0.0
-		// 	 */
-		// 	'status'         => apply_filters( 'woocommerce_sequracheckout_sent_statuses', array( $this->order_status_service->get_shop_status_completed() ) ),
-		// 	'limit'          => $limit,
-		// 	'return'         => 'ids',
-		// );
-		// if ( -1 !== $limit ) {
-		// 	$args['paged'] = $page + 1;
-		// }
-		// return wc_get_orders( $args );
-		//phpcs:enable
 	}
 
 	/**

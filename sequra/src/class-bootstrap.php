@@ -684,10 +684,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ ShopOrderService::class ] ) ) {
 					self::$cache[ ShopOrderService::class ] = new Shop_Order_Service(
-						Reg::getService( OrderStatusSettingsService::class ),
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
-						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( Interface_Order_Service::class )
+						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
 				return self::$cache[ ShopOrderService::class ];
