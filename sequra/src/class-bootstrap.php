@@ -33,6 +33,7 @@ use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\AbstractItemFactory;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
@@ -640,7 +641,10 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
-						Reg::getService( OrderStatusSettingsService::class )
+						Reg::getService( OrderStatusSettingsService::class ),
+						Reg::getService( Configuration::class ),
+						Reg::getService( OrderService::class ),
+						Reg::getService( Interface_Cart_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Order_Service::class ];

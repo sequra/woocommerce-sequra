@@ -12,6 +12,7 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 	return;
 }
 
+use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\WebhookAPI\WebhookAPI;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
@@ -106,6 +107,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 		$this->supports = array(
 			'products',
+			// 'refunds',
 		);
 
 		$this->init_form_fields();
@@ -345,9 +347,16 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			|| null === $payload['signature'] 
 			|| null === $payload['storeId']
 			|| $this->payment_service->sign( $payload['order'] ) !== $payload['signature'] ) {
-			$this->logger->log_error( 'Bad signature', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
+			$this->logger->log_debug( 'Bad signature', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
 			status_header( 498 );
 			die( 'Bad signature' );
+		}
+
+		// Check if 'sq_state' is one of the expected values.
+		if ( ! in_array( $payload['sq_state'], OrderStates::toArray(), true ) ) {
+			$this->logger->log_error( 'Invalid sq_state', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
+			status_header( 400 );
+			die( 'Invalid state' );
 		}
 
 		$order = wc_get_order( $payload['order'] );
@@ -365,6 +374,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$payload = $this->prepare_payload();
 		$this->die_on_invalid_payload( $payload );
 		try {
+			// TODO: Check what to do when risk_assessment is received in the payload sq_state. Currently success page is shown to the user but order remains pending.
 			$response = WebhookAPI::webhookHandler( $payload['storeId'] )->handleRequest( $payload );
 			if ( ! $response->isSuccessful() ) {
 				$error = $response->toArray();
@@ -410,6 +420,10 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Webhook to process events
 	 */
 	public function process_event() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['event'] ) && 'cancelled' !== sanitize_text_field( wp_unslash( $_POST['event'] ) ) ) {
+			return;
+		}
 		$this->handle_webhook( $this->payment_service->get_event_webhook() );
 	}
 
