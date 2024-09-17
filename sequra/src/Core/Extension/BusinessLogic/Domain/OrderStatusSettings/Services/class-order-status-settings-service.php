@@ -42,13 +42,14 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	/**
 	 * Returns WooCommerce status for completed orders.
 	 */
-	public function get_shop_status_completed(): string {
+	public function get_shop_status_completed( bool $unprefixed = false ): string {
 		/**
 		 * Filter the WooCommerce status for completed.
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_shop_status_completed', 'wc-completed' );
+		$status = apply_filters( 'sequra_shop_status_completed', 'wc-completed' );
+		return $unprefixed ? $this->unprefixed_shop_status( $status ) : $status;
 	}
 
 	/**

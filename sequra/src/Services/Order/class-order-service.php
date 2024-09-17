@@ -641,31 +641,28 @@ class Order_Service implements Interface_Order_Service {
 	 * Call the Order Update API to sync the order status with SeQura
 	 */
 	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void {
-		if ( $this->order_status_service->unprefixed_shop_status( $this->order_status_service->get_shop_status_completed() ) === $new_store_status ) {
-			// TODO: call order update api and send shipped order.
-			$cart_info    = $this->get_cart_info( $order );
-			$shipped_cart = new Cart(
-				$order->get_currency( 'edit' ), // Currency.
-				false, // Gift.
-				array_merge(
-					$this->cart_service->get_items( $order ),
-					$this->cart_service->get_handling_items( $order ),
-					$this->cart_service->get_discount_items( $order )
-				), // Items.
-				$cart_info->ref ?? null,
-				$cart_info->created_at ?? null, // Created at.
-				$order->get_date_completed()->format( 'Y-m-d H:i:s' ) // Updated At.
+		if ( $this->order_status_service->get_shop_status_completed( true ) === $new_store_status ) {
+			$cart_info     = $this->get_cart_info( $order );
+			$currency      = $order->get_currency( 'edit' );
+			$cart_ref      = $cart_info->ref ?? null;
+			$created_at    = $cart_info->created_at ?? null;
+			$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+			$shipped_items = array_merge(
+				$this->cart_service->get_items( $order ),
+				$this->cart_service->get_handling_items( $order ),
+				$this->cart_service->get_discount_items( $order )
 			);
-			$order_data   = new OrderUpdateData(
-				$order->get_id(),
-				$shipped_cart,
-				null, // Unshipped cart.
-				null,
-				null
+
+			$order_data = new OrderUpdateData(
+				(string) $order->get_id(), // Order reference.
+				new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
+				new Cart( $currency, false, array(), $cart_ref, $created_at, $updated_at ), // Unshipped cart.
+				null, // Delivery address.
+				null // Invoice address.
 			);
-			$store_id     = $this->configuration->get_store_id();
+			$store_id   = $this->configuration->get_store_id();
 			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
-			return;
+			// TODO: check if we must revert the order status if the API call fails.
 		}
 
 		// TODO: implement refund handling.
