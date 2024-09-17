@@ -112,7 +112,7 @@ export default class CheckoutPage {
         await this.page.fill(this.selector[fieldGroup].address1, shopperData.address1);
         await this.page.fill(this.selector[fieldGroup].postcode, shopperData.postcode);
         await this.page.fill(this.selector[fieldGroup].city, shopperData.city);
-        
+
         // !Since Woo 9.2.0 this now is a native select instead of an input
         // await this.page.fill(this.selector[fieldGroup].state, shopperData.state);
         await this.page.locator(this.selector[fieldGroup].state).selectOption({ label: shopperData.state });
@@ -133,7 +133,7 @@ export default class CheckoutPage {
         await this.page.fill(this.selector[fieldGroup].address1, dataShopper.nonSpecial.address1);
         await this.page.fill(this.selector[fieldGroup].postcode, dataShopper.nonSpecial.postcode);
         await this.page.fill(this.selector[fieldGroup].city, dataShopper.nonSpecial.city);
-        
+
         // !Since Woo 9.2.0 this now is a native select instead of an input
         // await this.page.fill(this.selector[fieldGroup].state, dataShopper.nonSpecial.state);
         await this.page.locator(this.selector[fieldGroup].state).selectOption({ label: dataShopper.nonSpecial.state });
@@ -264,7 +264,7 @@ export default class CheckoutPage {
     }
 
     async waitForOrderOnHold() {
-        await this.page.waitForURL(/\/checkout\/order-received\//, { timeout: 30000});
+        await this.page.waitForURL(/\/checkout\/order-received\//, { timeout: 30000 });
         await this.expect(this.page.getByText('seQura is processing your request.')).toBeVisible();
     }
 
@@ -311,6 +311,14 @@ export default class CheckoutPage {
     }
 
     async expectPaymentMethodToBeVisible({ methodName }) {
+        try {
+            // check if radio #radio-control-wc-payment-method-options-sequra exists and it is not checked and check it
+            const locator = this.page.locator('#radio-control-wc-payment-method-options-sequra');
+            await this.expect(locator).toBeChecked({ checked: false, timeout: 1000 });
+            await locator.click();
+        } catch (err) {
+            console.log('Radio control not found');
+        }
         await this.expect(this.page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 3000 });
     }
 
