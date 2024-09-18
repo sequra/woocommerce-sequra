@@ -217,7 +217,7 @@ class SequraLogger {
 		}
 
 		if ( is_array( $msg ) || is_object( $msg ) ) {
-			$msg = wp_json_encode( $msg );
+			$msg = wp_json_encode( $msg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS );
 		}
 
 		return $message . $msg;
