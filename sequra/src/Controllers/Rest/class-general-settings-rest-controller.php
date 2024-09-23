@@ -407,7 +407,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 					return false;
 				}
 			}
-		} catch ( \Throwable ) {
+		} catch ( \Throwable $e ) {
 			return false;
 		}
 		return true;

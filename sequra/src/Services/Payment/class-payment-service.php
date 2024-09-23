@@ -93,7 +93,7 @@ class Payment_Service implements Interface_Payment_Service {
 				}
 			}
 			return empty( $merchant ) ? null : $merchant;
-		} catch ( Throwable ) {
+		} catch ( Throwable $e ) {
 			return null;
 		}
 	}
