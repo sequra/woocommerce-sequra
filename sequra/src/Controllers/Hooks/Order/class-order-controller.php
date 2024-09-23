@@ -92,7 +92,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 				$this->get_notices_transient( $order_id ),
 				array(
 					array(
-						'notice'      => __( 'An error occurred while updating the order status in seQura.', 'sequra' ), // TODO: improve message with link to simba.
+						'notice'      => __( 'An error occurred while updating the order data in seQura.', 'sequra' ), // TODO: improve message with link to simba.
 						'type'        => 'error',
 						'dismissible' => true,
 					),
@@ -108,7 +108,6 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	private function get_notices_transient( int $order_id ): string {
 		return 'sequra_notices_order_' . $order_id;
 	}
-
 
 	/**
 	 * Display notices related to an order
@@ -134,5 +133,15 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 			wc_get_template( 'admin/notice.php', $notice, '', $this->templates_path );
 			echo ob_get_clean(); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
+	}
+
+	/**
+	 * Show a link to the seQura back office in the order details page
+	 */
+	public function show_link_to_sequra_back_office( WC_Order $order ): void {
+		$args = array(
+			'sequra_link' => $this->order_service->get_link_to_sequra_back_office( $order ),
+		);
+		wc_get_template( 'admin/order_details.php', $args, '', $this->templates_path );
 	}
 }

@@ -112,6 +112,8 @@ class Plugin {
 		
 		// Order Update.
 		add_action( 'woocommerce_order_status_changed', array( $order_controller, 'handle_order_status_changed' ), 10, 4 );
+
+		add_action( 'woocommerce_admin_order_data_after_order_details', array( $order_controller, 'show_link_to_sequra_back_office' ) );
 	}
 
 	/**

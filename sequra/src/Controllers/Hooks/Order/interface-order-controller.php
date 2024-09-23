@@ -35,4 +35,9 @@ interface Interface_Order_Controller {
 	 * Display notices related to an order
 	 */
 	public function display_notices(): void;
+
+	/**
+	 * Show a link to the seQura back office in the order details page
+	 */
+	public function show_link_to_sequra_back_office( WC_Order $order ): void;
 }

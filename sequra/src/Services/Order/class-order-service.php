@@ -717,4 +717,22 @@ class Order_Service implements Interface_Order_Service {
 			throw $e;
 		}
 	}
+
+	/**
+	 * Get the link to the SeQura back office for the order
+	 */
+	public function get_link_to_sequra_back_office( WC_Order $order ): ?string {
+		if ( $order->get_payment_method() !== $this->payment_service->get_payment_gateway_id() ) {
+			return null;
+		}
+		
+		switch ( $this->configuration->get_env() ) {
+			case 'sandbox':
+				return 'https://simbox.sequrapi.com/orders/' . $order->get_transaction_id();
+			case 'production':
+				return 'https://simba.sequra.es/orders/' . $order->get_transaction_id();
+			default:
+				return null;
+		}
+	}
 }

@@ -199,4 +199,9 @@ interface Interface_Order_Service {
 	 * @throws Throwable 
 	 */
 	public function handle_refund( WC_Order $order, float $amount ): void;
+
+	/**
+	 * Get the link to the SeQura back office for the order
+	 */
+	public function get_link_to_sequra_back_office( WC_Order $order ): ?string;
 }

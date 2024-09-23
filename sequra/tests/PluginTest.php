@@ -115,6 +115,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'sequra_delivery_report', array( $this->async_process_controller, 'send_delivery_report' ) ) );
 		$this->assertEquals( 10, has_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this->order_controller, 'handle_custom_query_vars' ) ) );
 		$this->assertEquals( 10, has_action( 'woocommerce_order_status_changed', array( $this->order_controller, 'handle_order_status_changed' ) ) );
+		$this->assertEquals( 10, has_action( 'woocommerce_admin_order_data_after_order_details', array( $this->order_controller, 'show_link_to_sequra_back_office' ) ) );
 	}
 
 	public function testActivate_notMeetPhpRequirements_deactivateAndDie() {

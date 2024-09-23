@@ -125,6 +125,7 @@ class Shop_Order_Service implements ShopOrderService {
 		} 
 		
 		$this->update_sequra_order_status( $webhook );
+		$order->set_transaction_id( $webhook->getOrderRef() );
 
 		// translators: %1$d: WooCommerce Order ID.
 		$order->add_order_note( sprintf( esc_html__( 'Order ref sent to seQura: %1$d', 'sequra' ), $order->get_id() ) );
@@ -183,7 +184,7 @@ class Shop_Order_Service implements ShopOrderService {
 			->getMerchantReference()
 			->getOrderRef1();
 		}
-		
+
 		$order = wc_get_order( absint( $order_ref1 ) );
 		
 		if ( ! $order instanceof WC_Order ) {
