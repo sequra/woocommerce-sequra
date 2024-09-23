@@ -184,7 +184,6 @@ class Shop_Order_Service implements ShopOrderService {
 			->getOrderRef1();
 		}
 		
-		// TODO: change to store_id blog in a multisite environment. Or maybe it is already set via URL?
 		$order = wc_get_order( absint( $order_ref1 ) );
 		
 		if ( ! $order instanceof WC_Order ) {

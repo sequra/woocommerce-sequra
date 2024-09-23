@@ -375,7 +375,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$payload = $this->prepare_payload();
 		$this->die_on_invalid_payload( $payload );
 		try {
-			// TODO: Check what to do when risk_assessment is received in the payload sq_state. Currently success page is shown to the user but order remains pending.
 			$response = WebhookAPI::webhookHandler( $payload['storeId'] )->handleRequest( $payload );
 			if ( ! $response->isSuccessful() ) {
 				$error = $response->toArray();
@@ -482,7 +481,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			return true;
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			return new WP_Error( 'refund_failed', __( 'Refund failed', 'sequra' ) ); // TODO: improve message.
+			return new WP_Error( 'refund_failed', __( 'An error occurred while refunding the order in seQura.', 'sequra' ) ); // TODO: improve message.
 		}
 	}
 }
