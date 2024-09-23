@@ -192,4 +192,11 @@ interface Interface_Order_Service {
 	 * Call the Order Update API to sync the order status with SeQura
 	 */
 	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void;
+
+	/**
+	 * Update the order amount in SeQura after a refund
+	 *
+	 * @throws Throwable 
+	 */
+	public function handle_refund( WC_Order $order, float $amount ): void;
 }

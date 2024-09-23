@@ -24,6 +24,7 @@ use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use Throwable;
 use WC_DateTime;
 use WC_Order;
 use WP_User;
@@ -639,32 +640,81 @@ class Order_Service implements Interface_Order_Service {
 
 	/**
 	 * Call the Order Update API to sync the order status with SeQura
+	 * 
+	 * @throws Throwable
 	 */
 	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void {
 		if ( $this->order_status_service->get_shop_status_completed( true ) === $new_store_status ) {
-			$cart_info     = $this->get_cart_info( $order );
-			$currency      = $order->get_currency( 'edit' );
-			$cart_ref      = $cart_info->ref ?? null;
-			$created_at    = $cart_info->created_at ?? null;
-			$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+			$this->set_sequra_order_status_to_shipped( $order );
+		}
+	}
+
+	/**
+	 * Set the order status to shipped in SeQura
+	 *
+	 * @throws Throwable 
+	 */
+	private function set_sequra_order_status_to_shipped( WC_Order $order ): void {
+		$cart_info     = $this->get_cart_info( $order );
+		$currency      = $order->get_currency( 'edit' );
+		$cart_ref      = $cart_info->ref ?? null;
+		$created_at    = $cart_info->created_at ?? null;
+		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+		$shipped_items = array_merge(
+			$this->cart_service->get_items( $order ),
+			$this->cart_service->get_handling_items( $order ),
+			$this->cart_service->get_discount_items( $order ),
+			$this->cart_service->get_refund_items( $order )
+		);
+
+		$order_data = new OrderUpdateData(
+			(string) $order->get_id(), // Order reference.
+			new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
+			new Cart( $currency ), // Unshipped cart.
+			null, // Delivery address.
+			null // Invoice address.
+		);
+		try {
+			$store_id = $this->configuration->get_store_id();
+			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
+		} catch ( Throwable $e ) {
+			throw $e;
+		}
+	}
+
+	/**
+	 * Update the order amount in SeQura after a refund
+	 *
+	 * @throws Throwable 
+	 */
+	public function handle_refund( WC_Order $order, float $amount ): void {
+		$cart_info     = $this->get_cart_info( $order );
+		$currency      = $order->get_currency( 'edit' );
+		$cart_ref      = $cart_info->ref ?? null;
+		$created_at    = $cart_info->created_at ?? null;
+		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+		$shipped_items = array();
+		if ( $order->get_total( 'edit' ) > $amount ) {
 			$shipped_items = array_merge(
 				$this->cart_service->get_items( $order ),
 				$this->cart_service->get_handling_items( $order ),
-				$this->cart_service->get_discount_items( $order )
+				$this->cart_service->get_discount_items( $order ),
+				$this->cart_service->get_refund_items( $order )
 			);
-
+		}
+		
+		try {
+			$store_id   = $this->configuration->get_store_id();
 			$order_data = new OrderUpdateData(
 				(string) $order->get_id(), // Order reference.
 				new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
-				new Cart( $currency, false, array(), $cart_ref, $created_at, $updated_at ), // Unshipped cart.
+				new Cart( $currency ), // Unshipped cart.
 				null, // Delivery address.
 				null // Invoice address.
 			);
-			$store_id   = $this->configuration->get_store_id();
 			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
-			// TODO: check if we must revert the order status if the API call fails.
+		} catch ( Throwable $e ) {
+			throw $e;
 		}
-
-		// TODO: implement refund handling.
 	}
 }

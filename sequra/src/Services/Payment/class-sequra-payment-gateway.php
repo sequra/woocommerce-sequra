@@ -23,6 +23,7 @@ use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
 use WC_Order;
 use WC_Payment_Gateway;
+use WP_Error;
 
 /**
  * Handle use cases related to payments
@@ -107,7 +108,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 		$this->supports = array(
 			'products',
-			// 'refunds',
+			'refunds',
 		);
 
 		$this->init_form_fields();
@@ -452,5 +453,36 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			'form' => $response->getForm(),
 		);
 		wc_get_template( 'front/receipt_page.php', $args, '', $this->templates_path );
+	}
+
+	/**
+	 * Process refund.
+	 *
+	 * If the gateway declares 'refunds' support, this will allow it to refund.
+	 * a passed in amount.
+	 *
+	 * @param  int        $order_id Order ID.
+	 * @param  float|null $amount Refund amount.
+	 * @param  string     $reason Refund reason.
+	 * @return bool|\WP_Error True or false based on success, or a WP_Error object.
+	 */
+	public function process_refund( $order_id, $amount = null, $reason = '' ) {
+		$amount = (float) $amount;
+		if ( $amount <= 0 ) {
+			$this->logger->log_debug( 'Invalid refund amount: ' . $amount, __FUNCTION__, __CLASS__ );
+			return new WP_Error( 'empty_refund_amount', __( 'Refund amount cannot be empty', 'sequra' ) );
+		}
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order ) {
+			$this->logger->log_error( 'Order not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
+			return new WP_Error( 'order_not_found', __( 'Order not found', 'sequra' ) );
+		}
+		try {
+			$this->order_service->handle_refund( $order, $amount );
+			return true;
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			return new WP_Error( 'refund_failed', __( 'Refund failed', 'sequra' ) ); // TODO: improve message.
+		}
 	}
 }

@@ -30,4 +30,9 @@ interface Interface_Order_Controller {
 	 * Trigger the sync of the order status with SeQura
 	 */
 	public function handle_order_status_changed( int $order_id, string $old_status, string $new_status, WC_Order $order ): void;
+
+	/**
+	 * Display notices related to an order
+	 */
+	public function display_notices(): void;
 }

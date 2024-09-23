@@ -8,9 +8,11 @@
 
 namespace SeQura\WC\Controllers\Hooks\Order;
 
+use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
+use Throwable;
 use WC_Order;
 
 /**
@@ -35,6 +37,8 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->order_service = $order_service;
+
+		add_action( 'admin_notices', array( $this, 'display_notices' ) );
 	}
 
 	/**
@@ -70,6 +74,65 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	 */
 	public function handle_order_status_changed( int $order_id, string $old_status, string $new_status, WC_Order $order ): void {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		$this->order_service->update_sequra_order_status( $order, $old_status, $new_status );
+		try {
+			$this->order_service->update_sequra_order_status( $order, $old_status, $new_status );
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable(
+				$e,
+				__FUNCTION__,
+				__CLASS__,
+				array(
+					new LogContextData( 'order_id', $order_id ),
+					new LogContextData( 'old_status', $old_status ),
+					new LogContextData( 'new_status', $new_status ),
+				) 
+			);
+			
+			set_transient(
+				$this->get_notices_transient( $order_id ),
+				array(
+					array(
+						'notice'      => __( 'An error occurred while updating the order status in seQura.', 'sequra' ), // TODO: improve message with link to simba.
+						'type'        => 'error',
+						'dismissible' => true,
+					),
+				),
+				0 
+			);
+		}
+	}
+
+	/**
+	 * Get the transient key for notices related to an order
+	 */
+	private function get_notices_transient( int $order_id ): string {
+		return 'sequra_notices_order_' . $order_id;
+	}
+
+
+	/**
+	 * Display notices related to an order
+	 */
+	public function display_notices(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! is_admin() || ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) {
+			return;
+		}
+
+		$order = wc_get_order( absint( $_GET['post'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
+		$transient_key = $this->get_notices_transient( $order->get_id() );
+		$notices       = (array) get_transient( $transient_key );
+		if ( ! empty( $notices ) ) {
+			delete_transient( $transient_key );
+		}
+		foreach ( $notices as $notice ) {
+			ob_start();
+			wc_get_template( 'admin/notice.php', $notice, '', $this->templates_path );
+			echo ob_get_clean(); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 	}
 }

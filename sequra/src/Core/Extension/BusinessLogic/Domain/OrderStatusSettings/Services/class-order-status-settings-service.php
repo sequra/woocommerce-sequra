@@ -35,8 +35,9 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	/**
 	 * Returns WooCommerce status for cancelled orders.
 	 */
-	public function get_shop_status_cancelled(): string {
-		return 'wc-cancelled';
+	public function get_shop_status_cancelled( bool $unprefixed = false ): string {
+		$status = 'wc-cancelled';
+		return $unprefixed ? $this->unprefixed_shop_status( $status ) : $status;
 	}
 
 	/**
