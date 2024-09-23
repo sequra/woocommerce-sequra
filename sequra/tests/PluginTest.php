@@ -10,6 +10,7 @@ namespace SeQura\WC\Tests;
 
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Hooks\Order\Interface_Order_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
@@ -35,6 +36,7 @@ class PluginTest extends WP_UnitTestCase {
 	private $migration_manager;
 	private $product_controller;
 	private $async_process_controller;
+	private $order_controller;
 
 	public function set_up() {
 
@@ -60,6 +62,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->rest_log_controller        = $this->createMock( REST_Controller::class );
 		$this->product_controller         = $this->createMock( Interface_Product_Controller::class );
 		$this->async_process_controller   = $this->createMock( Interface_Async_Process_Controller::class );
+		$this->order_controller           = $this->createMock( Interface_Order_Controller::class );
 	}
 
 	private function setup_plugin_instance() {
@@ -76,7 +79,8 @@ class PluginTest extends WP_UnitTestCase {
 			$this->rest_payment_controller,
 			$this->rest_log_controller,
 			$this->product_controller,
-			$this->async_process_controller
+			$this->async_process_controller,
+			$this->order_controller
 		);
 	}
 
@@ -109,7 +113,8 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'woocommerce_process_product_meta', array( $this->product_controller, 'save_product_meta' ) ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', array( $this->product_controller, 'add_meta_boxes' ) ) );
 		$this->assertEquals( 10, has_action( 'sequra_delivery_report', array( $this->async_process_controller, 'send_delivery_report' ) ) );
-		$this->assertEquals( 10, has_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this->payment_controller, 'handle_custom_query_vars' ) ) );
+		$this->assertEquals( 10, has_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this->order_controller, 'handle_custom_query_vars' ) ) );
+		$this->assertEquals( 10, has_action( 'woocommerce_order_status_changed', array( $this->order_controller, 'handle_order_status_changed' ) ) );
 	}
 
 	public function testActivate_notMeetPhpRequirements_deactivateAndDie() {
