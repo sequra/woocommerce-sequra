@@ -195,7 +195,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 			return array();
 		}
 			
-		$this->payment_methods = $response->toArray()['availablePaymentMethods'];
+		$this->payment_methods = $response->toArray()['availablePaymentMethods'] ?? array();
 		return $this->payment_methods;
 	}
 
@@ -210,22 +210,26 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		if ( ! $store_id || ! $merchant ) {
 			return array();
 		}
-		
-		$response = AdminAPI::get()
+		try {
+			$response = AdminAPI::get()
 			->paymentMethods( $store_id )
 			->getPaymentMethods( strval( $merchant ) );
 		
-		if ( ! $response->isSuccessful() ) {
+			if ( ! $response->isSuccessful() ) {
+				return array();
+			}
+			$payment_methods = $response->toArray();
+
+			foreach ( $payment_methods as &$method ) {
+				$method['supportsWidgets']             = $this->supports_widgets( $method );
+				$method['supportsInstallmentPayments'] = $this->supports_installment_payments( $method );
+			}
+
+			return $payment_methods;
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return array();
 		}
-		$payment_methods = $response->toArray();
-
-		foreach ( $payment_methods as &$method ) {
-			$method['supportsWidgets']             = $this->supports_widgets( $method );
-			$method['supportsInstallmentPayments'] = $this->supports_installment_payments( $method );
-		}
-
-		return $payment_methods;
 	}
 
 	/**

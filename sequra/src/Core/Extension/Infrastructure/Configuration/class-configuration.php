@@ -282,7 +282,7 @@ class Configuration extends CoreConfiguration {
 				return array_map( 'absint', $config['excludedCategories'] );
 			}
 			return array();
-		} catch ( Throwable $e ) {
+		} catch ( Throwable ) {
 			return array();
 		}
 	}
@@ -655,13 +655,15 @@ class Configuration extends CoreConfiguration {
 				}
 			}
 			return null;
-		} catch ( Throwable $e ) {
+		} catch ( Throwable ) {
 			return null;
 		}
 	}
 
 	/**
 	 * Get connection settings as array
+	 *
+	 * @throws Throwable
 	 */
 	private function get_connection_settings(): array {
 		return AdminAPI::get()
@@ -674,7 +676,12 @@ class Configuration extends CoreConfiguration {
 	 * Get the environment
 	 */
 	public function get_env(): ?string {
-		$conn = $this->get_connection_settings();
+		$conn = null;
+		try {
+			$conn = $this->get_connection_settings();
+		} catch ( Throwable ) {
+			return null;
+		}
 		return $conn['environment'] ?? null;
 	}
 }
