@@ -117,13 +117,6 @@ class ReportServiceTest extends WP_UnitTestCase {
 		}
 		$this->country_configuration_repository->method( 'getCountryConfiguration' )->willReturn( array( $countryConfiguration ) );
 
-		// $this->shop_order_service->method( 'getReportOrderIds' )->willReturn( $report_order_ids );
-		// $this->shop_order_service->method( 'getStatisticsOrderIds' )->willReturn( $statistics_order_ids );
-		// $statistical_data = $this->createMock( StatisticalData::class );
-		// $statistical_data->method( 'isSendStatisticalData' )->willReturn( $isSendStatisticalData );    
-		// $this->statistical_data_repository->method( 'getStatisticalData' )->willReturn( $statistical_data );
-
-
 		$this->shop_order_service->expects( $this->once() )
 		->method( 'getReportOrderIds' )
 		->with( 0, -1 )
