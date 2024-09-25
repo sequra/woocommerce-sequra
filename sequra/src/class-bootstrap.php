@@ -38,9 +38,7 @@ use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\Ord
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
-use SeQura\Core\BusinessLogic\Domain\SendReport\RepositoryContracts\SendReportRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\StatisticalDataRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\StatisticalData\Services\StatisticalDataService;
 use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
@@ -762,7 +760,6 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( SeQuraOrder::class, SeQura_Order_Repository::class );
 		RepositoryRegistry::registerRepository( WidgetSettings::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( SendReport::class, Entity_Repository::class );
-		RepositoryRegistry::registerRepository( StatisticalData::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( TransactionLog::class, Entity_Repository::class );
 	}
 
