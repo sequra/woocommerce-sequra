@@ -84,6 +84,13 @@ class Order_Service implements Interface_Order_Service {
 	private $cart_service;
 
 	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -92,7 +99,8 @@ class Order_Service implements Interface_Order_Service {
 		Order_Status_Settings_Service $order_status_service,
 		Configuration $configuration,
 		OrderService $core_order_service,
-		Interface_Cart_Service $cart_service
+		Interface_Cart_Service $cart_service,
+		StoreContext $store_context
 	) {
 		$this->payment_service      = $payment_service;
 		$this->pricing_service      = $pricing_service;
@@ -100,6 +108,7 @@ class Order_Service implements Interface_Order_Service {
 		$this->configuration        = $configuration;
 		$this->core_order_service   = $core_order_service;
 		$this->cart_service         = $cart_service;
+		$this->store_context        = $store_context;
 	}
 	
 	/**
@@ -676,7 +685,7 @@ class Order_Service implements Interface_Order_Service {
 		);
 		try {
 			$store_id = $this->configuration->get_store_id();
-			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
+			$this->store_context::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
 		} catch ( Throwable $e ) {
 			throw $e;
 		}
@@ -712,7 +721,7 @@ class Order_Service implements Interface_Order_Service {
 				null, // Delivery address.
 				null // Invoice address.
 			);
-			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
+			$this->store_context::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
 		} catch ( Throwable $e ) {
 			throw $e;
 		}
