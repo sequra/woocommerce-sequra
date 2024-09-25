@@ -150,10 +150,16 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_connection_data( WP_REST_Request $request ) {
-		$response = AdminAPI::get()
-		->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-		->getOnboardingData()
-		->toArray();
+		$response = null;
+		try {
+			$response = AdminAPI::get()
+			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getOnboardingData()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			$response = new WP_Error( 'error', $e->getMessage() );
+		}
 		return rest_ensure_response( $response );
 	}
 

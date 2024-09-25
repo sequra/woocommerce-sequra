@@ -129,7 +129,7 @@ test.describe('Widget settings', () => {
     await widgetSettingsPage.expectConfigurationMatches(newSettings);
   });
 
-  test('Show cart widget', async ({ page, productPage, cartPage, widgetSettingsPage, request }) => {
+  test('Show cart widget', async ({ productPage, cartPage, widgetSettingsPage, request }) => {
 
     let defaultSettings = widgetSettingsPage.getDefaultSettings();
     defaultSettings = {
@@ -139,24 +139,39 @@ test.describe('Widget settings', () => {
       productListingMiniWidget: { ...defaultSettings.productListingMiniWidget, enabled: false }
     };
 
-    await widgetSettingsPage.goto();
-    await widgetSettingsPage.expectLoadingShowAndHide();
-    await widgetSettingsPage.fill(defaultSettings);
-    await widgetSettingsPage.save({ expectLoadingShowAndHide: true, skipIfDisabled: true });
-    await widgetSettingsPage.logout();
-
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-
     const themes = [
-      'storefront', // For Classic editor
-      'twentytwentyfour' // For Gutenberg blocks
+      // For Gutenberg blocks
+      {
+        theme: 'twentytwentyfour', version: 'blocks', settings: {
+          ...defaultSettings,
+          cartMiniWidget: {
+            ...defaultSettings.cartMiniWidget,
+            priceSel: '.wp-block-woocommerce-cart-totals-block .wc-block-components-totals-footer-item .wc-block-components-totals-item__value',
+            locationSel: '.wp-block-woocommerce-cart-totals-block .wc-block-components-totals-footer-item',
+          }
+        }
+      },
+      // For Classic editor
+      { theme: 'storefront', version: 'classic', settings: defaultSettings },
     ];
 
     const helper = new SeQuraHelper(request, expect);
 
-    for (const theme of themes) {
+    for (const { theme, version, settings } of themes) {
+
+      await widgetSettingsPage.goto();
+      await widgetSettingsPage.expectLoadingShowAndHide();
+
+      await widgetSettingsPage.fill(settings);
+      await widgetSettingsPage.save({ expectLoadingShowAndHide: true, skipIfDisabled: true });
+      await widgetSettingsPage.logout();
+
+      await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+
       await helper.executeWebhook({ webhook: helper.webhooks.SET_THEME, args: [{ name: 'theme', value: theme }] });
-      const opt = { locationSel: defaultSettings.cartMiniWidget.locationSel, product: 'pp3', amount: 10000, message: 'Desde €11,33/mes con seQura' };
+      await helper.executeWebhook({ webhook: helper.webhooks.CART_VERSION, args: [{ name: 'version', value: version }] });
+
+      const opt = { locationSel: settings.cartMiniWidget.locationSel, product: 'pp3', amount: 10000, message: 'Desde €11,33/mes con seQura' };
 
       // await page.pause();
       await cartPage.expectMiniWidgetToBeVisible(opt);
@@ -165,15 +180,15 @@ test.describe('Widget settings', () => {
       await cartPage.expectMiniWidgetToBeVisible({ ...opt, navigate: false, amount: 1000, message: 'Fracciona con seQura a partir de €50,00' });
       // Clear coupon, add another product and check if mini widget is not shown
       await cartPage.removeCoupon({ theme });
-      await cartPage.setQuantity({ quantity: 2 });
+      await cartPage.setQuantity({ quantity: 2, theme });
       await cartPage.expectMiniWidgetToBeVisible({ ...opt, navigate: false, visible: false, message: '', amount: 0 });
       // restore cart amount.
-      await cartPage.setQuantity({ quantity: 1 });
+      await cartPage.setQuantity({ quantity: 1, theme });
       await cartPage.expectMiniWidgetToBeVisible({ ...opt, navigate: false, });
     }
   });
 
-  test('Show product listing widget', async ({ page, shopPage, widgetSettingsPage, request }) => {
+  test('Show product listing widget', async ({ shopPage, widgetSettingsPage, request }) => {
 
     let defaultSettings = widgetSettingsPage.getDefaultSettings();
     defaultSettings = {

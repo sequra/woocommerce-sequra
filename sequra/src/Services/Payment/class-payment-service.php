@@ -11,6 +11,7 @@ namespace SeQura\WC\Services\Payment;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\I18n\Interface_I18n;
+use Throwable;
 
 /**
  * Handle use cases related to payments
@@ -74,23 +75,27 @@ class Payment_Service implements Interface_Payment_Service {
 	 * Get current merchant ID
 	 */
 	public function get_merchant_id(): ?string {
-		$store_id = $this->configuration->get_store_id();
+		try {
+			$store_id = $this->configuration->get_store_id();
 		
-		$countries = AdminAPI::get()
-		->countryConfiguration( $store_id )
-		->getCountryConfigurations()
-		->toArray();
+			$countries = AdminAPI::get()
+			->countryConfiguration( $store_id )
+			->getCountryConfigurations()
+			->toArray();
 
-		$merchant        = null;
-		$current_country = $this->i18n->get_current_country();
+			$merchant        = null;
+			$current_country = $this->i18n->get_current_country();
 
-		foreach ( $countries as $country ) {
-			if ( $country['countryCode'] === $current_country ) {
-				$merchant = $country['merchantId'];
-				break;
+			foreach ( $countries as $country ) {
+				if ( $country['countryCode'] === $current_country ) {
+					$merchant = $country['merchantId'];
+					break;
+				}
 			}
+			return empty( $merchant ) ? null : $merchant;
+		} catch ( Throwable $e ) {
+			return null;
 		}
-		return empty( $merchant ) ? null : $merchant;
 	}
 
 	/**

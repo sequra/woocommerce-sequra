@@ -11,7 +11,7 @@ test.describe('Connection settings', () => {
     await connectionSettingsPage.disconnect();
   });
 
-  test.only('Change', async ({ page, connectionSettingsPage, checkoutPage }) => {
+  test('Change', async ({ page, connectionSettingsPage, checkoutPage }) => {
     await checkoutPage.setupForPhysicalProducts();
     await connectionSettingsPage.goto();
     await connectionSettingsPage.expectLoadingShowAndHide();

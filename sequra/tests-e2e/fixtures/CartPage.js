@@ -9,8 +9,20 @@ export default class CartPage extends MiniWidgetPage {
     constructor(page, expect) {
         super(page, expect);
         this.theme = {
-            'storefront': { rmCouponSel: '.woocommerce-remove-coupon' },
-            'twentytwentyfour': { rmCouponSel: '.woocommerce-remove-coupon' }
+            'storefront': {
+                couponInput: '[name="coupon_code"]',
+                applyCouponBtn: '[name="apply_coupon"]',
+                rmCouponSel: '.woocommerce-remove-coupon',
+                quantityInput: '.qty',
+                updateCartBtn: '[name="update_cart"]'
+            },
+            'twentytwentyfour': {
+                expandCouponForm: '.wp-block-woocommerce-cart-order-summary-coupon-form-block .wc-block-components-panel__button',
+                couponInput: '.wc-block-components-totals-coupon__form input',
+                applyCouponBtn: '.wc-block-components-totals-coupon__form button',
+                rmCouponSel: '.wc-block-components-totals-discount__coupon-list-item.is-removable button',
+                quantityInput: '.wc-block-components-quantity-selector__input'
+            }
         };
     }
 
@@ -19,9 +31,16 @@ export default class CartPage extends MiniWidgetPage {
     }
 
     async applyCoupon({ coupon, theme = 'storefront' }) {
-        await this.page.locator('[name="coupon_code"]').fill(coupon);
-        await this.page.locator('[name="apply_coupon"]').click();
-        await this.page.waitForSelector(this.theme[theme].rmCouponSel);
+
+        const { expandCouponForm = null, couponInput, applyCouponBtn, rmCouponSel } = this.theme[theme];
+
+        if (expandCouponForm) {
+            await this.page.locator(expandCouponForm).click();
+        }
+
+        await this.page.locator(couponInput).fill(coupon);
+        await this.page.locator(applyCouponBtn).click();
+        await this.page.waitForSelector(rmCouponSel);
     }
 
     async removeCoupon({ theme = 'storefront' }) {
@@ -31,7 +50,10 @@ export default class CartPage extends MiniWidgetPage {
     }
 
     async setQuantity({ quantity, theme = 'storefront' }) {
-        await this.page.locator('.qty').fill(`${quantity}`);
-        await this.page.locator('[name="update_cart"]').click();
+        const { quantityInput, updateCartBtn = null } = this.theme[theme];
+        await this.page.locator(quantityInput).fill(`${quantity}`);
+        if (updateCartBtn) {
+            await this.page.locator(updateCartBtn).click();
+        }
     }
 }

@@ -662,6 +662,8 @@ class Configuration extends CoreConfiguration {
 
 	/**
 	 * Get connection settings as array
+	 *
+	 * @throws Throwable
 	 */
 	private function get_connection_settings(): array {
 		return AdminAPI::get()
@@ -674,7 +676,12 @@ class Configuration extends CoreConfiguration {
 	 * Get the environment
 	 */
 	public function get_env(): ?string {
-		$conn = $this->get_connection_settings();
+		$conn = null;
+		try {
+			$conn = $this->get_connection_settings();
+		} catch ( Throwable $e ) {
+			return null;
+		}
 		return $conn['environment'] ?? null;
 	}
 }

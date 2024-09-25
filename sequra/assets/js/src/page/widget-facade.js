@@ -119,7 +119,7 @@ if (SequraWidgetFacade) {
                                 continue;// skip elements that are already observed in this mutation.
                             }
                             child.setAttribute(productObservedAttr, observedAt);
-                            targets.push({ elem: child, widget: widget });
+                            targets.push({ elem: child, widget });
                         }
                     }
                     return targets;
@@ -127,26 +127,27 @@ if (SequraWidgetFacade) {
 
                 /**
                  * Search for child elements in the parentElem that are targets of the widget
-                 * @param {object} parentElem DOM element that may contains the widget's targets
                  * @param {object} widget  Widget object
-                 * @param {string} observedAt Unique identifier to avoid fetch the same element multiple times
                  * @returns {array} Array of objects containing the target elements and a reference to the widget
                  */
-                getMiniWidgetTargets: function (parentElem, widget, observedAt) {
+                getMiniWidgetTargets: function (widget) {
                     const targets = [];
                     if (widget.dest) {
-                        const children = parentElem.querySelectorAll(widget.dest);
-                        const prices = parentElem.querySelectorAll(widget.priceSel);
-                        const productObservedAttr = 'data-sequra-observed-' + widget.product;
+                        const children = document.querySelectorAll(widget.dest);
+                        const prices = document.querySelectorAll(widget.priceSel);
+                        const priceObservedAttr = 'data-sequra-observed-price-' + widget.product;
 
                         for (let i = 0; i < children.length; i++) {
                             const child = children[i];
+
                             const priceElem = 'undefined' !== typeof prices[i] ? prices[i] : null;
-                            if (child.getAttribute(productObservedAttr) == observedAt) {
-                                continue;// skip elements that are already observed in this mutation.
+                            const priceValue = priceElem ? this.nodeToCents(priceElem) : null;
+
+                            if (null === priceValue || child.getAttribute(priceObservedAttr) == priceValue) {
+                                continue;
                             }
-                            child.setAttribute(productObservedAttr, observedAt);
-                            targets.push({ elem: child, priceElem, widget: widget });
+                            child.setAttribute(priceObservedAttr, priceValue);
+                            targets.push({ elem: child, priceElem, widget });
                         }
                     }
                     return targets;
@@ -167,7 +168,7 @@ if (SequraWidgetFacade) {
                     }
                     // debugger
                     for (const miniWidget of this.miniWidgets) {
-                        const widgetTargets = this.getMiniWidgetTargets(parentElem, miniWidget, observedAt);
+                        const widgetTargets = this.getMiniWidgetTargets(miniWidget);
                         targets.push(...widgetTargets);
                     }
                     return targets;
@@ -217,11 +218,12 @@ if (SequraWidgetFacade) {
                         const observedAt = this.getObservedAt();
 
                         for (const mutation of mutations) {
-                            if (!['childList', 'subtree'].includes(mutation.type)) {
-                                continue; // skip mutations that not are changing the DOM.
+                            if (!['childList', 'subtree', 'characterData'].includes(mutation.type)) {
+                                continue;
                             }
 
-                            const widgetTargets = this.getAllWidgetTargets(mutation.target, this.widgets, observedAt)
+                            const mutationTarget = ['characterData'].includes(mutation.type) ? mutation.target.parentElement : mutation.target;
+                            const widgetTargets = this.getAllWidgetTargets(mutationTarget, this.widgets, observedAt)
                             targets.push(...widgetTargets);
                         }
 
@@ -232,10 +234,10 @@ if (SequraWidgetFacade) {
                             this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, target.priceElem) : this.drawWidgetOnElement(widget, elem);
                         });
 
-                        this.mutationObserver.observe(document, { childList: true, subtree: true }); // enable the observer again.
+                        this.mutationObserver.observe(document, { childList: true, subtree: true, characterData: true }); // enable the observer again.
                     });
 
-                    this.mutationObserver.observe(document, { childList: true, subtree: true });
+                    this.mutationObserver.observe(document, { childList: true, subtree: true, characterData: true });
                 },
 
                 isMiniWidget: function (widget) {
@@ -253,9 +255,7 @@ if (SequraWidgetFacade) {
                     }
                     const cents = this.nodeToCents(priceElem);
 
-                    if (widget.maxAmount && widget.maxAmount < cents) {
-                        return;
-                    }
+
 
                     const className = 'sequra-educational-popup';
                     const modifierClassName = className + '--' + widget.product;
@@ -267,6 +267,10 @@ if (SequraWidgetFacade) {
                         }
 
                         oldWidget.remove();// remove the old widget to draw a new one.
+                    }
+
+                    if (widget.maxAmount && widget.maxAmount < cents) {
+                        return;
                     }
 
                     const widgetNode = document.createElement('small');

@@ -187,4 +187,21 @@ interface Interface_Order_Service {
 	 * Set the order as sent to seQura
 	 */
 	public function set_as_sent_to_sequra( WC_Order $order ): void;
+
+	/**
+	 * Call the Order Update API to sync the order status with SeQura
+	 */
+	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void;
+
+	/**
+	 * Update the order amount in SeQura after a refund
+	 *
+	 * @throws Throwable 
+	 */
+	public function handle_refund( WC_Order $order, float $amount ): void;
+
+	/**
+	 * Get the link to the SeQura back office for the order
+	 */
+	public function get_link_to_sequra_back_office( WC_Order $order ): ?string;
 }

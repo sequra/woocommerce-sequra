@@ -10,6 +10,7 @@ namespace SeQura\WC\Services\Cart;
 
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Registration_Item;
@@ -64,6 +65,18 @@ interface Interface_Cart_Service {
 	 * @return DiscountItem[]
 	 */
 	public function get_discount_items( ?WC_Order $order = null ): array;
+
+	/**
+	 * Get refund items
+	 *
+	 * @return OtherPaymentItem[]
+	 */
+	public function get_refund_items( WC_Order $order = null ): array;
+
+	/**
+	 * Create refund item instance
+	 */
+	public function create_refund_item( ?int $id, float $amount ): OtherPaymentItem;
 
 	/**
 	 * Check if conditions are met for showing seQura in checkout

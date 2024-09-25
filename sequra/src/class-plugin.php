@@ -10,6 +10,7 @@ namespace SeQura\WC;
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
+use SeQura\WC\Controllers\Hooks\Order\Interface_Order_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
@@ -60,7 +61,8 @@ class Plugin {
 		REST_Controller $rest_payment_controller,
 		REST_Controller $rest_log_controller,
 		Interface_Product_Controller $product_controller,
-		Interface_Async_Process_Controller $async_process_controller
+		Interface_Async_Process_Controller $async_process_controller,
+		Interface_Order_Controller $order_controller
 	) {
 		$this->data              = $data;
 		$this->base_name         = $base_name;
@@ -106,7 +108,12 @@ class Plugin {
 
 		// Delivery report.
 		add_action( self::HOOK_DELIVERY_REPORT, array( $async_process_controller, 'send_delivery_report' ) );
-		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $payment_controller, 'handle_custom_query_vars' ), 10, 3 );
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $order_controller, 'handle_custom_query_vars' ), 10, 3 );
+		
+		// Order Update.
+		add_action( 'woocommerce_order_status_changed', array( $order_controller, 'handle_order_status_changed' ), 10, 4 );
+
+		add_action( 'woocommerce_admin_order_data_after_order_details', array( $order_controller, 'show_link_to_sequra_back_office' ) );
 	}
 
 	/**

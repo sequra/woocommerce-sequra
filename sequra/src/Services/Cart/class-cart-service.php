@@ -11,6 +11,7 @@ namespace SeQura\WC\Services\Cart;
 use DateTime;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
@@ -25,6 +26,7 @@ use WC_Order;
 use WC_Order_Item_Coupon;
 use WC_Order_Item_Fee;
 use WC_Order_Item_Product;
+use WC_Order_Refund;
 use WC_Product;
 
 /**
@@ -75,6 +77,35 @@ class Cart_Service implements Interface_Cart_Service {
 		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
 		$this->logger          = $logger;
+	}
+
+	/**
+	 * Get refund items
+	 *
+	 * @return OtherPaymentItem[] 
+	 */
+	public function get_refund_items( WC_Order $order = null ): array {
+		$items = array();
+		/**
+		 * Order refund
+		 *
+		 * @var WC_Order_Refund $refund
+		 */
+		foreach ( $order->get_refunds() as $refund ) {
+			$items[] = $this->create_refund_item( $refund->get_id(), $refund->get_amount( 'edit' ) );
+		}
+		return $items;
+	}
+
+	/**
+	 * Create refund item instance
+	 */
+	public function create_refund_item( ?int $id, float $amount ): OtherPaymentItem {
+		$cents = $this->pricing_service->to_cents( $amount );
+		if ( ! $id ) {
+			$id = $cents;
+		}
+		return new OtherPaymentItem( 'r_' . $id, 'Refund', -1 * $cents );
 	}
 
 	/**

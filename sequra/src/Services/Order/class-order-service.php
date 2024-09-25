@@ -8,16 +8,23 @@
 
 namespace SeQura\WC\Services\Order;
 
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
-use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Payment_Method_Data;
+use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use Throwable;
 use WC_DateTime;
 use WC_Order;
 use WP_User;
@@ -51,9 +58,30 @@ class Order_Service implements Interface_Order_Service {
 	/**
 	 * Order status service
 	 *
-	 * @var OrderStatusSettingsService
+	 * @var Order_Status_Settings_Service
 	 */
 	private $order_status_service;
+
+	/**
+	 * Configuration
+	 *
+	 * @var Configuration
+	 */
+	private $configuration;
+
+	/**
+	 * Core order service
+	 *
+	 * @var OrderService
+	 */
+	private $core_order_service;
+
+	/**
+	 * Cart service
+	 *
+	 * @var Interface_Cart_Service
+	 */
+	private $cart_service;
 
 	/**
 	 * Constructor
@@ -61,11 +89,17 @@ class Order_Service implements Interface_Order_Service {
 	public function __construct( 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
-		OrderStatusSettingsService $order_status_service
+		Order_Status_Settings_Service $order_status_service,
+		Configuration $configuration,
+		OrderService $core_order_service,
+		Interface_Cart_Service $cart_service
 	) {
 		$this->payment_service      = $payment_service;
 		$this->pricing_service      = $pricing_service;
 		$this->order_status_service = $order_status_service;
+		$this->configuration        = $configuration;
+		$this->core_order_service   = $core_order_service;
+		$this->cart_service         = $cart_service;
 	}
 	
 	/**
@@ -602,5 +636,103 @@ class Order_Service implements Interface_Order_Service {
 			$order ? $order->get_customer_note( 'edit' ) : null, // extra.
 			$this->get_vat( $order, $is_delivery )
 		);
+	}
+
+	/**
+	 * Call the Order Update API to sync the order status with SeQura
+	 * 
+	 * @throws Throwable
+	 */
+	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void {
+		if ( $this->order_status_service->get_shop_status_completed( true ) === $new_store_status ) {
+			$this->set_sequra_order_status_to_shipped( $order );
+		}
+	}
+
+	/**
+	 * Set the order status to shipped in SeQura
+	 *
+	 * @throws Throwable 
+	 */
+	private function set_sequra_order_status_to_shipped( WC_Order $order ): void {
+		$cart_info     = $this->get_cart_info( $order );
+		$currency      = $order->get_currency( 'edit' );
+		$cart_ref      = $cart_info->ref ?? null;
+		$created_at    = $cart_info->created_at ?? null;
+		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+		$shipped_items = array_merge(
+			$this->cart_service->get_items( $order ),
+			$this->cart_service->get_handling_items( $order ),
+			$this->cart_service->get_discount_items( $order ),
+			$this->cart_service->get_refund_items( $order )
+		);
+
+		$order_data = new OrderUpdateData(
+			(string) $order->get_id(), // Order reference.
+			new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
+			new Cart( $currency ), // Unshipped cart.
+			null, // Delivery address.
+			null // Invoice address.
+		);
+		try {
+			$store_id = $this->configuration->get_store_id();
+			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
+		} catch ( Throwable $e ) {
+			throw $e;
+		}
+	}
+
+	/**
+	 * Update the order amount in SeQura after a refund
+	 *
+	 * @throws Throwable 
+	 */
+	public function handle_refund( WC_Order $order, float $amount ): void {
+		$cart_info     = $this->get_cart_info( $order );
+		$currency      = $order->get_currency( 'edit' );
+		$cart_ref      = $cart_info->ref ?? null;
+		$created_at    = $cart_info->created_at ?? null;
+		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+		$shipped_items = array();
+		if ( $order->get_total( 'edit' ) > $amount ) {
+			$shipped_items = array_merge(
+				$this->cart_service->get_items( $order ),
+				$this->cart_service->get_handling_items( $order ),
+				$this->cart_service->get_discount_items( $order ),
+				$this->cart_service->get_refund_items( $order )
+			);
+		}
+		
+		try {
+			$store_id   = $this->configuration->get_store_id();
+			$order_data = new OrderUpdateData(
+				(string) $order->get_id(), // Order reference.
+				new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
+				new Cart( $currency ), // Unshipped cart.
+				null, // Delivery address.
+				null // Invoice address.
+			);
+			StoreContext::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
+		} catch ( Throwable $e ) {
+			throw $e;
+		}
+	}
+
+	/**
+	 * Get the link to the SeQura back office for the order
+	 */
+	public function get_link_to_sequra_back_office( WC_Order $order ): ?string {
+		if ( $order->get_payment_method() !== $this->payment_service->get_payment_gateway_id() ) {
+			return null;
+		}
+		
+		switch ( $this->configuration->get_env() ) {
+			case 'sandbox':
+				return 'https://simbox.sequrapi.com/orders/' . $order->get_transaction_id();
+			case 'production':
+				return 'https://simba.sequra.es/orders/' . $order->get_transaction_id();
+			default:
+				return null;
+		}
 	}
 }
