@@ -51,7 +51,6 @@
             }))
 
         },
-        // isClassicCheckout: () => !window.wc || !window.wc.blocksCheckout,
         isClassicCheckout: () => document.querySelector('#payment_method_sequra') !== null,
         isJQueryActive: () => 'undefined' !== typeof jQuery,
     }
