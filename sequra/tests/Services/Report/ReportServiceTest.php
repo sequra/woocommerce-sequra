@@ -56,7 +56,7 @@ class ReportServiceTest extends WP_UnitTestCase {
 
 		ServiceRegister::registerService(
 			OrderReportService::class,
-			function () use( $order_report_service ) {
+			function () use ( $order_report_service ) {
 				return $order_report_service;
 			}
 		);
