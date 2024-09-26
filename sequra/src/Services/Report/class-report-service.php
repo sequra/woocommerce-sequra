@@ -66,6 +66,13 @@ class Report_Service implements Interface_Report_Service {
 	private $order_service;
 
 	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct( 
@@ -74,7 +81,8 @@ class Report_Service implements Interface_Report_Service {
 		ShopOrderService $shop_order_service,
 		StatisticalDataRepositoryInterface $statistical_data_repository,
 		CountryConfigurationRepositoryInterface $country_configuration_repository,
-		Interface_Order_Service $order_service
+		Interface_Order_Service $order_service,
+		StoreContext $store_context
 	) {
 		$this->configuration                    = $configuration;
 		$this->store_service                    = $store_service;
@@ -82,6 +90,7 @@ class Report_Service implements Interface_Report_Service {
 		$this->statistical_data_repository      = $statistical_data_repository;
 		$this->country_configuration_repository = $country_configuration_repository;
 		$this->order_service                    = $order_service;
+		$this->store_context                    = $store_context;
 	}
 
 	/**
@@ -91,7 +100,7 @@ class Report_Service implements Interface_Report_Service {
 	 */
 	public function send_delivery_report_for_current_store(): void {
 		$store_id = $this->configuration->get_store_id();
-		StoreContext::doWithStore( $store_id, array( $this, 'send_delivery_report' ) );
+		$this->store_context::doWithStore( $store_id, array( $this, 'send_delivery_report' ) );
 	}
 
 

@@ -38,9 +38,7 @@ use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\Ord
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
-use SeQura\Core\BusinessLogic\Domain\SendReport\RepositoryContracts\SendReportRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\StatisticalDataRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\StatisticalData\Services\StatisticalDataService;
 use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
@@ -582,7 +580,8 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( ShopOrderService::class ),
 						Reg::getService( StatisticalDataRepositoryInterface::class ),
 						Reg::getService( CountryConfigurationRepositoryInterface::class ),
-						Reg::getService( Interface_Order_Service::class )
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( StoreContext::class )
 					);
 				}
 				return self::$cache[ Interface_Report_Service::class ];
@@ -644,7 +643,8 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( OrderStatusSettingsService::class ),
 						Reg::getService( Configuration::class ),
 						Reg::getService( OrderService::class ),
-						Reg::getService( Interface_Cart_Service::class )
+						Reg::getService( Interface_Cart_Service::class ),
+						Reg::getService( StoreContext::class )
 					);
 				}
 				return self::$cache[ Interface_Order_Service::class ];
@@ -760,7 +760,6 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( SeQuraOrder::class, SeQura_Order_Repository::class );
 		RepositoryRegistry::registerRepository( WidgetSettings::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( SendReport::class, Entity_Repository::class );
-		RepositoryRegistry::registerRepository( StatisticalData::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( TransactionLog::class, Entity_Repository::class );
 	}
 
