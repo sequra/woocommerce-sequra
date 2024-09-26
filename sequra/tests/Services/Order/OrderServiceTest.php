@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Tests
  */
 
-namespace SeQura\WC\Tests\Services\Report;
+namespace SeQura\WC\Tests\Services\Order;
 
 // Load required classes.
 require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContextMock.php';
