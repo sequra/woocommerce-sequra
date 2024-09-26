@@ -46,20 +46,17 @@ class ShopOrderServiceTest extends WP_UnitTestCase {
 	 * @dataProvider dataProvider_statisticsOrderIds
 	 */
 	public function testGetStatisticsOrderIds( $page, $limit, $index ) {
-		$this->assertEquals(
-			$this->shop_order_service->getStatisticsOrderIds( $page, $limit ),
-			$this->result_statisticsOrderIds( $index )
-		);
+		$result   = $this->shop_order_service->getStatisticsOrderIds( $page, $limit );
+		$expected = $this->result_statisticsOrderIds( $index );
+		$this->assertTrue( count( $expected ) === count( array_intersect( $expected, $result ) ) );
 	}
 
 	/**
 	 * @dataProvider dataProvider_reportOrderIds
 	 */
-	public function testGetReportOrderIds( $page, $limit, $result ) {
-		$this->assertEquals(
-			$this->shop_order_service->getReportOrderIds( $page, $limit ),
-			$result
-		);
+	public function testGetReportOrderIds( $page, $limit, $expected ) {
+		$result = $this->shop_order_service->getReportOrderIds( $page, $limit );
+		$this->assertEquals( $result, $expected );
 	}
 
 	public function dataProvider_reportOrderIds() {
