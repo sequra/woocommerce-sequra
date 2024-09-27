@@ -25,6 +25,12 @@ class Store {
 	private $products;
 	private $coupons;
 
+	public function __construct() {
+		$this->orders   = array();
+		$this->products = array();
+		$this->coupons  = array();
+	}
+
 	public function get_shopper_address(): array {
 		return array(
 			'first_name' => 'Name',
