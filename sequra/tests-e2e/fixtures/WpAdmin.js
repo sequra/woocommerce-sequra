@@ -50,7 +50,7 @@ export default class WpAdmin {
      */
     async gotoSeQuraSettings({ page = '' }) {
         await this.login({ force: false });
-        await this.page.goto(`./wp-admin/options-general.php?page=sequra${page ? `#${page}` : ''}`, { waitUntil: 'domcontentloaded' });
+        await this.page.goto(`./wp-admin/admin.php?page=sequra${page ? `#${page}` : ''}`, { waitUntil: 'domcontentloaded' });
     }
 
     async gotoOrder({orderId}) {

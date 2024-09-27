@@ -65,6 +65,13 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	}
 
 	/**
+	 * Get the settings page URL.
+	 */
+	public function get_settings_page_url( ?string $url = null ): string {
+		return admin_url( 'admin.php?page=' . $this->configuration->get_page() );
+	}
+
+	/**
 	 * Add action links to the plugin settings page.
 	 *
 	 * @param string[] $actions The actions.
@@ -76,7 +83,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	public function add_action_link( $actions, $plugin_file, $plugin_data, $context ): array {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$args = array(
-			'href' => admin_url( $this->configuration->get_parent_page() . '?page=' . $this->configuration->get_page() ),
+			'href' => $this->get_settings_page_url(),
 			'text' => esc_attr__( 'Settings', 'sequra' ),
 		);
 		ob_start();

@@ -104,7 +104,20 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->id                     = $this->payment_service->get_payment_gateway_id(); // @phpstan-ignore-line
 		$this->has_fields             = true;
 		$this->method_title           = __( 'seQura', 'sequra' );
-		$this->method_description     = __( 'seQura payment method\'s configuration', 'sequra' );
+		$this->method_description     = sprintf(
+			'%1$s <a href="%2$s">%3$s</a>',
+			esc_html__( 'seQura payment method\'s configuration.', 'sequra' ),
+			/**
+			 * Must return the URL to the settings page.
+			 *
+			 * @since 3.0.0
+			 */
+			esc_url( strval( apply_filters( 'sequra_settings_page_url', '' ) ) ),
+			esc_html__( 'View more configuration options.', 'sequra' ),
+		);
+
+		
+		// __( 'seQura payment method\'s configuration', 'sequra' );
 
 		$this->supports = array(
 			'products',

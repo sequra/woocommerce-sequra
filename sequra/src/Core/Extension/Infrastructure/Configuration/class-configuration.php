@@ -77,8 +77,7 @@ class Configuration extends CoreConfiguration {
 	 * Check if the current page is the settings page.
 	 */
 	public function is_settings_page(): bool {
-		global $pagenow;
-		return $this->get_parent_page() === $pagenow && isset( $_GET['page'] ) && $this->get_page() === $_GET['page']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return is_admin() && isset( $_GET['page'] ) && $this->get_page() === $_GET['page']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -92,7 +91,7 @@ class Configuration extends CoreConfiguration {
 	 * Get the configuration page parent slug.
 	 */
 	public function get_parent_page(): string {
-		return 'options-general.php';
+		return 'woocommerce';
 	}
 
 	/**
