@@ -155,6 +155,7 @@ class SequraConfigFormFields {
 		);
 		$this->add_active_methods_info();
 		$this->init_communication_form_fields();
+		// TODO: exclude this hook from migration. Now configuration is done in the core implementation.
 		/**
 		 * Filter to add custom settings
 		 * 

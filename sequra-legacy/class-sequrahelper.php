@@ -114,6 +114,7 @@ class SequraHelper {
 	 * @return mixed 
 	 */
 	public function get_merchant_ref() {
+		// TODO: exclude from migration.
 		/**
 		 * Filter merchant reference
 		 *
@@ -300,6 +301,7 @@ class SequraHelper {
 			require_once $this->dir . 'class-sequrabuilderwc.php';
 		}
 		// phpcs:enable
+		// TODO: exclude from migration.
 		/**
 		 * Filter builder class
 		 *
@@ -488,6 +490,7 @@ class SequraHelper {
 				$elegible        = ( 1 === $services_count );
 			}
 		}
+		// TODO: already migrated.
 		/**
 		 * Filter if cart is elegible for service sale
 		 *
@@ -518,6 +521,7 @@ class SequraHelper {
 			$this->logger->log_debug( 'Order doesn\'t need shipping seQura will not be offered.', __FUNCTION__, __CLASS__ );
 			$elegible = false;
 		}
+		// TODO: already migrated.
 		/**
 		 * Filter if cart is elegible for product sale
 		 *
@@ -542,6 +546,7 @@ class SequraHelper {
 				$return = false;
 			}
 		}
+		// TODO: already migrated.
 		/**
 		 * Filter seQura availablity at checkout
 		 *
@@ -558,6 +563,7 @@ class SequraHelper {
 	 */
 	public function is_available_in_product_page( $product_id ) {
 		$return = get_post_meta( $product_id, 'is_sequra_banned', true ) !== 'yes';
+		// TODO: already migrated.
 		/**
 		 * Filter seQura availablity at product page
 		 *

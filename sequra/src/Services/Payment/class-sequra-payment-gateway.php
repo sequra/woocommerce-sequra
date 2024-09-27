@@ -139,15 +139,18 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 */
 	public function is_available() {
 		$is_available = parent::is_available();
-		if ( ! $is_available ) {
-			return false;
-		}
-		if ( ! $this->cart_service->is_available_in_checkout() ) {
+		if ( $is_available && ! $this->cart_service->is_available_in_checkout() ) {
 			$this->logger->log_debug( 'Payment gateway is not available in checkout', __FUNCTION__, __CLASS__ );
-			return false;
+			$is_available = false;
+		} elseif ( $is_available && empty( $this->payment_method_service->get_payment_methods() ) ) {
+			$is_available = false;
 		}
-		
-		return ! empty( $this->payment_method_service->get_payment_methods() );
+		/**
+		 * Filter hook to allow plugins to modify the return value for sequra availability.
+		 * 
+		 * @since 2.0.0
+		 */
+		return (bool) apply_filters( 'woocommerce_sequra_is_available', $is_available );
 	}
 
 	/**
@@ -221,24 +224,46 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$order              = wc_get_order( $order_id );
 		$payment_method_dto = $this->get_posted_data();
 		$cart_info_dto      = $this->cart_service->get_cart_info_from_session();
+		$result             = null;
 
 		if ( ! $order instanceof WC_Order
 		|| ! $this->payment_method_service->is_payment_method_data_valid( $payment_method_dto )
 		|| ! $this->order_service->set_order_metadata( $order, $payment_method_dto, $cart_info_dto )
 		) {
-			return array(
+			$result = array(
 				'result'   => 'failure',
 				'redirect' => wc_get_checkout_url(),
 			);
+		} else {
+			// clear session data.
+			$this->cart_service->clear_cart_info_from_session();
+
+			// TODO: Check if we are keeping this action hook.
+			/**
+			 * Action hook to allow plugins to process payment.
+			 * 
+			 * @since 2.0.0
+			 */
+			do_action( 'woocommerce_sequracheckout_process_payment', $order, $this );
+			
+			$result = array(
+				'result'   => 'success',
+				'redirect' => $order->get_checkout_payment_url( true ),
+			);
 		}
-
-		// clear session data.
-		$this->cart_service->clear_cart_info_from_session();
-
-		return array(
-			'result'   => 'success',
-			'redirect' => $order->get_checkout_payment_url( true ),
-		);
+		/**
+		 * Filter hook to allow plugins to modify the return array.
+		 * 
+		 * @since 2.0.0
+		 */
+		$result = apply_filters_deprecated( 'woocommerce_sequracheckout_process_payment_return', array( $result, null ), '3.0.0', 'sequra_checkout_process_payment_return' );
+		
+		/**
+		 * Filter hook to allow plugins to modify the return array.
+		 *
+		 * @since 3.0.0
+		 */
+		return apply_filters( 'sequra_checkout_process_payment_return', $result, $order, $this ); 
 	} 
 
 	/**

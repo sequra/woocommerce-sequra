@@ -132,8 +132,20 @@ class Product_Service implements Interface_Product_Service {
 	 * @param WC_Product|int $product the product we are building item info for.
 	 */
 	public function get_service_end_date( $product, bool $raw_value = false ): string {
-		$product          = $this->get_product_instance( $product );
-		$service_end_date = $product->get_meta( self::META_KEY_SEQURA_SERVICE_END_DATE, true );
+		$product = $this->get_product_instance( $product );
+		
+		/**
+		 * Filter the service end date.
+		 *
+		 * @since 2.0.0
+		 */
+		$service_end_date = apply_filters(
+			'woocommerce_sequra_add_service_end_date',
+			$product->get_meta( self::META_KEY_SEQURA_SERVICE_END_DATE, true ),
+			$product,
+			array()
+		);
+
 		if ( $raw_value ) {
 			return $service_end_date;
 		}
@@ -187,24 +199,26 @@ class Product_Service implements Interface_Product_Service {
 	 * @param WC_Product|int $product the product.
 	 */
 	public function can_display_widgets( $product ): bool {
-		if ( ! $this->can_display_mini_widgets() ) {
-			return false;
-		}
-
 		$product = $this->get_product_instance( $product );
-		if ( ! $product ) {
-			return false;
-		}
 
-		if ( ! $this->configuration->is_enabled_for_services() && ! $product->needs_shipping() ) {
-			return false;
-		}
+		$return = $this->can_display_mini_widgets()
+		&& $product
+		&& ( $this->configuration->is_enabled_for_services() || $product->needs_shipping() )
+		&& ! $this->is_banned( $product );
 
-		if ( $this->is_banned( $product ) ) {
-			return false;
-		}
-
-		return true;
+		/**
+		* Filter seQura availability at product page
+		*
+		* @since 2.0.0
+		*/
+		$return = (bool) apply_filters_deprecated( 'woocommerce_sq_is_available_in_product_page', array( $return, $product->get_id() ), '3.0.0', 'sequra_can_display_widgets' );
+		
+		/**
+		 * Filter widget availability for a given product
+		 *
+		 * @since 3.0.0
+		 */
+		return (bool) apply_filters( 'sequra_can_display_widgets', $return, $product );
 	}
 
 	/**
@@ -215,30 +229,22 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function can_display_widget_for_method( $product, $method ): bool {
 		$product = $this->get_product_instance( $product );
-		if ( ! $product ) {
-			return false;
-		}
-
-		if ( ! $this->can_display_widgets( $product ) ) {
-			return false;
-		}
-
+		
+		$return = $product 
+		&& $this->can_display_widgets( $product )
 		// Check if price is too high.
-		if ( ! empty( $method['maxAmount'] ) && $method['maxAmount'] < $this->pricing_service->to_cents( (float) $product->get_price( 'edit' ) ) ) {
-			return false;
-		}
-
+		&& ( empty( $method['maxAmount'] ) || $method['maxAmount'] >= $this->pricing_service->to_cents( (float) $product->get_price( 'edit' ) ) )
 		// Check if is too early to display the widget.
-		if ( ! empty( $method['startsAt'] ) && time() < strtotime( $method['startsAt'] ) ) {
-			return false;
-		}
-
+		&& ( empty( $method['startsAt'] ) || time() >= strtotime( $method['startsAt'] ) )
 		// Check if is too late to display the widget.
-		if ( ! empty( $method['endsAt'] ) && strtotime( $method['endsAt'] ) < time() ) {
-			return false;
-		}
+		&& ( empty( $method['endsAt'] ) || strtotime( $method['endsAt'] ) >= time() ); 
 
-		return true;            
+		/**
+		* Filter widget availability for a given seQura method
+		*
+		* @since 3.0.0
+		*/
+		return (bool) apply_filters( 'sequra_can_display_widget_for_method', $return, $product, $method );
 	}
 
 	/**

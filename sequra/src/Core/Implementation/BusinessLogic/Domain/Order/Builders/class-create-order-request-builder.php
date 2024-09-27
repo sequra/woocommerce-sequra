@@ -170,7 +170,22 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private function merchant_reference(): ?MerchantReference {
 		$merchant_reference = null;
 		if ( $this->current_order ) {
-			$merchant_reference = new MerchantReference( $this->current_order->get_id() );
+			/**
+			 * Filter the order_ref_1.
+			 *
+			 * @since 2.0.0
+			 */
+			$ref_1 = apply_filters_deprecated(
+				'woocommerce_sequra_get_order_ref_1',
+				array(
+					$this->current_order->get_id(),
+					$this->current_order,
+				),
+				'3.0.0',
+				'sequra_create_order_request_merchant_reference'
+			);
+
+			$merchant_reference = new MerchantReference( $ref_1 );
 		}
 
 		/**
