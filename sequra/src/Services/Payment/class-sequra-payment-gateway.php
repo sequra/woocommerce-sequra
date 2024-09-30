@@ -127,8 +127,8 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 		$this->enabled     = $this->get_form_field_value( self::FORM_FIELD_ENABLED );
-		$this->title       = $this->get_form_field_value( self::FORM_FIELD_TITLE ); // Title of the payment method shown on the checkout page.
-		$this->description = $this->get_form_field_value( self::FORM_FIELD_DESC ); // Description of the payment method shown on the checkout page.
+		$this->title       = __( 'Flexible payment with seQura', 'sequra' ); // Title of the payment method shown on the checkout page.
+		$this->description = __( 'Please, select the payment method you want to use', 'sequra' ); // Description of the payment method shown on the checkout page.
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
@@ -137,12 +137,30 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_api_' . $this->payment_service->get_event_webhook(), array( $this, 'process_event' ) );
 		add_action( 'woocommerce_api_' . $this->payment_service->get_return_webhook(), array( $this, 'handle_return' ) );
 
+		add_action( 'load-woocommerce_page_wc-settings', array( $this, 'redirect_to_settings_page' ) );
+
 		/**
 		 * Action hook to allow plugins to run when the class is loaded.
 		 * 
 		 * @since 2.0.0 
 		 */
 		do_action( 'woocommerce_sequra_loaded', $this );
+	}
+
+	/**
+	 * Redirect to settings page if needed.
+	 */
+	public function redirect_to_settings_page(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['tab'], $_GET['section'] ) && 'checkout' === $_GET['tab'] && $this->id === $_GET['section'] ) {
+			/**
+			 * Must return the URL to the settings page.
+			 *
+			 * @since 3.0.0
+			 */
+			wp_safe_redirect( esc_url( strval( apply_filters( 'sequra_settings_page_url', '' ) ) ) );
+			exit;
+		}
 	}
 
 	/**
@@ -183,18 +201,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no',
-			),
-			self::FORM_FIELD_TITLE   => array(
-				'title'       => __( 'Title', 'sequra' ),
-				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'sequra' ),
-				'default'     => __( 'Flexible payment with seQura', 'sequra' ),
-			),
-			self::FORM_FIELD_DESC    => array(
-				'title'       => __( 'Description', 'sequra' ),
-				'type'        => 'text',
-				'description' => __( 'This controls the description which the user sees during checkout.', 'sequra' ),
-				'default'     => __( 'Please, select the payment method you want to use', 'sequra' ),
 			),
 		);
 	}
