@@ -862,7 +862,9 @@ table tr th {
   display: flex;
   justify-content: center;
   flex: 1;
-  width: 150px;
+  min-width: 150px;
+  text-wrap: nowrap;
+  box-sizing: content-box;
   color: #656566;
   font-size: 14px;
   padding: 8px;
