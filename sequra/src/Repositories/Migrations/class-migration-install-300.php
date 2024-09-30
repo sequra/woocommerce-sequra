@@ -8,6 +8,10 @@
 
 namespace SeQura\WC\Repositories\Migrations;
 
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
+
 /**
  * Post install migration for version 3.0.0 of the plugin.
  */
@@ -22,8 +26,25 @@ class Migration_Install_300 extends Migration {
 
 	/**
 	 * Run the migration.
+	 *
+	 * @throws \Throwable
 	 */
 	public function run(): void {
+		$this->add_new_tables_to_database();
+		// TODO: Migrate old settings to new settings.
+		$woocommerce_sequra_settings = (array) get_option( 'woocommerce_sequra_settings', array() );
+		if ( ! empty( $woocommerce_sequra_settings ) ) {
+			$this->migrate_connection_configuration( $woocommerce_sequra_settings );
+			$this->migrate_country_configuration( $woocommerce_sequra_settings );
+			$this->migrate_widget_configuration( $woocommerce_sequra_settings );
+			$this->migrate_logger_configuration( $woocommerce_sequra_settings );
+		}
+	}
+
+	/**
+	 * Add new tables to the database.
+	 */
+	private function add_new_tables_to_database(): void {
 		$charset_collate = $this->db->get_charset_collate();
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -65,5 +86,50 @@ class Migration_Install_300 extends Migration {
 			PRIMARY KEY  (id)
 		) $charset_collate;" 
 		);
+	}
+
+	/** Migrate connection settings from v2
+	 *
+	 * @param string[] $settings
+	 * @throws \Exception
+	 */
+	private function migrate_connection_configuration( array $settings ): void {
+		$env_mapping = array(
+			'0' => 'live',
+			'1' => 'sandbox',
+		);
+
+		if ( ! isset( $settings['env'], $settings['user'], $settings['password'] ) 
+		|| ! array_key_exists( $settings['env'], $env_mapping ) ) {
+			// Skip this migration if the environment is not set or is not valid.
+			return;
+		}
+
+		$response = AdminAPI::get()
+		->connection( $this->configuration->get_store_id() )
+		->saveOnboardingData(
+			new OnboardingRequest(
+				$env_mapping[ $settings['env'] ],
+				strval( $settings['user'] ),
+				strval( $settings['password'] ),
+				true
+			)
+		);
+
+		if ( ! $response->isSuccessful() ) {
+			throw new \Exception( esc_html( $response['errorMessage'] ) );
+		}
+	}
+
+	/** Migrate country settings from v2 */
+	private function migrate_country_configuration( array $settings ): void {
+	}
+
+	/** Migrate widget settings from v2 */
+	private function migrate_widget_configuration( array $settings ): void {
+	}
+	
+	/** Migrate logger settings from v2 */
+	private function migrate_logger_configuration( array $settings ): void {
 	}
 }

@@ -61,10 +61,14 @@ class Migration_Manager implements Interface_Migration_Manager {
 
 		foreach ( $this->migrations as $migration ) {
 			if ( -1 === version_compare( $db_module_version, $migration->get_version() ) ) {
-				$migration->run();
-				
-				// Update the module version in the database.
-				$this->configuration->set_module_version( $migration->get_version() );
+				try {
+					$migration->run();
+					// Update the module version in the database.
+					$this->configuration->set_module_version( $migration->get_version() );
+				} catch ( \Throwable $e ) {
+					// Migration failed.
+					return;
+				}
 			}
 		}
 	}

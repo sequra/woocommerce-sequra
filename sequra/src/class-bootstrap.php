@@ -545,7 +545,10 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Configuration::CLASS_NAME ),
 						Reg::getService( 'plugin.data' )['Version'],
 						array(
-							new Migration_Install_300( Reg::getService( \wpdb::class ) ),
+							new Migration_Install_300( 
+								Reg::getService( \wpdb::class ),
+								Reg::getService( Configuration::CLASS_NAME ),
+							 ),
 						)
 					);
 				}
