@@ -32,6 +32,7 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 	private $templates_path;
 	private $logger;
 	private $store;
+	private $settings_url;
 
 
 	public function set_up(): void {        
@@ -95,6 +96,16 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 		);
 
 		$this->store = new Store();
+
+		$settings_url       = 'https://example.com/wp-admin/admin.php?page=sequra';
+		$this->settings_url = $settings_url;
+		add_filter(
+			'sequra_settings_page_url',
+			function ( $url ) use ( $settings_url ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+				return $settings_url;
+			},
+			99999
+		);
 		
 		$this->payment_gateway = new Sequra_Payment_Gateway();
 	}
@@ -109,7 +120,7 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->payment_gateway->has_fields );
 		$this->assertEquals( 'seQura', $this->payment_gateway->method_title );
 		$this->assertEquals( 'Flexible payment with seQura', $this->payment_gateway->title );
-		$this->assertEquals( 'seQura payment method\'s configuration', $this->payment_gateway->method_description );
+		$this->assertEquals( 'seQura payment method&#039;s configuration. <a href="' . $this->settings_url . '">View more configuration options.</a>', $this->payment_gateway->method_description );
 		$this->assertEquals( 'Please, select the payment method you want to use', $this->payment_gateway->description );
 		$this->assertEquals( array( 'products', 'refunds' ), $this->payment_gateway->supports );
 		

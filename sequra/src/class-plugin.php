@@ -80,7 +80,9 @@ class Plugin {
 		// Settings hooks.
 		add_action( 'admin_menu', array( $settings_controller, 'register_page' ) );
 		add_filter( "plugin_action_links_{$base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
+		add_filter( 'sequra_settings_page_url', array( $settings_controller, 'get_settings_page_url' ) );
 		add_filter( 'admin_footer_text', array( $settings_controller, 'remove_footer_admin' ) );
+		add_filter( 'plugin_row_meta', array( $settings_controller, 'add_plugin_row_meta' ), 10, 2 );
 
 		// REST Controllers.
 		add_action( 'rest_api_init', array( $rest_settings_controller, 'register_routes' ) );
