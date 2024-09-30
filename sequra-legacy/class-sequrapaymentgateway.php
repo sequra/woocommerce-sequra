@@ -476,7 +476,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		switch ( $sq_state ) {
 			case 'needs_review':
-				// TODO: exclude from migration. Why is this needed?
+				// TODO: exclude from migration. Already implemented in settings.
 				/**
 				 * Filter hold result from seQura if needed.
 				 *
@@ -498,7 +498,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				}
 				break;
 			case 'approved':
-				// TODO: exclude from migration. Why is this needed?
+				// TODO: exclude from migration. Already implemented in settings.
 				/**
 				 * Filter approval result from seQura if needed.
 				 * 

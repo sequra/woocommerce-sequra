@@ -114,7 +114,7 @@ class SequraHelper {
 	 * @return mixed 
 	 */
 	public function get_merchant_ref() {
-		// TODO: exclude from migration.
+		// TODO: exclude from migration. Now each country ref is managed from configuration.
 		/**
 		 * Filter merchant reference
 		 *

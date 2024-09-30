@@ -648,7 +648,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 
 			),
 			'type'       => 'shop_order',
-			// TODO: exclude hook from migration.
+			// TODO: already migrated.
 			/**
 			 * Filter the order statuses to consider as shipped.
 			 *
