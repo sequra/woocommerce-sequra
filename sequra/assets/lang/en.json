@@ -190,7 +190,7 @@
     },
     "description": {
       "onboarding": "Make sure you're logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you don't have an account, contact us ",
-      "settings": "Settings description",
+      "settings": "Settings description ",
       "endLink": "here"
     },
     "environment": {
@@ -206,7 +206,7 @@
     },
     "password": {
       "label": "Password",
-      "description": "Following information should be provided by seQura, you can sign-up <a href=\"https://sqra.es/signupwen\">here</a> to get it."
+      "description": "Following information should be provided by seQura, you can sign-up <a class=\"sq-link-button\" href=\"https://sqra.es/signupwen\">here</a> to get it."
     },
     "sendStatisticalData": {
       "description": {

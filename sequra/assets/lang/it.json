@@ -190,7 +190,7 @@
       },
       "description": {
         "onboarding": "Assicurati di essere connesso al portale del commerciante, perché dovrai copiare diverse impostazioni da lì per compilare le informazioni seguenti. Se non hai un account, contattaci ",
-        "settings": "Descrizione delle impostazioni",
+        "settings": "Descrizione delle impostazioni ",
         "endLink": "qui"
       },
       "environment": {
@@ -206,7 +206,7 @@
       },
       "password": {
         "label": "Password",
-        "description": "Le seguenti informazioni devono essere fornite da SeQura, puoi registrarti <a href=\"https://sqra.es/signupwit\">qui</a> per ottenerle."
+        "description": "Le seguenti informazioni devono essere fornite da SeQura, puoi registrarti <a class=\"sq-link-button\" href=\"https://sqra.es/signupwit\">qui</a> per ottenerle."
       },
       "sendStatisticalData": {
         "description": {

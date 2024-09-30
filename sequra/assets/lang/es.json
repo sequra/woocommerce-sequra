@@ -190,7 +190,7 @@
         },
         "description": {
             "onboarding": "Asegúrate de estar conectado al portal del comerciante porque necesitarás copiar varios ajustes de ahí para rellenar la información siguiente. Si no tienes una cuenta, contáctanos ",
-            "settings": "Descripción de las configuraciones",
+            "settings": "Descripción de las configuraciones ",
             "endLink": "aquí"
         },
         "environment": {
@@ -206,7 +206,7 @@
         },
         "password": {
             "label": "Contraseña",
-            "description": "La información siguiente debe ser proporcionada por SeQura, puedes registrarte <a href=\"https://sqra.es/signupwes\">aquí</a> para obtenerla."
+            "description": "La información siguiente debe ser proporcionada por SeQura, puedes registrarte <a class=\"sq-link-button\" href=\"https://sqra.es/signupwes\">aquí</a> para obtenerla."
         },
         "sendStatisticalData": {
             "description": {
