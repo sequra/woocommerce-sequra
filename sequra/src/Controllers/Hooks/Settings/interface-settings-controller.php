@@ -35,7 +35,20 @@ interface Interface_Settings_Controller {
 	public function add_action_link( $actions, $plugin_file, $plugin_data, $context ): array;
 
 	/**
+	 * Get the settings page URL.
+	 */
+	public function get_settings_page_url( ?string $url = null ): string;
+
+	/**
 	 * Removes the WP footer message
 	 */
 	public function remove_footer_admin( string $text ): string;
+
+	/**
+	 * Show row meta on the plugin screen.
+	 *
+	 * @param array $links Plugin Row Meta.
+	 * @param string $file  Plugin Base file.
+	 */
+	public function add_plugin_row_meta( $links, $file ): array;
 }

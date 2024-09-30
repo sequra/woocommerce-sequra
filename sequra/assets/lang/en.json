@@ -29,8 +29,6 @@
       "saveEntityFailed": "Failed to save entity because %s",
       "getEntityFailed": "Failed to retrieve entity because %s",
       "failedToRetrieveStores": "Failed to retrieve stores.",
-      "failedToRetrieveLog": "Failed to retrieve log content.",
-      "failedToRemoveLog": "Failed to remove log content.",
       "failedToRetrieveOrderStatuses": "Failed to retrieve order statuses.",
       "stores": {
         "failed": "Failed to retrieve stores.",
@@ -88,7 +86,9 @@
         "merchantError": "Merchant with id %s not found.",
         "failedToRegisterWebhook": "Failed to register webhook.",
         "hmacError": "Error generating HMAC."
-      }
+      },
+      "failedToRetrieveLog": "Failed to retrieve log content.",
+      "failedToRemoveLog": "Failed to remove log content."
     }
   },
   "sidebar": {
@@ -96,7 +96,7 @@
     "connectionSettings": "Connection settings",
     "orderStatusSettings": "Order status settings",
     "widgetSettings": "Widget settings",
-    "stepOneLabel": "Install ecommerce integration",
+    "stepOneLabel": "Install e-commerce integration",
     "stepOneDescription": "Your integration is ready for connection.",
     "stepTwoLabel": "Connect integration",
     "stepThreeLabel": "Configure selling countries",
@@ -106,9 +106,7 @@
   "validation": {
     "requiredField": "This field is required.",
     "invalidField": "This field is invalid.",
-    "invalidJson": "This field contains invalid JSON.",
     "invalidIPAddress": "This field must contain only valid IP addresses.",
-    "invalidTimeDuration": "This field must contain only dates as 2017-08-31 or time duration as P3M15D (3 months and 15 days). Check ISO 8601",
     "invalidJSON": "This field must be a valid JSON.",
     "invalidEmail": "This field must be a valid email.",
     "maxLength": "The field cannot have more than %s characters.",
@@ -121,7 +119,9 @@
     "invalidFieldValue": "Field must be set to \"%s\".",
     "invalidMaxValue": "Maximal allowed value is %s.",
     "invalidImageType": "Please provide a file in one of the supported image types (PNG, JPG, SVG).",
-    "invalidImageSize": "The selected file exceeds the limit of 10MB."
+    "invalidImageSize": "The selected file exceeds the limit of 10MB.",
+    "invalidJson": "This field contains invalid JSON.",
+    "invalidTimeDuration": "This field must contain only dates as 2017-08-31 or time duration as P3M15D (3 months and 15 days). Check ISO 8601"
   },
   "payments": {
     "title": "Payment methods",
@@ -168,8 +168,6 @@
   "debug": {
     "title": "Enable logs",
     "description": "Help to diagnose issues with the seQura integration",
-    "reload": "Reload",
-    "remove": "Remove",
     "noLogs": "There are no logs available",
     "log": {
       "severity": "Severity",
@@ -181,7 +179,9 @@
       },
       "minLevel": "Minimum severity level",
       "minLevelDescription": "Set the minimum severity level of logs to write to the log file."
-    }
+    },
+    "reload": "Reload",
+    "remove": "Remove"
   },
   "connection": {
     "title": {
@@ -189,8 +189,8 @@
       "settings": "Connection settings"
     },
     "description": {
-      "onboarding": "Make sure you're logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you dont have an account, contact us ",
-      "settings": "Settings description",
+      "onboarding": "Make sure you're logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you don't have an account, contact us ",
+      "settings": "Settings description ",
       "endLink": "here"
     },
     "environment": {
@@ -206,7 +206,7 @@
     },
     "password": {
       "label": "Password",
-      "description": "You can find your password in the email sent by SeQura."
+      "description": "Following information should be provided by seQura, you can sign-up <a class=\"sq-link-button\" href=\"https://sqra.es/signupwen\">here</a> to get it."
     },
     "sendStatisticalData": {
       "description": {

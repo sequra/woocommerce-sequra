@@ -93,7 +93,9 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $this->asset_controller, 'enqueue_front' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', array( $this->settings_controller, 'register_page' ) ) );
 		$this->assertEquals( 10, has_filter( "plugin_action_links_{$this->base_name}", array( $this->settings_controller, 'add_action_link' ) ) );
+		$this->assertEquals( 10, has_filter( 'sequra_settings_page_url', array( $this->settings_controller, 'get_settings_page_url' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_footer_text', array( $this->settings_controller, 'remove_footer_admin' ) ) );
+		$this->assertEquals( 10, has_filter( 'plugin_row_meta', array( $this->settings_controller, 'add_plugin_row_meta' ) ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_settings_controller, 'register_routes' ) ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_onboarding_controller, 'register_routes' ) ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_payment_controller, 'register_routes' ) ) );

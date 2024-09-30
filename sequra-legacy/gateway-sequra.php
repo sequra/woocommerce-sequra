@@ -228,6 +228,7 @@ function sequrapayment_action_links( $links ) {
 	return array_merge(
 		array(
 			'comf' => '<a href="' . esc_url(
+				// TODO: exclude hook from migration. Why is this needed?
 				/**
 				 * Filters the URL of the plugin configuration.
 				 *
