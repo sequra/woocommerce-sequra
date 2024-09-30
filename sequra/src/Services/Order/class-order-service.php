@@ -377,7 +377,7 @@ class Order_Service implements Interface_Order_Service {
 			return $previous_orders;
 		}
 
-		$statuses = array( 'wc-completed' );
+		$statuses = $this->order_status_service->get_shop_status_completed();
 		foreach ( $order_statuses as $order_status ) {
 			if ( $order_status->getSequraStatus() === OrderStates::STATE_APPROVED ) {
 				// Use the default status if the shop status is not set.
@@ -653,7 +653,7 @@ class Order_Service implements Interface_Order_Service {
 	 * @throws Throwable
 	 */
 	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void {
-		if ( $this->order_status_service->get_shop_status_completed( true ) === $new_store_status ) {
+		if ( in_array( $new_store_status, $this->order_status_service->get_shop_status_completed( true ), true ) ) {
 			$this->set_sequra_order_status_to_shipped( $order );
 		}
 	}
