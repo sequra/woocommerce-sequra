@@ -158,7 +158,7 @@
             "title": "Detalles",
             "label": "Mostrar detalles",
             "reason": "Razón:",
-            "failureDescription": "Descripción del fallo en el procesamiento de la notificación:",
+            "failureDescription": "",
             "sequraLink": "Ir al pedido en el portal de SeQura",
             "shopLink": "Ir al pedido en la tienda"
         },
