@@ -43,4 +43,12 @@ interface Interface_Settings_Controller {
 	 * Removes the WP footer message
 	 */
 	public function remove_footer_admin( string $text ): string;
+
+	/**
+	 * Show row meta on the plugin screen.
+	 *
+	 * @param array $links Plugin Row Meta.
+	 * @param string $file  Plugin Base file.
+	 */
+	public function add_plugin_row_meta( $links, $file ): array;
 }

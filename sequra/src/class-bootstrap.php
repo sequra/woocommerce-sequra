@@ -834,7 +834,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Settings_Controller::class ] = new Settings_Controller(
 						Reg::getService( 'plugin.templates_path' ),
 						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( 'plugin.basename' )
 					);
 				}
 				return self::$cache[ Interface_Settings_Controller::class ];

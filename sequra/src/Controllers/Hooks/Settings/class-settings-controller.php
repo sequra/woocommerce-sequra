@@ -25,15 +25,22 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	private $configuration;
 
 	/**
+	 * Plugin basename.
+	 */
+	private $plugin_basename;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct( 
 		string $templates_path, 
 		Configuration $configuration, 
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		string $plugin_basename
 	) {
 		parent::__construct( $logger, $templates_path );
-		$this->configuration = $configuration;
+		$this->configuration   = $configuration;
+		$this->plugin_basename = $plugin_basename;
 	}
 
 	/**
@@ -101,5 +108,61 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 			return $text;
 		}
 		return '';
+	}
+
+	/**
+	 * Show row meta on the plugin screen.
+	 *
+	 * @param array $links Plugin Row Meta.
+	 * @param string $file  Plugin Base file.
+	 */
+	public function add_plugin_row_meta( $links, $file ): array {
+		if ( $this->plugin_basename === $file ) {
+			$row_meta = array(
+				'docs'    => sprintf(
+					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
+					esc_url(
+						/**
+						 * Filters the URL of the plugin documentation.
+						 *
+						 * @since 2.0.0
+						 */
+						apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' )
+					),
+					esc_attr__( 'View WooCommerce documentation', 'sequra' ),
+					esc_html__( 'Docs', 'woocommerce' )
+				),
+				'apidocs' => sprintf(
+					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
+					esc_url(
+						/**
+						 * Filters the URL of the plugin API documentation.
+						 *
+						 * @since 2.0.0
+						 */
+						apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' )
+					),
+					esc_attr__( 'View WooCommerce API docs', 'sequra' ),
+					esc_html__( 'API docs', 'sequra' )
+				),
+				'support' => sprintf(
+					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
+					esc_url(
+						/**
+						 * Filters the URL of the plugin support.
+						 *
+						 * @since 2.0.0
+						 */
+						apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' )
+					),
+					esc_attr__( 'Support', 'sequra' ),
+					esc_html__( 'Support', 'sequra' )
+				),
+			);
+
+			return array_merge( $links, $row_meta );
+		}
+
+		return (array) $links;
 	}
 }
