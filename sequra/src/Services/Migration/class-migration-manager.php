@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Services
  */
 
-namespace SeQura\WC\Services;
+namespace SeQura\WC\Services\Migration;
 
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Repositories\Migrations\Migration;
