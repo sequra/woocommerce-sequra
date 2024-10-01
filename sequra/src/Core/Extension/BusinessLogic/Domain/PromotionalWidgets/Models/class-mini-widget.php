@@ -17,8 +17,8 @@ class Mini_Widget {
 	private const MESSAGE             = 'message';
 	private const MESSAGE_BELOW_LIMIT = 'messageBelowLimit';
 	private const PRODUCT             = 'product';
+	private const CAMPAIGN            = 'campaign';
 	private const COUNTRY             = 'countryCode';
-	private const TITLE               = 'title';
 
 	/**
 	 * CSS selector for retrieving the price element.
@@ -63,11 +63,11 @@ class Mini_Widget {
 	private $country;
 
 	/**
-	 * The seQura product title.
+	 * The seQura product campaign.
 	 *
 	 * @var string
 	 */
-	private $title;
+	private $campaign;
 
 	/**
 	 * Constructor.
@@ -79,7 +79,7 @@ class Mini_Widget {
 		string $message_below_limit,
 		?string $product = null,
 		?string $country = null,
-		?string $title = null
+		?string $campaign = null
 	) {
 		$this->sel_for_price       = $sel_for_price;
 		$this->sel_for_location    = $sel_for_location;
@@ -87,7 +87,7 @@ class Mini_Widget {
 		$this->message_below_limit = $message_below_limit;
 		$this->product             = $product;
 		$this->country             = $country;
-		$this->title               = $title;
+		$this->campaign            = $campaign;
 	}
 
 	/**
@@ -140,7 +140,7 @@ class Mini_Widget {
 			strval( $data[ self::MESSAGE_BELOW_LIMIT ] ),
 			$data[ self::PRODUCT ] ?? null,
 			$data[ self::COUNTRY ] ?? null,
-			$data[ self::TITLE ] ?? null
+			$data[ self::CAMPAIGN ] ?? null
 		);
 	}
 
@@ -157,7 +157,7 @@ class Mini_Widget {
 			self::MESSAGE_BELOW_LIMIT => $this->message_below_limit,
 			self::PRODUCT             => $this->product,
 			self::COUNTRY             => $this->country,
-			self::TITLE               => $this->title,
+			self::CAMPAIGN            => $this->campaign,
 		);
 	}
 }

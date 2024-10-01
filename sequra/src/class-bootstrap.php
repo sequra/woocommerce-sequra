@@ -550,7 +550,7 @@ class Bootstrap extends BootstrapComponent {
 							new Migration_Install_300( 
 								Reg::getService( \wpdb::class ),
 								Reg::getService( Configuration::CLASS_NAME ),
-							 ),
+							),
 						)
 					);
 				}

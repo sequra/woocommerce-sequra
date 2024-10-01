@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
 use SeQura\Core\Infrastructure\Configuration\Configuration as CoreConfiguration;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 use Throwable;
 use WP_Site;
@@ -338,10 +339,12 @@ class Configuration extends CoreConfiguration {
 	/**
 	 * Check if the widget is enabled.
 	 */
-	public function is_widget_enabled( ?string $payment_method = null, ?string $country = null ): bool {
+	public function is_widget_enabled( ?string $payment_method, ?string $campaign, ?string $country ): bool {
 		try {
 			$config = $this->get_widget_settings();
-			return ! empty( $config['useWidgets'] ) && ! empty( $config['displayWidgetOnProductPage'] ) && $this->is_widget_enabled_in_custom_locations( $payment_method, $country );
+			return ! empty( $config['useWidgets'] ) 
+			&& ! empty( $config['displayWidgetOnProductPage'] ) 
+			&& $this->is_widget_enabled_in_custom_locations( $payment_method, $campaign, $country );
 		} catch ( Throwable $e ) {
 			return false;
 		}
@@ -416,7 +419,7 @@ class Configuration extends CoreConfiguration {
 	 * - message: string
 	 * - messageBelowLimit: string
 	 * - product: string
-	 * - title: string
+	 * - campaign: ?string
 	 */
 	public function get_cart_widget_config( string $country ): ?array {
 		try {
@@ -429,6 +432,7 @@ class Configuration extends CoreConfiguration {
 				'message'           => $mini_widget['message'] ?? $this->get_mini_widget_default_message( $country ),
 				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? $this->get_mini_widget_default_message_below_limit( $country ),
 				'product'           => $mini_widget['product'] ?? 'pp3',
+				'campaign'          => $mini_widget['campaign'] ?? null,
 				// 'title'             => $mini_widget['title'] ?? null,
 			);
 		} catch ( Throwable $e ) {
@@ -445,7 +449,7 @@ class Configuration extends CoreConfiguration {
 	 * - message: string
 	 * - messageBelowLimit: string
 	 * - product: string
-	 * - title: string
+	 * - campaign: ?string
 	 */
 	public function get_product_listing_widget_config( string $country ): ?array {
 		try {
@@ -458,6 +462,7 @@ class Configuration extends CoreConfiguration {
 				'message'           => $mini_widget['message'] ?? $this->get_mini_widget_default_message( $country ),
 				'messageBelowLimit' => $mini_widget['messageBelowLimit'] ?? $this->get_mini_widget_default_message_below_limit( $country ),
 				'product'           => $mini_widget['product'] ?? 'pp3',
+				'campaign'          => $mini_widget['campaign'] ?? null,
 				// 'title'             => $mini_widget['title'] ?? null,
 			);
 		} catch ( Throwable $e ) {
@@ -523,13 +528,10 @@ class Configuration extends CoreConfiguration {
 	/**
 	 * Check if the widget is enabled in custom locations.
 	 */
-	private function is_widget_enabled_in_custom_locations( ?string $payment_method = null, ?string $country = null ): bool {
+	private function is_widget_enabled_in_custom_locations( ?string $payment_method, ?string $campaign, ?string $country ): bool {
 		try {
-			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
-			if ( isset( $custom_location['display_widget'] ) ) {
-				return $custom_location['display_widget'];
-			}
-			return true;
+			$custom_location = $this->get_widget_custom_location( $payment_method, $campaign, $country );
+			return $custom_location ? $custom_location->get_display_widget() : true;
 		} catch ( Throwable $e ) {
 			return false;
 		}
@@ -538,15 +540,12 @@ class Configuration extends CoreConfiguration {
 	/**
 	 * Get the widget location selector
 	 */
-	public function get_widget_dest_css_sel( ?string $payment_method = null, ?string $country = null ): string {
+	public function get_widget_dest_css_sel( ?string $payment_method, ?string $campaign, ?string $country ): string {
 		try {
 			$config          = $this->get_widget_settings();
 			$sel             = $config['selForDefaultLocation'];
-			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
-			if ( ! empty( $custom_location['sel_for_target'] ) ) {
-				$sel = $custom_location['sel_for_target'];
-			}
-			return $sel;
+			$custom_location = $this->get_widget_custom_location( $payment_method, $campaign, $country );
+			return $custom_location ? $custom_location->get_sel_for_target() : $sel;
 		} catch ( Throwable $e ) {
 			return '';
 		}
@@ -590,37 +589,32 @@ class Configuration extends CoreConfiguration {
 
 	/**
 	 * Get the widget custom location
-	 * 
-	 * @return array<string, mixed>
 	 */
-	private function get_widget_custom_location( ?string $payment_method = null, ?string $country = null ): array {
+	private function get_widget_custom_location( ?string $payment_method, ?string $campaign, ?string $country ): ?Widget_Location {
 		$config = $this->get_widget_settings();
 		if ( ! empty( $payment_method ) && ! empty( $country ) && isset( $config['customLocations'] ) && is_array( $config['customLocations'] ) ) {
 			foreach ( $config['customLocations'] as $location ) {
-				if ( isset( $location['product'] ) 
-					&& $location['product'] === $payment_method 
-					&& isset( $location['country'] ) 
-					&& $location['country'] === $country ) {
-					return $location;
+				$loc = Widget_Location::from_array( $location );
+				if ( null !== $loc
+					&& $loc->get_product() === $payment_method
+					&& $loc->get_country() === $country
+					&& ( $loc->get_campaign() ?? null ) === $campaign ) {
+					return $loc;
 				}
 			}
 		}
-		return array();
+		return null;
 	}
 
 	/**
 	 * Get widget theme
 	 */
-	public function get_widget_theme( ?string $payment_method = null, ?string $country = null ): string {
+	public function get_widget_theme( ?string $payment_method, ?string $campaign, ?string $country ): string {
 		try {
-			$config = $this->get_widget_settings();
-			$style  = $config['widgetConfiguration'] ?? '';
-
-			$custom_location = $this->get_widget_custom_location( $payment_method, $country );
-			if ( ! empty( $custom_location['widget_styles'] ) ) {
-				$style = $custom_location['widget_styles'] ?? $style;
-			}
-			return $style;
+			$config          = $this->get_widget_settings();
+			$style           = $config['widgetConfiguration'] ?? '';
+			$custom_location = $this->get_widget_custom_location( $payment_method, $campaign, $country );
+			return $custom_location ? $custom_location->get_widget_styles() : $style;
 		} catch ( Throwable $e ) {
 			return '';
 		}
