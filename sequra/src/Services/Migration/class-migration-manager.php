@@ -54,6 +54,8 @@ class Migration_Manager implements Interface_Migration_Manager {
 	 */
 	private $logger;
 
+	private const MIGRATION_LOCK = 'sequra_migration_lock';
+
 	/**
 	 * Constructor
 	 *
@@ -76,23 +78,28 @@ class Migration_Manager implements Interface_Migration_Manager {
 			return;
 		}
 
-		foreach ( $this->migrations as $migration ) {
-			if ( -1 === version_compare( $db_module_version, $migration->get_version() ) ) {
-				try {
+		if ( (bool) get_transient( self::MIGRATION_LOCK ) ) {
+			return;
+		}
+
+		set_transient( self::MIGRATION_LOCK, 1, 60 * 60 ); // Set 1 hour as the maximum time to run the migrations.
+		
+		try {
+			foreach ( $this->migrations as $migration ) {
+				if ( -1 === version_compare( $db_module_version, $migration->get_version() ) ) {
 					$migration->run();
 					$this->configuration->set_module_version( $migration->get_version() );
-				} catch ( Critical_Migration_Exception $e ) {
-					// Critical migration failed and the plugin cannot work properly. 
-					// Stop the process, deactivate the plugin and log the error.
-					$this->logger->log_throwable( $e );
-					deactivate_plugins( $this->plugin_basename, true );
-					return;
-				} catch ( Throwable $e ) {
-					// Non-critical migration failed. Stop the process and log the error.
-					$this->logger->log_throwable( $e );
-					return;
 				}
 			}
+		} catch ( Critical_Migration_Exception $e ) {
+			// ! Critical migration failed and the plugin cannot work properly. Deactivate the plugin and log the error.
+			$this->logger->log_throwable( $e );
+			deactivate_plugins( $this->plugin_basename, true );
+		} catch ( Throwable $e ) {
+			// ! Non-critical migration failed. Stop the process and log the error.
+			$this->logger->log_throwable( $e );
+		} finally {
+			delete_transient( self::MIGRATION_LOCK );
 		}
 	}
 
