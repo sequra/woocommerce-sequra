@@ -542,6 +542,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
+						Reg::getService( 'plugin.basename' ),
+						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( Configuration::CLASS_NAME ),
 						Reg::getService( 'plugin.data' )['Version'],
 						array(

@@ -8,9 +8,10 @@
 
 namespace SeQura\WC\Repositories\Migrations;
 
+use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
-use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
+use Throwable;
 
 /**
  * Post install migration for version 3.0.0 of the plugin.
@@ -27,7 +28,7 @@ class Migration_Install_300 extends Migration {
 	/**
 	 * Run the migration.
 	 *
-	 * @throws \Throwable
+	 * @throws Throwable|Critical_Migration_Exception
 	 */
 	public function run(): void {
 		$this->add_new_tables_to_database();
@@ -42,7 +43,20 @@ class Migration_Install_300 extends Migration {
 	}
 
 	/**
+	 * Check if the table exists in the database
+	 *
+	 * @throws Critical_Migration_Exception
+	 */
+	private function check_if_table_exists( string $table_name ): void {
+		if ( $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) !== $table_name ) {
+			throw new Critical_Migration_Exception( esc_html( "Could not create the table \"$table_name\"" ) );
+		}
+	}
+
+	/**
 	 * Add new tables to the database.
+	 * 
+	 * @throws Throwable|Critical_Migration_Exception
 	 */
 	private function add_new_tables_to_database(): void {
 		$charset_collate = $this->db->get_charset_collate();
@@ -51,7 +65,7 @@ class Migration_Install_300 extends Migration {
 
 		foreach ( array( 'sequra_entity', 'sequra_order' ) as $table ) {
 			$table_name = $this->db->prefix . $table;
-			\dbDelta(
+			dbDelta(
 				"CREATE TABLE IF NOT EXISTS $table_name (
 				`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				`type` VARCHAR(255),
@@ -66,10 +80,11 @@ class Migration_Install_300 extends Migration {
 				PRIMARY KEY  (id)
 			) $charset_collate;" 
 			);
+			$this->check_if_table_exists( $table_name );
 		}
 
 		$table_name = $this->db->prefix . 'sequra_queue';
-		\dbDelta(
+		dbDelta(
 			"CREATE TABLE IF NOT EXISTS $table_name (
 			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			`type` VARCHAR(255),
@@ -86,12 +101,13 @@ class Migration_Install_300 extends Migration {
 			PRIMARY KEY  (id)
 		) $charset_collate;" 
 		);
+		$this->check_if_table_exists( $table_name );
 	}
 
 	/** Migrate connection settings from v2
 	 *
 	 * @param string[] $settings
-	 * @throws \Exception
+	 * @throws Throwable|Exception
 	 */
 	private function migrate_connection_configuration( array $settings ): void {
 		$env_mapping = array(
@@ -117,7 +133,7 @@ class Migration_Install_300 extends Migration {
 		);
 
 		if ( ! $response->isSuccessful() ) {
-			throw new \Exception( esc_html( $response['errorMessage'] ) );
+			throw new Exception( esc_html( $response['errorMessage'] ) );
 		}
 	}
 
