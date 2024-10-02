@@ -12,6 +12,12 @@ namespace SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Model
  */
 class Widget_Location_Config {
 
+	private const SEL_FOR_PRICE             = 'selForPrice';
+	private const SEL_FOR_ALT_PRICE         = 'selForAltPrice';
+	private const SEL_FOR_ALT_PRICE_TRIGGER = 'selForAltPriceTrigger';
+	private const SEL_FOR_DEFAULT_LOCATION  = 'selForDefaultLocation';
+	private const CUSTOM_LOCATIONS          = 'customLocations';
+
 	/**
 	 * CSS selector for retrieving the price element.
 	 *
@@ -152,18 +158,18 @@ class Widget_Location_Config {
 	 */
 	public static function from_array( array $data ): ?Widget_Location_Config {
 		if (
-			! isset( $data['sel_for_price'] )
-			|| ! isset( $data['sel_for_alt_price'] )
-			|| ! isset( $data['sel_for_alt_price_trigger'] )
-			|| ! isset( $data['sel_for_default_location'] )
-			|| ! isset( $data['custom_locations'] )
+			! isset( $data[ self::SEL_FOR_PRICE ] )
+			|| ! isset( $data[ self::SEL_FOR_ALT_PRICE ] )
+			|| ! isset( $data[ self::SEL_FOR_ALT_PRICE_TRIGGER ] )
+			|| ! isset( $data[ self::SEL_FOR_DEFAULT_LOCATION ] )
+			|| ! isset( $data[ self::CUSTOM_LOCATIONS ] )
 		) {
 			return null;
 		}
 
 		$locations = array();
-		if ( is_array( $data['custom_locations'] ) ) {
-			foreach ( $data['custom_locations'] as $location ) {
+		if ( is_array( $data[ self::CUSTOM_LOCATIONS ] ) ) {
+			foreach ( $data[ self::CUSTOM_LOCATIONS ] as $location ) {
 				$location = Widget_Location::from_array( $location );
 				if ( $location ) {
 					$locations[] = $location;
@@ -172,10 +178,10 @@ class Widget_Location_Config {
 		}
 
 		return new self(
-			strval( $data['sel_for_price'] ),
-			strval( $data['sel_for_alt_price'] ),
-			strval( $data['sel_for_alt_price_trigger'] ),
-			strval( $data['sel_for_default_location'] ),
+			strval( $data[ self::SEL_FOR_PRICE ] ),
+			strval( $data[ self::SEL_FOR_ALT_PRICE ] ),
+			strval( $data[ self::SEL_FOR_ALT_PRICE_TRIGGER ] ),
+			strval( $data[ self::SEL_FOR_DEFAULT_LOCATION ] ),
 			$locations
 		);
 	}
@@ -192,11 +198,11 @@ class Widget_Location_Config {
 		}
 
 		return array(
-			'sel_for_price'             => $this->sel_for_price,
-			'sel_for_alt_price'         => $this->sel_for_alt_price,
-			'sel_for_alt_price_trigger' => $this->sel_for_alt_price_trigger,
-			'sel_for_default_location'  => $this->sel_for_default_location,
-			'custom_locations'          => $locations,
+			self::SEL_FOR_PRICE             => $this->sel_for_price,
+			self::SEL_FOR_ALT_PRICE         => $this->sel_for_alt_price,
+			self::SEL_FOR_ALT_PRICE_TRIGGER => $this->sel_for_alt_price_trigger,
+			self::SEL_FOR_DEFAULT_LOCATION  => $this->sel_for_default_location,
+			self::CUSTOM_LOCATIONS          => $locations,
 		);
 	}
 }

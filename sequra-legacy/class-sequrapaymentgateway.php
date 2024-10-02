@@ -225,6 +225,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			return false;
 		}
 		$ret = $this->helper->is_available_for_ip();
+		// TODO: already migrated.
 		/**
 		 * Filter hook to allow plugins to modify the return value for sequra availability.
 		 * 
@@ -278,6 +279,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		}
 		$payment_methods = $this->get_remote_config()->get_available_payment_methods();
 		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPressVIPMinimum.Files.IncludingFile.UsingVariable
+		// TODO: exclude from migration. Is not used in v2.
 		/**
 		 * Filter hook to allow plugins to modify the payment methods.
 		 *
@@ -323,6 +325,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 			$campaign = isset( $tmp[1] ) ? $tmp[1] : '';
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
+		// TODO: already migrated.
 		/**
 		 * Action hook to allow plugins to process payment.
 		 * 
@@ -339,6 +342,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				$order->get_checkout_payment_url( true )
 			),
 		);
+		// TODO: already migrated.
 		/**
 		 * Filter hook to allow plugins to modify the return array.
 		 * 
@@ -365,6 +369,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$identity_form = $this->helper->get_identity_form(
 			// phpcs:enable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable 
+			// TODO: already migrated.
 			/**
 			 * Filter the options to be sent to seQura if needed
 			 * 
@@ -471,6 +476,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.NonceVerification.Missing
 		switch ( $sq_state ) {
 			case 'needs_review':
+				// TODO: exclude from migration. Already implemented in settings.
 				/**
 				 * Filter hold result from seQura if needed.
 				 *
@@ -492,6 +498,7 @@ class SequraPaymentGateway extends WC_Payment_Gateway {
 				}
 				break;
 			case 'approved':
+				// TODO: exclude from migration. Already implemented in settings.
 				/**
 				 * Filter approval result from seQura if needed.
 				 * 

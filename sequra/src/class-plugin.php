@@ -15,7 +15,7 @@ use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
-use SeQura\WC\Services\Interface_Migration_Manager;
+use SeQura\WC\Services\Migration\Interface_Migration_Manager;
 
 /**
  * The core plugin class.

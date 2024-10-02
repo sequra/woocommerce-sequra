@@ -13,9 +13,10 @@ if (!window.SequraFE) {
 
     /**
      * @typedef WidgetLocation
-     * @property {string|null} sel_for_target
+     * @property {string|null} selForTarget
      * @property {string|null} product
      * @property {string|null} country
+     * @property {string|null} campaign
      */
 
     /**
@@ -26,13 +27,14 @@ if (!window.SequraFE) {
      * @property {string|null} messageBelowLimit
      * @property {string|null} product
      * @property {string|null} country
-     * @property {string|null} title
+     * @property {string|null} campaign
      */
 
     /**
      * @typedef CountryPaymentMethod
      * @property {string|null} countryCode
      * @property {string|null} product
+     * @property {string|null} campaign
      * @property {string|null} title
      */
 
@@ -352,8 +354,8 @@ if (!window.SequraFE) {
                 ],
                 getRowContent: (data) => {
                     let displayWidget = true;
-                    if (data && 'undefined' !== typeof data.display_widget) {
-                        displayWidget = data.display_widget;
+                    if (data && 'undefined' !== typeof data.displayWidget) {
+                        displayWidget = data.displayWidget;
                     }
 
                     return `
@@ -367,16 +369,17 @@ if (!window.SequraFE) {
                      <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.selector')}</label>
                         <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.locations.leaveEmptyToUseDefault')}</span>
-                        <input class="sq-table__row-field" type="text" value="${data && 'undefined' !== typeof data.sel_for_target ? data.sel_for_target : ''}">
+                        <input class="sq-table__row-field" type="text" value="${data && 'undefined' !== typeof data.selForTarget ? data.selForTarget : ''}">
                     </div>
                     <div class="sq-table__row-field-wrapper sq-table__row-field-wrapper--grow">
                     <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.configurator.label')}</label>
                     <span class="sqp-field-subtitle">${SequraFE.translationService.translate('widgets.configurator.description.start')}<a class="sq-link-button" href="https://live.sequracdn.com/assets/static/simulator.html" target="_blank"><span>${SequraFE.translationService.translate('widgets.configurator.description.link')}</span></a><span>${SequraFE.translationService.translate('widgets.configurator.description.end')} ${SequraFE.translationService.translate('widgets.locations.leaveEmptyToUseDefault')}</span></span>
-                    <textarea class="sqp-field-component sq-text-input sq-text-area" rows="5">${data && 'undefined' !== typeof data.widget_styles ? data.widget_styles : ''}</textarea>
+                    <textarea class="sqp-field-component sq-text-input sq-text-area" rows="5">${data && 'undefined' !== typeof data.widgetStyles ? data.widgetStyles : ''}</textarea>
                     </div>
                     `
                 },
                 getRowHeader: (data) => {
+                    let selectedFound = false;
                     return `
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
@@ -384,8 +387,14 @@ if (!window.SequraFE) {
                         if (!pm.supportsWidgets) {
                             return '';
                         }
-                        const selected = data && data.product === pm.product && data.country === pm.countryCode && data.title === pm.title ? ' selected' : '';
-                        return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${selected}>${pm.title}</option>`;
+
+                        let selected = '';
+                        if(!selectedFound && data && data.product === pm.product && data.country === pm.countryCode && data.campaign === pm.campaign) {
+                            selected = ' selected';
+                            selectedFound = true;
+                        }
+                        const dataCampaign = pm.campaign ? ` data-campaign="${pm.campaign}"` : '';
+                        return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${dataCampaign + selected}>${pm.title}</option>`;
                     }).join('') : ''
                         }
                         </select>
@@ -396,13 +405,15 @@ if (!window.SequraFE) {
                     const customLocations = [];
                     table.querySelectorAll('.sq-table__row').forEach(row => {
                         const select = row.querySelector('select');
-                        const sel_for_target = row.querySelector('input[type="text"]').value;
-                        const widget_styles = row.querySelector('textarea').value;
-                        const display_widget = row.querySelector('input[type="checkbox"]').checked;
-                        const product = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.product;
-                        const country = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset.countryCode;
-                        const title = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].textContent;
-                        customLocations.push({ sel_for_target, product, country, title, widget_styles, display_widget });
+                        const selForTarget = row.querySelector('input[type="text"]').value;
+                        const widgetStyles = row.querySelector('textarea').value;
+                        const displayWidget = row.querySelector('input[type="checkbox"]').checked;
+                        const dataset = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset;
+
+                        const product = 'undefined' !== typeof dataset.product ? dataset.product : null;
+                        const country = 'undefined' !== typeof dataset.countryCode ? dataset.countryCode : null;
+                        const campaign = 'undefined' !== typeof dataset.campaign ? dataset.campaign : null;
+                        customLocations.push({ selForTarget, product, country, campaign, widgetStyles, displayWidget });
                     });
                     handleChange('customLocations', customLocations)
                 },
@@ -496,17 +507,17 @@ if (!window.SequraFE) {
         const isCustomLocationValid = value => {
             try {
                 value.forEach(location => {
-                    if ('' !== location.sel_for_target && !isCssSelectorValid(location.sel_for_target)) {
+                    if ('' !== location.selForTarget && !isCssSelectorValid(location.selForTarget)) {
                         throw new Error('Invalid selector');
                     }
-                    if ('' !== location.widget_styles && !isJSONValid(location.widget_styles)) {
+                    if ('' !== location.widgetStyles && !isJSONValid(location.widgetStyles)) {
                         throw new Error('Invalid selector');
                     }
-                    if (!allPaymentMethods.some(pm => pm.supportsWidgets && pm.product === location.product && pm.countryCode === location.country && pm.title === location.title)) {
+                    if (!allPaymentMethods.some(pm => pm.supportsWidgets && pm.product === location.product && pm.countryCode === location.country && pm.campaign === location.campaign)) {
                         throw new Error('Invalid payment method');
                     }
                     // Check if exists other location with the same product and country
-                    if (value.filter(l => l.product === location.product && l.country === location.country && l.title === location.title).length > 1) {
+                    if (value.filter(l => l.product === location.product && l.country === location.country && l.campaign === location.campaign).length > 1) {
                         throw new Error('Duplicated entry found');
                     }
                 });
@@ -564,7 +575,7 @@ if (!window.SequraFE) {
                 maybeShowRelatedFields('.sq-listing-related-field', value);
             }
 
-            if(['selForPrice', 'selForDefaultLocation', 'selForAltPrice', 'selForAltPriceTrigger', 'selForCartPrice', 'selForCartLocation', 'selForListingPrice', 'selForListingLocation'].includes(name)){
+            if (['selForPrice', 'selForDefaultLocation', 'selForAltPrice', 'selForAltPriceTrigger', 'selForCartPrice', 'selForCartLocation', 'selForListingPrice', 'selForListingLocation'].includes(name)) {
                 const required = ['selForPrice', 'selForDefaultLocation', 'selForCartPrice', 'selForCartLocation', 'selForListingPrice', 'selForListingLocation'];
                 const isValid = validator.validateCssSelector(
                     document.querySelector(`[name="${name}"]`),

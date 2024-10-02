@@ -102,7 +102,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'widget-styles-es',
 						'pp3',
 						'ES',
-						'pp3 title'
+						'pp3_campaign'
 					),
 					new Widget_Location(
 						true,
@@ -110,7 +110,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'widget-styles-it',
 						'i1',
 						'IT',
-						'i1 title'
+						'i1_campaign'
 					),
 				)
 			),
@@ -125,7 +125,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'message-below-limit-es',
 						'pp3',
 						'ES',
-						'pp3 title'
+						'pp3_campaign'
 					),
 				)
 			),
@@ -140,7 +140,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'message-below-limit-es',
 						'pp3',
 						'ES',
-						'pp3 title'
+						'pp3_campaign'
 					),
 				)
 			)
@@ -168,20 +168,20 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 				'selForDefaultLocation'                 => 'selector-for-default-location',
 				'customLocations'                       => array(
 					array(
-						'product'        => 'pp3',
-						'country'        => 'ES',
-						'sel_for_target' => 'selector-for-location',
-						'widget_styles'  => 'widget-styles-es',
-						'display_widget' => true,
-						'title'          => 'pp3 title',
+						'product'       => 'pp3',
+						'country'       => 'ES',
+						'selForTarget'  => 'selector-for-location',
+						'widgetStyles'  => 'widget-styles-es',
+						'displayWidget' => true,
+						'campaign'      => 'pp3_campaign',
 					),
 					array(
-						'product'        => 'i1',
-						'country'        => 'IT',
-						'sel_for_target' => 'selector-for-location2',
-						'widget_styles'  => 'widget-styles-it',
-						'display_widget' => true,
-						'title'          => 'i1 title',
+						'product'       => 'i1',
+						'country'       => 'IT',
+						'selForTarget'  => 'selector-for-location2',
+						'widgetStyles'  => 'widget-styles-it',
+						'displayWidget' => true,
+						'campaign'      => 'i1_campaign',
 					),
 				),
 				'selForCartPrice'                       => 'cart-mini-widget-sel-for-price',
@@ -194,7 +194,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'messageBelowLimit' => 'message-below-limit-es',
 						'product'           => 'pp3',
 						'countryCode'       => 'ES',
-						'title'             => 'pp3 title',
+						'campaign'          => 'pp3_campaign',
 					),
 				),
 				'selForListingPrice'                    => 'listing-mini-widget-sel-for-price',
@@ -207,7 +207,7 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 						'messageBelowLimit' => 'message-below-limit-es',
 						'product'           => 'pp3',
 						'countryCode'       => 'ES',
-						'title'             => 'pp3 title',
+						'campaign'          => 'pp3_campaign',
 					),
 				),
 				
@@ -239,18 +239,18 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 			'selector-for-default-location',
 			array(
 				array(
-					'product'        => 'pp3',
-					'country'        => 'ES',
-					'sel_for_target' => 'selector-for-location',
-					'widget_styles'  => 'widget-styles-es',
-					'display_widget' => true,
+					'product'       => 'pp3',
+					'country'       => 'ES',
+					'selForTarget'  => 'selector-for-location',
+					'widgetStyles'  => 'widget-styles-es',
+					'displayWidget' => true,
 				),
 				array(
-					'product'        => 'i1',
-					'country'        => 'IT',
-					'sel_for_target' => 'selector-for-location2',
-					'widget_styles'  => 'widget-styles-it',
-					'display_widget' => true,
+					'product'       => 'i1',
+					'country'       => 'IT',
+					'selForTarget'  => 'selector-for-location2',
+					'widgetStyles'  => 'widget-styles-it',
+					'displayWidget' => true,
 				),
 			)
 		);

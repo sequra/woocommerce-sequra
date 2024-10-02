@@ -12,6 +12,13 @@ namespace SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Model
  */
 class Widget_Location {
 
+	private const DISPLAY_WIDGET = 'displayWidget';
+	private const SEL_FOR_TARGET = 'selForTarget';
+	private const WIDGET_STYLES  = 'widgetStyles';
+	private const PRODUCT        = 'product';
+	private const COUNTRY        = 'country';
+	private const CAMPAIGN       = 'campaign';
+
 	/**
 	 * CSS selector for retrieving the element where the widget should be inserted.
 	 *
@@ -48,22 +55,29 @@ class Widget_Location {
 	private $country;
 
 	/**
-	 * The title of the payment method.
+	 * The campaign of the payment method.
 	 *
-	 * @var string
+	 * @var ?string
 	 */
-	private $title;
+	private $campaign;
 
 	/**
 	 * Constructor.
 	 */
-	public function __construct( bool $display_widget, string $sel_for_target, string $widget_styles, ?string $product = null, ?string $country = null, ?string $title = null ) {
+	public function __construct( 
+		bool $display_widget, 
+		string $sel_for_target,
+		string $widget_styles,
+		?string $product = null,
+		?string $country = null,
+		?string $campaign = null 
+	) {
 		$this->display_widget = $display_widget;
 		$this->widget_styles  = $widget_styles;
 		$this->sel_for_target = $sel_for_target;
 		$this->product        = $product;
+		$this->campaign       = $campaign;
 		$this->country        = $country;
-		$this->title          = $title;
 	}
 
 	/**
@@ -90,8 +104,8 @@ class Widget_Location {
 	/**
 	 * Getter
 	 */
-	public function get_title(): string {
-		return $this->title;
+	public function get_campaign(): ?string {
+		return $this->campaign;
 	}
 
 	/**
@@ -118,8 +132,8 @@ class Widget_Location {
 	/**
 	 * Setter
 	 */
-	public function set_title( string $title ): void {
-		$this->title = $title;
+	public function set_campaign( ?string $campaign ): void {
+		$this->campaign = $campaign;
 	}
 
 	/**
@@ -157,17 +171,17 @@ class Widget_Location {
 	 * @param array<string, mixed> $data Array containing the data.
 	 */
 	public static function from_array( array $data ): ?Widget_Location {
-		if ( ! isset( $data['sel_for_target'] ) ) {
+		if ( ! isset( $data['selForTarget'] ) ) {
 			return null;
 		}
 
 		return new self(
-			isset( $data['display_widget'] ) ? boolval( $data['display_widget'] ) : false,
-			isset( $data['sel_for_target'] ) ? strval( $data['sel_for_target'] ) : null,
-			isset( $data['widget_styles'] ) ? strval( $data['widget_styles'] ) : null,
-			isset( $data['product'] ) ? strval( $data['product'] ) : null,
-			isset( $data['country'] ) ? strval( $data['country'] ) : null,
-			isset( $data['title'] ) ? strval( $data['title'] ) : null
+			isset( $data[ self::DISPLAY_WIDGET ] ) ? boolval( $data[ self::DISPLAY_WIDGET ] ) : false,
+			isset( $data[ self::SEL_FOR_TARGET ] ) ? strval( $data[ self::SEL_FOR_TARGET ] ) : null,
+			isset( $data[ self::WIDGET_STYLES ] ) ? strval( $data[ self::WIDGET_STYLES ] ) : null,
+			isset( $data[ self::PRODUCT ] ) ? strval( $data[ self::PRODUCT ] ) : null,
+			isset( $data[ self::COUNTRY ] ) ? strval( $data[ self::COUNTRY ] ) : null,
+			isset( $data[ self::CAMPAIGN ] ) ? strval( $data[ self::CAMPAIGN ] ) : null
 		);
 	}
 
@@ -178,12 +192,12 @@ class Widget_Location {
 	 */
 	public function to_array(): array {
 		return array(
-			'display_widget' => $this->display_widget,
-			'widget_styles'  => $this->widget_styles,
-			'sel_for_target' => $this->sel_for_target,
-			'product'        => $this->product,
-			'country'        => $this->country,
-			'title'          => $this->title,
+			self::DISPLAY_WIDGET => $this->display_widget,
+			self::SEL_FOR_TARGET => $this->sel_for_target,
+			self::WIDGET_STYLES  => $this->widget_styles,
+			self::PRODUCT        => $this->product,
+			self::COUNTRY        => $this->country,
+			self::CAMPAIGN       => $this->campaign,
 		);
 	}
 }

@@ -81,6 +81,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 * @return mixed
 	 */
 	public function build( $state = null ) {
+		// TODO: exclude hook from migration.
 		/**
 		 * Filter the order state.
 		 *
@@ -128,6 +129,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	public function getOrderRef( $num ) {
 		if ( 1 === $num ) {
+			// TODO: already migrated.
 			/**
 			 * Filter the order_ref_1.
 			 *
@@ -344,6 +346,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	 */
 	protected function add_service_end_date( &$item, $product, $cart_item ) {
 		$post_id = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
+		// TODO: already migrated.
 		/**
 		 * Filter the service end date.
 		 *
@@ -474,6 +477,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 	protected function getCartcontents() {
 		if ( 'completed' === $this->current_order->get_status() ) {
 			return $this->current_order->get_items(
+				// TODO: already migrated.
 				/**
 				 * Filter the order item types.
 				 *
@@ -644,6 +648,7 @@ class SequraBuilderWC extends \Sequra\PhpClient\BuilderAbstract {
 
 			),
 			'type'       => 'shop_order',
+			// TODO: already migrated.
 			/**
 			 * Filter the order statuses to consider as shipped.
 			 *

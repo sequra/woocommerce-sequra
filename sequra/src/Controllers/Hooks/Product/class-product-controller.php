@@ -115,20 +115,21 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 */
 	public function do_widget_shortcode( array $atts ): string {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
-
-		$current_country = $this->i18n->get_current_country();
-
-		if ( ! $this->configuration->is_widget_enabled( $atts['product'] ?? null, $current_country ) ) {
-			$this->logger->log_info( 'Widget is disabled', __FUNCTION__, __CLASS__ );
-			return '';
-		}
-
+		
 		// Check for required attributes.
 		foreach ( array( 'product', 'product_id' ) as $required ) {
 			if ( ! isset( $atts[ $required ] ) ) {
 				$this->logger->log_error( "\"$required\" attribute is required", __FUNCTION__, __CLASS__ );
 				return '';
 			}
+		}
+
+		$current_country = $this->i18n->get_current_country();
+		$campaign        = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : null;
+		
+		if ( ! $this->configuration->is_widget_enabled( $atts['product'], $campaign, $current_country ) ) {
+			$this->logger->log_info( 'Widget is disabled', __FUNCTION__, __CLASS__ );
+			return '';
 		}
 
 		// Replace old attribute names introduced in 2.0.0 with the new ones.
@@ -149,10 +150,10 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'product'      => '',
 				'campaign'     => '',
 				'product_id'   => '',
-				'theme'        => $this->configuration->get_widget_theme( $atts['product'], $current_country ),
+				'theme'        => $this->configuration->get_widget_theme( $atts['product'], $campaign, $current_country ),
 				'reverse'      => 0,
 				'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
-				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'], $current_country ),
+				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'], $campaign, $current_country ),
 				'price'        => $this->configuration->get_widget_price_css_sel(),
 				'alt_price'    => $this->configuration->get_widget_alt_price_css_sel(),
 				'is_alt_price' => $this->configuration->get_widget_is_alt_price_css_sel(),
@@ -168,6 +169,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				__CLASS__,
 				array( 
 					new LogContextData( 'payment_method', $atts['product'] ),
+					new LogContextData( 'campaign', $atts['campaign'] ),
 					new LogContextData( 'product_id', $atts['product_id'] ),
 				) 
 			);

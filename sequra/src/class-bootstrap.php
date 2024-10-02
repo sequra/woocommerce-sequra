@@ -105,10 +105,10 @@ use SeQura\WC\Services\I18n\I18n;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Log_File;
 use SeQura\WC\Services\Interface_Logger_Service;
-use SeQura\WC\Services\Interface_Migration_Manager;
 use SeQura\WC\Services\Log_File;
 use SeQura\WC\Services\Logger_Service;
-use SeQura\WC\Services\Migration_Manager;
+use SeQura\WC\Services\Migration\Interface_Migration_Manager;
+use SeQura\WC\Services\Migration\Migration_Manager;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Order\Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
@@ -542,10 +542,15 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
+						Reg::getService( 'plugin.basename' ),
+						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( Configuration::CLASS_NAME ),
 						Reg::getService( 'plugin.data' )['Version'],
 						array(
-							new Migration_Install_300( Reg::getService( \wpdb::class ) ),
+							new Migration_Install_300( 
+								Reg::getService( \wpdb::class ),
+								Reg::getService( Configuration::CLASS_NAME ),
+							),
 						)
 					);
 				}

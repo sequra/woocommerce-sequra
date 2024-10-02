@@ -110,7 +110,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 		$this->order_status_service->expects( $this->once() )
 		->method( 'get_shop_status_completed' )
 		->with( true )
-		->willReturn( 'completed' );
+		->willReturn( array( 'completed' ) );
 		
 		$this->configuration->expects( $this->once() )
 		->method( 'get_store_id' )
@@ -176,7 +176,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 		$this->order_status_service->expects( $this->once() )
 		->method( 'get_shop_status_completed' )
 		->with( true )
-		->willReturn( 'completed' );
+		->willReturn( array( 'completed' ) );
 		
 		$store_id = '1';
 		$this->configuration->expects( $this->once() )
@@ -235,7 +235,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 		$this->order_status_service->expects( $this->once() )
 		->method( 'get_shop_status_completed' )
 		->with( true )
-		->willReturn( 'completed' );
+		->willReturn( array( 'completed' ) );
 
 		// Execute.
 		$this->order_service->update_sequra_order_status( $order, $old_status, $new_status );
