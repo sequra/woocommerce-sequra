@@ -379,6 +379,7 @@ if (!window.SequraFE) {
                     `
                 },
                 getRowHeader: (data) => {
+                    let selectedFound = false;
                     return `
                     <div class="sq-table__row-field-wrapper">
                         <label class="sq-table__row-field-label">${SequraFE.translationService.translate('widgets.locations.paymentMethod')}</label>
@@ -386,7 +387,12 @@ if (!window.SequraFE) {
                         if (!pm.supportsWidgets) {
                             return '';
                         }
-                        const selected = data && data.product === pm.product && data.country === pm.countryCode && data.campaign === pm.campaign ? ' selected' : '';
+
+                        let selected = '';
+                        if(!selectedFound && data && data.product === pm.product && data.country === pm.countryCode && data.campaign === pm.campaign) {
+                            selected = ' selected';
+                            selectedFound = true;
+                        }
                         const dataCampaign = pm.campaign ? ` data-campaign="${pm.campaign}"` : '';
                         return `<option key="${idx}" data-country-code="${pm.countryCode}" data-product="${pm.product}"${dataCampaign + selected}>${pm.title}</option>`;
                     }).join('') : ''

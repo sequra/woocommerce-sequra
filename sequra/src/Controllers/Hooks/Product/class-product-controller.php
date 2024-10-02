@@ -125,13 +125,12 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		}
 
 		$current_country = $this->i18n->get_current_country();
-		$campaign        = $atts['campaign'] ?? null;
+		$campaign        = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : null;
 		
 		if ( ! $this->configuration->is_widget_enabled( $atts['product'], $campaign, $current_country ) ) {
 			$this->logger->log_info( 'Widget is disabled', __FUNCTION__, __CLASS__ );
 			return '';
 		}
-
 
 		// Replace old attribute names introduced in 2.0.0 with the new ones.
 		$atts_replacements = array(
@@ -170,6 +169,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				__CLASS__,
 				array( 
 					new LogContextData( 'payment_method', $atts['product'] ),
+					new LogContextData( 'campaign', $atts['campaign'] ),
 					new LogContextData( 'product_id', $atts['product_id'] ),
 				) 
 			);
