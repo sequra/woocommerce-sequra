@@ -11,7 +11,6 @@ namespace SeQura\WC\Services\Migration;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Repositories\Migrations\Critical_Migration_Exception;
 use SeQura\WC\Repositories\Migrations\Migration;
-use SeQura\WC\Services\Interface_Logger_Service;
 use Throwable;
 
 /**
@@ -47,13 +46,6 @@ class Migration_Manager implements Interface_Migration_Manager {
 	 */
 	private $configuration;
 
-	/**
-	 * Logger service.
-	 * 
-	 * @var Interface_Logger_Service
-	 */
-	private $logger;
-
 	private const MIGRATION_LOCK = 'sequra_migration_lock';
 
 	/**
@@ -61,12 +53,11 @@ class Migration_Manager implements Interface_Migration_Manager {
 	 *
 	 * @param Migration[]         $migrations Migration list.
 	 */
-	public function __construct( string $plugin_basename, Interface_Logger_Service $logger, Configuration $configuration, string $current_version, array $migrations ) {
+	public function __construct( string $plugin_basename, Configuration $configuration, string $current_version, array $migrations ) {
 		$this->plugin_basename = $plugin_basename;
 		$this->migrations      = $migrations;
 		$this->current_version = $current_version;
 		$this->configuration   = $configuration;
-		$this->logger          = $logger;
 	}
 
 	/**
@@ -93,11 +84,11 @@ class Migration_Manager implements Interface_Migration_Manager {
 			}
 		} catch ( Critical_Migration_Exception $e ) {
 			// ! Critical migration failed and the plugin cannot work properly. Deactivate the plugin and log the error.
-			$this->logger->log_throwable( $e );
+			$this->log_error( $e );
 			deactivate_plugins( $this->plugin_basename, true );
 		} catch ( Throwable $e ) {
 			// ! Non-critical migration failed. Stop the process and log the error.
-			$this->logger->log_throwable( $e );
+			$this->log_error( $e );
 		} finally {
 			delete_transient( self::MIGRATION_LOCK );
 		}
@@ -108,5 +99,29 @@ class Migration_Manager implements Interface_Migration_Manager {
 	 */
 	public function run_uninstall_migrations(): void {
 		// Implement run_uninstall_migrations() method.
+	}
+
+	/**
+	 * Log an error using the default logger instead of the 
+	 * existing logger service that relies on the database
+	 * configuration that may not be available during the
+	 * migration process.
+	 */
+	private function log_error( Throwable $error ): void {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && ( ! defined( 'WP_DEBUG_LOG' ) || ! empty( WP_DEBUG_LOG ) ) ) {
+			// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			error_log(
+				print_r(
+					array(
+						'error' => $error->getMessage(),
+						'file'  => $error->getFile(),
+						'line'  => $error->getLine(),
+						'trace' => $error->getTraceAsString(),
+					),
+					true
+				) 
+			);
+			// phpcs:enable WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		}
 	}
 }
