@@ -282,23 +282,33 @@ export default class CheckoutPage {
     async expectOrderChangeTo({ toStatus, fromStatus = 'wc-on-hold', waitFor = 60 }) {
         const url = new URL(this.page.url());
         const orderId = url.pathname.split('/order-received/')[1].replace('/', '')
-        // this.wpAdmin.gotoOrder({ orderId: url.searchParams.get('order-received') });
         this.wpAdmin.gotoOrder({ orderId });
 
+        await this.#expectOrderEditPageHasStatus({ status: fromStatus, waitFor });
+        await this.#expectOrderEditPageHasStatus({ status: toStatus, waitFor });
+    }
+
+    /**
+    * @param {Object} options
+    * @param {string} options.status The status to expect the order to change to. Use the wc- prefix
+    * @param {number} options.waitFor The maximum amount of seconds to wait for the order status to change
+    */
+    async #expectOrderEditPageHasStatus({ status, waitFor = 60 }) {
+        console.log(`Waiting for order has status "${status}" for ${waitFor} seconds...`);
         for (let i = 0; i < waitFor; i++) {
             try {
-                await this.expect(this.page.locator(this.selector.adminOrderStatus)).toHaveValue(fromStatus);
-                if (i < waitFor - 1) {
-                    await this.page.waitForTimeout(1000);
-                    await this.page.reload();
-                }
-            } catch (err) {
-                console.log('Order status changed to: ' + toStatus + ' after ' + i + ' seconds');
+                await this.expect(this.page.locator(this.selector.adminOrderStatus)).toHaveValue(status);
+                console.log(`Order status changed to "${status}" after ${i} seconds`);
                 break;
+            } catch (err) {
+                if (i >= waitFor) {
+                    console.log(`Timeout: after ${i} seconds the order status didn't change to "${status}" `);
+                    throw err
+                }
+                await this.page.waitForTimeout(1000);
+                await this.page.reload();
             }
         }
-
-        await this.expect(this.page.locator(this.selector.adminOrderStatus), 'The order status should be: ' + toStatus).toHaveValue(toStatus);
     }
 
     async expectAnyPaymentMethod({ available = true }) {
