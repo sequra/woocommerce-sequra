@@ -421,7 +421,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 */
 	public function sanitize_array_of_ids( array $param ): array {
 		foreach ( $param as &$val ) {
-			$val = (string) absint( $val );
+			$val = (string) abs( intval( $val ) );
 		}
 		return $param;
 	}

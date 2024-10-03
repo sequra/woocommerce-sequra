@@ -18,17 +18,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        id: cache-composer
-        with:
-          path: |
-            sequra/vendor
-            sequra/composer.lock
-          key: composer-${{ hashFiles('sequra/composer.json') }}
+      # - name: Cache Composer dependencies
+      #   uses: actions/cache@v4
+      #   id: cache-composer
+      #   with:
+      #     path: |
+      #       sequra/vendor
+      #       sequra/composer.lock
+      #     key: composer-${{ hashFiles('sequra/composer.json') }}
 
       - name: Install Composer dependencies
-        if: steps.cache-composer.outputs.cache-hit != 'true'
+        # if: steps.cache-composer.outputs.cache-hit != 'true'
         run: ./bin/composer install --quiet --no-interaction
 
       - name: Cache NPM dependencies
