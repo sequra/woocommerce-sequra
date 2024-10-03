@@ -73,7 +73,7 @@ class Migration_Manager implements Interface_Migration_Manager {
 			return;
 		}
 
-		set_transient( self::MIGRATION_LOCK, 1, 60 * 60 ); // Set 1 hour as the maximum time to run the migrations.
+		set_transient( self::MIGRATION_LOCK, 1, 10 * 60 ); // Set 10 minutes as the maximum time to run the migrations.
 		
 		try {
 			foreach ( $this->migrations as $migration ) {
