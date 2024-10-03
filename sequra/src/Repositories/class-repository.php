@@ -91,6 +91,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
 	public function select( QueryFilter $filter = null ) {
+		if ( ! $this->table_exists() ) {
+			return array();
+		}
+
 		/**
 		 * Entity object.
 		 *
@@ -139,6 +143,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return int Identifier of saved entity.
 	 */
 	public function save( Entity $entity ) {
+		if ( ! $this->table_exists() ) {
+			return -1;
+		}
+
 		if ( $entity->getId() ) {
 			$this->update( $entity );
 
@@ -156,6 +164,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return bool TRUE if operation succeeded; otherwise, FALSE.
 	 */
 	public function update( Entity $entity ) {
+		if ( ! $this->table_exists() ) {
+			return false;
+		}
+
 		$item = $this->prepare_entity_for_storage( $entity );
 
 		// Only one record should be updated.
@@ -170,6 +182,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return bool TRUE if operation succeeded; otherwise, FALSE.
 	 */
 	public function delete( Entity $entity ) {
+		if ( ! $this->table_exists() ) {
+			return false;
+		}
 		return false !== $this->db->delete( $this->get_table_name(), array( 'id' => $entity->getId() ) );
 	}
 
@@ -182,6 +197,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
 	public function count( QueryFilter $filter = null ) {
+		if ( ! $this->table_exists() ) {
+			return 0;
+		}
 		/**
 		 * Entity object.
 		 *
@@ -370,6 +388,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return int Inserted entity identifier.
 	 */
 	protected function save_entity_to_storage( Entity $entity ) {
+		if ( ! $this->table_exists() ) {
+			return -1;
+		}
 		$storage_item = $this->prepare_entity_for_storage( $entity );
 
 		$this->db->insert( $this->get_table_name(), $storage_item );
@@ -428,6 +449,17 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * Delete all the entities.
 	 */
 	public function delete_all(): bool {
+		if ( ! $this->table_exists() ) {
+			return false;
+		}
 		return false !== $this->db->query( 'DELETE FROM ' . sanitize_text_field( $this->get_table_name() ) );
+	}
+
+	/**
+	 * Check if table exists in the database.
+	 */
+	protected function table_exists(): bool {
+		$table_name = sanitize_text_field( $this->get_table_name() );
+		return $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
 	}
 }

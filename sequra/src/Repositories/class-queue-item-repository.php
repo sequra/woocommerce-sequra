@@ -40,7 +40,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * @return Entity[] Found queue item list
 	 */
 	public function findOldestQueuedItems( $priority, $limit = 10 ) {
-		if ( Priority::NORMAL !== $priority ) {
+		if ( ! $this->table_exists() || Priority::NORMAL !== $priority ) {
 			return array();
 		}
 
@@ -88,6 +88,9 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * @throws QueueItemSaveException If queue item could not be saved.
 	 */
 	public function saveWithCondition( QueueItem $queue_item, array $additional_where = array() ) {
+		if ( ! $this->table_exists() ) {
+			return -1;
+		}
 		$item_id = null;
 		try {
 			$queue_item_id = $queue_item->getId();
