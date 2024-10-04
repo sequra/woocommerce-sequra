@@ -93,6 +93,12 @@ module.exports = defineConfig({
       testMatch: '007-configuration-mini-widget.spec.js',
       dependencies: ['configuration-widget'],
     },
+    {
+      name: 'migration',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '008-migration.spec.js',
+      dependencies: ['configuration-mini-widget'],
+    },
   ],
 });
 
