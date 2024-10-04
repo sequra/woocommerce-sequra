@@ -30,6 +30,7 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug \
 
 RUN apt-get update && apt-get install -y \
     wget \
+    zip \
     mariadb-client \
     subversion \
     netcat-openbsd && \

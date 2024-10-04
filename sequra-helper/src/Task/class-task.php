@@ -66,4 +66,20 @@ class Task {
             ) $charset_collate"
 		);
 	}
+
+	/**
+	 * Response with an error message
+	 */
+	public function http_error_response( string $message, int $error_code ): void {
+		header( 'Content-Type: application/json' );
+		wp_send_json_error( array( 'message' => $message ), $error_code );
+	}
+
+	/**
+	 * Response with an error message
+	 */
+	public function http_success_response(): void {
+		header( 'Content-Type: application/json' );
+		wp_send_json_success( array( 'message' => 'Task executed' ) );
+	}
 }
