@@ -24,7 +24,7 @@ services:
       - sq_wordpress:/var/www/html
       # - ./.devcontainer/wp-config.php:/var/www/html/wp-config.php
       # - ./sequra:/var/www/html/wp-content/plugins/sequra:ro
-      - ./sequra:/var/www/html/wp-content/plugins/sequra
+      - ./sequra:/var/www/html/wp-content/plugins/_sequra
       - ./sequra-helper:/var/www/html/wp-content/plugins/sequra-helper
   db:
     image: mariadb:$MARIADB_TAG
