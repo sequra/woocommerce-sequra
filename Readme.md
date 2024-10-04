@@ -203,6 +203,8 @@ Some examples of arguments you can append to the command above:
 
 More info at: https://playwright.dev/docs/intro
 
+> Note: Make sure you wrote values for `DUMMY_PASSWORD`, `DUMMY_SERVICE_PASSWORD` and `DUMMY_ASSETS_KEY` in the `.env` file before launching e2e tests.
+
 ### Running using headed mode
 
 It is possible to run Playwright in headed mode. This will open a browser window to execute the tests. For now, it is not possible by using the utility, so you need to install nvm on your local machine. Then, install npm (See system requirements at: https://playwright.dev/docs/intro#system-requirements).
