@@ -9,6 +9,7 @@ import ConnectionSettingsPage from "./ConnectionSettingsPage";
 import WidgetSettingsPage from "./WidgetSettingsPage";
 import CartPage from "./CartPage";
 import ShopPage from "./ShopPage";
+import WpAdmin from "./WpAdmin";
 
 export const test = baseTest.extend({
     advancedSettingsPage: async ({ page, baseURL, request }, use) => {
@@ -67,7 +68,7 @@ export const test = baseTest.extend({
         // Provide the fixture to the test
         await use(widgetSettingsPage);
     },
-
+    wpAdmin: async ({ page, baseURL }, use) => await use(new WpAdmin(page, baseURL, expect)),
     productPage: async ({ page }, use) => await use(new ProductPage(page)),
     cartPage: async ({ page }, use) => await use(new CartPage(page, expect)),
     shopPage: async ({ page }, use) => await use(new ShopPage(page, expect)),
