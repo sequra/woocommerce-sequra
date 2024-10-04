@@ -1,10 +1,14 @@
 #!/bin/bash
 BASEDIR="$(dirname $(realpath $0))/.."
+cd "${BASEDIR}"
+
+# Install only production dependencies
+bin/composer install --no-dev
+bin/npm run build
 
 # Check if --headed is passed
 if [[ "$@" == *"--headed"* ]]; then
 
-    cd "${BASEDIR}"
     set -o allexport
     source .env
     set +o allexport
