@@ -29,6 +29,7 @@ require_once __DIR__ . '/src/Task/class-task.php';
 require_once __DIR__ . '/src/Task/class-configure-dummy-service-task.php';
 require_once __DIR__ . '/src/Task/class-configure-dummy-task.php';
 require_once __DIR__ . '/src/Task/class-clear-configuration-task.php';
+require_once __DIR__ . '/src/Task/class-remove-db-tables-task.php';
 require_once __DIR__ . '/src/Task/class-force-order-failure-task.php';
 require_once __DIR__ . '/src/Task/class-remove-log-task.php';
 require_once __DIR__ . '/src/Task/class-print-logs-task.php';

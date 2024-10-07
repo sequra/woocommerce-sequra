@@ -15,6 +15,7 @@ use SeQura\Helper\Task\Configure_Dummy_Task;
 use SeQura\Helper\Task\Force_Order_Failure_Task;
 use SeQura\Helper\Task\Get_Plugin_Zip_Task;
 use SeQura\Helper\Task\Print_Logs_Task;
+use SeQura\Helper\Task\Remove_Db_Tables_Task;
 use SeQura\Helper\Task\Remove_Log_Task;
 use SeQura\Helper\Task\Set_Theme_Task;
 use SeQura\Helper\Task\Task;
@@ -49,6 +50,7 @@ class Plugin {
 			'cart_version'          => Cart_Version_Task::class,
 			'checkout_version'      => Checkout_Version_Task::class,
 			'plugin_zip'            => Get_Plugin_Zip_Task::class,
+			'remove_db_tables'      => Remove_Db_Tables_Task::class,
 
 		);
 
