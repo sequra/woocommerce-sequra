@@ -18,6 +18,6 @@ class Clear_Configuration_Task extends Task {
 	 * @throws \Exception If the task fails
 	 */
 	public function execute( array $args = array() ): void {
-		$this->recreate_tables_in_database();
+		$this->recreate_entity_table_in_database();
 	}
 }

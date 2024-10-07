@@ -103,7 +103,7 @@ class Configure_Dummy_Task extends Task {
 	public function execute( array $args = array() ): void {
 		$widgets = isset( $args['widgets'] ) ? (bool) $args['widgets'] : true;
 		if ( ! $this->is_dummy_config_in_use( $widgets ) ) {
-			$this->recreate_tables_in_database();
+			$this->recreate_entity_table_in_database();
 			$this->set_dummy_config( $widgets );
 		}
 	}

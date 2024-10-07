@@ -7,7 +7,7 @@
 
 namespace SeQura\Helper\Task;
 
-// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 /**
  * Task class
@@ -40,14 +40,40 @@ class Task {
 	}
 
 	/**
+	 * Get the table name for the seQura queue table
+	 */
+	protected function get_sequra_queue_table_name(): string {
+		global $wpdb;
+		return $wpdb->prefix . 'sequra_queue';
+	}
+
+	/**
+	 * Drop tables in the database
+	 * 
+	 * @throws \Exception If the task fails
+	 */
+	protected function drop_tables_in_database( $tables = array() ): void {
+		if ( empty( $tables ) ) {
+			return;
+		}
+
+		global $wpdb;
+		
+		foreach ( $tables as $table ) {
+			if ( ! $wpdb->query( "DROP TABLE IF EXISTS $table" ) ) {
+				throw new \Exception( "Failed to drop table $table", 500 ); //phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+		}
+	}
+
+	/**
 	 * Recreate tables in the database
 	 */
-	protected function recreate_tables_in_database(): void {
+	protected function recreate_entity_table_in_database(): void {
+		$this->drop_tables_in_database( array( $this->get_sequra_entity_table_name() ) );
+
 		global $wpdb;
-		$table_name      = $this->get_sequra_entity_table_name();
 		$charset_collate = $wpdb->get_charset_collate();
-		
-		$wpdb->query( "DROP TABLE IF EXISTS $table_name" );
 		
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta(
