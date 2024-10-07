@@ -70,7 +70,8 @@ class Task {
 	 * Recreate tables in the database
 	 */
 	protected function recreate_entity_table_in_database(): void {
-		$this->drop_tables_in_database( array( $this->get_sequra_entity_table_name() ) );
+		$table_name = $this->get_sequra_entity_table_name();
+		$this->drop_tables_in_database( array( $table_name ) );
 
 		global $wpdb;
 		$charset_collate = $wpdb->get_charset_collate();
