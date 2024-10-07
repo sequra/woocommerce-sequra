@@ -12,6 +12,7 @@ use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
+use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
 use Throwable;
@@ -38,6 +39,7 @@ class Migration_Install_300 extends Migration {
 		$woocommerce_sequra_settings = (array) get_option( 'woocommerce_sequra_settings', array() );
 		if ( ! empty( $woocommerce_sequra_settings ) ) {
 			$this->migrate_connection_configuration( $woocommerce_sequra_settings );
+			$this->migrate_general_settings_configuration( $woocommerce_sequra_settings );
 			$this->migrate_country_configuration( $woocommerce_sequra_settings );
 			$this->migrate_widget_configuration( $woocommerce_sequra_settings );
 		}
@@ -181,7 +183,6 @@ class Migration_Install_300 extends Migration {
 			// Skip this migration if the data isn't set or valid.
 			return;
 		}
-		
 
 		$response = AdminAPI::get()
 		->countryConfiguration( $this->configuration->get_store_id() )
@@ -197,6 +198,33 @@ class Migration_Install_300 extends Migration {
 		);
 		if ( ! $response->isSuccessful() ) {
 			throw new Exception( 'Error migrating country settings' );
+		}
+	}
+
+	/** Migrate general settings from v2
+	 *
+	 * @param string[] $settings
+	 * @throws Throwable|Exception
+	 */
+	private function migrate_general_settings_configuration( array $settings ): void {
+		$response = AdminAPI::get()
+			->generalSettings( $this->configuration->get_store_id() )
+			->saveGeneralSettings(
+				new General_Settings_Request(
+					true,
+					false,
+					explode( ',', str_replace( ' ', '', strval( $settings['test_ips'] ?? '' ) ) ),
+					null,
+					null,
+					strval( $settings['enable_for_virtual'] ?? 'no' ) === 'yes',
+					strval( $settings['allow_payment_delay'] ?? 'no' ) === 'yes',
+					strval( $settings['allow_registration_items'] ?? 'no' ) === 'yes',
+					strval( $settings['default_service_end_date'] ?? 'P1Y' )
+				)
+			);
+			
+		if ( ! $response->isSuccessful() ) {
+			throw new Exception( 'Error general settings' );
 		}
 	}
 
