@@ -16,11 +16,9 @@ class Configure_V2_Task extends Task {
 
 	/**
 	 * Set configuration for dummy merchant
-	 * 
-	 * @throws \Exception If the task fails
 	 */
 	private function set_dummy_config(): void {
-		$result = update_option(
+		update_option(
 			'woocommerce_sequra_settings',
 			array(
 				'enabled'                                 => 'yes',
@@ -54,9 +52,6 @@ class Configure_V2_Task extends Task {
 				'widget_theme_pp3_flexi_free_preselected' => '',
 			) 
 		);
-		if ( ! $result ) {
-			throw new \Exception( 'Error setting dummy configuration' );
-		}
 	}
 
 	/**
