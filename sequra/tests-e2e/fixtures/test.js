@@ -10,6 +10,7 @@ import WidgetSettingsPage from "./WidgetSettingsPage";
 import CartPage from "./CartPage";
 import ShopPage from "./ShopPage";
 import WpAdmin from "./WpAdmin";
+import SeQuraHelper from "./SeQuraHelper";
 
 export const test = baseTest.extend({
     advancedSettingsPage: async ({ page, baseURL, request }, use) => {
@@ -69,6 +70,7 @@ export const test = baseTest.extend({
         await use(widgetSettingsPage);
     },
     wpAdmin: async ({ page, baseURL }, use) => await use(new WpAdmin(page, baseURL, expect)),
+    sqHelper: async ({ request }, use) => await use(new SeQuraHelper(request, expect)),
     productPage: async ({ page }, use) => await use(new ProductPage(page)),
     cartPage: async ({ page }, use) => await use(new CartPage(page, expect)),
     shopPage: async ({ page }, use) => await use(new ShopPage(page, expect)),
