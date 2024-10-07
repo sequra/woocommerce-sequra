@@ -28,6 +28,10 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug \
     && echo "xdebug.log=/dev/stdout" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.log_level=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
+RUN echo "memory_limit = 256M" > /usr/local/etc/php/conf.d/docker-php-woocommerce.ini \
+    && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/docker-php-woocommerce.ini \
+    && echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/docker-php-woocommerce.ini
+
 RUN apt-get update && apt-get install -y \
     wget \
     zip \
