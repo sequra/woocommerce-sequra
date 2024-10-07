@@ -13,7 +13,7 @@ rm -rf \
 mv /var/www/html/wp-content/plugins/_sequra/phpunit.xml.dist /var/www/html/wp-content/plugins/_sequra/phpunit.xml.dist.backup
 mv /var/www/html/wp-content/plugins/_sequra/.phpcs.xml.dist /var/www/html/wp-content/plugins/_sequra/.phpcs.xml.dist.backup
 
-echo "s" | wp scaffold plugin-tests sequra --allow-root
+echo "s" | wp scaffold plugin-tests _sequra --allow-root
 
 mv -f /var/www/html/wp-content/plugins/_sequra/phpunit.xml.dist.backup /var/www/html/wp-content/plugins/_sequra/phpunit.xml.dist
 mv -f /var/www/html/wp-content/plugins/_sequra/.phpcs.xml.dist.backup /var/www/html/wp-content/plugins/_sequra/.phpcs.xml.dist
