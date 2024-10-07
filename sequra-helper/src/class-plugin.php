@@ -12,6 +12,7 @@ use SeQura\Helper\Task\Checkout_Version_Task;
 use SeQura\Helper\Task\Clear_Configuration_Task;
 use SeQura\Helper\Task\Configure_Dummy_Service_Task;
 use SeQura\Helper\Task\Configure_Dummy_Task;
+use SeQura\Helper\Task\Configure_V2_Task;
 use SeQura\Helper\Task\Force_Order_Failure_Task;
 use SeQura\Helper\Task\Get_Plugin_Zip_Task;
 use SeQura\Helper\Task\Print_Logs_Task;
@@ -51,6 +52,7 @@ class Plugin {
 			'checkout_version'      => Checkout_Version_Task::class,
 			'plugin_zip'            => Get_Plugin_Zip_Task::class,
 			'remove_db_tables'      => Remove_Db_Tables_Task::class,
+			'v2_config'             => Configure_V2_Task::class,
 
 		);
 

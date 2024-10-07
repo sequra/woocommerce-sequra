@@ -28,6 +28,7 @@ defined( 'WPINC' ) || die;
 require_once __DIR__ . '/src/Task/class-task.php';
 require_once __DIR__ . '/src/Task/class-configure-dummy-service-task.php';
 require_once __DIR__ . '/src/Task/class-configure-dummy-task.php';
+require_once __DIR__ . '/src/Task/class-configure-v2-task.php';
 require_once __DIR__ . '/src/Task/class-clear-configuration-task.php';
 require_once __DIR__ . '/src/Task/class-remove-db-tables-task.php';
 require_once __DIR__ . '/src/Task/class-force-order-failure-task.php';

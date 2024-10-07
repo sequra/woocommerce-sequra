@@ -89,6 +89,31 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Set v2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=v2_config&merchant_ref=dummy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "v2_config"
+								},
+								{
+									"key": "merchant_ref",
+									"value": "dummy",
+									"description": "This is optional, dummy is the only supported value"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"description": "Contains webhooks used to modify the plugin's configuration value in the databasae"
