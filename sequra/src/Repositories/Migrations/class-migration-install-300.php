@@ -217,7 +217,7 @@ class Migration_Install_300 extends Migration {
 				$enabled_in_product = 'yes' === $value;
 				$enabled            = $enabled || $enabled_in_product;
 				$product_campaign   = str_replace( 'enabled_in_product_', '', $key );
-				$parts              = explode( '_', $product_campaign );
+				$parts              = explode( '_', $product_campaign, 2 );
 				
 				$loc                = new Widget_Location(
 					$enabled_in_product,
