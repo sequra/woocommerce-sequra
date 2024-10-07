@@ -35,6 +35,10 @@ export default class GeneralSettingsPage extends SettingsPage {
         await this.expect(this.page.locator(this.selector.allowedIPAddresses.hiddenInput), '"Allowed IP addresses" should be empty').toHaveValue('');
     }
 
+    async expectAllowedIPAddressesToHaveValue(value) {
+        await this.expect(this.page.locator(this.selector.allowedIPAddresses.hiddenInput), '"Allowed IP addresses" should have value: ' + value).toHaveValue(value);
+    }
+
     async expectExcludedProductsToBeEmpty() {
         await this.expect(this.#getExcludedProductsHiddenInputLocator(), '"Excluded products" should be empty').toHaveValue('');
     }

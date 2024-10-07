@@ -14,6 +14,7 @@ export default class WpAdmin {
             activatePluginActionBtn: () => this.page.locator('a[href*="action=activate"]'),
             notice: ({ message }) => this.page.locator(`.notice > p`, { hasText: message }),
             fileInput: () => this.page.locator('input[type="file"]'),
+            overwritePluginBtn: () => this.page.locator('.update-from-upload-overwrite')
         };
     }
 
@@ -91,8 +92,9 @@ export default class WpAdmin {
     * @param {Object} opt
     * @param {boolean} opt.activate Whether to activate the plugin after uploading
     * @param {boolean} opt.upgrade Whether to upgrade the plugin if already installed
+    * @param {string} opt.method The HTTP method to use for the request
     */
-    async uploadPlugin(path, opt = { filename: null, activate: true, upgrade: true }) {
+    async uploadPlugin(path, opt = { filename: null, activate: true, upgrade: true, method: 'GET' }) {
         await this.page.goto('./wp-admin/plugin-install.php?tab=upload');
 
         if (!opt.filename) {
@@ -104,12 +106,15 @@ export default class WpAdmin {
         await this.locator.fileInput().setInputFiles({
             name: opt.filename,
             mimeType: 'application/zip',
-            buffer: Buffer.from(await (await fetch(path)).arrayBuffer())
+            buffer: Buffer.from(await (await fetch(path, { method: opt.method })).arrayBuffer())
         });
         await this.locator.installPluginSubmit().click();
         await this.page.waitForURL('./wp-admin/update.php?action=upload-plugin', { waitUntil: 'domcontentloaded' });
-        // TODO: upgrade plugin
-        if (opt.activate) {
+
+        if (opt.upgrade) {
+            await this.locator.overwritePluginBtn().click();
+            await this.page.waitForURL(/overwrite=update-plugin/, { waitUntil: 'domcontentloaded' });
+        } else if (opt.activate) {
             await this.locator.activatePluginActionBtn().click();
             await this.page.waitForURL(/\/wp-admin\/plugins\.php/, { waitUntil: 'domcontentloaded' });
             await this.locator.notice({ message: 'Plugin activated.' }).waitFor({ state: 'visible' });

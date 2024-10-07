@@ -69,6 +69,13 @@ export default class ConnectionSettingsPage extends SettingsPage {
         await this.page.locator(this.selector.password).fill(password);
     }
 
+    async expectConfigurationMatches({ username, password, env }) {
+        await this.expect(this.page.locator(this.selector.username), 'Username should be ' + username).toHaveValue(username);
+        await this.expect(this.page.locator(this.selector.password), 'Password should be ' + password).toHaveValue(password);
+        const envLocator = env === 'sandbox' ? this.#envSandboxLocator() : this.#envLiveLocator();
+        await this.expect(envLocator, 'Environment should be ' + env).toBeChecked();
+    }
+
     getDummyConnectionOptions(environment = 'sandbox') {
         return { ...dataMerchant.dummy, env: environment };
     }
