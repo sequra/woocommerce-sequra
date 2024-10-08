@@ -273,7 +273,7 @@ class Migration_Install_300 extends Migration {
 		->setWidgetSettings(
 			new Widget_Settings_Request(
 				$enabled,
-				$settings['assets_secret'] ?? null,
+				$settings['assets_secret'] ?? '',
 				$enabled,
 				false,
 				false,
