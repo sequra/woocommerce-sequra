@@ -107,12 +107,27 @@ class Migration_Install_300 extends Migration {
 		$this->check_if_table_exists( $table_name );
 	}
 
+	/**
+	 * Check if the entity exists in the database.
+	 */
+	private function entity_exists( string $type ): bool {
+		$table_name = $this->db->prefix . 'sequra_entity';
+		$query      = $this->db->prepare( 'SELECT id FROM %i WHERE `type` = %s LIMIT 1', $table_name, $type );
+		$result     = $this->db->get_results( $query );
+		return is_array( $result ) && count( $result ) > 0;
+	}
+
 	/** Migrate connection settings from v2
 	 *
 	 * @param string[] $settings
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_connection_configuration( array $settings ): void {
+		if ( $this->entity_exists( 'ConnectionData' ) ) {
+			// Skip this migration if the data is already set.
+			return;
+		}
+
 		$env_mapping = array(
 			'0' => 'live',
 			'1' => 'sandbox',
@@ -179,8 +194,7 @@ class Migration_Install_300 extends Migration {
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_country_configuration( array $settings ): void {
-		if ( ! isset( $settings['merchantref'] ) ) {
-			// Skip this migration if the data isn't set or valid.
+		if ( $this->entity_exists( 'CountryConfiguration' ) || ! isset( $settings['merchantref'] ) ) {
 			return;
 		}
 
@@ -207,6 +221,10 @@ class Migration_Install_300 extends Migration {
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_general_settings_configuration( array $settings ): void {
+
+		if ( $this->entity_exists( 'GeneralSettings' ) ) {
+			return;
+		}
 
 		$allowed_ip_addresses = array();
 		foreach ( explode( ',', strval( $settings['test_ips'] ?? '' ) ) as $ip ) {
@@ -243,6 +261,11 @@ class Migration_Install_300 extends Migration {
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_widget_configuration( array $settings ): void {
+
+		if ( $this->entity_exists( 'WidgetSettings' ) ) {
+			return;
+		}
+
 		$enabled                           = false;
 		$default_sel_for_alt_price         = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
 		$default_sel_for_alt_price_trigger = '.variations';

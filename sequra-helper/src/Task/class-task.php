@@ -92,6 +92,23 @@ class Task {
             PRIMARY KEY  (id)
             ) $charset_collate"
 		);
+
+		// Insert version to prevent migration from running.
+		$wpdb->insert(
+			$table_name,
+			array(
+				'id'      => 7,
+				'type'    => 'Configuration',
+				'index_1' => 'version',
+				'index_2' => '',
+				'index_3' => null,
+				'index_4' => null,
+				'index_5' => null,
+				'index_6' => null,
+				'index_7' => null,
+				'data'    => '{"class_name":"SeQura\\\\Core\\\\Infrastructure\\\\Configuration\\\\ConfigEntity","id":null,"name":"version","value":"3.0.0","context":""}',
+			)
+		);
 	}
 
 	/**
