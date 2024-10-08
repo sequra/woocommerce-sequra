@@ -12,7 +12,7 @@ import ShopPage from "./ShopPage";
 import WpAdmin from "./WpAdmin";
 import SeQuraHelper from "./SeQuraHelper";
 
-export const test = baseTest.extend({
+const test = baseTest.extend({
     advancedSettingsPage: async ({ page, baseURL, request }, use) => {
         const advancedSettingsPage = new AdvancedSettingsPage(page, baseURL, request, expect);
 
@@ -77,4 +77,15 @@ export const test = baseTest.extend({
     checkoutPage: async ({ page, baseURL, request }, use) => await use(new CheckoutPage(page, baseURL, expect, request))
 });
 
-export { expect };
+test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+        const screenshotPath = testInfo.outputPath(`screenshot.png`);
+        testInfo.attachments.push({
+            name: 'screenshot', path:
+                screenshotPath, contentType: 'image/png'
+        });
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+    }
+});
+
+export { test, expect };

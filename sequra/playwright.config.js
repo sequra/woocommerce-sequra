@@ -30,11 +30,8 @@ module.exports = defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.WP_URL,
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    // Take a screenshot when a test fails.
-    screenshot: 'only-on-failure',
   },
 
   /* Configure projects for major browsers */
