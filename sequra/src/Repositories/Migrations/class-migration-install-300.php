@@ -207,13 +207,22 @@ class Migration_Install_300 extends Migration {
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_general_settings_configuration( array $settings ): void {
+
+		$allowed_ip_addresses = array();
+		foreach ( explode( ',', strval( $settings['test_ips'] ?? '' ) ) as $ip ) {
+			$ip = trim( $ip );
+			if ( ! empty( $ip ) ) {
+				$allowed_ip_addresses[] = $ip;
+			}
+		}
+
 		$response = AdminAPI::get()
 			->generalSettings( $this->configuration->get_store_id() )
 			->saveGeneralSettings(
 				new General_Settings_Request(
 					true,
 					false,
-					explode( ',', str_replace( ' ', '', strval( $settings['test_ips'] ?? '' ) ) ),
+					$allowed_ip_addresses,
 					null,
 					null,
 					strval( $settings['enable_for_virtual'] ?? 'no' ) === 'yes',
