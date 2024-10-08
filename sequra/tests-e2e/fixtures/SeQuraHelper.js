@@ -17,6 +17,8 @@ export default class SeQuraHelper {
             SET_THEME: 'set_theme',
             CART_VERSION: 'cart_version',
             CHECKOUT_VERSION: 'checkout_version',
+            REMOVE_DB_TABLES: 'remove_db_tables',
+            V2_CONFIG: 'v2_config',
         };
     }
 
@@ -33,9 +35,14 @@ export default class SeQuraHelper {
         for (const { name, value } of args) {
             url += `&${name}=${encodeURIComponent(value)}`;
         }
-        const response = await this.request.post(url);
-        this.expect(response.status(), 'Webhook response has HTTP 200 code').toBe(200);
-        const json = await response.json();
-        this.expect(json.success, 'Webhook was processed successfully').toBe(true);
+        try {
+            const response = await this.request.post(url);
+            this.expect(response.status(), 'Webhook response has HTTP 200 code').toBe(200);
+            const json = await response.json();
+            this.expect(json.success, 'Webhook was processed successfully').toBe(true);
+        } catch (e) {
+            console.log(webhook, args, e);
+            throw e;
+        }
     }
 }

@@ -171,10 +171,10 @@ Add this configuration to project workspace's settings:
 
         "phpunit.command": "docker compose exec web /bin/bash -c",
 	    "phpunit.php": "php",
-	    "phpunit.phpunit": "/var/www/html/wp-content/plugins/sequra/vendor/bin/phpunit",
+	    "phpunit.phpunit": "/var/www/html/wp-content/plugins/_sequra/vendor/bin/phpunit",
 	    "phpunit.args": [
 		    "-c",
-		    "/var/www/html/wp-content/plugins/sequra/phpunit.xml.dist"
+		    "/var/www/html/wp-content/plugins/_sequra/phpunit.xml.dist"
 	    ],
 	    "phpunit.paths": {
 	        "${workspaceFolder}": "/var/www/html/wp-content/plugins",

@@ -74,6 +74,7 @@ class Migration_Manager implements Interface_Migration_Manager {
 		}
 
 		set_transient( self::MIGRATION_LOCK, 1, 10 * 60 ); // Set 10 minutes as the maximum time to run the migrations.
+		$deactivate = false;
 		
 		try {
 			foreach ( $this->migrations as $migration ) {
@@ -84,13 +85,16 @@ class Migration_Manager implements Interface_Migration_Manager {
 			}
 		} catch ( Critical_Migration_Exception $e ) {
 			// ! Critical migration failed and the plugin cannot work properly. Deactivate the plugin and log the error.
+			$deactivate = true;
 			$this->log_error( $e );
-			deactivate_plugins( $this->plugin_basename, true );
 		} catch ( Throwable $e ) {
 			// ! Non-critical migration failed. Stop the process and log the error.
 			$this->log_error( $e );
 		} finally {
 			delete_transient( self::MIGRATION_LOCK );
+			if ( $deactivate ) {
+				deactivate_plugins( $this->plugin_basename );
+			}
 		}
 	}
 

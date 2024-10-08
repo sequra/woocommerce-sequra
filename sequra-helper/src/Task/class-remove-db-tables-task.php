@@ -10,7 +10,7 @@ namespace SeQura\Helper\Task;
 /**
  * Task class
  */
-class Clear_Configuration_Task extends Task {
+class Remove_Db_Tables_Task extends Task {
 
 	/**
 	 * Execute the task
@@ -18,6 +18,12 @@ class Clear_Configuration_Task extends Task {
 	 * @throws \Exception If the task fails
 	 */
 	public function execute( array $args = array() ): void {
-		$this->recreate_entity_table_in_database();
+		$this->drop_tables_in_database(
+			array(
+				$this->get_sequra_order_table_name(),
+				$this->get_sequra_entity_table_name(),
+				$this->get_sequra_queue_table_name(),
+			)
+		);
 	}
 }

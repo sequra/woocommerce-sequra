@@ -1,0 +1,340 @@
+{
+	"info": {
+		"_postman_id": "f2a59bda-2e53-4b25-9323-1c9d8a13979d",
+		"name": "WC SeQura Helper",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34793316"
+	},
+	"item": [
+		{
+			"name": "Configuration",
+			"item": [
+				{
+					"name": "Set dummy_services",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=dummy_services_config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "dummy_services_config"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set dummy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=dummy_config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "dummy_config"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clear",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=clear_config",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "clear_config"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Tables",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=remove_db_tables",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "remove_db_tables",
+									"description": "Remove v3 tables from database"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set v2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=v2_config&merchant_ref=dummy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "v2_config"
+								},
+								{
+									"key": "merchant_ref",
+									"value": "dummy",
+									"description": "This is optional, dummy is the only supported value"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Contains webhooks used to modify the plugin's configuration value in the databasae"
+		},
+		{
+			"name": "Logs",
+			"item": [
+				{
+					"name": "Print",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=print_logs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "print_logs"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=remove_log",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "remove_log"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Contains webhooks to modify log's content"
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Force failure",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=force_order_failure&order_id=ORDER_ID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "force_order_failure"
+								},
+								{
+									"key": "order_id",
+									"value": "ORDER_ID",
+									"description": "The ID of the WooCommerce order"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Contains webhooks to modify orders in the database"
+		},
+		{
+			"name": "UI",
+			"item": [
+				{
+					"name": "Set theme",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=set_theme&theme=twentytwentyfour",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "set_theme"
+								},
+								{
+									"key": "theme",
+									"value": "twentytwentyfour",
+									"description": "twentytwentyfour, storefront"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cart version",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=cart_version&version=blocks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "cart_version"
+								},
+								{
+									"key": "version",
+									"value": "blocks",
+									"description": "blocks, classic"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Checkout version",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=checkout_version&version=blocks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "checkout_version"
+								},
+								{
+									"key": "version",
+									"value": "blocks",
+									"description": "blocks, classic"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Webhooks to change the user interface settings, such as the WP theme and components style"
+		},
+		{
+			"name": "Zip",
+			"item": [
+				{
+					"name": "Plugin ZIP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}?{{webhook}}=plugin_zip",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"query": [
+								{
+									"key": "{{webhook}}",
+									"value": "plugin_zip"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Webhooks to provide zipped production-ready version of the plugin"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://sq.wp.michel.ngrok.dev/",
+			"type": "string"
+		},
+		{
+			"key": "webhook",
+			"value": "sq-webhook",
+			"type": "string"
+		}
+	]
+}

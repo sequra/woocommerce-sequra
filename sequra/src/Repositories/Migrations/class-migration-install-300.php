@@ -12,6 +12,7 @@ use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
+use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
 use Throwable;
@@ -38,6 +39,7 @@ class Migration_Install_300 extends Migration {
 		$woocommerce_sequra_settings = (array) get_option( 'woocommerce_sequra_settings', array() );
 		if ( ! empty( $woocommerce_sequra_settings ) ) {
 			$this->migrate_connection_configuration( $woocommerce_sequra_settings );
+			$this->migrate_general_settings_configuration( $woocommerce_sequra_settings );
 			$this->migrate_country_configuration( $woocommerce_sequra_settings );
 			$this->migrate_widget_configuration( $woocommerce_sequra_settings );
 		}
@@ -105,12 +107,27 @@ class Migration_Install_300 extends Migration {
 		$this->check_if_table_exists( $table_name );
 	}
 
+	/**
+	 * Check if the entity exists in the database.
+	 */
+	private function entity_exists( string $type ): bool {
+		$table_name = $this->db->prefix . 'sequra_entity';
+		$query      = $this->db->prepare( 'SELECT id FROM %i WHERE `type` = %s LIMIT 1', $table_name, $type );
+		$result     = $this->db->get_results( $query );
+		return is_array( $result ) && count( $result ) > 0;
+	}
+
 	/** Migrate connection settings from v2
 	 *
 	 * @param string[] $settings
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_connection_configuration( array $settings ): void {
+		if ( $this->entity_exists( 'ConnectionData' ) ) {
+			// Skip this migration if the data is already set.
+			return;
+		}
+
 		$env_mapping = array(
 			'0' => 'live',
 			'1' => 'sandbox',
@@ -177,11 +194,9 @@ class Migration_Install_300 extends Migration {
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_country_configuration( array $settings ): void {
-		if ( ! isset( $settings['merchantref'] ) ) {
-			// Skip this migration if the data isn't set or valid.
+		if ( $this->entity_exists( 'CountryConfiguration' ) || ! isset( $settings['merchantref'] ) ) {
 			return;
 		}
-		
 
 		$response = AdminAPI::get()
 		->countryConfiguration( $this->configuration->get_store_id() )
@@ -200,12 +215,57 @@ class Migration_Install_300 extends Migration {
 		}
 	}
 
+	/** Migrate general settings from v2
+	 *
+	 * @param string[] $settings
+	 * @throws Throwable|Exception
+	 */
+	private function migrate_general_settings_configuration( array $settings ): void {
+
+		if ( $this->entity_exists( 'GeneralSettings' ) ) {
+			return;
+		}
+
+		$allowed_ip_addresses = array();
+		foreach ( explode( ',', strval( $settings['test_ips'] ?? '' ) ) as $ip ) {
+			$ip = trim( $ip );
+			if ( ! empty( $ip ) ) {
+				$allowed_ip_addresses[] = $ip;
+			}
+		}
+
+		$response = AdminAPI::get()
+			->generalSettings( $this->configuration->get_store_id() )
+			->saveGeneralSettings(
+				new General_Settings_Request(
+					true,
+					false,
+					$allowed_ip_addresses,
+					null,
+					null,
+					strval( $settings['enable_for_virtual'] ?? 'no' ) === 'yes',
+					strval( $settings['allow_payment_delay'] ?? 'no' ) === 'yes',
+					strval( $settings['allow_registration_items'] ?? 'no' ) === 'yes',
+					strval( $settings['default_service_end_date'] ?? 'P1Y' )
+				)
+			);
+			
+		if ( ! $response->isSuccessful() ) {
+			throw new Exception( 'Error general settings' );
+		}
+	}
+
 	/** Migrate widget settings from v2
 	 *
 	 * @param string[] $settings
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_widget_configuration( array $settings ): void {
+
+		if ( $this->entity_exists( 'WidgetSettings' ) ) {
+			return;
+		}
+
 		$enabled                           = false;
 		$default_sel_for_alt_price         = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
 		$default_sel_for_alt_price_trigger = '.variations';
@@ -217,7 +277,7 @@ class Migration_Install_300 extends Migration {
 				$enabled_in_product = 'yes' === $value;
 				$enabled            = $enabled || $enabled_in_product;
 				$product_campaign   = str_replace( 'enabled_in_product_', '', $key );
-				$parts              = explode( '_', $product_campaign );
+				$parts              = explode( '_', $product_campaign, 2 );
 				
 				$loc                = new Widget_Location(
 					$enabled_in_product,
@@ -236,7 +296,7 @@ class Migration_Install_300 extends Migration {
 		->setWidgetSettings(
 			new Widget_Settings_Request(
 				$enabled,
-				$settings['assets_secret'] ?? null,
+				$settings['assets_secret'] ?? '',
 				$enabled,
 				false,
 				false,

@@ -210,9 +210,18 @@ class Configuration extends CoreConfiguration {
 			$config = $this->get_general_settings();
 			// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
 			$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-			return ( ! isset( $config['allowedIPAddresses'] ) || ! is_array( $config['allowedIPAddresses'] ) ) 
-			|| 0 === count( $config['allowedIPAddresses'] ) 
-			|| in_array( $remote_addr, $config['allowedIPAddresses'], true );
+
+			$allowed_ip_addresses = array();
+			if ( isset( $config['allowedIPAddresses'] ) && is_array( $config['allowedIPAddresses'] ) ) {
+				foreach ( $config['allowedIPAddresses'] as $ip ) {
+					$ip = trim( (string) $ip );
+					if ( ! empty( $ip ) ) {
+						$allowed_ip_addresses[] = $ip;
+					}
+				}
+			}
+
+			return empty( $allowed_ip_addresses ) || in_array( $remote_addr, $allowed_ip_addresses, true );
 		} catch ( Throwable $e ) {
 			return true;
 		}

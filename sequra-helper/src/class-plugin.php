@@ -12,8 +12,11 @@ use SeQura\Helper\Task\Checkout_Version_Task;
 use SeQura\Helper\Task\Clear_Configuration_Task;
 use SeQura\Helper\Task\Configure_Dummy_Service_Task;
 use SeQura\Helper\Task\Configure_Dummy_Task;
+use SeQura\Helper\Task\Configure_V2_Task;
 use SeQura\Helper\Task\Force_Order_Failure_Task;
+use SeQura\Helper\Task\Get_Plugin_Zip_Task;
 use SeQura\Helper\Task\Print_Logs_Task;
+use SeQura\Helper\Task\Remove_Db_Tables_Task;
 use SeQura\Helper\Task\Remove_Log_Task;
 use SeQura\Helper\Task\Set_Theme_Task;
 use SeQura\Helper\Task\Task;
@@ -47,6 +50,9 @@ class Plugin {
 			'set_theme'             => Set_Theme_Task::class,
 			'cart_version'          => Cart_Version_Task::class,
 			'checkout_version'      => Checkout_Version_Task::class,
+			'plugin_zip'            => Get_Plugin_Zip_Task::class,
+			'remove_db_tables'      => Remove_Db_Tables_Task::class,
+			'v2_config'             => Configure_V2_Task::class,
 
 		);
 
@@ -61,18 +67,17 @@ class Plugin {
 			return;
 		}
 
-		header( 'Content-Type: application/json' );
-
+		$task = $this->get_task_for_webhook( sanitize_text_field( $_GET['sq-webhook'] ) );
+		
 		if ( 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
-			wp_send_json_error( array( 'message' => 'Invalid request method' ), 405 );
+			$task->http_error_response( 'Invalid request method', 405 );
 		}
 
-		$task = $this->get_task_for_webhook( sanitize_text_field( $_GET['sq-webhook'] ) );
 		try {
 			$task->execute( $_REQUEST );
-			wp_send_json_success( array( 'message' => 'Task executed' ) );
+			$task->http_success_response();
 		} catch ( \Exception $e ) {
-			wp_send_json_error( array( 'message' => $e->getMessage() ), $e->getCode() );
+			$task->http_error_response( $e->getMessage(), (int) $e->getCode() );
 		}
 	}
 }

@@ -95,7 +95,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp wc shipping_zone_method create 0 --method_id="${WC_SHIPPING_ZONE_METHOD_ID}" --settings="${WC_SHIPPING_ZONE_METHOD_SETTINGS}" --user=admin --allow-root
     wp wc shop_coupon create --code=FREE --amount=100 --discount_type=percent --user=admin --allow-root
     
-    wp plugin activate --allow-root sequra
+    wp plugin activate --allow-root _sequra
     wp plugin activate --allow-root sequra-helper
     
     wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Flexible payment with seQura","description":"Please, select the payment method you want to use"}' --allow-root
@@ -108,7 +108,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp db query "ALTER TABLE wp_posts AUTO_INCREMENT = $(date +%s)" --allow-root
 
     wp plugin deactivate --allow-root wordpress-importer --uninstall
-    wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v sequra | tr "\n" " ")
+    wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v '_\?sequra' | tr "\n" " ")
 
     touch /var/www/html/.post-install-complete
     

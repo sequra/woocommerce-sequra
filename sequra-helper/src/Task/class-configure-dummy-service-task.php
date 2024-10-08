@@ -115,7 +115,7 @@ class Configure_Dummy_Service_Task extends Task {
 	 */
 	public function execute( array $args = array() ): void {
 		if ( ! $this->is_dummy_service_config_in_use() ) {
-			$this->recreate_tables_in_database();
+			$this->recreate_entity_table_in_database();
 			$this->set_dummy_services_config();
 		}
 	}

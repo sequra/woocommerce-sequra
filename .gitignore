@@ -9,6 +9,7 @@ publish.sh
 woocommerce-sequra/composer.lock
 sequra/composer.lock
 sequra-legacy/composer.lock
+sequra-helper/zip
 node-modules
 e2e-tests/node_modules/*
 # Ignore Vscode workspace files

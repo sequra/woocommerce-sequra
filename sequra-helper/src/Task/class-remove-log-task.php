@@ -20,7 +20,7 @@ class Remove_Log_Task extends Task {
 	 * @throws \Exception If the task fails
 	 */
 	public function execute( array $args = array() ): void {
-		$sequra_dir = dirname( __DIR__, 3 ) . '/sequra';
+		$sequra_dir = dirname( __DIR__, 3 ) . '/_sequra';
 
 		$files = glob( $sequra_dir . '/*.log' );
 

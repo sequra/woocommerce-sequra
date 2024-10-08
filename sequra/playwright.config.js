@@ -30,11 +30,8 @@ module.exports = defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.WP_URL,
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    // Take a screenshot when a test fails.
-    screenshot: 'only-on-failure',
   },
 
   /* Configure projects for major browsers */
@@ -92,6 +89,12 @@ module.exports = defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: '007-configuration-mini-widget.spec.js',
       dependencies: ['configuration-widget'],
+    },
+    {
+      name: 'migration',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '008-migration.spec.js',
+      dependencies: ['configuration-mini-widget'],
     },
   ],
 });
