@@ -13,11 +13,14 @@ if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\Abstra
 }
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+use Error;
 
 /**
  * Provide compatibility with Gutenberg blocks for the payment gateway
  */
 class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
+
+	private const PAYMENT_METHOD_CONTENT_ACTION = 'sequra_payment_method_content';
 	
 	/**
 	 * Sequra payment gateway instance.
@@ -66,6 +69,10 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 		$this->assets_url      = $assets_url;
 		$this->name            = 'sequra';
 		$this->version         = $version;
+
+		// Register the AJAX actions for handle block content.
+		add_action( 'wp_ajax_' . self::PAYMENT_METHOD_CONTENT_ACTION, array( $this, 'handle_get_payment_method_block_content' ) );
+		add_action( 'wp_ajax_nopriv_' . self::PAYMENT_METHOD_CONTENT_ACTION, array( $this, 'handle_get_payment_method_block_content' ) );
 	}
 
 	/**
@@ -113,15 +120,45 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	}
 
 	/**
-	 * Provide all the necessary data to use on the front-end as an associative array.
+	 * Return the block content if any.
 	 */
-	public function get_payment_method_data(): array {
+	public function handle_get_payment_method_block_content(): void {
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$country   = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
+		$requestId = isset( $_POST['requestId'] ) ? sanitize_text_field( $_POST['requestId'] ) : 0;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		ob_start();
 		$this->gateway->payment_fields();
 		$payment_fields = ob_get_clean();
+
+		wp_send_json(
+			array(
+				'content'   => $payment_fields,
+				'requestId' => (int) $requestId,
+				'country'   => $country ?? '',
+			),
+			200,
+			JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS
+		);
+
+		// $this->gateway->payment_fields();
+		// wp_die();
+	}
+
+	/**
+	 * Provide all the necessary data to use on the front-end as an associative array.
+	 */
+	public function get_payment_method_data(): array {
+		// ob_start();
+		// $this->gateway->payment_fields();
+		// $payment_fields = ob_get_clean();
 		return array(
-			'title'       => $this->gateway->get_title(),
-			'description' => $payment_fields,
+			'blockContentUrl'        => admin_url( 'admin-ajax.php' ),
+			'blockContentAjaxAction' => self::PAYMENT_METHOD_CONTENT_ACTION,
+			'title'                  => $this->gateway->get_title(),
+			// 'description' => $payment_fields,
+			'description'            => '',
 		);
 	}
 }

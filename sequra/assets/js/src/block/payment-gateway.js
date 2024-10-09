@@ -1,17 +1,19 @@
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 const { registerPaymentMethod } = window.wc.wcBlocksRegistry
 const { getSetting } = window.wc.wcSettings
 
 const settings = getSetting('sequra_data', {})
-
+let canMakePaymentRequestId = 0;
 const label = decodeEntities(settings.title)
 
 const Content = (props) => {
     const { eventRegistration, emitResponse } = props;
     const { onPaymentProcessing } = eventRegistration;
+
+    const [content, setContent] = useState(settings.description || '');
 
     useEffect(() => {
         const unsubscribe = onPaymentProcessing(async () => {
@@ -38,14 +40,22 @@ const Content = (props) => {
         onPaymentProcessing,
     ]);
 
-    return <div dangerouslySetInnerHTML={{ __html: decodeEntities(settings.description || '') }} />
+    useEffect(() => {
+        // add listener to custom event canMakePayment
+        document.addEventListener('canMakePaymentLoading', (event) => {
+            // TODO: show loading spinner
+            setContent('Loading...');
+        });
+        document.addEventListener('canMakePaymentReady', (event) => setContent(event.detail.content));
+    }, []);
+
+    return <div dangerouslySetInnerHTML={{ __html: decodeEntities(content) }} />
 }
 
 const Label = () => {
     return (
         <span style={{ width: '100%' }}>
             {label}
-            {/* <img src={decodeEntities(settings.icon)} alt={label} style={{ float: 'right', marginRight: '20px' }} /> */}
         </span>
     )
 }
@@ -60,7 +70,46 @@ registerPaymentMethod({
     // A react node to display a preview of your payment method in the editor.
     edit: <Content />,
     // A callback to determine whether the payment method should be shown in the checkout.
-    canMakePayment: () => true,
+    canMakePayment: ({ shippingAddress, billingAddress, cart }) => {
+        const requestId = ++canMakePaymentRequestId;
+        return new Promise((resolve) => {
+            document.dispatchEvent(new CustomEvent('canMakePaymentLoading', { detail: { requestId } }));
+
+            settings.description = '';
+            const data = new FormData();
+            data.append('action', settings.blockContentAjaxAction);
+            data.append('country', billingAddress.country ?? shippingAddress.country ?? '');
+            data.append('requestId', requestId);
+
+            const onResolved = (canMakePayment, detail) => {
+                settings.description = detail.content;
+                document.dispatchEvent(new CustomEvent('canMakePaymentReady', { detail }));
+                resolve(canMakePayment);
+            }
+
+            fetch(settings.blockContentUrl, {
+                method: 'POST',
+                body: data
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                response.json().then(json => {
+                    if (requestId !== parseInt(json.requestId)) {
+                        // invalidate the request.
+                        throw new Error('Request ID mismatch');
+                    }
+
+                    onResolved('' !== json.content, { content: json.content });
+                }).catch(() => {
+                    onResolved(false, { content: '' });
+                });
+            }).catch(() => {
+                onResolved(false, { content: '' });
+            });
+        });
+    },
     ariaLabel: label,
     // SupportsConfiguration Object that describes various features provided by the payment method.
     supports: {

@@ -212,10 +212,16 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Declare fields for the payment method in the checkout page
 	 */
 	public function payment_fields() {
+		$payment_methods = $this->payment_method_service->get_payment_methods();
+		if ( empty( $payment_methods ) ) {
+			return '';
+		}
+
 		$args = array(
 			'description'     => $this->description,
-			'payment_methods' => $this->payment_method_service->get_payment_methods(),
+			'payment_methods' => $payment_methods,
 		);
+
 		wc_get_template( 'front/payment_fields.php', $args, '', $this->templates_path );
 	}
 
