@@ -78,7 +78,8 @@ registerPaymentMethod({
             settings.description = '';
             const data = new FormData();
             data.append('action', settings.blockContentAjaxAction);
-            data.append('country', billingAddress.country ?? shippingAddress.country ?? '');
+            data.append('shippingAddress', JSON.stringify(shippingAddress));
+            data.append('billingAddress', JSON.stringify(billingAddress));
             data.append('requestId', requestId);
 
             const onResolved = (canMakePayment, detail) => {

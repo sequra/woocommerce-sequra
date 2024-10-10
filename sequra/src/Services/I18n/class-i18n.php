@@ -64,14 +64,7 @@ class I18n implements Interface_I18n {
 	 * 3. The country by current locale.
 	 */
 	public function get_current_country(): string {
-		// $country = 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$country = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : null;
-
-		if ( ! empty( $country ) ) {
-			return strtoupper( $country );
-		}
-
+		$country = null;
 		if ( function_exists( 'WC' ) ) {
 			$customer = WC()->customer;
 			$country  = $customer ? $customer->get_shipping_country() : null;
