@@ -13,6 +13,7 @@ test.describe('Product checkout', () => {
     for (const version of ['classic', 'blocks']) {
       await helper.executeWebhook({ webhook: helper.webhooks.CHECKOUT_VERSION, args: [{ name: 'version', value: version }] });
       await checkoutPage.goto();
+      await checkoutPage.expectPaymentMethodsBeingReloaded();
       await checkoutPage.expectFp1ToBeVisible();
       await checkoutPage.expectI1ToBeVisible();
       await checkoutPage.expectSp1ToBeVisible();
@@ -26,8 +27,8 @@ test.describe('Product checkout', () => {
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
     await checkoutPage.goto();
-    await checkoutPage.expectFp1ToBeVisible();
     await checkoutPage.fillWithNonSpecialShopperName({});
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrderUsingFp1({});
     await checkoutPage.waitForOrderSuccess();
   });
@@ -37,8 +38,8 @@ test.describe('Product checkout', () => {
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
     await checkoutPage.goto();
-    await checkoutPage.expectI1ToBeVisible();
     await checkoutPage.fillWithReviewTest({});
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrderUsingI1({});
     await checkoutPage.waitForOrderOnHold();
     await checkoutPage.expectOrderChangeTo({ toStatus: 'wc-processing' });
@@ -49,8 +50,8 @@ test.describe('Product checkout', () => {
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
     await checkoutPage.goto();
-    await checkoutPage.expectI1ToBeVisible();
     await checkoutPage.fillWithReviewTest({ shopper: 'cancel' });
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrderUsingI1({});
     await checkoutPage.waitForOrderOnHold();
     await checkoutPage.expectOrderChangeTo({ toStatus: 'wc-cancelled' });
@@ -60,8 +61,8 @@ test.describe('Product checkout', () => {
     await checkoutPage.setupForPhysicalProducts();
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
     await checkoutPage.goto();
-    await checkoutPage.expectFp1ToBeVisible();
     await checkoutPage.fillWithNonSpecialShopperName({});
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrderUsingFp1({ forceFailure: true });
     await checkoutPage.waitForOrderFailure();
   });

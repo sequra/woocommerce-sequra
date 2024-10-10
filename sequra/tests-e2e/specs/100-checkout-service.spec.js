@@ -8,8 +8,8 @@ test.describe('Service checkout', () => {
     await productPage.addToCart({ slug: 'album', quantity: 1 });
     
     await checkoutPage.goto();
-    await checkoutPage.expectPp3ToBeVisible();
     await checkoutPage.fillWithNonSpecialShopperName({ fieldGroup: 'billing' });
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrderUsingPp3({});
     await checkoutPage.waitForOrderSuccess();
   });

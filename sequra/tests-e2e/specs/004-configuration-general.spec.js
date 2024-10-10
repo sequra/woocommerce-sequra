@@ -48,6 +48,7 @@ test.describe('Configuration', () => {
       await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
       await checkoutPage.goto();
+      await checkoutPage.expectPaymentMethodsBeingReloaded();
       await checkoutPage.expectAnyPaymentMethod({ available });
 
       await generalSettingsPage.goto();
@@ -97,6 +98,7 @@ test.describe('Configuration', () => {
       await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
       await checkoutPage.goto();
+      await checkoutPage.expectPaymentMethodsBeingReloaded();
       await checkoutPage.expectAnyPaymentMethod({ available });
 
       await generalSettingsPage.goto();
@@ -150,6 +152,7 @@ test.describe('Configuration', () => {
       await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
 
       await checkoutPage.goto();
+      await checkoutPage.expectPaymentMethodsBeingReloaded();
       await checkoutPage.expectAnyPaymentMethod({ available });
 
       await generalSettingsPage.goto();
