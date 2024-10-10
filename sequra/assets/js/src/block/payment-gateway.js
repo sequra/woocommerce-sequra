@@ -41,10 +41,8 @@ const Content = (props) => {
     ]);
 
     useEffect(() => {
-        // add listener to custom event canMakePayment
         document.addEventListener('canMakePaymentLoading', (event) => {
-            // TODO: show loading spinner
-            setContent('Loading...');
+            setContent('<div class="sq-loader" style="margin-top:1rem;margin-bottom:1rem;"><span class="sqp-spinner"></span></div>');
         });
         document.addEventListener('canMakePaymentReady', (event) => setContent(event.detail.content));
     }, []);
