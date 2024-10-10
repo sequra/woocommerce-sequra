@@ -25,6 +25,7 @@ use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use Throwable;
+use WC_Customer;
 use WC_DateTime;
 use WC_Order;
 use WP_User;
@@ -458,7 +459,43 @@ class Order_Service implements Interface_Order_Service {
 	 * Get customer data from session. If not found, return an empty array.
 	 */
 	private function get_customer_from_session(): array {
-		return WC()->session ? WC()->session->get( 'customer' ) : array();
+		$data = array();
+		if ( function_exists( 'WC' ) && WC()->customer ) {
+			/**
+			 * Customer instance.
+			 *
+			 * @var WC_Customer $customer
+			 */
+			$customer = WC()->customer;
+			$data     = array(
+				'email'               => $customer->get_email(),
+				'billing_first_name'  => $customer->get_billing_first_name(),
+				'billing_last_name'   => $customer->get_billing_last_name(),
+				'billing_company'     => $customer->get_billing_company(),
+				'billing_address_1'   => $customer->get_billing_address_1(),
+				'billing_address_2'   => $customer->get_billing_address_2(),
+				'billing_postcode'    => $customer->get_billing_postcode(),
+				'billing_city'        => $customer->get_billing_city(),
+				'billing_country'     => $customer->get_billing_country(),
+				'billing_state'       => $customer->get_billing_state(),
+				'billing_phone'       => $customer->get_billing_phone(),
+				'billing_nif'         => method_exists( $customer, 'get_billing_nif' ) ? $customer->get_billing_nif() : '',
+				'billing_vat'         => method_exists( $customer, 'get_billing_vat' ) ? $customer->get_billing_vat() : '',
+				'shipping_first_name' => $customer->get_shipping_first_name(),
+				'shipping_last_name'  => $customer->get_shipping_last_name(),
+				'shipping_company'    => $customer->get_shipping_company(),
+				'shipping_address_1'  => $customer->get_shipping_address_1(),
+				'shipping_address_2'  => $customer->get_shipping_address_2(),
+				'shipping_postcode'   => $customer->get_shipping_postcode(),
+				'shipping_city'       => $customer->get_shipping_city(),
+				'shipping_country'    => $customer->get_shipping_country(),
+				'shipping_state'      => $customer->get_shipping_state(),
+				'shipping_phone'      => $customer->get_shipping_phone(),
+				'shipping_nif'        => method_exists( $customer, 'get_shipping_nif' ) ? $customer->get_shipping_nif() : '',
+				'shipping_vat'        => method_exists( $customer, 'get_shipping_vat' ) ? $customer->get_shipping_vat() : '',
+			);
+		}
+		return $data;
 	}
 
 	/**
