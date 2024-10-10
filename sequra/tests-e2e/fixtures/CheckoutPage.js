@@ -143,6 +143,17 @@ export default class CheckoutPage {
         await this.page.waitForSelector(this.selector.placeOrder);
     }
 
+    async expectPaymentMethodsBeingReloaded() {
+        while (true) {
+            try {
+                await this.page.waitForSelector('.sq-loader', { state: 'visible', timeout: 5000 });
+                await this.page.waitForSelector('.sq-loader', { state: 'detached', timeout: 5000 });
+            } catch (err) {
+                break;
+            }
+        }
+    }
+
     async placeOrderUsingFp1({ forceFailure = false }) {
         await this.page.click(this.selector.paymentMethodFp1);
         await this.page.click(this.selector.placeOrder);
@@ -314,9 +325,9 @@ export default class CheckoutPage {
     async expectAnyPaymentMethod({ available = true }) {
         const locator = this.page.locator(this.selector.sqPaymentMethod);
         if (available) {
-            await this.expect(locator.first(), `"seQura payment methods should be available`).toBeVisible({ timeout: 3000 });
+            await this.expect(locator.first(), `"seQura payment methods should be available`).toBeVisible({ timeout: 10000 });
         } else {
-            await this.expect(locator, `"seQura payment methods should not be available`).toHaveCount(0, { timeout: 3000 });
+            await this.expect(locator, `"seQura payment methods should not be available`).toHaveCount(0, { timeout: 10000 });
         }
     }
 
@@ -329,7 +340,7 @@ export default class CheckoutPage {
         } catch (err) {
             console.log('Radio control not found');
         }
-        await this.expect(this.page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 3000 });
+        await this.expect(this.page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 10000 });
     }
 
     async expectFp1ToBeVisible() {

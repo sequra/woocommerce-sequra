@@ -18,6 +18,8 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
  * Provide compatibility with Gutenberg blocks for the payment gateway
  */
 class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
+
+	private const PAYMENT_METHOD_CONTENT_ACTION = 'sequra_payment_method_content';
 	
 	/**
 	 * Sequra payment gateway instance.
@@ -66,6 +68,10 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 		$this->assets_url      = $assets_url;
 		$this->name            = 'sequra';
 		$this->version         = $version;
+
+		// Register the AJAX actions for handle block content.
+		add_action( 'wp_ajax_' . self::PAYMENT_METHOD_CONTENT_ACTION, array( $this, 'handle_get_payment_method_block_content' ) );
+		add_action( 'wp_ajax_nopriv_' . self::PAYMENT_METHOD_CONTENT_ACTION, array( $this, 'handle_get_payment_method_block_content' ) );
 	}
 
 	/**
@@ -113,6 +119,60 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	}
 
 	/**
+	 * Return the block content if any.
+	 */
+	public function handle_get_payment_method_block_content(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$requestId = isset( $_POST['requestId'] ) ? (int) sanitize_text_field( $_POST['requestId'] ) : 0;
+		if ( ! function_exists( 'WC' ) || null === WC()->customer ) {
+			wp_send_json(
+				array(
+					'content'   => '',
+					'requestId' => $requestId,
+				),
+				500,
+				JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS
+			);
+		}
+
+		// Update the billing and shipping data in the customer object.
+		$shipping_address = isset( $_POST['shippingAddress'] ) ? (array) json_decode( sanitize_text_field( wp_unslash( $_POST['shippingAddress'] ) ), true ) : array();
+		foreach ( $shipping_address as $key => $value ) {
+			$this->update_customer_data( $value, 'set_shipping_' . $key );
+		}
+		$billing_address = isset( $_POST['billingAddress'] ) ? (array) json_decode( sanitize_text_field( wp_unslash( $_POST['billingAddress'] ) ), true ) : array();
+		foreach ( $billing_address as $key => $value ) {
+			$this->update_customer_data( $value, 'set_billing_' . $key );
+		}
+
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+		ob_start();
+		$this->gateway->payment_fields();
+		$payment_fields = ob_get_clean();
+
+		wp_send_json(
+			array(
+				'content'   => $payment_fields,
+				'requestId' => $requestId,
+			),
+			200,
+			JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS
+		);
+	}
+
+	/**
+	 * Maybe update the customer object using the provided data.
+	 *
+	 * @param mixed $value The value to update. 
+	 */
+	private function update_customer_data( $value, string $method ): void {
+		$customer = WC()->customer;
+		if ( method_exists( $customer, $method ) ) {
+			$customer->$method( $value );
+		}
+	}
+
+	/**
 	 * Provide all the necessary data to use on the front-end as an associative array.
 	 */
 	public function get_payment_method_data(): array {
@@ -120,8 +180,10 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 		$this->gateway->payment_fields();
 		$payment_fields = ob_get_clean();
 		return array(
-			'title'       => $this->gateway->get_title(),
-			'description' => $payment_fields,
+			'blockContentUrl'        => admin_url( 'admin-ajax.php' ),
+			'blockContentAjaxAction' => self::PAYMENT_METHOD_CONTENT_ACTION,
+			'title'                  => $this->gateway->get_title(),
+			'description'            => $payment_fields,
 		);
 	}
 }

@@ -40,7 +40,7 @@ export default class CartPage extends MiniWidgetPage {
 
         await this.page.locator(couponInput).fill(coupon);
         await this.page.locator(applyCouponBtn).click();
-        await this.page.waitForSelector(rmCouponSel);
+        await this.page.waitForSelector(rmCouponSel, { timeout: 5000 });
     }
 
     async removeCoupon({ theme = 'storefront' }) {
