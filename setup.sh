@@ -3,22 +3,30 @@ if [ ! -f .env ]; then
     cp .env.sample .env
 fi
 
+install=1
+
+# Parse arguments:
+# --install=0: Skip installation of dependencies
+# --ngrok-token=YOUR_NGROK_TOKEN: Override the ngrok token in .env
+while [[ "$#" -gt 0 ]]; do
+    if [ "$1" == "--install=0" ]; then
+        install=0
+    elif [[ "$1" == --ngrok-token=* ]]; then
+        ngrok_token="${1#*=}"
+        sed -i.bak "s|NGROK_AUTHTOKEN=.*|NGROK_AUTHTOKEN=$ngrok_token|" .env
+        rm .env.bak
+    fi
+    shift
+done
+
 set -o allexport
 source .env
 set +o allexport
 
-# Variables
-install=1  # Valor por defecto
-
-# Parse arguments:
-# --install=0: Skip installation of dependencies
-while [[ "$#" -gt 0 ]]; do
-    if [ "$1" == "--install=0" ]; then
-        install=0
-        break
-    fi
-    shift
-done
+if [ -z "$NGROK_AUTHTOKEN" ]; then
+    echo "❌ Please enter your ngrok auth token under the key NGROK_AUTHTOKEN in your .env file (get it from https://dashboard.ngrok.com/)"
+    exit 1
+fi
 
 if [ $install -eq 1 ]; then
     ./bin/composer install
@@ -32,7 +40,7 @@ docker compose up -d --build
 
 echo "🚀 Waiting for installation to complete..."
 
-retry=60
+retry=120
 timeout=1
 start=$(date +%s)
 while [ $(($(date +%s) - $start)) -lt $retry ]; do
