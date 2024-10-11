@@ -127,7 +127,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 						 *
 						 * @since 2.0.0
 						 */
-						apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/1334280489/WOOCOMMERCE' )
+						apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/2247524378/WOOCOMMERCE' )
 					),
 					esc_attr__( 'View WooCommerce documentation', 'sequra' ),
 					esc_html__( 'Docs', 'woocommerce' )
@@ -153,7 +153,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 						 *
 						 * @since 2.0.0
 						 */
-						apply_filters( 'sequrapayment_support_url', 'mailto:sat@sequra.es' )
+						apply_filters( 'sequrapayment_support_url', 'https://sequra.atlassian.net/servicedesk/customer/portal/5/group/-1' )
 					),
 					esc_attr__( 'Support', 'sequra' ),
 					esc_html__( 'Support', 'sequra' )
