@@ -3,15 +3,19 @@ BASEDIR="$(dirname $(realpath $0))/.."
 cd "${BASEDIR}"
 
 # Install only production dependencies
-bin/composer install --no-dev
-bin/npm run build
+bin/composer install --no-dev --quiet --no-interaction
+bin/npm run build --no-progress --silent --no-update-notifier
 
 cd "${BASEDIR}" || exit
 set -o allexport
 source .env
 set +o allexport
 
- # Wait for ngrok tunnel to be ready. It should return a 200 status code when hitting $WP_URL
+if [ -z "$PUBLIC_URL" ]; then
+	echo "❌ PUBLIC_URL is not set in .env file. Please run 'bin/setup' to create it."
+	exit 1
+fi
+
 wait_for() {
 	local retry=60
 	local timeout=1
@@ -26,12 +30,12 @@ wait_for() {
 	return 1
 }
 echo "🚀 Waiting for ngrok tunnel to be ready..."
-result=$(wait_for curl -s -o /dev/null --header "ngrok-skip-browser-warning: 1" --head --fail "${WP_URL}")
+result=$(wait_for curl -H "ngrok-skip-browser-warning: 1" -s -o /dev/null --head --fail "${PUBLIC_URL}")
 if [ "$result" == "1" ]; then
-	echo "❌ WordPress is not available at: ${WP_URL}"
+	echo "❌ WordPress is not available at: ${PUBLIC_URL}"
 	exit 1
 fi
-echo "✅ WordPress is available at: ${WP_URL}"
+echo "✅ WordPress is available at: ${PUBLIC_URL}"
 
 # Check if --headed is passed
 if [[ "$@" == *"--headed"* ]]; then
