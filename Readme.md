@@ -20,6 +20,8 @@ Optionally, you can pass the following parameters to the setup script:
 | Argument | Description |
 | -------- | ------------------------------------------------------------------ |
 | ```--install=<0\|1>``` | Perform the installation of packages (1) or not (0). Default is 1 |
+| ```--disable-ngrok=<0\|1>``` | Prevent the setup of ngrok to expose the environment to the internet. Default is 0 |
+| ```--ngrok-toke=<YOUR_NGROK_TOKEN>``` | Required to expose the environment to the internet. Get yours at https://dashboard.ngrok.com/ |
 
 Then, access to [plugin settings](http://localhost.sequrapi.com:8000/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra) and login with user `admin` and password `admin`, or browse the [frontend](http://localhost.sequrapi.com:8000/?post_type=product)
 
@@ -142,6 +144,14 @@ This functionality changes the Checkout page content to use Classic or Block bas
 
 ```bash
 curl --location --request POST '<WP_URL>/?sq-webhook=checkout_version&version=<VERSION>'
+```
+
+### Get plugin zip file
+
+This functionality prepares and returns a zipped version of the plugin, similar to the one you can get from wordpress.org. To used it you must do a POST request to the webhook, like this (replace `<WP_URL>` with the value present in your `.env` file):
+
+```bash
+curl --location --request POST '<WP_URL>/?sq-webhook=plugin_zip'
 ```
 
 ## Unit and Integration Tests
