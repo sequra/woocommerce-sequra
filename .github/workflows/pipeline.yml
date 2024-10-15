@@ -69,7 +69,7 @@ jobs:
 
       - name: Setup Environment
         if: github.event_name == 'pull_request'
-        run: ./setup.sh --install=0
+        run: ./setup.sh --install=0 --disable-ngrok=1
 
       - name: Setup Tests
         if: github.event_name == 'pull_request'

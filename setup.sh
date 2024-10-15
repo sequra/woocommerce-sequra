@@ -27,12 +27,12 @@ set -o allexport
 source .env
 set +o allexport
 
-if [ -z "$NGROK_AUTHTOKEN" ]; then
-    echo "❌ Please set NGROK_AUTHTOKEN with your ngrok auth token in your .env file (get it from https://dashboard.ngrok.com/)"
-    exit 1
-fi
-
 if [ $disable_ngrok -eq 0 ]; then
+
+    if [ -z "$NGROK_AUTHTOKEN" ]; then
+        echo "❌ Please set NGROK_AUTHTOKEN with your ngrok auth token in your .env file (get it from https://dashboard.ngrok.com/)"
+        exit 1
+    fi
     
     echo "🚀 Starting ngrok..."
 
