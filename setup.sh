@@ -23,6 +23,10 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+# Reset PUBLIC_URL inside .env
+sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=|" .env
+rm .env.bak
+
 set -o allexport
 source .env
 set +o allexport
