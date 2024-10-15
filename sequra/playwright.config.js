@@ -32,9 +32,9 @@ module.exports = defineConfig({
     baseURL: process.env.PUBLIC_URL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    extraHTTPHeaders: {
-      'ngrok-skip-browser-warning': '1',
-    },
+    // extraHTTPHeaders: {
+    //   'ngrok-skip-browser-warning': '1',
+    // },
   },
 
   /* Configure projects for major browsers */
