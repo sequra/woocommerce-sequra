@@ -338,7 +338,7 @@ export default class CheckoutPage {
             await this.expect(locator).toBeChecked({ checked: false, timeout: 1000 });
             await locator.click();
         } catch (err) {
-            console.log('Radio control not found');
+            console.log(`Waiting for payment method ${methodName} to be visible...`);
         }
         await this.expect(this.page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 10000 });
     }

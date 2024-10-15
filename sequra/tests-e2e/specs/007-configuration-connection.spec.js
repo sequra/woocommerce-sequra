@@ -1,7 +1,5 @@
-import { env } from 'process';
-import { test, expect } from '../fixtures/test';
+import { test } from '../fixtures/test';
 
-test.describe.configure({ mode: 'serial' });
 test.describe('Connection settings', () => {
 
   test('Disconnect', async ({ connectionSettingsPage, checkoutPage }) => {

@@ -3,22 +3,66 @@ if [ ! -f .env ]; then
     cp .env.sample .env
 fi
 
+install=1
+disable_ngrok=0
+
+# Parse arguments:
+# --install=0: Skip installation of dependencies
+# --ngrok-token=YOUR_NGROK_TOKEN: Override the ngrok token in .env
+# --disable-ngrok=1: Skip ngrok setup
+while [[ "$#" -gt 0 ]]; do
+    if [ "$1" == "--install=0" ]; then
+        install=0
+    elif [ "$1" == "--disable-ngrok=1" ]; then
+        disable_ngrok=1
+    elif [[ "$1" == --ngrok-token=* ]]; then
+        ngrok_token="${1#*=}"
+        sed -i.bak "s|NGROK_AUTHTOKEN=.*|NGROK_AUTHTOKEN=$ngrok_token|" .env
+        rm .env.bak
+    fi
+    shift
+done
+
 set -o allexport
 source .env
 set +o allexport
 
-# Variables
-install=1  # Valor por defecto
+if [ $disable_ngrok -eq 0 ]; then
 
-# Parse arguments:
-# --install=0: Skip installation of dependencies
-while [[ "$#" -gt 0 ]]; do
-    if [ "$1" == "--install=0" ]; then
-        install=0
-        break
+    if [ -z "$NGROK_AUTHTOKEN" ]; then
+        echo "❌ Please set NGROK_AUTHTOKEN with your ngrok auth token in your .env file (get it from https://dashboard.ngrok.com/)"
+        exit 1
     fi
-    shift
-done
+    
+    echo "🚀 Starting ngrok..."
+
+    docker run -d -e NGROK_AUTHTOKEN=$NGROK_AUTHTOKEN \
+        -p $NGROK_PORT:4040 \
+        --name $NGROK_CONTAINER_NAME \
+        --add-host=host:host-gateway \
+        ngrok/ngrok:alpine \
+        http host:$WP_HTTP_PORT
+    
+    WP_URL=""
+    retry=10
+    timeout=1
+    start=$(date +%s)
+    while [ -z "$WP_URL" ]; do
+        sleep $timeout
+        WP_URL=$(curl -s http://localhost:$NGROK_PORT/api/tunnels | grep -o '"public_url":"[^"]*"' | sed 's/"public_url":"\(.*\)"/\1/' | head -n 1)
+        if [ $(($(date +%s) - $start)) -gt $retry ]; then
+            docker rm -f $NGROK_CONTAINER_NAME || true
+            echo "❌ Error getting public url from ngrok after ${retry} seconds"
+            exit 1
+        fi
+    done
+
+    # Overwrite PUBLIC_URL inside .env
+    sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=$WP_URL|" .env
+    rm .env.bak
+
+    echo "✅ Ngrok started. Public URL: $WP_URL"
+fi
 
 if [ $install -eq 1 ]; then
     ./bin/composer install
@@ -32,7 +76,7 @@ docker compose up -d --build
 
 echo "🚀 Waiting for installation to complete..."
 
-retry=60
+retry=120
 timeout=1
 start=$(date +%s)
 while [ $(($(date +%s) - $start)) -lt $retry ]; do

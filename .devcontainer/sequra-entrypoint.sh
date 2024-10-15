@@ -20,6 +20,11 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
         done
         return 1
     }
+
+    # Override WP_URL if PUBLIC_URL is set
+    if [ -n "$PUBLIC_URL" ]; then
+        WP_URL="$PUBLIC_URL"
+    fi
     
     # Wait for database to be ready and then create it.
     DB_PORT=3306

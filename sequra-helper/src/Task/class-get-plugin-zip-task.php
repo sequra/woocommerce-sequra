@@ -35,6 +35,7 @@ class Get_Plugin_Zip_Task extends Task {
 			cp _sequra/sequra.php sequra-helper/zip/sequra &&\
 			rm -rf sequra-helper/zip/sequra/assets/css/scss &&\
 			rm -rf sequra-helper/zip/sequra/assets/js/src &&\
+			rm -rf sequra-helper/zip/sequra/vendor/sequra/integration-core/.github &&\
 			cd sequra-helper/zip &&\
 			zip -r9 sequra.zip sequra &&\
 			rm -rf sequra',

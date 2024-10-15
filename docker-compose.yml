@@ -13,7 +13,7 @@ services:
     depends_on:
       - db
     ports:
-      - 8000:80
+      - $WP_HTTP_PORT:80
     extra_hosts:
       - "localhost.sequrapi.com:host-gateway"
     <<: *env_file
@@ -22,8 +22,6 @@ services:
         define( 'WP_LOCALE', '$WP_LOCALE' );
     volumes:
       - sq_wordpress:/var/www/html
-      # - ./.devcontainer/wp-config.php:/var/www/html/wp-config.php
-      # - ./sequra:/var/www/html/wp-content/plugins/sequra:ro
       - ./sequra:/var/www/html/wp-content/plugins/_sequra
       - ./sequra-helper:/var/www/html/wp-content/plugins/sequra-helper
   db:

@@ -3,45 +3,45 @@ BASEDIR="$(dirname $(realpath $0))/.."
 cd "${BASEDIR}"
 
 # Install only production dependencies
-bin/composer install --no-dev
-bin/npm run build
+bin/composer install --no-dev --quiet --no-interaction
+bin/npm run build --no-progress --silent --no-update-notifier
 
 cd "${BASEDIR}" || exit
 set -o allexport
 source .env
 set +o allexport
 
-# Get a public domain
-if [[ -z "$NGROK_AUTHTOKEN" ]]; then
-	export NGROK_AUTHTOKEN=$(ngrok config check | grep -Eo 'file at .*' | cut -d' ' -f3 | xargs cat | grep -Eo 'authtoken: .*' | cut -d' ' -f2)
+if [ -z "$PUBLIC_URL" ]; then
+	echo "❌ PUBLIC_URL is not set in .env file. Please run 'bin/setup' to create it."
+	exit 1
 fi
-if [[ -z "$NGROK_AUTHTOKEN" ]]; then
-	echo "Authtoken is missing. Please enter your ngrok authtoken: (get it from https://dashboard.ngrok.com/)"
-	read -r NGROK_AUTHTOKEN
-fi
-docker run --rm -d -e NGROK_AUTHTOKEN=$NGROK_AUTHTOKEN \
-	-p 4740:4040 \
-	--name ngrok \
-	--add-host=host:host-gateway \
-	ngrok/ngrok:latest \
-	http host:$WP_HTTP_PORT
 
-# Loop until PUBLIC_URL is available
-while [ -z "$PUBLIC_URL" ]; do
-	sleep 2  # Wait for 2 seconds before retrying
-	echo "Waiting for ngrok to start..."
-	PUBLIC_URL=$(curl -s http://localhost:4740/api/tunnels | jq -r '.tunnels[0].public_url')
-done
-docker compose exec web wp --allow-root search-replace $WP_URL $PUBLIC_URL
-echo "Your site is now available at $PUBLIC_URL"
+wait_for() {
+	local retry=60
+	local timeout=1
+	local start=$(date +%s)
+
+	while [ $(($(date +%s) - $start)) -lt $retry ]; do
+		if "$@" > /dev/null 2>&1; then
+			return 0
+		fi
+		sleep $timeout
+	done
+	return 1
+}
+echo "🚀 Waiting for ngrok tunnel to be ready..."
+result=$(wait_for curl -H "ngrok-skip-browser-warning: 1" -s -o /dev/null --head --fail "${PUBLIC_URL}")
+if [ "$result" == "1" ]; then
+	echo "❌ WordPress is not available at: ${PUBLIC_URL}"
+	exit 1
+fi
+echo "✅ WordPress is available at: ${PUBLIC_URL}"
 
 # Check if --headed is passed
 if [[ "$@" == *"--headed"* ]]; then
-	export WP_URL=$PUBLIC_URL
     cd sequra && npx playwright test $@
 else
     docker run \
     --env-file "${BASEDIR}"/.env \
-	-e WP_URL=$PUBLIC_URL \
     -it --rm -v "${BASEDIR}"/sequra:/app -w /app mcr.microsoft.com/playwright:v1.45.0-jammy bash -c "npx playwright test $@"
 fi

@@ -33,8 +33,8 @@ export default class OnboardingSettingsPage extends SettingsPage {
 
     async fillConnectForm({ merchant = 'dummy', env = 'sandbox' }) {
         await this.page.locator(this.selector.env[env]).click();
-        await this.page.locator(this.selector.username).type(dataMerchant[merchant].username);
-        await this.page.locator(this.selector.password).type(dataMerchant[merchant].password);
+        await this.page.locator(this.selector.username).fill(dataMerchant[merchant].username);
+        await this.page.locator(this.selector.password).fill(dataMerchant[merchant].password);
         await this.page.locator(this.selector.primaryBtn).click();
         await this.page.waitForSelector(this.selector.onboarding.completedStepConnect, { timeout: 5000 });
     }
@@ -51,7 +51,7 @@ export default class OnboardingSettingsPage extends SettingsPage {
         for (const country of countries) {
             const merchantRefInput = `[name="country_${country}"]`;
             await this.page.locator(merchantRefInput).click();
-            await this.page.locator(merchantRefInput).type(dataMerchant[merchant].ref[country]);
+            await this.page.locator(merchantRefInput).fill(dataMerchant[merchant].ref[country]);
         }
 
         await this.page.locator(this.selector.primaryBtn).click();
@@ -63,7 +63,7 @@ export default class OnboardingSettingsPage extends SettingsPage {
         await this.page.locator(this.selector.yesOption).click();
         await this.page.waitForSelector(this.selector.assetsKey, { timeout: 1000 });
         await this.page.locator(this.selector.assetsKey).click();
-        await this.page.locator(this.selector.assetsKey).type(dataMerchant[merchant].assetsKey);
+        await this.page.locator(this.selector.assetsKey).fill(dataMerchant[merchant].assetsKey);
         await this.page.locator(this.selector.primaryBtn).click();
         await this.page.locator(this.selector.primaryBtn).click();
         await this.page.waitForSelector(this.selector.headerNavbar, { timeout: 5000 });
