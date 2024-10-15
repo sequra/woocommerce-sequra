@@ -12,8 +12,7 @@ source .env
 set +o allexport
 
 if [ -z "$PUBLIC_URL" ]; then
-	echo "❌ PUBLIC_URL is not set in .env file. Please run 'bin/setup' to create it."
-	exit 1
+	PUBLIC_URL="$WP_URL"
 fi
 
 wait_for() {
