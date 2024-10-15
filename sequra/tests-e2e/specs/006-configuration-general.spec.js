@@ -1,6 +1,5 @@
 import { test, expect } from '../fixtures/test';
 
-test.describe.configure({ mode: 'serial' });
 test.describe('Configuration', () => {
 
   test('Change allowed IP addresses', async ({ page, generalSettingsPage, productPage, checkoutPage }) => {

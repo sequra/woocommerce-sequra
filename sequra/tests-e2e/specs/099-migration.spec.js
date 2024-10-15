@@ -3,7 +3,6 @@ import GeneralSettingsPage from '../fixtures/GeneralSettingsPage';
 import { expect, test } from '../fixtures/test';
 import WidgetSettingsPage from '../fixtures/WidgetSettingsPage';
 
-test.describe.configure({ mode: 'serial' });
 test.describe('Migration', () => {
 
   test('From v2.0.12 to v3.0.0', async ({ page, wpAdmin, sqHelper, baseURL, request }) => {

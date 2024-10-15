@@ -1,7 +1,6 @@
 import SeQuraHelper from '../fixtures/SeQuraHelper';
 import { test, expect } from '../fixtures/test';
 
-test.describe.configure({ mode: 'serial' });
 test.describe('Widget settings', () => {
 
   test('Change settings', async ({ page, widgetSettingsPage }) => {

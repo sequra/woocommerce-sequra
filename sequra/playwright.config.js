@@ -14,7 +14,7 @@ module.exports = defineConfig({
   testDir: './tests-e2e/specs',
   timeout: 5 * 60 * 1000, // 5 minutes
   /* Run tests in files in parallel */
-  // fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
@@ -22,8 +22,7 @@ module.exports = defineConfig({
   retries: 0,
   /* Opt out of parallel tests on CI. */
   // workers: process.env.CI ? 1 : undefined,
-  workers: 4,
-  // workers: 1,
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? 'dot' : 'list',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -32,9 +31,6 @@ module.exports = defineConfig({
     baseURL: process.env.PUBLIC_URL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    // extraHTTPHeaders: {
-    //   'ngrok-skip-browser-warning': '1',
-    // },
   },
 
   /* Configure projects for major browsers */
@@ -42,62 +38,52 @@ module.exports = defineConfig({
     {
       name: 'checkout-product',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '099-checkout-product.spec.js',
-      // dependencies: ['configuration-connection'],
+      testMatch: '001-checkout-product.spec.js',
     },
     {
       name: 'checkout-service',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '100-checkout-service.spec.js',
-      dependencies: ['checkout-product'],
+      testMatch: '002-checkout-service.spec.js',
     },
     {
       name: 'configuration-onboarding',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '001-configuration-onboarding.spec.js',
-      dependencies: ['checkout-product', 'checkout-service'],
+      testMatch: '003-configuration-onboarding.spec.js',
     },
     {
       name: 'configuration-payment-methods',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '002-configuration-payment-methods.spec.js',
-      dependencies: ['configuration-onboarding'],
+      testMatch: '004-configuration-payment-methods.spec.js',
     },
     {
       name: 'configuration-advanced',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '003-configuration-advanced.spec.js',
-      dependencies: ['configuration-payment-methods'],
+      testMatch: '005-configuration-advanced.spec.js',
     },
     {
       name: 'configuration-general',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '004-configuration-general.spec.js',
-      dependencies: ['configuration-advanced'],
+      testMatch: '006-configuration-general.spec.js',
     },
     {
       name: 'configuration-connection',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '005-configuration-connection.spec.js',
-      dependencies: ['configuration-general'],
+      testMatch: '007-configuration-connection.spec.js',
     },
     {
       name: 'configuration-widget',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '006-configuration-widget.spec.js',
-      dependencies: ['configuration-connection'],
+      testMatch: '008-configuration-widget.spec.js',
     },
     {
       name: 'configuration-mini-widget',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '007-configuration-mini-widget.spec.js',
-      dependencies: ['configuration-widget'],
+      testMatch: '009-configuration-mini-widget.spec.js',
     },
     {
       name: 'migration',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '008-migration.spec.js',
-      dependencies: ['configuration-mini-widget'],
+      testMatch: '099-migration.spec.js',
     },
   ],
 });

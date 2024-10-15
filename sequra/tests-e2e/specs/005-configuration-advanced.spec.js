@@ -1,7 +1,5 @@
 import { test } from '../fixtures/test';
 
-test.describe.configure({ mode: 'serial' });
-
 test.describe('Configuration', () => {
   test('Enable logs', async ({ page, advancedSettingsPage }) => {
     await advancedSettingsPage.expectLogIsEmpty();
