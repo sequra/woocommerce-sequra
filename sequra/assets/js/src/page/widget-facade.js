@@ -154,27 +154,6 @@ if (SequraWidgetFacade) {
                 },
 
                 /**
-                 * Search for all the targets of the widgets in a parent element
-                 * @param {object} parentElem DOM element that may contains the widget's targets
-                 * @param {array} widgets List of widgets to be drawn in the page
-                 * @param {string} observedAt Unique identifier to avoid fetch the same element multiple times
-                 * @returns {array} Array of objects containing the target elements and a reference to the widget 
-                 */
-                getAllWidgetTargets: function (parentElem, widgets, observedAt) {
-                    const targets = [];
-                    for (const widget of widgets) {
-                        const widgetTargets = this.getWidgetTargets(parentElem, widget, observedAt);
-                        targets.push(...widgetTargets);
-                    }
-                    // debugger
-                    for (const miniWidget of this.miniWidgets) {
-                        const widgetTargets = this.getMiniWidgetTargets(miniWidget);
-                        targets.push(...widgetTargets);
-                    }
-                    return targets;
-                },
-
-                /**
                  * Get an unique identifier to avoid fetch the same element multiple times
                  * @returns {number} The current timestamp
                  */
@@ -191,6 +170,27 @@ if (SequraWidgetFacade) {
                 },
 
                 /**
+                 * Draw the missing or outdated widgets in the page.
+                 */
+                refreshWidgets: function () {
+
+                    const targets = [];
+                    for (const widget of this.widgets) {
+                        const widgetTargets = this.getWidgetTargets(document, widget, this.getObservedAt());
+                        targets.push(...widgetTargets);
+                    }
+                    for (const miniWidget of this.miniWidgets) {
+                        const widgetTargets = this.getMiniWidgetTargets(miniWidget);
+                        targets.push(...widgetTargets);
+                    }
+
+                    targets.forEach(target => {
+                        const { elem, widget } = target;
+                        this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, target.priceElem) : this.drawWidgetOnElement(widget, elem);
+                    });
+                },
+
+                /**
                  * Paint the widgets in the page and observe the DOM to refresh the widgets when the page changes.
                  * @param {boolean} forcePriceSelector If true, the price selector will be forced to the simple product price selector.
                  */
@@ -199,41 +199,23 @@ if (SequraWidgetFacade) {
                         return;
                     }
 
-                    this.forcePriceSelector = forcePriceSelector;
-
-                    // First, draw the widgets in the page for the first time.
-                    const widgetsTargets = this.getAllWidgetTargets(document, this.widgets, this.getObservedAt());
-                    widgetsTargets.forEach((target) => {
-                        const { elem, widget } = target;
-                        this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, target.priceElem) : this.drawWidgetOnElement(widget, elem);
-                    });
-
                     if (this.mutationObserver) {
                         this.mutationObserver.disconnect();
                     }
 
+                    this.forcePriceSelector = forcePriceSelector;
+
+                    this.refreshWidgets();
+
                     // Then, observe the DOM to refresh the widgets when the page changes.
                     this.mutationObserver = new MutationObserver((mutations) => {
-                        const targets = []; // contains the elements that must be refreshed.
-                        const observedAt = this.getObservedAt();
-
-                        for (const mutation of mutations) {
-                            if (!['childList', 'subtree', 'characterData'].includes(mutation.type)) {
-                                continue;
-                            }
-
-                            const mutationTarget = ['characterData'].includes(mutation.type) ? mutation.target.parentElement : mutation.target;
-                            const widgetTargets = this.getAllWidgetTargets(mutationTarget, this.widgets, observedAt)
-                            targets.push(...widgetTargets);
-                        }
-
                         this.mutationObserver.disconnect();// disable the observer to avoid multiple calls to the same function.
-
-                        targets.forEach((target) => {
-                            const { elem, widget } = target;
-                            this.isMiniWidget(widget) ? this.drawMiniWidgetOnElement(widget, elem, target.priceElem) : this.drawWidgetOnElement(widget, elem);
-                        });
-
+                        for (const mutation of mutations) {
+                            if (['childList', 'subtree', 'characterData'].includes(mutation.type)) {
+                                this.refreshWidgets();
+                                break;
+                            }
+                        }
                         this.mutationObserver.observe(document, { childList: true, subtree: true, characterData: true }); // enable the observer again.
                     });
 
