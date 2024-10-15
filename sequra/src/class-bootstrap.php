@@ -310,7 +310,7 @@ class Bootstrap extends BootstrapComponent {
 			'plugin.assets_url',
 			static function () {
 				if ( ! isset( self::$cache['plugin.assets_url'] ) ) {
-					self::$cache['plugin.assets_url'] = Reg::getService( 'plugin.dir_url' ) . '/assets';
+					self::$cache['plugin.assets_url'] = untrailingslashit( Reg::getService( 'plugin.dir_url' ) ) . '/assets';
 				}
 				return self::$cache['plugin.assets_url'];
 			}
