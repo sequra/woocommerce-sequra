@@ -1,7 +1,7 @@
 (function () {
     const ClassicCheckout = {
         init: function () {
-            if (!this.isClassicCheckout()) {
+            if ('undefined' !== typeof SeQuraCheckout && SeQuraCheckout.isBlockCheckout) {
                 return
             }
 
@@ -19,8 +19,10 @@
             const sqPaymentMethodId = 'payment_method_sequra';
             const paymentMethods = document.querySelectorAll('[name="payment_method"]');
 
+            let isSqPaymentMethodChecked = false;
             paymentMethods.forEach(paymentMethod => {
                 if (paymentMethod.id === sqPaymentMethodId && paymentMethod.checked) {
+                    isSqPaymentMethodChecked = true;
                     if (sqProductOptions) {
                         sqProductOptions[0].checked = true;
                     }
@@ -33,6 +35,18 @@
                     sqProductOptions.forEach(sqProductOption => sqProductOption.checked = false);
                 })
             });
+
+            if (!isSqPaymentMethodChecked) {
+                // Uncheck seQura payment methods that remain checked.
+                sqProductOptions.forEach(sqProductOption => sqProductOption.checked = false);
+            } else {
+                // Uncheck all the other payment methods that remain checked
+                paymentMethods.forEach(paymentMethod => {
+                    if (paymentMethod.id !== sqPaymentMethodId && paymentMethod.checked) {
+                        paymentMethod.checked = false;
+                    }
+                });
+            }
 
             sqProductOptions.forEach(sqProductOption => sqProductOption.addEventListener('change', e => {
                 if (!e.target.checked) {
@@ -47,11 +61,12 @@
                         paymentMethod.dispatchEvent(new Event('change'));
                     }
                 })
-                jQuery( document.body ).trigger( 'payment_method_selected' );
+                if (this.isJQueryActive()) {
+                    jQuery(document.body).trigger('payment_method_selected');
+                }
             }))
 
         },
-        isClassicCheckout: () => document.querySelector('#payment_method_sequra') !== null,
         isJQueryActive: () => 'undefined' !== typeof jQuery,
     }
 
