@@ -21,7 +21,7 @@ Optionally, you can pass the following parameters to the setup script:
 | -------- | ------------------------------------------------------------------ |
 | ```--install=<0\|1>``` | Perform the installation of packages (1) or not (0). Default is 1 |
 | ```--disable-ngrok=<0\|1>``` | Prevent the setup of ngrok to expose the environment to the internet. Default is 0 |
-| ```--ngrok-toke=<YOUR_NGROK_TOKEN>``` | Required to expose the environment to the internet. Get yours at https://dashboard.ngrok.com/ |
+| ```--ngrok-token=<YOUR_NGROK_TOKEN>``` | Required to expose the environment to the internet. Get yours at https://dashboard.ngrok.com/ |
 
 Then, access to [plugin settings](http://localhost.sequrapi.com:8000/wp-admin/admin.php?page=wc-settings&tab=checkout&section=sequra) and login with user `admin` and password `admin`, or browse the [frontend](http://localhost.sequrapi.com:8000/?post_type=product)
 
