@@ -553,13 +553,18 @@ class Cart_Service implements Interface_Cart_Service {
 			global $wp;
 			// Only reject if all products are virtual (don't need shipping).
 			if ( isset( $wp->query_vars['order-pay'] ) ) { // if paying an order.
-				$order = wc_get_order( $wp->query_vars['order-pay'] );
-				if ( ! $order->needs_shipping_address() ) {
+				/**
+				 * Order
+				 *
+				 * @var WC_Order $order
+				 */
+				$order = wc_get_order( (int) $wp->query_vars['order-pay'] );
+				if ( ! $order instanceof WC_Order || ! $order->needs_shipping_address() ) {
 					$this->logger->log_debug( 'Order doesn\'t need shipping address seQura will not be offered.', __FUNCTION__, __CLASS__ );
 					$eligible = false;
 				}
 			} elseif ( ! WC()->cart->needs_shipping() ) { // If paying cart.
-				$this->logger->log_debug( 'Order doesn\'t need shipping seQura will not be offered.', __FUNCTION__, __CLASS__ );
+				$this->logger->log_debug( 'Cart doesn\'t need shipping seQura will not be offered.', __FUNCTION__, __CLASS__ );
 				$eligible = false;
 			}
 		} else {
@@ -586,14 +591,16 @@ class Cart_Service implements Interface_Cart_Service {
 	 */
 	public function is_available_in_checkout(): bool {
 		$return = ! empty( WC()->cart ) && $this->configuration->is_available_for_ip();
-		if ( $return ) {
+		if ( ! $return ) {
+			$this->logger->log_debug( 'seQura is not available for this IP.', __FUNCTION__, __CLASS__ );
+		} else {
 			$is_enabled_for_services = $this->configuration->is_enabled_for_services();
 			if ( $is_enabled_for_services && ! $this->is_eligible_for_service_sale() ) {
-					// $this->logger->log_info( 'Order is not eligible for service sale.', __FUNCTION__, __CLASS__ );
+					$this->logger->log_debug( 'Order is not eligible for service sale.', __FUNCTION__, __CLASS__ );
 					$return = false;
 			}
 			if ( ! $is_enabled_for_services && ! $this->is_eligible_for_product_sale() ) {
-				// $this->logger->log_info( 'Order is not eligible for for product sale.', __FUNCTION__, __CLASS__ );
+				$this->logger->log_debug( 'Order is not eligible for for product sale.', __FUNCTION__, __CLASS__ );
 				$return = false;
 			}
 			if ( $return ) {

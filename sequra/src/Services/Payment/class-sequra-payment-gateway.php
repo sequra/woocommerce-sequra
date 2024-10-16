@@ -171,9 +171,10 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	public function is_available() {
 		$is_available = parent::is_available();
 		if ( $is_available && ! $this->cart_service->is_available_in_checkout() ) {
-			$this->logger->log_debug( 'Payment gateway is not available in checkout', __FUNCTION__, __CLASS__ );
+			$this->logger->log_debug( 'Payment gateway is not available in checkout. Conditions are not met', __FUNCTION__, __CLASS__ );
 			$is_available = false;
 		} elseif ( $is_available && empty( $this->payment_method_service->get_payment_methods() ) ) {
+			$this->logger->log_debug( 'Payment gateway is not available in checkout. No payment methods available', __FUNCTION__, __CLASS__ );
 			$is_available = false;
 		}
 		/**
@@ -214,6 +215,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	public function payment_fields() {
 		$payment_methods = $this->payment_method_service->get_payment_methods();
 		if ( empty( $payment_methods ) ) {
+			$this->logger->log_debug( 'No payment methods available', __FUNCTION__, __CLASS__ );
 			return '';
 		}
 

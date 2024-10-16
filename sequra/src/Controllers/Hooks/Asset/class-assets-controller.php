@@ -280,13 +280,25 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	private function enqueue_front_checkout(): void {
 		wp_enqueue_style( self::HANDLE_CHECKOUT, "{$this->assets_dir_url}/css/checkout.css", array(), $this->assets_version );
-		wp_enqueue_script( 
+		wp_register_script( 
 			self::HANDLE_CHECKOUT,
 			"{$this->assets_dir_url}/js/dist/page/checkout.min.js",
 			array(),
 			$this->assets_version,
 			$this->get_script_args( self::STRATEGY_DEFER, true )
 		);
+
+		$is_block = class_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' ) 
+		&& method_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils', 'is_checkout_block_default' )
+		&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default();
+		wp_localize_script(
+			self::HANDLE_CHECKOUT,
+			'SeQuraCheckout',
+			array(
+				'isBlockCheckout' => $is_block,
+			) 
+		);
+		wp_enqueue_script( self::HANDLE_CHECKOUT );
 	}
 
 	/**
