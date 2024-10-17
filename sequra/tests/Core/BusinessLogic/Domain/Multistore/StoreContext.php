@@ -50,7 +50,7 @@ class StoreContext extends CoreStoreContext {
 	 *
 	 * @return mixed
 	 */
-	public static function doWithStore( string $storeId, callable $callback, array $params = array() ) {
-		self::$mock->do_with_store( $storeId, $callback, $params );
+	public static function doWithStore( string $storeId, $callback, array $params = array() ) {
+		return self::$mock->do_with_store( $storeId, $callback, $params );
 	}
 }
