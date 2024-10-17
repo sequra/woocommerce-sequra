@@ -14,6 +14,14 @@ interface StoreContextMock {
 
 	/**
 	 * Executes callback method with set store id.
+	 *
+	 * @param string $storeId
+	 * @param callable $callback
+	 * @param array $params
+	 *
+	 * @throws Exception
+	 *
+	 * @return mixed
 	 */
-	public function do_with_store( string $storeId, callable $callback, array $params = array() ): void;
+	public function do_with_store( $storeId, $callback, $params = array() );
 }

@@ -54,10 +54,13 @@ class OrderServiceTest extends WP_UnitTestCase {
 			$this->pricing_service,
 			$this->order_status_service,
 			$this->configuration,
-			$this->core_order_service,
 			$this->cart_service,
 			new StoreContext( $this->store_context_mock )
 		);
+	}
+
+	public function getOrderService() {
+		return $this->order_service;
 	}
 
 	public function testUpdateSequraOrderStatus_onException_throwException() {
@@ -125,7 +128,10 @@ class OrderServiceTest extends WP_UnitTestCase {
 
 	public function testUpdateSequraOrderStatus_orderCompleted_sendOrderUpdate() {
 		// Setup.
-		$date  = new WC_DateTime();
+		$date = new WC_DateTime();
+		/**
+		 * @var WC_Order $order
+		 */
 		$order = $this->createMock( WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 1 );
 		$order->method( 'get_currency' )->willReturn( 'EUR' );
@@ -183,40 +189,38 @@ class OrderServiceTest extends WP_UnitTestCase {
 		->method( 'get_store_id' )
 		->willReturn( $store_id );
 
-		$this->store_context_mock->expects( $this->once() )
+		$invoked_count      = $this->exactly( 2 );
+		$core_order_service = $this->core_order_service;
+		$this->store_context_mock->expects( $invoked_count )
 		->method( 'do_with_store' )
-		->with(
-			$store_id,
-			array( $this->core_order_service, 'updateOrder' ),
-			$this->callback(
-				function ( $args ) use ( $items, $date ) {
-					if ( ! isset( $args[0] ) || ! $args[0] instanceof OrderUpdateData ) {
-						return false;
-					}
+		->willReturnCallback(
+			function ( $storeId, $callback, $params ) use ( $core_order_service, $store_id, $invoked_count, $items, $date ) {
+				$this->assertEquals( $store_id, $storeId );
+				
+				if ( 1 === $invoked_count->getInvocationCount() ) {
+					return $core_order_service;
+				}
+		
+				if ( 2 === $invoked_count->getInvocationCount() ) {
 					/**
-					 * @var OrderUpdateData $order_data
-					 */
-					$order_data = $args[0];
-					if ( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null ) {
-						return false;
-					}
+					* @var OrderUpdateData $order_data
+					*/
+					$order_data = $params[0];
+					$this->assertTrue( $order_data instanceof OrderUpdateData );
+					$this->assertFalse( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null );
 					$shipped_cart = $order_data->getShippedCart();
-					if ( $shipped_cart->getCurrency() !== 'EUR'
+					$this->assertFalse(
+						$shipped_cart->getCurrency() !== 'EUR'
 						|| $shipped_cart->isGift() !== false
 						|| $shipped_cart->getItems() !== $items
 						|| $shipped_cart->getCartRef() !== 'cart_ref'
 						|| $shipped_cart->getCreatedAt() !== 'cart_created_at'
 						|| $shipped_cart->getUpdatedAt() !== $date->format( 'Y-m-d H:i:s' )
-						) {
-						return false;
-					}
+					);
 					$unshipped_cart = $order_data->getUnshippedCart();
-					if ( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) ) {
-						return false;
-					}
-					return true;
+					$this->assertFalse( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) );
 				}
-			) 
+			}
 		);
 
 		// Execute.
@@ -378,40 +382,38 @@ class OrderServiceTest extends WP_UnitTestCase {
 		->method( 'get_store_id' )
 		->willReturn( $store_id );
 
-		$this->store_context_mock->expects( $this->once() )
+		$invoked_count      = $this->exactly( 2 );
+		$core_order_service = $this->core_order_service;
+		$this->store_context_mock->expects( $invoked_count )
 		->method( 'do_with_store' )
-		->with(
-			$store_id,
-			array( $this->core_order_service, 'updateOrder' ),
-			$this->callback(
-				function ( $args ) use ( $shipped_items, $date ) {
-					if ( ! isset( $args[0] ) || ! $args[0] instanceof OrderUpdateData ) {
-						return false;
-					}
+		->willReturnCallback(
+			function ( $storeId, $callback, $params ) use ( $core_order_service, $store_id, $invoked_count, $shipped_items, $date ) {
+				$this->assertEquals( $store_id, $storeId );
+				if ( 1 === $invoked_count->getInvocationCount() ) {
+					return $core_order_service;
+				}
+		
+				if ( 2 === $invoked_count->getInvocationCount() ) {
 					/**
 					 * @var OrderUpdateData $order_data
 					 */
-					$order_data = $args[0];
-					if ( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null ) {
-						return false;
-					}
+					$order_data = $params[0];
+					$this->assertTrue( $order_data instanceof OrderUpdateData );
+					$this->assertFalse( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null );
 					$shipped_cart = $order_data->getShippedCart();
-					if ( $shipped_cart->getCurrency() !== 'EUR'
+					$this->assertFalse(
+						$shipped_cart->getCurrency() !== 'EUR'
 						|| $shipped_cart->isGift() !== false
 						|| $shipped_cart->getItems() !== $shipped_items
 						|| $shipped_cart->getCartRef() !== 'cart_ref'
 						|| $shipped_cart->getCreatedAt() !== 'cart_created_at'
 						|| $shipped_cart->getUpdatedAt() !== $date->format( 'Y-m-d H:i:s' )
-						) {
-						return false;
-					}
+					);
 					$unshipped_cart = $order_data->getUnshippedCart();
-					if ( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) ) {
-						return false;
-					}
-					return true;
+					$this->assertFalse( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) );
+					return;
 				}
-			) 
+			}
 		);
 
 		// Execute.
