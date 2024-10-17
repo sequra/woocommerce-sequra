@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Services\Order;
 
+use Exception;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
@@ -71,13 +72,6 @@ class Order_Service implements Interface_Order_Service {
 	private $configuration;
 
 	/**
-	 * Core order service
-	 *
-	 * @var OrderService
-	 */
-	private $core_order_service;
-
-	/**
 	 * Cart service
 	 *
 	 * @var Interface_Cart_Service
@@ -99,7 +93,6 @@ class Order_Service implements Interface_Order_Service {
 		Interface_Pricing_Service $pricing_service,
 		Order_Status_Settings_Service $order_status_service,
 		Configuration $configuration,
-		OrderService $core_order_service,
 		Interface_Cart_Service $cart_service,
 		StoreContext $store_context
 	) {
@@ -107,7 +100,6 @@ class Order_Service implements Interface_Order_Service {
 		$this->pricing_service      = $pricing_service;
 		$this->order_status_service = $order_status_service;
 		$this->configuration        = $configuration;
-		$this->core_order_service   = $core_order_service;
 		$this->cart_service         = $cart_service;
 		$this->store_context        = $store_context;
 	}
@@ -713,19 +705,37 @@ class Order_Service implements Interface_Order_Service {
 			$this->cart_service->get_refund_items( $order )
 		);
 
-		$order_data = new OrderUpdateData(
-			(string) $order->get_id(), // Order reference.
-			new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
-			new Cart( $currency ), // Unshipped cart.
-			null, // Delivery address.
-			null // Invoice address.
-		);
 		try {
-			$store_id = $this->configuration->get_store_id();
-			$this->store_context::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
+			$this->call_update_order(
+				new OrderUpdateData(
+					(string) $order->get_id(), // Order reference.
+					new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
+					new Cart( $currency ), // Unshipped cart.
+					null, // Delivery address.
+					null // Invoice address.
+				) 
+			);
 		} catch ( Throwable $e ) {
 			throw $e;
 		}
+	}
+
+	/**
+	 * Get a fresh instance of the core order service
+	 *
+	 * @param OrderUpdateData $order_data Order data
+	 * 
+	 * @throws Exception
+	 */
+	private function call_update_order( $order_data ) {
+		$store_id = $this->configuration->get_store_id();
+		/**
+		 * Order service
+		 *
+		 * @var OrderService $order_service
+		 */
+		$order_service = $this->store_context::doWithStore( $store_id, 'SeQura\Core\Infrastructure\ServiceRegister::getService', array( OrderService::class ) );
+		$this->store_context::doWithStore( $store_id, array( $order_service, 'updateOrder' ), array( $order_data ) );
 	}
 
 	/**
@@ -750,15 +760,15 @@ class Order_Service implements Interface_Order_Service {
 		}
 		
 		try {
-			$store_id   = $this->configuration->get_store_id();
-			$order_data = new OrderUpdateData(
-				(string) $order->get_id(), // Order reference.
-				new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
-				new Cart( $currency ), // Unshipped cart.
-				null, // Delivery address.
-				null // Invoice address.
+			$this->call_update_order(
+				new OrderUpdateData(
+					(string) $order->get_id(), // Order reference.
+					new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
+					new Cart( $currency ), // Unshipped cart.
+					null, // Delivery address.
+					null // Invoice address.
+				) 
 			);
-			$this->store_context::doWithStore( $store_id, array( $this->core_order_service, 'updateOrder' ), array( $order_data ) );
 		} catch ( Throwable $e ) {
 			throw $e;
 		}
