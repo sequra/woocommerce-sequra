@@ -8,6 +8,8 @@
 namespace SeQura\WC\NoAddress;
 
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
+use SeQura\WC\NoAddress\Controller\Hooks\Order\Interface_Order_Controller;
 
 /**
  * The core plugin class.
@@ -61,6 +63,8 @@ class Plugin {
 			return;
 		}
 		// TODO: Bind controllers with hooks.
+		$order_controller = ServiceRegister::getService( Interface_Order_Controller::class );
+		add_filter( 'sequra_create_order_request_merchant_options', array( $order_controller, 'add_no_address' ) );
 	}
 
 	/**

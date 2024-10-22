@@ -8,6 +8,9 @@
 namespace SeQura\WC\NoAddress;
 
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\NoAddress\Controller\Hooks\Order\Interface_Order_Controller;
+use SeQura\WC\NoAddress\Controller\Hooks\Order\Order_Controller;
+use SeQura\WC\Services\Interface_Logger_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -96,11 +99,21 @@ class Bootstrap {
 		// TODO: Implement init_services() method.
 	}
 
-	
 	/**
 	 * Initializes controllers.
 	 */
 	private static function init_controllers(): void {
-		// TODO: Implement init_controllers() method.
+		ServiceRegister::registerService(
+			Interface_Order_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[Interface_Order_Controller::class] ) ) {
+					self::$cache[Interface_Order_Controller::class] = new Order_Controller(
+						ServiceRegister::getService( Interface_Logger_Service::class ),
+						ServiceRegister::getService( 'plugin.templates_path' )
+					);
+				}
+				return self::$cache[Interface_Order_Controller::class];
+			}
+		);
 	}
 }
