@@ -1,3 +1,7 @@
 #!/bin/bash
 BASEDIR="$(dirname $(realpath $0))/.."
+echo "🔍 Running PHPStan in sequra"
 docker run --rm -v "${BASEDIR}"/sequra:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon $@ --memory-limit=1G
+
+echo "🔍 Running PHPStan in glue-plugins/sequra-learnpress"
+docker run --rm -v "${BASEDIR}"/glue-plugins/sequra-learnpress:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon $@ --memory-limit=1G
