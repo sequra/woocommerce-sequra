@@ -785,7 +785,7 @@ class Order_Service implements Interface_Order_Service {
 		switch ( $this->configuration->get_env() ) {
 			case 'sandbox':
 				return 'https://simbox.sequrapi.com/orders/' . $order->get_transaction_id();
-			case 'production':
+			case 'live':
 				return 'https://simba.sequra.es/orders/' . $order->get_transaction_id();
 			default:
 				return null;
