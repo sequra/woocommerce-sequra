@@ -5,7 +5,7 @@
  * @package SeQura/WC
  *
  * @wordpress-plugin
- * Plugin Name:       seQura - LearnPress
+ * Plugin Name:       seQura - LearnPress Addon
  * Plugin URI:        https://sequra.es/
  * Description:       Brings compatibility between seQura and LearnPress
  * Version:           3.0.0-rc.3

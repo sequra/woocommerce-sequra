@@ -77,11 +77,17 @@ class Bootstrap {
 					$data = get_plugin_data( ServiceRegister::getService( 'lp_addon.file_path' ) );
 					remove_filter( 'extra_plugin_headers', $add_wc_headers );
 					
-					$data['RequiresSQ'] = $data['seQura requires at least'];
-					unset( $data['seQura requires at least'] );
+					$data['RequiresSQ'] = '';
+					if ( isset( $data['seQura requires at least'] ) ) {
+						$data['RequiresSQ'] = $data['seQura requires at least'];
+						unset( $data['seQura requires at least'] );
+					}
 
-					$data['RequiresLP'] = $data['LearnPress requires at least'];
-					unset( $data['LearnPress requires at least'] );
+					$data['RequiresLP'] = '';
+					if ( isset( $data['LearnPress requires at least'] ) ) {
+						$data['RequiresLP'] = $data['LearnPress requires at least'];
+						unset( $data['LearnPress requires at least'] );
+					}
 
 					self::$cache['lp_addon.data'] = $data;
 				}

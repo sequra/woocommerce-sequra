@@ -65,13 +65,18 @@ class Plugin {
 
 	/**
 	 * Show an admin notice with an error message.
+	 * 
+	 * @param string $msg The error message.
 	 */
 	public function show_error( string $msg ) {
-		add_action( 'admin_notices', function() use ( $msg ) {
-			?>
+		add_action(
+			'admin_notices',
+			function () use ( $msg ) {
+				?>
 			<div class="notice notice-error"><p><?php echo wp_kses_post( $msg ); ?></p></div>
-			<?php
-		} );
+				<?php
+			} 
+		);
 	}
 
 	/**
