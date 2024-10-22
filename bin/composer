@@ -7,9 +7,11 @@ if [ ! -f "$BASEDIR/auth.json" ]; then
     docker run --rm -v "$BASEDIR/sequra":/app -w /app -u $(id -u):$(id -g) composer:latest composer $@
     docker run --rm -v "$BASEDIR/glue-plugins/sequra-learnpress":/app -w /app -u $(id -u):$(id -g) composer:latest composer $@
     docker run --rm -v "$BASEDIR/glue-plugins/sequra-no-address":/app -w /app -u $(id -u):$(id -g) composer:latest composer $@
+    docker run --rm -v "$BASEDIR/glue-plugins/sequra-variations-end-date":/app -w /app -u $(id -u):$(id -g) composer:latest composer $@
 
 else
     docker run --rm -v "$BASEDIR/sequra":/app -v "$(pwd)"/auth.json:/tmp/auth.json -w /app -u $(id -u):$(id -g) composer:latest composer $@
     docker run --rm -v "$BASEDIR/glue-plugins/sequra-learnpress":/app -v "$(pwd)"/auth.json:/tmp/auth.json -w /app -u $(id -u):$(id -g) composer:latest composer $@
     docker run --rm -v "$BASEDIR/glue-plugins/sequra-no-address":/app -v "$(pwd)"/auth.json:/tmp/auth.json -w /app -u $(id -u):$(id -g) composer:latest composer $@
+    docker run --rm -v "$BASEDIR/glue-plugins/sequra-variations-end-date":/app -v "$(pwd)"/auth.json:/tmp/auth.json -w /app -u $(id -u):$(id -g) composer:latest composer $@
 fi
