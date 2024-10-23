@@ -29,7 +29,6 @@ class Bootstrap {
 	 */
 	public static function init(): void {
 		self::init_constants();
-		self::init_services();
 		self::init_controllers();
 	}
 
@@ -93,26 +92,19 @@ class Bootstrap {
 	}
 
 	/**
-	 * Initializes services and utilities.
-	 */
-	private static function init_services(): void {
-		// TODO: Implement init_services() method.
-	}
-
-	/**
 	 * Initializes controllers.
 	 */
 	private static function init_controllers(): void {
 		ServiceRegister::registerService(
 			Interface_Order_Controller::class,
 			static function () {
-				if ( ! isset( self::$cache[Interface_Order_Controller::class] ) ) {
-					self::$cache[Interface_Order_Controller::class] = new Order_Controller(
+				if ( ! isset( self::$cache[ Interface_Order_Controller::class ] ) ) {
+					self::$cache[ Interface_Order_Controller::class ] = new Order_Controller(
 						ServiceRegister::getService( Interface_Logger_Service::class ),
 						ServiceRegister::getService( 'plugin.templates_path' )
 					);
 				}
-				return self::$cache[Interface_Order_Controller::class];
+				return self::$cache[ Interface_Order_Controller::class ];
 			}
 		);
 	}

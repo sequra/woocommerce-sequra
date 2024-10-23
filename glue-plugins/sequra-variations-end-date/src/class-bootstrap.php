@@ -69,7 +69,7 @@ class Bootstrap {
 						require_once ABSPATH . 'wp-admin/includes/plugin.php';
 					}
 					$add_wc_headers = function ( $headers ) {
-						$headers['seQura requires at least']     = 'seQura requires at least';
+						$headers['seQura requires at least'] = 'seQura requires at least';
 						return $headers;
 					};
 					add_filter( 'extra_plugin_headers', $add_wc_headers );

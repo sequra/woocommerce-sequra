@@ -26,9 +26,4 @@ defined( 'WPINC' ) || die;
 
 require plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
-call_user_func(
-	function () {   
-		$plugin = new \SeQura\WC\NoAddress\Plugin();
-		register_deactivation_hook( __FILE__, array( $plugin, 'deactivate' ) );
-	}
-);
+new \SeQura\WC\NoAddress\Plugin();
