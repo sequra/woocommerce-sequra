@@ -26,7 +26,6 @@ services:
       - ./sequra-helper:/var/www/html/wp-content/plugins/sequra-helper
       - ./glue-plugins/sequra-learnpress:/var/www/html/wp-content/plugins/_sequra-learnpress
       - ./glue-plugins/sequra-no-address:/var/www/html/wp-content/plugins/_sequra-no-address
-      - ./glue-plugins/sequra-variations-end-date:/var/www/html/wp-content/plugins/_sequra-variations-end-date
   db:
     image: mariadb:$MARIADB_TAG
     ports:
