@@ -40,4 +40,12 @@ interface Interface_Order_Controller {
 	 * Show a link to the seQura back office in the order details page
 	 */
 	public function show_link_to_sequra_back_office( WC_Order $order ): void;
+
+	/**
+	 * Maybe set cart info to order if it is not set
+	 * 
+	 * @param int $order_id Order ID.
+	 * @param WC_Order $order Order instance.
+	 */
+	public function maybe_set_cart_info( $order_id, $order ): void;
 }

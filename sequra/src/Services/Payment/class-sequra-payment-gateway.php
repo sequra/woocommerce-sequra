@@ -173,7 +173,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		if ( $is_available && ! $this->cart_service->is_available_in_checkout() ) {
 			$this->logger->log_debug( 'Payment gateway is not available in checkout. Conditions are not met', __FUNCTION__, __CLASS__ );
 			$is_available = false;
-		} elseif ( $is_available && empty( $this->payment_method_service->get_payment_methods() ) ) {
+		} elseif ( $is_available && empty( $this->payment_method_service->get_payment_methods( $this->try_to_get_order_from_context() ) ) ) {
 			$this->logger->log_debug( 'Payment gateway is not available in checkout. No payment methods available', __FUNCTION__, __CLASS__ );
 			$is_available = false;
 		}
@@ -183,6 +183,18 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 * @since 2.0.0
 		 */
 		return (bool) apply_filters( 'woocommerce_sequra_is_available', $is_available );
+	}
+
+	/**
+	 * Try to get the order from the current context
+	 */
+	private function try_to_get_order_from_context(): ?WC_Order {
+		$order = null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) ) {
+			$order = wc_get_order( absint( strval( get_query_var( 'order-pay' ) ) ) );
+		}
+		return $order instanceof WC_Order ? $order : null;
 	}
 
 	/**

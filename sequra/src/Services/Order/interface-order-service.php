@@ -152,6 +152,11 @@ interface Interface_Order_Service {
 	 * If the value is not found null is returned.
 	 */
 	public function get_cart_info( WC_Order $order ): ?Cart_Info;
+
+	/**
+	 * Set cart info if it is not already set
+	 */
+	public function create_cart_info( WC_Order $order ): ?Cart_Info;
 	
 	/**
 	 * Get payment gateway webhook identifier

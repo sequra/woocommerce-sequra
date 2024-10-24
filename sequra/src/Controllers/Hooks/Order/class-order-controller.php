@@ -144,4 +144,24 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		);
 		wc_get_template( 'admin/order_details.php', $args, '', $this->templates_path );
 	}
+
+	/**
+	 * Maybe set cart info to order if it is not set
+	 * 
+	 * @param int $order_id Order ID.
+	 * @param WC_Order $order Order instance.
+	 */
+	public function maybe_set_cart_info( $order_id, $order ): void {
+		$cart_info = $this->order_service->get_cart_info( $order );
+		if ( ! $cart_info || ! $cart_info->ref ) {
+			$this->logger->log_debug( 'Cart info ref missing. Trying to create one', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order->get_id() ) ) );
+
+			$cart_info = $this->order_service->create_cart_info( $order );
+			if ( ! $cart_info || ! $cart_info->ref ) {
+				$this->logger->log_debug( 'Cart info can\'t be created', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order->get_id() ) ) );
+			} else {
+				$this->logger->log_debug( 'Cart info created successfully', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order->get_id() ) ) );
+			}
+		}
+	}
 }
