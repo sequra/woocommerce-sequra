@@ -29,8 +29,8 @@ class Cart_Info extends Dto {
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
-		$this->ref        = uniqid();
-		$this->created_at = gmdate( 'c' );
+	public function __construct( ?string $ref = null, ?string $created_at = null ) {
+		$this->ref        = $ref ? $ref : uniqid();
+		$this->created_at = $created_at ? $created_at : gmdate( 'c' );
 	}
 }

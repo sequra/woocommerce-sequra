@@ -589,7 +589,7 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Check if conditions are met for showing seQura in checkout
 	 */
-	public function is_available_in_checkout(): bool {
+	public function is_available_in_checkout( ?WC_Order $order = null ): bool {
 		$return = ! empty( WC()->cart ) && $this->configuration->is_available_for_ip();
 		if ( ! $return ) {
 			$this->logger->log_debug( 'seQura is not available for this IP.', __FUNCTION__, __CLASS__ );
@@ -604,11 +604,46 @@ class Cart_Service implements Interface_Cart_Service {
 				$return = false;
 			}
 			if ( $return ) {
-				foreach ( WC()->cart->get_cart_contents() as $values ) {
-					if ( $this->product_service->is_banned( (int) $values['product_id'] ) ) {
-						$this->logger->log_debug( 'Banned product in the cart seQura will not be offered', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $values['product_id'] ) ) );
-						$return = false;
-						break;
+				if ( ! $order instanceof WC_Order ) {
+					foreach ( WC()->cart->get_cart_contents() as $values ) {
+						if ( $this->product_service->is_banned( (int) $values['product_id'] ) ) {
+							$this->logger->log_debug( 'Banned product in the cart. seQura will not be offered', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $values['product_id'] ) ) );
+							$return = false;
+						}
+
+						/**
+						 * Filter if item is available in checkout
+						 * Can receive an array with the cart item values or the WC_Order_Item instance
+						 *
+						 * @since 3.0.0
+						 * TODO: Document this hook
+						 */
+						$return = apply_filters( 'sequra_is_item_available_in_checkout', $return, $values );
+						if ( ! $return ) {
+							break;
+						}
+					}
+				} else {
+					// Order items.
+					foreach ( $order->get_items() as $item ) {
+						if ( $item instanceof WC_Order_Item_Product ) {
+							$product_id = $item->get_product_id();
+							if ( $this->product_service->is_banned( $product_id ) ) {
+								$this->logger->log_debug( 'Banned product in the order. seQura will not be offered', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $product_id ) ) );
+								$return = false;
+							}
+						}
+						/**
+						 * Filter if item is available in checkout
+						 * Can receive an array with the cart item values or the WC_Order_Item instance
+						 * 
+						 * @since 3.0.0
+						 * TODO: Document this hook
+						 */
+						$return = apply_filters( 'sequra_is_item_available_in_checkout', $return, $item );
+						if ( ! $return ) {
+							break;
+						}
 					}
 				}
 			}

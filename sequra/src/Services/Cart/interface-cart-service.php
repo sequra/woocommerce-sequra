@@ -81,5 +81,5 @@ interface Interface_Cart_Service {
 	/**
 	 * Check if conditions are met for showing seQura in checkout
 	 */
-	public function is_available_in_checkout(): bool;
+	public function is_available_in_checkout( ?WC_Order $order = null ): bool;
 }

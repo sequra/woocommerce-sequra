@@ -596,6 +596,8 @@ class Order_Service implements Interface_Order_Service {
 		$order->update_meta_data( self::META_KEY_PRODUCT, $dto->product );
 		if ( ! empty( $dto->campaign ) ) {
 			$order->update_meta_data( self::META_KEY_CAMPAIGN, $dto->campaign );
+		} else {
+			$order->delete_meta_data( self::META_KEY_CAMPAIGN );
 		}
 		$order->update_meta_data( self::META_KEY_METHOD_TITLE, $dto->title );
 
@@ -610,19 +612,14 @@ class Order_Service implements Interface_Order_Service {
 	 * Set cart info if it is not already set
 	 */
 	public function create_cart_info( WC_Order $order ): ?Cart_Info {
-		if ( $order->get_payment_method() !== $this->payment_service->get_payment_gateway_id() ) {
-			// Skip if the order is not a seQura order.
-			return null;
-		}
-
 		$cart_info = $this->get_cart_info( $order );
 		if ( $cart_info && $cart_info->ref ) {
 			// Skip if the cart info is already set.
 			return null;
 		}
 
-		$cart_info             = new Cart_Info();
-		$cart_info->created_at = $order->get_date_created()->date( 'c' );
+		$date      = $order->get_date_created();
+		$cart_info = new Cart_Info( null, $date ? $date->date( 'c' ) : null );
 		$order->update_meta_data( self::META_KEY_CART_REF, $cart_info->ref );
 		$order->update_meta_data( self::META_KEY_CART_CREATED_AT, $cart_info->created_at );
 		$order->save();
@@ -719,8 +716,8 @@ class Order_Service implements Interface_Order_Service {
 	private function set_sequra_order_status_to_shipped( WC_Order $order ): void {
 		$cart_info     = $this->get_cart_info( $order );
 		$currency      = $order->get_currency( 'edit' );
-		$cart_ref      = $cart_info->ref ?? null;
-		$created_at    = $cart_info->created_at ?? null;
+		$cart_ref      = $cart_info ? $cart_info->ref : null;
+		$created_at    = $cart_info ? $cart_info->created_at : null;
 		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
 		$shipped_items = array_merge(
 			$this->cart_service->get_items( $order ),
@@ -770,8 +767,8 @@ class Order_Service implements Interface_Order_Service {
 	public function handle_refund( WC_Order $order, float $amount ): void {
 		$cart_info     = $this->get_cart_info( $order );
 		$currency      = $order->get_currency( 'edit' );
-		$cart_ref      = $cart_info->ref ?? null;
-		$created_at    = $cart_info->created_at ?? null;
+		$cart_ref      = $cart_info ? $cart_info->ref : null;
+		$created_at    = $cart_info ? $cart_info->created_at : null;
 		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
 		$shipped_items = array();
 		if ( $order->get_total( 'edit' ) > $amount ) {

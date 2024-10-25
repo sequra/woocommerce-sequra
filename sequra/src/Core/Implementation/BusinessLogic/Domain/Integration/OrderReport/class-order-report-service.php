@@ -125,8 +125,8 @@ class Order_Report_Service implements OrderReportServiceInterface {
 						$this->cart_service->get_handling_items( $order ),
 						$this->cart_service->get_discount_items( $order )
 					), // Items.
-					$cart_info->ref ?? null,
-					$cart_info->created_at ?? null, // Created at.
+					$cart_info ? $cart_info->ref : null,
+					$cart_info ? $cart_info->created_at : null, // Created at.
 					$order->get_date_completed()->format( 'Y-m-d H:i:s' ) // Updated At.
 				), // Cart.
 				$this->order_service->get_delivery_method( $order ), // Delivery Method.
