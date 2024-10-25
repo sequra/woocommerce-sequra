@@ -607,30 +607,6 @@ class Order_Service implements Interface_Order_Service {
 	}
 
 	/**
-	 * Set cart info if it is not already set
-	 */
-	public function create_cart_info( WC_Order $order ): ?Cart_Info {
-		if ( $order->get_payment_method() !== $this->payment_service->get_payment_gateway_id() ) {
-			// Skip if the order is not a seQura order.
-			return null;
-		}
-
-		$cart_info = $this->get_cart_info( $order );
-		if ( $cart_info && $cart_info->ref ) {
-			// Skip if the cart info is already set.
-			return null;
-		}
-
-		$cart_info             = new Cart_Info();
-		$cart_info->created_at = $order->get_date_created()->date( 'c' );
-		$order->update_meta_data( self::META_KEY_CART_REF, $cart_info->ref );
-		$order->update_meta_data( self::META_KEY_CART_CREATED_AT, $cart_info->created_at );
-		$order->save();
-
-		return $cart_info;
-	}
-
-	/**
 	 * Get the meta key used to store the sent to seQura value.
 	 */
 	public function get_sent_to_sequra_meta_key(): string {

@@ -288,20 +288,9 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			$this->get_script_args( self::STRATEGY_DEFER, true )
 		);
 
-		/**
-		 * Check if the checkout is a Gutenberg block based version
-		 *
-		 * @since 3.0.0
-		 * TODO: Document the hook
-		 */
-		$is_block = apply_filters( 
-			'sequra_is_block_checkout', 
-			! $this->is_order_pay_page() // TODO: Remove this condition once the block checkout is implemented in the order pay page.
-			&& class_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' ) 
-			&& method_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils', 'is_checkout_block_default' )
-			&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default()
-		);
-
+		$is_block = class_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' ) 
+		&& method_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils', 'is_checkout_block_default' )
+		&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default();
 		wp_localize_script(
 			self::HANDLE_CHECKOUT,
 			'SeQuraCheckout',
@@ -363,18 +352,11 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	}
 
 	/**
-	 * Check if the current page is the order pay page
-	 */
-	private function is_order_pay_page(): bool {
-		return ( (int) strval( get_query_var( 'order-pay' ) ) ) > 0;
-	}
-
-	/**
 	 * Enqueue styles and scripts in Front-End
 	 */
 	public function enqueue_front(): void {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-		if ( is_checkout() || $this->is_order_pay_page() ) {
+		if ( is_checkout() ) {
 			$this->enqueue_front_checkout();
 		} 
 		
