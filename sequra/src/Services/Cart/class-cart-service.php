@@ -626,7 +626,12 @@ class Cart_Service implements Interface_Cart_Service {
 				} else {
 					// Order items.
 					foreach ( $order->get_items() as $item ) {
-						if ( $item instanceof WC_Order_Item_Product ) {
+						if ( method_exists( $item, 'get_product_id' ) ) {
+							/**
+							 * Define type for $item to prevent linting errors
+							 *
+							 * @var WC_Order_Item_Product $item
+							 */
 							$product_id = $item->get_product_id();
 							if ( $this->product_service->is_banned( $product_id ) ) {
 								$this->logger->log_debug( 'Banned product in the order. seQura will not be offered', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $product_id ) ) );
