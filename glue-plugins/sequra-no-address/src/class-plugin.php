@@ -68,6 +68,7 @@ class Plugin {
 		 */
 		$order_controller = ServiceRegister::getService( Interface_Order_Controller::class );
 		add_filter( 'sequra_create_order_request_merchant_options', array( $order_controller, 'add_no_address' ) );
+		add_filter( 'sequra_platform_options_version', array( $this, 'update_platform_version' ) );
 	}
 
 	/**
@@ -84,6 +85,15 @@ class Plugin {
 				<?php
 			} 
 		);
+	}
+
+	/**
+	 * Add the addon version to the platform version.
+	 * 
+	 * @param string $version Original platform version.
+	 */
+	public function update_platform_version( $version ): string {
+		return sprintf( '%s + %s %s', $version, $this->addon_data['Name'], $this->addon_data['Version'] );
 	}
 
 	/**
