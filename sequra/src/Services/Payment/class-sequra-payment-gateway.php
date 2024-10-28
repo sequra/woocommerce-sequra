@@ -170,10 +170,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 */
 	public function is_available() {
 		$is_available = parent::is_available();
-		if ( $is_available && ! $this->cart_service->is_available_in_checkout() ) {
+		$order        = $this->try_to_get_order_from_context();
+		if ( $is_available && ! $this->cart_service->is_available_in_checkout( $order ) ) {
 			$this->logger->log_debug( 'Payment gateway is not available in checkout. Conditions are not met', __FUNCTION__, __CLASS__ );
 			$is_available = false;
-		} elseif ( $is_available && empty( $this->payment_method_service->get_payment_methods() ) ) {
+		} elseif ( $is_available && empty( $this->payment_method_service->get_payment_methods( $order ) ) ) {
 			$this->logger->log_debug( 'Payment gateway is not available in checkout. No payment methods available', __FUNCTION__, __CLASS__ );
 			$is_available = false;
 		}
@@ -183,6 +184,18 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 * @since 2.0.0
 		 */
 		return (bool) apply_filters( 'woocommerce_sequra_is_available', $is_available );
+	}
+
+	/**
+	 * Try to get the order from the current context
+	 */
+	private function try_to_get_order_from_context(): ?WC_Order {
+		$order = null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) ) {
+			$order = wc_get_order( absint( strval( get_query_var( 'order-pay' ) ) ) );
+		}
+		return $order instanceof WC_Order ? $order : null;
 	}
 
 	/**
@@ -213,7 +226,9 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Declare fields for the payment method in the checkout page
 	 */
 	public function payment_fields() {
-		$payment_methods = $this->payment_method_service->get_payment_methods();
+		$payment_methods = $this->payment_method_service->get_payment_methods(
+			$this->try_to_get_order_from_context()
+		);
 		if ( empty( $payment_methods ) ) {
 			$this->logger->log_debug( 'No payment methods available', __FUNCTION__, __CLASS__ );
 			return '';
@@ -250,8 +265,19 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {  
 		$order              = wc_get_order( $order_id );
 		$payment_method_dto = $this->get_posted_data();
-		$cart_info_dto      = $this->cart_service->get_cart_info_from_session();
-		$result             = null;
+		$cart_info_dto      = null;
+		if ( $order instanceof WC_Order ) {
+			// Try to recover cart info from the order if it is already set.
+			$this->logger->log_debug( 'Trying to recover cart info from the order', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
+			$cart_info_dto = $this->order_service->get_cart_info( $order );
+		}
+		if ( ! $cart_info_dto || ! $cart_info_dto->ref ) {
+			// Fetch cart info from session if it is not set.
+			$this->logger->log_debug( 'Trying to recover from cart session data', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
+			$cart_info_dto = $this->cart_service->get_cart_info_from_session();
+		}
+
+		$result = null;
 
 		if ( ! $order instanceof WC_Order
 		|| ! $this->payment_method_service->is_payment_method_data_valid( $payment_method_dto )

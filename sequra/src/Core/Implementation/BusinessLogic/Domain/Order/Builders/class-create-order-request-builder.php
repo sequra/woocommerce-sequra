@@ -205,6 +205,16 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 */
 	private function cart(): Cart {
 		$cart_info = $this->current_order ? $this->order_service->get_cart_info( $this->current_order ) : $this->cart_service->get_cart_info_from_session();
+
+		if ( $this->current_order && ( ! $cart_info || ! $cart_info->ref ) ) {
+			$this->logger->log_debug( 'Cart info ref for order is missing. Trying to create one', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $this->current_order->get_id() ) ) );
+			$cart_info = $this->order_service->create_cart_info( $this->current_order );
+			if ( ! $cart_info || ! $cart_info->ref ) {
+				$this->logger->log_debug( 'Cart info can\'t be created', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $this->current_order->get_id() ) ) );
+			} else {
+				$this->logger->log_debug( 'Cart info created successfully', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $this->current_order->get_id() ) ) );
+			}
+		}
 		
 		/**
 		 * List of items in the order.
@@ -229,8 +239,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 				$this->current_order ? $this->current_order->get_currency( 'edit' ) : get_woocommerce_currency(),
 				false, // gift.
 				$items,
-				$cart_info->ref ?? null,
-				$cart_info->created_at ?? null,
+				$cart_info ? $cart_info->ref : null,
+				$cart_info ? $cart_info->created_at : null,
 				gmdate( 'c' )
 			)
 		);
