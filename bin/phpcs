@@ -3,8 +3,5 @@ BASEDIR="$(dirname $(realpath $0))/.."
 echo "🔍 Running PHP-CS in sequra"
 docker run --rm -v "${BASEDIR}"/sequra:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpcs $@ --standard=.phpcs.xml.dist .
 
-echo "🔍 Running PHP-CS in glue-plugins/sequra-learnpress"
-docker run --rm -v "${BASEDIR}"/glue-plugins/sequra-learnpress:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpcs $@ --standard=.phpcs.xml.dist .
-
 echo "🔍 Running PHP-CS in glue-plugins/sequra-no-address"
 docker run --rm -v "${BASEDIR}"/glue-plugins/sequra-no-address:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpcs $@ --standard=.phpcs.xml.dist .
