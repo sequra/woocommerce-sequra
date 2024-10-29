@@ -13,7 +13,7 @@ use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSet
 use SeQura\Core\Infrastructure\Configuration\Configuration as CoreConfiguration;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
-use SeQura\WC\Services\Report\Interface_Report_Service;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
 use Throwable;
 use WP_Site;
 
@@ -685,5 +685,61 @@ class Configuration extends CoreConfiguration {
 			return null;
 		}
 		return $conn['environment'] ?? null;
+	}
+
+	/**
+	 * Get platform payload
+	 */
+	public function get_platform(): Platform {
+		/**
+		 * WooCommerce data
+		 *
+		 * @var array<string, string>
+		 */
+		$woo = ServiceRegister::getService( 'woocommerce.data' );
+		
+		/**
+		 * Environment data
+		 * 
+		 * @var array<string, string>
+		 */
+		$env = ServiceRegister::getService( 'environment.data' );
+
+		/**
+		 * Plugin data
+		 * 
+		 * @var array<string, string>
+		 */
+		$sq = ServiceRegister::getService( 'plugin.data' );
+
+		/**
+		* Filter the module version to be used in the platform options.
+		* TODO: document this hook
+		* 
+		* @since 3.0.0
+		*/
+		$version = apply_filters(
+			'sequra_platform_options_version',
+			$sq['Version'] ?? ''
+		);
+
+		/**
+		 * Filter the platform options.
+		 * TODO: document this hook
+		 *
+		 * @since 3.0.0
+		 */
+		return apply_filters(
+			'sequra_platform_options',
+			new Platform(
+				$this->getIntegrationName(),
+				$woo['Version'] ?? '',
+				$env['uname'],
+				$env['db_name'],
+				$env['db_version'],
+				$version,
+				$env['php_version']
+			) 
+		);
 	}
 }

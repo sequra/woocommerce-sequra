@@ -433,8 +433,6 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ OrderReportServiceInterface::class ] ) ) {
 					self::$cache[ OrderReportServiceInterface::class ] = new Order_Report_Service(
 						Reg::getService( Configuration::CLASS_NAME ),
-						Reg::getService( 'woocommerce.data' ),
-						Reg::getService( 'environment.data' ),
 						Reg::getService( Interface_Pricing_Service::class ),
 						Reg::getService( Interface_Cart_Service::class ),
 						Reg::getService( Interface_Order_Service::class ),

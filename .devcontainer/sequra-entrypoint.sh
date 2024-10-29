@@ -113,7 +113,7 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     wp db query "ALTER TABLE wp_posts AUTO_INCREMENT = $(date +%s)" --allow-root
 
     wp plugin deactivate --allow-root wordpress-importer --uninstall
-    wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v '_\?sequra' | tr "\n" " ")
+    wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v '_\?\(sequra\|learnpress\)' | tr "\n" " ")
 
     touch /var/www/html/.post-install-complete
     

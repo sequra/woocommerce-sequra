@@ -27,11 +27,11 @@ use WC_Order;
 class Order_Report_Service implements OrderReportServiceInterface {
 
 	/**
-	 * Platform instance.
+	 * Configuration instance.
 	 *
-	 * @var Platform
+	 * @var Configuration
 	 */
-	private $platform;
+	private $configuration;
 
 	/**
 	 * Pricing service.
@@ -63,28 +63,15 @@ class Order_Report_Service implements OrderReportServiceInterface {
 
 	/**
 	 * Constructor.
-	 *
-	 * @param string[] $wc_data
-	 * @param string[] $env_data
 	 */
 	public function __construct( 
 		Configuration $configuration, 
-		array $wc_data, 
-		array $env_data,
 		Interface_Pricing_Service $pricing_service,
 		Interface_Cart_Service $cart_service,
 		Interface_Order_Service $order_service,
 		Interface_I18n $i18n
 	) {
-		$this->platform        = new Platform(
-			$configuration->getIntegrationName(),
-			$wc_data['Version'],
-			$env_data['uname'],
-			$env_data['db_name'],
-			$env_data['db_version'],
-			$configuration->get_module_version(),
-			$env_data['php_version']
-		);
+		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
 		$this->cart_service    = $cart_service;
 		$this->order_service   = $order_service;
@@ -184,7 +171,7 @@ class Order_Report_Service implements OrderReportServiceInterface {
 	 * @return Platform
 	 */
 	public function getPlatform(): Platform {
-		return $this->platform;
+		return $this->configuration->get_platform();
 	}
 
 	/**

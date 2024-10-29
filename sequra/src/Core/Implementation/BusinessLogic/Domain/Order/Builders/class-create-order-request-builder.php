@@ -16,9 +16,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\EventsWebhook;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Gui;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
-use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Models\OrderRequest\Options as ExtendedOptions;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
@@ -155,7 +153,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			$this->cart(),
 			$delivery_method,
 			$this->customer(),
-			$this->platform(),
+			$this->configuration->get_platform(),
 			$this->delivery_address(),
 			$this->invoice_address(),
 			$this->gui(),
@@ -414,51 +412,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 * @since 3.0.0
 		 */
 		return apply_filters( 'sequra_create_order_request_gui_options', $gui );
-	}
-
-	/**
-	 * Get platform payload
-	 */
-	public static function platform(): Platform {
-		/**
-		 * WooCommerce data
-		 *
-		 * @var array<string, string>
-		 */
-		$woo = ServiceRegister::getService( 'woocommerce.data' );
-		
-		/**
-		 * Plugin data
-		 * 
-		 * @var array<string, string>
-		 */
-		$sq = ServiceRegister::getService( 'plugin.data' );
-		
-		/**
-		 * Environment data
-		 * 
-		 * @var array<string, string>
-		 */
-		$env = ServiceRegister::getService( 'environment.data' );
-
-		/**
-		 * Filter the platform options.
-		 * TODO: document this hook
-		 *
-		 * @since 3.0.0
-		 */
-		return apply_filters(
-			'sequra_create_order_request_platform_options',
-			new Platform(
-				'WooCommerce',
-				$woo['Version'] ?? '',
-				$env['uname'],
-				$env['db_name'],
-				$env['db_version'],
-				$sq['Version'] ?? null,
-				$env['php_version']
-			) 
-		);
 	}
 
 	/**

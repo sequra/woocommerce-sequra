@@ -13,13 +13,14 @@ else
     docker cp "$container_id":/var/www/html/wp-includes "${BASEDIR}"/.devcontainer
     # wp-admin
     docker cp "$container_id":/var/www/html/wp-admin "${BASEDIR}"/.devcontainer
-    # woocommerce plugin
+    # plugins
     mkdir -p "${BASEDIR}"/.devcontainer/wp-content/plugins
-    docker cp "$container_id":/var/www/html/wp-content/plugins/woocommerce "${BASEDIR}"/.devcontainer/wp-content/plugins
+    docker cp "$container_id":/var/www/html/wp-content/plugins/woocommerce "${BASEDIR}"/.devcontainer/wp-content/plugins || true
+    docker cp "$container_id":/var/www/html/wp-content/plugins/learnpress "${BASEDIR}"/.devcontainer/wp-content/plugins || true
     # Wordpress Test libs
     mkdir -p "${BASEDIR}"/.devcontainer/wordpress-tests-lib
-    docker cp "$container_id":/tmp/wordpress-tests-lib/data "${BASEDIR}"/.devcontainer/wordpress-tests-lib
-    docker cp "$container_id":/tmp/wordpress-tests-lib/includes "${BASEDIR}"/.devcontainer/wordpress-tests-lib
+    docker cp "$container_id":/tmp/wordpress-tests-lib/data "${BASEDIR}"/.devcontainer/wordpress-tests-lib || true
+    docker cp "$container_id":/tmp/wordpress-tests-lib/includes "${BASEDIR}"/.devcontainer/wordpress-tests-lib || true
     
     echo "Done!"
 fi
