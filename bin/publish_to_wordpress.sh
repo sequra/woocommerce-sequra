@@ -1,6 +1,5 @@
 #!/bin/sh
 # ----- START EDITING HERE -----
-
 # The slug of your WordPress.org plugin
 PLUGIN_SLUG="sequra"
 
@@ -26,7 +25,7 @@ echo ""
 echo "Before continuing, confirm that you have done the following :)"
 echo ""
 read -p " - Added a changelog for "${VERSION}"?"
-read -p " - Set header version and SEQURA_VERSION constant at sequra.php to "${VERSION}"?"
+read -p " - Set header version at sequra.php to "${VERSION}"?"
 read -p " - Set version in the readme.txt and main file to "${VERSION}"?"
 read -p " - Set stable tag in the readme.txt file to "${VERSION}"?"
 read -p " - Updated the POT file?"
@@ -78,37 +77,54 @@ read -p "PRESS [ENTER] TO DEPLOY BRANCH "${BRANCH}
 
 # RUN COMPOSER
 echo "Running composer"
-composer install --no-dev
+# composer install --no-dev
+../bin/composer install --no-dev --no-interaction
+
+# RUN NPM
+../bin/npm i --no-progress --no-update-notifier
+../bin/npm run build --no-progress --no-update-notifier
 
 # REMOVE UNWANTED FILES & FOLDERS
 echo "Removing unwanted files"
-rm -Rf .git
-rm -Rf .github
-rm -Rf .wordpress-org
+# rm -Rf .git
+# rm -Rf .github
+# rm -Rf .wordpress-org
+# rm -Rf .circleci
+# rm -Rf bin
+rm -Rf node_modules
 rm -Rf tests
+rm -Rf tests-e2e
 rm -Rf apigen
-rm -f .gitattributes
+# rm -f .gitattributes
 rm -f .gitignore
-rm -f .gitmodules
-rm -f .travis.yml
-rm -f Gruntfile.js
+# rm -f .gitmodules
+# rm -f .travis.yml
+# rm -f Gruntfile.js
 rm -f package.json
-rm -f .jscrsrc
-rm -f .jshintrc
-rm -f .stylelintrc
+rm -f package-lock.json
+# rm -f .jscrsrc
+# rm -f .jshintrc
+# rm -f .stylelintrc
 rm -f composer.json
 rm -f composer.lock
-rm -f phpcs.xml
-rm -f phpunit.xml
+# rm -f phpcs.xml
+rm -f .phpcs.xml.dist
+rm -f babel.config.json
+rm -f phpstan.neon
+# rm -f phpunit.xml
 rm -f phpunit.xml.dist
-rm -f README.md
-rm -f .coveralls.yml
-rm -f .editorconfig
-rm -f .scrutinizer.yml
-rm -f apigen.neon
-rm -f CHANGELOG.txt
-rm -f CONTRIBUTING.md
-rm -f CODE_OF_CONDUCT.md
+rm -f playwright.config.js
+rm -f postcss.config.js
+rm -f *.log
+rm -f webpack.config.js
+# rm -f README.md
+# rm -f .coveralls.yml
+# rm -f .editorconfig
+# rm -f .scrutinizer.yml
+# rm -f apigen.neon
+# rm -f CHANGELOG.txt
+# rm -f CONTRIBUTING.md
+# rm -f CODE_OF_CONDUCT.md
 
 # MOVE INTO SVN DIR
 cd $ROOT_PATH$TEMP_SVN_REPO
