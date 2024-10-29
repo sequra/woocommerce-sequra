@@ -1,5 +1,6 @@
 @charset "UTF-8";
 @use "loader" as *;
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 %field {
   outline-color: transparent !important;
   box-shadow: none !important;
@@ -607,33 +608,33 @@ table tr th {
   }
 }
 
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 400;
-  src:
-    local("Inter Regular"),
-    url(../fonts/Inter/Inter-Regular.woff2) format("woff2"),
-    url(../fonts/Inter/Inter-Regular.woff) format("woff");
-}
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 600;
-  src:
-    local("Inter SemiBold"),
-    url(../fonts/Inter/Inter-SemiBold.woff2) format("woff2"),
-    url(../fonts/Inter/Inter-SemiBold.woff) format("woff");
-}
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 700;
-  src:
-    local("Inter Bold"),
-    url(../fonts/Inter/Inter-Bold.woff2) format("woff2"),
-    url(../fonts/Inter/Inter-Bold.woff) format("woff");
-}
+// @font-face {
+//   font-family: "Inter";
+//   font-style: normal;
+//   font-weight: 400;
+//   src:
+//     local("Inter Regular"),
+//     url(../fonts/Inter/Inter-Regular.woff2) format("woff2"),
+//     url(../fonts/Inter/Inter-Regular.woff) format("woff");
+// }
+// @font-face {
+//   font-family: "Inter";
+//   font-style: normal;
+//   font-weight: 600;
+//   src:
+//     local("Inter SemiBold"),
+//     url(../fonts/Inter/Inter-SemiBold.woff2) format("woff2"),
+//     url(../fonts/Inter/Inter-SemiBold.woff) format("woff");
+// }
+// @font-face {
+//   font-family: "Inter";
+//   font-style: normal;
+//   font-weight: 700;
+//   src:
+//     local("Inter Bold"),
+//     url(../fonts/Inter/Inter-Bold.woff2) format("woff2"),
+//     url(../fonts/Inter/Inter-Bold.woff) format("woff");
+// }
 /**
  * Font face declaration for icons
  */
