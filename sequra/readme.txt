@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.6.2
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.0.1	=
+* Changed: Move local fonts to CDN.
+* Fixed: Bug that prevents from showing seQura's payment methods on the mobile version of the checkout page.
 = 3.0.0	=
 * Added: Compatibility with pages using WooCommerce's Gutenberg blocks.
 * Added: Support for different merchant-ref within the same installation.
