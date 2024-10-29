@@ -1,12 +1,12 @@
-=== Pasarela de pago para seQura ===
+=== seQura ===
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.4
-Stable tag: 2.0.10
+Tested up to: 6.6.2
+Stable tag: 3.0.0
 Requires PHP: 7.3
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+License: GPL-3.0+
+License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 Flexible payment platform that enhances business conversion and recurrence. The easiest, safest, and quickest way for customers to pay installments.
 
 == Description ==
@@ -17,8 +17,6 @@ The easiest, safest, and quickest way for your customers to pay on installments.
 +6.000 e-commerce and +1.5 million delight shoppers already use seQura. Are you still thinking about it?
 
 This WooCommerce plugin allows you to make payments with [seQura](https://sequra.es).
-
-
 
 = Benefits for merchants =
 
@@ -36,7 +34,6 @@ Your customers in good hands:
 * Cost transparency and clarity
 * Local support teams to deliver the best shopper experience
 * Secure data, we don’t share your data with anyone or use your information to sell our own or third-party products 
-
 
 Obsessed with conversion and recurrence
 
@@ -74,17 +71,17 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 
 = Minimum Requirements =
 
-* PHP version 7.2 or greater
+* PHP version 7.3 or greater
 * PHP extensions enabled: cURL, JSON
 * WordPress 5.9 or greater
-* WooCommerce 6.0 or greater
+* WooCommerce 4.7.0 or greater
 * Merchant account at seQura, [sign up here](https://share.hsforms.com/1J2S1J2NPTi-pZERcgJPOVw1c4yg)
 
 = Automatic installation =
 
 1. Install the plugin via Plugins -> New plugin. Search for 'seQura'.
 2. Activate the 'seQura' plugin through the 'Plugins' menu in WordPress
-3. Set your seQura credentials at WooCommerce -> Settings -> payments -> seQura
+3. Set your seQura credentials at WooCommerce -> seQura
 4. You're done, the seQura payment methods should be visible in the checkout of your WooCommerce.
 
 = Manual installation =
@@ -92,7 +89,7 @@ Most of the time a white screen means a PHP error. Because PHP won't show error 
 1. Unpack the download package
 2. Upload the directory `sequra` to the `/wp-content/plugins/` directory
 3. Activate the 'seQura' plugin through the 'Plugins' menu in WordPress
-4. Set your seQura credentials at WooCommerce -> Settings -> payments -> seQura
+4. Set your seQura credentials at WooCommerce -> seQura
 5. You're done, the seQura payment methods should be visible in the checkout of your WooCommerce.
 
 Please contact sat@sequra.com if you need help installing the seQura WooCommerce plugin.
@@ -103,10 +100,28 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.0.0	=
+* Added: Compatibility with pages using WooCommerce's Gutenberg blocks.
+* Added: Support for different merchant-ref within the same installation.
+* Added: Order completion and refund events are now synched instantly with seQura.
+* Added: Better widget configuration with new parameters and improved price changing detection.
+* Added: Support for mini widgets on both cart page and product listings.
+* Added: Onboarding screen for new installations.
+* Added: Orders now show a link to seQura's back-office.
+* Added: Out of the box compatibility with third party WooCommerce addons (such as LearnPress).
+* Changed: Revamped configuration page with modern UI and better UX.
+* Changed: Tested up to WordPress 6.6.2 and WooCommerce 9.3.3.
+* Fixed: Now is possible to pay with seQura for orders created manually via wp-admin.
+= 2.0.12	=
+* Changed: Sign-up URLs.
+* Fixed: Widget's JavaScript to read prices from product pages.
+* Changed: ISO 8061 date format regular expression used for validations.
+= 2.0.11	=
+* Fixed: Filter order to report by payment_method field instead of _payment_method order meta.
 = 2.0.10	=
 * Added: Translations for ES, PT, IT, FR
 * Fixed: Warning in php 8.2
-* Fixed: Emptiing firsts desired date in product datils page
+* Fixed: Emptying firsts desired date in product details page
 = 2.0.9	=
 * Fixed: Deprecation warning on plugin's settings page.
 * Fixed: Hide widgets when payment methods start/end dates don't match.
@@ -116,7 +131,7 @@ Contributors:
 = 2.0.7 =
 * Fixed: rounding amount total for the +info popup in the checkout.
 = 2.0.6 =
-* Fixed: javascript warning due to changes in the integrations assets.
+* Fixed: Javascript warning due to changes in the integrations assets.
 * Fixed: PHP warning due to sequra/php-client package upgrade.
 * Fixed: Removed all references to deprecated `without_tax` values.
 * Fixed: Add dependance on the "enabled in product" admin option to "Simulator params" option.
