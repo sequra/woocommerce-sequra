@@ -136,13 +136,6 @@ class Plugin {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires WooCommerce ' . $this->data['RequiresWC'] . ' or greater.' ) );
 		}
-
-		if ( ! wp_next_scheduled( self::HOOK_DELIVERY_REPORT ) ) {
-			$random_offset = wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
-			$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
-			$time          = $random_offset + strtotime( $tomorrow );
-			wp_schedule_event( $time, 'daily', self::HOOK_DELIVERY_REPORT );
-		}
 	}
 
 	/**
@@ -156,6 +149,12 @@ class Plugin {
 	 * Execute the installation process if needed.
 	 */
 	public function install(): void {
+		if ( ! wp_next_scheduled( self::HOOK_DELIVERY_REPORT ) ) {
+			$random_offset = wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
+			$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
+			$time          = $random_offset + strtotime( $tomorrow );
+			wp_schedule_event( $time, 'daily', self::HOOK_DELIVERY_REPORT );
+		}
 		$this->migration_manager->run_install_migrations();
 	}
 }
