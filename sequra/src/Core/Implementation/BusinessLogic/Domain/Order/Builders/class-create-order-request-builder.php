@@ -403,7 +403,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get GUI payload
 	 */
 	private function gui(): Gui {
-		$gui = new Gui( $this->shopper_service->is_using_mobile() ? 'mobile' : 'desktop' );
+		$gui = new Gui( $this->shopper_service->is_using_mobile() ? 'smartphone' : 'desktop' );
 
 		/**
 		 * Filter the gui options.
