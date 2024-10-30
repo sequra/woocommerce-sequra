@@ -158,7 +158,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			$this->invoice_address(),
 			$this->gui(),
 			$this->merchant_reference(),
-			null, // trackings.
+			null // trackings.
 		);
 	}
 

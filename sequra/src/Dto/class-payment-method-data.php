@@ -47,7 +47,7 @@ class Payment_Method_Data extends Dto {
 	 * 
 	 * @return static|null
 	 */
-	public static function decode( string $raw ): mixed {
+	public static function decode( string $raw ) {
 		$decoded = base64_decode( $raw );
 		if ( ! $decoded ) {
 			return null;

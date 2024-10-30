@@ -27,12 +27,22 @@ use SeQura\Helper\Task\Task;
  * SeQura Helper Plugin
  */
 class Plugin {
+
+	/**
+	 * File path
+	 *
+	 * @var string
+	 */
+	private $file_path;
 	
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct( string $file_path ) {
+		$this->file_path = $file_path;
 		add_action( 'init', array( $this, 'handle_webhook' ) );
+		// WooCommerce Compat.
+		add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
 	}
 
 	/**
@@ -78,6 +88,15 @@ class Plugin {
 			$task->http_success_response();
 		} catch ( \Exception $e ) {
 			$task->http_error_response( $e->getMessage(), (int) $e->getCode() );
+		}
+	}
+
+	/**
+	 * Declare WooCommerce compatibility.
+	 */
+	public function declare_woocommerce_compatibility() {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', $this->file_path, true );
 		}
 	}
 }

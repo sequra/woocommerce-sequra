@@ -37,10 +37,22 @@ class Plugin {
 	private $addon_base_name;
 
 	/**
-	 * Construct the plugin.
+	 * The plugin file path.
+	 * 
+	 * @var string
 	 */
-	public function __construct() {
+	private $file_path;
+
+	/**
+	 * Construct the plugin.
+	 * 
+	 * @param string $file_path The plugin file path.
+	 */
+	public function __construct( string $file_path ) {
+		$this->file_path = $file_path;
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
+		// WooCommerce Compat.
+		add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );   
 	}
 
 	/**
@@ -125,5 +137,14 @@ class Plugin {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Declare WooCommerce compatibility.
+	 */
+	public function declare_woocommerce_compatibility() {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', $this->file_path, true );
+		}
 	}
 }

@@ -73,8 +73,10 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 
 	/**
 	 * Append text after the thank you message on the order received page
+	 * 
+	 * @param mixed $order The order object.
 	 */
-	public function order_received_text( string $text, mixed $order ): string {
+	public function order_received_text( string $text, $order ): string {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$notices = wc_print_notices( true );
 		return $notices . $text;
@@ -82,8 +84,10 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 
 	/**
 	 * Set the proper payment method description in the order
+	 * 
+	 * @param mixed $order The order object.
 	 */
-	public function order_get_payment_method_title( string $value, mixed $order ): string {
+	public function order_get_payment_method_title( string $value, $order ): string {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$sequra_payment_method = $order instanceof WC_Order ? $this->order_service->get_payment_method_title( $order ) : null;
 		return empty( $sequra_payment_method ) ? $value : $sequra_payment_method;

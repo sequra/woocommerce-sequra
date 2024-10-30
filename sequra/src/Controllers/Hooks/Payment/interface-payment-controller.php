@@ -35,11 +35,15 @@ interface Interface_Payment_Controller {
 
 	/**
 	 * Append text after the thank you message on the order received page
+	 * 
+	 * @param mixed $order The order object.
 	 */
-	public function order_received_text( string $text, mixed $order ): string;
+	public function order_received_text( string $text, $order ): string;
 
 	/**
 	 * Set the proper payment method description in the order
+	 * 
+	 * @param mixed $order The order object.
 	 */
-	public function order_get_payment_method_title( string $value, mixed $order ): string;
+	public function order_get_payment_method_title( string $value, $order ): string;
 }

@@ -8,7 +8,7 @@
  * Plugin Name:       seQura - No Address Addon
  * Plugin URI:        https://sequra.es/
  * Description:       Allow customers to pay with seQura without providing an address.
- * Version:           3.0.1
+ * Version:           3.0.2
  * Author:            "seQura Tech" <wordpress@sequra.com>
  * Author URI:        https://sequra.com/
  * License:           GPL-3.0+
@@ -26,4 +26,4 @@ defined( 'WPINC' ) || die;
 
 require plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
-new \SeQura\WC\NoAddress\Plugin();
+new \SeQura\WC\NoAddress\Plugin( __FILE__ );

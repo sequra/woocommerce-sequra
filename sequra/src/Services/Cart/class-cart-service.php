@@ -192,9 +192,10 @@ class Cart_Service implements Interface_Cart_Service {
 	/**
 	 * Get item instance
 	 *
+	 * @param mixed $item The product item.
 	 * @return ProductItem|ServiceItem
 	 */
-	private function get_item( WC_Product $product, float $total_price, ?Registration_Item $reg_item, int $qty, mixed $item ) {
+	private function get_item( WC_Product $product, float $total_price, ?Registration_Item $reg_item, int $qty, $item ) {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = wp_strip_all_tags( $product->get_title() );
 		if ( $this->configuration->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
