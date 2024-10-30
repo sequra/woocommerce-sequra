@@ -505,8 +505,10 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 	/**
 	 * Validate if required selector is valid.
+	 * 
+	 * @param mixed $param The parameter.
 	 */
-	private function validate_required_selector( string $dependant_param_key, mixed $param, WP_REST_Request $request, string $key ): bool {
+	private function validate_required_selector( string $dependant_param_key, $param, WP_REST_Request $request, string $key ): bool {
 		
 		$use_widgets = (bool) $request->get_param( $dependant_param_key );
 		if ( ! $use_widgets ) {
@@ -520,22 +522,28 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 	/**
 	 * Validate if required widget selector is valid.
+	 * 
+	 * @param mixed $param The param.
 	 */
-	public function validate_required_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+	public function validate_required_widget_selector( $param, WP_REST_Request $request, string $key ): bool {
 		return $this->validate_required_selector( self::PARAM_USE_WIDGETS, $param, $request, $key );
 	}
 
 	/**
 	 * Validate if required cart widget selector is valid.
+	 * 
+	 * @param mixed $param The param.
 	 */
-	public function validate_required_cart_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+	public function validate_required_cart_widget_selector( $param, WP_REST_Request $request, string $key ): bool {
 		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE, $param, $request, $key );
 	}
 
 	/**
 	 * Validate if required listing widget selector is valid.
+	 * 
+	 * @param mixed $param The param.
 	 */
-	public function validate_required_listing_widget_selector( mixed $param, WP_REST_Request $request, string $key ): bool {
+	public function validate_required_listing_widget_selector( $param, WP_REST_Request $request, string $key ): bool {
 		return $this->validate_required_selector( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING, $param, $request, $key );
 	}
 

@@ -45,6 +45,8 @@ class Plugin {
 
 	/**
 	 * Construct the plugin.
+	 * 
+	 * @param string $file_path The plugin file path.
 	 */
 	public function __construct( string $file_path ) {
 		$this->file_path = $file_path;
