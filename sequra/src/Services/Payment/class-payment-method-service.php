@@ -150,7 +150,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 			->getIdentificationForm( 
 				$cart_info->ref, 
 				isset( $opts['product'] ) && '' !== $opts['product'] ? $opts['product'] : null,
-				isset( $opts['campaign'] ) && '' !== $opts['campaign'] ? $opts['campaign'] : null,
+				isset( $opts['campaign'] ) && '' !== $opts['campaign'] ? $opts['campaign'] : null
 			);
 
 			if ( ! $response ) {

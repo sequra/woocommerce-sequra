@@ -122,7 +122,7 @@ class Order_Report_Service implements OrderReportServiceInterface {
 				null, // Trackings.
 				null, // Remaining cart.
 				$this->order_service->get_address( $order, true ), // Delivery Address.
-				$this->order_service->get_address( $order, false ), // Invoice Address.
+				$this->order_service->get_address( $order, false ) // Invoice Address.
 			);
 		}
 		return $order_reports;

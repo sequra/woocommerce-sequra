@@ -113,7 +113,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			 * @since 3.0.0
 			 */
 			esc_url( strval( apply_filters( 'sequra_settings_page_url', '' ) ) ),
-			esc_html__( 'View more configuration options.', 'sequra' ),
+			esc_html__( 'View more configuration options.', 'sequra' )
 		);
 
 		
