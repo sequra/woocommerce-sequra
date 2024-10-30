@@ -40,4 +40,4 @@ require_once __DIR__ . '/src/Task/class-cart-version-task.php';
 require_once __DIR__ . '/src/Task/class-checkout-version-task.php';
 require_once __DIR__ . '/src/Task/class-get-plugin-zip-task.php';
 require_once __DIR__ . '/src/class-plugin.php';
-new SeQura\Helper\Plugin();
+new SeQura\Helper\Plugin( __FILE__ );

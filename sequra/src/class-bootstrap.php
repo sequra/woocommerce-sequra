@@ -148,6 +148,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				return new Plugin(
 					Reg::getService( 'plugin.data' ),
+					Reg::getService( 'plugin.file_path' ),
 					Reg::getService( 'plugin.basename' ),
 					Reg::getService( Interface_Migration_Manager::class ),
 					Reg::getService( Interface_I18n_Controller::class ),

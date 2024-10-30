@@ -26,4 +26,4 @@ defined( 'WPINC' ) || die;
 
 require plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
-new \SeQura\WC\NoAddress\Plugin();
+new \SeQura\WC\NoAddress\Plugin( __FILE__ );

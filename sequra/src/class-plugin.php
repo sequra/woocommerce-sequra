@@ -37,6 +37,13 @@ class Plugin {
 	private $base_name;
 
 	/**
+	 * The plugin file path.
+	 * 
+	 * @var string
+	 */
+	private $file_path;
+
+	/**
 	 * Migration manager.
 	 * 
 	 * @var Interface_Migration_Manager
@@ -50,6 +57,7 @@ class Plugin {
 	 */
 	public function __construct(
 		array $data,
+		string $file_path,
 		string $base_name,
 		Interface_Migration_Manager $migration_manager,
 		Interface_I18n_Controller $i18n_controller,
@@ -65,6 +73,7 @@ class Plugin {
 		Interface_Order_Controller $order_controller
 	) {
 		$this->data              = $data;
+		$this->file_path         = $file_path;
 		$this->base_name         = $base_name;
 		$this->migration_manager = $migration_manager;
 
@@ -115,6 +124,9 @@ class Plugin {
 		// Order Update.
 		add_action( 'woocommerce_order_status_changed', array( $order_controller, 'handle_order_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_admin_order_data_after_order_details', array( $order_controller, 'show_link_to_sequra_back_office' ) );
+
+		// WooCommerce Compat.
+		add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
 	}
 
 	/**
@@ -156,5 +168,14 @@ class Plugin {
 			wp_schedule_event( $time, 'daily', self::HOOK_DELIVERY_REPORT );
 		}
 		$this->migration_manager->run_install_migrations();
+	}
+
+	/**
+	 * Declare WooCommerce compatibility.
+	 */
+	public function declare_woocommerce_compatibility() {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', $this->file_path, true );
+		}
 	}
 }
