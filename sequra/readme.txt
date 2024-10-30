@@ -102,6 +102,7 @@ Contributors:
 == Changelog ==
 = 3.0.2	=
 * Fixed: Error when accessing order listing in wp-admin with the HPOS feature activated.
+* Fixed: PHP 7.4 compatibility error.
 = 3.0.1	=
 * Changed: Move local fonts to CDN.
 * Fixed: Bug that prevents from showing seQura's payment methods on the mobile version of the checkout page.
