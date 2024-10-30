@@ -40,6 +40,7 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 	private $integration_version;
 	private $i18n;
 	private $order_report_service;
+	private $platform;
 
 	/**
 	 * Store instance.
@@ -50,19 +51,35 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 	public function set_up(): void {        
 		$this->integration_name    = 'WC';
 		$this->integration_version = '99.99.99';
-		$this->configuration       = $this->createMock( Configuration::class );
+		
+		$this->configuration = $this->createMock( Configuration::class );
 		$this->configuration->method( 'getIntegrationName' )->willReturn( $this->integration_name );
 		$this->configuration->method( 'get_module_version' )->willReturn( $this->integration_version );
 		
-		$this->wc_data         = array(
+
+		
+		$this->wc_data  = array(
 			'Version' => '99.99.99',
 		);
-		$this->env_data        = array(
+		$this->env_data = array(
 			'uname'       => 'Uname',
 			'db_name'     => 'DB name',
 			'db_version'  => '1.0.0',
 			'php_version' => '99.99.0',
 		);
+
+		$this->platform = new Platform(
+			$this->integration_name,
+			$this->wc_data['Version'],
+			$this->env_data['uname'],
+			$this->env_data['db_name'],
+			$this->env_data['db_version'],
+			$this->integration_version,
+			$this->env_data['php_version']
+		);
+
+		$this->configuration->method( 'get_platform' )->willReturn( $this->platform );
+
 		$this->pricing_service = $this->createMock( Interface_Pricing_Service::class );
 		$this->cart_service    = $this->createMock( Interface_Cart_Service::class );
 		$this->order_service   = $this->createMock( Interface_Order_Service::class );
@@ -70,8 +87,6 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 
 		$this->order_report_service = new Order_Report_Service(
 			$this->configuration,
-			$this->wc_data,
-			$this->env_data,
 			$this->pricing_service,
 			$this->cart_service,
 			$this->order_service,

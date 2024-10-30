@@ -25,6 +25,7 @@ class PluginTest extends WP_UnitTestCase {
 	private $plugin;
 	private $plugin_data;
 	private $base_name;
+	private $file_path;
 	private $i18n_controller;
 	private $asset_controller;
 	private $settings_controller;
@@ -51,6 +52,7 @@ class PluginTest extends WP_UnitTestCase {
 		);
 
 		$this->base_name                  = 'sequra/sequra.php';
+		$this->file_path                  = '/var/www/html/wordpress/plugins/sequra/sequra.php';
 		$this->i18n_controller            = $this->createMock( Interface_I18n_Controller::class );
 		$this->migration_manager          = $this->createMock( Interface_Migration_Manager::class );
 		$this->asset_controller           = $this->createMock( Interface_Assets_Controller::class );
@@ -68,6 +70,7 @@ class PluginTest extends WP_UnitTestCase {
 	private function setup_plugin_instance() {
 		$this->plugin = new Plugin( 
 			$this->plugin_data, 
+			$this->file_path,
 			$this->base_name,
 			$this->migration_manager,
 			$this->i18n_controller, 
