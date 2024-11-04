@@ -418,6 +418,11 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Check if the builder is allowed for the current settings 
 	 */
 	public function is_allowed(): bool {
+		// Filter bots requests.
+		if ( $this->shopper_service->is_bot() ) {
+			return false;
+		}
+
 		if ( ! $this->payment_service->get_merchant_id() ) {
 			$this->logger->log_debug( 'Merchant ID is empty', __FUNCTION__, __CLASS__ );
 			return false;
