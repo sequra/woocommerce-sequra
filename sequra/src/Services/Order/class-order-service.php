@@ -378,18 +378,21 @@ class Order_Service implements Interface_Order_Service {
 			}
 		}
 
-		/**
-		 * Get previous orders
-		 *
-		 * @var WC_Order[] $previous_orders
-		 */
-		$orders = wc_get_orders(
-			array(
-				'limit'    => -1,
-				'customer' => $customer_id,
-				'status'   => $statuses,
-			) 
-		);
+		$orders = array();
+		if ( $customer_id ) {
+			/**
+			 * Get previous orders
+			 *
+			 * @var WC_Order[] $previous_orders
+			 */
+			$orders = wc_get_orders(
+				array(
+					'limit'    => -1,
+					'customer' => $customer_id,
+					'status'   => $statuses,
+				) 
+			);
+		}
 
 		if ( is_array( $orders ) ) {
 			foreach ( $orders as $order ) {
