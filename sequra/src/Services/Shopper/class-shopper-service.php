@@ -44,6 +44,13 @@ class Shopper_Service implements Interface_Shopper_Service {
 	}
 
 	/**
+	 * Check if the User Agent is a bot
+	 */
+	public function is_bot(): bool {
+		return ! empty( preg_match( '/bot|crawl|slurp|spider|mediapartners/i', $this->get_user_agent() ) );
+	}
+
+	/**
 	 * Get customer date of birth
 	 */
 	public function get_date_of_birth( int $customer_id ): string {
