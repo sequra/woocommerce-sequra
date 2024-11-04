@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.6.2
-Stable tag: 3.0.2
+Stable tag: 3.0.3
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.0.3	=
+* Fixed: Improve performance skipping previous orders retrieval for guest shoppers.
+* Fixed: Don't offer seQura payment methods to bots.
 = 3.0.2	=
 * Fixed: Error when accessing order listing in wp-admin with the HPOS feature activated.
 * Fixed: PHP 7.4 compatibility error.
