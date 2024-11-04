@@ -29,6 +29,11 @@ interface Interface_Shopper_Service {
 	public function is_using_mobile(): bool;
 
 	/**
+	 * Check if the User Agent is a bot
+	 */
+	public function is_bot(): bool;
+
+	/**
 	 * Get customer date of birth
 	 */
 	public function get_date_of_birth( int $customer_id ): string;
