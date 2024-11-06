@@ -30,6 +30,20 @@ class Plugin {
 	private $data;
 
 	/**
+	 * The WordPress version
+	 * 
+	 * @var string
+	 */
+	private $wp_version;
+
+	/**
+	 * The WooCommerce version
+	 * 
+	 * @var string
+	 */
+	private $wc_version;
+
+	/**
 	 * The plugin base name.
 	 * 
 	 * @var string
@@ -57,6 +71,8 @@ class Plugin {
 	 */
 	public function __construct(
 		array $data,
+		string $wp_version,
+		string $wc_version,
 		string $file_path,
 		string $base_name,
 		Interface_Migration_Manager $migration_manager,
@@ -73,6 +89,8 @@ class Plugin {
 		Interface_Order_Controller $order_controller
 	) {
 		$this->data              = $data;
+		$this->wp_version        = $wp_version;
+		$this->wc_version        = $wc_version;
 		$this->file_path         = $file_path;
 		$this->base_name         = $base_name;
 		$this->migration_manager = $migration_manager;
@@ -138,13 +156,12 @@ class Plugin {
 			wp_die( esc_html( 'This plugin requires PHP ' . $this->data['RequiresPHP'] . ' or greater.' ) );
 		}
 
-		global $wp_version;
-		if ( version_compare( $wp_version, $this->data['RequiresWP'], '<' ) ) {
+		if ( version_compare( $this->wp_version, $this->data['RequiresWP'], '<' ) ) {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires WordPress ' . $this->data['RequiresWP'] . ' or greater.' ) );
 		}
 
-		if ( ! defined( 'WC_VERSION' ) || version_compare( WC_VERSION, $this->data['RequiresWC'], '<' ) ) {
+		if ( version_compare( $this->wc_version, $this->data['RequiresWC'], '<' ) ) {
 			deactivate_plugins( $this->base_name );
 			wp_die( esc_html( 'This plugin requires WooCommerce ' . $this->data['RequiresWC'] . ' or greater.' ) );
 		}

@@ -722,6 +722,8 @@ class Configuration extends CoreConfiguration {
 			'sequra_platform_options_version',
 			$sq['Version'] ?? ''
 		);
+		
+		$platform_version = ( $woo['Version'] ?? '' ) . ( isset( $env['wp_version'] ) ? " + WordPress {$env['wp_version']}" : '' );
 
 		/**
 		 * Filter the platform options.
@@ -733,7 +735,7 @@ class Configuration extends CoreConfiguration {
 			'sequra_platform_options',
 			new Platform(
 				$this->getIntegrationName(),
-				$woo['Version'] ?? '',
+				$platform_version,
 				$env['uname'],
 				$env['db_name'],
 				$env['db_version'],

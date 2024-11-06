@@ -50,6 +50,13 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	private $assets_version;
 
 	/**
+	 * WP Version
+	 * 
+	 * @var string
+	 */
+	private $wp_version;
+
+	/**
 	 * I18n service
 	 *
 	 * @var Interface_I18n
@@ -91,6 +98,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		string $assets_dir_url, 
 		string $assets_dir_path, 
 		string $assets_version, 
+		string $wp_version, 
 		Interface_I18n $i18n, 
 		Interface_Logger_Service $logger,
 		string $templates_path, 
@@ -109,6 +117,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$this->assets                 = $assets;
 		$this->payment_method_service = $payment_method_service;
 		$this->regex                  = $regex;
+		$this->wp_version             = $wp_version;
 	}
 
 	/**
@@ -265,8 +274,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return array|bool
 	 */
 	private function get_script_args( string $strategy, bool $in_footer ) {
-		$wp_version = get_bloginfo( 'version' );
-		if ( version_compare( $wp_version, '6.3', '>=' ) ) {
+		if ( version_compare( $this->wp_version, '6.3', '>=' ) ) {
 			return array(
 				'strategy'  => $strategy,
 				'in_footer' => $in_footer,
