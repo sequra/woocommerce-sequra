@@ -24,6 +24,8 @@ class PluginTest extends WP_UnitTestCase {
 
 	private $plugin;
 	private $plugin_data;
+	private $wp_version;
+	private $wc_version;
 	private $base_name;
 	private $file_path;
 	private $i18n_controller;
@@ -40,6 +42,9 @@ class PluginTest extends WP_UnitTestCase {
 	private $order_controller;
 
 	public function set_up() {
+
+		$this->wp_version = '5.9';
+		$this->wc_version = '4.0';
 
 		$this->plugin_data = array(
 			'Name'        => 'seQura',
@@ -69,7 +74,9 @@ class PluginTest extends WP_UnitTestCase {
 
 	private function setup_plugin_instance() {
 		$this->plugin = new Plugin( 
-			$this->plugin_data, 
+			$this->plugin_data,
+			$this->wp_version,
+			$this->wc_version,
 			$this->file_path,
 			$this->base_name,
 			$this->migration_manager,
@@ -121,6 +128,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this->order_controller, 'handle_custom_query_vars' ) ) );
 		$this->assertEquals( 10, has_action( 'woocommerce_order_status_changed', array( $this->order_controller, 'handle_order_status_changed' ) ) );
 		$this->assertEquals( 10, has_action( 'woocommerce_admin_order_data_after_order_details', array( $this->order_controller, 'show_link_to_sequra_back_office' ) ) );
+		$this->assertEquals( 10, has_action( 'before_woocommerce_init', array( $this->plugin, 'declare_woocommerce_compatibility' ) ) );
 	}
 
 	public function testActivate_notMeetPhpRequirements_deactivateAndDie() {
