@@ -113,8 +113,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * 
 	 * @param array<string, string> $atts The shortcode attributes
 	 */
-	public function do_widget_shortcode( array $atts ): string {
+	public function do_widget_shortcode( $atts ): string {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+		$atts = (array) $atts;
 		
 		// Check for required attributes.
 		foreach ( array( 'product', 'product_id' ) as $required ) {
@@ -183,9 +184,12 @@ class Product_Controller extends Controller implements Interface_Product_Control
 
 	/**
 	 * Handle the cart widget shortcode callback
+	 * 
+	 * @param array<string, string> $atts The shortcode attributes
 	 */
-	public function do_cart_widget_shortcode( array $atts ): string {
+	public function do_cart_widget_shortcode( $atts ): string {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+		$atts = (array) $atts;
 
 		$current_country = $this->i18n->get_current_country();
 
@@ -243,9 +247,12 @@ class Product_Controller extends Controller implements Interface_Product_Control
 
 	/**
 	 * Handle the product listing widget shortcode callback
+	 * 
+	 * @param array<string, string> $atts The shortcode attributes
 	 */
-	public function do_product_listing_widget_shortcode( array $atts ): string {
+	public function do_product_listing_widget_shortcode( $atts ): string {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+		$atts = (array) $atts;
 
 		$current_country = $this->i18n->get_current_country();
 		

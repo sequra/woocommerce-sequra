@@ -17,18 +17,24 @@ interface Interface_Product_Controller {
 
 	/**
 	 * Handle the widget shortcode callback
+	 * 
+	 * @param array<string, string> $atts The shortcode attributes
 	 */
-	public function do_widget_shortcode( array $atts ): string;
+	public function do_widget_shortcode( $atts ): string;
 
 	/**
 	 * Handle the cart widget shortcode callback
+	 * 
+	 * @param array<string, string> $atts The shortcode attributes
 	 */
-	public function do_cart_widget_shortcode( array $atts ): string;
+	public function do_cart_widget_shortcode( $atts ): string;
 
 	/**
 	 * Handle the product listing widget shortcode callback
+	 * 
+	 * @param array<string, string> $atts The shortcode attributes
 	 */
-	public function do_product_listing_widget_shortcode( array $atts ): string;
+	public function do_product_listing_widget_shortcode( $atts ): string;
 	
 	/**
 	 * Add [sequra_widget] to product page automatically
