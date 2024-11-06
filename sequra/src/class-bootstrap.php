@@ -148,6 +148,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				return new Plugin(
 					Reg::getService( 'plugin.data' ),
+					Reg::getService( 'environment.data' )['wp_version'] ?? '',
+					Reg::getService( 'woocommerce.data' )['Version'] ?? '',
 					Reg::getService( 'plugin.file_path' ),
 					Reg::getService( 'plugin.basename' ),
 					Reg::getService( Interface_Migration_Manager::class ),
@@ -275,6 +277,7 @@ class Bootstrap extends BootstrapComponent {
 					 * @var \wpdb $wpdb
 					 */
 					$wpdb = Reg::getService( \wpdb::class );
+					global $wp_version;
 				
 					self::$cache['environment.data'] = array(
 						'php_version' => phpversion(),
@@ -282,6 +285,7 @@ class Bootstrap extends BootstrapComponent {
 						'uname'       => php_uname(),
 						'db_name'     => false === strpos( strtolower( $wpdb->db_server_info() ), 'mariadb' ) ? 'mysql' : 'mariadb',
 						'db_version'  => $wpdb->db_version() ?? '',
+						'wp_version'  => strval( $wp_version ),
 					);
 				}
 				return self::$cache['environment.data'];
@@ -816,6 +820,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( 'plugin.assets_url' ), 
 						Reg::getService( 'plugin.assets_path' ), 
 						Reg::getService( 'plugin.data' )['Version'],
+						Reg::getService( 'environment.data' )['wp_version'],
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( 'plugin.templates_path' ),
