@@ -78,7 +78,10 @@ class Default_Logger_Adapter implements DefaultLoggerAdapter {
 					foreach ( $data->getContext() as $log_context_data ) {
 						$arr = $log_context_data->toArray();
 						if ( isset( $arr['value'] ) && is_string( $arr['value'] ) ) {
-							$arr['value'] = json_decode( $arr['value'], true );
+							$decoded_value = json_decode( $arr['value'], true );
+							if ( null !== $decoded_value ) {
+								$arr['value'] = $decoded_value;
+							}
 						}
 						$ctx[] = $arr;
 					}
