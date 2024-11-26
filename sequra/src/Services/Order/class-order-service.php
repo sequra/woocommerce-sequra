@@ -730,9 +730,16 @@ class Order_Service implements Interface_Order_Service {
 		);
 
 		try {
+			/**
+			 * Filter the order_ref_1.
+			 *
+			 * @since 2.0.0
+			 */
+			$ref_1 = apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
+
 			$this->call_update_order(
 				new OrderUpdateData(
-					(string) $order->get_id(), // Order reference.
+					$ref_1, // Order reference.
 					new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
 					new Cart( $currency ), // Unshipped cart.
 					null, // Delivery address.
@@ -784,9 +791,15 @@ class Order_Service implements Interface_Order_Service {
 		}
 		
 		try {
+			/**
+			 * Filter the order_ref_1.
+			 *
+			 * @since 2.0.0
+			 */
+			$ref_1 = apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
 			$this->call_update_order(
 				new OrderUpdateData(
-					(string) $order->get_id(), // Order reference.
+					$ref_1, // Order reference.
 					new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
 					new Cart( $currency ), // Unshipped cart.
 					null, // Delivery address.

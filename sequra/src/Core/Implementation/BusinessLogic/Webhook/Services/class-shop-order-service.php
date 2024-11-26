@@ -17,6 +17,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
+use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Services\Interface_Logger_Service;
 use WC_Order;
 
@@ -178,17 +179,21 @@ class Shop_Order_Service implements ShopOrderService {
 	 * @throws OrderNotFoundException
 	 */
 	private function get_order( Webhook $webhook ): ?WC_Order {
-		$order_ref1 = $webhook->getOrderRef1();
-		if ( empty( $order_ref1 ) ) {
-			$order_ref1 = $this->get_sequra_order( $webhook->getOrderRef() )
-			->getMerchantReference()
-			->getOrderRef1();
-		}
-
-		$order = wc_get_order( absint( $order_ref1 ) );
+		$sq_order = $this->get_sequra_order( $webhook->getOrderRef() );
+		$params   = $sq_order->getMerchant()->getNotificationParameters();
+		$order_id = $params['order'] ?? 0;
+		$order    = wc_get_order( absint( $order_id ) );
 		
 		if ( ! $order instanceof WC_Order ) {
-			$this->logger->log_debug( 'WC Order not found for orderRef1', array( 'orderRef1' => $order_ref1 ) );
+			$this->logger->log_debug(
+				'WC Order not found for orderRef',
+				__FUNCTION__,
+				__CLASS__,
+				array( 
+					new LogContextData( 'orderRef', $webhook->getOrderRef() ),
+					new LogContextData( 'orderID', $order_id ),
+				) 
+			);
 			return null;
 		}
 
