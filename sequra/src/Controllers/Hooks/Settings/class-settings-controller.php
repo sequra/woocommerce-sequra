@@ -101,8 +101,10 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 
 	/**
 	 * Removes the WP footer message
+	 * 
+	 * @param string $text The footer text.
 	 */
-	public function remove_footer_admin( string $text ): string {
+	public function remove_footer_admin( $text ): string {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( ! $this->configuration->is_settings_page() ) {
 			return $text;
