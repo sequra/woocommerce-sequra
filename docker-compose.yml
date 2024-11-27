@@ -20,6 +20,7 @@ services:
     environment:
       WORDPRESS_CONFIG_EXTRA: |
         define( 'WP_LOCALE', '$WP_LOCALE' );
+        define( 'WP_AUTO_UPDATE_CORE', false );
     volumes:
       - sq_wordpress:/var/www/html
       - ./sequra:/var/www/html/wp-content/plugins/_sequra

@@ -110,6 +110,11 @@
                 if (emitEvent) {
                     if (this.isJQueryActive()) {
                         jQuery(paymentMethod).trigger('change');
+
+                        if (paymentMethod.id === this.SQ_PAYMENT_METHOD_ID && paymentMethod.checked) {
+                            // This refreshes the complete order button text.
+                            jQuery(paymentMethod).trigger('click');
+                        }
                     } else {
                         paymentMethod.dispatchEvent(new Event('change'));
                     }
