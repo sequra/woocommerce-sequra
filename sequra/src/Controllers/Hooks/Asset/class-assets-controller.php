@@ -122,8 +122,10 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 
 	/**
 	 * Enqueue styles and scripts in WP-Admin
+	 * 
+	 * @return void
 	 */
-	public function enqueue_admin(): void {
+	public function enqueue_admin() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( ! $this->configuration->is_settings_page() ) {
 			return;
@@ -379,8 +381,10 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 
 	/**
 	 * Enqueue styles and scripts in Front-End
+	 * 
+	 * @return void
 	 */
-	public function enqueue_front(): void {
+	public function enqueue_front() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( is_checkout() || $this->is_order_pay_page() ) {
 			$this->enqueue_front_checkout();

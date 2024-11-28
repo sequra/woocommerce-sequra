@@ -112,8 +112,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * - theme: The theme to use. Accepted values are: L, R, legacy, legacyL, legacyR, minimal, minimalL, minimalR or JSON formatted string. Optional.
 	 * 
 	 * @param array<string, string> $atts The shortcode attributes
+	 * @return string
 	 */
-	public function do_widget_shortcode( $atts ): string {
+	public function do_widget_shortcode( $atts ) {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
 		$atts = (array) $atts;
 		
@@ -186,8 +187,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * Handle the cart widget shortcode callback
 	 * 
 	 * @param array<string, string> $atts The shortcode attributes
+	 * @return string
 	 */
-	public function do_cart_widget_shortcode( $atts ): string {
+	public function do_cart_widget_shortcode( $atts ) {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
 		$atts = (array) $atts;
 
@@ -249,8 +251,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * Handle the product listing widget shortcode callback
 	 * 
 	 * @param array<string, string> $atts The shortcode attributes
+	 * @return string
 	 */
-	public function do_product_listing_widget_shortcode( $atts ): string {
+	public function do_product_listing_widget_shortcode( $atts ) {
 		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
 		$atts = (array) $atts;
 
@@ -372,8 +375,10 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	/**
 	 * Add [sequra_widget] to product page automatically
 	 * Add [sequra_cart_widget] to cart page automatically
+	 * 
+	 * @return void
 	 */
-	public function add_widget_shortcode_to_page(): void {
+	public function add_widget_shortcode_to_page() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( did_action( 'before_woocommerce_sequra_add_widget_to_page' ) ) {
 			return;
@@ -393,15 +398,20 @@ class Product_Controller extends Controller implements Interface_Product_Control
 
 	/**
 	 * Add meta boxes to the product edit page
+	 * 
+	 * @return void
 	 */
-	public function add_meta_boxes(): void {
+	public function add_meta_boxes() {
 		add_meta_box( 'sequra_settings', esc_html__( 'seQura settings', 'sequra' ), array( $this, 'render_meta_boxes' ), 'product', 'side', 'default' );
 	}
 
 	/**
 	 * Render the meta boxes
+	 * 
+	 * @param WP_Post $post The post object
+	 * @return void
 	 */
-	public function render_meta_boxes( WP_Post $post ): void {
+	public function render_meta_boxes( $post ) {
 		$args = array(
 			'is_banned'                                    => $this->product_service->is_banned( $post->ID ),
 			'is_banned_field_name'                         => self::FIELD_NAME_IS_BANNED,
@@ -425,8 +435,11 @@ class Product_Controller extends Controller implements Interface_Product_Control
 
 	/**
 	 * Save product meta
+	 * 
+	 * @param int $post_id The post ID
+	 * @return void
 	 */
-	public function save_product_meta( int $post_id ): void {
+	public function save_product_meta( $post_id ) {
 		if ( ! isset( $_POST[ self::NONCE_SEQURA_PRODUCT ] ) 
 		|| ! wp_verify_nonce( $_POST[ self::NONCE_SEQURA_PRODUCT ], -1 ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		|| ! current_user_can( 'edit_post', $post_id )

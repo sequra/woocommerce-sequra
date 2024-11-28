@@ -57,8 +57,10 @@ class Plugin {
 
 	/**
 	 * Initialize the plugin.
+	 * 
+	 * @return void
 	 */
-	public function init(): void {
+	public function init() {
 		if ( ! class_exists( 'SeQura\Core\Infrastructure\ServiceRegister' ) ) {
 			$this->show_error( 'seQura - No Address Addon requires seQura to be installed and active.' );
 			return;
@@ -103,8 +105,9 @@ class Plugin {
 	 * Add the addon version to the platform version.
 	 * 
 	 * @param string $version Original platform version.
+	 * @return string
 	 */
-	public function update_platform_version( $version ): string {
+	public function update_platform_version( $version ) {
 		return sprintf( '%s + %s %s', $version, $this->addon_data['Name'], $this->addon_data['Version'] );
 	}
 

@@ -24,20 +24,32 @@ interface Interface_Order_Controller {
 	 * @param WC_Order_Data_Store_CPT $order_data_store WC_Order_Data_Store instance.
 	 * @return array modified $query
 	 */
-	public function handle_custom_query_vars( array $wp_query_args, array $query_vars, $order_data_store ): array;
+	public function handle_custom_query_vars( $wp_query_args, $query_vars, $order_data_store );
 
 	/**
 	 * Trigger the sync of the order status with SeQura
+	 * 
+	 * @param int $order_id Order ID.
+	 * @param string $old_status Old status.
+	 * @param string $new_status New status.
+	 * @param WC_Order $order Order object.
+	 * 
+	 * @return void
 	 */
-	public function handle_order_status_changed( int $order_id, string $old_status, string $new_status, WC_Order $order ): void;
+	public function handle_order_status_changed( $order_id, $old_status, $new_status, $order );
 
 	/**
 	 * Display notices related to an order
+	 * 
+	 * @return void
 	 */
-	public function display_notices(): void;
+	public function display_notices();
 
 	/**
 	 * Show a link to the seQura back office in the order details page
+	 * 
+	 * @param WC_Order $order Order object.
+	 * @return void
 	 */
-	public function show_link_to_sequra_back_office( WC_Order $order ): void;
+	public function show_link_to_sequra_back_office( $order );
 }

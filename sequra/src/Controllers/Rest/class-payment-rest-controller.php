@@ -44,8 +44,10 @@ class Payment_REST_Controller extends REST_Controller {
 
 	/**
 	 * Register the API endpoints.
+	 * 
+	 * @return void
 	 */
-	public function register_routes(): void {
+	public function register_routes() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$data_store_id = array( self::PARAM_STORE_ID => $this->get_arg_string() );
 		$data_methods  = array_merge(

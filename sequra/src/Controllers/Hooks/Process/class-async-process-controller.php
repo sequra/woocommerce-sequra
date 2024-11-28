@@ -39,8 +39,10 @@ class Async_Process_Controller extends Controller implements Interface_Async_Pro
 
 	/**
 	 * Send the delivery report
+	 * 
+	 * @return void
 	 */
-	public function send_delivery_report(): void {
+	public function send_delivery_report() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		try {
 			$this->report_service->send_delivery_report_for_current_store();

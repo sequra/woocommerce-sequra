@@ -146,10 +146,13 @@ class Bootstrap extends BootstrapComponent {
 		Reg::registerService(
 			Plugin::class,
 			static function () {
+				$env_data = (array) Reg::getService( 'environment.data' );
+				$wc_data  = (array) Reg::getService( 'woocommerce.data' );
+
 				return new Plugin(
 					Reg::getService( 'plugin.data' ),
-					Reg::getService( 'environment.data' )['wp_version'] ?? '',
-					Reg::getService( 'woocommerce.data' )['Version'] ?? '',
+					$env_data['wp_version'] ?? '',
+					$wc_data['Version'] ?? '',
 					Reg::getService( 'plugin.file_path' ),
 					Reg::getService( 'plugin.basename' ),
 					Reg::getService( Interface_Migration_Manager::class ),
@@ -816,11 +819,12 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Assets_Controller::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Assets_Controller::class ] ) ) {
+					$env_data = (array) Reg::getService( 'environment.data' );
 					self::$cache[ Interface_Assets_Controller::class ] = new Assets_Controller(
 						Reg::getService( 'plugin.assets_url' ), 
 						Reg::getService( 'plugin.assets_path' ), 
 						Reg::getService( 'plugin.data' )['Version'],
-						Reg::getService( 'environment.data' )['wp_version'],
+						$env_data['wp_version'] ?? '',
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( 'plugin.templates_path' ),
