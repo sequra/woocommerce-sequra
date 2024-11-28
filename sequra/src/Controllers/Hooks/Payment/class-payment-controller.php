@@ -47,7 +47,7 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	 * @param string[] $gateways
 	 * @return string[]
 	 */
-	public function register_gateway_classes( $gateways ): array {
+	public function register_gateway_classes( $gateways ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( ! in_array( Sequra_Payment_Gateway::class, $gateways, true ) ) {
 			$gateways[] = Sequra_Payment_Gateway::class;
@@ -57,16 +57,21 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 
 	/**
 	 * Register the payment gateway block so that it can be used by Gutenberg
+	 * 
+	 * @return void
 	 */
-	public function register_gateway_gutenberg_block(): void {
+	public function register_gateway_gutenberg_block() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		add_action( 'woocommerce_blocks_payment_method_type_registration', array( $this, 'register_gateway_gutenberg_block_class' ) );
 	}
 
 	/**
 	 * Register the payment gateway block class
+	 * 
+	 * @param PaymentMethodRegistry $payment_method_registry The payment method registry.
+	 * @return void
 	 */
-	public function register_gateway_gutenberg_block_class( PaymentMethodRegistry $payment_method_registry ): void {
+	public function register_gateway_gutenberg_block_class( $payment_method_registry ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$payment_method_registry->register( ServiceRegister::getService( Sequra_Payment_Gateway_Block_Support::class ) );
 	}
@@ -74,9 +79,11 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	/**
 	 * Append text after the thank you message on the order received page
 	 * 
+	 * @param string $text The text to append.
 	 * @param mixed $order The order object.
+	 * @return string
 	 */
-	public function order_received_text( string $text, $order ): string {
+	public function order_received_text( $text, $order ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$notices = wc_print_notices( true );
 		return $notices . $text;
@@ -85,9 +92,11 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	/**
 	 * Set the proper payment method description in the order
 	 * 
+	 * @param string $value The payment method title.
 	 * @param mixed $order The order object.
+	 * @return string
 	 */
-	public function order_get_payment_method_title( string $value, $order ): string {
+	public function order_get_payment_method_title( $value, $order ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$sequra_payment_method = $order instanceof WC_Order ? $this->order_service->get_payment_method_title( $order ) : null;
 		return empty( $sequra_payment_method ) ? $value : $sequra_payment_method;

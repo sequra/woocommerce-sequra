@@ -49,7 +49,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	 * @param WC_Order_Data_Store_CPT $order_data_store WC_Order_Data_Store instance.
 	 * @return array modified $query
 	 */
-	public function handle_custom_query_vars( array $wp_query_args, array $query_vars, $order_data_store ): array {
+	public function handle_custom_query_vars( $wp_query_args, $query_vars, $order_data_store ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$custom_query_vars = array( 
 			$this->order_service->get_sent_to_sequra_meta_key(),
@@ -71,8 +71,15 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 
 	/**
 	 * Trigger the sync of the order status with SeQura
+	 * 
+	 * @param int $order_id Order ID.
+	 * @param string $old_status Old status.
+	 * @param string $new_status New status.
+	 * @param WC_Order $order Order object.
+	 * 
+	 * @return void
 	 */
-	public function handle_order_status_changed( int $order_id, string $old_status, string $new_status, WC_Order $order ): void {
+	public function handle_order_status_changed( $order_id, $old_status, $new_status, $order ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		try {
 			$this->order_service->update_sequra_order_status( $order, $old_status, $new_status );
@@ -104,15 +111,19 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 
 	/**
 	 * Get the transient key for notices related to an order
+	 * 
+	 * @param int $order_id Order ID.
 	 */
-	private function get_notices_transient( int $order_id ): string {
+	private function get_notices_transient( $order_id ): string {
 		return 'sequra_notices_order_' . $order_id;
 	}
 
 	/**
 	 * Display notices related to an order
+	 * 
+	 * @return void
 	 */
-	public function display_notices(): void {
+	public function display_notices() {
 		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! is_admin() || ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) {
 			return;
@@ -137,8 +148,11 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 
 	/**
 	 * Show a link to the seQura back office in the order details page
+	 * 
+	 * @param WC_Order $order Order object.
+	 * @return void
 	 */
-	public function show_link_to_sequra_back_office( WC_Order $order ): void {
+	public function show_link_to_sequra_back_office( $order ): void {
 		$args = array(
 			'sequra_link' => $this->order_service->get_link_to_sequra_back_office( $order ),
 		);

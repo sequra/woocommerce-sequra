@@ -48,8 +48,10 @@ class I18n_Controller extends Controller implements Interface_I18n_Controller {
 
 	/**
 	 * Load the plugin text domain for translation.
+	 * 
+	 * @return void
 	 */
-	public function load_text_domain(): void {
+	public function load_text_domain() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		load_plugin_textdomain( $this->text_domain, false, $this->domain_path );
 	}

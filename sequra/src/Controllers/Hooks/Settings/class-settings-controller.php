@@ -45,8 +45,10 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 
 	/**
 	 * Register the settings page.
+	 * 
+	 * @return void
 	 */
-	public function register_page(): void {
+	public function register_page() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		add_submenu_page(
 			$this->configuration->get_parent_page(),
@@ -65,16 +67,21 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 
 	/**
 	 * Render the settings page.
+	 * 
+	 * @return void
 	 */
-	public function render_page(): void {
+	public function render_page() {
 		$this->logger->log_info( 'Callback executed', __FUNCTION__, __CLASS__ );
 		wc_get_template( 'admin/settings_page.php', array(), '', $this->templates_path );
 	}
 
 	/**
 	 * Get the settings page URL.
+	 * 
+	 * @param string|null $url The URL.
+	 * @return string
 	 */
-	public function get_settings_page_url( ?string $url = null ): string {
+	public function get_settings_page_url( $url = null ) {
 		return admin_url( 'admin.php?page=' . $this->configuration->get_page() );
 	}
 
@@ -85,9 +92,9 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * @param string   $plugin_file The plugin file.
 	 * @param string   $plugin_data The plugin data.
 	 * @param string   $context The context.
-	 * @return mixed[]
+	 * @return string[]
 	 */
-	public function add_action_link( $actions, $plugin_file, $plugin_data, $context ): array {
+	public function add_action_link( $actions, $plugin_file, $plugin_data, $context ) {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$args = array(
 			'href' => $this->get_settings_page_url(),
@@ -103,8 +110,9 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * Removes the WP footer message
 	 * 
 	 * @param string $text The footer text.
+	 * @return string
 	 */
-	public function remove_footer_admin( $text ): string {
+	public function remove_footer_admin( $text ) {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( ! $this->configuration->is_settings_page() ) {
 			return $text;
@@ -117,8 +125,9 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 *
 	 * @param array $links Plugin Row Meta.
 	 * @param string $file  Plugin Base file.
+	 * @return string[]
 	 */
-	public function add_plugin_row_meta( $links, $file ): array {
+	public function add_plugin_row_meta( $links, $file ) {
 		if ( $this->plugin_basename === $file ) {
 			$row_meta = array(
 				'docs'    => sprintf(

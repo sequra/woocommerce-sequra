@@ -15,6 +15,8 @@ interface Interface_Async_Process_Controller {
 
 	/**
 	 * Send the delivery report
+	 * 
+	 * @return void
 	 */
-	public function send_delivery_report(): void;
+	public function send_delivery_report();
 }

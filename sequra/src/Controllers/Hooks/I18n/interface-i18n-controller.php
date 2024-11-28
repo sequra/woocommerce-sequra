@@ -17,6 +17,8 @@ interface Interface_I18n_Controller {
 
 	/**
 	 * Load the plugin text domain for translation.
+	 * 
+	 * @return void
 	 */
-	public function load_text_domain(): void;
+	public function load_text_domain();
 }

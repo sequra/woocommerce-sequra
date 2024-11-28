@@ -69,8 +69,10 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 	/**
 	 * Register the API endpoints.
+	 * 
+	 * @return void
 	 */
-	public function register_routes(): void {
+	public function register_routes() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$store_id_args = array( self::PARAM_STORE_ID => $this->get_arg_string() );
 
