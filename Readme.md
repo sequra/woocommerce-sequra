@@ -59,6 +59,7 @@ This repo contains a group of utility scripts under ```bin/``` directory. The go
 | ```./bin/phpstan``` | Run PHPStan on the project files |
 | ```./bin/cp_sources``` | Copy WordPress Core and WooCommerce code to ```.devcontainer/``` |
 | ```./bin/publish_to_wordpress.sh``` | Handles the plugin publishing to WordPress.org |
+| ```./bin/make_zip``` | Make a ZIP of `sequra` or a glue-plugin that is ready to be use for manual installations. The script allows the following arguments: `--branch=<GIT-BRANCH-NAME>` and `--project=<sequra\|sequra-no-address>`. The resulting file will be generated into `zip/` directory.|
 | ```./bin/playwright``` | Run E2E in `sequra/tests-e2e` directory tests using Playwright using a Docker container |
 
 If you require a composer dependency from a GitHub repository, you need to create a `auth.json` file in the root of the repository. Set this as the file content, replacing `GITHUB_TOKEN` with your access token:
