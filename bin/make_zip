@@ -30,13 +30,16 @@ BASEDIR="$(dirname $(realpath $0))/.."
 
 mkdir -p "$BASEDIR/zip" || true
 rm -rf "$BASEDIR/zip/$GITHUB_REPO_NAME"
-rm -f "$BASEDIR/zip/$PROJECT-$BRANCH.zip"
 
 echo "Cloning the repository..."
 git clone --depth 1 --branch "$BRANCH" "$GIT_REPO" "$BASEDIR/zip/$GITHUB_REPO_NAME"
 
-echo "Installing dependencies and building the project..."
 cd "$BASEDIR/zip/$GITHUB_REPO_NAME"
+
+# Get last commit hash
+COMMIT_HASH=$(git rev-parse --short HEAD)
+
+echo "Installing dependencies and building the project..."
 bin/composer install --no-dev --quiet --no-interaction
 
 if [[ "$PROJECT" == "sequra" ]]; then
@@ -45,6 +48,9 @@ if [[ "$PROJECT" == "sequra" ]]; then
 elif [[ "$PROJECT" == "sequra-no-address" ]]; then
     cd "glue-plugins/$PROJECT"
 fi
+
+# Read plugin version from headers something like  * Version:           3.0.4
+PLUGIN_VERSION=$(grep "Version:" $PROJECT.php | awk '{print $3}')
 
 echo "Removing unwanted files"
 rm -Rf node_modules
@@ -67,11 +73,12 @@ rm -f webpack.config.js
 cd ..
 
 echo "Creating the zip file..."
-zip -r9 "$PROJECT-$BRANCH.zip" "$PROJECT"
-mv "$PROJECT-$BRANCH.zip" "$BASEDIR/zip"
+FILENAME="$PROJECT-$PLUGIN_VERSION-$COMMIT_HASH.zip"
+zip -r9 $FILENAME "$PROJECT"
+mv $FILENAME "$BASEDIR/zip"
 cd "$BASEDIR/zip"
 
 echo "Removing the temporary directory..."
 rm -rf "$BASEDIR/zip/$GITHUB_REPO_NAME"
 
-echo "✅ Done!
+echo "✅ Done!"
