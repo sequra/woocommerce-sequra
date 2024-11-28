@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# Set default values
+# Argument --project. Supported values: "sequra", "sequra-no-address"
+PROJECT="sequra"
+# Argument --branch. Name of the Git branch to checkout
+BRANCH="3.0.0"
+
+while [[ "$#" -gt 0 ]]; do
+    if [[ "$1" == --project=* ]]; then
+        PROJECT="${1#*=}"
+        # Check if the project is supported
+        if [[ "$PROJECT" != "sequra" && "$PROJECT" != "sequra-no-address" ]]; then
+            echo "❌ The project \"$PROJECT\" is not supported. Choose between \"sequra\" and \"sequra-no-address\""
+            exit 1
+        fi
+
+    elif [[ "$1" == --branch=* ]]; then
+        BRANCH="${1#*=}"
+    fi
+    shift
+done
+
+echo "Creating a zip file for the \"$PROJECT\" project using branch \"$BRANCH\""
+
+GITHUB_REPO_OWNER="sequra"
+GITHUB_REPO_NAME="woocommerce-sequra"
+GIT_REPO="git@github.com:"${GITHUB_REPO_OWNER}"/"${GITHUB_REPO_NAME}".git"
+BASEDIR="$(dirname $(realpath $0))/.."
+
+mkdir -p "$BASEDIR/zip" || true
+rm -rf "$BASEDIR/zip/$GITHUB_REPO_NAME"
+rm -f "$BASEDIR/zip/$PROJECT-$BRANCH.zip"
+
+echo "Cloning the repository..."
+git clone --depth 1 --branch "$BRANCH" "$GIT_REPO" "$BASEDIR/zip/$GITHUB_REPO_NAME"
+
+echo "Installing dependencies and building the project..."
+cd "$BASEDIR/zip/$GITHUB_REPO_NAME"
+bin/composer install --no-dev --quiet --no-interaction
+
+if [[ "$PROJECT" == "sequra" ]]; then
+    bin/npm run build --no-progress --silent --no-update-notifier
+    cd "$PROJECT"
+elif [[ "$PROJECT" == "sequra-no-address" ]]; then
+    cd "glue-plugins/$PROJECT"
+fi
+
+echo "Removing unwanted files"
+rm -Rf node_modules
+rm -Rf tests
+rm -Rf tests-e2e
+rm -Rf apigen
+rm -f .gitignore
+rm -f package.json
+rm -f package-lock.json
+rm -f composer.json
+rm -f composer.lock
+rm -f .phpcs.xml.dist
+rm -f babel.config.json
+rm -f phpstan.neon
+rm -f phpunit.xml.dist
+rm -f playwright.config.js
+rm -f postcss.config.js
+rm -f *.log
+rm -f webpack.config.js
+cd ..
+
+echo "Creating the zip file..."
+zip -r9 "$PROJECT-$BRANCH.zip" "$PROJECT"
+mv "$PROJECT-$BRANCH.zip" "$BASEDIR/zip"
+cd "$BASEDIR/zip"
+
+echo "Removing the temporary directory..."
+rm -rf "$BASEDIR/zip/$GITHUB_REPO_NAME"
+
+echo "✅ Done!
