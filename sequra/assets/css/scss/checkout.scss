@@ -40,7 +40,7 @@
         flex-grow: 1;
     }
     &__name {
-        font-weight: 700;
+        // font-weight: 700;
     }
     &__input {
         display: inline-block !important;
@@ -80,9 +80,9 @@
             }
             
             &__name {
-                font-weight: inherit;
-                color: var(--wp--preset--color--contrast, #000);
-                font-size: var(--wp--preset--font-size--medium, 1em);
+                // font-weight: inherit;
+                // color: var(--wp--preset--color--contrast, #000);
+                // font-size: var(--wp--preset--font-size--medium, 1em);
             }
 
             &__input {
@@ -90,11 +90,11 @@
             }
 
             &_claim {
-                font-size: 0.92em;
+                // font-size: 0.92em;
             }
 
             & > label {
-                font-size: inherit;
+                // font-size: inherit;
                 margin-bottom: 0!important;
             }
             &__icon {
