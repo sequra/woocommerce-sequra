@@ -47,7 +47,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 * Check if the User Agent is a bot
 	 */
 	public function is_bot(): bool {
-		return ! empty( preg_match( '/bot|crawl|slurp|spider|mediapartners/i', $this->get_user_agent() ) );
+		return ! empty( preg_match( '/bot|crawl|slurp|spider|mediapartners|GoogleOther|Google-Safety|FeedFetcher-Google|Google-Read-Aloud|Google-Site-Verification|Google-InspectionTool/i', $this->get_user_agent() ) );
 	}
 
 	/**
