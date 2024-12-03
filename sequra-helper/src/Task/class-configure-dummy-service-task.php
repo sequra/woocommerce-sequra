@@ -43,7 +43,7 @@ class Configure_Dummy_Service_Task extends Task {
 				'index_5' => null,
 				'index_6' => null,
 				'index_7' => null,
-				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\ConnectionData\\\\Entities\\\\ConnectionData","id":null,"storeId":"1","connectionData":{"environment":"sandbox","merchantId":null,"authorizationCredentials":{"username":"dummy_services_automated_tests","password":"nkT\/LVmRilA\/0ZSPv6hlfNE80glXw6mp0BwYBQ4KNlip9xUHfxsgrZwuvWz8PuCHQYDKtNcRYb+u3UUExhcm2VgiEte5Lw=="}}}',
+				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\ConnectionData\\\\Entities\\\\ConnectionData","id":null,"storeId":"1","connectionData":{"environment":"sandbox","merchantId":null,"authorizationCredentials":{"username":"dummy_services_automated_tests","password":"ZBxwvm\/cnsxrFR8oZigTT8w9BTZjZ\/rNeoGoCvn3LbUJ2YtYVccNzl5Gfx4sQa9VhstyaykUJvJazydRCe2sz91fvHMU\/Q=="}}}',
 			)
 		);
 		$wpdb->insert(
