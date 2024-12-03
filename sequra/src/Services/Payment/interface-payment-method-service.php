@@ -56,4 +56,14 @@ interface Interface_Payment_Method_Service {
 	 * @return array<string, string>[]
 	 */
 	public function get_all_mini_widget_compatible_payment_methods( string $store_id, ?string $merchant ): array;
+
+	/**
+	 * Check if the current page is the order pay page
+	 */
+	public function is_order_pay_page(): bool;
+
+	/**
+	 * Check if the current page is the checkout page
+	 */
+	public function is_checkout(): bool;
 }

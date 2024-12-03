@@ -169,13 +169,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		$is_available = parent::is_available();
-		$order        = $this->try_to_get_order_from_context();
+		$is_available = parent::is_available() && $this->payment_method_service->is_checkout();
+		$order        = $is_available ? $this->try_to_get_order_from_context() : null; // skip order retrieval if not available.
+
 		if ( $is_available && ! $this->cart_service->is_available_in_checkout( $order ) ) {
 			$this->logger->log_debug( 'Payment gateway is not available in checkout. Conditions are not met', __FUNCTION__, __CLASS__ );
-			$is_available = false;
-		} elseif ( $is_available && empty( $this->payment_method_service->get_payment_methods( $order ) ) ) {
-			$this->logger->log_debug( 'Payment gateway is not available in checkout. No payment methods available', __FUNCTION__, __CLASS__ );
 			$is_available = false;
 		}
 		/**
