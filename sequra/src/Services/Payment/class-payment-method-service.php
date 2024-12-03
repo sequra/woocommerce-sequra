@@ -184,11 +184,10 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * @return array<string, string>[]
 	 */
 	public function get_payment_methods( ?WC_Order $order = null ): array {
-
 		if ( null !== $this->payment_methods ) {
 			return $this->payment_methods;
 		}
-	
+		// TODO: Implement a cache system to avoid multiple requests with the same payload.
 		$response = $this->request_solicitation( $order );
 
 		if ( ! $response || ! $response->isSuccessful() ) {
@@ -313,5 +312,24 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Check if the current page is the order pay page
+	 */
+	public function is_order_pay_page(): bool {
+		return ( (int) strval( get_query_var( 'order-pay' ) ) ) > 0;
+	}
+
+	/**
+	 * Check if the current page is the checkout page
+	 */
+	public function is_checkout(): bool {
+		/**
+		 * Check if current page is checkout
+		 * 
+		 * @since 3.0.0
+		 */
+		return (bool) apply_filters( 'sequra_is_checkout', is_checkout() || $this->is_order_pay_page() || WC()->is_store_api_request() );
 	}
 }
