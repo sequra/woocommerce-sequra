@@ -306,7 +306,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		 */
 		$is_block = apply_filters( 
 			'sequra_is_block_checkout', 
-			! $this->is_order_pay_page() // TODO: Remove this condition once the block checkout is implemented in the order pay page.
+			! $this->payment_method_service->is_order_pay_page() // TODO: Remove this condition once the block checkout is implemented in the order pay page.
 			&& class_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' ) 
 			&& method_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils', 'is_checkout_block_default' )
 			&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default()
@@ -371,14 +371,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		global $post;
 		return has_shortcode( $post->post_content, 'sequra_product_listing_widget' );
 	}
-
-	/**
-	 * Check if the current page is the order pay page
-	 */
-	private function is_order_pay_page(): bool {
-		return ( (int) strval( get_query_var( 'order-pay' ) ) ) > 0;
-	}
-
+	
 	/**
 	 * Enqueue styles and scripts in Front-End
 	 * 
@@ -386,7 +379,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	public function enqueue_front() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-		if ( is_checkout() || $this->is_order_pay_page() ) {
+		if ( $this->payment_method_service->is_checkout() ) {
 			$this->enqueue_front_checkout();
 		} 
 		
