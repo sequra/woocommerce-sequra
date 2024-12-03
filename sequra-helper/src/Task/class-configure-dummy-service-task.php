@@ -20,7 +20,7 @@ class Configure_Dummy_Service_Task extends Task {
 	private function is_dummy_service_config_in_use(): bool {
 		global $wpdb;
 		$table_name = $this->get_sequra_entity_table_name();
-		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%\"username\":\"dummy_services\"%'";
+		$query      = "SELECT * FROM $table_name WHERE type = 'ConnectionData' AND `data` LIKE '%\"username\":\"dummy_services_automated_tests\"%'";
 		$result     = $wpdb->get_results( $query );
 		return is_array( $result ) && ! empty( $result );
 	}
@@ -43,7 +43,7 @@ class Configure_Dummy_Service_Task extends Task {
 				'index_5' => null,
 				'index_6' => null,
 				'index_7' => null,
-				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\ConnectionData\\\\Entities\\\\ConnectionData","id":null,"storeId":"1","connectionData":{"environment":"sandbox","merchantId":null,"authorizationCredentials":{"username":"dummy_services","password":"nkT\/LVmRilA\/0ZSPv6hlfNE80glXw6mp0BwYBQ4KNlip9xUHfxsgrZwuvWz8PuCHQYDKtNcRYb+u3UUExhcm2VgiEte5Lw=="}}}',
+				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\ConnectionData\\\\Entities\\\\ConnectionData","id":null,"storeId":"1","connectionData":{"environment":"sandbox","merchantId":null,"authorizationCredentials":{"username":"dummy_services_automated_tests","password":"nkT\/LVmRilA\/0ZSPv6hlfNE80glXw6mp0BwYBQ4KNlip9xUHfxsgrZwuvWz8PuCHQYDKtNcRYb+u3UUExhcm2VgiEte5Lw=="}}}',
 			)
 		);
 		$wpdb->insert(
@@ -73,7 +73,7 @@ class Configure_Dummy_Service_Task extends Task {
 				'index_5' => null,
 				'index_6' => null,
 				'index_7' => null,
-				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\CountryConfiguration\\\\Entities\\\\CountryConfiguration","id":null,"storeId":"1","countryConfigurations":[{"countryCode":"ES","merchantId":"dummy_services"}]}',
+				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\CountryConfiguration\\\\Entities\\\\CountryConfiguration","id":null,"storeId":"1","countryConfigurations":[{"countryCode":"ES","merchantId":"dummy_services_automated_tests"}]}',
 			)
 		);
 		$wpdb->insert(

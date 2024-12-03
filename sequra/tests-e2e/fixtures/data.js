@@ -66,16 +66,16 @@ export const sqProduct = {
 
 export const merchant = {
     dummy: {
-        username: 'dummy',
+        username: 'dummy_automated_tests',
         password: process.env.DUMMY_PASSWORD,
         assetsKey: process.env.DUMMY_ASSETS_KEY,
         ref: {
-            ES: 'dummy',
-            FR: 'dummy_fr',
-            IT: 'dummy_it',
-            PT: 'dummy_pt',
-            CO: 'dummy_co',
-            PE: 'dummy_pe',
+            ES: 'dummy_automated_tests',
+            FR: 'dummy_automated_tests_fr',
+            IT: 'dummy_automated_tests_it',
+            PT: 'dummy_automated_tests_pt',
+            CO: 'dummy_automated_tests_co',
+            PE: 'dummy_automated_tests_pe',
         },
         paymentMethods: {
             ES: [
@@ -99,7 +99,7 @@ export const merchant = {
         }
     },
     dummyServices: {
-        username: 'dummy_services',
+        username: 'dummy_services_automated_tests',
         password: process.env.DUMMY_SERVICE_PASSWORD,
     }
 }

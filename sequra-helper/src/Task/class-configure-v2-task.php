@@ -24,8 +24,8 @@ class Configure_V2_Task extends Task {
 				'enabled'                                 => 'yes',
 				'title'                                   => 'Flexible payment with seQura',
 				'sign-up-info'                            => '',
-				'merchantref'                             => 'dummy',
-				'user'                                    => 'dummy',
+				'merchantref'                             => 'dummy_automated_tests',
+				'user'                                    => 'dummy_automated_tests',
 				'password'                                => getenv( 'DUMMY_PASSWORD' ),
 				'assets_secret'                           => getenv( 'DUMMY_ASSETS_KEY' ),
 				'enable_for_virtual'                      => 'no',
@@ -61,9 +61,9 @@ class Configure_V2_Task extends Task {
 	 */
 	public function execute( array $args = array() ): void {
 
-		$ref = $args['merchant_ref'] ?? 'dummy';
+		$ref = $args['merchant_ref'] ?? 'dummy_automated_tests';
 
-		if ( 'dummy' !== $ref ) {
+		if ( 'dummy_automated_tests' !== $ref ) {
 			throw new \Exception( 'Invalid merchant ref', 400 );
 		}
 

@@ -21,7 +21,7 @@ class Configure_Dummy_Task extends Task {
 		$expected_rows = $widgets ? 2 : 1;
 		global $wpdb;
 		$table_name = $this->get_sequra_entity_table_name();
-		$query      = "SELECT * FROM $table_name WHERE (`type` = 'ConnectionData' AND `data` LIKE '%\"username\":\"dummy\"%') OR (`type` = 'WidgetSettings' AND `data` LIKE '%\"displayOnProductPage\":true%')";
+		$query      = "SELECT * FROM $table_name WHERE (`type` = 'ConnectionData' AND `data` LIKE '%\"username\":\"dummy_automated_tests\"%') OR (`type` = 'WidgetSettings' AND `data` LIKE '%\"displayOnProductPage\":true%')";
 		$result     = $wpdb->get_results( $query );
 		return is_array( $result ) && count( $result ) === $expected_rows;
 	}
@@ -74,7 +74,7 @@ class Configure_Dummy_Task extends Task {
 				'index_5' => null,
 				'index_6' => null,
 				'index_7' => null,
-				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\CountryConfiguration\\\\Entities\\\\CountryConfiguration","id":null,"storeId":"1","countryConfigurations":[{"countryCode":"ES","merchantId":"dummy"},{"countryCode":"FR","merchantId":"dummy_fr"},{"countryCode":"IT","merchantId":"dummy_it"},{"countryCode":"PT","merchantId":"dummy_pt"}]}',
+				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\CountryConfiguration\\\\Entities\\\\CountryConfiguration","id":null,"storeId":"1","countryConfigurations":[{"countryCode":"ES","merchantId":"dummy_automated_tests"},{"countryCode":"FR","merchantId":"dummy_automated_tests_fr"},{"countryCode":"IT","merchantId":"dummy_automated_tests_it"},{"countryCode":"PT","merchantId":"dummy_automated_tests_pt"}]}',
 			)
 		);
 

@@ -240,10 +240,10 @@ test.describe('Configuration', () => {
     await generalSettingsPage.expectLoadingShowAndHide();
 
     const defaultCountriesRef = [
-      { country: 'ES', ref: 'dummy' },
-      { country: 'FR', ref: 'dummy_fr' },
-      { country: 'IT', ref: 'dummy_it' },
-      { country: 'PT', ref: 'dummy_pt' },
+      { country: 'ES', ref: 'dummy_automated_tests' },
+      { country: 'FR', ref: 'dummy_automated_tests_fr' },
+      { country: 'IT', ref: 'dummy_automated_tests_it' },
+      { country: 'PT', ref: 'dummy_automated_tests_pt' },
     ];
 
     await generalSettingsPage.expectAvailableCountries(defaultCountriesRef);
