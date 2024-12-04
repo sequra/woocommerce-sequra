@@ -67,7 +67,7 @@ export default class CheckoutPage {
             sqNin: '[name="nin"]',
             sqI1MobilePhone: '[name="mobile_phone"]',
             sqAcceptPrivacyPolicy: '#sequra_privacy_policy_accepted',
-            sqAcceptServiceDuration: '[for="sequra_service_duration_accepted"]',
+            sqAcceptServiceDuration: '#sequra_service_duration_accepted',
             sqIframeBtn: '.actions-section button:not([disabled])',
 
             sqIframePp3: '#sq-identification-pp3',
