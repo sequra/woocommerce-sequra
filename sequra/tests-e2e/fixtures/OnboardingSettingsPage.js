@@ -31,7 +31,7 @@ export default class OnboardingSettingsPage extends SettingsPage {
         }
     }
 
-    async fillConnectForm({ merchant = 'dummy_automated_tests', env = 'sandbox' }) {
+    async fillConnectForm({ merchant = 'dummy', env = 'sandbox' }) {
         await this.page.locator(this.selector.env[env]).click();
         await this.page.locator(this.selector.username).fill(dataMerchant[merchant].username);
         await this.page.locator(this.selector.password).fill(dataMerchant[merchant].password);
@@ -39,7 +39,7 @@ export default class OnboardingSettingsPage extends SettingsPage {
         await this.page.waitForSelector(this.selector.onboarding.completedStepConnect, { timeout: 5000 });
     }
 
-    async fillCountriesForm({ merchant = 'dummy_automated_tests', countries = ['ES'] }) {
+    async fillCountriesForm({ merchant = 'dummy', countries = ['ES'] }) {
         await this.page.locator(this.selector.multiSelect).click();
         await this.page.waitForSelector(this.selector.dropdownListItem, { timeout: 1000 });
 
@@ -59,7 +59,7 @@ export default class OnboardingSettingsPage extends SettingsPage {
         await this.page.waitForSelector(this.selector.onboarding.completedStepCountries, { timeout: 5000 });
     }
 
-    async fillWidgetsForm({ merchant = 'dummy_automated_tests' }) {
+    async fillWidgetsForm({ merchant = 'dummy' }) {
         await this.page.locator(this.selector.yesOption).click();
         await this.page.waitForSelector(this.selector.assetsKey, { timeout: 1000 });
         await this.page.locator(this.selector.assetsKey).click();
