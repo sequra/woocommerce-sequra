@@ -66,7 +66,7 @@ export default class CheckoutPage {
             sqDateOfBirth: '[name="date_of_birth"]',
             sqNin: '[name="nin"]',
             sqI1MobilePhone: '[name="mobile_phone"]',
-            sqAcceptPrivacyPolicy: '[for="sequra_privacy_policy_accepted"]',
+            sqAcceptPrivacyPolicy: '#sequra_privacy_policy_accepted',
             sqAcceptServiceDuration: '[for="sequra_service_duration_accepted"]',
             sqIframeBtn: '.actions-section button:not([disabled])',
 
@@ -188,7 +188,7 @@ export default class CheckoutPage {
         await mainIframe.locator(this.selector.sqPayBtn).click();
     }
 
-    async placeOrderUsingI1({ shopper = 'approve' }) {
+    async placeOrderUsingI1({ shopper = 'approve', forceFailure = false }) {
         await this.page.click(this.selector.paymentMethodI1);
         await this.page.click(this.selector.placeOrder);
         await this.page.waitForURL(/\/checkout\/order-pay\//, { timeout: 5000 });
@@ -204,6 +204,17 @@ export default class CheckoutPage {
         await iframe.locator(this.selector.sqNin).click();
         await iframe.locator(this.selector.sqNin).pressSequentially(shopperData.dni);
         await iframe.locator(this.selector.sqAcceptPrivacyPolicy).click();
+
+        if (forceFailure) {
+            const url = new URL(this.page.url());
+            const orderId = url.pathname.split('/order-pay/')[1].replace('/', '')
+
+            this.helper.executeWebhook({
+                webhook: this.helper.webhooks.FORCE_ORDER_FAILURE,
+                args: [{ name: 'order_id', value: orderId }]
+            });
+        }
+
         await iframe.locator(this.selector.sqIframeBtn).click();
 
         await this.fillOtp({ iframe, shopper });
