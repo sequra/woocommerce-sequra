@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.6.2
-Stable tag: 3.0.4
+Stable tag: 3.0.5
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.0.5	=
+* Fixed: CSS rules for the payment method component.
+* Fixed: Performance improvements due the ignore of bot requests.
+* Fixed: Update place order text button when seQura's payment method is selected.
+* Changed: Remove request to seQura's API from the cart page to improve performance.
 = 3.0.4	=
 * Fixed: Fatal error detected in WordPress 6.4.5 when using shortcode without passing attributes.
 = 3.0.3	=
