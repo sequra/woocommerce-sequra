@@ -79,20 +79,18 @@ export const merchant = {
         },
         paymentMethods: {
             ES: [
-                'Paga con tarjeta',
                 'Paga Después',
                 'Divide tu pago en 3',
-                'Paga Fraccionado',
-                'Divide en 3 0,00 €/mes (DECOMBINED)'
+                'Paga Fraccionado'
             ],
             FR: [
                 'Payez en plusieurs fois'
             ],
             PT: [
-                'Divida seu pagamento em 3'
+                'Pagamento Fracionado'
             ],
             IT: [
-                'Dividi il tuo pagamento in 3'
+                'Pagamento a rate'
             ],
             CO: [],
             PE: []
