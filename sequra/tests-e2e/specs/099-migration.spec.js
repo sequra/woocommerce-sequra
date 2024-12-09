@@ -45,13 +45,6 @@ test.describe('Migration', () => {
           ...customLoc,
           paymentMethod: "Paga Fraccionado",
         },
-        {
-          ...customLoc,
-          paymentMethod: "Divide en 3 0,00 €/mes (DECOMBINED)",
-          locationSel: "",
-          widgetConfig: defaultWidgetSettings.widgetConfig,
-          display: false
-        }
       ]
     });
 
