@@ -533,7 +533,7 @@ class Cart_Service implements Interface_Cart_Service {
 		$services_count = 0;
 		foreach ( WC()->cart->cart_contents as $values ) {
 			if ( $this->product_service->is_service( $values['product_id'] ) ) {
-				$services_count += $values['quantity'];
+				$services_count += (int) $values['quantity'];
 				$eligible        = ( 1 === $services_count );
 			}
 		}
