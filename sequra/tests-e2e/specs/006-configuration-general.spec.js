@@ -55,10 +55,12 @@ test.describe('Configuration', () => {
     }
 
     for (const ipAddresses of notAllowedIPAddressesMatrix) {
+      console.log('Fill not allowed IP addresses:', ipAddresses);
       await fillAndAssert(ipAddresses, false);
     }
 
     for (const ipAddresses of allowedIPAddressesMatrix) {
+      console.log('Fill allowed IP addresses:', ipAddresses);
       await fillAndAssert(ipAddresses, true);
     }
   });
