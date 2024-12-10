@@ -22,7 +22,7 @@ class Store_Service implements StoreServiceInterface {
 	 * @return string
 	 */
 	public function getStoreDomain(): string {
-		return get_site_url();
+		return \get_site_url();
 	}
 
 	/**
@@ -38,7 +38,7 @@ class Store_Service implements StoreServiceInterface {
 			 *
 			 * @var WP_Site $site
 			 */
-			foreach ( get_sites() as $site ) {
+			foreach ( \get_sites() as $site ) {
 				$stores[] = new Store( (string) $site->blog_id, $site->blogname );
 			}
 		} else {
@@ -56,7 +56,7 @@ class Store_Service implements StoreServiceInterface {
 	 * @return Store|null
 	 */
 	public function getDefaultStore(): ?Store {
-		return new Store( (string) get_current_blog_id(), get_bloginfo( 'name' ) );
+		return new Store( (string) \get_current_blog_id(), \get_bloginfo( 'name' ) );
 	}
 
 	/**

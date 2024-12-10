@@ -147,7 +147,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			}
 		}
 
-		$atts = shortcode_atts(
+		$atts = \shortcode_atts(
 			array(
 				'product'      => '',
 				'campaign'     => '',
@@ -179,7 +179,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		}
 
 		ob_start();
-		wc_get_template( 'front/widget.php', $atts, '', $this->templates_path );
+		\wc_get_template( 'front/widget.php', $atts, '', $this->templates_path );
 		return ob_get_clean();
 	}
 
@@ -222,7 +222,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 					continue;
 				}
 
-				$atts = shortcode_atts(
+				$atts = \shortcode_atts(
 					array(
 						'product'             => $method['product'] ?? '',
 						'campaign'            => $method['campaign'] ?? '',
@@ -238,7 +238,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				);
 	
 				ob_start();
-				wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
+				\wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
 				return ob_get_clean();
 			}
 		} catch ( \Throwable $e ) {
@@ -284,7 +284,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 					continue;
 				}
 
-				$atts = shortcode_atts(
+				$atts = \shortcode_atts(
 					array(
 						'product'             => $method['product'] ?? '',
 						'campaign'            => $method['campaign'] ?? '',
@@ -300,7 +300,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				);
 	
 				ob_start();
-				wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
+				\wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
 				return ob_get_clean();
 			}
 		} catch ( \Throwable $e ) {
@@ -313,7 +313,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * Add [sequra_widget] to product page automatically
 	 */
 	private function add_widget_shortcode_to_product_page(): void {
-		if ( ! is_product() ) {
+		if ( ! \is_product() ) {
 			return;
 		}
 		/**
@@ -348,7 +348,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			foreach ( $atts as $key => $value ) {
 				$atts_str .= " $key=\"$value\"";
 			}
-			echo do_shortcode( "[sequra_widget $atts_str]" );
+			echo \do_shortcode( "[sequra_widget $atts_str]" );
 		}
 	}
 
@@ -356,20 +356,20 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * Add [sequra_cart_widget] to product page automatically
 	 */
 	private function add_widget_shortcode_to_cart_page(): void {
-		if ( ! is_cart() ) {
+		if ( ! \is_cart() ) {
 			return;
 		}
-		echo do_shortcode( '[sequra_cart_widget]' );
+		echo \do_shortcode( '[sequra_cart_widget]' );
 	}
 
 	/**
 	 * Add [sequra_product_listing_widget] to product archive automatically
 	 */
 	private function add_widget_shortcode_to_product_listing_page(): void {
-		if ( ! is_product_category() && ! is_product_tag() && ! is_shop() ) {
+		if ( ! \is_product_category() && ! \is_product_tag() && ! \is_shop() ) {
 			return;
 		}
-		echo do_shortcode( '[sequra_product_listing_widget]' );
+		echo \do_shortcode( '[sequra_product_listing_widget]' );
 	}
 
 	/**
@@ -380,7 +380,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 */
 	public function add_widget_shortcode_to_page() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-		if ( did_action( 'before_woocommerce_sequra_add_widget_to_page' ) ) {
+		if ( \did_action( 'before_woocommerce_sequra_add_widget_to_page' ) ) {
 			return;
 		}
 
@@ -389,7 +389,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		 *
 		 * @since 3.0.0
 		 */
-		do_action( 'before_woocommerce_sequra_add_widget_to_page' );
+		\do_action( 'before_woocommerce_sequra_add_widget_to_page' );
 
 		$this->add_widget_shortcode_to_product_page();
 		$this->add_widget_shortcode_to_cart_page();
@@ -402,7 +402,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * @return void
 	 */
 	public function add_meta_boxes() {
-		add_meta_box( 'sequra_settings', esc_html__( 'seQura settings', 'sequra' ), array( $this, 'render_meta_boxes' ), 'product', 'side', 'default' );
+		\add_meta_box( 'sequra_settings', \esc_html__( 'seQura settings', 'sequra' ), array( $this, 'render_meta_boxes' ), 'product', 'side', 'default' );
 	}
 
 	/**
@@ -430,7 +430,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			'service_registration_amount_field_name'       => self::FIELD_NAME_REGISTRATION_AMOUNT,
 			'nonce_name'                                   => self::NONCE_SEQURA_PRODUCT,
 		);
-		wc_get_template( 'admin/product_metabox.php', $args, '', $this->templates_path );
+		\wc_get_template( 'admin/product_metabox.php', $args, '', $this->templates_path );
 	}
 
 	/**
@@ -441,16 +441,16 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 */
 	public function save_product_meta( $post_id ) {
 		if ( ! isset( $_POST[ self::NONCE_SEQURA_PRODUCT ] ) 
-		|| ! wp_verify_nonce( $_POST[ self::NONCE_SEQURA_PRODUCT ], -1 ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		|| ! current_user_can( 'edit_post', $post_id )
-		|| wp_doing_ajax() ) {
+		|| ! \wp_verify_nonce( $_POST[ self::NONCE_SEQURA_PRODUCT ], -1 ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		|| ! \current_user_can( 'edit_post', $post_id )
+		|| \wp_doing_ajax() ) {
 			return;
 		}
 
-		$this->product_service->set_is_banned( $post_id, isset( $_POST[ self::FIELD_NAME_IS_BANNED ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_IS_BANNED ] ) ) : null );
-		$this->product_service->set_is_service( $post_id, isset( $_POST[ self::FIELD_NAME_IS_SERVICE ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_IS_SERVICE ] ) ) : null );
-		$this->product_service->set_service_end_date( $post_id, ! empty( $_POST[ self::FIELD_NAME_SERVICE_END_DATE ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_SERVICE_END_DATE ] ) ) : null );
-		$this->product_service->set_desired_first_charge_date( $post_id, ! empty( $_POST[ self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE ] ) ) : null );
-		$this->product_service->set_registration_amount( $post_id, ! empty( $_POST[ self::FIELD_NAME_REGISTRATION_AMOUNT ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::FIELD_NAME_REGISTRATION_AMOUNT ] ) ) : null );
+		$this->product_service->set_is_banned( $post_id, isset( $_POST[ self::FIELD_NAME_IS_BANNED ] ) ? \sanitize_text_field( \wp_unslash( $_POST[ self::FIELD_NAME_IS_BANNED ] ) ) : null );
+		$this->product_service->set_is_service( $post_id, isset( $_POST[ self::FIELD_NAME_IS_SERVICE ] ) ? \sanitize_text_field( \wp_unslash( $_POST[ self::FIELD_NAME_IS_SERVICE ] ) ) : null );
+		$this->product_service->set_service_end_date( $post_id, ! empty( $_POST[ self::FIELD_NAME_SERVICE_END_DATE ] ) ? \sanitize_text_field( \wp_unslash( $_POST[ self::FIELD_NAME_SERVICE_END_DATE ] ) ) : null );
+		$this->product_service->set_desired_first_charge_date( $post_id, ! empty( $_POST[ self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE ] ) ? \sanitize_text_field( \wp_unslash( $_POST[ self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE ] ) ) : null );
+		$this->product_service->set_registration_amount( $post_id, ! empty( $_POST[ self::FIELD_NAME_REGISTRATION_AMOUNT ] ) ? \sanitize_text_field( \wp_unslash( $_POST[ self::FIELD_NAME_REGISTRATION_AMOUNT ] ) ) : null );
 	}
 }

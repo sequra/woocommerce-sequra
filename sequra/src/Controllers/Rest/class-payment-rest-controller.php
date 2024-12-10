@@ -80,7 +80,7 @@ class Payment_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -128,6 +128,6 @@ class Payment_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 }

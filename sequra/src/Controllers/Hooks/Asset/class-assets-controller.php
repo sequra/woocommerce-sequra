@@ -131,12 +131,12 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			return;
 		}
 		// Styles.
-		wp_enqueue_style( self::HANDLE_CORE, "{$this->assets_dir_url}/css/sequra-core.css", array(), self::INTEGRATION_CORE_VERSION );
+		\wp_enqueue_style( self::HANDLE_CORE, "{$this->assets_dir_url}/css/sequra-core.css", array(), self::INTEGRATION_CORE_VERSION );
 		
 		// Scripts.
-		wp_register_script( self::HANDLE_SETTINGS_PAGE, "{$this->assets_dir_url}/js/dist/page/settings.min.js", array(), $this->assets_version, true );
-		wp_localize_script( self::HANDLE_SETTINGS_PAGE, 'SequraFE', $this->get_sequra_fe_l10n() );
-		wp_enqueue_script( self::HANDLE_SETTINGS_PAGE );
+		\wp_register_script( self::HANDLE_SETTINGS_PAGE, "{$this->assets_dir_url}/js/dist/page/settings.min.js", array(), $this->assets_version, true );
+		\wp_localize_script( self::HANDLE_SETTINGS_PAGE, 'SequraFE', $this->get_sequra_fe_l10n() );
+		\wp_enqueue_script( self::HANDLE_SETTINGS_PAGE );
 	}
 
 	/**
@@ -146,25 +146,25 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	private function get_sequra_fe_l10n(): array {
 		$connection_config      = array(
-			'getConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
+			'getConnectionDataUrl' => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
 		);
 		$payment_page_config    = array_merge(
 			$connection_config,
 			array(
-				'getPaymentMethodsUrl'      => get_rest_url( null, 'sequra/v1/payment/methods/{storeId}/{merchantId}' ),
-				'getAllPaymentMethodsUrl'   => get_rest_url( null, 'sequra/v1/payment/methods/{storeId}' ),
-				'getSellingCountriesUrl'    => get_rest_url( null, 'sequra/v1/onboarding/countries/selling/{storeId}' ),
-				'getCountrySettingsUrl'     => get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
-				'validateConnectionDataUrl' => get_rest_url( null, 'sequra/v1/onboarding/data/validate/{storeId}' ),
+				'getPaymentMethodsUrl'      => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}/{merchantId}' ),
+				'getAllPaymentMethodsUrl'   => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}' ),
+				'getSellingCountriesUrl'    => \get_rest_url( null, 'sequra/v1/onboarding/countries/selling/{storeId}' ),
+				'getCountrySettingsUrl'     => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
+				'validateConnectionDataUrl' => \get_rest_url( null, 'sequra/v1/onboarding/data/validate/{storeId}' ),
 			)
 		);
 		$onboarding_page_config = array_merge(
 			$payment_page_config, 
 			array(
-				'saveConnectionDataUrl'  => get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
-				'saveCountrySettingsUrl' => get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
-				'getWidgetSettingsUrl'   => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
-				'saveWidgetSettingsUrl'  => get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
+				'saveConnectionDataUrl'  => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
+				'saveCountrySettingsUrl' => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
+				'getWidgetSettingsUrl'   => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
+				'saveWidgetSettingsUrl'  => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
 			)
 		);
 		$page_config            = array(
@@ -173,39 +173,39 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				$onboarding_page_config,
 				array(
 					'getShopPaymentMethodsUrl'          => '', // Not used in this implementation.
-					'getShopCategoriesUrl'              => get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
-					'getGeneralSettingsUrl'             => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
-					'saveGeneralSettingsUrl'            => get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
-					'getShopOrderStatusesUrl'           => get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
-					'getOrderStatusMappingSettingsUrl'  => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
-					'saveOrderStatusMappingSettingsUrl' => get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
-					'disconnectUrl'                     => get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
+					'getShopCategoriesUrl'              => \get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
+					'getGeneralSettingsUrl'             => \get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
+					'saveGeneralSettingsUrl'            => \get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
+					'getShopOrderStatusesUrl'           => \get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
+					'getOrderStatusMappingSettingsUrl'  => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
+					'saveOrderStatusMappingSettingsUrl' => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
+					'disconnectUrl'                     => \get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
 				)
 			),
 			'payment'      => $payment_page_config,
 			'transactions' => array_merge(
 				$connection_config,
 				array(
-					'getTransactionLogsUrl' => get_rest_url( null, 'sequra/v1/log/{storeId}' ),
+					'getTransactionLogsUrl' => \get_rest_url( null, 'sequra/v1/log/{storeId}' ),
 				)
 			),
 			'advanced'     => array_merge(
 				$connection_config,
 				array(
-					'getLogsUrl'          => get_rest_url( null, 'sequra/v1/log/{storeId}' ),
-					'removeLogsUrl'       => get_rest_url( null, 'sequra/v1/log/{storeId}' ),
-					'getLogsSettingsUrl'  => get_rest_url( null, 'sequra/v1/log/settings/{storeId}' ),
-					'saveLogsSettingsUrl' => get_rest_url( null, 'sequra/v1/log/settings/{storeId}' ),
+					'getLogsUrl'          => \get_rest_url( null, 'sequra/v1/log/{storeId}' ),
+					'removeLogsUrl'       => \get_rest_url( null, 'sequra/v1/log/{storeId}' ),
+					'getLogsSettingsUrl'  => \get_rest_url( null, 'sequra/v1/log/settings/{storeId}' ),
+					'saveLogsSettingsUrl' => \get_rest_url( null, 'sequra/v1/log/settings/{storeId}' ),
 				)
 			),
 		);
 
 		$state_controller = array(
-			'storesUrl'         => get_rest_url( null, 'sequra/v1/settings/stores/{storeId}' ),
-			'currentStoreUrl'   => get_rest_url( null, 'sequra/v1/settings/current-store' ),
-			'stateUrl'          => get_rest_url( null, 'sequra/v1/settings/state/{storeId}' ),
-			'versionUrl'        => get_rest_url( null, 'sequra/v1/settings/version/{storeId}' ),
-			'shopNameUrl'       => get_rest_url( null, 'sequra/v1/settings/shop-name/{storeId}' ),
+			'storesUrl'         => \get_rest_url( null, 'sequra/v1/settings/stores/{storeId}' ),
+			'currentStoreUrl'   => \get_rest_url( null, 'sequra/v1/settings/current-store' ),
+			'stateUrl'          => \get_rest_url( null, 'sequra/v1/settings/state/{storeId}' ),
+			'versionUrl'        => \get_rest_url( null, 'sequra/v1/settings/version/{storeId}' ),
+			'shopNameUrl'       => \get_rest_url( null, 'sequra/v1/settings/shop-name/{storeId}' ),
 			'pageConfiguration' => $page_config,
 		);
 
@@ -234,7 +234,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			),
 			'isPromotional'     => false,
 			'_state_controller' => $state_controller,
-			'customHeader'      => array( 'X-WP-Nonce' => wp_create_nonce( 'wp_rest' ) ),
+			'customHeader'      => array( 'X-WP-Nonce' => \wp_create_nonce( 'wp_rest' ) ),
 
 			'regex'             => array(
 				'ip'             => $this->regex->ip( false ),
@@ -259,8 +259,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $this->configuration->get_store_id(), $merchant );
 		return array(
 			'scriptUri'         => $this->assets->get_cdn_resource_uri( $this->configuration->get_env(), 'sequra-checkout.min.js' ),
-			'thousandSeparator' => wc_get_price_thousand_separator(),
-			'decimalSeparator'  => wc_get_price_decimal_separator(),
+			'thousandSeparator' => \wc_get_price_thousand_separator(),
+			'decimalSeparator'  => \wc_get_price_decimal_separator(),
 			'locale'            => $this->i18n->get_locale(),
 			'merchant'          => $merchant,
 			'assetKey'          => $this->configuration->get_assets_key(),
@@ -289,8 +289,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * Enqueue styles and scripts in Front-End for the checkout page
 	 */
 	private function enqueue_front_checkout(): void {
-		wp_enqueue_style( self::HANDLE_CHECKOUT, "{$this->assets_dir_url}/css/checkout.css", array(), $this->assets_version );
-		wp_register_script( 
+		\wp_enqueue_style( self::HANDLE_CHECKOUT, "{$this->assets_dir_url}/css/checkout.css", array(), $this->assets_version );
+		\wp_register_script( 
 			self::HANDLE_CHECKOUT,
 			"{$this->assets_dir_url}/js/dist/page/checkout.min.js",
 			array(),
@@ -312,14 +312,14 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default()
 		);
 
-		wp_localize_script(
+		\wp_localize_script(
 			self::HANDLE_CHECKOUT,
 			'SeQuraCheckout',
 			array(
 				'isBlockCheckout' => $is_block,
 			) 
 		);
-		wp_enqueue_script( self::HANDLE_CHECKOUT );
+		\wp_enqueue_script( self::HANDLE_CHECKOUT );
 	}
 
 	/**
@@ -327,49 +327,49 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	private function enqueue_front_widgets(): void {
 		
-		wp_enqueue_style( self::HANDLE_WIDGET, "{$this->assets_dir_url}/css/widget.css", array(), $this->assets_version );
-		wp_register_script( 
+		\wp_enqueue_style( self::HANDLE_WIDGET, "{$this->assets_dir_url}/css/widget.css", array(), $this->assets_version );
+		\wp_register_script( 
 			self::HANDLE_WIDGET, 
 			"{$this->assets_dir_url}/js/dist/page/widget-facade.min.js",
 			array(),
 			$this->assets_version,
 			$this->get_script_args( self::STRATEGY_DEFER, false )
 		);
-		wp_localize_script( self::HANDLE_WIDGET, 'SequraWidgetFacade', $this->get_sequra_widget_facade_l10n() );
-		wp_enqueue_script( self::HANDLE_WIDGET );
+		\wp_localize_script( self::HANDLE_WIDGET, 'SequraWidgetFacade', $this->get_sequra_widget_facade_l10n() );
+		\wp_enqueue_script( self::HANDLE_WIDGET );
 	}
 
 	/**
 	 * Check if the current post has the widget shortcode in its content
 	 */
 	private function has_widget_shortcode(): bool {
-		if ( is_checkout() || is_cart() || ! is_singular() ) {
+		if ( \is_checkout() || \is_cart() || ! \is_singular() ) {
 			return false;
 		}
 		global $post;
-		return has_shortcode( $post->post_content, 'sequra_widget' );
+		return \has_shortcode( $post->post_content, 'sequra_widget' );
 	}
 
 	/**
 	 * Check if the current post has the cart widget shortcode in its content
 	 */
 	private function has_cart_widget_shortcode(): bool {
-		if ( is_checkout() || is_product() || ! is_page() ) {
+		if ( \is_checkout() || \is_product() || ! \is_page() ) {
 			return false;
 		}
 		global $post;
-		return has_shortcode( $post->post_content, 'sequra_cart_widget' );
+		return \has_shortcode( $post->post_content, 'sequra_cart_widget' );
 	}
 
 	/**
 	 * Check if the current post has the cart widget shortcode in its content
 	 */
 	private function has_product_listing_widget_shortcode(): bool {
-		if ( is_checkout() || is_product() || is_cart() || ! is_page() ) {
+		if ( \is_checkout() || \is_product() || \is_cart() || ! \is_page() ) {
 			return false;
 		}
 		global $post;
-		return has_shortcode( $post->post_content, 'sequra_product_listing_widget' );
+		return \has_shortcode( $post->post_content, 'sequra_product_listing_widget' );
 	}
 	
 	/**
@@ -383,13 +383,13 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			$this->enqueue_front_checkout();
 		} 
 		
-		if ( is_product() 
+		if ( \is_product() 
 		|| $this->has_widget_shortcode() 
-		|| is_cart() 
+		|| \is_cart() 
 		|| $this->has_cart_widget_shortcode()
-		|| is_product_category() 
-		|| is_product_tag() 
-		|| is_shop()
+		|| \is_product_category() 
+		|| \is_product_tag() 
+		|| \is_shop()
 		|| $this->has_product_listing_widget_shortcode() ) {
 			$this->enqueue_front_widgets();
 		}

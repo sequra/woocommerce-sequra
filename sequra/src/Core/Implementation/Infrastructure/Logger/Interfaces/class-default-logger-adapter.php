@@ -85,7 +85,7 @@ class Default_Logger_Adapter implements DefaultLoggerAdapter {
 						}
 						$ctx[] = $arr;
 					}
-					$ctx_data .= ' ' . wp_json_encode( $ctx, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS );
+					$ctx_data .= ' ' . \wp_json_encode( $ctx, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS );
 				}
 
 				$formatted_message = sprintf(

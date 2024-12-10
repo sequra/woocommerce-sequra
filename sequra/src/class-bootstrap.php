@@ -180,7 +180,7 @@ class Bootstrap extends BootstrapComponent {
 			'plugin.dir_path',
 			static function () {
 				if ( ! isset( self::$cache['plugin.dir_path'] ) ) {
-					self::$cache['plugin.dir_path'] = trailingslashit( dirname( __DIR__, 1 ) );
+					self::$cache['plugin.dir_path'] = \trailingslashit( dirname( __DIR__, 1 ) );
 				}
 				return self::$cache['plugin.dir_path'];
 			}
@@ -208,7 +208,7 @@ class Bootstrap extends BootstrapComponent {
 			'plugin.basename',
 			static function () {
 				if ( ! isset( self::$cache['plugin.basename'] ) ) {
-					self::$cache['plugin.basename'] = plugin_basename( Reg::getService( 'plugin.dir_path' ) . 'sequra.php' );
+					self::$cache['plugin.basename'] = \plugin_basename( Reg::getService( 'plugin.dir_path' ) . 'sequra.php' );
 				}
 				return self::$cache['plugin.basename'];
 			}
@@ -218,7 +218,7 @@ class Bootstrap extends BootstrapComponent {
 			'plugin.dir_url',
 			static function () {
 				if ( ! isset( self::$cache['plugin.dir_url'] ) ) {
-					self::$cache['plugin.dir_url'] = plugin_dir_url( Reg::getService( 'plugin.file_path' ) );
+					self::$cache['plugin.dir_url'] = \plugin_dir_url( Reg::getService( 'plugin.file_path' ) );
 				}
 				return self::$cache['plugin.dir_url'];
 			}
@@ -241,7 +241,7 @@ class Bootstrap extends BootstrapComponent {
 					if ( ! function_exists( 'get_plugin_data' ) ) {
 						require_once ABSPATH . 'wp-admin/includes/plugin.php';
 					}
-					self::$cache['woocommerce.data'] = get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php' );
+					self::$cache['woocommerce.data'] = \get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php' );
 				}
 				return self::$cache['woocommerce.data'];
 			}
@@ -258,9 +258,9 @@ class Bootstrap extends BootstrapComponent {
 						$headers['WC requires at least'] = 'WC requires at least';
 						return $headers;
 					};
-					add_filter( 'extra_plugin_headers', $add_wc_headers );
-					$data = get_plugin_data( Reg::getService( 'plugin.file_path' ) );
-					remove_filter( 'extra_plugin_headers', $add_wc_headers );
+					\add_filter( 'extra_plugin_headers', $add_wc_headers );
+					$data = \get_plugin_data( Reg::getService( 'plugin.file_path' ) );
+					\remove_filter( 'extra_plugin_headers', $add_wc_headers );
 					$data['RequiresWC'] = $data['WC requires at least'];
 					unset( $data['WC requires at least'] );
 
@@ -317,7 +317,7 @@ class Bootstrap extends BootstrapComponent {
 			'plugin.assets_url',
 			static function () {
 				if ( ! isset( self::$cache['plugin.assets_url'] ) ) {
-					self::$cache['plugin.assets_url'] = untrailingslashit( Reg::getService( 'plugin.dir_url' ) ) . '/assets';
+					self::$cache['plugin.assets_url'] = \untrailingslashit( Reg::getService( 'plugin.dir_url' ) ) . '/assets';
 				}
 				return self::$cache['plugin.assets_url'];
 			}

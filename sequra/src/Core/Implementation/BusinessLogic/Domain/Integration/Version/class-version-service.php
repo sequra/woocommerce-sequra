@@ -54,14 +54,14 @@ class Version_Service implements VersionServiceInterface {
 		if ( ! function_exists( 'plugins_api' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 		}
-		$response = plugins_api(
+		$response = \plugins_api(
 			'plugin_information',
 			array(
 				'slug'   => 'sequra',
 				'fields' => array( 'version' => true ),
 			) 
 		);
-		if ( is_wp_error( $response ) || empty( $response->version ) ) {
+		if ( \is_wp_error( $response ) || empty( $response->version ) ) {
 			return '';
 		}
 

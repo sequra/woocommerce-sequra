@@ -94,7 +94,7 @@ class Order_Report_Service implements OrderReportServiceInterface {
 			 *
 			 * @var WC_Order $order
 			 */
-			$order = wc_get_order( $order_id );
+			$order = \wc_get_order( $order_id );
 			if ( ! $order instanceof WC_Order ) {
 				continue;
 			}
@@ -144,7 +144,7 @@ class Order_Report_Service implements OrderReportServiceInterface {
 			 *
 			 * @var WC_Order $order
 			 */
-			$order = wc_get_order( $order_id );
+			$order = \wc_get_order( $order_id );
 			if ( ! $order instanceof WC_Order ) {
 				continue;
 			}

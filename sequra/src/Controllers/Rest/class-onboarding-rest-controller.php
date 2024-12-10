@@ -162,7 +162,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -190,7 +190,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -238,7 +238,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -259,7 +259,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -280,7 +280,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -301,7 +301,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -329,7 +329,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -360,7 +360,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -390,7 +390,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			 * @since 3.0.0
 			 * @var Mini_Widget[] $cart_mini_widgets The cart mini widgets.
 			 */
-			$cart_mini_widgets = apply_filters( 'sequra_widget_settings_cart_mini_widgets', array(), $store_id );
+			$cart_mini_widgets = \apply_filters( 'sequra_widget_settings_cart_mini_widgets', array(), $store_id );
 			if ( ! is_array( $cart_mini_widgets ) ) {
 				$this->logger->log_debug( 'Invalid cart mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
 				$cart_mini_widgets = array();
@@ -409,7 +409,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			 * @since 3.0.0
 			 * @var Mini_Widget[] $listing_mini_widgets The product listing mini widgets.
 			 */
-			$listing_mini_widgets = apply_filters( 'sequra_widget_settings_product_listing_mini_widgets', array(), $store_id );
+			$listing_mini_widgets = \apply_filters( 'sequra_widget_settings_product_listing_mini_widgets', array(), $store_id );
 			if ( ! is_array( $listing_mini_widgets ) ) {
 				$this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
 				$listing_mini_widgets = array();
@@ -453,7 +453,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -568,8 +568,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 */
 	public function sanitize_widget_labels( $param ): array {
 		return array(
-			'message'           => sanitize_text_field( strval( $param['message'] ) ),
-			'messageBelowLimit' => sanitize_text_field( strval( $param['messageBelowLimit'] ) ),
+			'message'           => \sanitize_text_field( strval( $param['message'] ) ),
+			'messageBelowLimit' => \sanitize_text_field( strval( $param['messageBelowLimit'] ) ),
 		);
 	}
 
@@ -626,7 +626,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$country  = $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ];
 			$product  = $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ];
 			$campaign = $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ?? null;
-			$found    = array_filter(
+			$found    = \array_filter(
 				$param,
 				function ( $loc ) use ( $country, $product, $campaign ) {
 					return isset( $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], $loc[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
@@ -651,11 +651,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function sanitize_widget_location_list( $param ): array {
 		foreach ( $param as &$location ) {
 			$location = array(
-				self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] ) ),
-				self::PARAM_CUSTOM_LOCATION_PRODUCT        => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] ) ),
-				self::PARAM_CUSTOM_LOCATION_COUNTRY        => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] ) ),
-				self::PARAM_CUSTOM_LOCATION_CAMPAIGN       => isset( $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ) ? sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ) ) : null,
-				self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES  => sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ] ) ),
+				self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] ) ),
+				self::PARAM_CUSTOM_LOCATION_PRODUCT        => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] ) ),
+				self::PARAM_CUSTOM_LOCATION_COUNTRY        => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] ) ),
+				self::PARAM_CUSTOM_LOCATION_CAMPAIGN       => isset( $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ) ? \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ) ) : null,
+				self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES  => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ] ) ),
 				self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET => (bool) $location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ],
 			);
 		}

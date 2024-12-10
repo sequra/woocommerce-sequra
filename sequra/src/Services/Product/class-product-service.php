@@ -96,7 +96,7 @@ class Product_Service implements Interface_Product_Service {
 		if ( $product instanceof WC_Product ) {
 			return $product;
 		}
-		$_product = wc_get_product( $product );
+		$_product = \wc_get_product( $product );
 		return ! $_product ? null : $_product;
 	}
 
@@ -139,7 +139,7 @@ class Product_Service implements Interface_Product_Service {
 		 *
 		 * @since 2.0.0
 		 */
-		$service_end_date = apply_filters(
+		$service_end_date = \apply_filters(
 			'woocommerce_sequra_add_service_end_date',
 			$product->get_meta( self::META_KEY_SEQURA_SERVICE_END_DATE, true ),
 			$product,
@@ -211,14 +211,14 @@ class Product_Service implements Interface_Product_Service {
 		*
 		* @since 2.0.0
 		*/
-		$return = (bool) apply_filters_deprecated( 'woocommerce_sq_is_available_in_product_page', array( $return, $product->get_id() ), '3.0.0', 'sequra_can_display_widgets' );
+		$return = (bool) \apply_filters_deprecated( 'woocommerce_sq_is_available_in_product_page', array( $return, $product->get_id() ), '3.0.0', 'sequra_can_display_widgets' );
 		
 		/**
 		 * Filter widget availability for a given product
 		 *
 		 * @since 3.0.0
 		 */
-		return (bool) apply_filters( 'sequra_can_display_widgets', $return, $product );
+		return (bool) \apply_filters( 'sequra_can_display_widgets', $return, $product );
 	}
 
 	/**
@@ -244,7 +244,7 @@ class Product_Service implements Interface_Product_Service {
 		*
 		* @since 3.0.0
 		*/
-		return (bool) apply_filters( 'sequra_can_display_widget_for_method', $return, $product, $method );
+		return (bool) \apply_filters( 'sequra_can_display_widget_for_method', $return, $product, $method );
 	}
 
 	/**
@@ -252,9 +252,9 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function set_is_service( int $product_id, ?string $value ): void {
 		if ( null === $value ) {
-			delete_post_meta( $product_id, self::META_KEY_IS_SEQURA_SERVICE );
+			\delete_post_meta( $product_id, self::META_KEY_IS_SEQURA_SERVICE );
 		} else {
-			update_post_meta( $product_id, self::META_KEY_IS_SEQURA_SERVICE, 'yes' === $value ? 'yes' : 'no' );
+			\update_post_meta( $product_id, self::META_KEY_IS_SEQURA_SERVICE, 'yes' === $value ? 'yes' : 'no' );
 		}
 	}
 
@@ -263,9 +263,9 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function set_is_banned( int $product_id, ?string $value ): void {
 		if ( null === $value ) {
-			delete_post_meta( $product_id, self::META_KEY_IS_SEQURA_BANNED );
+			\delete_post_meta( $product_id, self::META_KEY_IS_SEQURA_BANNED );
 		} else {
-			update_post_meta( $product_id, self::META_KEY_IS_SEQURA_BANNED, 'yes' === $value ? 'yes' : 'no' );
+			\update_post_meta( $product_id, self::META_KEY_IS_SEQURA_BANNED, 'yes' === $value ? 'yes' : 'no' );
 		}
 	}
 
@@ -274,9 +274,9 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function set_service_end_date( int $product_id, ?string $value ): void {
 		if ( null === $value ) {
-			delete_post_meta( $product_id, self::META_KEY_SEQURA_SERVICE_END_DATE );
+			\delete_post_meta( $product_id, self::META_KEY_SEQURA_SERVICE_END_DATE );
 		} else {
-			update_post_meta( $product_id, self::META_KEY_SEQURA_SERVICE_END_DATE, $value );
+			\update_post_meta( $product_id, self::META_KEY_SEQURA_SERVICE_END_DATE, $value );
 		}
 	}
 
@@ -285,9 +285,9 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function set_desired_first_charge_date( int $product_id, ?string $value ): void {
 		if ( null === $value ) {
-			delete_post_meta( $product_id, self::META_KEY_DESIRED_FIRST_CHARGE_DATE );
+			\delete_post_meta( $product_id, self::META_KEY_DESIRED_FIRST_CHARGE_DATE );
 		} else {
-			update_post_meta( $product_id, self::META_KEY_DESIRED_FIRST_CHARGE_DATE, $value );
+			\update_post_meta( $product_id, self::META_KEY_DESIRED_FIRST_CHARGE_DATE, $value );
 		}
 	}
 
@@ -296,9 +296,9 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function set_registration_amount( int $product_id, ?float $value ): void {
 		if ( null === $value ) {
-			delete_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT );
+			\delete_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT );
 		} else {
-			update_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT, $value );
+			\update_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT, $value );
 		}
 	}
 }

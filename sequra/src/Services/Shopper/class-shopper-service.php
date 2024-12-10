@@ -21,11 +21,11 @@ class Shopper_Service implements Interface_Shopper_Service {
 	public function get_ip(): string {
 		// phpcs:disable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
 		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
+			return \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
 		} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+			return \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
 		} elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+			return \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
 		// phpcs:enable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
 		return '';
@@ -37,7 +37,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 	public function get_user_agent(): string {
 		// phpcs:disable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
 		if ( ! empty( $_SERVER['HTTP_USER_AGENT'] ) ) {
-			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+			return \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
 		}
 		// phpcs:enable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
 		return '';
@@ -54,7 +54,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 * Get customer date of birth
 	 */
 	public function get_date_of_birth( int $customer_id ): string {
-		return strval( get_user_meta( $customer_id, self::META_KEY_DATE_OF_BIRTH, true ) );
+		return strval( \get_user_meta( $customer_id, self::META_KEY_DATE_OF_BIRTH, true ) );
 	}
 
 	/**
@@ -62,7 +62,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 */
 	public function is_using_mobile(): bool {
 		// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
-		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ) : '';
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? \sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ) : '';
 
 		if ( empty( $user_agent ) ) {
 			return false;
@@ -79,7 +79,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 			return true;
 		}
 
-		$http_accept = isset( $_SERVER['HTTP_ACCEPT'] ) ? strtolower( sanitize_text_field( $_SERVER['HTTP_ACCEPT'] ) ) : '';
+		$http_accept = isset( $_SERVER['HTTP_ACCEPT'] ) ? strtolower( \sanitize_text_field( $_SERVER['HTTP_ACCEPT'] ) ) : '';
 
 		if ( strpos( $http_accept, 'application/vnd.wap.xhtml+xml' ) > 0 
 		|| isset( $_SERVER['HTTP_X_WAP_PROFILE'] ) 
@@ -181,7 +181,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 			return true;
 		}
 
-		if ( isset( $_SERVER['ALL_HTTP'] ) && strpos( strtolower( sanitize_text_field( $_SERVER['ALL_HTTP'] ) ), 'OperaMini' ) > 0 ) {
+		if ( isset( $_SERVER['ALL_HTTP'] ) && strpos( strtolower( \sanitize_text_field( $_SERVER['ALL_HTTP'] ) ), 'OperaMini' ) > 0 ) {
 			return true;
 		}
 

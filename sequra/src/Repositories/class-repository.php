@@ -419,7 +419,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			'index_5' => null,
 			'index_6' => null,
 			'index_7' => null,
-			'data'    => wp_json_encode( $entity->toArray() ),
+			'data'    => \wp_json_encode( $entity->toArray() ),
 		);
 
 		foreach ( $indexes as $index => $value ) {
@@ -441,7 +441,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	protected function validate_index_column( $column, array $index_map ) {
 		if ( 'id' !== $column && ! array_key_exists( $column, $index_map ) ) {
-			throw new QueryFilterInvalidParamException( esc_html__( 'Column is not id or index.', 'sequra' ) );
+			throw new QueryFilterInvalidParamException( \esc_html__( 'Column is not id or index.', 'sequra' ) );
 		}
 	}
 
@@ -452,14 +452,14 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( ! $this->table_exists() ) {
 			return false;
 		}
-		return false !== $this->db->query( 'DELETE FROM ' . sanitize_text_field( $this->get_table_name() ) );
+		return false !== $this->db->query( 'DELETE FROM ' . \sanitize_text_field( $this->get_table_name() ) );
 	}
 
 	/**
 	 * Check if table exists in the database.
 	 */
 	protected function table_exists(): bool {
-		$table_name = sanitize_text_field( $this->get_table_name() );
+		$table_name = \sanitize_text_field( $this->get_table_name() );
 		return $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
 	}
 }

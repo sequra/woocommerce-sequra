@@ -43,7 +43,7 @@ class I18n_Controller extends Controller implements Interface_I18n_Controller {
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->text_domain = $text_domain;
-		$this->domain_path = trailingslashit( $domain_path );
+		$this->domain_path = \trailingslashit( $domain_path );
 	}
 
 	/**
@@ -53,6 +53,6 @@ class I18n_Controller extends Controller implements Interface_I18n_Controller {
 	 */
 	public function load_text_domain() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-		load_plugin_textdomain( $this->text_domain, false, $this->domain_path );
+		\load_plugin_textdomain( $this->text_domain, false, $this->domain_path );
 	}
 }

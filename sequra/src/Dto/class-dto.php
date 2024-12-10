@@ -69,7 +69,7 @@ abstract class Dto {
 	 * Encode the DTO instance into a raw string. By default, returns a JSON string.
 	 */
 	public function encode(): string {
-		$encoded = wp_json_encode( $this, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		$encoded = \wp_json_encode( $this, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 		return $encoded ? $encoded : '';
 	}
 }

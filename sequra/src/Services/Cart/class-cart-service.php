@@ -181,7 +181,7 @@ class Cart_Service implements Interface_Cart_Service {
 		}
 
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
-		$name = wp_strip_all_tags( $product->get_title() );
+		$name = \wp_strip_all_tags( $product->get_title() );
 
 		return new Registration_Item(
 			"$ref-reg",
@@ -197,14 +197,14 @@ class Cart_Service implements Interface_Cart_Service {
 	 */
 	private function get_item( WC_Product $product, float $total_price, ?Registration_Item $reg_item, int $qty, $item ) {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
-		$name = wp_strip_all_tags( $product->get_title() );
+		$name = \wp_strip_all_tags( $product->get_title() );
 		if ( $this->configuration->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
 			/**
 			* Filter the service end date.
 			*
 			* @since 2.0.0
 			*/
-			$service_end_date = apply_filters(
+			$service_end_date = \apply_filters(
 				'woocommerce_sequra_add_service_end_date',
 				$this->product_service->get_service_end_date( $product->get_parent_id() ? $product->get_parent_id() : $product->get_id() ),
 				$product,
@@ -236,7 +236,7 @@ class Cart_Service implements Interface_Cart_Service {
 			null, // perishable.
 			null, // personalized.
 			null, // restockable.
-			wc_get_product_category_list( $product->get_id() ),
+			\wc_get_product_category_list( $product->get_id() ),
 			$product->get_description(),
 			null, // manufacturer.
 			null, // supplier.
@@ -314,7 +314,7 @@ class Cart_Service implements Interface_Cart_Service {
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_cart_service_get_items', $items, $order );
+		return \apply_filters( 'sequra_cart_service_get_items', $items, $order );
 	}
 
 	/**
@@ -383,7 +383,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new HandlingItem(
 					$fee->name ?? 'handling',
-					esc_html__( 'Handling cost', 'sequra' ),
+					\esc_html__( 'Handling cost', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
@@ -408,7 +408,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new HandlingItem(
 					$fee->get_name(),
-					esc_html__( 'Handling cost', 'sequra' ),
+					\esc_html__( 'Handling cost', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
@@ -417,7 +417,7 @@ class Cart_Service implements Interface_Cart_Service {
 		if ( $shipping_total_with_tax ) {
 			$items[] = new HandlingItem(
 				'handling',
-				esc_html__( 'Shipping cost', 'sequra' ),
+				\esc_html__( 'Shipping cost', 'sequra' ),
 				$this->pricing_service->to_cents( $shipping_total_with_tax )
 			);
 		}
@@ -442,7 +442,7 @@ class Cart_Service implements Interface_Cart_Service {
 			foreach ( $cart->get_coupons() as $coupon ) {
 				$items[] = new DiscountItem(
 					$coupon->get_code(),
-					esc_html__( 'Discount', 'sequra' ),
+					\esc_html__( 'Discount', 'sequra' ),
 					-1 * $this->pricing_service->to_cents( 
 						$cart->get_coupon_discount_amount( $coupon->get_code(), false ) 
 					)
@@ -463,7 +463,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new DiscountItem(
 					$fee->name ?? 'discount',
-					esc_html__( 'Discount', 'sequra' ),
+					\esc_html__( 'Discount', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
@@ -505,7 +505,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new DiscountItem(
 					$fee->get_name(),
-					esc_html__( 'Discount', 'sequra' ),
+					\esc_html__( 'Discount', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
@@ -542,7 +542,7 @@ class Cart_Service implements Interface_Cart_Service {
 		 *
 		 * @since 2.0.0
 		 */
-		return apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $eligible );
+		return \apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $eligible );
 	}
 
 	/**
@@ -559,7 +559,7 @@ class Cart_Service implements Interface_Cart_Service {
 				 *
 				 * @var WC_Order $order
 				 */
-				$order = wc_get_order( (int) $wp->query_vars['order-pay'] );
+				$order = \wc_get_order( (int) $wp->query_vars['order-pay'] );
 				if ( ! $order instanceof WC_Order || ! $order->needs_shipping_address() ) {
 					$this->logger->log_debug( 'Order doesn\'t need shipping address seQura will not be offered.', __FUNCTION__, __CLASS__ );
 					$eligible = false;
@@ -577,14 +577,14 @@ class Cart_Service implements Interface_Cart_Service {
 		 * @since 2.0.0
 		 * @deprecated 3.0.0 Use woocommerce_cart_is_eligible_for_product_sale instead
 		 */
-		$eligible = apply_filters_deprecated( 'woocommerce_cart_is_elegible_for_product_sale', array( $eligible ), '3.0.0', 'woocommerce_cart_is_eligible_for_product_sale' );
+		$eligible = \apply_filters_deprecated( 'woocommerce_cart_is_elegible_for_product_sale', array( $eligible ), '3.0.0', 'woocommerce_cart_is_eligible_for_product_sale' );
 
 		/**
 		 * Filter if cart is eligible for product sale
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'woocommerce_cart_is_eligible_for_product_sale', $eligible );
+		return \apply_filters( 'woocommerce_cart_is_eligible_for_product_sale', $eligible );
 	}
 
 	/**
@@ -619,7 +619,7 @@ class Cart_Service implements Interface_Cart_Service {
 						 * @since 3.0.0
 						 * TODO: Document this hook
 						 */
-						$return = apply_filters( 'sequra_is_item_available_in_checkout', $return, $values );
+						$return = \apply_filters( 'sequra_is_item_available_in_checkout', $return, $values );
 						if ( ! $return ) {
 							break;
 						}
@@ -646,7 +646,7 @@ class Cart_Service implements Interface_Cart_Service {
 						 * @since 3.0.0
 						 * TODO: Document this hook
 						 */
-						$return = apply_filters( 'sequra_is_item_available_in_checkout', $return, $item );
+						$return = \apply_filters( 'sequra_is_item_available_in_checkout', $return, $item );
 						if ( ! $return ) {
 							break;
 						}
@@ -659,6 +659,6 @@ class Cart_Service implements Interface_Cart_Service {
 		 *
 		 * @since 2.0.0
 		 */
-		return apply_filters( 'woocommerce_cart_sq_is_available_in_checkout', $return );
+		return \apply_filters( 'woocommerce_cart_sq_is_available_in_checkout', $return );
 	}
 }

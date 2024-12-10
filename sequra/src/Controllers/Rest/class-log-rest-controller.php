@@ -73,7 +73,7 @@ class Log_REST_Controller extends REST_Controller {
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -93,7 +93,7 @@ class Log_REST_Controller extends REST_Controller {
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -108,7 +108,7 @@ class Log_REST_Controller extends REST_Controller {
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**
@@ -127,7 +127,7 @@ class Log_REST_Controller extends REST_Controller {
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
-		return rest_ensure_response( $response );
+		return \rest_ensure_response( $response );
 	}
 
 	/**

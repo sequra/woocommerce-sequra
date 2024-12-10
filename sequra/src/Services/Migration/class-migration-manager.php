@@ -69,7 +69,7 @@ class Migration_Manager implements Interface_Migration_Manager {
 			return;
 		}
 
-		if ( (bool) get_transient( self::MIGRATION_LOCK ) ) {
+		if ( (bool) \get_transient( self::MIGRATION_LOCK ) ) {
 			return;
 		}
 
@@ -91,9 +91,9 @@ class Migration_Manager implements Interface_Migration_Manager {
 			// ! Non-critical migration failed. Stop the process and log the error.
 			$this->log_error( $e );
 		} finally {
-			delete_transient( self::MIGRATION_LOCK );
+			\delete_transient( self::MIGRATION_LOCK );
 			if ( $deactivate ) {
-				deactivate_plugins( $this->plugin_basename );
+				\deactivate_plugins( $this->plugin_basename );
 			}
 		}
 	}

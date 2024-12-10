@@ -127,7 +127,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		 * 
 		 * @since 2.0.0
 		 * */
-		$opts = apply_filters(
+		$opts = \apply_filters(
 			'wc_sequra_pumbaa_options', 
 			array(
 				'product'  => $this->order_service->get_product( $order ),
@@ -318,7 +318,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * Check if the current page is the order pay page
 	 */
 	public function is_order_pay_page(): bool {
-		return ( (int) strval( get_query_var( 'order-pay' ) ) ) > 0;
+		return ( (int) strval( \get_query_var( 'order-pay' ) ) ) > 0;
 	}
 
 	/**
@@ -330,6 +330,6 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		 * 
 		 * @since 3.0.0
 		 */
-		return (bool) apply_filters( 'sequra_is_checkout', is_checkout() || $this->is_order_pay_page() || WC()->is_store_api_request() );
+		return (bool) \apply_filters( 'sequra_is_checkout', \is_checkout() || $this->is_order_pay_page() || WC()->is_store_api_request() );
 	}
 }
