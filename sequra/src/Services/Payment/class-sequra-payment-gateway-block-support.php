@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
 class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 
 	private const PAYMENT_METHOD_CONTENT_ACTION = 'sequra_payment_method_content';
+	private const SCRIPT_HANDLER                = 'wc-sequra-blocks-integration';
 	
 	/**
 	 * Sequra payment gateway instance.
@@ -72,6 +73,22 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 		// Register the AJAX actions for handle block content.
 		add_action( 'wp_ajax_' . self::PAYMENT_METHOD_CONTENT_ACTION, array( $this, 'handle_get_payment_method_block_content' ) );
 		add_action( 'wp_ajax_nopriv_' . self::PAYMENT_METHOD_CONTENT_ACTION, array( $this, 'handle_get_payment_method_block_content' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_front' ) );
+	}
+
+	/**
+	 * Register additional data to be used on the front-end.
+	 *
+	 * @return void 
+	 */
+	public function enqueue_front() {
+		wp_localize_script(
+			self::SCRIPT_HANDLER,
+			'SeQuraBlockIntegration',
+			array(
+				'isCart' => is_cart(),
+			) 
+		);
 	}
 
 	/**
@@ -108,14 +125,14 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : $dependencies;
 	
 		wp_register_script( 
-			'wc-sequra-blocks-integration', 
+			self::SCRIPT_HANDLER, 
 			$asset_url, 
 			$dependencies, 
 			$version, 
 			true 
 		);
 
-		return array( 'wc-sequra-blocks-integration' );
+		return array( self::SCRIPT_HANDLER );
 	}
 
 	/**

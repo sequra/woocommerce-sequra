@@ -45,13 +45,6 @@ test.describe('Migration', () => {
           ...customLoc,
           paymentMethod: "Paga Fraccionado",
         },
-        {
-          ...customLoc,
-          paymentMethod: "Divide en 3 0,00 €/mes (DECOMBINED)",
-          locationSel: "",
-          widgetConfig: defaultWidgetSettings.widgetConfig,
-          display: false
-        }
       ]
     });
 
@@ -60,7 +53,7 @@ test.describe('Migration', () => {
     await connectionSettingsPage.goto();
     // await connectionSettingsPage.expectLoadingShowAndHide();
     await connectionSettingsPage.expectConfigurationMatches({
-      username: 'dummy',
+      username: 'dummy_automated_tests',
       password: process.env.DUMMY_PASSWORD,
       env: 'sandbox'
     });
@@ -74,7 +67,7 @@ test.describe('Migration', () => {
     await generalSettingsPage.expectExcludedProductsToBeEmpty();
     await generalSettingsPage.expectEnabledForServicesToBe(false);
     await generalSettingsPage.expectAvailableCountries([
-      { country: 'ES', ref: 'dummy' }
+      { country: 'ES', ref: 'dummy_automated_tests' }
     ]);
   });
 });

@@ -12,11 +12,9 @@ test.describe('Product checkout', () => {
       await helper.executeWebhook({ webhook: helper.webhooks.CHECKOUT_VERSION, args: [{ name: 'version', value: version }] });
       await checkoutPage.goto();
       await checkoutPage.expectPaymentMethodsBeingReloaded();
-      await checkoutPage.expectFp1ToBeVisible();
       await checkoutPage.expectI1ToBeVisible();
       await checkoutPage.expectSp1ToBeVisible();
       await checkoutPage.expectPp3ToBeVisible();
-      await checkoutPage.expectPp3DecombinedToBeVisible();
     }
   });
 
@@ -27,7 +25,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.goto();
     await checkoutPage.fillWithNonSpecialShopperName({});
     await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.placeOrderUsingFp1({});
+    await checkoutPage.placeOrderUsingI1({shopper: 'nonSpecial'});
     await checkoutPage.waitForOrderSuccess();
   });
 
@@ -61,7 +59,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.goto();
     await checkoutPage.fillWithNonSpecialShopperName({});
     await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.placeOrderUsingFp1({ forceFailure: true });
+    await checkoutPage.placeOrderUsingI1({ forceFailure: true });
     await checkoutPage.waitForOrderFailure();
   });
 });

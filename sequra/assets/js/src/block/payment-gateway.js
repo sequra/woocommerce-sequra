@@ -71,6 +71,13 @@ registerPaymentMethod({
     canMakePayment: ({ shippingAddress, billingAddress, cart }) => {
         const requestId = ++canMakePaymentRequestId;
         return new Promise((resolve) => {
+
+            if (SeQuraBlockIntegration.isCart) {
+                // Prevent unnecessary requests.
+                onResolved(false, { content: '' });
+                return;
+            }
+
             document.dispatchEvent(new CustomEvent('canMakePaymentLoading', { detail: { requestId } }));
 
             settings.description = '';
@@ -88,6 +95,7 @@ registerPaymentMethod({
 
             fetch(settings.blockContentUrl, {
                 method: 'POST',
+                credentials: 'same-origin', // Allow including cookies in the request.
                 body: data
             }).then(response => {
                 if (!response.ok) {

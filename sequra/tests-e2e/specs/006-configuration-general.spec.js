@@ -55,10 +55,12 @@ test.describe('Configuration', () => {
     }
 
     for (const ipAddresses of notAllowedIPAddressesMatrix) {
+      console.log('Fill not allowed IP addresses:', ipAddresses);
       await fillAndAssert(ipAddresses, false);
     }
 
     for (const ipAddresses of allowedIPAddressesMatrix) {
+      console.log('Fill allowed IP addresses:', ipAddresses);
       await fillAndAssert(ipAddresses, true);
     }
   });
@@ -240,10 +242,10 @@ test.describe('Configuration', () => {
     await generalSettingsPage.expectLoadingShowAndHide();
 
     const defaultCountriesRef = [
-      { country: 'ES', ref: 'dummy' },
-      { country: 'FR', ref: 'dummy_fr' },
-      { country: 'IT', ref: 'dummy_it' },
-      { country: 'PT', ref: 'dummy_pt' },
+      { country: 'ES', ref: 'dummy_automated_tests' },
+      { country: 'FR', ref: 'dummy_automated_tests_fr' },
+      { country: 'IT', ref: 'dummy_automated_tests_it' },
+      { country: 'PT', ref: 'dummy_automated_tests_pt' },
     ];
 
     await generalSettingsPage.expectAvailableCountries(defaultCountriesRef);

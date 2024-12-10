@@ -42,5 +42,5 @@ if [[ "$@" == *"--headed"* ]]; then
 else
     docker run \
     --env-file "${BASEDIR}"/.env \
-    -it --rm -v "${BASEDIR}"/sequra:/app -w /app mcr.microsoft.com/playwright:v1.45.0-jammy bash -c "npx playwright test $@"
+    -it --rm -v "${BASEDIR}"/sequra:/app -w /app mcr.microsoft.com/playwright:v1.45.1-jammy bash -c "npx playwright test $@"
 fi
