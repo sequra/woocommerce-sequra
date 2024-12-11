@@ -22,7 +22,7 @@ class Shop_Order_Status_Service implements ShopOrderStatusesServiceInterface {
 	 */
 	public function getShopOrderStatuses(): array {
 		$shop_order_statuses = array();
-		foreach ( wc_get_order_statuses() as $key => $value ) {
+		foreach ( \wc_get_order_statuses() as $key => $value ) {
 			$shop_order_statuses[] = new OrderStatus( $key, $value );
 		}
 		return $shop_order_statuses;

@@ -262,7 +262,7 @@ class Order_Service implements Interface_Order_Service {
 		 *
 		 * @since 3.0.0
 		 */
-		$nin = apply_filters( 'sequra_get_nin', null, $order );
+		$nin = \apply_filters( 'sequra_get_nin', null, $order );
 		return is_string( $nin ) || null === $nin ? $nin : null;
 	}
 
@@ -276,7 +276,7 @@ class Order_Service implements Interface_Order_Service {
 		 *
 		 * @since 3.0.0
 		 */
-		$dob = apply_filters( 'sequra_get_dob', null, $order );
+		$dob = \apply_filters( 'sequra_get_dob', null, $order );
 		return is_string( $dob ) || null === $dob ? $dob : null;
 	}
 
@@ -290,7 +290,7 @@ class Order_Service implements Interface_Order_Service {
 		 *
 		 * @since 3.0.0
 		 */
-		$title = apply_filters( 'sequra_get_shopper_title', null, $order );
+		$title = \apply_filters( 'sequra_get_shopper_title', null, $order );
 		return is_string( $title ) || null === $title ? $title : null;
 	}
 
@@ -304,7 +304,7 @@ class Order_Service implements Interface_Order_Service {
 		 *
 		 * @since 3.0.0
 		 */
-		$date = apply_filters( 'sequra_get_shopper_created_at', $this->get_shopper_registration_date( $order ), $order );
+		$date = \apply_filters( 'sequra_get_shopper_created_at', $this->get_shopper_registration_date( $order ), $order );
 		return is_string( $date ) || null === $date ? $date : null;
 	}
 
@@ -320,7 +320,7 @@ class Order_Service implements Interface_Order_Service {
 		 *
 		 * @var WP_User $shopper
 		 */
-		$shopper = get_user_by( 'id', $order->get_customer_id() );
+		$shopper = \get_user_by( 'id', $order->get_customer_id() );
 		if ( ! $shopper instanceof WP_User ) {
 			return null;
 		}
@@ -338,7 +338,7 @@ class Order_Service implements Interface_Order_Service {
 		 *
 		 * @since 3.0.0
 		 */
-		$date = apply_filters( 'sequra_get_shopper_updated_at', $this->get_shopper_registration_date( $order ), $order );
+		$date = \apply_filters( 'sequra_get_shopper_updated_at', $this->get_shopper_registration_date( $order ), $order );
 		return is_string( $date ) || null === $date ? $date : null;
 	}
 
@@ -352,7 +352,7 @@ class Order_Service implements Interface_Order_Service {
 		 *
 		 * @since 3.0.0
 		 */
-		$rating = apply_filters( 'sequra_get_shopper_rating', null, $order );
+		$rating = \apply_filters( 'sequra_get_shopper_rating', null, $order );
 		return ( is_int( $rating ) && 0 <= $rating && 100 >= $rating ) || null === $rating ? $rating : null;
 	}
 
@@ -385,7 +385,7 @@ class Order_Service implements Interface_Order_Service {
 			 *
 			 * @var WC_Order[] $previous_orders
 			 */
-			$orders = wc_get_orders(
+			$orders = \wc_get_orders(
 				array(
 					'limit'    => -1,
 					'customer' => $customer_id,
@@ -410,7 +410,7 @@ class Order_Service implements Interface_Order_Service {
 					$this->pricing_service->to_cents( (float) $order->get_total( 'edit' ) ),
 					$order->get_currency(),
 					$order->get_status( 'edit' ),
-					wc_get_order_status_name( $order->get_status( 'edit' ) ),
+					\wc_get_order_status_name( $order->get_status( 'edit' ) ),
 					$order->get_payment_method( 'edit' ),
 					$order->get_payment_method_title( 'edit' ),
 					$postcode ? $postcode : null,
@@ -545,13 +545,13 @@ class Order_Service implements Interface_Order_Service {
 	 * Get IPN webhook identifier
 	 */
 	public function get_ipn_url( WC_Order $order, string $store_id ): string {
-		return add_query_arg(
+		return \add_query_arg(
 			array(
 				'order'    => strval( $order->get_id() ),
 				'wc-api'   => $this->payment_service->get_ipn_webhook(),
 				'store_id' => $store_id,
 			),
-			home_url( '/' )
+			\home_url( '/' )
 		);
 	}
 
@@ -559,13 +559,13 @@ class Order_Service implements Interface_Order_Service {
 	 * Get payment gateway webhook identifier
 	 */
 	public function get_event_url( WC_Order $order, string $store_id ): string {
-		return add_query_arg(
+		return \add_query_arg(
 			array(
 				'order'    => strval( $order->get_id() ),
 				'wc-api'   => $this->payment_service->get_event_webhook(),
 				'store_id' => $store_id,
 			),
-			home_url( '/' )
+			\home_url( '/' )
 		);
 	}
 
@@ -573,13 +573,13 @@ class Order_Service implements Interface_Order_Service {
 	 * Get payment gateway webhook identifier
 	 */
 	public function get_return_url( WC_Order $order ): string {
-		return add_query_arg(
+		return \add_query_arg(
 			array(
 				'order'      => strval( $order->get_id() ),
 				'sq_product' => 'SQ_PRODUCT_CODE',
 				'wc-api'     => $this->payment_service->get_return_webhook(),
 			),
-			home_url( '/' )
+			\home_url( '/' )
 		);
 	}
 
@@ -735,7 +735,7 @@ class Order_Service implements Interface_Order_Service {
 			 *
 			 * @since 2.0.0
 			 */
-			$ref_1 = apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
+			$ref_1 = \apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
 
 			$this->call_update_order(
 				new OrderUpdateData(
@@ -796,7 +796,7 @@ class Order_Service implements Interface_Order_Service {
 			 *
 			 * @since 2.0.0
 			 */
-			$ref_1 = apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
+			$ref_1 = \apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
 			$this->call_update_order(
 				new OrderUpdateData(
 					$ref_1, // Order reference.

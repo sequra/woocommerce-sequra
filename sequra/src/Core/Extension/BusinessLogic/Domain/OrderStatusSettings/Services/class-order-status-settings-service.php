@@ -45,13 +45,13 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	 */
 	public function get_shop_status_completed( bool $unprefixed = false ): array {
 
-		$status = (array) apply_filters_deprecated( 'woocommerce_sequracheckout_sent_statuses', array( array( 'wc-completed' ) ), '3.0.0', 'sequra_shop_status_completed' );
+		$status = (array) \apply_filters_deprecated( 'woocommerce_sequracheckout_sent_statuses', array( array( 'wc-completed' ) ), '3.0.0', 'sequra_shop_status_completed' );
 		/**
 		 * Filter the WooCommerce status for completed.
 		 *
 		 * @since 3.0.0
 		 */
-		$status = apply_filters( 'sequra_shop_status_completed', $status );
+		$status = \apply_filters( 'sequra_shop_status_completed', $status );
 
 		if ( $unprefixed ) {
 			$status = array_map( array( $this, 'unprefixed_shop_status' ), $status );

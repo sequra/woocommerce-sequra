@@ -38,7 +38,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		parent::__construct( $logger, $templates_path );
 		$this->order_service = $order_service;
 
-		add_action( 'admin_notices', array( $this, 'display_notices' ) );
+		\add_action( 'admin_notices', array( $this, 'display_notices' ) );
 	}
 
 	/**
@@ -95,11 +95,11 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 				) 
 			);
 			
-			set_transient(
+			\set_transient(
 				$this->get_notices_transient( $order_id ),
 				array(
 					array(
-						'notice'      => __( 'An error occurred while updating the order data in seQura.', 'sequra' ), // TODO: improve message with link to simba.
+						'notice'      => \__( 'An error occurred while updating the order data in seQura.', 'sequra' ), // TODO: improve message with link to simba.
 						'type'        => 'error',
 						'dismissible' => true,
 					),
@@ -125,7 +125,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	 */
 	public function display_notices() {
 		// phpcs:ignore WordPress.Security.NonceVerification
-		if ( ! is_admin() || ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) {
+		if ( ! \is_admin() || ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) {
 			return;
 		}
 
@@ -135,13 +135,13 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		}
 
 		$transient_key = $this->get_notices_transient( $order->get_id() );
-		$notices       = (array) get_transient( $transient_key );
+		$notices       = (array) \get_transient( $transient_key );
 		if ( ! empty( $notices ) ) {
-			delete_transient( $transient_key );
+			\delete_transient( $transient_key );
 		}
 		foreach ( $notices as $notice ) {
 			ob_start();
-			wc_get_template( 'admin/notice.php', $notice, '', $this->templates_path );
+			\wc_get_template( 'admin/notice.php', $notice, '', $this->templates_path );
 			echo ob_get_clean(); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
@@ -156,6 +156,6 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		$args = array(
 			'sequra_link' => $this->order_service->get_link_to_sequra_back_office( $order ),
 		);
-		wc_get_template( 'admin/order_details.php', $args, '', $this->templates_path );
+		\wc_get_template( 'admin/order_details.php', $args, '', $this->templates_path );
 	}
 }

@@ -107,14 +107,14 @@ class Configuration extends CoreConfiguration {
 		if ( ! function_exists( 'plugins_api' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 		}
-		$response = plugins_api(
+		$response = \plugins_api(
 			'plugin_information',
 			array(
 				'slug'   => 'sequra',
 				'fields' => array( 'version' => true ),
 			) 
 		);
-		if ( is_wp_error( $response ) || empty( $response->version ) ) {
+		if ( \is_wp_error( $response ) || empty( $response->version ) ) {
 			return '';
 		}
 
@@ -129,8 +129,8 @@ class Configuration extends CoreConfiguration {
 	 */
 	public function get_current_store(): array {
 		return array(
-			'storeId'   => get_current_blog_id(),
-			'storeName' => get_bloginfo( 'name' ),
+			'storeId'   => \get_current_blog_id(),
+			'storeName' => \get_bloginfo( 'name' ),
 		);
 	}
 
@@ -147,7 +147,7 @@ class Configuration extends CoreConfiguration {
 			 *
 			 * @var WP_Site $site
 			 */
-			foreach ( get_sites() as $site ) {
+			foreach ( \get_sites() as $site ) {
 				$stores[] = array(
 					'storeId'   => $site->blog_id,
 					'storeName' => $site->blogname,
@@ -502,7 +502,7 @@ class Configuration extends CoreConfiguration {
 		 * @since 3.0.0
 		 * @return string The default message below limit for the mini widget.
 		 */
-		return apply_filters(
+		return \apply_filters(
 			'sequra_mini_widget_default_message',
 			array(
 				'ES' => 'Desde %s/mes con seQura',
@@ -523,7 +523,7 @@ class Configuration extends CoreConfiguration {
 		 * @since 3.0.0
 		 * @return string The default message below limit for the mini widget.
 		 */
-		return apply_filters(
+		return \apply_filters(
 			'sequra_mini_widget_default_message_below_limit',
 			array(
 				'ES' => 'Fracciona con seQura a partir de %s',
@@ -718,7 +718,7 @@ class Configuration extends CoreConfiguration {
 		* 
 		* @since 3.0.0
 		*/
-		$version = apply_filters(
+		$version = \apply_filters(
 			'sequra_platform_options_version',
 			$sq['Version'] ?? ''
 		);
@@ -731,7 +731,7 @@ class Configuration extends CoreConfiguration {
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters(
+		return \apply_filters(
 			'sequra_platform_options',
 			new Platform(
 				$this->getIntegrationName(),

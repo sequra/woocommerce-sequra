@@ -102,7 +102,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 			}
 		} catch ( \Exception $exception ) {
 			throw new QueueItemSaveException(
-				esc_html( 'Failed to save queue item with id: ' . $item_id ),
+				\esc_html( 'Failed to save queue item with id: ' . $item_id ),
 				0,
 				$exception // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			);

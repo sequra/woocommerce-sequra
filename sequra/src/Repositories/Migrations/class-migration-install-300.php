@@ -36,7 +36,7 @@ class Migration_Install_300 extends Migration {
 	 */
 	public function run(): void {
 		$this->add_new_tables_to_database();
-		$woocommerce_sequra_settings = (array) get_option( 'woocommerce_sequra_settings', array() );
+		$woocommerce_sequra_settings = (array) \get_option( 'woocommerce_sequra_settings', array() );
 		if ( ! empty( $woocommerce_sequra_settings ) ) {
 			$this->migrate_connection_configuration( $woocommerce_sequra_settings );
 			$this->migrate_general_settings_configuration( $woocommerce_sequra_settings );
@@ -52,7 +52,7 @@ class Migration_Install_300 extends Migration {
 	 */
 	private function check_if_table_exists( string $table_name ): void {
 		if ( $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) !== $table_name ) {
-			throw new Critical_Migration_Exception( esc_html( "Could not create the table \"$table_name\"" ) );
+			throw new Critical_Migration_Exception( \esc_html( "Could not create the table \"$table_name\"" ) );
 		}
 	}
 

@@ -133,7 +133,7 @@ class Report_Service implements Interface_Report_Service {
 
 		// Mark orders as reported.
 		foreach ( $report_order_ids as $order_id ) {
-			$order = wc_get_order( (int) $order_id );
+			$order = \wc_get_order( (int) $order_id );
 			if ( ! $order instanceof WC_Order ) {
 				continue;
 			}

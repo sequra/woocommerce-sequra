@@ -145,7 +145,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		$delivery_method = apply_filters( 'sequra_create_order_request_delivery_method_options', $this->order_service->get_delivery_method( $this->current_order ) );
+		$delivery_method = \apply_filters( 'sequra_create_order_request_delivery_method_options', $this->order_service->get_delivery_method( $this->current_order ) );
 
 		return new CreateOrderRequest(
 			'', // state.
@@ -173,7 +173,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			 *
 			 * @since 2.0.0
 			 */
-			$ref_1              = apply_filters( 'woocommerce_sequra_get_order_ref_1', $this->current_order->get_id(), $this->current_order );
+			$ref_1              = \apply_filters( 'woocommerce_sequra_get_order_ref_1', $this->current_order->get_id(), $this->current_order );
 			$merchant_reference = new MerchantReference( $ref_1 );
 		}
 
@@ -183,7 +183,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		*
 		* @since 3.0.0
 		*/
-		return apply_filters(
+		return \apply_filters(
 			'sequra_create_order_request_merchant_reference',
 			$merchant_reference
 		);
@@ -225,7 +225,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		return apply_filters(
 			'sequra_create_order_request_cart_options',
 			new Cart(
-				$this->current_order ? $this->current_order->get_currency( 'edit' ) : get_woocommerce_currency(),
+				$this->current_order ? $this->current_order->get_currency( 'edit' ) : \get_woocommerce_currency(),
 				false, // gift.
 				$items,
 				$cart_info ? $cart_info->ref : null,
@@ -280,7 +280,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters(
+		return \apply_filters(
 			'sequra_create_order_request_merchant_data',
 			new Merchant(
 				$merchant_id,
@@ -314,7 +314,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 				*
 				* @since 3.0.0
 				*/
-				$addresses_may_be_missing = apply_filters( 'sequra_merchant_options_addresses_may_be_missing', null );
+				$addresses_may_be_missing = \apply_filters( 'sequra_merchant_options_addresses_may_be_missing', null );
 
 				if ( ! is_bool( $addresses_may_be_missing ) && null !== $addresses_may_be_missing ) {
 					$addresses_may_be_missing = null;
@@ -336,7 +336,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_merchant_options', $options );
+		return \apply_filters( 'sequra_create_order_request_merchant_options', $options );
 	}
 
 	/**
@@ -362,7 +362,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters(
+		return \apply_filters(
 			'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options',
 			$this->order_service->get_address( $this->current_order, $is_delivery )
 		);
@@ -378,12 +378,12 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters(
+		return \apply_filters(
 			'sequra_create_order_request_customer_options',
 			$this->order_service->get_customer(
 				$this->current_order,
 				$this->i18n->get_lang(),
-				get_current_user_id(),
+				\get_current_user_id(),
 				$this->shopper_service->get_ip(),
 				$this->shopper_service->get_user_agent()
 			)
@@ -402,7 +402,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		return apply_filters( 'sequra_create_order_request_gui_options', $gui );
+		return \apply_filters( 'sequra_create_order_request_gui_options', $gui );
 	}
 
 	/**

@@ -24,14 +24,14 @@ class Category_Service implements CategoryServiceInterface {
 	public function getCategories(): array {
 		$categories = array();
 
-		$terms = get_terms(
+		$terms = \get_terms(
 			array(
 				'taxonomy'   => 'product_cat',
 				'hide_empty' => false,
 			)
 		);
 
-		if ( is_wp_error( $terms ) ) {
+		if ( \is_wp_error( $terms ) ) {
 			return $categories;
 		}
 

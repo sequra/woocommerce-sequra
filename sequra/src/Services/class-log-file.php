@@ -167,6 +167,6 @@ class Log_File implements Interface_Log_File {
 	 * Get the current store ID.
 	 */
 	private function current_store_id(): string {
-		return (string) get_current_blog_id();
+		return (string) \get_current_blog_id();
 	}
 }

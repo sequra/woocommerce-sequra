@@ -50,10 +50,10 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 */
 	public function register_page() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
-		add_submenu_page(
+		\add_submenu_page(
 			$this->configuration->get_parent_page(),
-			__( 'seQura', 'sequra' ),
-			__( 'seQura', 'sequra' ),
+			\__( 'seQura', 'sequra' ),
+			\__( 'seQura', 'sequra' ),
 			'manage_options',
 			$this->configuration->get_page(),
 			array( $this, 'render_page' )
@@ -61,7 +61,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 
 		// Additionally remove WP version footer text if we are in the settings page.
 		if ( $this->configuration->is_settings_page() ) {
-			remove_filter( 'update_footer', 'core_update_footer' );
+			\remove_filter( 'update_footer', 'core_update_footer' );
 		}
 	}
 
@@ -72,7 +72,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 */
 	public function render_page() {
 		$this->logger->log_info( 'Callback executed', __FUNCTION__, __CLASS__ );
-		wc_get_template( 'admin/settings_page.php', array(), '', $this->templates_path );
+		\wc_get_template( 'admin/settings_page.php', array(), '', $this->templates_path );
 	}
 
 	/**
@@ -82,7 +82,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * @return string
 	 */
 	public function get_settings_page_url( $url = null ) {
-		return admin_url( 'admin.php?page=' . $this->configuration->get_page() );
+		return \admin_url( 'admin.php?page=' . $this->configuration->get_page() );
 	}
 
 	/**
@@ -98,10 +98,10 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$args = array(
 			'href' => $this->get_settings_page_url(),
-			'text' => esc_attr__( 'Settings', 'sequra' ),
+			'text' => \esc_attr__( 'Settings', 'sequra' ),
 		);
 		ob_start();
-		wc_get_template( 'admin/action_link.php', $args, '', $this->templates_path );
+		\wc_get_template( 'admin/action_link.php', $args, '', $this->templates_path );
 		$actions['settings'] = ob_get_clean();
 		return $actions;
 	}
@@ -132,42 +132,42 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 			$row_meta = array(
 				'docs'    => sprintf(
 					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
-					esc_url(
+					\esc_url(
 						/**
 						 * Filters the URL of the plugin documentation.
 						 *
 						 * @since 2.0.0
 						 */
-						apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/2247524378/WOOCOMMERCE' )
+						\apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/2247524378/WOOCOMMERCE' )
 					),
-					esc_attr__( 'View WooCommerce documentation', 'sequra' ),
-					esc_html__( 'Docs', 'woocommerce' )
+					\esc_attr__( 'View WooCommerce documentation', 'sequra' ),
+					\esc_html__( 'Docs', 'woocommerce' )
 				),
 				'apidocs' => sprintf(
 					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
-					esc_url(
+					\esc_url(
 						/**
 						 * Filters the URL of the plugin API documentation.
 						 *
 						 * @since 2.0.0
 						 */
-						apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' )
+						\apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' )
 					),
-					esc_attr__( 'View WooCommerce API docs', 'sequra' ),
-					esc_html__( 'API docs', 'sequra' )
+					\esc_attr__( 'View WooCommerce API docs', 'sequra' ),
+					\esc_html__( 'API docs', 'sequra' )
 				),
 				'support' => sprintf(
 					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
-					esc_url(
+					\esc_url(
 						/**
 						 * Filters the URL of the plugin support.
 						 *
 						 * @since 2.0.0
 						 */
-						apply_filters( 'sequrapayment_support_url', 'https://sequra.atlassian.net/servicedesk/customer/portal/5/group/-1' )
+						\apply_filters( 'sequrapayment_support_url', 'https://sequra.atlassian.net/servicedesk/customer/portal/5/group/-1' )
 					),
-					esc_attr__( 'Support', 'sequra' ),
-					esc_html__( 'Support', 'sequra' )
+					\esc_attr__( 'Support', 'sequra' ),
+					\esc_html__( 'Support', 'sequra' )
 				),
 			);
 

@@ -39,7 +39,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * Check if the current user can manage options.
 	 */
 	public function can_user_manage_options(): bool {
-		return user_can( get_current_user_id(), 'manage_options' );
+		return \user_can( \get_current_user_id(), 'manage_options' );
 	}
 
 	/**
@@ -96,7 +96,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 		if ( ! empty( $arguments ) && is_array( $arguments ) ) {
 			$args['args'] = $arguments;
 		}
-		register_rest_route( $this->namespace, "{$this->rest_base}/$endpoint", $args );
+		\register_rest_route( $this->namespace, "{$this->rest_base}/$endpoint", $args );
 	}
 
 	/**
@@ -192,7 +192,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 */
 	public function sanitize_array_sanitize_text_field( $param ): array {
 		foreach ( $param as &$value ) {
-			$value = sanitize_text_field( strval( $value ) );
+			$value = \sanitize_text_field( strval( $value ) );
 		}
 		return $param;
 	}

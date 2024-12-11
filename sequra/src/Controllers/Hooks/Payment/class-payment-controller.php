@@ -62,7 +62,7 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	 */
 	public function register_gateway_gutenberg_block() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		add_action( 'woocommerce_blocks_payment_method_type_registration', array( $this, 'register_gateway_gutenberg_block_class' ) );
+		\add_action( 'woocommerce_blocks_payment_method_type_registration', array( $this, 'register_gateway_gutenberg_block_class' ) );
 	}
 
 	/**
@@ -85,7 +85,7 @@ class Payment_Controller extends Controller implements Interface_Payment_Control
 	 */
 	public function order_received_text( $text, $order ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		$notices = wc_print_notices( true );
+		$notices = \wc_print_notices( true );
 		return $notices . $text;
 	}
 
