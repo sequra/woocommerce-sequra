@@ -39,7 +39,7 @@ interface Interface_Payment_Method_Service {
 	/**
 	 * Check if the payment method data matches a valid payment method.
 	 */
-	public function is_payment_method_data_valid( Payment_Method_Data $data ): bool;
+	public function is_payment_method_data_valid( ?Payment_Method_Data $data ): bool;
 
 	/**
 	 * Look for available payment methods which can be used with the widget
