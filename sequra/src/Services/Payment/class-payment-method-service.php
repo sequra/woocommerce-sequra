@@ -305,10 +305,12 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	/**
 	 * Check if the payment method data matches a valid payment method.
 	 */
-	public function is_payment_method_data_valid( Payment_Method_Data $data ): bool {
-		foreach ( $this->get_payment_methods() as $pm ) {
-			if ( $pm['product'] === $data->product && $pm['campaign'] === $data->campaign ) {
-				return true;
+	public function is_payment_method_data_valid( ?Payment_Method_Data $data ): bool {
+		if ( null !== $data ) {
+			foreach ( $this->get_payment_methods() as $pm ) {
+				if ( $pm['product'] === $data->product && $pm['campaign'] === $data->campaign ) {
+					return true;
+				}
 			}
 		}
 		return false;
