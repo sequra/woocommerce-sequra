@@ -332,6 +332,22 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		 * 
 		 * @since 3.0.0
 		 */
-		return (bool) \apply_filters( 'sequra_is_checkout', \is_checkout() || $this->is_order_pay_page() || WC()->is_store_api_request() );
+		return (bool) \apply_filters( 'sequra_is_checkout', \is_checkout() || $this->is_order_pay_page() || $this->is_store_api_request() );
+	}
+
+	/**
+	 * Returns true if the request is a store REST API request.
+	 *
+	 * @return bool
+	 */
+	private function is_store_api_request() {
+		if ( method_exists( 'WooCommerce', 'is_store_api_request' ) ) {
+			return WC()->is_store_api_request();
+		}
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
 	}
 }
