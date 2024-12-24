@@ -241,7 +241,7 @@ class Bootstrap extends BootstrapComponent {
 					if ( ! function_exists( 'get_plugin_data' ) ) {
 						require_once ABSPATH . 'wp-admin/includes/plugin.php';
 					}
-					self::$cache['woocommerce.data'] = \get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php' );
+					self::$cache['woocommerce.data'] = \get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php', true, false );
 				}
 				return self::$cache['woocommerce.data'];
 			}
@@ -259,7 +259,7 @@ class Bootstrap extends BootstrapComponent {
 						return $headers;
 					};
 					\add_filter( 'extra_plugin_headers', $add_wc_headers );
-					$data = \get_plugin_data( Reg::getService( 'plugin.file_path' ) );
+					$data = \get_plugin_data( Reg::getService( 'plugin.file_path' ), true, false );
 					\remove_filter( 'extra_plugin_headers', $add_wc_headers );
 					$data['RequiresWC'] = $data['WC requires at least'];
 					unset( $data['WC requires at least'] );
