@@ -72,7 +72,7 @@ registerPaymentMethod({
         const requestId = ++canMakePaymentRequestId;
         return new Promise((resolve) => {
 
-            if (SeQuraBlockIntegration.isCart) {
+            if (!SeQuraBlockIntegration.isSolicitationAllowed) {
                 // Prevent unnecessary requests.
                 onResolved(false, { content: '' });
                 return;
