@@ -75,7 +75,7 @@ class Bootstrap {
 						return $headers;
 					};
 					add_filter( 'extra_plugin_headers', $add_wc_headers );
-					$data = get_plugin_data( ServiceRegister::getService( 'noaddress_addon.file_path' ) );
+					$data = get_plugin_data( ServiceRegister::getService( 'noaddress_addon.file_path' ), true, false );
 					remove_filter( 'extra_plugin_headers', $add_wc_headers );
 					
 					$data['RequiresSQ'] = '';
