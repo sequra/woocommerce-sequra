@@ -2,8 +2,8 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.6.2
-Stable tag: 3.0.5
+Tested up to: 6.7.1
+Stable tag: 3.0.6
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.0.6	=
+* Fixed: Type comparison bug that prevents orders from being eligible for service sales in some scenarios.
+* Fixed: Allow null payment method data in validation method.
+* Fixed: Implement an adapter for the is_store_api_request method to avoid errors in older versions of WooCommerce.
+* Changed: Add namespace prefix to WordPress and WooCommerce functions used for better compatibility.
+* Changed: Tested up to WordPress 6.7.1 and WooCommerce 9.5.1.
 = 3.0.5	=
 * Fixed: CSS rules for the payment method component.
 * Fixed: Performance improvements due the ignore of bot requests.
