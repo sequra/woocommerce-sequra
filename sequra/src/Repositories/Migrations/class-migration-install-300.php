@@ -69,7 +69,7 @@ class Migration_Install_300 extends Migration {
 		foreach ( array( 'sequra_entity', 'sequra_order' ) as $table ) {
 			$table_name = $this->db->prefix . $table;
 			dbDelta(
-				"CREATE TABLE IF NOT EXISTS $table_name (
+				"CREATE TABLE $table_name (
 				`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				`type` VARCHAR(255),
 				`index_1` VARCHAR(127),
@@ -88,7 +88,7 @@ class Migration_Install_300 extends Migration {
 
 		$table_name = $this->db->prefix . 'sequra_queue';
 		dbDelta(
-			"CREATE TABLE IF NOT EXISTS $table_name (
+			"CREATE TABLE $table_name (
 			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			`type` VARCHAR(255),
 			`index_1` VARCHAR(127),
