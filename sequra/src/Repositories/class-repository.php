@@ -78,7 +78,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @param string $entity_class Entity class.
 	 * @return void
 	 */
-	public function setEntityClass( $entity_class ) {
+	public function setEntityClass( $entity_class ): void {
 		$this->entity_class = $entity_class;
 	}
 

@@ -14,6 +14,7 @@ use SeQura\Core\Infrastructure\Configuration\Configuration as CoreConfiguration;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
+use SeQura\WC\Services\Interface_Constants;
 use Throwable;
 use WP_Site;
 
@@ -696,21 +697,21 @@ class Configuration extends CoreConfiguration {
 		 *
 		 * @var array<string, string>
 		 */
-		$woo = ServiceRegister::getService( 'woocommerce.data' );
+		$woo = ServiceRegister::getService( Interface_Constants::class )->get_woocommerce_data();
 		
 		/**
 		 * Environment data
 		 * 
 		 * @var array<string, string>
 		 */
-		$env = ServiceRegister::getService( 'environment.data' );
+		$env = ServiceRegister::getService( Interface_Constants::class  )->get_environment_data();
 
 		/**
 		 * Plugin data
 		 * 
 		 * @var array<string, string>
 		 */
-		$sq = ServiceRegister::getService( 'plugin.data' );
+		$sq = ServiceRegister::getService(  Interface_Constants::class )->get_plugin_data();
 
 		/**
 		* Filter the module version to be used in the platform options.

@@ -77,8 +77,8 @@ class Widget_Settings_Request extends WidgetSettingsRequest {
 	 * @param bool $show_installments_in_cart_page Show installments in cart page.
 	 * @param string $mini_widget_selector Mini widget selector.
 	 * @param string $widget_configuration Widget configuration.
-	 * @param array<mixed> $messages Messages.
-	 * @param array<mixed> $messages_below_limit Messages below limit.
+	 * @param array<string> $messages Messages.
+	 * @param array<string> $messages_below_limit Messages below limit.
 	 * @param string|null $sel_for_price Selector for price.
 	 * @param string|null $sel_for_alt_price Selector for alternative price.
 	 * @param string|null $sel_for_alt_price_trigger Selector for alternative price trigger.

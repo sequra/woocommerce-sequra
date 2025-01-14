@@ -11,6 +11,7 @@ namespace SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services;
 use DateTime;
 use Exception;
 use SeQura\Core\BusinessLogic\Domain\Order\Exceptions\OrderNotFoundException;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\CreateOrderRequest;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderRequestStatusMapping;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
@@ -49,6 +50,11 @@ class Shop_Order_Service implements ShopOrderService {
 	) {
 		$this->sequra_order_repository = $sequra_order_repository;
 		$this->logger                  = $logger;
+	}
+
+	public function getCreateOrderRequest(string $orderReference): CreateOrderRequest {
+		// TODO: Implement this.
+		throw new Exception('Not implemented');
 	}
 	
 	/**
