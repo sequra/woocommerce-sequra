@@ -327,11 +327,16 @@ class General_Settings_REST_Controller extends REST_Controller {
 
 		$response = null;
 		try {
+
+			/**
+			 * Order status mappings.
+			 * @var array<string> $order_status_mappings
+			 */
+			$order_status_mappings = (array) json_decode( $request->get_body(), true );
+
 			$response = AdminAPI::get()
 			->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->saveOrderStatusSettings(
-				new OrderStatusSettingsRequest( (array) json_decode( $request->get_body(), true ) )
-			)
+			->saveOrderStatusSettings(new OrderStatusSettingsRequest( $order_status_mappings ))
 			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );

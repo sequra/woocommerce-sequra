@@ -101,7 +101,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 Contributors:
 == Changelog ==
 = 3.0.7	=
-* Fixed: Bug in the migration sql sentence to create new tables.
+* Fixed: Bug in the migration SQL query to create new tables.
 = 3.0.6	=
 * Fixed: Type comparison bug that prevents orders from being eligible for service sales in some scenarios.
 * Fixed: Allow null payment method data in validation method.

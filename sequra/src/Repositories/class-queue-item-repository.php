@@ -87,7 +87,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * @return int Id of saved queue item.
 	 * @throws QueueItemSaveException If queue item could not be saved.
 	 */
-	public function saveWithCondition( QueueItem $queue_item, array $additional_where = array() ) {
+	public function saveWithCondition( QueueItem $queue_item, array $additional_where = array() ): int {
 		if ( ! $this->table_exists() ) {
 			return -1;
 		}
@@ -119,7 +119,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 *
 	 * @return void
 	 */
-	public function batchStatusUpdate( array $ids, $status ) {
+	public function batchStatusUpdate( array $ids, $status ): void {
 		// Not used in this implementation.
 	}
 

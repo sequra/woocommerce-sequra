@@ -22,17 +22,17 @@ class Widget_Settings extends WidgetSettings {
 	 *
 	 * @return string Fully qualified class name.
 	 */
-	public static function getClassName() {
+	public static function getClassName(): string {
 		return __CLASS__;
 	}
 
 	/**
 	 * Sets raw array data to this entity instance properties.
 	 *
-	 * @param array<string, mixed> $data Raw array data with keys for class fields. @see self::$fields for field names.
+	 * @param array<string, array<string,string>> $data Raw array data with keys for class fields. @see self::$fields for field names.
 	 * @return void
 	 */
-	public function inflate( array $data ) {
+	public function inflate( array $data ): void {
 		parent::inflate( $data );
 		$data_widget_settings           = isset( $data['widgetSettings'] ) ? (array) $data['widgetSettings'] : array();
 		$raw_widget_location_config     = self::getArrayValue( $data_widget_settings, 'widgetLocationConfiguration', array() );
@@ -64,6 +64,10 @@ class Widget_Settings extends WidgetSettings {
 	 * @return array<string, mixed> Entity in array format.
 	 */
 	public function toArray(): array {
+		/**
+		 * Data
+		 * @var array<string, array<string>> $data
+		 */
 		$data = parent::toArray();
 
         // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
