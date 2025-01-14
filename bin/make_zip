@@ -4,7 +4,7 @@
 # Argument --project. Supported values: "sequra", "sequra-no-address"
 PROJECT="sequra"
 # Argument --branch. Name of the Git branch to checkout
-BRANCH="3.0.0"
+BRANCH="master"
 
 while [[ "$#" -gt 0 ]]; do
     if [[ "$1" == --project=* ]]; then
