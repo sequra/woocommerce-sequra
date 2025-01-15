@@ -191,14 +191,11 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	 * Provide all the necessary data to use on the front-end as an associative array.
 	 */
 	public function get_payment_method_data(): array {
-		ob_start();
-		$this->gateway->payment_fields();
-		$payment_fields = ob_get_clean();
 		return array(
 			'blockContentUrl'        => \admin_url( 'admin-ajax.php' ),
 			'blockContentAjaxAction' => self::PAYMENT_METHOD_CONTENT_ACTION,
 			'title'                  => $this->gateway->get_title(),
-			'description'            => $payment_fields,
+			'description'            => '',
 		);
 	}
 }
