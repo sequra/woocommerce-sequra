@@ -212,19 +212,21 @@ class Bootstrap extends BootstrapComponent {
 						'wp_version'  => strval( $wp_version ),
 					);
 
+					$dir_url = \plugin_dir_url( $plugin_file_path );
+
 					self::$cache[ Interface_Constants::class ] = new Constants(
 						$dir_path,
 						$plugin_file_path,
 						$dir_path . 'sequra.{storeId}.log',
 						\plugin_basename( $plugin_file_path ),
-						\plugin_dir_url( $plugin_file_path ),
+						$dir_url,
 						'sequra/v1',
 						$data,
 						\get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php', true, false ),
 						$environment_data,
 						$dir_path . 'templates/',
 						$dir_path . 'assets',
-						\untrailingslashit( $dir_path ) . '/assets'
+						\untrailingslashit( $dir_url ) . '/assets'
 					);
 				}
 
