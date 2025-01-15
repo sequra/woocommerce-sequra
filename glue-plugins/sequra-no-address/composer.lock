@@ -4,52 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7f4962d4327097d9e019d2964f5a60f8",
-    "packages": [
-        {
-            "name": "sequra/integration-core",
-            "version": "v1.0.17",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/sequra/integration-core.git",
-                "reference": "6090e6078233a4c53b03e53befcb4580bf75d1c4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/6090e6078233a4c53b03e53befcb4580bf75d1c4",
-                "reference": "6090e6078233a4c53b03e53befcb4580bf75d1c4",
-                "shasum": ""
-            },
-            "require": {
-                "ext-ctype": "*",
-                "ext-json": "*",
-                "ext-mbstring": "*",
-                "php": ">=7.2"
-            },
-            "require-dev": {
-                "phpcompatibility/php-compatibility": "*",
-                "phpstan/phpstan": "^1.12",
-                "phpunit/phpunit": "8.5.14"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "SeQura\\Core\\BusinessLogic\\": "src/BusinessLogic",
-                    "SeQura\\Core\\Infrastructure\\": "src/Infrastructure"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "proprietary"
-            ],
-            "description": "Core SeQura integration library",
-            "support": {
-                "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v1.0.17"
-            },
-            "time": "2025-01-14T16:02:37+00:00"
-        }
-    ],
+    "content-hash": "176b5622894c5f15a78dae7bd3c71e60",
+    "packages": [],
     "packages-dev": [
         {
             "name": "automattic/vipwpcs",
