@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Implementation for the core bootstrap class.
  *
@@ -236,6 +235,7 @@ class Bootstrap extends BootstrapComponent {
 	}
 
 	/**
+	 * Get the constants instance.
 	 * 
 	 * @return Interface_Constants 
 	 * @throws ServiceNotRegisteredException 
