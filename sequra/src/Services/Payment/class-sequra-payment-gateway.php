@@ -460,7 +460,13 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$payload = $this->prepare_payload();
 		$this->die_on_invalid_payload( $payload );
 		try {
-			$response = WebhookAPI::webhookHandler( $payload['storeId'] )->handleRequest( $payload );
+			/**
+			 * Webhook handler
+			 * 
+			 * @var WebhookController $webhook_handler
+			 */
+			$webhook_handler = WebhookAPI::webhookHandler( $payload['storeId'] );
+			$response        = $webhook_handler->handleRequest( $payload );
 			if ( ! $response->isSuccessful() ) {
 				$error = $response->toArray();
 

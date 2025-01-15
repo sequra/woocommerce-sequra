@@ -7,6 +7,7 @@ parameters:
         - src/
         - templates/
     ignoreErrors:
+        - '#Call to an undefined method SeQura\\Core\\BusinessLogic\\Bootstrap\\Aspect\\Aspects::.*\(\)\.#'
         - '#Method .+ has parameter \$\w+ with generic class .+ but does not specify its types: T#'
         - '#Parameter .+ \$var of function .+ expects bool\|float\|int\|resource\|string\|null, mixed given#'
         - '#Parameter .+ \$var of function .+ expects array\|bool\|float\|int\|resource\|string\|null, mixed given#'
