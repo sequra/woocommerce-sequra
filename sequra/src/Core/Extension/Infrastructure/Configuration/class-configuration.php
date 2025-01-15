@@ -693,25 +693,31 @@ class Configuration extends CoreConfiguration {
 	 */
 	public function get_platform(): Platform {
 		/**
+		 * Constants service
+		 *
+		 * @var Interface_Constants
+		 */
+		$constants = ServiceRegister::getService( Interface_Constants::class );
+		/**
 		 * WooCommerce data
 		 *
 		 * @var array<string, string>
 		 */
-		$woo = ServiceRegister::getService( Interface_Constants::class )->get_woocommerce_data();
+		$woo = $constants->get_woocommerce_data();
 		
 		/**
 		 * Environment data
 		 * 
 		 * @var array<string, string>
 		 */
-		$env = ServiceRegister::getService( Interface_Constants::class  )->get_environment_data();
+		$env = $constants->get_environment_data();
 
 		/**
 		 * Plugin data
 		 * 
 		 * @var array<string, string>
 		 */
-		$sq = ServiceRegister::getService(  Interface_Constants::class )->get_plugin_data();
+		$sq = $constants->get_plugin_data();
 
 		/**
 		* Filter the module version to be used in the platform options.

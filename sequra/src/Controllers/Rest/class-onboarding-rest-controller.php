@@ -321,6 +321,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		try {
 			/**
 			 * Data
+			 *
 			 * @var array<int, array<string, string>> $data The data.
 			 */
 			$data = (array) json_decode( $request->get_body(), true );

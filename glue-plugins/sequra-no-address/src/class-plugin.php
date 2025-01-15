@@ -9,6 +9,8 @@ namespace SeQura\WC\NoAddress;
 
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\NoAddress\Controller\Hooks\Order\Interface_Order_Controller;
+use SeQura\WC\NoAddress\Services\Interface_Constants;
+use SeQura\WC\Services\Interface_Constants as Interface_Base_Constants;
 
 /**
  * The core plugin class.
@@ -68,9 +70,12 @@ class Plugin {
 
 		\SeQura\WC\NoAddress\Bootstrap::init();
 
-		$this->plugin_data     = (array) ServiceRegister::getService( 'plugin.data' );
-		$this->addon_data      = (array) ServiceRegister::getService( 'noaddress_addon.data' );
-		$this->addon_base_name = strval( ServiceRegister::getService( 'noaddress_addon.basename' ) );
+		$base_constants = ServiceRegister::getService( Interface_Base_Constants::class );
+		$constants      = ServiceRegister::getService( Interface_Constants::class );
+
+		$this->plugin_data     = $base_constants->get_plugin_data();
+		$this->addon_data      = $constants->get_plugin_data();
+		$this->addon_base_name = $base_constants->get_plugin_basename();
 		
 		if ( ! $this->check_dependencies() ) {
 			return;

@@ -51,6 +51,7 @@ class General_Settings extends GeneralSettings {
 	public function toArray(): array {
 		/**
 		 * Data
+		 *
 		 * @var array<string, array<string>> $data
 		 */
 		$data = parent::toArray();

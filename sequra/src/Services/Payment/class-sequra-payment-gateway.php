@@ -91,6 +91,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 */
 		\do_action( 'woocommerce_sequra_before_load', $this );
 
+		
 		/**
 		 * Payment service
 		 *
@@ -101,12 +102,18 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
 		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
 		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
-		$this->templates_path         = ServiceRegister::getService( Interface_Constants::class )->get_plugin_templates_path();
-		$this->logger                 = ServiceRegister::getService( Interface_Logger_Service::class );
-		$this->id                     = $this->payment_service->get_payment_gateway_id();
-		$this->has_fields             = true;
-		$this->method_title           = __( 'seQura', 'sequra' );
-		$this->method_description     = sprintf(
+		/**
+		 * Constants service
+		 *
+		 * @var Interface_Constants $constants
+		 */
+		$constants                = ServiceRegister::getService( Interface_Constants::class );
+		$this->templates_path     = $constants->get_plugin_templates_path();
+		$this->logger             = ServiceRegister::getService( Interface_Logger_Service::class );
+		$this->id                 = $this->payment_service->get_payment_gateway_id();
+		$this->has_fields         = true;
+		$this->method_title       = __( 'seQura', 'sequra' );
+		$this->method_description = sprintf(
 			'%1$s <a href="%2$s">%3$s</a>',
 			\esc_html__( 'seQura payment method\'s configuration.', 'sequra' ),
 			/**

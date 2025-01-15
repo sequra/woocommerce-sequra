@@ -341,7 +341,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 * @return bool
 	 */
 	private function is_store_api_request() {
-		//@phpstan-ignore-next-line
+		// @phpstan-ignore-next-line
 		if ( method_exists( 'WooCommerce', 'is_store_api_request' ) ) {
 			return WC()->is_store_api_request();
 		}

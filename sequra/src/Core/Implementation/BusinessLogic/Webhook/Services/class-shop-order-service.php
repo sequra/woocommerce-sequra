@@ -52,9 +52,16 @@ class Shop_Order_Service implements ShopOrderService {
 		$this->logger                  = $logger;
 	}
 
-	public function getCreateOrderRequest(string $orderReference): CreateOrderRequest {
+	/**
+	 * Gets the CreateOrderRequest for the order.
+	 * 
+	 * @param string $orderReference Order reference.
+	 * @throws Exception
+	 * @return CreateOrderRequest
+	 */
+	public function getCreateOrderRequest( string $orderReference ): CreateOrderRequest {
 		// TODO: Implement this.
-		throw new Exception('Not implemented');
+		throw new Exception( 'Not implemented' );
 	}
 	
 	/**
@@ -115,7 +122,7 @@ class Shop_Order_Service implements ShopOrderService {
 	 * @return string
 	 */
 	public function getOrderUrl( string $merchant_reference ): string {
-		$order = \wc_get_order( absint( $merchant_reference ) );
+		$order = \wc_get_order( \absint( $merchant_reference ) );
 		return $order instanceof WC_Order ? $order->get_view_order_url() : '';
 	}
 

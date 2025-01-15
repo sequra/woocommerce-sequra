@@ -190,7 +190,7 @@ class Bootstrap extends BootstrapComponent {
 						return $headers;
 					};
 					\add_filter( 'extra_plugin_headers', $add_wc_headers );
-					$data = \get_plugin_data( Reg::getService( 'plugin.file_path' ), true, false );
+					$data = \get_plugin_data( $plugin_file_path, true, false );
 					\remove_filter( 'extra_plugin_headers', $add_wc_headers );
 					$data['RequiresWC'] = $data['WC requires at least'];
 					unset( $data['WC requires at least'] );
@@ -465,7 +465,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
-						Reg::getService( Interface_Constants::class )->get_plugin_basename(),
+						self::get_constants()->get_plugin_basename(),
 						Reg::getService( Configuration::CLASS_NAME ),
 						self::get_constants()->get_plugin_data()['Version'],
 						array(
