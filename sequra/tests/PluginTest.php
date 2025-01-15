@@ -17,12 +17,14 @@ use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Plugin;
 use SeQura\WC\Controllers\Rest\REST_Controller;
+use SeQura\WC\Services\Interface_Constants;
 use SeQura\WC\Services\Migration\Interface_Migration_Manager;
 use WP_UnitTestCase;
 
 class PluginTest extends WP_UnitTestCase {
 
 	private $plugin;
+	private $constants;
 	private $plugin_data;
 	private $wp_version;
 	private $wc_version;
@@ -43,9 +45,10 @@ class PluginTest extends WP_UnitTestCase {
 
 	public function set_up() {
 
-		$this->wp_version = '5.9';
-		$this->wc_version = '4.0';
-
+		$this->wp_version  = '5.9';
+		$this->wc_version  = '4.0';
+		$this->base_name   = 'sequra/sequra.php';
+		$this->file_path   = '/var/www/html/wordpress/plugins/sequra/sequra.php';
 		$this->plugin_data = array(
 			'Name'        => 'seQura',
 			'TextDomain'  => 'sequra',
@@ -56,8 +59,7 @@ class PluginTest extends WP_UnitTestCase {
 			'RequiresWC'  => '4.0',
 		);
 
-		$this->base_name                  = 'sequra/sequra.php';
-		$this->file_path                  = '/var/www/html/wordpress/plugins/sequra/sequra.php';
+		$this->constants                  = $this->createMock( Interface_Constants::class );
 		$this->i18n_controller            = $this->createMock( Interface_I18n_Controller::class );
 		$this->migration_manager          = $this->createMock( Interface_Migration_Manager::class );
 		$this->asset_controller           = $this->createMock( Interface_Assets_Controller::class );
@@ -73,12 +75,15 @@ class PluginTest extends WP_UnitTestCase {
 	}
 
 	private function setup_plugin_instance() {
+
+		$this->constants->method( 'get_plugin_basename' )->willReturn( $this->base_name );
+		$this->constants->method( 'get_plugin_file_path' )->willReturn( $this->file_path );
+		$this->constants->method( 'get_environment_data' )->willReturn( array( 'wp_version' => $this->wp_version ) );
+		$this->constants->method( 'get_woocommerce_data' )->willReturn( array( 'Version' => $this->wc_version ) );
+		$this->constants->method( 'get_plugin_data' )->willReturn( $this->plugin_data );
+
 		$this->plugin = new Plugin( 
-			$this->plugin_data,
-			$this->wp_version,
-			$this->wc_version,
-			$this->file_path,
-			$this->base_name,
+			$this->constants,
 			$this->migration_manager,
 			$this->i18n_controller, 
 			$this->asset_controller,
