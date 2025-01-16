@@ -78,7 +78,7 @@ class Shop_Order_Service implements ShopOrderService {
 		$order_id = (int) $sq_order->getOrderRef1();
 		$wc_order = \wc_get_order( $order_id );
 		if ( ! $wc_order instanceof \WC_Order ) {
-			throw new Exception( 'WC order not found. Reference: ' . \esc_html( $order_id ) );
+			throw new Exception( \esc_html( "WC order with ID '$order_id' not found" ) );
 		}
 
 		$this->create_order_request_builder->set_current_order( $wc_order );
