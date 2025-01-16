@@ -20,6 +20,7 @@ use SeQura\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use WC_Order;
 
 /**
@@ -42,14 +43,23 @@ class Shop_Order_Service implements ShopOrderService {
 	private $logger;
 
 	/**
+	 * Create order request builder
+	 *
+	 * @var Interface_Create_Order_Request_Builder
+	 */
+	private $create_order_request_builder;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
 		SeQuraOrderRepositoryInterface $sequra_order_repository,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		Interface_Create_Order_Request_Builder $create_order_request_builder
 	) {
-		$this->sequra_order_repository = $sequra_order_repository;
-		$this->logger                  = $logger;
+		$this->sequra_order_repository      = $sequra_order_repository;
+		$this->logger                       = $logger;
+		$this->create_order_request_builder = $create_order_request_builder;
 	}
 
 	/**
@@ -60,8 +70,19 @@ class Shop_Order_Service implements ShopOrderService {
 	 * @return CreateOrderRequest
 	 */
 	public function getCreateOrderRequest( string $orderReference ): CreateOrderRequest {
-		// TODO: Implement this.
-		throw new Exception( 'Not implemented' );
+
+		$sq_order = $this->sequra_order_repository->getByOrderReference( $orderReference );
+		if ( ! $sq_order ) {
+			throw new Exception( 'SeQura order not found. Reference: ' . \esc_html( $orderReference ) );
+		}
+		$order_id = (int) $sq_order->getOrderRef1();
+		$wc_order = \wc_get_order( $order_id );
+		if ( ! $wc_order instanceof \WC_Order ) {
+			throw new Exception( 'WC order not found. Reference: ' . \esc_html( $order_id ) );
+		}
+
+		$this->create_order_request_builder->set_current_order( $wc_order );
+		return $this->create_order_request_builder->build();
 	}
 	
 	/**
