@@ -9,6 +9,7 @@
 namespace SeQura\WC\Tests\Core\BusinessLogic\Webhook\Services;
 
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Tests\Fixtures\Store;
@@ -21,6 +22,7 @@ class ShopOrderServiceTest extends WP_UnitTestCase {
 	private $sq_order_repo;
 	private $shop_order_service;
 	private $logger;
+	private $create_order_request_builder;
 
 	/**
 	 * Store instance.
@@ -29,10 +31,11 @@ class ShopOrderServiceTest extends WP_UnitTestCase {
 	private $store;
 
 	public function set_up(): void {        
-		$this->sq_order_repo = $this->createMock( SeQuraOrderRepositoryInterface::class );
-		$this->logger        = $this->createMock( Interface_Logger_Service::class );
+		$this->sq_order_repo                = $this->createMock( SeQuraOrderRepositoryInterface::class );
+		$this->logger                       = $this->createMock( Interface_Logger_Service::class );
+		$this->create_order_request_builder = $this->createMock( Interface_Create_Order_Request_Builder::class );
 
-		$this->shop_order_service = new Shop_Order_Service( $this->sq_order_repo, $this->logger );
+		$this->shop_order_service = new Shop_Order_Service( $this->sq_order_repo, $this->logger, $this->create_order_request_builder );
 
 		$this->store = new Store();
 		$this->store->set_up();
