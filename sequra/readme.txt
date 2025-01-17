@@ -102,6 +102,8 @@ Contributors:
 == Changelog ==
 = 3.0.7	=
 * Fixed: Bug in the migration SQL query to create new tables.
+* Changed: Update integration-core library to version v1.0.17.
+* Added: Improved checkout performance by eliminating unnecessary requests.
 = 3.0.6	=
 * Fixed: Type comparison bug that prevents orders from being eligible for service sales in some scenarios.
 * Fixed: Allow null payment method data in validation method.
