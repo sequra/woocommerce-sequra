@@ -150,13 +150,20 @@ class Cart_Service implements Interface_Cart_Service {
 
 	/**
 	 * Get seQura cart info data from session. If not exists, then initialize it.
+	 * 
+	 * @param bool $initialize_if_not_exists If true, then initialize cart info if not exists.
 	 */
-	public function get_cart_info_from_session(): ?Cart_Info {
+	public function get_cart_info_from_session( $initialize_if_not_exists = true ): ?Cart_Info {
 		$_session = WC()->session;
 		$raw_data = $_session->get( self::SESSION_CART_INFO, null );
 		if ( $raw_data ) {
 			return Cart_Info::from_array( $raw_data );
 		}
+
+		if ( ! $initialize_if_not_exists ) {
+			return null;
+		}
+
 		$cart_info = new Cart_Info();
 		$_session->set( self::SESSION_CART_INFO, $cart_info->to_array() );
 		return $cart_info;
@@ -169,6 +176,15 @@ class Cart_Service implements Interface_Cart_Service {
 		if ( WC()->session ) {
 			WC()->session->set( self::SESSION_CART_INFO, null );
 		}
+	}
+
+	/**
+	 * Check if cart info is valid
+	 * 
+	 * @param ?Cart_Info $cart_info
+	 */
+	public function is_cart_info_valid( $cart_info ): bool {
+		return $cart_info instanceof Cart_Info && $cart_info->ref;
 	}
 
 	/**
