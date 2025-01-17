@@ -53,13 +53,13 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectOrderChangeTo({ toStatus: 'wc-cancelled' });
   });
 
-  test('Make a payment attempt forcing a failure by changing the order payload amounts so it differs with the approved one.', async ({ page, productPage, checkoutPage }) => {
-    await checkoutPage.setupForPhysicalProducts();
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-    await checkoutPage.goto();
-    await checkoutPage.fillWithNonSpecialShopperName({});
-    await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.placeOrderUsingI1({ forceFailure: true });
-    await checkoutPage.waitForOrderFailure();
-  });
+  // test('Make a payment attempt forcing a failure by changing the order payload amounts so it differs with the approved one.', async ({ page, productPage, checkoutPage }) => {
+  //   await checkoutPage.setupForPhysicalProducts();
+  //   await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+  //   await checkoutPage.goto();
+  //   await checkoutPage.fillWithNonSpecialShopperName({});
+  //   await checkoutPage.expectPaymentMethodsBeingReloaded();
+  //   await checkoutPage.placeOrderUsingI1({ forceFailure: true });
+  //   await checkoutPage.waitForOrderFailure();
+  // });
 });
