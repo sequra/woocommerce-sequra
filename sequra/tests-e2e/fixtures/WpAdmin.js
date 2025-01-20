@@ -33,11 +33,14 @@ export default class WpAdmin {
                     return;
                 }
             }
-            await this.page.goto(`${this.baseURL}/wp-login.php?redirect_to=${encodeURIComponent(`${this.baseURL}/wp-admin/`)}&reauth=1`);
-            await this.expect(this.page.locator('#loginform')).toBeVisible({ timeout: 0 });
-            await this.page.fill('#user_login', process.env.WP_ADMIN_USER);
-            await this.page.fill('#user_pass', process.env.WP_ADMIN_PASSWORD);
-            await this.page.click('#wp-submit');
+            const user = process.env.WP_ADMIN_USER;
+            const pass = process.env.WP_ADMIN_PASSWORD;
+            console.log(`Logging in as user: "${user}" with password: "${pass}"`);
+
+            await this.page.goto(`${this.baseURL}/wp-login.php?redirect_to=${encodeURIComponent(`${this.baseURL}/wp-admin/`)}&reauth=1`, { waitUntil: 'domcontentloaded' });
+            await this.page.locator('#user_login').pressSequentially(user);
+            await this.page.locator('#user_pass').pressSequentially(pass);
+            await this.page.locator('#wp-submit').click();
             await this.page.waitForURL('./wp-admin/');
         }
         catch {
