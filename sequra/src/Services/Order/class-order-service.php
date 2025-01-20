@@ -835,4 +835,18 @@ class Order_Service implements Interface_Order_Service {
 				return null;
 		}
 	}
+
+	/**
+	 * Get the total amount of the order
+	 * 
+	 * @param WC_Order $order
+	 * @return float|int
+	 */
+	public function get_total( $order, $in_cents = true ) {
+		$total = 0;
+		if ( $order instanceof WC_Order ) {
+			$total = (float) $order->get_total( 'edit' );
+		}
+		return $in_cents ? $this->pricing_service->to_cents( $total ) : $total;
+	}
 }

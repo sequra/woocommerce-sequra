@@ -677,4 +677,17 @@ class Cart_Service implements Interface_Cart_Service {
 		 */
 		return \apply_filters( 'woocommerce_cart_sq_is_available_in_checkout', $return );
 	}
+
+	/**
+	 * Get the total amount of the cart
+	 * 
+	 * @return float|int
+	 */
+	public function get_total( $in_cents = true ) {
+		$total = 0;
+		if ( null !== WC()->cart ) {
+			$total = (float) WC()->cart->total;
+		}
+		return $in_cents ? $this->pricing_service->to_cents( $total ) : $total;
+	}
 }

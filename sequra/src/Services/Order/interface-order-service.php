@@ -216,4 +216,12 @@ interface Interface_Order_Service {
 	 * Get the link to the SeQura back office for the order
 	 */
 	public function get_link_to_sequra_back_office( WC_Order $order ): ?string;
+
+	/**
+	 * Get the total amount of the order
+	 * 
+	 * @param WC_Order $order
+	 * @return float|int
+	 */
+	public function get_total( $order, $in_cents = true );
 }
