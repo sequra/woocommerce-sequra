@@ -37,7 +37,7 @@ fi
 echo "✅ WordPress is available at: ${PUBLIC_URL}"
 
 # Check if --headed is passed
-if [[ "$@" == *"--headed"* ]]; then
+if [[ "$@" == *"--headed"* || "$@" == *"--ui"* ]]; then
     cd sequra && npx playwright test $@
 else
     docker run \
