@@ -21,7 +21,7 @@ class Shop_Logger_Adapter implements ShopLoggerAdapter {
 	 * @param LogData $data Log data.
 	 * @return void
 	 */
-	public function logMessage( LogData $data ) {
+	public function logMessage( LogData $data ): void {
 		// Do nothing.
 	}
 }

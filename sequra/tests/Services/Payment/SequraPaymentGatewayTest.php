@@ -14,6 +14,7 @@ use Exception;
 use WP_UnitTestCase;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
+use SeQura\WC\Services\Interface_Constants;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
@@ -76,13 +77,13 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 				return $payment_method_service;
 			} 
 		);
-		
-		$templates_path       = 'path/to/templates';
-		$this->templates_path = $templates_path;
+
+		$constants = $this->createMock( Interface_Constants::class );
+		$constants->method( 'get_plugin_templates_path' )->willReturn( 'path/to/templates' );
 		ServiceRegister::registerService(
-			'plugin.templates_path',
-			function () use ( $templates_path ) {
-				return $templates_path;
+			Interface_Constants::class,
+			function () use ( $constants ) {
+				return $constants;
 			} 
 		);
 		

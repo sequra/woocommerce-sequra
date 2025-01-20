@@ -604,10 +604,7 @@ class Order_Service implements Interface_Order_Service {
 		}
 		$order->update_meta_data( self::META_KEY_METHOD_TITLE, $dto->title );
 
-		$order->update_meta_data( self::META_KEY_CART_REF, $cart_info->ref );
-		$order->update_meta_data( self::META_KEY_CART_CREATED_AT, $cart_info->created_at );
-
-		$order->save();
+		$this->set_cart_info( $order, $cart_info );
 		return true;
 	}
 
@@ -616,18 +613,28 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function create_cart_info( WC_Order $order ): ?Cart_Info {
 		$cart_info = $this->get_cart_info( $order );
-		if ( $cart_info && $cart_info->ref ) {
+		if ( $this->cart_service->is_cart_info_valid( $cart_info ) ) {
 			// Skip if the cart info is already set.
 			return null;
 		}
 
 		$date      = $order->get_date_created();
 		$cart_info = new Cart_Info( null, $date ? $date->date( 'c' ) : null );
-		$order->update_meta_data( self::META_KEY_CART_REF, $cart_info->ref );
-		$order->update_meta_data( self::META_KEY_CART_CREATED_AT, $cart_info->created_at );
-		$order->save();
-
+		$this->set_cart_info( $order, $cart_info );
 		return $cart_info;
+	}
+
+	/**
+	 * Set cart info for the order
+	 * 
+	 * @param Cart_Info $cart_info Cart info
+	 */
+	public function set_cart_info( WC_Order $order, $cart_info ): void {
+		if ( $cart_info instanceof Cart_Info ) {    
+			$order->update_meta_data( self::META_KEY_CART_REF, $cart_info->ref );
+			$order->update_meta_data( self::META_KEY_CART_CREATED_AT, $cart_info->created_at );
+			$order->save();
+		}
 	}
 
 	/**

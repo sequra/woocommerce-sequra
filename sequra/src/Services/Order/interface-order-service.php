@@ -154,6 +154,13 @@ interface Interface_Order_Service {
 	public function get_cart_info( WC_Order $order ): ?Cart_Info;
 
 	/**
+	 * Set cart info for the order
+	 * 
+	 * @param Cart_Info $cart_info Cart info
+	 */
+	public function set_cart_info( WC_Order $order, $cart_info ): void;
+
+	/**
 	 * Set cart info if it is not already set
 	 */
 	public function create_cart_info( WC_Order $order ): ?Cart_Info;

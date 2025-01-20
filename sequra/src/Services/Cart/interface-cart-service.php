@@ -30,13 +30,22 @@ interface Interface_Cart_Service {
 
 	/**
 	 * Get seQura cart info data from session. If not exists, then initialize it.
+	 * 
+	 * @param bool $initialize_if_not_exists If true, then initialize cart info if not exists.
 	 */
-	public function get_cart_info_from_session(): ?Cart_Info;
+	public function get_cart_info_from_session( $initialize_if_not_exists = true ): ?Cart_Info;
 
 	/**
 	 * Attempt to clear seQura cart info data from session. 
 	 */
 	public function clear_cart_info_from_session(): void;
+	
+	/**
+	 * Check if cart info is valid
+	 * 
+	 * @param ?Cart_Info $cart_info
+	 */
+	public function is_cart_info_valid( $cart_info ): bool;
 
 	/**
 	 * Get items in cart

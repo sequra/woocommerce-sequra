@@ -193,15 +193,32 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get cart payload
 	 */
 	private function cart(): Cart {
-		$cart_info = $this->current_order ? $this->order_service->get_cart_info( $this->current_order ) : $this->cart_service->get_cart_info_from_session();
+		$cart_info = null;
 
-		if ( $this->current_order && ( ! $cart_info || ! $cart_info->ref ) ) {
-			$this->logger->log_debug( 'Cart info ref for order is missing. Trying to create one', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $this->current_order->get_id() ) ) );
-			$cart_info = $this->order_service->create_cart_info( $this->current_order );
-			if ( ! $cart_info || ! $cart_info->ref ) {
-				$this->logger->log_debug( 'Cart info can\'t be created', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $this->current_order->get_id() ) ) );
-			} else {
-				$this->logger->log_debug( 'Cart info created successfully', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $this->current_order->get_id() ) ) );
+		if ( ! $this->current_order ) {
+			$cart_info = $this->cart_service->get_cart_info_from_session();
+		} else {
+			// Try to get cart info from order.
+			$cart_info = $this->order_service->get_cart_info( $this->current_order );
+
+			if ( ! $this->cart_service->is_cart_info_valid( $cart_info ) ) {
+				$context = array( new LogContextData( 'order_id', $this->current_order->get_id() ) );
+				// Try to get cart info from session.
+				$this->logger->log_debug( 'Cart info ref for order is missing. Trying to recover from session', __FUNCTION__, __CLASS__, $context );
+				$cart_info = $this->cart_service->get_cart_info_from_session( false );
+				if ( ! $this->cart_service->is_cart_info_valid( $cart_info ) ) {
+					// Try to create a new cart info.
+					$this->logger->log_debug( 'Cart info can\'t be recovered from session. Trying to create one', __FUNCTION__, __CLASS__, $context );
+					$cart_info = $this->order_service->create_cart_info( $this->current_order );
+	
+					if ( ! $cart_info ) {
+						$this->logger->log_debug( 'Cart info can\'t be created', __FUNCTION__, __CLASS__, $context );
+					}
+				} else {
+					// Set cart info for the order.
+					$this->order_service->set_cart_info( $this->current_order, $cart_info );
+					$this->logger->log_debug( 'Cart info recovered from session', __FUNCTION__, __CLASS__, $context );
+				}
 			}
 		}
 		

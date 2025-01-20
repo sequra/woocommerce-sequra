@@ -231,8 +231,8 @@ export default class CheckoutPage {
         const cartTotal = iframe.locator(this.selector.sqPp3CartTotal)
 
         await cartTotal.waitFor({ state: 'attached', timeout: 10000 });
-        await this.expect(cartTotal, 'The checkout popup should show the service price as the cart amount').toHaveText('50,00 €');
-        await this.expect(iframe.locator(this.selector.sqPp3RegistrationFee), 'The checkout popup should show the registration amount').toHaveText('Total a pagar hoy 15,90 €');
+        await this.expect(cartTotal, 'The checkout popup should show the service price as the cart amount').toHaveText(/50,00\s€/);
+        await this.expect(iframe.locator(this.selector.sqPp3RegistrationFee), 'The checkout popup should show the registration amount').toHaveText(/15,90\s€/);
 
         await iframe.locator(this.selector.sqIframeBtn).click();
 

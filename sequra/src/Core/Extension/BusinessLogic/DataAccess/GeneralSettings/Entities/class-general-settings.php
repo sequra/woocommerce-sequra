@@ -39,7 +39,7 @@ class General_Settings extends GeneralSettings {
 	 *
 	 * @return string Fully qualified class name.
 	 */
-	public static function getClassName() {
+	public static function getClassName(): string {
 		return __CLASS__;
 	}
 
@@ -49,6 +49,11 @@ class General_Settings extends GeneralSettings {
 	 * @return array<string, mixed> Entity in array format.
 	 */
 	public function toArray(): array {
+		/**
+		 * Data
+		 *
+		 * @var array<string, array<string>> $data
+		 */
 		$data = parent::toArray();
         // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		if ( $this->generalSettings instanceof Domain_General_Settings ) { 

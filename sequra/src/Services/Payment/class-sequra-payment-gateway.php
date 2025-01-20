@@ -12,12 +12,14 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 	return;
 }
 
+use PhpParser\Node\Stmt\Interface_;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\WebhookAPI\WebhookAPI;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
+use SeQura\WC\Services\Interface_Constants;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
@@ -89,6 +91,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 */
 		\do_action( 'woocommerce_sequra_before_load', $this );
 
+		
 		/**
 		 * Payment service
 		 *
@@ -99,12 +102,18 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
 		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
 		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
-		$this->templates_path         = ServiceRegister::getService( 'plugin.templates_path' );
-		$this->logger                 = ServiceRegister::getService( Interface_Logger_Service::class );
-		$this->id                     = $this->payment_service->get_payment_gateway_id(); // @phpstan-ignore-line
-		$this->has_fields             = true;
-		$this->method_title           = __( 'seQura', 'sequra' );
-		$this->method_description     = sprintf(
+		/**
+		 * Constants service
+		 *
+		 * @var Interface_Constants $constants
+		 */
+		$constants                = ServiceRegister::getService( Interface_Constants::class );
+		$this->templates_path     = $constants->get_plugin_templates_path();
+		$this->logger             = ServiceRegister::getService( Interface_Logger_Service::class );
+		$this->id                 = $this->payment_service->get_payment_gateway_id();
+		$this->has_fields         = true;
+		$this->method_title       = __( 'seQura', 'sequra' );
+		$this->method_description = sprintf(
 			'%1$s <a href="%2$s">%3$s</a>',
 			\esc_html__( 'seQura payment method\'s configuration.', 'sequra' ),
 			/**
@@ -451,7 +460,13 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$payload = $this->prepare_payload();
 		$this->die_on_invalid_payload( $payload );
 		try {
-			$response = WebhookAPI::webhookHandler( $payload['storeId'] )->handleRequest( $payload );
+			/**
+			 * Webhook handler
+			 * 
+			 * @var WebhookController $webhook_handler
+			 */
+			$webhook_handler = WebhookAPI::webhookHandler( $payload['storeId'] );
+			$response        = $webhook_handler->handleRequest( $payload );
 			if ( ! $response->isSuccessful() ) {
 				$error = $response->toArray();
 

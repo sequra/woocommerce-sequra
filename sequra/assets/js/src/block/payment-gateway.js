@@ -6,7 +6,6 @@ const { registerPaymentMethod } = window.wc.wcBlocksRegistry
 const { getSetting } = window.wc.wcSettings
 
 const settings = getSetting('sequra_data', {})
-let canMakePaymentRequestId = 0;
 const label = decodeEntities(settings.title)
 
 const Content = (props) => {
@@ -69,8 +68,31 @@ registerPaymentMethod({
     edit: <Content />,
     // A callback to determine whether the payment method should be shown in the checkout.
     canMakePayment: ({ shippingAddress, billingAddress, cart }) => {
-        const requestId = ++canMakePaymentRequestId;
+        // Hash the data to prevent unnecessary requests.
+        const requestId = btoa(encodeURIComponent(JSON.stringify({ shippingAddress, billingAddress, cart })));
+
+        const initCache = () => {
+            if ('undefined' === typeof SeQuraCheckout.cache) {
+                SeQuraCheckout.cache = {};
+            }
+        };
+
+        const readFromCache = (key) => {
+            initCache();
+            return SeQuraCheckout.cache[key];
+        };
+
+        const writeToCache = (key, value) => {
+            initCache();
+            SeQuraCheckout.cache[key] = value;
+        };
+
         return new Promise((resolve) => {
+            const onResolved = (canMakePayment, detail) => {
+                settings.description = detail.content;
+                document.dispatchEvent(new CustomEvent('canMakePaymentReady', { detail }));
+                resolve(canMakePayment);
+            }
 
             if (!SeQuraBlockIntegration.isSolicitationAllowed) {
                 // Prevent unnecessary requests.
@@ -80,18 +102,18 @@ registerPaymentMethod({
 
             document.dispatchEvent(new CustomEvent('canMakePaymentLoading', { detail: { requestId } }));
 
+            const cachedContent = readFromCache(requestId);
+            if (cachedContent) {
+                onResolved('' !== cachedContent, { content: cachedContent });
+                return;
+            }
+
             settings.description = '';
             const data = new FormData();
             data.append('action', settings.blockContentAjaxAction);
             data.append('shippingAddress', JSON.stringify(shippingAddress));
             data.append('billingAddress', JSON.stringify(billingAddress));
             data.append('requestId', requestId);
-
-            const onResolved = (canMakePayment, detail) => {
-                settings.description = detail.content;
-                document.dispatchEvent(new CustomEvent('canMakePaymentReady', { detail }));
-                resolve(canMakePayment);
-            }
 
             fetch(settings.blockContentUrl, {
                 method: 'POST',
@@ -103,11 +125,12 @@ registerPaymentMethod({
                 }
 
                 response.json().then(json => {
-                    if (requestId !== parseInt(json.requestId)) {
+                    if (!json.requestId) {
                         // invalidate the request.
-                        throw new Error('Request ID mismatch');
+                        throw new Error('Request ID is missing');
                     }
 
+                    writeToCache(json.requestId, json.content);
                     onResolved('' !== json.content, { content: json.content });
                 }).catch(() => {
                     onResolved(false, { content: '' });

@@ -10,6 +10,9 @@ namespace SeQura\WC\NoAddress;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\NoAddress\Controller\Hooks\Order\Interface_Order_Controller;
 use SeQura\WC\NoAddress\Controller\Hooks\Order\Order_Controller;
+use SeQura\WC\NoAddress\Services\Constants;
+use SeQura\WC\NoAddress\Services\Interface_Constants;
+use SeQura\WC\Services\Interface_Constants as Interface_Base_Constants;
 use SeQura\WC\Services\Interface_Logger_Service;
 
 /**
@@ -37,56 +40,36 @@ class Bootstrap {
 	 */
 	private static function init_constants(): void {
 		ServiceRegister::registerService(
-			'noaddress_addon.dir_path',
+			Interface_Constants::class,
 			static function () {
-				if ( ! isset( self::$cache['noaddress_addon.dir_path'] ) ) {
-					self::$cache['noaddress_addon.dir_path'] = trailingslashit( dirname( __DIR__, 1 ) );
-				}
-				return self::$cache['noaddress_addon.dir_path'];
-			}
-		);
-		ServiceRegister::registerService(
-			'noaddress_addon.file_path',
-			static function () {
-				if ( ! isset( self::$cache['noaddress_addon.file_path'] ) ) {
-					self::$cache['noaddress_addon.file_path'] = ServiceRegister::getService( 'noaddress_addon.dir_path' ) . 'sequra-no-address.php';
-				}
-				return self::$cache['noaddress_addon.file_path'];
-			}
-		);
-		ServiceRegister::registerService(
-			'noaddress_addon.basename',
-			static function () {
-				if ( ! isset( self::$cache['noaddress_addon.basename'] ) ) {
-					self::$cache['noaddress_addon.basename'] = plugin_basename( ServiceRegister::getService( 'noaddress_addon.dir_path' ) . 'sequra-no-address.php' );
-				}
-				return self::$cache['noaddress_addon.basename'];
-			}
-		);
-		ServiceRegister::registerService(
-			'noaddress_addon.data',
-			static function () {
-				if ( ! isset( self::$cache['noaddress_addon.data'] ) ) {
+				if ( ! isset( self::$cache[ Interface_Constants::class ] ) ) {
+					$dir_path         = \trailingslashit( dirname( __DIR__, 1 ) );
+					$plugin_file_path = $dir_path . 'sequra-no-address.php';
+
 					if ( ! function_exists( 'get_plugin_data' ) ) {
 						require_once ABSPATH . 'wp-admin/includes/plugin.php';
 					}
-					$add_wc_headers = function ( $headers ) {
+					$add_sq_headers = function ( $headers ) {
 						$headers['seQura requires at least'] = 'seQura requires at least';
 						return $headers;
 					};
-					add_filter( 'extra_plugin_headers', $add_wc_headers );
-					$data = get_plugin_data( ServiceRegister::getService( 'noaddress_addon.file_path' ), true, false );
-					remove_filter( 'extra_plugin_headers', $add_wc_headers );
-					
+					\add_filter( 'extra_plugin_headers', $add_sq_headers );
+					$data = \get_plugin_data( $plugin_file_path, true, false );
+					\remove_filter( 'extra_plugin_headers', $add_sq_headers );
 					$data['RequiresSQ'] = '';
 					if ( isset( $data['seQura requires at least'] ) ) {
 						$data['RequiresSQ'] = $data['seQura requires at least'];
 						unset( $data['seQura requires at least'] );
 					}
 
-					self::$cache['noaddress_addon.data'] = $data;
+					self::$cache[ Interface_Constants::class ] = new Constants(
+						$dir_path,
+						$plugin_file_path,
+						\plugin_basename( $plugin_file_path ),
+						$data
+					);
 				}
-				return self::$cache['noaddress_addon.data'];
+				return self::$cache[ Interface_Constants::class ];
 			}
 		);
 	}
@@ -101,7 +84,7 @@ class Bootstrap {
 				if ( ! isset( self::$cache[ Interface_Order_Controller::class ] ) ) {
 					self::$cache[ Interface_Order_Controller::class ] = new Order_Controller(
 						ServiceRegister::getService( Interface_Logger_Service::class ),
-						ServiceRegister::getService( 'plugin.templates_path' )
+						ServiceRegister::getService( Interface_Base_Constants::class )->get_plugin_templates_path()
 					);
 				}
 				return self::$cache[ Interface_Order_Controller::class ];

@@ -24,9 +24,6 @@
             "src/"
         ]
     },
-    "require": {
-        "sequra/integration-core": "v1.0.15"
-    },
     "require-dev": {
         "phpunit/phpunit": ">5.0",
         "yoast/phpunit-polyfills": "^1.0",
@@ -38,5 +35,8 @@
         "phpstan/extension-installer": "^1.3",
         "php-stubs/woocommerce-stubs": "^8.8"
     },
-    "prefer-stable": true
+    "prefer-stable": true,
+    "require": {
+        "sequra/integration-core": "v1.0.17"
+    }
 }

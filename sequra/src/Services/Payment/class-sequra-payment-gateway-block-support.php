@@ -138,7 +138,18 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	 */
 	public function handle_get_payment_method_block_content(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$requestId = isset( $_POST['requestId'] ) ? (int) \sanitize_text_field( $_POST['requestId'] ) : 0;
+		if ( ! isset( $_POST['requestId'] ) ) {
+			\wp_send_json(
+				array(
+					'content'   => '',
+					'requestId' => null,
+				),
+				400,
+				JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS
+			);
+		}
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$requestId = \sanitize_text_field( (string) $_POST['requestId'] );
 		if ( ! function_exists( 'WC' ) || null === WC()->customer ) {
 			\wp_send_json(
 				array(
@@ -191,14 +202,11 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	 * Provide all the necessary data to use on the front-end as an associative array.
 	 */
 	public function get_payment_method_data(): array {
-		ob_start();
-		$this->gateway->payment_fields();
-		$payment_fields = ob_get_clean();
 		return array(
 			'blockContentUrl'        => \admin_url( 'admin-ajax.php' ),
 			'blockContentAjaxAction' => self::PAYMENT_METHOD_CONTENT_ACTION,
 			'title'                  => $this->gateway->get_title(),
-			'description'            => $payment_fields,
+			'description'            => '',
 		);
 	}
 }

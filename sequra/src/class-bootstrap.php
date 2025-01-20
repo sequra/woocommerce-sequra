@@ -42,6 +42,7 @@ use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
+use SeQura\Core\Infrastructure\Exceptions\ServiceNotRegisteredException;
 use SeQura\Core\Infrastructure\Logger\Interfaces\DefaultLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\LoggerConfiguration;
@@ -95,6 +96,7 @@ use SeQura\WC\Services\Assets\Assets;
 use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\Cart\Cart_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
+use SeQura\WC\Services\Constants;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
@@ -123,11 +125,13 @@ use SeQura\WC\Services\Regex\Interface_Regex;
 use SeQura\WC\Services\Regex\Regex;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 use SeQura\WC\Services\Report\Report_Service;
+use SeQura\WC\Services\Interface_Constants;
 
 /**
  * Implementation for the core bootstrap class.
  */
 class Bootstrap extends BootstrapComponent {
+
 
 	/**
 	 * Cache for Service instances.
@@ -146,15 +150,8 @@ class Bootstrap extends BootstrapComponent {
 		Reg::registerService(
 			Plugin::class,
 			static function () {
-				$env_data = (array) Reg::getService( 'environment.data' );
-				$wc_data  = (array) Reg::getService( 'woocommerce.data' );
-
 				return new Plugin(
-					Reg::getService( 'plugin.data' ),
-					$env_data['wp_version'] ?? '',
-					$wc_data['Version'] ?? '',
-					Reg::getService( 'plugin.file_path' ),
-					Reg::getService( 'plugin.basename' ),
+					Reg::getService( Interface_Constants::class ),
 					Reg::getService( Interface_Migration_Manager::class ),
 					Reg::getService( Interface_I18n_Controller::class ),
 					Reg::getService( Interface_Assets_Controller::class ),
@@ -177,80 +174,13 @@ class Bootstrap extends BootstrapComponent {
 	 */
 	public static function initConstants(): void {
 		Reg::registerService(
-			'plugin.dir_path',
+			Interface_Constants::class,
 			static function () {
-				if ( ! isset( self::$cache['plugin.dir_path'] ) ) {
-					self::$cache['plugin.dir_path'] = \trailingslashit( dirname( __DIR__, 1 ) );
-				}
-				return self::$cache['plugin.dir_path'];
-			}
-		);
-		Reg::registerService(
-			'plugin.file_path',
-			static function () {
-				if ( ! isset( self::$cache['plugin.file_path'] ) ) {
-					self::$cache['plugin.file_path'] = Reg::getService( 'plugin.dir_path' ) . 'sequra.php';
-				}
-				return self::$cache['plugin.file_path'];
-			}
-		);
-		Reg::registerService(
-			'plugin.log_file_path',
-			static function () {
-				if ( ! isset( self::$cache['plugin.log_file_path'] ) ) {
-					self::$cache['plugin.log_file_path'] = Reg::getService( 'plugin.dir_path' ) . 'sequra.{storeId}.log';
-				}
-				return self::$cache['plugin.log_file_path'];
-			}
-		);
 
-		Reg::registerService(
-			'plugin.basename',
-			static function () {
-				if ( ! isset( self::$cache['plugin.basename'] ) ) {
-					self::$cache['plugin.basename'] = \plugin_basename( Reg::getService( 'plugin.dir_path' ) . 'sequra.php' );
-				}
-				return self::$cache['plugin.basename'];
-			}
-		);
+				if ( ! isset( self::$cache[ Interface_Constants::class ] ) ) {
+					$dir_path         = \trailingslashit( dirname( __DIR__, 1 ) );
+					$plugin_file_path = $dir_path . 'sequra.php';
 
-		Reg::registerService(
-			'plugin.dir_url',
-			static function () {
-				if ( ! isset( self::$cache['plugin.dir_url'] ) ) {
-					self::$cache['plugin.dir_url'] = \plugin_dir_url( Reg::getService( 'plugin.file_path' ) );
-				}
-				return self::$cache['plugin.dir_url'];
-			}
-		);
-
-		Reg::registerService(
-			'plugin.rest_namespace',
-			static function () {
-				if ( ! isset( self::$cache['plugin.rest_namespace'] ) ) {
-					self::$cache['plugin.rest_namespace'] = 'sequra/v1';
-				}
-				return self::$cache['plugin.rest_namespace'];
-			}
-		);
-
-		Reg::registerService(
-			'woocommerce.data',
-			static function () {
-				if ( ! isset( self::$cache['woocommerce.data'] ) ) {
-					if ( ! function_exists( 'get_plugin_data' ) ) {
-						require_once ABSPATH . 'wp-admin/includes/plugin.php';
-					}
-					self::$cache['woocommerce.data'] = \get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php', true, false );
-				}
-				return self::$cache['woocommerce.data'];
-			}
-		);
-
-		Reg::registerService(
-			'plugin.data',
-			static function () {
-				if ( ! isset( self::$cache['plugin.data'] ) ) {
 					if ( ! function_exists( 'get_plugin_data' ) ) {
 						require_once ABSPATH . 'wp-admin/includes/plugin.php';
 					}
@@ -259,21 +189,11 @@ class Bootstrap extends BootstrapComponent {
 						return $headers;
 					};
 					\add_filter( 'extra_plugin_headers', $add_wc_headers );
-					$data = \get_plugin_data( Reg::getService( 'plugin.file_path' ), true, false );
+					$data = \get_plugin_data( $plugin_file_path, true, false );
 					\remove_filter( 'extra_plugin_headers', $add_wc_headers );
 					$data['RequiresWC'] = $data['WC requires at least'];
 					unset( $data['WC requires at least'] );
 
-					self::$cache['plugin.data'] = $data;
-				}
-				return self::$cache['plugin.data'];
-			}
-		);
-
-		Reg::registerService(
-			'environment.data',
-			static function () {
-				if ( ! isset( self::$cache['environment.data'] ) ) {
 					/**
 					 * Database instance.
 					 *
@@ -281,8 +201,8 @@ class Bootstrap extends BootstrapComponent {
 					 */
 					$wpdb = Reg::getService( \wpdb::class );
 					global $wp_version;
-				
-					self::$cache['environment.data'] = array(
+
+					$environment_data = array(
 						'php_version' => phpversion(),
 						'php_os'      => PHP_OS,
 						'uname'       => php_uname(),
@@ -290,38 +210,38 @@ class Bootstrap extends BootstrapComponent {
 						'db_version'  => $wpdb->db_version() ?? '',
 						'wp_version'  => strval( $wp_version ),
 					);
-				}
-				return self::$cache['environment.data'];
-			}
-		);
 
-		Reg::registerService(
-			'plugin.templates_path',
-			static function () {
-				if ( ! isset( self::$cache['plugin.templates_path'] ) ) {
-					self::$cache['plugin.templates_path'] = Reg::getService( 'plugin.dir_path' ) . 'templates/';
+					$dir_url = \plugin_dir_url( $plugin_file_path );
+
+					self::$cache[ Interface_Constants::class ] = new Constants(
+						$dir_path,
+						$plugin_file_path,
+						$dir_path . 'sequra.{storeId}.log',
+						\plugin_basename( $plugin_file_path ),
+						$dir_url,
+						'sequra/v1',
+						$data,
+						\get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php', true, false ),
+						$environment_data,
+						$dir_path . 'templates/',
+						$dir_path . 'assets',
+						\untrailingslashit( $dir_url ) . '/assets'
+					);
 				}
-				return self::$cache['plugin.templates_path'];
+
+				return self::$cache[ Interface_Constants::class ];
 			}
 		);
-		Reg::registerService(
-			'plugin.assets_path',
-			static function () {
-				if ( ! isset( self::$cache['plugin.assets_path'] ) ) {
-					self::$cache['plugin.assets_path'] = Reg::getService( 'plugin.dir_path' ) . 'assets';
-				}
-				return self::$cache['plugin.assets_path'];
-			}
-		);
-		Reg::registerService(
-			'plugin.assets_url',
-			static function () {
-				if ( ! isset( self::$cache['plugin.assets_url'] ) ) {
-					self::$cache['plugin.assets_url'] = \untrailingslashit( Reg::getService( 'plugin.dir_url' ) ) . '/assets';
-				}
-				return self::$cache['plugin.assets_url'];
-			}
-		);
+	}
+
+	/**
+	 * Get the constants instance.
+	 * 
+	 * @return Interface_Constants 
+	 * @throws ServiceNotRegisteredException 
+	 */
+	private static function get_constants() {
+		return Reg::getService( Interface_Constants::class );
 	}
 
 	/**
@@ -332,7 +252,7 @@ class Bootstrap extends BootstrapComponent {
 
 		// Core Default.
 		Reg::registerService(
-			LoggerConfiguration::class, 
+			LoggerConfiguration::class,
 			static function () {
 				if ( ! isset( self::$cache[ LoggerConfiguration::class ] ) ) {
 					$loggerConfig = LoggerConfiguration::getInstance();
@@ -484,7 +404,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ VersionServiceInterface::class ] ) ) {
 					self::$cache[ VersionServiceInterface::class ] = new Version_Service(
-						Reg::getService( 'plugin.data' )['Version']
+						self::get_constants()->get_plugin_data()['Version']
 					);
 				}
 				return self::$cache[ VersionServiceInterface::class ];
@@ -536,7 +456,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Log_File::class ] ) ) {
 					self::$cache[ Interface_Log_File::class ] = new Log_File(
-						Reg::getService( 'plugin.log_file_path' )
+						self::get_constants()->get_plugin_log_file_path()
 					);
 				}
 				return self::$cache[ Interface_Log_File::class ];
@@ -547,11 +467,11 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
-						Reg::getService( 'plugin.basename' ),
+						self::get_constants()->get_plugin_basename(),
 						Reg::getService( Configuration::CLASS_NAME ),
-						Reg::getService( 'plugin.data' )['Version'],
+						self::get_constants()->get_plugin_data()['Version'],
 						array(
-							new Migration_Install_300( 
+							new Migration_Install_300(
 								Reg::getService( \wpdb::class ),
 								Reg::getService( Configuration::CLASS_NAME )
 							),
@@ -620,14 +540,15 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Payment_Service::class ];
 			}
 		);
+
 		Reg::registerService(
 			Sequra_Payment_Gateway_Block_Support::class,
 			static function () {
 				if ( ! isset( self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] ) ) {
 					self::$cache[ Sequra_Payment_Gateway_Block_Support::class ] = new Sequra_Payment_Gateway_Block_Support(
-						Reg::getService( 'plugin.assets_path' ),
-						Reg::getService( 'plugin.assets_url' ),
-						Reg::getService( 'plugin.data' )['Version']
+						self::get_constants()->get_plugin_assets_path(),
+						self::get_constants()->get_plugin_assets_url(),
+						self::get_constants()->get_plugin_data()['Version']
 					);
 				}
 				return self::$cache[ Sequra_Payment_Gateway_Block_Support::class ];
@@ -700,7 +621,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ ShopOrderService::class ] ) ) {
 					self::$cache[ ShopOrderService::class ] = new Shop_Order_Service(
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Create_Order_Request_Builder::class )
 					);
 				}
 				return self::$cache[ ShopOrderService::class ];
@@ -803,13 +725,13 @@ class Bootstrap extends BootstrapComponent {
 			Interface_I18n_Controller::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_I18n_Controller::class ] ) ) {
-					$data   = Reg::getService( 'plugin.data' );
+					$data   = self::get_constants()->get_plugin_data();
 					$domain = $data['TextDomain'];
-					self::$cache[ Interface_I18n_Controller::class ] = new I18n_Controller( 
+					self::$cache[ Interface_I18n_Controller::class ] = new I18n_Controller(
 						$domain . $data['DomainPath'],
 						$domain,
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( 'plugin.templates_path' )
+						self::get_constants()->get_plugin_templates_path()
 					);
 				}
 				return self::$cache[ Interface_I18n_Controller::class ];
@@ -819,15 +741,15 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Assets_Controller::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Assets_Controller::class ] ) ) {
-					$env_data = (array) Reg::getService( 'environment.data' );
+					$env_data = self::get_constants()->get_environment_data();
 					self::$cache[ Interface_Assets_Controller::class ] = new Assets_Controller(
-						Reg::getService( 'plugin.assets_url' ), 
-						Reg::getService( 'plugin.assets_path' ), 
-						Reg::getService( 'plugin.data' )['Version'],
+						self::get_constants()->get_plugin_assets_url(),
+						self::get_constants()->get_plugin_assets_path(),
+						self::get_constants()->get_plugin_data()['Version'],
 						$env_data['wp_version'] ?? '',
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( 'plugin.templates_path' ),
+						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Assets::class ),
 						Reg::getService( Interface_Payment_Method_Service::class ),
@@ -842,10 +764,10 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Settings_Controller::class ] ) ) {
 					self::$cache[ Interface_Settings_Controller::class ] = new Settings_Controller(
-						Reg::getService( 'plugin.templates_path' ),
+						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( 'plugin.basename' )
+						self::get_constants()->get_plugin_basename()
 					);
 				}
 				return self::$cache[ Interface_Settings_Controller::class ];
@@ -857,7 +779,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Payment_Controller::class ] ) ) {
 					self::$cache[ Interface_Payment_Controller::class ] = new Payment_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( 'plugin.templates_path' ),
+						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Interface_Order_Service::class )
 					);
 				}
@@ -870,7 +792,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Product_Controller::class ] ) ) {
 					self::$cache[ Interface_Product_Controller::class ] = new Product_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( 'plugin.templates_path' ),
+						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Product_Service::class ),
 						Reg::getService( Interface_Payment_Service::class ),
@@ -888,7 +810,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Async_Process_Controller::class ] ) ) {
 					self::$cache[ Interface_Async_Process_Controller::class ] = new Async_Process_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( 'plugin.templates_path' ),
+						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Interface_Report_Service::class )
 					);
 				}
@@ -901,7 +823,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Order_Controller::class ] ) ) {
 					self::$cache[ Interface_Order_Controller::class ] = new Order_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( 'plugin.templates_path' ),
+						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Interface_Order_Service::class )
 					);
 				}
@@ -913,7 +835,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Onboarding_REST_Controller::class ] ) ) {
 					self::$cache[ Onboarding_REST_Controller::class ] = new Onboarding_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' ),
+						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
@@ -925,7 +847,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Payment_REST_Controller::class ] ) ) {
 					self::$cache[ Payment_REST_Controller::class ] = new Payment_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' ),
+						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( Interface_Payment_Method_Service::class )
 					);
@@ -938,7 +860,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ General_Settings_REST_Controller::class ] ) ) {
 					self::$cache[ General_Settings_REST_Controller::class ] = new General_Settings_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' ),
+						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
@@ -950,7 +872,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Log_REST_Controller::class ] ) ) {
 					self::$cache[ Log_REST_Controller::class ] = new Log_REST_Controller(
-						Reg::getService( 'plugin.rest_namespace' ),
+						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class )
 					);
 				}

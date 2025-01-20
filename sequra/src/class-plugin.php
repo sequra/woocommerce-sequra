@@ -15,6 +15,7 @@ use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Controllers\Rest\REST_Controller;
+use SeQura\WC\Services\Interface_Constants;
 use SeQura\WC\Services\Migration\Interface_Migration_Manager;
 
 /**
@@ -70,11 +71,7 @@ class Plugin {
 	 * Construct the plugin and bind hooks with controllers.
 	 */
 	public function __construct(
-		array $data,
-		string $wp_version,
-		string $wc_version,
-		string $file_path,
-		string $base_name,
+		Interface_Constants $constants,
 		Interface_Migration_Manager $migration_manager,
 		Interface_I18n_Controller $i18n_controller,
 		Interface_Assets_Controller $assets_controller,
@@ -88,11 +85,11 @@ class Plugin {
 		Interface_Async_Process_Controller $async_process_controller,
 		Interface_Order_Controller $order_controller
 	) {
-		$this->data              = $data;
-		$this->wp_version        = $wp_version;
-		$this->wc_version        = $wc_version;
-		$this->file_path         = $file_path;
-		$this->base_name         = $base_name;
+		$this->data              = $constants->get_plugin_data();
+		$this->wp_version        = $constants->get_environment_data()['wp_version'] ?? '';
+		$this->wc_version        = $constants->get_woocommerce_data()['Version'] ?? '';
+		$this->file_path         = $constants->get_plugin_file_path();
+		$this->base_name         = $constants->get_plugin_basename();
 		$this->migration_manager = $migration_manager;
 
 		\add_action( 'plugins_loaded', array( $this, 'install' ) );
@@ -106,7 +103,7 @@ class Plugin {
 
 		// Settings hooks.
 		\add_action( 'admin_menu', array( $settings_controller, 'register_page' ) );
-		\add_filter( "plugin_action_links_{$base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
+		\add_filter( "plugin_action_links_{$this->base_name}", array( $settings_controller, 'add_action_link' ), 10, 4 );
 		\add_filter( 'sequra_settings_page_url', array( $settings_controller, 'get_settings_page_url' ) );
 		\add_filter( 'admin_footer_text', array( $settings_controller, 'remove_footer_admin' ) );
 		\add_filter( 'plugin_row_meta', array( $settings_controller, 'add_plugin_row_meta' ), 10, 2 );
