@@ -80,6 +80,14 @@ class I18n implements Interface_I18n {
 		if ( empty( $country ) ) {
 			$country = $this->get_lang();
 		}
+		/**
+		 * Allow changing the country of the shopper.
+		 *
+		 * @since 3.0.7
+		 * @param string|null $country The country code.
+		 * @return string The country code. Must be in ISO-3166-1 alpha-2 format.
+		 */
+		$country = (string) apply_filters( 'sequra_shopper_country', $country );
 		return strtoupper( $country );
 	}
 }
