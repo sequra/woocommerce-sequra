@@ -83,6 +83,16 @@ export default class CheckoutPage {
             sqPayBtn: '.full-payment-btn-container button:not([disabled])',
             sqPayBtnAlt: '.payment-btn-container button:not([disabled])',
             adminOrderStatus: '#order_status',
+            educationalPopup: '.Sequra__EducationalPopup',
+            educationalPopupInputPrice: '.input-price-editable',
+        }
+
+        this.locator = {
+            moreInfoLink: {
+                i1: () => this.page.locator('span').filter({ hasText: 'Sin coste adicional +info' }).locator('.sequra-educational-popup'),
+                sp1: () => this.page.locator('span').filter({ hasText: '¡Gratis! +info' }).locator('.sequra-educational-popup'),
+                pp3: () => this.page.locator('span').filter({ hasText: 'en 3, 6 o 12 meses +info' }).locator('.sequra-educational-popup'),
+            }
         }
     }
 
@@ -342,11 +352,11 @@ export default class CheckoutPage {
         }
     }
 
-    async expectPaymentMethodToBeVisible({ methodName }) {
+    async expectPaymentMethodToBeVisible({ methodName, checked = false }) {
         try {
             // check if radio #radio-control-wc-payment-method-options-sequra exists and it is not checked and check it
             const locator = this.page.locator('#radio-control-wc-payment-method-options-sequra');
-            await this.expect(locator).toBeChecked({ checked: false, timeout: 1000 });
+            await this.expect(locator).toBeChecked({ checked: checked, timeout: 1000 });
             await locator.click();
         } catch (err) {
             console.log(`Waiting for payment method ${methodName} to be visible...`);
@@ -354,20 +364,30 @@ export default class CheckoutPage {
         await this.expect(this.page.locator(this.selector.sqPaymentMethodName, { hasText: methodName }), `"${methodName}" payment method should be visible`).toBeVisible({ timeout: 10000 });
     }
 
-    async expectFp1ToBeVisible() {
-        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.fp1.es.name });
+    async expectFp1ToBeVisible(checked = false) {
+        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.fp1.es.name, checked });
     }
 
-    async expectI1ToBeVisible() {
-        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.i1.es.name });
+    async expectI1ToBeVisible(checked = false) {
+        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.i1.es.name, checked });
+        await this.expect(this.locator.moreInfoLink.i1()).toBeVisible();
     }
 
-    async expectSp1ToBeVisible() {
-        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.sp1.es.name });
+    async expectSp1ToBeVisible(checked = false) {
+        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.sp1.es.name, checked });
+        await this.expect(this.locator.moreInfoLink.sp1()).toBeVisible();
     }
 
-    async expectPp3ToBeVisible() {
-        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.pp3.es.name });
+    async expectPp3ToBeVisible(checked = false) {
+        await this.expectPaymentMethodToBeVisible({ methodName: sqProduct.pp3.es.name, checked });
+        await this.expect(this.locator.moreInfoLink.pp3()).toBeVisible();
+    }
+
+    async expectEducationPopupToWork(expectedPrice) {
+        await this.locator.moreInfoLink.pp3().click();
+        await this.page.waitForSelector(this.selector.educationalPopup, { state: 'attached', timeout: 5000 });
+        const priceLocator = this.page.frameLocator(this.selector.educationalPopup).locator(this.selector.educationalPopupInputPrice);
+        await this.expect(priceLocator).toHaveValue(expectedPrice, { timeout: 5000 });
     }
 
     async expectPp3DecombinedToBeVisible() {

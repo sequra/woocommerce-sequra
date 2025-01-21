@@ -11,10 +11,13 @@ test.describe('Product checkout', () => {
     for (const version of ['classic', 'blocks']) {
       await helper.executeWebhook({ webhook: helper.webhooks.CHECKOUT_VERSION, args: [{ name: 'version', value: version }] });
       await checkoutPage.goto();
-      await checkoutPage.expectPaymentMethodsBeingReloaded();
+      if (version === 'blocks') {
+        await checkoutPage.expectPaymentMethodsBeingReloaded();
+      }
       await checkoutPage.expectI1ToBeVisible();
       await checkoutPage.expectSp1ToBeVisible();
       await checkoutPage.expectPp3ToBeVisible();
+      await checkoutPage.expectEducationPopupToWork('100.00');
     }
   });
 
@@ -25,7 +28,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.goto();
     await checkoutPage.fillWithNonSpecialShopperName({});
     await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.placeOrderUsingI1({shopper: 'nonSpecial'});
+    await checkoutPage.placeOrderUsingI1({ shopper: 'nonSpecial' });
     await checkoutPage.waitForOrderSuccess();
   });
 
