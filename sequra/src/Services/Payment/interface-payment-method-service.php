@@ -10,6 +10,7 @@ namespace SeQura\WC\Services\Payment;
 
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraForm;
 use SeQura\WC\Dto\Payment_Method_Data;
+use SeQura\WC\Dto\Payment_Method_Option;
 use WC_Order;
 
 /**
@@ -25,9 +26,9 @@ interface Interface_Payment_Method_Service {
 	/**
 	 * Get payment methods
 	 * 
-	 * @return array<string, string>[]
+	 * @return Payment_Method_Option[]
 	 */
-	public function get_payment_methods( ?WC_Order $order = null ): array;
+	public function get_payment_methods( ?WC_Order $order = null );
 
 	/**
 	 * Get a list of all payment methods defined for store and merchant
