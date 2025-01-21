@@ -58,6 +58,14 @@ module.exports = (env, argv) => {
         },
         {
             plugins: frontPlugins,
+            entry: "./assets/js/src/page/sequra-config-params.js",
+            output: {
+                path: path.resolve(__dirname, './assets/js/dist/page'),
+                filename: "sequra-config-params.min.js",
+            },
+        },
+        {
+            plugins: frontPlugins,
             entry: "./assets/js/src/page/checkout.js",
             output: {
                 path: path.resolve(__dirname, './assets/js/dist/page'),

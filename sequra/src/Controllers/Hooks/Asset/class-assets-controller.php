@@ -24,6 +24,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	private const HANDLE_SETTINGS_PAGE     = 'sequra-settings';
 	private const HANDLE_CHECKOUT          = 'sequra-checkout';
 	private const HANDLE_WIDGET            = 'sequra-widget';
+	private const HANDLE_CONFIG_PARAMS     = 'sequra-config-params';
 	private const HANDLE_CORE              = 'sequra-core';
 	private const INTEGRATION_CORE_VERSION = '1.0.0';
 	private const STRATEGY_DEFER           = 'defer';
@@ -255,18 +256,18 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return array<string, mixed>
 	 */
 	private function get_sequra_widget_facade_l10n(): array {
-		$arr                = $this->get_sequra_js_config_l10n();
-		$arr['widgets']     = array();
-		$arr['miniWidgets'] = array();
-		return $arr;
+		return array(
+			'widgets'     => array(),
+			'miniWidgets' => array(),
+		);
 	}
 
 	/**
-	 * Get the SequraWidgetFacade object
+	 * Get the SequraConfigParams object
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function get_sequra_js_config_l10n(): array {
+	private function get_sequra_config_params_l10n(): array {
 		$merchant = $this->configuration->get_merchant_ref( $this->i18n->get_current_country() );
 		$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $this->configuration->get_store_id(), $merchant );
 		return array(
@@ -303,7 +304,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		\wp_register_script( 
 			self::HANDLE_CHECKOUT,
 			"{$this->assets_dir_url}/js/dist/page/checkout.min.js",
-			array(),
+			array( self::HANDLE_CONFIG_PARAMS ),
 			$this->assets_version,
 			$this->get_script_args( self::STRATEGY_DEFER, true )
 		);
@@ -329,7 +330,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'isBlockCheckout' => $is_block,
 			) 
 		);
-		\wp_localize_script( self::HANDLE_CHECKOUT, 'SequraJsConfig', $this->get_sequra_js_config_l10n() );
 		\wp_enqueue_script( self::HANDLE_CHECKOUT );
 	}
 
@@ -337,12 +337,11 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * Enqueue styles and scripts in Front-End for the widgets
 	 */
 	private function enqueue_front_widgets(): void {
-		
 		\wp_enqueue_style( self::HANDLE_WIDGET, "{$this->assets_dir_url}/css/widget.css", array(), $this->assets_version );
 		\wp_register_script( 
 			self::HANDLE_WIDGET, 
 			"{$this->assets_dir_url}/js/dist/page/widget-facade.min.js",
-			array(),
+			array( self::HANDLE_CONFIG_PARAMS ),
 			$this->assets_version,
 			$this->get_script_args( self::STRATEGY_DEFER, false )
 		);
@@ -390,6 +389,16 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	public function enqueue_front() {
 		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+
+		\wp_register_script( 
+			self::HANDLE_CONFIG_PARAMS, 
+			"{$this->assets_dir_url}/js/dist/page/sequra-config-params.min.js",
+			array(),
+			$this->assets_version,
+			$this->get_script_args( self::STRATEGY_DEFER, false )
+		);
+		\wp_localize_script( self::HANDLE_CONFIG_PARAMS, 'SequraConfigParams', $this->get_sequra_config_params_l10n() );
+
 		if ( $this->payment_method_service->is_checkout() ) {
 			$this->enqueue_front_checkout();
 		} 
