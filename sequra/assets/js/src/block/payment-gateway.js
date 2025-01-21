@@ -68,23 +68,22 @@ registerPaymentMethod({
     edit: <Content />,
     // A callback to determine whether the payment method should be shown in the checkout.
     canMakePayment: ({ shippingAddress, billingAddress, cart }) => {
-        // Hash the data to prevent unnecessary requests.
-        const requestId = btoa(encodeURIComponent(JSON.stringify({ shippingAddress, billingAddress, cart })));
+        const isSolicitationAllowed = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isSolicitationAllowed;
 
         const initCache = () => {
-            if ('undefined' === typeof SeQuraCheckout.cache) {
-                SeQuraCheckout.cache = {};
+            if ('undefined' === typeof SeQuraBlockIntegration.cache) {
+                SeQuraBlockIntegration.cache = {};
             }
         };
 
         const readFromCache = (key) => {
             initCache();
-            return SeQuraCheckout.cache[key];
+            return SeQuraBlockIntegration.cache[key];
         };
 
         const writeToCache = (key, value) => {
             initCache();
-            SeQuraCheckout.cache[key] = value;
+            SeQuraBlockIntegration.cache[key] = value;
         };
 
         return new Promise((resolve) => {
@@ -94,14 +93,18 @@ registerPaymentMethod({
                 resolve(canMakePayment);
             }
 
-            if (!SeQuraBlockIntegration.isSolicitationAllowed) {
+            if (!isSolicitationAllowed()) {
                 // Prevent unnecessary requests.
                 onResolved(false, { content: '' });
                 return;
             }
 
+            // Hash the data to prevent unnecessary requests.
+            const requestId = btoa(encodeURIComponent(JSON.stringify({ shippingAddress, billingAddress, cart })));
+
             document.dispatchEvent(new CustomEvent('canMakePaymentLoading', { detail: { requestId } }));
 
+            // TODO: Implement check if requestId is pending. When page loads, this code is executed three times for the same requestId what can be avoided.
             const cachedContent = readFromCache(requestId);
             if (cachedContent) {
                 onResolved('' !== cachedContent, { content: cachedContent });
