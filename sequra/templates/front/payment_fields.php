@@ -38,7 +38,7 @@ foreach ( (array) $args['payment_methods'] as $key => $pm ) :
 			esc_attr( (string) $pm->product ),
 			esc_attr( (string) $pm->campaign ?? '' ),
 			esc_attr__( 'More information', 'sequra' ),
-			esc_html__( '+ info', 'sequra' )
+			esc_html__( '+info', 'sequra' )
 		);
 	}
 	?>
