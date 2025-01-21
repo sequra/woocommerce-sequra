@@ -105,6 +105,7 @@ Contributors:
 * Changed: Update integration-core library to version v1.0.17.
 * Added: Improved checkout performance by eliminating unnecessary requests.
 * Added: The sequra_shopper_country filter, allowing customization of the detected shopper's country code.
+* Added: Restored the educational pop-up present in every seQura payment option on the checkout page in v2.
 = 3.0.6	=
 * Fixed: Type comparison bug that prevents orders from being eligible for service sales in some scenarios.
 * Fixed: Allow null payment method data in validation method.
