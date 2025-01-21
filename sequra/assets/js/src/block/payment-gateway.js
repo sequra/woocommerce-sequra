@@ -10,12 +10,12 @@ const label = decodeEntities(settings.title)
 
 const Content = (props) => {
     const { eventRegistration, emitResponse } = props;
-    const { onPaymentProcessing } = eventRegistration;
+    const { onPaymentSetup } = eventRegistration;
 
     const [content, setContent] = useState(settings.description || '');
 
     useEffect(() => {
-        const unsubscribe = onPaymentProcessing(async () => {
+        const unsubscribe = onPaymentSetup(async () => {
             const checkedInput = document.querySelector('[name="sequra_payment_method_data"]:checked')
             const data = checkedInput ? checkedInput.value : null;
 
@@ -36,14 +36,19 @@ const Content = (props) => {
     }, [
         emitResponse.responseTypes.ERROR,
         emitResponse.responseTypes.SUCCESS,
-        onPaymentProcessing,
+        onPaymentSetup,
     ]);
 
     useEffect(() => {
         document.addEventListener('canMakePaymentLoading', (event) => {
             setContent('<div class="sq-loader" style="margin-top:1rem;margin-bottom:1rem;"><span class="sqp-spinner"></span></div>');
         });
-        document.addEventListener('canMakePaymentReady', (event) => setContent(event.detail.content));
+        document.addEventListener('canMakePaymentReady', (event) => {
+            setContent(event.detail.content);
+            if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents && 'function' === typeof Sequra.onLoad) {
+                Sequra.onLoad(() => Sequra.refreshComponents());
+            }
+        });
     }, []);
 
     return <div dangerouslySetInnerHTML={{ __html: decodeEntities(content) }} />

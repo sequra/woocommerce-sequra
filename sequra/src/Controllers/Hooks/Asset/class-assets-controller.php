@@ -255,6 +255,18 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return array<string, mixed>
 	 */
 	private function get_sequra_widget_facade_l10n(): array {
+		$arr                = $this->get_sequra_js_config_l10n();
+		$arr['widgets']     = array();
+		$arr['miniWidgets'] = array();
+		return $arr;
+	}
+
+	/**
+	 * Get the SequraWidgetFacade object
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function get_sequra_js_config_l10n(): array {
 		$merchant = $this->configuration->get_merchant_ref( $this->i18n->get_current_country() );
 		$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $this->configuration->get_store_id(), $merchant );
 		return array(
@@ -265,8 +277,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'merchant'          => $merchant,
 			'assetKey'          => $this->configuration->get_assets_key(),
 			'products'          => array_column( $methods, 'product' ),
-			'widgets'           => array(),
-			'miniWidgets'       => array(),
 		);
 	}
 
@@ -319,6 +329,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'isBlockCheckout' => $is_block,
 			) 
 		);
+		\wp_localize_script( self::HANDLE_CHECKOUT, 'SequraJsConfig', $this->get_sequra_js_config_l10n() );
 		\wp_enqueue_script( self::HANDLE_CHECKOUT );
 	}
 

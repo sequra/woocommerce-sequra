@@ -1,3 +1,6 @@
+if (SequraJsConfig) {
+    (function (i, s, o, g, r, a, m) { i['SequraConfiguration'] = g; i['SequraOnLoad'] = []; i[r] = {}; i[r][a] = function (callback) { i['SequraOnLoad'].push(callback); }; (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]); a.async = 1; a.src = g.scriptUri; m.parentNode.insertBefore(a, m); })(window, document, 'script', SequraJsConfig, 'Sequra', 'onLoad');
+}
 (function () {
     const ClassicCheckout = {
 
@@ -151,6 +154,10 @@
             this.maybeSelectSeQura(sqPaymentMethodInput, sqProductOptions, paymentMethods);
             this.addPaymentMethodChangeListener(paymentMethods, sqProductOptions);
             this.addSqProductOptionChangeListener(sqProductOptions, paymentMethods);
+
+            if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents && 'function' === typeof Sequra.onLoad) {
+                Sequra.onLoad(() => Sequra.refreshComponents());
+            }
         },
 
         isJQueryActive: () => 'undefined' !== typeof jQuery,

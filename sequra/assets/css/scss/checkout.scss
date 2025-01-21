@@ -45,6 +45,11 @@
     &__input {
         display: inline-block !important;
     }
+
+    .sequra_more_info {
+        cursor: pointer;
+        text-decoration: underline;
+    }
 }
 .sequra-block__description {
     margin-bottom: 1em;
@@ -74,11 +79,11 @@
             padding: 0 !important;
         }
         .sequra-payment-method {
-            margin-bottom: 0.5em!important;
+            margin-bottom: 0.5em !important;
             &::after {
-               display: none;
+                display: none;
             }
-            
+
             &__name {
                 // font-weight: inherit;
                 // color: var(--wp--preset--color--contrast, #000);
@@ -96,7 +101,7 @@
             & > label {
                 // font-size: inherit;
                 font-size: revert;
-                margin-bottom: 0!important;
+                margin-bottom: 0 !important;
             }
             &__icon {
                 width: 80px !important;
@@ -105,10 +110,10 @@
     }
 
     > .wc_payment_method:not(.payment_method_sequra) > input[type="radio"]:not(:checked) ~ .payment_box {
-        display: none!important;
+        display: none !important;
     }
 
-    .payment_box.payment_method_sequra{
+    .payment_box.payment_method_sequra {
         box-shadow: none;
     }
 }
