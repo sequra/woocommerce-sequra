@@ -165,14 +165,13 @@ test.describe('Widget settings', () => {
       await widgetSettingsPage.save({ expectLoadingShowAndHide: true, skipIfDisabled: true });
       await widgetSettingsPage.logout();
 
-      await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-
       await helper.executeWebhook({ webhook: helper.webhooks.SET_THEME, args: [{ name: 'theme', value: theme }] });
       await helper.executeWebhook({ webhook: helper.webhooks.CART_VERSION, args: [{ name: 'version', value: version }] });
 
+      await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+
       const opt = { locationSel: settings.cartMiniWidget.locationSel, product: 'pp3', amount: 10000, message: 'Desde €11,33/mes con seQura' };
 
-      // await page.pause();
       await cartPage.expectMiniWidgetToBeVisible(opt);
       // Apply 100% product price discount and check if message below limit is shown
       await cartPage.applyCoupon({ coupon: 'free', theme });
@@ -184,6 +183,9 @@ test.describe('Widget settings', () => {
       // restore cart amount.
       await cartPage.setQuantity({ quantity: 1, theme });
       await cartPage.expectMiniWidgetToBeVisible({ ...opt, navigate: false, });
+
+      // Empty the cart.
+      await cartPage.emptyCart();
     }
   });
 
