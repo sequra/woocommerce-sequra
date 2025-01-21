@@ -37,9 +37,9 @@ export default class SeQuraHelper {
         }
         try {
             const response = await this.request.post(url);
-            this.expect(response.status(), 'Webhook response has HTTP 200 code').toBe(200);
+            this.expect(response.status(), `Webhook "${url}" response has HTTP 200 code`).toBe(200);
             const json = await response.json();
-            this.expect(json.success, 'Webhook was processed successfully').toBe(true);
+            this.expect(json.success, `Webhook "${webhook}" was processed successfully`).toBe(true);
         } catch (e) {
             console.log(webhook, args, e);
             throw e;

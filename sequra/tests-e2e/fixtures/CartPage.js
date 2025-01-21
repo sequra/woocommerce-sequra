@@ -56,4 +56,24 @@ export default class CartPage extends MiniWidgetPage {
             await this.page.locator(updateCartBtn).click();
         }
     }
+
+    async emptyCart() {
+        try {
+            await this.expect(this.page.getByText('Your cart is currently empty!')).toBeVisible({ timeout: 1000 });
+            return; // The cart is already empty
+        } catch (e) {
+            // The cart is not empty, continue.
+        }
+        // '.wc-block-cart-item__remove-link,.remove'
+        const rmBtnLocator = this.page.locator('.wc-block-cart-item__remove-link,.remove');
+        // count the existing remove buttons
+        let qty = await rmBtnLocator.count();
+        while (qty > 0){
+            // click the first one
+            await rmBtnLocator.first().click();
+            qty -= 1;
+            // then wait until the amount of remove buttons is less than before
+            await this.page.waitForFunction(`document.querySelectorAll('.wc-block-cart-item__remove-link,.remove').length == ${qty}`);
+        } 
+    }
 }

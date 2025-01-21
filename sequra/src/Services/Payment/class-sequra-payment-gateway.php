@@ -200,7 +200,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$order = null;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) ) {
-			$order = \wc_get_order( absint( strval( \get_query_var( 'order-pay' ) ) ) );
+			$order = \wc_get_order( \absint( strval( \get_query_var( 'order-pay' ) ) ) );
 		}
 		return $order instanceof WC_Order ? $order : null;
 	}
@@ -233,9 +233,8 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Declare fields for the payment method in the checkout page
 	 */
 	public function payment_fields() {
-		$payment_methods = $this->payment_method_service->get_payment_methods(
-			$this->try_to_get_order_from_context()
-		);
+		$order           = $this->try_to_get_order_from_context();
+		$payment_methods = $this->payment_method_service->get_payment_methods( $order );
 		if ( empty( $payment_methods ) ) {
 			$this->logger->log_debug( 'No payment methods available', __FUNCTION__, __CLASS__ );
 			return '';
@@ -244,6 +243,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$args = array(
 			'description'     => $this->description,
 			'payment_methods' => $payment_methods,
+			'cart_total'      => $order ? $this->order_service->get_total( $order ) : $this->cart_service->get_total(),
 		);
 
 		\wc_get_template( 'front/payment_fields.php', $args, '', $this->templates_path );
@@ -358,7 +358,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			exit;
 		}
 
-		$order = wc_get_order( absint( $_GET['order'] ) );
+		$order = \wc_get_order( \absint( $_GET['order'] ) );
 		if ( $order instanceof WC_Order ) {
 			if ( in_array( $order->get_status(), array( 'on-hold', 'processing' ), true ) ) {
 				$return_url = $order->get_checkout_order_received_url();
@@ -418,7 +418,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 				continue;
 			}
 			$payload[ $payload_key ] = in_array( $payload_key, array( 'approved_since', 'needs_review_since', 'order' ), true ) ? 
-			intval( wp_unslash( $value ) ) :
+			intval( \wp_unslash( $value ) ) :
 			\sanitize_text_field( \wp_unslash( $value ) );
 		}
 

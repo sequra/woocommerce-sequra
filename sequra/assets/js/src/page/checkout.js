@@ -151,6 +151,10 @@
             this.maybeSelectSeQura(sqPaymentMethodInput, sqProductOptions, paymentMethods);
             this.addPaymentMethodChangeListener(paymentMethods, sqProductOptions);
             this.addSqProductOptionChangeListener(sqProductOptions, paymentMethods);
+
+            if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents && 'function' === typeof Sequra.onLoad) {
+                Sequra.onLoad(() => Sequra.refreshComponents());
+            }
         },
 
         isJQueryActive: () => 'undefined' !== typeof jQuery,

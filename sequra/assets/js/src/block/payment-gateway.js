@@ -10,12 +10,12 @@ const label = decodeEntities(settings.title)
 
 const Content = (props) => {
     const { eventRegistration, emitResponse } = props;
-    const { onPaymentProcessing } = eventRegistration;
+    const { onPaymentSetup } = eventRegistration;
 
     const [content, setContent] = useState(settings.description || '');
 
     useEffect(() => {
-        const unsubscribe = onPaymentProcessing(async () => {
+        const unsubscribe = onPaymentSetup(async () => {
             const checkedInput = document.querySelector('[name="sequra_payment_method_data"]:checked')
             const data = checkedInput ? checkedInput.value : null;
 
@@ -36,14 +36,19 @@ const Content = (props) => {
     }, [
         emitResponse.responseTypes.ERROR,
         emitResponse.responseTypes.SUCCESS,
-        onPaymentProcessing,
+        onPaymentSetup,
     ]);
 
     useEffect(() => {
         document.addEventListener('canMakePaymentLoading', (event) => {
             setContent('<div class="sq-loader" style="margin-top:1rem;margin-bottom:1rem;"><span class="sqp-spinner"></span></div>');
         });
-        document.addEventListener('canMakePaymentReady', (event) => setContent(event.detail.content));
+        document.addEventListener('canMakePaymentReady', (event) => {
+            setContent(event.detail.content);
+            if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents && 'function' === typeof Sequra.onLoad) {
+                Sequra.onLoad(() => Sequra.refreshComponents());
+            }
+        });
     }, []);
 
     return <div dangerouslySetInnerHTML={{ __html: decodeEntities(content) }} />
@@ -68,23 +73,22 @@ registerPaymentMethod({
     edit: <Content />,
     // A callback to determine whether the payment method should be shown in the checkout.
     canMakePayment: ({ shippingAddress, billingAddress, cart }) => {
-        // Hash the data to prevent unnecessary requests.
-        const requestId = btoa(encodeURIComponent(JSON.stringify({ shippingAddress, billingAddress, cart })));
+        const isSolicitationAllowed = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isSolicitationAllowed;
 
         const initCache = () => {
-            if ('undefined' === typeof SeQuraCheckout.cache) {
-                SeQuraCheckout.cache = {};
+            if ('undefined' === typeof SeQuraBlockIntegration.cache) {
+                SeQuraBlockIntegration.cache = {};
             }
         };
 
         const readFromCache = (key) => {
             initCache();
-            return SeQuraCheckout.cache[key];
+            return SeQuraBlockIntegration.cache[key];
         };
 
         const writeToCache = (key, value) => {
             initCache();
-            SeQuraCheckout.cache[key] = value;
+            SeQuraBlockIntegration.cache[key] = value;
         };
 
         return new Promise((resolve) => {
@@ -94,14 +98,18 @@ registerPaymentMethod({
                 resolve(canMakePayment);
             }
 
-            if (!SeQuraBlockIntegration.isSolicitationAllowed) {
+            if (!isSolicitationAllowed()) {
                 // Prevent unnecessary requests.
                 onResolved(false, { content: '' });
                 return;
             }
 
+            // Hash the data to prevent unnecessary requests.
+            const requestId = btoa(encodeURIComponent(JSON.stringify({ shippingAddress, billingAddress, cart })));
+
             document.dispatchEvent(new CustomEvent('canMakePaymentLoading', { detail: { requestId } }));
 
+            // TODO: Implement check if requestId is pending. When page loads, this code is executed three times for the same requestId what can be avoided.
             const cachedContent = readFromCache(requestId);
             if (cachedContent) {
                 onResolved('' !== cachedContent, { content: cachedContent });

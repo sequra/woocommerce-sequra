@@ -31,7 +31,7 @@ export default class ProductPage {
         const url = await this.goto({ slug });
         await this.page.fill('[name="quantity"]', `${quantity || 1}`);
         await this.page.click('[name="add-to-cart"]');
-        await this.page.waitForURL(url, { timeout: 5000, waitUntil: 'commit' });
+        await this.page.waitForURL(url, { timeout: 5000, waitUntil: 'domcontentloaded' });
     }
 
     async expectWidgetToBeVisible({ locationSel, widgetConfig, product, amount, registrationAmount, campaign = null }) {

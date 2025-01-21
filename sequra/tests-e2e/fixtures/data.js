@@ -44,12 +44,12 @@ export const sqProduct = {
     },
     i1: {
         es: {
-            name: 'Paga Después',
+            name: 'Recibe tu compra antes de pagar',
         }
     },
     sp1: {
         es: {
-            name: 'Divide tu pago en 3',
+            name: 'Divide en 3 partes de 33,33 €/mes ¡Gratis!',
         }
     },
     pp3: {

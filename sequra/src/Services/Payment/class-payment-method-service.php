@@ -16,6 +16,7 @@ use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Payment_Method_Data;
+use SeQura\WC\Dto\Payment_Method_Option;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
@@ -41,7 +42,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	/**
 	 * Payment methods
 	 *
-	 * @var array<string, string>[]
+	 * @var Payment_Method_Option[]
 	 */
 	private $payment_methods;
 
@@ -181,9 +182,9 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	/**
 	 * Get payment methods
 	 * 
-	 * @return array<string, string>[]
+	 * @return Payment_Method_Option[]
 	 */
-	public function get_payment_methods( ?WC_Order $order = null ): array {
+	public function get_payment_methods( ?WC_Order $order = null ) {
 		if ( null !== $this->payment_methods ) {
 			return $this->payment_methods;
 		}
@@ -193,8 +194,10 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		if ( ! $response || ! $response->isSuccessful() ) {
 			return array();
 		}
-			
-		$this->payment_methods = $response->toArray()['availablePaymentMethods'] ?? array();
+		$this->payment_methods = array();
+		foreach ( (array) $response->toArray()['availablePaymentMethods'] ?? array() as $raw ) {
+			$this->payment_methods[] = Payment_Method_Option::from_array( $raw );
+		}
 		return $this->payment_methods;
 	}
 
@@ -308,7 +311,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	public function is_payment_method_data_valid( ?Payment_Method_Data $data ): bool {
 		if ( null !== $data ) {
 			foreach ( $this->get_payment_methods() as $pm ) {
-				if ( $pm['product'] === $data->product && $pm['campaign'] === $data->campaign ) {
+				if ( $pm->match( $data ) ) {
 					return true;
 				}
 			}
