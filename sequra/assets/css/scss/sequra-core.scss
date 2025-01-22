@@ -1,6 +1,6 @@
 @charset "UTF-8";
 @use "loader" as *;
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 %field {
   outline-color: transparent !important;
   box-shadow: none !important;
@@ -1391,7 +1391,6 @@ table tr th {
   gap: 20px;
 }
 
-
 .sq-toggle {
   position: relative;
   display: inline-block;
@@ -2284,6 +2283,7 @@ body {
       background-color: #fff;
       border-color: #fff;
       margin-left: auto;
+      float: right;
       // &::before {
       //   font-family: "sq-icons";
       //   content: "\e90c";
@@ -2358,6 +2358,11 @@ body {
       // margin-bottom: 1rem;
     }
   }
+
+  details.sq-table__row {
+    display: grid;
+    gap: 0;
+  }
 }
 
 .sq-mini-widgets-config-wrapper {
@@ -2369,7 +2374,7 @@ body {
     }
     .sqp-field-title {
       margin-bottom: 0;
-      margin-left: .5rem;
+      margin-left: 0.5rem;
     }
   }
 }
