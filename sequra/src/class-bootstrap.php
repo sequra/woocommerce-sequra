@@ -86,6 +86,7 @@ use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Shop_Logger_A
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Settings_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
+use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Payment_Methods;
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
@@ -691,6 +692,7 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( WidgetSettings::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( SendReport::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( TransactionLog::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( Payment_Methods::class, Entity_Repository::class );
 	}
 
 	/**
