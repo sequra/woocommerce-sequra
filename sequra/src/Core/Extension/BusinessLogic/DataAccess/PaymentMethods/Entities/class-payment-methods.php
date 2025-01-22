@@ -11,6 +11,8 @@ use SeQura\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
 use SeQura\Core\Infrastructure\ORM\Configuration\IndexMap;
 use SeQura\Core\Infrastructure\ORM\Entity;
 
+// phpcs:disable WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase, WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
 /**
  * Define the Payment_Methods entity.
  */
@@ -26,21 +28,21 @@ class Payment_Methods extends Entity {
 	 *
 	 * @var string
 	 */
-	protected $store_id;
+	protected $storeId;
 
 	/**
 	 * Merchant ID
 	 *
 	 * @var string
 	 */
-	protected $merchant_id;
+	protected $merchantId;
 
 	/**
 	 * Payment methods
 	 *
-	 * @var PaymentMethod[]
+	 * @var Payment_Method[]
 	 */
-	protected $payment_methods;
+	protected $paymentMethods;
 
 	/**
 	 * Returns entity configuration object.
@@ -61,14 +63,15 @@ class Payment_Methods extends Entity {
 	 */
 	public function inflate( array $data ): void {
 		parent::inflate( $data );
-		$this->set_store_id( $data['storeId'] );
-		$this->set_merchant_id( $data['merchantId'] );
+		$this->setStoreId( $data['storeId'] );
+		$this->setMerchantId( $data['merchantId'] );
 
-		$payment_methods = $data['paymentMethods'] ?? array();
-		foreach ( $payment_methods as $payment_method ) {
-			$this->payment_methods[] = Payment_Method::fromArray( $payment_method );
+		$dataPaymentMethods = $data['paymentMethods'] ?? array();
+		$paymentMethods     = array();
+		foreach ( $dataPaymentMethods as $pm ) {
+			$paymentMethods[] = Payment_Method::fromArray( $pm );
 		}
-		$this->set_payment_methods( $this->payment_methods );
+		$this->setPaymentMethods( $paymentMethods );
 	}
 
 	/**
@@ -76,11 +79,11 @@ class Payment_Methods extends Entity {
 	 */
 	public function toArray(): array {
 		$data                   = parent::toArray();
-		$data['storeId']        = $this->get_store_id();
-		$data['merchantId']     = $this->get_merchant_id();
+		$data['storeId']        = $this->getStoreId();
+		$data['merchantId']     = $this->getMerchantId();
 		$data['paymentMethods'] = array();
 
-		foreach ( $this->get_payment_methods() as $payment_method ) {
+		foreach ( $this->getPaymentMethods() as $payment_method ) {
 			$data['paymentMethods'][] = $payment_method->toArray();
 		}
 
@@ -92,17 +95,17 @@ class Payment_Methods extends Entity {
 	 *
 	 * @return string
 	 */
-	public function get_store_id() {
-		return $this->store_id;
+	public function getStoreId() {
+		return $this->storeId;
 	}
 
 	/**
 	 * Set store ID
 	 *
-	 * @param string $store_id The store ID.
+	 * @param string $storeId The store ID.
 	 */
-	public function set_store_id( $store_id ) {
-		$this->store_id = (string) $store_id;
+	public function setStoreId( $storeId ) {
+		$this->storeId = (string) $storeId;
 	}
 
 	/**
@@ -110,8 +113,8 @@ class Payment_Methods extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_merchant_id() {
-		return $this->merchant_id;
+	public function getMerchantId() {
+		return $this->merchantId;
 	}
 
 	/**
@@ -119,8 +122,8 @@ class Payment_Methods extends Entity {
 	 *
 	 * @param string|null $merchantId
 	 */
-	public function set_merchant_id( $merchant_id ) {
-		$this->merchant_id = null === $merchant_id ? $merchant_id : (string) $merchant_id;
+	public function setMerchantId( $merchantId ) {
+		$this->merchantId = null === $merchantId ? $merchantId : (string) $merchantId;
 	}
 
 	/**
@@ -128,8 +131,8 @@ class Payment_Methods extends Entity {
 	 *
 	 * @return PaymentMethod[]
 	 */
-	public function get_payment_methods() {
-		return (array) $this->payment_methods;
+	public function getPaymentMethods() {
+		return (array) $this->paymentMethods;
 	}
 
 	/**
@@ -137,7 +140,7 @@ class Payment_Methods extends Entity {
 	 * 
 	 * @param PaymentMethod[] $paymentMethods
 	 */
-	public function set_payment_methods( $payment_methods ) {
-		$this->payment_methods = is_array( $payment_methods ) ? $payment_methods : array();
+	public function setPaymentMethods( $paymentMethods ) {
+		$this->paymentMethods = is_array( $paymentMethods ) ? $paymentMethods : array();
 	}
 }

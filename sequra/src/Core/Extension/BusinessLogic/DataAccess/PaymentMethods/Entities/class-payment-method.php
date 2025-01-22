@@ -11,6 +11,7 @@ use SeQura\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
 use SeQura\Core\Infrastructure\ORM\Configuration\IndexMap;
 use SeQura\Core\Infrastructure\ORM\Entity;
 
+// phpcs:disable WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase, WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 /**
  * Class Payment_Method
  */
@@ -40,21 +41,21 @@ class Payment_Method extends Entity {
 	 * 
 	 * @var string
 	 */
-	protected $long_title;
+	protected $longTitle;
 
 	/**
 	 * Starts at
 	 * 
 	 * @var string
 	 */
-	protected $starts_at;
+	protected $startsAt;
 
 	/**
 	 * Ends at
 	 *
 	 * @var string
 	 */
-	protected $ends_at;
+	protected $endsAt;
 
 	/**
 	 * Campaign
@@ -89,21 +90,35 @@ class Payment_Method extends Entity {
 	 *
 	 * @var string
 	 */
-	protected $cost_description;
+	protected $costDescription;
 
 	/**
 	 * Min amount
 	 *
 	 * @var int
 	 */
-	protected $min_amount;
+	protected $minAmount;
 
 	/**
 	 * Max amount
 	 *
 	 * @var int
 	 */
-	protected $max_amount;
+	protected $maxAmount;
+
+	/**
+	 * Does this payment method support widgets?
+	 * 
+	 * @var bool
+	 */
+	protected $supportsWidgets;
+
+	/**
+	 * Does this payment method support installment payments?
+	 * 
+	 * @var bool
+	 */
+	protected $supportsInstallmentPayments;
 
 	/**
 	 * Returns entity configuration object.
@@ -123,37 +138,41 @@ class Payment_Method extends Entity {
 	 */
 	public function inflate( array $data ): void {
 		parent::inflate( $data );
-		$this->set_product( $data['product'] );
-		$this->set_title( $data['title'] );
-		$this->set_long_title( $data['longTitle'] );
-		$this->set_starts_at( $data['startsAt'] );
-		$this->set_ends_at( $data['endsAt'] );
-		$this->set_campaign( $data['campaign'] );
-		$this->set_claim( $data['claim'] );
-		$this->set_description( $data['description'] );
-		$this->set_icon( $data['icon'] );
-		$this->set_cost_description( $data['costDescription'] );
-		$this->set_min_amount( $data['minAmount'] );
-		$this->set_max_amount( $data['maxAmount'] );
+		$this->setProduct( $data['product'] );
+		$this->setTitle( $data['title'] );
+		$this->setLongTitle( $data['longTitle'] );
+		$this->setStartsAt( $data['startsAt'] );
+		$this->setEndsAt( $data['endsAt'] );
+		$this->setCampaign( $data['campaign'] );
+		$this->setClaim( $data['claim'] );
+		$this->setDescription( $data['description'] );
+		$this->setIcon( $data['icon'] );
+		$this->setCostDescription( $data['costDescription'] );
+		$this->setMinAmount( $data['minAmount'] );
+		$this->setMaxAmount( $data['maxAmount'] );
+		$this->setSupportsWidgets();
+		$this->setSupportsInstallmentPayments();
 	}
 
 	/**
 	 * Transforms entity to its array format representation.
 	 */
 	public function toArray(): array {
-		$data                    = parent::toArray();
-		$data['product']         = $this->get_product();
-		$data['title']           = $this->get_title();
-		$data['longTitle']       = $this->get_long_title();
-		$data['startsAt']        = $this->get_starts_at();
-		$data['endsAt']          = $this->get_ends_at();
-		$data['campaign']        = $this->get_campaign();
-		$data['claim']           = $this->get_claim();
-		$data['description']     = $this->get_description();
-		$data['icon']            = $this->get_icon();
-		$data['costDescription'] = $this->get_cost_description();
-		$data['minAmount']       = $this->get_min_amount();
-		$data['maxAmount']       = $this->get_max_amount();
+		$data                                = parent::toArray();
+		$data['product']                     = $this->getProduct();
+		$data['title']                       = $this->getTitle();
+		$data['longTitle']                   = $this->getLongTitle();
+		$data['startsAt']                    = $this->getStartsAt();
+		$data['endsAt']                      = $this->getEndsAt();
+		$data['campaign']                    = $this->getCampaign();
+		$data['claim']                       = $this->getClaim();
+		$data['description']                 = $this->getDescription();
+		$data['icon']                        = $this->getIcon();
+		$data['costDescription']             = $this->getCostDescription();
+		$data['minAmount']                   = $this->getMinAmount();
+		$data['maxAmount']                   = $this->getMaxAmount();
+		$data['supportsWidgets']             = $this->getSupportsWidgets();
+		$data['supportsInstallmentPayments'] = $this->getSupportsInstallmentPayments();
 		return $data;
 	}
 
@@ -162,7 +181,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_product() {
+	public function getProduct() {
 		return $this->product;
 	}
 
@@ -171,7 +190,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @param string|null $product The product.
 	 */
-	public function set_product( $product ) {
+	public function setProduct( $product ) {
 		$this->product = null === $product ? $product : (string) $product;
 	}
 
@@ -180,7 +199,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_title() {
+	public function getTitle() {
 		return $this->title;
 	}
 
@@ -189,7 +208,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @param string|null $title The title.
 	 */
-	public function set_title( $title ) {
+	public function setTitle( $title ) {
 		$this->title = null === $title ? $title : (string) $title;
 	}
 
@@ -198,17 +217,17 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_long_title() {
-		return $this->long_title;
+	public function getLongTitle() {
+		return $this->longTitle;
 	}
 
 	/**
 	 * Set long title
 	 *
-	 * @param string|null $long_title The long title.
+	 * @param string|null $longTitle The long title.
 	 */
-	public function set_long_title( $long_title ) {
-		$this->long_title = null === $long_title ? $long_title : (string) $long_title;
+	public function setLongTitle( $longTitle ) {
+		$this->longTitle = null === $longTitle ? $longTitle : (string) $longTitle;
 	}
 
 	/**
@@ -216,17 +235,17 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_starts_at() {
-		return $this->starts_at;
+	public function getStartsAt() {
+		return $this->startsAt;
 	}
 
 	/**
 	 * Set starts at
 	 *
-	 * @param string|null $starts_at The starts at.
+	 * @param string|null $startsAt The starts at.
 	 */
-	public function set_starts_at( $starts_at ) {
-		$this->starts_at = null === $starts_at ? $starts_at : (string) $starts_at;
+	public function setStartsAt( $startsAt ) {
+		$this->startsAt = null === $startsAt ? $startsAt : (string) $startsAt;
 	}
 
 	/**
@@ -234,17 +253,17 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_ends_at() {
-		return $this->ends_at;
+	public function getEndsAt() {
+		return $this->endsAt;
 	}
 
 	/**
 	 * Set ends at
 	 *
-	 * @param string|null $ends_at The ends at.
+	 * @param string|null $endsAt The ends at.
 	 */
-	public function set_ends_at( $ends_at ) {
-		$this->ends_at = null === $ends_at ? $ends_at : (string) $ends_at;
+	public function setEndsAt( $endsAt ) {
+		$this->endsAt = null === $endsAt ? $endsAt : (string) $endsAt;
 	}
 
 	/**
@@ -252,7 +271,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_campaign() {
+	public function getCampaign() {
 		return $this->campaign;
 	}
 
@@ -261,7 +280,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @param string|null $campaign The campaign.
 	 */
-	public function set_campaign( $campaign ) {
+	public function setCampaign( $campaign ) {
 		$this->campaign = null === $campaign ? $campaign : (string) $campaign;
 	}
 
@@ -270,7 +289,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_claim() {
+	public function getClaim() {
 		return $this->claim;
 	}
 
@@ -279,7 +298,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @param string|null $claim The claim.
 	 */
-	public function set_claim( $claim ) {
+	public function setClaim( $claim ) {
 		$this->claim = null === $claim ? $claim : (string) $claim;
 	}
 
@@ -288,7 +307,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return $this->description;
 	}
 
@@ -297,7 +316,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @param string|null $description The description.
 	 */
-	public function set_description( $description ) {
+	public function setDescription( $description ) {
 		$this->description = null === $description ? $description : (string) $description;
 	}
 
@@ -306,7 +325,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_icon() {
+	public function getIcon() {
 		return $this->icon;
 	}
 
@@ -315,7 +334,7 @@ class Payment_Method extends Entity {
 	 *
 	 * @param string|null $icon
 	 */
-	public function set_icon( $icon ) {
+	public function setIcon( $icon ) {
 		$this->icon = null === $icon ? $icon : (string) $icon;
 	}
 
@@ -324,17 +343,17 @@ class Payment_Method extends Entity {
 	 *
 	 * @return string|null
 	 */
-	public function get_cost_description() {
-		return $this->cost_description;
+	public function getCostDescription() {
+		return $this->costDescription;
 	}
 
 	/**
 	 * Set cost description
 	 *
-	 * @param string|null $cost_description The cost description.
+	 * @param string|null $costDescription The cost description.
 	 */
-	public function set_cost_description( $cost_description ) {
-		$this->cost_description = null === $cost_description ? $cost_description : (string) $cost_description;
+	public function setCostDescription( $costDescription ) {
+		$this->costDescription = null === $costDescription ? $costDescription : (string) $costDescription;
 	}
 
 	/**
@@ -342,17 +361,17 @@ class Payment_Method extends Entity {
 	 *
 	 * @return int|null
 	 */
-	public function get_min_amount() {
-		return $this->min_amount;
+	public function getMinAmount() {
+		return $this->minAmount;
 	}
 
 	/**
 	 * Set min amount
 	 *
-	 * @param int|null $min_amount The min amount.
+	 * @param int|null $minAmount The min amount.
 	 */
-	public function set_min_amount( $min_amount ) {
-		$this->min_amount = null === $min_amount ? $min_amount : (int) $min_amount;
+	public function setMinAmount( $minAmount ) {
+		$this->minAmount = null === $minAmount ? $minAmount : (int) $minAmount;
 	}
 
 	/**
@@ -360,16 +379,54 @@ class Payment_Method extends Entity {
 	 *
 	 * @return int|null
 	 */
-	public function get_max_amount() {
-		return $this->max_amount;
+	public function getMaxAmount() {
+		return $this->maxAmount;
 	}
 
 	/**
 	 * Set max amount
 	 *
-	 * @param int|null $max_amount The max amount.
+	 * @param int|null $maxAmount The max amount.
 	 */
-	public function set_max_amount( $max_amount ) {
-		$this->max_amount = null === $max_amount ? $max_amount : (int) $max_amount;
+	public function setMaxAmount( $maxAmount ) {
+		$this->maxAmount = null === $maxAmount ? $maxAmount : (int) $maxAmount;
+	}
+
+	/**
+	 * Get supports widgets
+	 *
+	 * @return bool
+	 */
+	public function getSupportsWidgets() {
+		if ( null === $this->supportsWidgets ) {
+			$this->setSupportsWidgets();
+		}
+		return $this->supportsWidgets;
+	}
+
+	/**
+	 * Set supports widgets
+	 */
+	protected function setSupportsWidgets() {
+		$this->supportsWidgets = is_string( $this->product ) && in_array( $this->product, array( 'i1', 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
+	}
+
+	/**
+	 * Get supports installment payments
+	 *
+	 * @return bool
+	 */
+	public function getSupportsInstallmentPayments() {
+		if ( null === $this->supportsInstallmentPayments ) {
+			$this->setSupportsInstallmentPayments();
+		}
+		return $this->supportsInstallmentPayments;
+	}
+
+	/**
+	 * Set supports installment payments
+	 */
+	public function setSupportsInstallmentPayments() {
+		$this->supportsInstallmentPayments = is_string( $this->product ) && in_array( $this->product, array( 'pp3' ), true );
 	}
 }
