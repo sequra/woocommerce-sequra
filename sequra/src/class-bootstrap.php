@@ -889,7 +889,8 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Create_Order_Request_Builder::class ),
 						Reg::getService( Interface_Order_Service::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						RepositoryRegistry::getRepository( Payment_Methods::CLASS_NAME )
 					);
 				}
 				return self::$cache[ Interface_Payment_Method_Service::class ];
