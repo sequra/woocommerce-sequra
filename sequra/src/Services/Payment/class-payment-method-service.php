@@ -13,6 +13,11 @@ use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\Solicitation\Response\SolicitationResponse;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraForm;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
+use SeQura\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
+use SeQura\Core\Infrastructure\ORM\QueryFilter\Operators;
+use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
+use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Payment_Method;
+use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Payment_Methods;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Payment_Method_Data;
@@ -68,18 +73,27 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	private $logger;
 
 	/**
+	 * Payment methods repository
+	 *
+	 * @var RepositoryInterface
+	 */
+	private $payment_methods_repo;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		Configuration $configuration,
 		Interface_Create_Order_Request_Builder $create_order_request_builder,
 		Interface_Order_Service $order_service,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		RepositoryInterface $payment_methods_repo
 	) {
 		$this->configuration                = $configuration;
 		$this->create_order_request_builder = $create_order_request_builder;
 		$this->order_service                = $order_service;
 		$this->logger                       = $logger;
+		$this->payment_methods_repo         = $payment_methods_repo;
 	}
 
 	/**
@@ -202,36 +216,109 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	}
 
 	/**
+	 * Get all payment methods from cache
+	 * 
+	 * @param string $store_id The store ID.
+	 * @param string $merchant The merchant ID.
+	 * @return Payment_Methods
+	 */
+	private function get_payment_methods_from_cache( $store_id, $merchant ) {
+		/**
+		 * Payment methods entity 
+		 *
+		 * @var Payment_Methods|null $payment_methods 
+		 */
+		$payment_methods = $this->payment_methods_repo->selectOne(
+			( new QueryFilter() )
+			->where( 'storeId', Operators::EQUALS, $store_id )
+			->where( 'merchantId', Operators::EQUALS, $merchant ) 
+		);
+
+		return $payment_methods;
+	}
+
+	/**
+	 * Save payment methods to cache
+	 *
+	 * @param Payment_Methods $payment_methods The payment methods.
+	 */
+	private function save_payment_methods_to_cache( $payment_methods ) {
+		/**
+		 * Payment methods entity
+		 *
+		 * @var Payment_Methods|null $payment_methods 
+		 */
+		$entity = $this->get_payment_methods_from_cache( 
+			$payment_methods->getStoreId(),
+			$payment_methods->getMerchantId() 
+		);
+		if ( null === $entity ) {
+			$this->payment_methods_repo->save( $payment_methods );
+		} else {
+			$entity->setPaymentMethods( $payment_methods->getPaymentMethods() );
+			$this->payment_methods_repo->update( $entity );
+		}
+	}
+
+	/**
+	 * Get all payment methods from the API
+	 * 
+	 * @param string $store_id The store ID.
+	 * @param string $merchant The merchant ID.
+	 * @return Payment_Methods|null
+	 */
+	private function get_payment_methods_from_api( $store_id, $merchant ) {
+		try {
+			$response = AdminAPI::get()->paymentMethods( $store_id )->getPaymentMethods( $merchant );
+			if ( ! $response->isSuccessful() ) {
+				return null;
+			}
+			$payment_methods = new Payment_Methods();
+			$payment_methods->setStoreId( $store_id );
+			$payment_methods->setMerchantId( $merchant );
+			$payment_methods->setPaymentMethods( Payment_Method::fromBatch( $response->toArray() ) );
+			return $payment_methods;
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__, array( new LogContextData( 'store_id', $store_id ), new LogContextData( 'merchant', $merchant ) ) );
+			return null;
+		}
+	}
+
+	/**
 	 * Get a list of all payment methods defined for store and merchant
 	 * 
 	 * @throws Throwable
 	 * 
+	 * @param bool $cache Use cache if available.
 	 * @return array<string, string>[]
 	 */
-	public function get_all_payment_methods( ?string $store_id, ?string $merchant ): array {
+	public function get_all_payment_methods( ?string $store_id, ?string $merchant, $cache = true ): array {
 		if ( ! $store_id || ! $merchant ) {
 			return array();
 		}
-		try {
-			$response = AdminAPI::get()
-			->paymentMethods( $store_id )
-			->getPaymentMethods( strval( $merchant ) );
-		
-			if ( ! $response->isSuccessful() ) {
-				return array();
-			}
-			$payment_methods = $response->toArray();
 
-			foreach ( $payment_methods as &$method ) {
-				$method['supportsWidgets']             = $this->supports_widgets( $method );
-				$method['supportsInstallmentPayments'] = $this->supports_installment_payments( $method );
-			}
+		$merchant        = strval( $merchant );
+		$store_id        = strval( $store_id );
+		$payment_methods = $cache ? $this->get_payment_methods_from_cache( $store_id, $merchant ) : null;
 
-			return $payment_methods;
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		if ( ! $payment_methods ) {
+			$payment_methods = $this->get_payment_methods_from_api( $store_id, $merchant );
+			if ( $payment_methods ) {
+				// Save the payment methods in the cache.
+				$this->save_payment_methods_to_cache( $payment_methods );
+			}
+		}
+
+		if ( ! $payment_methods ) {
 			return array();
 		}
+
+		$arr = array();
+		foreach ( $payment_methods->getPaymentMethods() as $method ) {
+			$arr[] = $method->toArray();
+		}
+
+		return $arr;
 	}
 
 	/**

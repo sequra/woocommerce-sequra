@@ -74,7 +74,8 @@ class Payment_REST_Controller extends REST_Controller {
 		try {
 			$response = $this->payment_method_service->get_all_payment_methods(
 				strval( $request->get_param( self::PARAM_STORE_ID ) ),
-				strval( $request->get_param( self::PARAM_MERCHANT_ID ) )
+				strval( $request->get_param( self::PARAM_MERCHANT_ID ) ),
+				false
 			);
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
