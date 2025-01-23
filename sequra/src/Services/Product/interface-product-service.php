@@ -51,9 +51,16 @@ interface Interface_Product_Service {
 	public function is_banned( $product ): bool;
 
 	/**
-	 * Update is banned value
+	 * Update is_banned value
 	 */
 	public function set_is_banned( int $product_id, ?string $value ): void;
+
+	/**
+	 * Get product is_banned value
+	 * 
+	 * @param int|WC_Product $product The product ID or product object
+	 */
+	public function get_is_banned( $product ): bool;
 
 	/**
 	 * Get product service end date

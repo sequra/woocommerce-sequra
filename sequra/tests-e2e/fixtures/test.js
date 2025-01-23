@@ -71,7 +71,7 @@ const test = baseTest.extend({
     },
     wpAdmin: async ({ page, baseURL }, use) => await use(new WpAdmin(page, baseURL, expect)),
     sqHelper: async ({ request }, use) => await use(new SeQuraHelper(request, expect)),
-    productPage: async ({ page }, use) => await use(new ProductPage(page)),
+    productPage: async ({ page }, use) => await use(new ProductPage(page, expect)),
     cartPage: async ({ page }, use) => await use(new CartPage(page, expect)),
     shopPage: async ({ page }, use) => await use(new ShopPage(page, expect)),
     checkoutPage: async ({ page, baseURL, request }, use) => await use(new CheckoutPage(page, baseURL, expect, request))

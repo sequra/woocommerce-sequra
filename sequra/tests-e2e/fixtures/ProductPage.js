@@ -3,8 +3,9 @@ export default class ProductPage {
     /**
      * @param {import('@playwright/test').Page} page
      */
-    constructor(page) {
+    constructor(page, expect) {
         this.page = page;
+        this.expect = expect;
     }
 
     /**
@@ -32,6 +33,10 @@ export default class ProductPage {
         await this.page.fill('[name="quantity"]', `${quantity || 1}`);
         await this.page.click('[name="add-to-cart"]');
         await this.page.waitForURL(url, { timeout: 5000, waitUntil: 'domcontentloaded' });
+    }
+
+    async expectWidgetsNotToBeVisible() {
+        await this.expect(this.page.locator('.sequra-promotion-widget')).toHaveCount(0);
     }
 
     async expectWidgetToBeVisible({ locationSel, widgetConfig, product, amount, registrationAmount, campaign = null }) {

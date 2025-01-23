@@ -14,7 +14,9 @@ export default class WpAdmin {
             activatePluginActionBtn: () => this.page.locator('a[href*="action=activate"]'),
             notice: ({ message }) => this.page.locator(`.notice > p`, { hasText: message }),
             fileInput: () => this.page.locator('input[type="file"]'),
-            overwritePluginBtn: () => this.page.locator('.update-from-upload-overwrite')
+            overwritePluginBtn: () => this.page.locator('.update-from-upload-overwrite'),
+            isSequraBannedCheckbox: () => this.page.locator('#is_sequra_banned'),
+            publishPostBtn: () => this.page.locator('#publish'),
         };
     }
 
@@ -66,8 +68,22 @@ export default class WpAdmin {
     }
 
     async gotoOrder({ orderId }) {
+        await this.#gotoPostEdit({ postId: orderId });
+    }
+
+    async gotoProduct({ productId }) {
+        await this.#gotoPostEdit({ postId: productId });
+    }
+
+    async setProductAsBanned(banned = true) {
+        await this.locator.isSequraBannedCheckbox().setChecked(banned);
+        await this.locator.publishPostBtn().click();
+        await this.page.waitForURL(/post\.php\?post=\d+&action=edit/);
+    }
+
+    async #gotoPostEdit({ postId }) {
         await this.login({ force: false });
-        await this.page.goto(`${this.baseURL}/wp-admin/post.php?post=${orderId}&action=edit`);
+        await this.page.goto(`${this.baseURL}/wp-admin/post.php?post=${postId}&action=edit`);
     }
 
     /**

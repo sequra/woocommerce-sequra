@@ -454,39 +454,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 * @var WC_Product $product
 		 */
 		foreach ( $this->cart_service->get_products( $this->current_order ) as $product ) {
-			if ( in_array( $product->get_sku(), $excluded_products, true ) 
-				|| in_array( strval( $product->get_id() ), $excluded_products, true ) 
-			) {
-				$this->logger->log_debug(
-					'Payment gateway is not available for this product',
-					__FUNCTION__,
-					__CLASS__,
-					array( 
-						new LogContextData( 'product_id', $product->get_id() ),
-						new LogContextData( 'product_sku', $product->get_sku() ),
-						new LogContextData( 'excluded_products', $excluded_products ), 
-					) 
-				);
-				return false;
-			}
-
 			if ( $this->product_service->is_banned( $product ) ) {
-				$this->logger->log_debug( 'Payment gateway is not available: product is banned', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $product->get_id() ) ) );
-				return false;
-			}
-
-			if ( ! empty( $excluded_categories ) && ! empty(
-				array_intersect( $excluded_categories, $product->get_category_ids() )
-			) ) {
-				$this->logger->log_debug(
-					'Payment gateway is not available for category',
-					__FUNCTION__,
-					__CLASS__,
-					array( 
-						new LogContextData( 'product_categories', $product->get_category_ids() ), 
-						new LogContextData( 'excluded_categories', $excluded_categories ), 
-					) 
-				);
+				$this->logger->log_debug( 'SeQura is not available: product is banned or is in a banned category', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $product->get_id() ) ) );
 				return false;
 			}
 		}
