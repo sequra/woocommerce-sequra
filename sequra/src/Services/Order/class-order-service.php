@@ -713,6 +713,10 @@ class Order_Service implements Interface_Order_Service {
 	 * @throws Throwable
 	 */
 	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void {
+		if ( $order->get_payment_method( 'edit' ) !== $this->payment_service->get_payment_gateway_id() ) {
+			return;// Prevent updating orders that were not paid with SeQura.
+		}
+
 		if ( in_array( $new_store_status, $this->order_status_service->get_shop_status_completed( true ), true ) ) {
 			$this->set_sequra_order_status_to_shipped( $order );
 		}
