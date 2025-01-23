@@ -10,6 +10,7 @@ namespace SeQura\WC\Services\Product;
 
 use DateInterval;
 use DateTime;
+use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
@@ -114,6 +115,19 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
+	 * Get product is_banned value
+	 * 
+	 * @param int|WC_Product $product The product ID or product object
+	 */
+	public function get_is_banned( $product ): bool {
+		$_product = $this->get_product_instance( $product );
+		if ( ! $_product ) {
+			return false;
+		}
+		return 'yes' === $_product->get_meta( self::META_KEY_IS_SEQURA_BANNED, true );
+	}
+
+	/**
 	 * Check if product is banned
 	 * 
 	 * @param int|WC_Product $product The product ID or product object
@@ -123,7 +137,21 @@ class Product_Service implements Interface_Product_Service {
 		if ( ! $_product ) {
 			return false;
 		}
-		return 'yes' === $_product->get_meta( self::META_KEY_IS_SEQURA_BANNED, true );
+		// TODO: Deprecate the ban using metadata in favor of the configuration.
+		$banned = $this->get_is_banned( $_product );
+		if ( ! $banned ) {
+			// Look for banned product option value in the configuration.
+			$banned_products = $this->configuration->get_excluded_products();
+			$banned          = in_array( $_product->get_sku(), $banned_products, true ) || in_array( strval( $_product->get_id() ), $banned_products, true );
+
+			if ( ! $banned ) {
+				// Look for banned product category option value in the configuration.
+				$banned_categories = $this->configuration->get_excluded_categories();
+				$banned            = ! empty( $banned_categories ) && ! empty( array_intersect( $banned_categories, $_product->get_category_ids() ) );
+			}
+		}
+		
+		return $banned;
 	}
 
 	/**
@@ -259,7 +287,7 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
-	 * Update is banned value
+	 * Update is_banned value
 	 */
 	public function set_is_banned( int $product_id, ?string $value ): void {
 		if ( null === $value ) {

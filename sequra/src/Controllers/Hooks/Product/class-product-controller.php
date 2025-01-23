@@ -413,7 +413,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 */
 	public function render_meta_boxes( $post ) {
 		$args = array(
-			'is_banned'                                    => $this->product_service->is_banned( $post->ID ),
+			'is_banned'                                    => $this->product_service->get_is_banned( $post->ID ),
 			'is_banned_field_name'                         => self::FIELD_NAME_IS_BANNED,
 			'enabled_for_services'                         => $this->configuration->is_enabled_for_services(),
 			'is_service'                                   => $this->product_service->is_service( $post->ID ),
