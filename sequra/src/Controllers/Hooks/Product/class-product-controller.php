@@ -379,7 +379,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * @return void
 	 */
 	public function add_widget_shortcode_to_page() {
-		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( \did_action( 'before_woocommerce_sequra_add_widget_to_page' ) ) {
 			return;
 		}

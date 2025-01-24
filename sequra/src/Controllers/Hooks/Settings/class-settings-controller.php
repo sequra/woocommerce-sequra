@@ -49,7 +49,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * @return void
 	 */
 	public function register_page() {
-		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		\add_submenu_page(
 			$this->configuration->get_parent_page(),
 			\__( 'seQura', 'sequra' ),
@@ -95,7 +95,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * @return string[]
 	 */
 	public function add_action_link( $actions, $plugin_file, $plugin_data, $context ) {
-		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$args = array(
 			'href' => $this->get_settings_page_url(),
 			'text' => \esc_attr__( 'Settings', 'sequra' ),
@@ -113,7 +113,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * @return string
 	 */
 	public function remove_footer_admin( $text ) {
-		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( ! $this->configuration->is_settings_page() ) {
 			return $text;
 		}

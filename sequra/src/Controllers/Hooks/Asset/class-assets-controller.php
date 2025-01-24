@@ -127,7 +127,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return void
 	 */
 	public function enqueue_admin() {
-		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		if ( ! $this->configuration->is_settings_page() ) {
 			return;
 		}
@@ -388,7 +388,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return void
 	 */
 	public function enqueue_front() {
-		$this->logger->log_info( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 
 		\wp_register_script( 
 			self::HANDLE_CONFIG_PARAMS, 
