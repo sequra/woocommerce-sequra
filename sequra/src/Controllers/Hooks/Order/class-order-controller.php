@@ -83,6 +83,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		try {
 			$this->order_service->update_sequra_order_status( $order, $old_status, $new_status );
+			$this->order_service->complete_order_if_not_need_processing( $order );
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable(
 				$e,

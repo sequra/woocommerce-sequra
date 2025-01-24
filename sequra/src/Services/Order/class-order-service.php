@@ -857,4 +857,18 @@ class Order_Service implements Interface_Order_Service {
 		}
 		return $in_cents ? $this->pricing_service->to_cents( $total ) : $total;
 	}
+
+	/**
+	 * Set order status to completed if it is not needed to be processed
+	 * and it is in processing status
+	 * 
+	 * @param WC_Order $order
+	 */
+	public function complete_order_if_not_need_processing( $order ) {
+		if ( $order instanceof WC_Order 
+		&& ! $order->needs_processing() 
+		&& $order->get_status() === $this->order_status_service->getMapping( OrderStates::STATE_APPROVED ) ) {
+			$order->update_status( $this->order_status_service->get_shop_status_completed( true ) );
+		}
+	}
 }
