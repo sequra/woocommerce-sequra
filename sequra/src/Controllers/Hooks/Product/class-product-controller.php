@@ -115,7 +115,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * @return string
 	 */
 	public function do_widget_shortcode( $atts ) {
-		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Shortcode called', __FUNCTION__, __CLASS__ );
 		$atts = (array) $atts;
 		
 		// Check for required attributes.
@@ -190,7 +190,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * @return string
 	 */
 	public function do_cart_widget_shortcode( $atts ) {
-		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Shortcode called', __FUNCTION__, __CLASS__ );
 		$atts = (array) $atts;
 
 		$current_country = $this->i18n->get_current_country();
@@ -254,7 +254,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * @return string
 	 */
 	public function do_product_listing_widget_shortcode( $atts ) {
-		$this->logger->log_info( 'Shortcode called', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Shortcode called', __FUNCTION__, __CLASS__ );
 		$atts = (array) $atts;
 
 		$current_country = $this->i18n->get_current_country();
