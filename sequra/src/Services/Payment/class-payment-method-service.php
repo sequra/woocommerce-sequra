@@ -119,7 +119,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 				$this->logger->log_error( 'Solicitation response is not successful', __FUNCTION__, __CLASS__, $ctx );
 			}
 
-			return $response;
+			return $response instanceof SolicitationResponse ? $response : null;
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return null;
