@@ -321,6 +321,19 @@ export default class CheckoutPage {
     }
 
     /**
+     * @param {Object} options
+     * @param {string} options.status The status to expect the order has. Use the wc- prefix
+     * @param {number} options.waitFor The maximum amount of seconds to wait for the order status to change
+     */
+    async expectOrderHasStatus({ status = 'wc-processing', waitFor = 10 }) {
+        const url = new URL(this.page.url());
+        const orderId = url.pathname.split('/order-received/')[1].replace('/', '')
+        this.wpAdmin.gotoOrder({ orderId });
+
+        await this.#expectOrderEditPageHasStatus({ status, waitFor });
+    }
+
+    /**
     * @param {Object} options
     * @param {string} options.status The status to expect the order to change to. Use the wc- prefix
     * @param {number} options.waitFor The maximum amount of seconds to wait for the order status to change
