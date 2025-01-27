@@ -160,29 +160,27 @@ class Shop_Order_Service implements ShopOrderService {
 
 		$this->update_sequra_order_status( $webhook );
 		
-		$order->set_transaction_id( $webhook->getOrderRef() );
+		$transaction_id = $webhook->getOrderRef();
+		$order->set_transaction_id( $transaction_id );
 		// translators: %1$d: WooCommerce Order ID.
 		$order->add_order_note( sprintf( \esc_html__( 'Order ref sent to seQura: %1$d', 'sequra' ), $order->get_id() ) );
+		$order->set_status( $status );
 		
 		switch ( $webhook->getSqState() ) {
 			case OrderStates::STATE_APPROVED:
 				$order->add_order_note( \esc_html__( 'Payment accepted by seQura', 'sequra' ) );
+				\do_action( 'woocommerce_pre_payment_complete', $order->get_id(), $transaction_id );
+				if ( ! $order->get_date_paid( 'edit' ) ) {
+					$order->set_date_paid( time() );
+				}
+				\do_action( 'woocommerce_payment_complete', $order->get_id(), $transaction_id );
 
-				// $fn = function ( $status, $order_id, $_order ) use ( $order ) {
-				// if ( $_order->get_id() === $order->get_id() ) {
-				// return \Automattic\WooCommerce\Enums\OrderStatus::COMPLETED;
-				// }
-				// return $status;
-				// };
-				// add_filter( 'woocommerce_payment_complete_order_status', $fn, 10, 3 );
-				// $order->payment_complete(); 
-				// remove_filter( 'woocommerce_payment_complete_order_status', $fn, 10 );
 				break;
 			case OrderStates::STATE_NEEDS_REVIEW:
 				$order->add_order_note( \esc_html__( 'Payment is in review by seQura', 'sequra' ) );        
 				break;
 		}
-		$order->set_status( $status );
+		$order->save();
 	}
 
 	/**

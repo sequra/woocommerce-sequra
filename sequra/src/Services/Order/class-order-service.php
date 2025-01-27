@@ -18,11 +18,13 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
+use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
+use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use Throwable;
@@ -86,6 +88,13 @@ class Order_Service implements Interface_Order_Service {
 	private $store_context;
 
 	/**
+	 * Logger
+	 *
+	 * @var Interface_Logger_Service
+	 */
+	private $logger;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -94,7 +103,8 @@ class Order_Service implements Interface_Order_Service {
 		Order_Status_Settings_Service $order_status_service,
 		Configuration $configuration,
 		Interface_Cart_Service $cart_service,
-		StoreContext $store_context
+		StoreContext $store_context,
+		Interface_Logger_Service $logger
 	) {
 		$this->payment_service      = $payment_service;
 		$this->pricing_service      = $pricing_service;
@@ -102,6 +112,7 @@ class Order_Service implements Interface_Order_Service {
 		$this->configuration        = $configuration;
 		$this->cart_service         = $cart_service;
 		$this->store_context        = $store_context;
+		$this->logger               = $logger;
 	}
 	
 	/**
@@ -867,8 +878,22 @@ class Order_Service implements Interface_Order_Service {
 	public function complete_order_if_not_need_processing( $order ) {
 		if ( $order instanceof WC_Order 
 		&& ! $order->needs_processing() 
-		&& $order->get_status() === $this->order_status_service->getMapping( OrderStates::STATE_APPROVED ) ) {
-			$order->update_status( $this->order_status_service->get_shop_status_completed( true ) );
+		&& $order->get_status( 'edit' ) === $this->order_status_service->unprefixed_shop_status( $this->order_status_service->getMapping( OrderStates::STATE_APPROVED ) ) ) {
+			$statuses = $this->order_status_service->get_shop_status_completed( true );
+			$status   = $statuses[0] ?? null;
+			if ( ! $status ) {
+				$this->logger->log_error( 
+					'Could not find a "completed" status to be set for the order',
+					__FUNCTION__,
+					__CLASS__,
+					array( 
+						new LogContextData( 'order_id', $order->get_id() ),
+						new LogContextData( 'get_shop_status_completed', $statuses ),
+					) 
+				);
+				return;
+			}
+			$order->update_status( $status );
 		}
 	}
 }
