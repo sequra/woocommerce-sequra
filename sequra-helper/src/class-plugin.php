@@ -43,6 +43,16 @@ class Plugin {
 		add_action( 'init', array( $this, 'handle_webhook' ) );
 		// WooCommerce Compat.
 		add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
+		if ( defined( 'SQ_STOP_HEARTBEAT' ) && SQ_STOP_HEARTBEAT ) {
+			add_action( 'init', array( $this, 'stop_heartbeat' ), 1 );
+		}
+	}
+
+	/**
+	 * Disable heartbeat to ease debugging
+	 */
+	public function stop_heartbeat() {
+		wp_deregister_script( 'heartbeat' );
 	}
 
 	/**
