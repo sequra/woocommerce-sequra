@@ -574,7 +574,8 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( OrderStatusSettingsService::class ),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Cart_Service::class ),
-						Reg::getService( StoreContext::class )
+						Reg::getService( StoreContext::class ),
+						Reg::getService( Interface_Logger_Service::class ),
 					);
 				}
 				return self::$cache[ Interface_Order_Service::class ];

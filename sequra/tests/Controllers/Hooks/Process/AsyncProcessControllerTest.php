@@ -28,7 +28,7 @@ class AsyncProcessControllerTest extends WP_UnitTestCase {
 
 	public function testSendDeliveryReport_onException_logError() {
 		$this->logger->expects( $this->once() )
-			->method( 'log_info' )
+			->method( 'log_debug' )
 			->with( 'Hook executed', 'send_delivery_report', 'SeQura\WC\Controllers\Hooks\Process\Async_Process_Controller' );
 
 		$e = new Exception( 'Test exception' );
@@ -46,7 +46,7 @@ class AsyncProcessControllerTest extends WP_UnitTestCase {
 
 	public function testSendDeliveryReport_happyPath() {
 		$this->logger->expects( $this->once() )
-			->method( 'log_info' )
+			->method( 'log_debug' )
 			->with( 'Hook executed', 'send_delivery_report', 'SeQura\WC\Controllers\Hooks\Process\Async_Process_Controller' );
 
 		$this->report_service->expects( $this->once() )

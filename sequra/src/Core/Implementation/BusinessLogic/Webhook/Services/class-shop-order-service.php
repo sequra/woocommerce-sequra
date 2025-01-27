@@ -154,30 +154,32 @@ class Shop_Order_Service implements ShopOrderService {
 	 */
 	private function update_order_to_status( Webhook $webhook, string $status ): void {
 		$order = $this->get_order( $webhook );
-
 		if ( ! $order ) {
 			throw new Exception( 'WC Order not found' );
-		} 
-		
-		$this->update_sequra_order_status( $webhook );
-		$order->set_transaction_id( $webhook->getOrderRef() );
+		}
 
+		$this->update_sequra_order_status( $webhook );
+		
+		$transaction_id = $webhook->getOrderRef();
+		$order->set_transaction_id( $transaction_id );
 		// translators: %1$d: WooCommerce Order ID.
 		$order->add_order_note( sprintf( \esc_html__( 'Order ref sent to seQura: %1$d', 'sequra' ), $order->get_id() ) );
 		$order->set_status( $status );
 		
-
 		switch ( $webhook->getSqState() ) {
 			case OrderStates::STATE_APPROVED:
 				$order->add_order_note( \esc_html__( 'Payment accepted by seQura', 'sequra' ) );
-				$order->payment_complete(); // If all items are virtual, mark as complete. Else, remain pending.
+				\do_action( 'woocommerce_pre_payment_complete', $order->get_id(), $transaction_id );
+				if ( ! $order->get_date_paid( 'edit' ) ) {
+					$order->set_date_paid( time() );
+				}
+				\do_action( 'woocommerce_payment_complete', $order->get_id(), $transaction_id );
+
 				break;
 			case OrderStates::STATE_NEEDS_REVIEW:
-				$order->add_order_note( \esc_html__( 'Payment is in review by seQura', 'sequra' ) );
-				$order->set_status( $status );
+				$order->add_order_note( \esc_html__( 'Payment is in review by seQura', 'sequra' ) );        
 				break;
 		}
-		
 		$order->save();
 	}
 

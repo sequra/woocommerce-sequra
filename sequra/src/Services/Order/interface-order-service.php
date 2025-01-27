@@ -224,4 +224,12 @@ interface Interface_Order_Service {
 	 * @return float|int
 	 */
 	public function get_total( $order, $in_cents = true );
+
+	/**
+	 * Set order status to completed if it is not needed to be processed
+	 * and it is in processing status
+	 * 
+	 * @param WC_Order $order
+	 */
+	public function complete_order_if_not_need_processing( $order );
 }

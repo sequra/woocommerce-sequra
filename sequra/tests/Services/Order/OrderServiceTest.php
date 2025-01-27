@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContext
 require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContext.php';
 
 use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
@@ -21,6 +22,7 @@ use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
+use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
@@ -39,6 +41,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 	private $core_order_service;
 	private $cart_service;
 	private $store_context_mock;
+	private $logger;
 
 	public function set_up(): void {        
 		$this->payment_service      = $this->createMock( Interface_Payment_Service::class );
@@ -48,6 +51,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 		$this->core_order_service   = $this->createMock( OrderService::class );
 		$this->cart_service         = $this->createMock( Interface_Cart_Service::class );
 		$this->store_context_mock   = $this->createMock( StoreContextMock::class );
+		$this->logger               = $this->createMock( Interface_Logger_Service::class );
 		
 		$this->order_service = new Order_Service(
 			$this->payment_service,
@@ -55,7 +59,8 @@ class OrderServiceTest extends WP_UnitTestCase {
 			$this->order_status_service,
 			$this->configuration,
 			$this->cart_service,
-			new StoreContext( $this->store_context_mock )
+			new StoreContext( $this->store_context_mock ),
+			$this->logger
 		);
 	}
 
@@ -63,14 +68,13 @@ class OrderServiceTest extends WP_UnitTestCase {
 		return $this->order_service;
 	}
 
-	public function testUpdateSequraOrderStatus_onException_throwException() {
-		// Setup.
-		$date  = new WC_DateTime();
+	private function setupOrderMock( $date = new WC_DateTime(), $needs_processing = true, $payment_method = 'sequra' ): MockObject {
 		$order = $this->createMock( WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 1 );
 		$order->method( 'get_currency' )->willReturn( 'EUR' );
 		$order->method( 'get_date_completed' )->willReturn( $date );
-		$order->method( 'get_payment_method' )->willReturn( 'sequra' );
+		$order->method( 'get_payment_method' )->willReturn( $payment_method );
+		$order->method( 'needs_processing' )->willReturn( $needs_processing );
 		$order->method( 'get_meta' )
 		->with( 
 			$this->logicalOr( $this->equalTo( '_sq_cart_ref' ), $this->equalTo( '_sq_cart_created_at' ) )
@@ -87,33 +91,48 @@ class OrderServiceTest extends WP_UnitTestCase {
 				} 
 			) 
 		);
+		return $order;
+	}
 
-		$this->payment_service->method( 'get_payment_gateway_id' )->willReturn( 'sequra' );
-
+	private function setupCartServiceMock( $items = array(), $handling_items = array(), $discount_items = array(), $refund_items = array() ) {
 		$this->cart_service->expects( $this->once() )
 		->method( 'get_items' )
-		->with( $order )
-		->willReturn( array() );
+		->with( $this->anything() )
+		->willReturn( $items );
 		
 		$this->cart_service->expects( $this->once() )
 		->method( 'get_handling_items' )
-		->with( $order )
-		->willReturn( array() );
+		->with( $this->anything() )
+		->willReturn( $handling_items );
 
 		$this->cart_service->expects( $this->once() )
 		->method( 'get_discount_items' )
-		->with( $order )
-		->willReturn( array() );
+		->with( $this->anything() )
+		->willReturn( $discount_items );
 
 		$this->cart_service->expects( $this->once() )
 		->method( 'get_refund_items' )
-		->with( $order )
-		->willReturn( array() );
+		->with( $this->anything() )
+		->willReturn( $refund_items );
+	}
 
+	private function setupPaymentServiceMock( $gateway_id = 'sequra' ) {
+		$this->payment_service->method( 'get_payment_gateway_id' )->willReturn( $gateway_id );
+	}
+
+	private function setupOrderStatusServiceMock( $completed_status = array( 'completed' ) ) {
 		$this->order_status_service->expects( $this->once() )
 		->method( 'get_shop_status_completed' )
 		->with( true )
-		->willReturn( array( 'completed' ) );
+		->willReturn( $completed_status );
+	}
+
+	public function testUpdateSequraOrderStatus_onException_throwException() {
+		// Setup.
+		$order = $this->setupOrderMock();
+		$this->setupPaymentServiceMock();
+		$this->setupCartServiceMock();
+		$this->setupOrderStatusServiceMock();
 		
 		$this->configuration->expects( $this->once() )
 		->method( 'get_store_id' )
@@ -128,61 +147,14 @@ class OrderServiceTest extends WP_UnitTestCase {
 
 	public function testUpdateSequraOrderStatus_orderCompleted_sendOrderUpdate() {
 		// Setup.
-		$date = new WC_DateTime();
-		/**
-		 * @var WC_Order $order
-		 */
-		$order = $this->createMock( WC_Order::class );
-		$order->method( 'get_id' )->willReturn( 1 );
-		$order->method( 'get_currency' )->willReturn( 'EUR' );
-		$order->method( 'get_date_completed' )->willReturn( $date );
-		$order->method( 'get_payment_method' )->willReturn( 'sequra' );
-		$order->method( 'get_meta' )
-		->with( 
-			$this->logicalOr( $this->equalTo( '_sq_cart_ref' ), $this->equalTo( '_sq_cart_created_at' ) )
-		)
-		->will(
-			$this->returnCallback(
-				function ( $arg ) {
-					if ( '_sq_cart_ref' === $arg ) {
-						return 'cart_ref';
-					} 
-					if ( '_sq_cart_created_at' === $arg ) {
-						return 'cart_created_at';
-					}
-				} 
-			) 
-		);
-
-		$this->payment_service->method( 'get_payment_gateway_id' )->willReturn( 'sequra' );
-
+		$date  = new WC_DateTime();
+		$order = $this->setupOrderMock( $date );
+		$this->setupPaymentServiceMock();
 		$items = array(
 			new ProductItem( 'reference', 'Product', 100, 1, 100, false ),
 		);
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_items' )
-		->with( $order )
-		->willReturn( $items );
-		
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_handling_items' )
-		->with( $order )
-		->willReturn( array() );
-
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_discount_items' )
-		->with( $order )
-		->willReturn( array() );
-
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_refund_items' )
-		->with( $order )
-		->willReturn( array() );
-
-		$this->order_status_service->expects( $this->once() )
-		->method( 'get_shop_status_completed' )
-		->with( true )
-		->willReturn( array( 'completed' ) );
+		$this->setupCartServiceMock( $items );
+		$this->setupOrderStatusServiceMock();
 		
 		$store_id = '1';
 		$this->configuration->expects( $this->once() )
@@ -227,19 +199,36 @@ class OrderServiceTest extends WP_UnitTestCase {
 		$this->order_service->update_sequra_order_status( $order, 'processing', 'completed' );
 	}
 
+	public function testUpdateSequraOrderStatus_notPaidWithSeQura_skipExecution() {
+		// Setup.
+		$order = $this->setupOrderMock( new WC_DateTime(), true, 'other_payment_method' );
+		$this->setupPaymentServiceMock();
+		$this->store_context_mock->expects( $this->never() )->method( 'do_with_store' );
+
+		// Execute.
+		$this->order_service->update_sequra_order_status( $order, 'processing', 'completed' );
+	}
+
+	public function testUpdateSequraOrderStatus_notNeedsProcessing_skipExecution() {
+		// Setup.
+		$order = $this->setupOrderMock( new WC_DateTime(), false );
+		$this->setupOrderStatusServiceMock();
+		$this->setupPaymentServiceMock();
+		
+		$this->store_context_mock->expects( $this->never() )->method( 'do_with_store' );
+
+		// Execute.
+		$this->order_service->update_sequra_order_status( $order, 'processing', 'completed' );
+	}
+
 	/**
 	 * @dataProvider dataProvider_UpdateSequraOrderStatus
 	 */
 	public function testUpdateSequraOrderStatus_notCompletedOrder_skipExecution( $old_status, $new_status ) {
 		// Setup.
-		$order = $this->createMock( WC_Order::class );
-		$order->expects( $this->never() )->method( 'get_meta' );
-		$order->expects( $this->never() )->method( 'get_currency' );
-
-		$this->order_status_service->expects( $this->once() )
-		->method( 'get_shop_status_completed' )
-		->with( true )
-		->willReturn( array( 'completed' ) );
+		$order = $this->setupOrderMock();
+		
+		$this->store_context_mock->expects( $this->never() )->method( 'do_with_store' );
 
 		// Execute.
 		$this->order_service->update_sequra_order_status( $order, $old_status, $new_status );
@@ -247,59 +236,20 @@ class OrderServiceTest extends WP_UnitTestCase {
 
 	public function dataProvider_UpdateSequraOrderStatus() {
 		return array(
+			array( 'pending', 'on-hold' ),
+			array( 'pending', 'failed' ),
+			array( 'failed', 'cancelled' ),
+			array( 'pending', 'processing' ),
+			array( 'on-hold', 'processing' ),
 			array( 'processing', 'cancelled' ),
-			array( 'processing', 'pending' ),
-			array( 'processing', 'on-hold' ),
 		);
 	}
 
 	public function testHandleRefund_onException_throwException() {
 		// Setup.
-		$date  = new WC_DateTime();
-		$order = $this->createMock( WC_Order::class );
-		$order->method( 'get_id' )->willReturn( 1 );
-		$order->method( 'get_currency' )->willReturn( 'EUR' );
-		$order->method( 'get_date_completed' )->willReturn( $date );
-		$order->method( 'get_payment_method' )->willReturn( 'sequra' );
-		$order->method( 'get_total' )->willReturn( 100 );
-		$order->method( 'get_meta' )
-		->with( 
-			$this->logicalOr( $this->equalTo( '_sq_cart_ref' ), $this->equalTo( '_sq_cart_created_at' ) )
-		)
-		->will(
-			$this->returnCallback(
-				function ( $arg ) {
-					if ( '_sq_cart_ref' === $arg ) {
-						return 'cart_ref';
-					} 
-					if ( '_sq_cart_created_at' === $arg ) {
-						return 'cart_created_at';
-					}
-				} 
-			) 
-		);
-
-		$this->payment_service->method( 'get_payment_gateway_id' )->willReturn( 'sequra' );
-
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_items' )
-		->with( $order )
-		->willReturn( array() );
-		
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_handling_items' )
-		->with( $order )
-		->willReturn( array() );
-
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_discount_items' )
-		->with( $order )
-		->willReturn( array() );
-
-		$this->cart_service->expects( $this->once() )
-		->method( 'get_refund_items' )
-		->with( $order )
-		->willReturn( array() );
+		$order = $this->setupOrderMock();
+		$this->setupPaymentServiceMock();
+		// $this->setupCartServiceMock();
 		
 		$this->configuration->expects( $this->once() )
 		->method( 'get_store_id' )
@@ -336,7 +286,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 		$order->method( 'get_id' )->willReturn( 1 );
 		$order->method( 'get_currency' )->willReturn( 'EUR' );
 		$order->method( 'get_date_completed' )->willReturn( $date );
-		$order->method( 'get_payment_method' )->willReturn( 'sequra' );
+		$order->method( 'get_payment_method' )->with( $this->anything() )->willReturn( 'sequra' );
 		$order->method( 'get_total' )->willReturn( $order_total );
 		$order->method( 'get_meta' )
 		->with( 

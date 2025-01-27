@@ -129,7 +129,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 			return;
 		}
 
-		$order = wc_get_order( absint( $_GET['post'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$order = wc_get_order( \absint( $_GET['post'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $order instanceof WC_Order ) {
 			return;
 		}

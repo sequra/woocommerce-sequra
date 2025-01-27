@@ -108,6 +108,8 @@ Contributors:
 * Added: Restored the educational pop-up present in every seQura payment option on the checkout page in v2.
 * Added: Payment options are now cached to enhance performance when rendering widgets.
 * Fixed: Banned products will not display widgets.
+* Fixed: Stop calling OrderUpdate API for orders not paid using seQura.
+* Fixed: Orders containing only virtual and downloadable products are automatically marked as completed once paid through seQura.
 = 3.0.6	=
 * Fixed: Type comparison bug that prevents orders from being eligible for service sales in some scenarios.
 * Fixed: Allow null payment method data in validation method.

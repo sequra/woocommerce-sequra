@@ -21,21 +21,21 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	/**
 	 * Returns WooCommerce status for approved orders.
 	 */
-	public function get_shop_status_approved(): string {
+	protected function get_shop_status_approved(): string {
 		return 'wc-processing';
 	}
 
 	/**
 	 * Returns WooCommerce status for orders that need review.
 	 */
-	public function get_shop_status_needs_review(): string {
+	protected function get_shop_status_needs_review(): string {
 		return 'wc-on-hold';
 	}
 
 	/**
 	 * Returns WooCommerce status for cancelled orders.
 	 */
-	public function get_shop_status_cancelled( bool $unprefixed = false ): string {
+	protected function get_shop_status_cancelled( bool $unprefixed = false ): string {
 		$status = 'wc-cancelled';
 		return $unprefixed ? $this->unprefixed_shop_status( $status ) : $status;
 	}

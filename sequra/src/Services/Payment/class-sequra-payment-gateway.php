@@ -12,11 +12,11 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 	return;
 }
 
-use PhpParser\Node\Stmt\Interface_;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\WebhookAPI\WebhookAPI;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Constants;
@@ -80,6 +80,13 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	private $logger;
 
 	/**
+	 * Order status service
+	 * 
+	 * @var Order_Status_Settings_Service
+	 */
+	private $order_status_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -100,6 +107,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$payment_service              = ServiceRegister::getService( Interface_Payment_Service::class );
 		$this->payment_service        = $payment_service;
 		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
+		$this->order_status_service   = ServiceRegister::getService( Order_Status_Settings_Service::class );
 		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
 		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
 		/**
@@ -360,7 +368,12 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 		$order = \wc_get_order( \absint( $_GET['order'] ) );
 		if ( $order instanceof WC_Order ) {
-			if ( in_array( $order->get_status(), array( 'on-hold', 'processing' ), true ) ) {
+			$paid_statuses = array(
+				$this->order_status_service->unprefixed_shop_status( $this->order_status_service->getMapping( OrderStates::STATE_APPROVED ) ),
+				$this->order_status_service->unprefixed_shop_status( $this->order_status_service->getMapping( OrderStates::STATE_NEEDS_REVIEW ) ),
+			);
+
+			if ( in_array( $order->get_status(), $paid_statuses, true ) ) {
 				$return_url = $order->get_checkout_order_received_url();
 				if ( ! $order->is_paid() ) {
 					\wc_add_notice(
@@ -373,6 +386,8 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 						),
 						'notice'
 					);
+				} else {
+					$this->order_service->complete_order_if_not_need_processing( $order );
 				}
 			} else {
 				\wc_add_notice( \__( 'Error has occurred, please try again.', 'sequra' ), 'error' );

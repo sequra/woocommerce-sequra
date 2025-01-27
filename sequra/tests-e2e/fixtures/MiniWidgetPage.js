@@ -10,7 +10,7 @@ export default class MiniWidgetPage {
     }
 
     async expectMiniWidgetToBeVisible({ navigate = true, visible = true, locationSel, product, amount = 0, message = '' }) {
-        if(navigate) {
+        if (navigate) {
             await this.goto();
         }
         let containerSel = `${locationSel} ~ .sequra-educational-popup.sequra-educational-popup--${product}[data-product="${product}"]`;
@@ -18,7 +18,7 @@ export default class MiniWidgetPage {
             containerSel += `[data-amount="${amount}"]`;
         }
         if (visible) {
-            await this.page.locator(containerSel, { hasText: message }).waitFor({ timeout: 5000 });
+            await this.page.locator(containerSel, { hasText: message }).first().waitFor({ timeout: 5000 });
         } else {
             await this.expect(this.page.locator(containerSel)).toHaveCount(0, { timeout: 5000 });
         }
