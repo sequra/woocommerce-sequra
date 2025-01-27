@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../Fixtures/Store.php';
 use Exception;
 use WP_UnitTestCase;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Constants;
 use SeQura\WC\Services\Interface_Logger_Service;
@@ -34,6 +35,7 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 	private $logger;
 	private $store;
 	private $settings_url;
+	private $order_status_settings_service;
 
 
 	public function set_up(): void {        
@@ -93,6 +95,15 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 			Interface_Logger_Service::class,
 			function () use ( $logger ) {
 				return $logger;
+			} 
+		);
+
+		$order_status_settings_service       = $this->createMock( Order_Status_Settings_Service::class );
+		$this->order_status_settings_service = $order_status_settings_service;
+		ServiceRegister::registerService(
+			Order_Status_Settings_Service::class,
+			function () use ( $order_status_settings_service ) {
+				return $order_status_settings_service;
 			} 
 		);
 
