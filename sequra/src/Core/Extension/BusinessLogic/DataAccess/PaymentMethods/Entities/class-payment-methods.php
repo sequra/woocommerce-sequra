@@ -66,10 +66,12 @@ class Payment_Methods extends Entity {
 		$this->setStoreId( $data['storeId'] );
 		$this->setMerchantId( $data['merchantId'] );
 
-		$dataPaymentMethods = $data['paymentMethods'] ?? array();
+		$dataPaymentMethods = (array) ( $data['paymentMethods'] ?? array() );
 		$paymentMethods     = array();
 		foreach ( $dataPaymentMethods as $pm ) {
-			$paymentMethods[] = Payment_Method::fromArray( $pm );
+			if ( is_array( $pm ) ) {
+				$paymentMethods[] = Payment_Method::fromArray( $pm );
+			}
 		}
 		$this->setPaymentMethods( $paymentMethods );
 	}

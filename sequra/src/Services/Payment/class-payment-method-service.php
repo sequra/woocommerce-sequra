@@ -209,7 +209,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 			return array();
 		}
 		$this->payment_methods = array();
-		foreach ( (array) $response->toArray()['availablePaymentMethods'] ?? array() as $raw ) {
+		foreach ( (array) ( $response->toArray()['availablePaymentMethods'] ?? array() ) as $raw ) {
 			$this->payment_methods[] = Payment_Method_Option::from_array( $raw );
 		}
 		return $this->payment_methods;

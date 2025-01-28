@@ -391,10 +391,10 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			 *
 			 * @since 2.0.0
 			 */
-			$url = \apply_filters( 'woocommerce_get_return_url', $return_url, $order );
+			$return_url = \apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 		}
 		
-		\wp_safe_redirect( $url, 302 );
+		\wp_safe_redirect( $return_url, 302 );
 		exit;
 	}
 
