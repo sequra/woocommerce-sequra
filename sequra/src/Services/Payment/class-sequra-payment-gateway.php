@@ -358,52 +358,43 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Webhook to process handle return url
 	 */
 	public function handle_return() {
-		
-		//phpcs:disable WordPress.Security.NonceVerification.Recommended
+		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order      = ! isset( $_GET['order'] ) ? null : \wc_get_order( \absint( $_GET['order'] ) );
 		$return_url = \wc_get_checkout_url();
-		if ( ! isset( $_GET['order'] ) ) {
-			\wp_safe_redirect( $return_url, 302 );
-			exit;
-		}
 
-		$order = \wc_get_order( \absint( $_GET['order'] ) );
 		if ( $order instanceof WC_Order ) {
-			$paid_statuses = array(
-				$this->order_status_service->unprefixed_shop_status( $this->order_status_service->getMapping( OrderStates::STATE_APPROVED ) ),
-				$this->order_status_service->unprefixed_shop_status( $this->order_status_service->getMapping( OrderStates::STATE_NEEDS_REVIEW ) ),
-			);
+			$return_url = $order->get_checkout_payment_url();
 
-			if ( in_array( $order->get_status(), $paid_statuses, true ) ) {
-				$return_url = $order->get_checkout_order_received_url();
-				if ( ! $order->is_paid() ) {
-					\wc_add_notice(
-						\__(
-							'<p>seQura is processing your request.</p>
-							<p>After a few minutes <b>you will get an email with your request result</b>.
-							seQura might contact you to get some more information.</p>
-							<p><b>Thanks for choosing seQura!</b>',
-							'sequra'
-						),
-						'notice'
-					);
-				} else {
-					$this->order_service->complete_order_if_not_need_processing( $order );
-				}
-			} else {
+			if ( $order->needs_payment() ) {
+				// This will be true for PENDING and FAILED orders.
 				\wc_add_notice( \__( 'Error has occurred, please try again.', 'sequra' ), 'error' );
-				$return_url = $order->get_checkout_payment_url();
+			} elseif ( $order->is_paid() ) {
+				// This will be true for COMPLETED and PROCESSING orders.
+				$return_url = $order->get_checkout_order_received_url();
+			} else {
+				// This will be true for ON-HOLD orders.
+				$return_url = $order->get_checkout_order_received_url();
+				\wc_add_notice(
+					\__(
+						'<p>seQura is processing your request.</p>
+						<p>After a few minutes <b>you will get an email with your request result</b>.
+						seQura might contact you to get some more information.</p>
+						<p><b>Thanks for choosing seQura!</b>',
+						'sequra'
+					),
+					'notice'
+				);
 			}
+
+			/**
+			 * Filter hook to allow plugins to modify the return URL.
+			 *
+			 * @since 2.0.0
+			 */
+			$return_url = \apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 		}
-		//phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-		/**
-		 * Filter hook to allow plugins to modify the return URL.
-		 *
-		 * @since 2.0.0
-		 */
-		$url = \apply_filters( 'woocommerce_get_return_url', $return_url, $order );
-
-		\wp_safe_redirect( $url, 302 );
+		
+		\wp_safe_redirect( $return_url, 302 );
 		exit;
 	}
 
