@@ -16,7 +16,6 @@ if ( ! isset( $args['description'], $args['payment_methods'], $args['cart_total'
 	return;
 }
 ?>
-
 <span class="sequra-block__description"><?php echo wp_kses_post( wpautop( wptexturize( $args['description'] ) ) ); ?></span>
 <?php
 /**

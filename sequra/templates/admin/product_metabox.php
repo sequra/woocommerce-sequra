@@ -38,7 +38,6 @@ if ( ! isset(
 
 wp_nonce_field( -1, $args['nonce_name'] );
 ?>
-
 <div class="wc-metaboxes-wrapper">
 	<div id="sequra_settings_is_banned" style="padding: 6px 0 8px;">
 		<input id="is_sequra_banned" name="<?php echo esc_attr( $args['is_banned_field_name'] ); ?>" type="checkbox" value="yes" <?php echo ( (bool) $args['is_banned'] ) ? 'checked' : ''; ?>/>

@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.7.1
-Stable tag: 3.0.7
+Stable tag: 3.0.8
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.0.8	=
+* Fixed: Remove blank lines from template files to prevent errors when wpautop or similar functions are used. 
 = 3.0.7	=
 * Fixed: Bug in the migration SQL query to create new tables.
 * Changed: Update integration-core library to version v1.0.17.

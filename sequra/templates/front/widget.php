@@ -32,7 +32,6 @@ if ( ! isset(
 }
 //phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
-
 <script type='text/javascript'>
 	SequraWidgetFacade.widgets && SequraWidgetFacade.widgets.push({
 		product: "<?php echo esc_js( $args['product'] ); ?>",

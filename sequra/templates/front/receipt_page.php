@@ -14,15 +14,8 @@ if ( empty( $args['form'] ) ) {
 }
 
 ?>
-
-<p>
-<?php 
-echo wp_kses_post( __( 'Thank you for your order. Please fill the required data to pay with seQura...', 'sequra' ) );
-?>
-</p>
-
+<p><?php echo wp_kses_post( __( 'Thank you for your order. Please fill the required data to pay with seQura...', 'sequra' ) ); ?></p>
 <?php
-
 echo wp_kses(
 	$args['form'],
 	array(
@@ -42,9 +35,7 @@ echo wp_kses(
 	),
 	array( 'https' )
 );
-
 ?>
-
 <script type="text/javascript">
 	(function(){
 		const tryToShowForm = () => {
@@ -55,12 +46,10 @@ echo wp_kses(
 				window.SequraFormInstance.show();
 				const iframe = document.querySelector('.sq-identification-iframe');
 				document.body.append(iframe);
-				// jQuery('.sq-identification-iframe').appendTo('body');
 			} catch (e) {
 				setTimeout(tryToShowForm, 100);
 			}
 		};
 		document.addEventListener("DOMContentLoaded", tryToShowForm);
-
 	})();
 </script>
