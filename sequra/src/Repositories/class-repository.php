@@ -447,12 +447,31 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 	/**
 	 * Delete all the entities.
+	 * 
+	 * @param string|null $store_id Delete entities from this store. Passing null will delete all entities.
 	 */
-	public function delete_all(): bool {
+	public function delete_all( $store_id = null ): bool {
 		if ( ! $this->table_exists() ) {
 			return false;
 		}
-		return false !== $this->db->query( 'DELETE FROM ' . \sanitize_text_field( $this->get_table_name() ) );
+		$sql = 'DELETE FROM ' . \sanitize_text_field( $this->get_table_name() );
+		if ( $store_id ) {
+			$column = $this->get_store_id_index_column();
+			if ( ! $column ) {
+				return false;
+			}
+			$sql .= ' WHERE ' . \sanitize_text_field( $column ) . ' = ' . \sanitize_text_field( $store_id );
+		}
+		return false !== $this->db->query( $sql );
+	}
+
+	/**
+	 * Get the index column name that stores the store ID.
+	 * 
+	 * @return string Index column name or empty string if not applicable.
+	 */
+	protected function get_store_id_index_column(): string {
+		return 'index_1';
 	}
 
 	/**
