@@ -410,9 +410,9 @@ if (!window.SequraFE) {
                         const displayWidget = row.querySelector('input[type="checkbox"]').checked;
                         const dataset = select.selectedIndex === -1 ? null : select.options[select.selectedIndex].dataset;
 
-                        const product = 'undefined' !== typeof dataset.product ? dataset.product : null;
-                        const country = 'undefined' !== typeof dataset.countryCode ? dataset.countryCode : null;
-                        const campaign = 'undefined' !== typeof dataset.campaign ? dataset.campaign : null;
+                        const product = dataset && 'undefined' !== typeof dataset.product ? dataset.product : null;
+                        const country = dataset && 'undefined' !== typeof dataset.countryCode ? dataset.countryCode : null;
+                        const campaign = dataset && 'undefined' !== typeof dataset.campaign ? dataset.campaign : null;
                         customLocations.push({ selForTarget, product, country, campaign, widgetStyles, displayWidget });
                     });
                     handleChange('customLocations', customLocations)

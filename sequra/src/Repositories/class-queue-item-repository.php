@@ -247,4 +247,13 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 		// Only one record should be updated.
 		return 1 === $this->db->update( $this->get_table_name(), $prepared, $indexed_conditions );
 	}
+
+	/**
+	 * Get the index column name that stores the store ID.
+	 * 
+	 * @return string Index column name or empty string if not applicable.
+	 */
+	protected function get_store_id_index_column(): string {
+		return '';
+	}
 }
