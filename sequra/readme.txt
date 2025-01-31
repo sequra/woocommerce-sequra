@@ -101,7 +101,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 Contributors:
 == Changelog ==
 = 3.0.8	=
-* Fixed: Remove blank lines from template files to prevent errors when wpautop or similar functions are used. 
+* Fixed: Remove blank lines from template files to prevent errors when wpautop or similar functions are used.
+* Fixed: Add missing value checks in the Configuration page scripts to prevent the loading state from getting stuck.
+* Changed: Enhance the disconnection process to support store-specific deletions.
 = 3.0.7	=
 * Fixed: Bug in the migration SQL query to create new tables.
 * Changed: Update integration-core library to version v1.0.17.
