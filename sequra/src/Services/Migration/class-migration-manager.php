@@ -83,6 +83,8 @@ class Migration_Manager implements Interface_Migration_Manager {
 					$this->configuration->set_module_version( $migration->get_version() );
 				}
 			}
+			// Prevent the migrations from running again for the same plugin version.
+			$this->configuration->set_module_version( $this->current_version );
 		} catch ( Critical_Migration_Exception $e ) {
 			// ! Critical migration failed and the plugin cannot work properly. Deactivate the plugin and log the error.
 			$deactivate = true;
