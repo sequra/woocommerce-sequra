@@ -46,6 +46,8 @@ class Plugin {
 		if ( defined( 'SQ_STOP_HEARTBEAT' ) && SQ_STOP_HEARTBEAT ) {
 			add_action( 'init', array( $this, 'stop_heartbeat' ), 1 );
 		}
+		// This disable entirely the coming soon page functionality from WooCommerce that affects the E2E tests.
+		add_filter( 'woocommerce_coming_soon_exclude', '__return_true', 10 );
 	}
 
 	/**
