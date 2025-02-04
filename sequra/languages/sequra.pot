@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: seQura\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-14 07:50+0000\n"
+"POT-Creation-Date: 2025-02-04 15:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -13,32 +13,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.6.11; wp-6.6.2\n"
+"X-Loco-Version: 2.7.1; wp-6.7.1\n"
 "X-Domain: sequra"
 
 #. Author of the plugin
 msgid "\"seQura Tech\" <wordpress@sequra.com>"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:332
+#. %1$s: <p>, %2$s: </p>, %3$s: <b>, %4$s: </b>.
+#: src/Services/Payment/class-sequra-payment-gateway.php:377
+#, php-format
 msgid ""
-"<p>seQura is processing your request.</p>\n"
-"\t\t\t\t\t\t\t<p>After a few minutes <b>you will get an email with your "
-"request result</b>.\n"
-"\t\t\t\t\t\t\tseQura might contact you to get some more information.</p>\n"
-"\t\t\t\t\t\t\t<p><b>Thanks for choosing seQura!</b>"
+"%1$sseQura is processing your request.%2$s%1$sAfter a few minutes %3$syou "
+"will get an email with your request result%4$s. seQura might contact you to "
+"get some more information.%2$s%1$s%3$sThanks for choosing seQura!%4$s%2$s"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:534
+#: templates/front/payment_fields.php:40
+msgid "+info"
+msgstr ""
+
+#: src/Services/Payment/class-sequra-payment-gateway.php:573
 msgid "An error occurred while refunding the order in seQura."
 msgstr ""
 
 #: tests/Controllers/Hooks/Order/OrderControllerTest.php:84
-#: src/Controllers/Hooks/Order/class-order-controller.php:95
+#: src/Controllers/Hooks/Order/class-order-controller.php:102
 msgid "An error occurred while updating the order data in seQura."
 msgstr ""
 
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:146
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:157
 msgid "API docs"
 msgstr ""
 
@@ -46,42 +50,42 @@ msgstr ""
 msgid "Column is not id or index."
 msgstr ""
 
-#: templates/admin/product_metabox.php:70
+#: templates/admin/product_metabox.php:69
 msgid "Date i.e: 2021-01-01 or period i.e: P1M for 1 month"
 msgstr ""
 
-#: templates/admin/product_metabox.php:63
+#: templates/admin/product_metabox.php:62
 msgid "Date i.e: 2021-06-06 or period i.e: P1Y for 1 year"
 msgstr ""
 
-#: templates/admin/product_metabox.php:69
+#: templates/admin/product_metabox.php:68
 msgid "date or period in ISO8601 format"
 msgstr ""
 
-#: src/Services/Cart/class-cart-service.php:444
-#: src/Services/Cart/class-cart-service.php:465
-#: src/Services/Cart/class-cart-service.php:507
+#: src/Services/Cart/class-cart-service.php:461
+#: src/Services/Cart/class-cart-service.php:482
+#: src/Services/Cart/class-cart-service.php:524
 msgid "Discount"
 msgstr ""
 
-#: templates/admin/product_metabox.php:46
+#: templates/admin/product_metabox.php:45
 msgid "Do not offer seQura for this product"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:343
+#: src/Services/Payment/class-sequra-payment-gateway.php:369
 msgid "Error has occurred, please try again."
 msgstr ""
 
-#: templates/admin/product_metabox.php:68
+#: templates/admin/product_metabox.php:67
 msgid "First instalment delay or date"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:130
+#: src/Services/Payment/class-sequra-payment-gateway.php:144
 msgid "Flexible payment with seQura"
 msgstr ""
 
-#: src/Services/Cart/class-cart-service.php:385
-#: src/Services/Cart/class-cart-service.php:410
+#: src/Services/Cart/class-cart-service.php:402
+#: src/Services/Cart/class-cart-service.php:427
 msgid "Handling cost"
 msgstr ""
 
@@ -93,53 +97,59 @@ msgstr ""
 msgid "https://sequra.es/"
 msgstr ""
 
-#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:211
+#: templates/front/payment_fields.php:39
+msgid "More information"
+msgstr ""
+
+#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:243
 msgid "Order cancelled by seQura."
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:490
-#: src/Services/Payment/class-sequra-payment-gateway.php:527
+#: src/Services/Payment/class-sequra-payment-gateway.php:529
+#: src/Services/Payment/class-sequra-payment-gateway.php:566
 msgid "Order not found"
 msgstr ""
 
 #. %1$d: WooCommerce Order ID.
-#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:131
+#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:163
 #, php-format
 msgid "Order ref sent to seQura: %1$d"
 msgstr ""
 
-#: templates/admin/product_metabox.php:78
+#: templates/admin/product_metabox.php:77
 msgid "Part of the price that will be paid as registration fee"
 msgstr ""
 
-#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:137
+#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:167
 msgid "Payment accepted by seQura"
 msgstr ""
 
-#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:141
+#: src/Core/Implementation/BusinessLogic/Webhook/Services/class-shop-order-service.php:172
 msgid "Payment is in review by seQura"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:235
-msgid "Please select a valid <strong>seQura payment method</strong>"
+#. %1$s: <strong>, %2$s: </strong>.
+#: src/Services/Payment/class-sequra-payment-gateway.php:265
+#, php-format
+msgid "Please select a valid %1$sseQura payment method%2$s"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:131
+#: src/Services/Payment/class-sequra-payment-gateway.php:145
 msgid "Please, select the payment method you want to use"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:522
+#: src/Services/Payment/class-sequra-payment-gateway.php:561
 msgid "Refund amount cannot be empty"
 msgstr ""
 
-#: templates/admin/product_metabox.php:76
+#: templates/admin/product_metabox.php:75
 msgid "Registration amount"
 msgstr ""
 
 #. Name of the plugin
-#: src/Services/Payment/class-sequra-payment-gateway.php:106
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:53
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:54
+#: src/Services/Payment/class-sequra-payment-gateway.php:123
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:55
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:56
 msgid "seQura"
 msgstr ""
 
@@ -147,45 +157,45 @@ msgstr ""
 msgid "seQura payment gateway for WooCommerce"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:109
+#: src/Services/Payment/class-sequra-payment-gateway.php:126
 msgid "seQura payment method's configuration."
 msgstr ""
 
-#: src/Controllers/Hooks/Product/class-product-controller.php:391
+#: src/Controllers/Hooks/Product/class-product-controller.php:405
 msgid "seQura settings"
 msgstr ""
 
-#: templates/admin/product_metabox.php:61
+#: templates/admin/product_metabox.php:60
 msgid "Service end date"
 msgstr ""
 
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:94
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:101
 msgid "Settings"
 msgstr ""
 
-#: src/Services/Cart/class-cart-service.php:419
+#: src/Services/Cart/class-cart-service.php:436
 msgid "Shipping cost"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:497
+#: src/Services/Payment/class-sequra-payment-gateway.php:536
 msgid "Sorry, something went wrong. Please contact the merchant."
 msgstr ""
 
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:158
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:159
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:169
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:170
 msgid "Support"
 msgstr ""
 
-#: templates/front/receipt_page.php:20
+#: templates/front/receipt_page.php:17
 msgid ""
 "Thank you for your order. Please fill the required data to pay with seQura..."
 msgstr ""
 
-#: templates/admin/product_metabox.php:55
+#: templates/admin/product_metabox.php:54
 msgid "This is not a service"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:116
+#: src/Services/Payment/class-sequra-payment-gateway.php:133
 msgid "View more configuration options."
 msgstr ""
 
@@ -193,10 +203,10 @@ msgstr ""
 msgid "View on seQura"
 msgstr ""
 
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:145
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:156
 msgid "View WooCommerce API docs"
 msgstr ""
 
-#: src/Controllers/Hooks/Settings/class-settings-controller.php:132
+#: src/Controllers/Hooks/Settings/class-settings-controller.php:143
 msgid "View WooCommerce documentation"
 msgstr ""

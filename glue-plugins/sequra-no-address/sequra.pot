@@ -1,0 +1,37 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: seQura - No Address Addon\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-04 15:02+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.7.1; wp-6.7.1\n"
+"X-Domain: sequra"
+
+#. Author of the plugin
+msgid "\"seQura Tech\" <wordpress@sequra.com>"
+msgstr ""
+
+#. Description of the plugin
+msgid "Allow customers to pay with seQura without providing an address."
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://sequra.com/"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://sequra.es/"
+msgstr ""
+
+#. Name of the plugin
+msgid "seQura - No Address Addon"
+msgstr ""
