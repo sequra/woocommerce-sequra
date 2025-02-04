@@ -99,7 +99,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 				$this->get_notices_transient( $order_id ),
 				array(
 					array(
-						'notice'      => \__( 'An error occurred while updating the order data in seQura.', 'sequra' ), // TODO: improve message with link to simba.
+						'notice'      => __( 'An error occurred while updating the order data in seQura.', 'sequra' ), // TODO: improve message with link to simba.
 						'type'        => 'error',
 						'dismissible' => true,
 					),

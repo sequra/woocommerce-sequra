@@ -123,18 +123,15 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->method_title       = __( 'seQura', 'sequra' );
 		$this->method_description = sprintf(
 			'%1$s <a href="%2$s">%3$s</a>',
-			\esc_html__( 'seQura payment method\'s configuration.', 'sequra' ),
+			esc_html__( 'seQura payment method\'s configuration.', 'sequra' ),
 			/**
 			 * Must return the URL to the settings page.
 			 *
 			 * @since 3.0.0
 			 */
 			\esc_url( strval( \apply_filters( 'sequra_settings_page_url', '' ) ) ),
-			\esc_html__( 'View more configuration options.', 'sequra' )
+			esc_html__( 'View more configuration options.', 'sequra' )
 		);
-
-		
-		// __( 'seQura payment method\'s configuration', 'sequra' );
 
 		$this->supports = array(
 			'products',
@@ -144,8 +141,8 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 		$this->enabled     = $this->get_form_field_value( self::FORM_FIELD_ENABLED );
-		$this->title       = \__( 'Flexible payment with seQura', 'sequra' ); // Title of the payment method shown on the checkout page.
-		$this->description = \__( 'Please, select the payment method you want to use', 'sequra' ); // Description of the payment method shown on the checkout page.
+		$this->title       = __( 'Flexible payment with seQura', 'sequra' ); // Title of the payment method shown on the checkout page.
+		$this->description = __( 'Please, select the payment method you want to use', 'sequra' ); // Description of the payment method shown on the checkout page.
 
 		\add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
@@ -264,7 +261,9 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 */
 	public function validate_fields() {
 		if ( ! $this->payment_method_service->is_payment_method_data_valid( $this->get_posted_data() ) ) {
-			\wc_add_notice( __( 'Please select a valid <strong>seQura payment method</strong>', 'sequra' ), 'error' );
+			// translators: %1$s: <strong>, %2$s: </strong>.
+			$message = __( 'Please select a valid %1$sseQura payment method%2$s', 'sequra' );
+			\wc_add_notice( sprintf( $message, '<strong>', '</strong>' ), 'error' );
 			return false;
 		}
 		return true;
@@ -367,23 +366,16 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 			if ( $order->needs_payment() ) {
 				// This will be true for PENDING and FAILED orders.
-				\wc_add_notice( \__( 'Error has occurred, please try again.', 'sequra' ), 'error' );
+				\wc_add_notice( __( 'Error has occurred, please try again.', 'sequra' ), 'error' );
 			} elseif ( $order->is_paid() ) {
 				// This will be true for COMPLETED and PROCESSING orders.
 				$return_url = $order->get_checkout_order_received_url();
 			} else {
 				// This will be true for ON-HOLD orders.
 				$return_url = $order->get_checkout_order_received_url();
-				\wc_add_notice(
-					\__(
-						'<p>seQura is processing your request.</p>
-						<p>After a few minutes <b>you will get an email with your request result</b>.
-						seQura might contact you to get some more information.</p>
-						<p><b>Thanks for choosing seQura!</b>',
-						'sequra'
-					),
-					'notice'
-				);
+				// translators: %1$s: <p>, %2$s: </p>, %3$s: <b>, %4$s: </b>.
+				$message = __( '%1$sseQura is processing your request.%2$s%1$sAfter a few minutes %3$syou will get an email with your request result%4$s. seQura might contact you to get some more information.%2$s%1$s%3$sThanks for choosing seQura!%4$s%2$s', 'sequra' );
+				\wc_add_notice( sprintf( $message, '<p>', '</p>', '<b>', '</b>' ), 'notice' );
 			}
 
 			/**
@@ -534,14 +526,14 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_error( 'Order not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
-			\wc_print_notice( \__( 'Order not found', 'sequra' ), 'error' );
+			\wc_print_notice( __( 'Order not found', 'sequra' ), 'error' );
 			return;
 		}
 
 		$response = $this->payment_method_service->get_identification_form( $order );
 
 		if ( ! $response ) {
-			\wc_print_notice( \__( 'Sorry, something went wrong. Please contact the merchant.', 'sequra' ), 'error' );
+			\wc_print_notice( __( 'Sorry, something went wrong. Please contact the merchant.', 'sequra' ), 'error' );
 			return;
 		}
 
@@ -566,19 +558,19 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$amount = (float) $amount;
 		if ( $amount <= 0 ) {
 			$this->logger->log_debug( 'Invalid refund amount: ' . $amount, __FUNCTION__, __CLASS__ );
-			return new WP_Error( 'empty_refund_amount', \__( 'Refund amount cannot be empty', 'sequra' ) );
+			return new WP_Error( 'empty_refund_amount', __( 'Refund amount cannot be empty', 'sequra' ) );
 		}
 		$order = \wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_error( 'Order not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
-			return new WP_Error( 'order_not_found', \__( 'Order not found', 'sequra' ) );
+			return new WP_Error( 'order_not_found', __( 'Order not found', 'sequra' ) );
 		}
 		try {
 			$this->order_service->handle_refund( $order, $amount );
 			return true;
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			return new WP_Error( 'refund_failed', \__( 'An error occurred while refunding the order in seQura.', 'sequra' ) ); // TODO: improve message.
+			return new WP_Error( 'refund_failed', __( 'An error occurred while refunding the order in seQura.', 'sequra' ) ); // TODO: improve message.
 		}
 	}
 }

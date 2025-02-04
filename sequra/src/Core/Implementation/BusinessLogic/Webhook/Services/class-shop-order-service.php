@@ -160,16 +160,16 @@ class Shop_Order_Service implements ShopOrderService {
 
 		$this->update_sequra_order_status( $webhook );
 		// translators: %1$d: WooCommerce Order ID.
-		$order->add_order_note( sprintf( \esc_html__( 'Order ref sent to seQura: %1$d', 'sequra' ), $order->get_id() ) );
+		$order->add_order_note( sprintf( esc_html__( 'Order ref sent to seQura: %1$d', 'sequra' ), $order->get_id() ) );
 		
 		switch ( $webhook->getSqState() ) {
 			case OrderStates::STATE_APPROVED:
-				$order->add_order_note( \esc_html__( 'Payment accepted by seQura', 'sequra' ) );
+				$order->add_order_note( esc_html__( 'Payment accepted by seQura', 'sequra' ) );
 				$order->payment_complete( $webhook->getOrderRef() );
 				break;
 			case OrderStates::STATE_NEEDS_REVIEW:
 				$order->set_transaction_id( $webhook->getOrderRef() );
-				$order->update_status( $status, \esc_html__( 'Payment is in review by seQura', 'sequra' ) );        
+				$order->update_status( $status, esc_html__( 'Payment is in review by seQura', 'sequra' ) );        
 				break;
 		}
 	}
@@ -235,12 +235,12 @@ class Shop_Order_Service implements ShopOrderService {
 	private function cancel_order( Webhook $webhook, string $status ): void {
 		$order = $this->get_order( $webhook );
 		if ( ! $order ) {
-			throw new OrderNotFoundException( \esc_html( "WC order with ID {$webhook->getOrderRef1()} not found." ), 404 );
+			throw new OrderNotFoundException( esc_html( "WC order with ID {$webhook->getOrderRef1()} not found." ), 404 );
 		}
 
 		$this->update_sequra_order_status( $webhook );
 
-		$order->update_status( $status, \esc_html__( 'Order cancelled by seQura.', 'sequra' ) );
+		$order->update_status( $status, esc_html__( 'Order cancelled by seQura.', 'sequra' ) );
 		$order->save();
 	}
 }

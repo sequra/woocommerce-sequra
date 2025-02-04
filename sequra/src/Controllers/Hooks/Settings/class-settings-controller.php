@@ -52,8 +52,8 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		\add_submenu_page(
 			$this->configuration->get_parent_page(),
-			\__( 'seQura', 'sequra' ),
-			\__( 'seQura', 'sequra' ),
+			__( 'seQura', 'sequra' ),
+			__( 'seQura', 'sequra' ),
 			'manage_options',
 			$this->configuration->get_page(),
 			array( $this, 'render_page' )
@@ -98,7 +98,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$args = array(
 			'href' => $this->get_settings_page_url(),
-			'text' => \esc_attr__( 'Settings', 'sequra' ),
+			'text' => esc_attr__( 'Settings', 'sequra' ),
 		);
 		ob_start();
 		\wc_get_template( 'admin/action_link.php', $args, '', $this->templates_path );
@@ -140,8 +140,8 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 						 */
 						\apply_filters( 'sequrapayment_docs_url', 'https://sequra.atlassian.net/wiki/spaces/DOC/pages/2247524378/WOOCOMMERCE' )
 					),
-					\esc_attr__( 'View WooCommerce documentation', 'sequra' ),
-					\esc_html__( 'Docs', 'woocommerce' )
+					esc_attr__( 'View WooCommerce documentation', 'sequra' ),
+					esc_html__( 'Docs', 'woocommerce' )
 				),
 				'apidocs' => sprintf(
 					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
@@ -153,8 +153,8 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 						 */
 						\apply_filters( 'sequrapayment_apidocs_url', 'https://docs.sequrapi.com/' )
 					),
-					\esc_attr__( 'View WooCommerce API docs', 'sequra' ),
-					\esc_html__( 'API docs', 'sequra' )
+					esc_attr__( 'View WooCommerce API docs', 'sequra' ),
+					esc_html__( 'API docs', 'sequra' )
 				),
 				'support' => sprintf(
 					'<a href="%s" aria-label="%s" target="_blank">%s</a>',
@@ -166,8 +166,8 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 						 */
 						\apply_filters( 'sequrapayment_support_url', 'https://sequra.atlassian.net/servicedesk/customer/portal/5/group/-1' )
 					),
-					\esc_attr__( 'Support', 'sequra' ),
-					\esc_html__( 'Support', 'sequra' )
+					esc_attr__( 'Support', 'sequra' ),
+					esc_html__( 'Support', 'sequra' )
 				),
 			);
 
