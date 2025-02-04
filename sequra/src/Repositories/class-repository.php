@@ -441,7 +441,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	protected function validate_index_column( $column, array $index_map ) {
 		if ( 'id' !== $column && ! array_key_exists( $column, $index_map ) ) {
-			throw new QueryFilterInvalidParamException( \esc_html__( 'Column is not id or index.', 'sequra' ) );
+			throw new QueryFilterInvalidParamException( esc_html__( 'Column is not id or index.', 'sequra' ) );
 		}
 	}
 

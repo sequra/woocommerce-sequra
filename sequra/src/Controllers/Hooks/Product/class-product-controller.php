@@ -402,7 +402,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * @return void
 	 */
 	public function add_meta_boxes() {
-		\add_meta_box( 'sequra_settings', \esc_html__( 'seQura settings', 'sequra' ), array( $this, 'render_meta_boxes' ), 'product', 'side', 'default' );
+		\add_meta_box( 'sequra_settings', esc_html__( 'seQura settings', 'sequra' ), array( $this, 'render_meta_boxes' ), 'product', 'side', 'default' );
 	}
 
 	/**

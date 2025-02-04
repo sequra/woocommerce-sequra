@@ -399,7 +399,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new HandlingItem(
 					$fee->name ?? 'handling',
-					\esc_html__( 'Handling cost', 'sequra' ),
+					esc_html__( 'Handling cost', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
@@ -424,7 +424,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new HandlingItem(
 					$fee->get_name(),
-					\esc_html__( 'Handling cost', 'sequra' ),
+					esc_html__( 'Handling cost', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
@@ -433,7 +433,7 @@ class Cart_Service implements Interface_Cart_Service {
 		if ( $shipping_total_with_tax ) {
 			$items[] = new HandlingItem(
 				'handling',
-				\esc_html__( 'Shipping cost', 'sequra' ),
+				esc_html__( 'Shipping cost', 'sequra' ),
 				$this->pricing_service->to_cents( $shipping_total_with_tax )
 			);
 		}
@@ -458,7 +458,7 @@ class Cart_Service implements Interface_Cart_Service {
 			foreach ( $cart->get_coupons() as $coupon ) {
 				$items[] = new DiscountItem(
 					$coupon->get_code(),
-					\esc_html__( 'Discount', 'sequra' ),
+					esc_html__( 'Discount', 'sequra' ),
 					-1 * $this->pricing_service->to_cents( 
 						$cart->get_coupon_discount_amount( $coupon->get_code(), false ) 
 					)
@@ -479,7 +479,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new DiscountItem(
 					$fee->name ?? 'discount',
-					\esc_html__( 'Discount', 'sequra' ),
+					esc_html__( 'Discount', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
@@ -521,7 +521,7 @@ class Cart_Service implements Interface_Cart_Service {
 
 				$items[] = new DiscountItem(
 					$fee->get_name(),
-					\esc_html__( 'Discount', 'sequra' ),
+					esc_html__( 'Discount', 'sequra' ),
 					$this->pricing_service->to_cents( $total_with_tax )
 				);
 			}
