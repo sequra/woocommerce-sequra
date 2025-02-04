@@ -234,6 +234,15 @@ bin/playwright --headed
 
 Note: append many arguments as needed to the command.
 
+## i18n automation
+
+The following command can be used to extract the strings from the plugin to the `.pot` file:
+
+```bash
+docker compose exec -u www-data web wp loco extract sequra
+```
+This guarantees that the `.pot` file is always up to date with the plugin strings and should be run on every release branch before merging it to the main branch.
+
 ## Hidden pages
 
 ### Order status settings
