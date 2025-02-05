@@ -90,6 +90,7 @@ use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Pa
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
+use SeQura\WC\Repositories\Interface_Deletable_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
@@ -568,14 +569,22 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Order_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Order_Service::class ] ) ) {
+					/**
+					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository.
+					 *
+					 * @var Interface_Deletable_Repository $deletable_repo
+					 */
+					$deletable_repo = RepositoryRegistry::getRepository( SeQuraOrder::class );
+
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
+						$deletable_repo,
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
 						Reg::getService( OrderStatusSettingsService::class ),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Cart_Service::class ),
 						Reg::getService( StoreContext::class ),
-						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Order_Service::class ];

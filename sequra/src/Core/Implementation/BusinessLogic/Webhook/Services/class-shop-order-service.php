@@ -21,6 +21,7 @@ use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
+
 use WC_Order;
 
 /**
@@ -238,7 +239,8 @@ class Shop_Order_Service implements ShopOrderService {
 			throw new OrderNotFoundException( esc_html( "WC order with ID {$webhook->getOrderRef1()} not found." ), 404 );
 		}
 
-		$this->update_sequra_order_status( $webhook );
+		$sq_order = $this->get_sequra_order( $webhook->getOrderRef() );
+		$this->sequra_order_repository->deleteOrder( $sq_order );
 
 		$order->update_status( $status, esc_html__( 'Order cancelled by seQura.', 'sequra' ) );
 		$order->save();

@@ -12,6 +12,7 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 	return;
 }
 
+use SeQura\Core\BusinessLogic\Domain\Order\Exceptions\OrderNotFoundException;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\WebhookAPI\WebhookAPI;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
@@ -498,6 +499,10 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			*/
 			\do_action( $webhook_identifier . '_process_webhook', \wc_get_order( $payload['order'] ), $this );
 			exit();
+		} catch ( OrderNotFoundException $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			\status_header( 404 );
+			die( 'Order no found' );
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			\status_header( 500 );

@@ -66,6 +66,7 @@ class Plugin {
 	private $migration_manager;
 
 	private const HOOK_DELIVERY_REPORT = 'sequra_delivery_report';
+	private const HOOK_CLEANUP_ORDERS  = 'sequra_cleanup_orders';
 
 	/**
 	 * Construct the plugin and bind hooks with controllers.
@@ -139,6 +140,7 @@ class Plugin {
 		// Order Update.
 		\add_action( 'woocommerce_order_status_changed', array( $order_controller, 'handle_order_status_changed' ), 10, 4 );
 		\add_action( 'woocommerce_admin_order_data_after_order_details', array( $order_controller, 'show_link_to_sequra_back_office' ) );
+		\add_action( self::HOOK_CLEANUP_ORDERS, array( $order_controller, 'cleanup_orders' ) );
 
 		// WooCommerce Compat.
 		\add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
@@ -169,6 +171,18 @@ class Plugin {
 	 */
 	public function deactivate(): void {
 		\wp_clear_scheduled_hook( self::HOOK_DELIVERY_REPORT );
+		\wp_clear_scheduled_hook( self::HOOK_CLEANUP_ORDERS );
+	}
+
+	/**
+	 * Get a random time between 2AM and 8AM.
+	 * 
+	 * @return int
+	 */
+	private function get_random_midnight_time() {
+		$random_offset = \wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
+		$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
+		return $random_offset + strtotime( $tomorrow );
 	}
 
 	/**
@@ -176,10 +190,10 @@ class Plugin {
 	 */
 	public function install(): void {
 		if ( ! \wp_next_scheduled( self::HOOK_DELIVERY_REPORT ) ) {
-			$random_offset = \wp_rand( 0, 25200 ); // 60*60*7 seconds from 2AM to 8AM.
-			$tomorrow      = gmdate( 'Y-m-d 02:00', strtotime( 'tomorrow' ) );
-			$time          = $random_offset + strtotime( $tomorrow );
-			\wp_schedule_event( $time, 'daily', self::HOOK_DELIVERY_REPORT );
+			\wp_schedule_event( $this->get_random_midnight_time(), 'daily', self::HOOK_DELIVERY_REPORT );
+		}
+		if ( ! \wp_next_scheduled( self::HOOK_CLEANUP_ORDERS ) ) {
+			\wp_schedule_event( $this->get_random_midnight_time(), 'daily', self::HOOK_CLEANUP_ORDERS );
 		}
 		$this->migration_manager->run_install_migrations();
 	}

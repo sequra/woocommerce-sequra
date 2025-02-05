@@ -224,4 +224,11 @@ interface Interface_Order_Service {
 	 * @return float|int
 	 */
 	public function get_total( $order, $in_cents = true );
+
+	/**
+	 * Cleanup orders
+	 * 
+	 * @return void
+	 */
+	public function cleanup_orders();
 }

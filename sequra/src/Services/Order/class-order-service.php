@@ -23,6 +23,7 @@ use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\O
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Payment_Method_Data;
+use SeQura\WC\Repositories\Interface_Deletable_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
@@ -95,9 +96,17 @@ class Order_Service implements Interface_Order_Service {
 	private $logger;
 
 	/**
+	 * SeQura Order repository
+	 *
+	 * @var Interface_Deletable_Repository
+	 */
+	private $sequra_order_repository;
+
+	/**
 	 * Constructor
 	 */
-	public function __construct( 
+	public function __construct(
+		Interface_Deletable_Repository $sequra_order_repository, 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
 		Order_Status_Settings_Service $order_status_service,
@@ -106,13 +115,14 @@ class Order_Service implements Interface_Order_Service {
 		StoreContext $store_context,
 		Interface_Logger_Service $logger
 	) {
-		$this->payment_service      = $payment_service;
-		$this->pricing_service      = $pricing_service;
-		$this->order_status_service = $order_status_service;
-		$this->configuration        = $configuration;
-		$this->cart_service         = $cart_service;
-		$this->store_context        = $store_context;
-		$this->logger               = $logger;
+		$this->payment_service         = $payment_service;
+		$this->pricing_service         = $pricing_service;
+		$this->order_status_service    = $order_status_service;
+		$this->configuration           = $configuration;
+		$this->cart_service            = $cart_service;
+		$this->store_context           = $store_context;
+		$this->logger                  = $logger;
+		$this->sequra_order_repository = $sequra_order_repository;
 	}
 	
 	/**
@@ -867,5 +877,14 @@ class Order_Service implements Interface_Order_Service {
 			$total = (float) $order->get_total( 'edit' );
 		}
 		return $in_cents ? $this->pricing_service->to_cents( $total ) : $total;
+	}
+
+	/**
+	 * Cleanup orders
+	 * 
+	 * @return void
+	 */
+	public function cleanup_orders() {
+		$this->sequra_order_repository->delete_old_and_invalid();
 	}
 }

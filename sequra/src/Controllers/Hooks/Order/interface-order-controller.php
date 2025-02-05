@@ -52,4 +52,11 @@ interface Interface_Order_Controller {
 	 * @return void
 	 */
 	public function show_link_to_sequra_back_office( $order );
+
+	/**
+	 * Cleanup orders
+	 * 
+	 * @return void
+	 */
+	public function cleanup_orders();
 }

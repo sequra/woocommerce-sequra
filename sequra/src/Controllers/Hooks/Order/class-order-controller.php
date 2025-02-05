@@ -158,4 +158,14 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		);
 		\wc_get_template( 'admin/order_details.php', $args, '', $this->templates_path );
 	}
+
+	/**
+	 * Cleanup orders
+	 * 
+	 * @return void
+	 */
+	public function cleanup_orders() {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->order_service->cleanup_orders();
+	}
 }
