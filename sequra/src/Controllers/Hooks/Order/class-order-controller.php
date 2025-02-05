@@ -165,6 +165,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	 * @return void
 	 */
 	public function cleanup_orders() {
-		// TODO: Implement.
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+		$this->order_service->cleanup_orders();
 	}
 }

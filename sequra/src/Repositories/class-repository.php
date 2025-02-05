@@ -481,4 +481,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		$table_name = \sanitize_text_field( $this->get_table_name() );
 		return $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
 	}
+
+	/**
+	 * Remove entities that are older than a certain date or that are invalid.
+	 * This performs a cleanup of the repository data.
+	 */
+	public function delete_old_and_invalid() {
+		// Do nothing by default. Implement in child class if needed.
+	}
 }
