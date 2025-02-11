@@ -253,10 +253,21 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	}
 
 	/**
+	 * Get merchant ID
+	 *
+	 * @return string|null
+	 */
+	private function get_merchant_id() {
+		$merchant_id = $this->current_order ? $this->order_service->get_merchant_id( $this->current_order ) : null;
+		return ! $merchant_id ? $this->payment_service->get_merchant_id() : $merchant_id;
+	}
+
+	/**
 	 * Get the merchant.
 	 */
 	private function get_merchant(): ?Merchant {
-		$merchant_id = $this->payment_service->get_merchant_id();
+		$merchant_id = $this->get_merchant_id();
+
 		if ( ! $merchant_id ) {
 			return null;
 		}
@@ -431,7 +442,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			return false;
 		}
 
-		if ( ! $this->payment_service->get_merchant_id() ) {
+		if ( ! $this->get_merchant_id() ) {
 			$this->logger->log_debug( 'Merchant ID is empty', __FUNCTION__, __CLASS__ );
 			return false;
 		}

@@ -17,8 +17,8 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\DeliveryMethod;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\PreviousOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
+use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
@@ -98,7 +98,7 @@ class Order_Service implements Interface_Order_Service {
 	/**
 	 * SeQura Order repository
 	 *
-	 * @var Interface_Deletable_Repository
+	 * @var SeQuraOrderRepositoryInterface
 	 */
 	private $sequra_order_repository;
 
@@ -106,7 +106,7 @@ class Order_Service implements Interface_Order_Service {
 	 * Constructor
 	 */
 	public function __construct(
-		Interface_Deletable_Repository $sequra_order_repository, 
+		SeQuraOrderRepositoryInterface $sequra_order_repository, 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
 		Order_Status_Settings_Service $order_status_service,
@@ -885,6 +885,24 @@ class Order_Service implements Interface_Order_Service {
 	 * @return void
 	 */
 	public function cleanup_orders() {
+		if ( ! $this->sequra_order_repository instanceof Interface_Deletable_Repository ) {
+			return;
+		}
 		$this->sequra_order_repository->delete_old_and_invalid();
+	}
+
+	/**
+	 * Get the Merchant ID
+	 * 
+	 * @param WC_Order $order
+	 * @return string|null
+	 */
+	public function get_merchant_id( $order ) {
+		if ( ! $order instanceof WC_Order ) {
+			return null;
+		}
+
+		$sq_order = $this->sequra_order_repository->getByShopReference( $order->get_id() );
+		return $sq_order ? (string) $sq_order->getMerchant()->getId() : null;
 	}
 }
