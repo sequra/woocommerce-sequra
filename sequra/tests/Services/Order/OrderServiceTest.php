@@ -17,6 +17,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
+use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use WP_UnitTestCase;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
@@ -42,18 +43,21 @@ class OrderServiceTest extends WP_UnitTestCase {
 	private $cart_service;
 	private $store_context_mock;
 	private $logger;
+	private $sequra_order_repository;
 
 	public function set_up(): void {        
-		$this->payment_service      = $this->createMock( Interface_Payment_Service::class );
-		$this->pricing_service      = $this->createMock( Interface_Pricing_Service::class );
-		$this->order_status_service = $this->createMock( Order_Status_Settings_Service::class );
-		$this->configuration        = $this->createMock( Configuration::class );
-		$this->core_order_service   = $this->createMock( OrderService::class );
-		$this->cart_service         = $this->createMock( Interface_Cart_Service::class );
-		$this->store_context_mock   = $this->createMock( StoreContextMock::class );
-		$this->logger               = $this->createMock( Interface_Logger_Service::class );
+		$this->payment_service         = $this->createMock( Interface_Payment_Service::class );
+		$this->pricing_service         = $this->createMock( Interface_Pricing_Service::class );
+		$this->order_status_service    = $this->createMock( Order_Status_Settings_Service::class );
+		$this->configuration           = $this->createMock( Configuration::class );
+		$this->core_order_service      = $this->createMock( OrderService::class );
+		$this->cart_service            = $this->createMock( Interface_Cart_Service::class );
+		$this->store_context_mock      = $this->createMock( StoreContextMock::class );
+		$this->logger                  = $this->createMock( Interface_Logger_Service::class );
+		$this->sequra_order_repository = $this->createMock( SeQuraOrderRepositoryInterface::class );
 		
 		$this->order_service = new Order_Service(
+			$this->sequra_order_repository,
 			$this->payment_service,
 			$this->pricing_service,
 			$this->order_status_service,
