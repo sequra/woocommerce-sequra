@@ -106,6 +106,7 @@ Contributors:
 * Changed: Enhance the disconnection process to support store-specific deletions.
 * Fixed: Prevent the migration process from running repeatedly unnecessarily.
 * Added: Cron job to delete old seQura order data from database to reduce the amount of space taken.
+* Fixed: Use the right merchant id based on the current order.
 = 3.0.7	=
 * Fixed: Bug in the migration SQL query to create new tables.
 * Changed: Update integration-core library to version v1.0.17.
