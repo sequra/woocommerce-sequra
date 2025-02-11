@@ -231,4 +231,12 @@ interface Interface_Order_Service {
 	 * @return void
 	 */
 	public function cleanup_orders();
+
+	/**
+	 * Get the Merchant ID
+	 * 
+	 * @param WC_Order $order
+	 * @return string
+	 */
+	public function get_merchant_id( $order ); 
 }
