@@ -258,10 +258,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * @return string|null
 	 */
 	private function get_merchant_id() {
-		if ( $this->current_order ) {
-			return $this->order_service->get_merchant_id( $this->current_order );
-		} 
-		return $this->payment_service->get_merchant_id();
+		$merchant_id = $this->current_order ? $this->order_service->get_merchant_id( $this->current_order ) : null;
+		return ! $merchant_id ? $this->payment_service->get_merchant_id() : $merchant_id;
 	}
 
 	/**
