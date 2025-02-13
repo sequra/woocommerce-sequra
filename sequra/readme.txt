@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.7.1
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.1.1	=
+* Fixed: Use WC Order ID from notification parameters for retrieving the Order for confirmation at seQura.
 = 3.1.0	=
 * Fixed: Remove blank lines from template files to prevent errors when wpautop or similar functions are used.
 * Fixed: Add missing value checks in the Configuration page scripts to prevent the loading state from getting stuck.
