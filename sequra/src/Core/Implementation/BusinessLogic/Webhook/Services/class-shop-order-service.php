@@ -76,10 +76,10 @@ class Shop_Order_Service implements ShopOrderService {
 		if ( ! $sq_order ) {
 			throw new Exception( 'SeQura order not found. Reference: ' . \esc_html( $orderReference ) );
 		}
-		$order_id = (int) $sq_order->getOrderRef1();
-		$wc_order = \wc_get_order( $order_id );
+		// TODO: Add unit test for this.
+		$wc_order = $this->get_wc_order( $sq_order );
 		if ( ! $wc_order instanceof \WC_Order ) {
-			throw new Exception( \esc_html( "WC order with ID '$order_id' not found" ) );
+			throw new Exception( \esc_html( "WC order with ID '{$this->get_wc_order_id($sq_order)}' not found" ) );
 		}
 
 		$this->create_order_request_builder->set_current_order( $wc_order );
@@ -208,9 +208,7 @@ class Shop_Order_Service implements ShopOrderService {
 	 */
 	private function get_order( Webhook $webhook ): ?WC_Order {
 		$sq_order = $this->get_sequra_order( $webhook->getOrderRef() );
-		$params   = $sq_order->getMerchant()->getNotificationParameters();
-		$order_id = $params['order'] ?? 0;
-		$order    = \wc_get_order( absint( $order_id ) );
+		$order    = $this->get_wc_order( $sq_order );
 		
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_debug(
@@ -219,13 +217,33 @@ class Shop_Order_Service implements ShopOrderService {
 				__CLASS__,
 				array( 
 					new LogContextData( 'orderRef', $webhook->getOrderRef() ),
-					new LogContextData( 'orderID', $order_id ),
+					new LogContextData( 'orderID', $this->get_wc_order_id( $sq_order ) ),
 				) 
 			);
 			return null;
 		}
 
 		return $order;
+	}
+
+	/**
+	 * Gets the WC order.
+	 * 
+	 * @param SeQuraOrder $sq_order SeQura order.
+	 */
+	private function get_wc_order( $sq_order ): ?WC_Order {
+		return \wc_get_order( $this->get_wc_order_id( $sq_order ) );
+	}
+
+	/**
+	 * Gets the WC order ID.
+	 * 
+	 * @param SeQuraOrder $sq_order SeQura order.
+	 */
+	private function get_wc_order_id( $sq_order ): int {
+		$params   = $sq_order->getMerchant()->getNotificationParameters();
+		$order_id = $params['order'] ?? 0;
+		return absint( $order_id );
 	}
 
 	/**
