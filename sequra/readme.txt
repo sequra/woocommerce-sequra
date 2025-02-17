@@ -103,6 +103,7 @@ Contributors:
 = 3.1.1	=
 * Fixed: Use WC Order ID from notification parameters for retrieving the Order for confirmation at seQura.
 * Fixed: Error that prevents the process that handles the deletion of old seQura order data from running.
+* Fixed: Error related to implicit conversion from float to int.
 = 3.1.0	=
 * Fixed: Remove blank lines from template files to prevent errors when wpautop or similar functions are used.
 * Fixed: Add missing value checks in the Configuration page scripts to prevent the loading state from getting stuck.
