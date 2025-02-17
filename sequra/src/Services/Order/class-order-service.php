@@ -19,7 +19,6 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
@@ -104,19 +103,9 @@ class Order_Service implements Interface_Order_Service {
 	private $sequra_order_repository;
 
 	/**
-	 * Deletable repository
-	 *
-	 * @var Interface_Deletable_Repository
-	 */
-	private $sequra_order_deletable_repository;
-
-	/**
 	 * Constructor
-	 * 
-	 * @param Interface_Deletable_Repository $sequra_order_deletable_repository
 	 */
 	public function __construct(
-		$sequra_order_deletable_repository,
 		SeQuraOrderRepositoryInterface $sequra_order_repository, 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
@@ -126,15 +115,14 @@ class Order_Service implements Interface_Order_Service {
 		StoreContext $store_context,
 		Interface_Logger_Service $logger
 	) {
-		$this->payment_service                   = $payment_service;
-		$this->pricing_service                   = $pricing_service;
-		$this->order_status_service              = $order_status_service;
-		$this->configuration                     = $configuration;
-		$this->cart_service                      = $cart_service;
-		$this->store_context                     = $store_context;
-		$this->logger                            = $logger;
-		$this->sequra_order_repository           = $sequra_order_repository;
-		$this->sequra_order_deletable_repository = $sequra_order_deletable_repository;
+		$this->payment_service         = $payment_service;
+		$this->pricing_service         = $pricing_service;
+		$this->order_status_service    = $order_status_service;
+		$this->configuration           = $configuration;
+		$this->cart_service            = $cart_service;
+		$this->store_context           = $store_context;
+		$this->logger                  = $logger;
+		$this->sequra_order_repository = $sequra_order_repository;
 	}
 	
 	/**
@@ -897,19 +885,10 @@ class Order_Service implements Interface_Order_Service {
 	 * @return void
 	 */
 	public function cleanup_orders() {
-		if ( ! $this->sequra_order_deletable_repository instanceof Interface_Deletable_Repository ) {
-			$this->logger->log_error(
-				'seQura Orders cleanup CRON JOB skipped: The order deletable repository is not set.',
-				__FUNCTION__,
-				__CLASS__,
-				array(
-					new LogContextData( 'actualType', is_object( $this->sequra_order_deletable_repository ) ? get_class( $this->sequra_order_deletable_repository ) : 'NULL' ),
-					new LogContextData( 'expectedType', Interface_Deletable_Repository::class ),
-				) 
-			);
+		if ( ! $this->sequra_order_repository instanceof Interface_Deletable_Repository ) {
 			return;
 		}
-		$this->sequra_order_deletable_repository->delete_old_and_invalid();
+		$this->sequra_order_repository->delete_old_and_invalid();
 	}
 
 	/**

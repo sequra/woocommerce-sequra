@@ -37,10 +37,7 @@ class SeQura_Order_Repository extends Repository {
 		$this->db->query(
 			"DELETE FROM {$this->get_table_name()} 
 		WHERE (`index_3` IS NULL OR `index_3` = '') 
-		AND (
-			JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.unshipped_cart')) = '{}'
-			OR STR_TO_DATE(LEFT(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.unshipped_cart.updated_at')), 19), '%Y-%m-%dT%H:%i:%s') <= CURDATE() - INTERVAL 1 DAY
-		)"
+		AND STR_TO_DATE(LEFT(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.unshipped_cart.updated_at')), 19), '%Y-%m-%dT%H:%i:%s') <= CURDATE() - INTERVAL 1 DAY" 
 		);
 	}
 }

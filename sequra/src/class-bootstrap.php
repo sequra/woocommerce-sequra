@@ -569,15 +569,7 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Order_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Order_Service::class ] ) ) {
-					/**
-					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository.
-					 *
-					 * @var Interface_Deletable_Repository $deletable_repo
-					 */
-					$deletable_repo = RepositoryRegistry::getRepository( SeQuraOrder::class );
-
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
-						$deletable_repo,
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
