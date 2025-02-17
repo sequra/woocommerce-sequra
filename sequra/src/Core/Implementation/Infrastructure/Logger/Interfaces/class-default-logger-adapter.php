@@ -70,7 +70,7 @@ class Default_Logger_Adapter implements DefaultLoggerAdapter {
 	public function logMessage( LogData $data ): void {
 		try {
 			if ( $this->log_file->setup() ) {
-				$datetime = $this->time_provider->getDateTime( $data->getTimestamp() / 1000 ); // Original timestamp is in milliseconds.
+				$datetime = $this->time_provider->getDateTime( (int) ( $data->getTimestamp() / 1000 ) ); // Original timestamp is in milliseconds.
 				$ctx_data = '';
 
 				if ( ! empty( $data->getContext() ) ) {
