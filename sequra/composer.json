@@ -17,7 +17,9 @@
             "szepeviktor/phpstan-wordpress": true,
             "phpstan/extension-installer": true
         },
-        "preferred-install": "dist"
+        "preferred-install": "dist",
+        "optimize-autoloader": true,
+        "classmap-authoritative": true
     },
     "autoload": {
         "classmap": [

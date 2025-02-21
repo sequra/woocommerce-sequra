@@ -72,6 +72,61 @@ If you require a composer dependency from a GitHub repository, you need to creat
 }
 ```
 
+
+## Debugging
+
+Debugging using XDebug is possible but you need to enable it first because is turned off by default in sake of performance. Use the following command to activate it:
+
+```bash
+docker compose exec web toggle-xdebug --mode=debug
+```
+Then, you need to configure VS Code to listen for XDebug connections. Add this configuration to project workspace's settings:
+
+```json
+{
+	"settings": {
+		"launch": {
+			"version": "0.2.0",
+			"configurations": [
+				{
+					"name": "Listen for Xdebug",
+					"type": "php",
+					"request": "launch",
+					"port": 9003,
+					"pathMappings": {
+						"/var/www/html/wp-content/plugins/_sequra/": "${workspaceFolder}/sequra/",
+						"/var/www/html/wp-content/plugins/sequra-helper/": "${workspaceFolder}/sequra-helper/",
+						"/var/www/html/wp-content/plugins/sequra-no-address/": "${workspaceFolder}/glue-plugins/sequra-no-address",
+					}
+				},
+			]
+		},
+	}
+}
+```
+Note that you need the [PHP Debug](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) extension active in your VS Code in order to debug.
+
+To disable entirely XDebug, run the following command:
+
+```bash
+docker compose exec web toggle-xdebug --mode=off
+```
+## Using the profiler
+
+XDebug includes a profiler that can be used to analyze the performance of the code. To enable the profiler, run the following command:
+
+```bash
+docker compose exec web toggle-xdebug --mode=profile
+```
+Each time a page loads in the browser, one ore more files will be generated at `/tmp/xdebug` directory inside the container. This path is mapped to the `.devcontainer/xdebug` directory in the host machine. You can use a tool like [QCacheGrind](https://sourceforge.net/projects/qcachegrind/) to analyze the generated files.
+
+To install QCacheGrind in macOS you can use [Homebrew](https://brew.sh/):
+
+```bash
+brew install qcachegrind
+```
+Once installed, simply run `qcachegrind` and open the generated file.
+
 ## seQura Helper plugin
 
 This plugin is intended to provide helper functions to setup data or ease common development tasks.

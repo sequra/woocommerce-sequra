@@ -25,3 +25,4 @@ override.env
 .env
 auth.json
 zip/
+.devcontainer/xdebug

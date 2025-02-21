@@ -114,9 +114,8 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
 
     wp plugin deactivate --allow-root wordpress-importer --uninstall
     wp plugin uninstall --allow-root $(wp plugin list --allow-root --status=inactive --field=name | grep -v '_\?\(sequra\|learnpress\)' | tr "\n" " ")
-
-    touch /var/www/html/.post-install-complete
     
     chown -R www-data:www-data /var/www/html
+    touch /var/www/html/.post-install-complete
 fi
 echo "✅ seQura plugin installed and configured."

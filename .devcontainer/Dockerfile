@@ -21,13 +21,18 @@ ENV WC_SHIPPING_ZONE_METHOD_SETTINGS='{"cost":"10"}'
 
 SHELL ["/bin/bash", "-c"]
 
-RUN pecl install xdebug && docker-php-ext-enable xdebug \
-    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.client_host=localhost.sequrapi.com" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.log_level=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+# Apache configuration
+RUN a2enmod rewrite && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-RUN echo "memory_limit = 256M" > /usr/local/etc/php/conf.d/docker-php-woocommerce.ini \
+COPY ./sequra-entrypoint.sh /usr/local/bin/sequra-entrypoint.sh
+COPY ./setup-tests.sh /usr/local/bin/setup-tests.sh
+COPY ./run-tests.sh /usr/local/bin/run-tests.sh
+COPY ./toggle-xdebug.sh /usr/local/bin/toggle-xdebug
+RUN chmod +x /usr/local/bin/sequra-entrypoint.sh /usr/local/bin/setup-tests.sh /usr/local/bin/run-tests.sh /usr/local/bin/toggle-xdebug
+
+RUN pecl install xdebug && docker-php-ext-enable xdebug \
+    && toggle-xdebug --mode=off \
+    && echo "memory_limit = 256M" > /usr/local/etc/php/conf.d/docker-php-woocommerce.ini \
     && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/docker-php-woocommerce.ini \
     && echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/docker-php-woocommerce.ini
 
@@ -43,8 +48,4 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
-COPY ./sequra-entrypoint.sh /usr/local/bin/sequra-entrypoint.sh
-COPY ./setup-tests.sh /usr/local/bin/setup-tests.sh
-COPY ./run-tests.sh /usr/local/bin/run-tests.sh
-RUN chmod +x /usr/local/bin/sequra-entrypoint.sh /usr/local/bin/setup-tests.sh /usr/local/bin/run-tests.sh
 RUN sed -i 's/exec "$@"/\/usr\/local\/bin\/sequra-entrypoint.sh \&\& exec "$@"/g' /usr/local/bin/docker-entrypoint.sh
