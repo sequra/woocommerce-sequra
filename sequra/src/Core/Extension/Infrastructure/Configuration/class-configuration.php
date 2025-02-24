@@ -721,7 +721,6 @@ class Configuration extends CoreConfiguration {
 
 		/**
 		* Filter the module version to be used in the platform options.
-		* TODO: document this hook
 		* 
 		* @since 3.0.0
 		*/
@@ -734,7 +733,6 @@ class Configuration extends CoreConfiguration {
 
 		/**
 		 * Filter the platform options.
-		 * TODO: document this hook
 		 *
 		 * @since 3.0.0
 		 */
