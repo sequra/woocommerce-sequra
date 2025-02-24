@@ -141,7 +141,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		/**
 		 * Filter the delivery method options.
-		 * TODO: document this hook
 		 *
 		 * @since 3.0.0
 		 */
@@ -179,7 +178,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		/**
 		* Filter the merchant_reference.
-		* TODO: document this hook
 		*
 		* @since 3.0.0
 		*/
@@ -235,7 +233,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		/**
 		 * Filter the cart options.
-		 * TODO: document this hook
 		 *
 		 * @since 3.0.0
 		 */
@@ -304,7 +301,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		/**
 		 * Filter the merchant data.
-		 * TODO: document this hook (https://docs.sequrapi.com/api_ref/api_ref_order_documentation.html#merchant)
 		 *
 		 * @since 3.0.0
 		 */
@@ -337,7 +333,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			$desired_first_charge_on = $this->cart_service->get_desired_first_charge_on( $this->current_order );
 			if ( $desired_first_charge_on ) {
 				/**
-				* TODO: document this hook
 				* Allow modify the addresses_may_be_missing value.Accept null, true or false.
 				*
 				* @since 3.0.0
@@ -360,7 +355,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		/**
 		 * Filter the merchant options.
-		 * TODO: document this hook
 		 *
 		 * @since 3.0.0
 		 */
@@ -386,7 +380,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private function address( bool $is_delivery ): Address {
 		/**
 		 * Filter the address options.
-		 * TODO: document this hook
 		 *
 		 * @since 3.0.0
 		 */
@@ -402,7 +395,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private function customer(): Customer {
 		/**
 		 * Filter the customer options.
-		 * TODO: document this hook
 		 *
 		 * @since 3.0.0
 		 */
@@ -426,7 +418,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		/**
 		 * Filter the gui options.
-		 * TODO: document this hook
 		 *
 		 * @since 3.0.0
 		 */
