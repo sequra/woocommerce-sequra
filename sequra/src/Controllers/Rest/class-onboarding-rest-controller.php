@@ -391,6 +391,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 			/**
 			 * Filter the cart mini widgets.
+			 * This field is not used in the UI and is not documented.
+			 * The filter is intended for future use.
 			 * 
 			 * @since 3.0.0
 			 * @var Mini_Widget[] $cart_mini_widgets The cart mini widgets.
@@ -410,6 +412,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 			/**
 			 * Filter the product listing mini widgets.
+			 * This field is not used in the UI and is not documented.
+			 * The filter is intended for future use.
 			 * 
 			 * @since 3.0.0
 			 * @var Mini_Widget[] $listing_mini_widgets The product listing mini widgets.

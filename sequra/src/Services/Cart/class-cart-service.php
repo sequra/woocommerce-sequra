@@ -325,7 +325,6 @@ class Cart_Service implements Interface_Cart_Service {
 		}
 		
 		/**
-		 * TODO: Document this filter
 		 * Filter cart items. Must return an array of ProductItem|ServiceItem
 		 *
 		 * @since 3.0.0
@@ -633,7 +632,6 @@ class Cart_Service implements Interface_Cart_Service {
 						 * Can receive an array with the cart item values or the WC_Order_Item instance
 						 *
 						 * @since 3.0.0
-						 * TODO: Document this hook
 						 */
 						$return = \apply_filters( 'sequra_is_item_available_in_checkout', $return, $values );
 						if ( ! $return ) {
@@ -660,7 +658,6 @@ class Cart_Service implements Interface_Cart_Service {
 						 * Can receive an array with the cart item values or the WC_Order_Item instance
 						 * 
 						 * @since 3.0.0
-						 * TODO: Document this hook
 						 */
 						$return = \apply_filters( 'sequra_is_item_available_in_checkout', $return, $item );
 						if ( ! $return ) {

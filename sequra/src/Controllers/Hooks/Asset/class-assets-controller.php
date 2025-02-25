@@ -313,7 +313,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		 * Check if the checkout is a Gutenberg block based version
 		 *
 		 * @since 3.0.0
-		 * TODO: Document the hook
 		 */
 		$is_block = apply_filters( 
 			'sequra_is_block_checkout', 
