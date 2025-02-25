@@ -290,7 +290,6 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function get_nin( ?WC_Order $order ): ?string {
 		/**
-		 * TODO: Document this filter
 		 * Get NIN number
 		 *
 		 * @since 3.0.0
@@ -304,7 +303,6 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function get_dob( ?WC_Order $order ): ?string {
 		/**
-		 * TODO: Document this filter
 		 * Get Date of Birth number
 		 *
 		 * @since 3.0.0
@@ -318,7 +316,6 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function get_shopper_title( ?WC_Order $order ): ?string {
 		/**
-		 * TODO: Document this filter
 		 * Get Shopper title
 		 *
 		 * @since 3.0.0
@@ -332,7 +329,6 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function get_shopper_created_at( ?WC_Order $order ): ?string {
 		/**
-		 * TODO: Document this filter
 		 * Get Shopper created at date
 		 *
 		 * @since 3.0.0
@@ -366,7 +362,6 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function get_shopper_updated_at( ?WC_Order $order ): ?string {
 		/**
-		 * TODO: Document this filter
 		 * Get Shopper updated at date
 		 *
 		 * @since 3.0.0
@@ -380,7 +375,6 @@ class Order_Service implements Interface_Order_Service {
 	 */
 	public function get_shopper_rating( ?WC_Order $order ): ?int {
 		/**
-		 * TODO: Document this filter
 		 * Get Shopper rating. Must return an integer between 0 and 100 or null.
 		 *
 		 * @since 3.0.0
