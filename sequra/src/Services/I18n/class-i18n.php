@@ -52,7 +52,12 @@ class I18n implements Interface_I18n {
 		if ( '_' !== $separator ) {
 			$locale = str_replace( '_', $separator, $locale );
 		}
-		return $locale;
+		/**
+		 * Filter the locale.
+		 *
+		 * @since 3.2.0
+		 */
+		return \apply_filters( 'sequra_get_locale', $locale );
 	}
 
 	/**
