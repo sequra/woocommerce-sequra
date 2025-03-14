@@ -100,6 +100,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.2.0	=
+* Added: Filter to allow modifying the locale.
 = 3.1.1	=
 * Fixed: Use WC Order ID from notification parameters for retrieving the Order for confirmation at seQura.
 * Fixed: Error that prevents the process that handles the deletion of old seQura order data from running.
