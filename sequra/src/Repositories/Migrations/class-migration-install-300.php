@@ -80,7 +80,10 @@ class Migration_Install_300 extends Migration {
 				`index_6` VARCHAR(127),
 				`index_7` VARCHAR(127),
 				`data` LONGTEXT,
-				PRIMARY KEY  (id)
+				PRIMARY KEY  (id),
+				KEY `{$table_name}_type_index_1` (`type`, `index_1`),
+				KEY `{$table_name}_type_index_2` (`type`, `index_2`),
+				KEY `{$table_name}_type_index_3` (`type`, `index_3`)
 			) $charset_collate;" 
 			);
 			$this->check_if_table_exists( $table_name );
@@ -101,7 +104,11 @@ class Migration_Install_300 extends Migration {
 			`index_8` BIGINT UNSIGNED,
 			`index_9` BIGINT UNSIGNED,
 			`data` LONGTEXT,
-			PRIMARY KEY  (id)
+			PRIMARY KEY  (id),
+			KEY `{$table_name}_type_index_1` (`type`, `index_1`),
+			KEY `{$table_name}_type_index_2` (`type`, `index_2`),
+			KEY `{$table_name}_type_index_3` (`type`, `index_3`),
+			KEY `{$table_name}_type_index_4` (`type`, `index_4`)
 		) $charset_collate;" 
 		);
 		$this->check_if_table_exists( $table_name );
