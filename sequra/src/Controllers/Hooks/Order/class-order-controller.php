@@ -168,4 +168,15 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$this->order_service->cleanup_orders();
 	}
+
+
+	/**
+	 * Add missing indexes to the database
+	 * 
+	 * @return void
+	 */
+	public function add_missing_indexes() {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+		// TODO: implement this method
+	}
 }
