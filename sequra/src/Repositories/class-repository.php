@@ -489,4 +489,33 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	public function delete_old_and_invalid() {
 		// Do nothing by default. Implement in child class if needed.
 	}
+
+	/**
+	 * Check if the index exists.
+	 * 
+	 * @param string $index_name The name of the index to check.
+	 * @return bool True if the index exists, false otherwise.
+	 */
+	public function does_index_exists( $index_name ) {
+		$indexes = $this->db->get_col( "SHOW INDEX FROM `{$this->get_table_name()}`" );
+		return in_array( $index_name, $indexes, true );
+	}
+
+	/**
+	 * Add an index to the table.
+	 * 
+	 * @param string $index_name The name of the index.
+	 * @param string[] $columns The column(s) to be indexed.
+	 */
+	public function add_index( $index_name, $columns ) {
+		if ( $this->does_index_exists( $index_name ) ) {
+			return;
+		}
+		$index_name = sanitize_key( $index_name );
+		foreach ($columns as &$column) {
+			$column = '`' . sanitize_key( $column ) . '`';
+		}
+		$columns = implode( ',', $columns );
+		$this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD KEY `{$index_name}` ({$columns})" );
+	}
 }
