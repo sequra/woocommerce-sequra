@@ -15,12 +15,13 @@ use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryCondition;
 use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
 use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Dto\Table_Index;
 use wpdb;
 
 /**
  * Shared repository functionality.
  */
-abstract class Repository implements RepositoryInterface, Interface_Deletable_Repository {
+abstract class Repository implements RepositoryInterface, Interface_Deletable_Repository, Interface_Indexable_Repository {
 
 	/**
 	 * Entity class FQN.
@@ -493,29 +494,82 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Check if the index exists.
 	 * 
-	 * @param string $index_name The name of the index to check.
+	 * @param Table_Index $index The index to check.
 	 * @return bool True if the index exists, false otherwise.
 	 */
-	public function does_index_exists( $index_name ) {
+	public function does_index_exists( $index ) {
 		$indexes = $this->db->get_col( "SHOW INDEX FROM `{$this->get_table_name()}`" );
-		return in_array( $index_name, $indexes, true );
+		return in_array( $index->name, $indexes, true );
 	}
 
 	/**
 	 * Add an index to the table.
 	 * 
-	 * @param string $index_name The name of the index.
-	 * @param string[] $columns The column(s) to be indexed.
+	 * @param Table_Index $index The index.
 	 */
-	public function add_index( $index_name, $columns ) {
-		if ( $this->does_index_exists( $index_name ) ) {
+	public function add_index( $index ) {
+		if ( $this->does_index_exists( $index ) ) {
 			return;
 		}
-		$index_name = sanitize_key( $index_name );
-		foreach ($columns as &$column) {
+		$index_name = sanitize_key( $index->name );
+		$columns    = $index->columns;
+		foreach ( $columns as &$column ) {
 			$column = '`' . sanitize_key( $column ) . '`';
 		}
 		$columns = implode( ',', $columns );
-		$this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD KEY `{$index_name}` ({$columns})" );
+		$this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD INDEX `{$index_name}` ({$columns})" );
+	}
+
+	/**
+	 * Check if the table is currently busy and cannot be indexed.
+	 * 
+	 * @return bool
+	 */
+	public function is_busy() {
+		$processes = $this->db->query( 'SHOW PROCESSLIST' );
+		if ( is_array( $processes ) ) {
+			foreach ( $processes as $process ) {
+				if ( strpos( $process['Info'], "ALTER TABLE `{$this->get_table_name()}`" ) !== false ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Get the index name for the type_index_1 index.
+	 * 
+	 * @return Table_Index
+	 */
+	public function get_index_type_index_1() {
+		return new Table_Index( $this->get_table_name() . '_type_index_1', array( 'type', 'index_1' ) );
+	}
+
+	/**
+	 * Get the index name for the type_index_2 index.
+	 * 
+	 * @return Table_Index
+	 */
+	public function get_index_type_index_2() {
+		return new Table_Index( $this->get_table_name() . '_type_index_2', array( 'type', 'index_2' ) );
+	}
+
+	/**
+	 * Get the index name for the type_index_3 index.
+	 * 
+	 * @return Table_Index
+	 */
+	public function get_index_type_index_3() {
+		return new Table_Index( $this->get_table_name() . '_type_index_3', array( 'type', 'index_3' ) );
+	}
+
+	/**
+	 * Get the index name for the index_3 index.
+	 * 
+	 * @return Table_Index
+	 */
+	public function get_index_index_3() {
+		return new Table_Index( $this->get_table_name() . '_index_3', array( 'index_3' ) );
 	}
 }

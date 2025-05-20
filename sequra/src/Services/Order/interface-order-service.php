@@ -238,5 +238,17 @@ interface Interface_Order_Service {
 	 * @param WC_Order $order
 	 * @return string
 	 */
-	public function get_merchant_id( $order ); 
+	public function get_merchant_id( $order );
+
+	/**
+	 * Check if the indexing process is done
+	 * 
+	 * @return bool True if they are missing indexes, false otherwise
+	 */
+	public function is_indexing_done();
+
+	/**
+	 * Add order indexes
+	 */
+	public function add_order_indexes();
 }

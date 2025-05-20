@@ -43,40 +43,4 @@ class SeQura_Order_Repository extends Repository {
 		)"
 		);
 	}
-
-	/**
-	 * Get the index name for the type_index_1 index.
-	 * 
-	 * @return string
-	 */
-	public function get_index_type_index_1() {
-		return $this->get_table_name() . '_type_index_1';
-	}
-
-	/**
-	 * Get the index name for the type_index_2 index.
-	 * 
-	 * @return string
-	 */
-	public function get_index_type_index_2() {
-		return $this->get_table_name() . '_type_index_2';
-	}
-
-	/**
-	 * Get the index name for the type_index_3 index.
-	 * 
-	 * @return string
-	 */
-	public function get_index_type_index_3() {
-		return $this->get_table_name() . '_type_index_3';
-	}
-
-	/**
-	 * Get the index name for the index_3 index.
-	 * 
-	 * @return string
-	 */
-	public function get_index_index_3() {
-		return $this->get_table_name() . '_index_3';
-	}
 }

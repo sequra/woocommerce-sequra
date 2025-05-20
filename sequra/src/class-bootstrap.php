@@ -91,7 +91,9 @@ use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Reposit
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
+use SeQura\WC\Repositories\Interface_Indexable_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
+use SeQura\WC\Repositories\Migrations\Migration_Install_312;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Assets\Assets;
@@ -477,6 +479,11 @@ class Bootstrap extends BootstrapComponent {
 								Reg::getService( \wpdb::class ),
 								Reg::getService( Configuration::CLASS_NAME )
 							),
+							new Migration_Install_312(
+								Reg::getService( \wpdb::class ),
+								Reg::getService( Configuration::CLASS_NAME ),
+								self::get_constants()->get_hook_add_order_indexes(),
+							),
 						)
 					);
 				}
@@ -570,14 +577,22 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Order_Service::class ] ) ) {
 					/**
-					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository.
+					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository & Interface_Indexable_Repository.
 					 *
 					 * @var Interface_Deletable_Repository $deletable_repo
 					 */
 					$deletable_repo = RepositoryRegistry::getRepository( SeQuraOrder::class );
+					
+					/**
+					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository & Interface_Indexable_Repository.
+					 * 
+					 * @var Interface_Indexable_Repository $indexable_repo
+					 */
+					$indexable_repo = $deletable_repo;
 
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
 						$deletable_repo,
+						$indexable_repo,
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Pricing_Service::class ),

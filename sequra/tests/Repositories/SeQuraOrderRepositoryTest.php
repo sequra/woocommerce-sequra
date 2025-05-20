@@ -46,6 +46,6 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$actual_ids = $this->order_table->get_ids();
 
 		// Assert.
-		$this->assertEquals( count($expected_ids), count(array_intersect($actual_ids, $expected_ids)) );
+		$this->assertEquals( count( $expected_ids ), count( array_intersect( $actual_ids, $expected_ids ) ) );
 	}
 }

@@ -59,4 +59,16 @@ interface Interface_Order_Controller {
 	 * @return void
 	 */
 	public function cleanup_orders();
+
+	/**
+	 * Respond to the add_order_indexes hook
+	 * 
+	 * @param string $hook Hook name that triggered the action.
+	 */
+	public function add_order_indexes( $hook );
+
+	/**
+	 * Handle the wp_ajax_nopriv_add_order_indexes async request
+	 */
+	public function ajax_add_order_indexes();
 }

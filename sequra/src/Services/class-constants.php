@@ -214,4 +214,11 @@ class Constants implements Interface_Constants {
 	public function get_plugin_assets_url(): string {
 		return $this->plugin_assets_url;
 	}
+
+	/**
+	 * Hook for adding order indexes.
+	 */
+	public function get_hook_add_order_indexes(): string {
+		return 'sequra_add_order_indexes';
+	}
 }

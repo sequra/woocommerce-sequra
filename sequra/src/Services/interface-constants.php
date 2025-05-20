@@ -61,4 +61,9 @@ interface Interface_Constants {
 	 * Get the plugin assets URL.
 	 */
 	public function get_plugin_assets_url(): string;
+
+	/**
+	 * Hook for adding order indexes.
+	 */
+	public function get_hook_add_order_indexes(): string;
 }

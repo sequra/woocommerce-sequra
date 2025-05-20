@@ -14,6 +14,8 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
 use WC_Order;
+use SeQura\Core\Infrastructure\Http\HttpClient;
+use SeQura\Core\Infrastructure\ServiceRegister;
 
 /**
  * Handle hooks related to order management
@@ -169,14 +171,50 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		$this->order_service->cleanup_orders();
 	}
 
+	/**
+	 * Respond to the add_order_indexes hook
+	 * 
+	 * @param string $hook Hook name that triggered the action.
+	 */
+	public function add_order_indexes( $hook ) {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+
+		// Skip if current time is not between 2AM and 6AM.
+		$current_time = \current_time( 'H' );
+		if ( $current_time < 2 || $current_time > 6 ) {
+			return;
+		}
+
+		if ( $this->order_service->is_indexing_done() ) {
+			$this->logger->log_debug( 'Indexing already done. Job will be unscheduled', __FUNCTION__, __CLASS__ );
+			\wp_clear_scheduled_hook( $hook, array( $hook ) );
+			return;
+		}
+
+		try {
+			$httpClient = ServiceRegister::getService( HttpClient::CLASS_NAME );
+			$httpClient->requestAsync(
+				'POST',
+				\admin_url( 'admin-ajax.php' ),
+				array(
+					'Content-Type' => 'application/x-www-form-urlencoded',
+				),
+				'action=add_order_indexes&nonce=' . \wp_create_nonce( 'add_order_indexes' )
+			);
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+	}
 
 	/**
-	 * Add missing indexes to the database
-	 * 
-	 * @return void
+	 * Handle the wp_ajax_nopriv_add_order_indexes async request
 	 */
-	public function add_missing_indexes() {
-		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		// TODO: implement this method
-	}
+	public function ajax_add_order_indexes() {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( empty( $_POST['nonce'] ) || ! \wp_verify_nonce( $_POST['nonce'], 'add_order_indexes' ) ) {
+			$this->logger->log_debug( 'Nonce verification failed', __FUNCTION__, __CLASS__ );
+			return;
+		}
+		$this->order_service->add_order_indexes();
+	}   
 }
