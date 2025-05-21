@@ -68,6 +68,13 @@ class Migration_Install_300 extends Migration {
 
 		foreach ( array( 'sequra_entity', 'sequra_order' ) as $table ) {
 			$table_name = $this->db->prefix . $table;
+			$extra_indexes = '';
+			if( $table === 'sequra_order' ) {
+				$extra_indexes = ", KEY `{$table_name}_type_index_1` (`type`, `index_1`), 
+				KEY `{$table_name}_type_index_2` (`type`, `index_2`), 
+				KEY `{$table_name}_type_index_3` (`type`, `index_3`), 
+				KEY `{$table_name}_index_3` (`index_3`)";
+			}
 			dbDelta(
 				"CREATE TABLE $table_name (
 				`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -80,10 +87,7 @@ class Migration_Install_300 extends Migration {
 				`index_6` VARCHAR(127),
 				`index_7` VARCHAR(127),
 				`data` LONGTEXT,
-				PRIMARY KEY  (id),
-				KEY `{$table_name}_type_index_1` (`type`, `index_1`),
-				KEY `{$table_name}_type_index_2` (`type`, `index_2`),
-				KEY `{$table_name}_type_index_3` (`type`, `index_3`)
+				PRIMARY KEY  (id) $extra_indexes
 			) $charset_collate;" 
 			);
 			$this->check_if_table_exists( $table_name );
