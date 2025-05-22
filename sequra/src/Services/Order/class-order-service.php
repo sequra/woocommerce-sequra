@@ -950,11 +950,16 @@ class Order_Service implements Interface_Order_Service {
 			return;
 		}
 
+		/**
+		 * Filters the batch size for the migration process.
+		 *
+		 * @since 3.1.2
+		 */
 		$batch_size = (int) apply_filters( 'sequra_migration_batch_size', 100 );
 		for ( $i = 0; $i < $batch_size; $i++ ) {
 			$this->sequra_order_repository->migrate_next_row();
-			if($this->sequra_order_repository->maybe_remove_legacy_table()){
-				// Migration is complete
+			if ( $this->sequra_order_repository->maybe_remove_legacy_table() ) {
+				// Migration is complete.
 				break;
 			}
 		}

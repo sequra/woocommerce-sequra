@@ -51,11 +51,11 @@ class Migration_Install_312 extends Migration {
 		$hook_name,
 		Repository $entity_repository,
 		Repository $queue_repository
-	 ) {
+	) {
 		parent::__construct( $wpdb, $configuration );
-		$this->hook_name     = $hook_name;
+		$this->hook_name         = $hook_name;
 		$this->entity_repository = $entity_repository;
-		$this->queue_repository   = $queue_repository;
+		$this->queue_repository  = $queue_repository;
 	}
 
 	/**
@@ -78,8 +78,8 @@ class Migration_Install_312 extends Migration {
 		);
 		foreach ( $repos as $repo ) {
 			foreach ( $repo->get_required_indexes() as $index ) {
-				if(!$repo->add_index( $index )){
-					throw new Exception( 'Failed to add index ' . $index->name . ' to table ' . $repo->get_table_name() );
+				if ( ! $repo->add_index( $index ) ) {
+					throw new Exception( 'Failed to add index ' . \sanitize_key( $index->name ) . ' to table ' . \sanitize_key( $repo->get_table_name() ) );
 				}
 			}
 		}

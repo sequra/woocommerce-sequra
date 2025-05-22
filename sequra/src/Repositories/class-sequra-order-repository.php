@@ -51,7 +51,7 @@ class SeQura_Order_Repository extends Repository {
 	 * 
 	 * @return Table_Index[] The list of indexes.
 	 */
-	public function get_required_indexes(){
+	public function get_required_indexes() {
 		return array_merge(
 			parent::get_required_indexes(),
 			array(

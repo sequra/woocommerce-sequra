@@ -83,7 +83,7 @@ interface Interface_Table_Migration_Repository {
 	 * 
 	 * @param boolean $legacy If true, check for legacy table.
 	 */
-	public function table_exists($legacy = false): bool;
+	public function table_exists( $legacy = false ): bool;
 
 	/**
 	 * Returns full table name.

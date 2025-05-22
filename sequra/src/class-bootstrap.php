@@ -470,7 +470,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
 					$configuration = Reg::getService( Configuration::CLASS_NAME );
-					$wpdb = Reg::getService( \wpdb::class );
+					$wpdb          = Reg::getService( \wpdb::class );
 					/**
 					 * Order repository.
 					 * 
@@ -487,7 +487,7 @@ class Bootstrap extends BootstrapComponent {
 					/**
 					 * Queue item repository.
 					 * 
-					 * @var Repository $payment_methods_repository
+					 * @var Repository $queue_item_repository
 					 */
 					$queue_item_repository = RepositoryRegistry::getRepository( QueueItem::class );
 

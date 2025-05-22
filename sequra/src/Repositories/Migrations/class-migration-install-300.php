@@ -63,11 +63,11 @@ class Migration_Install_300 extends Migration {
 		Repository $order_repository,
 		Repository $entity_repository,
 		Repository $queue_repository
-	 ) {
+	) {
 		parent::__construct( $wpdb, $configuration );
-		$this->order_repository   = $order_repository;
+		$this->order_repository  = $order_repository;
 		$this->entity_repository = $entity_repository;
-		$this->queue_repository   = $queue_repository;
+		$this->queue_repository  = $queue_repository;
 	}
 
 	/**
@@ -93,6 +93,8 @@ class Migration_Install_300 extends Migration {
 	 */
 	private function add_new_tables_to_database(): void {
 		/**
+		 * Repository instances.
+		 * 
 		 * @var Repository[] $repos
 		 */
 		$repos = array(
@@ -103,11 +105,10 @@ class Migration_Install_300 extends Migration {
 
 		foreach ( $repos as $repo ) {
 			// Skip this migration if the table already exists.
-			if( $repo->table_exists() ) {
+			if ( $repo->table_exists() ) {
 				continue;
 			}
-			$repo->create_table();
-			if ( ! $repo->table_exists() ) {
+			if ( ! $repo->create_table() ) {
 				throw new Critical_Migration_Exception( \esc_html( "Could not create the table \"{$repo->get_table_name()}\"" ) );
 			}
 		}
