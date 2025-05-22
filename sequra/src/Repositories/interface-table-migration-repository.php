@@ -77,4 +77,16 @@ interface Interface_Table_Migration_Repository {
 	 * @return bool True if the table was created successfully, false otherwise.
 	 */
 	public function create_table();
+
+	/**
+	 * Check if table exists in the database.
+	 * 
+	 * @param boolean $legacy If true, check for legacy table.
+	 */
+	public function table_exists($legacy = false): bool;
+
+	/**
+	 * Returns full table name.
+	 */
+	public function get_table_name(): string;
 }

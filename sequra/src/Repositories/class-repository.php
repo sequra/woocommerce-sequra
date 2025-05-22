@@ -45,7 +45,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Returns full table name.
 	 */
-	protected function get_table_name(): string {
+	public function get_table_name(): string {
 		return $this->db->prefix . $this->get_unprefixed_table_name();
 	}
 
@@ -489,7 +489,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * 
 	 * @param boolean $legacy If true, check for legacy table.
 	 */
-	protected function table_exists($legacy = false): bool {
+	public function table_exists($legacy = false): bool {
 		$table_name = \sanitize_text_field( !$legacy ? $this->get_table_name() : $this->get_legacy_table_name() );
 		return $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
 	}
