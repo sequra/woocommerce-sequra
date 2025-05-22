@@ -597,7 +597,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	protected function get_create_table_sql() {
 		$charset_collate = $this->db->get_charset_collate();
-		return "CREATE TABLE IF NOT EXISTS {$this->get_table_name()} (
+		return "CREATE TABLE {$this->get_table_name()} (
 			`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			`type` VARCHAR(255),
 			`index_1` VARCHAR(127),
@@ -616,7 +616,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * 
 	 * @return bool True if the table was created successfully, false otherwise.
 	 */
-	protected function create_table() {
+	public function create_table() {
 		$indexes = array();
 		foreach ( $this->get_required_indexes() as $index ) {
 			$index_name = $index->name;
@@ -633,7 +633,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		}
 
 		$sql = sprintf($this->get_create_table_sql(), $indexes);
-		return false !== $this->db->query($sql);
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+		return $this->table_exists();
 	}
 
 	/**

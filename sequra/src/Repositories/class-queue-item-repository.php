@@ -283,7 +283,7 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 */
 	protected function get_create_table_sql() {
 		$charset_collate = $this->db->get_charset_collate();
-		return "CREATE TABLE IF NOT EXISTS {$this->get_table_name()} (
+		return "CREATE TABLE {$this->get_table_name()} (
 			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			`type` VARCHAR(255),
 			`index_1` VARCHAR(127),

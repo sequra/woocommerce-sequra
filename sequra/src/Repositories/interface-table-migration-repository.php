@@ -70,4 +70,11 @@ interface Interface_Table_Migration_Repository {
 	 * @return bool True if the legacy table was removed or did not exist, false otherwise.
 	 */
 	public function maybe_remove_legacy_table();
+
+	/**
+	 * Create the table if it doesn't exist.
+	 * 
+	 * @return bool True if the table was created successfully, false otherwise.
+	 */
+	public function create_table();
 }
