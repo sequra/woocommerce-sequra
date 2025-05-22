@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings
+ * Sequra Order Repository
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -11,7 +11,7 @@ namespace SeQura\WC\Repositories;
 use SeQura\WC\Dto\Table_Index;
 
 /**
- * Class Base_Repository
+ * Sequra Order Repository
  */
 class SeQura_Order_Repository extends Repository {
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings
+ * Queue item repository.
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -19,7 +19,7 @@ use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\WC\Dto\Table_Index;
 
 /**
- * Class Base_Repository
+ * Queue item repository.
  */
 class Queue_Item_Repository extends Repository implements QueueItemRepository {
 
