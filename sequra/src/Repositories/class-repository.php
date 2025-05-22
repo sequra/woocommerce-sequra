@@ -101,10 +101,6 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
 	public function select( QueryFilter $filter = null ) {
-		if ( ! $this->table_exists() ) {
-			return array();
-		}
-
 		/**
 		 * Entity object.
 		 *
@@ -112,15 +108,27 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		 */
 		$entity = new $this->entity_class();
 		$type   = $entity->getConfig()->getType();
-
+		
 		$query = "SELECT * FROM {$this->get_table_name()} WHERE type = '$type' ";
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
-
-		$raw_results = $this->db->get_results( $query, ARRAY_A );
-		if ( ! is_array( $raw_results ) ) {
-			return array();
+		
+		$raw_results = array();
+		if( $this->table_exists() ) {
+			$raw_results = $this->db->get_results( $query, ARRAY_A );
+			if ( ! is_array( $raw_results ) ) {
+				$raw_results = array();
+			}
+		}
+		if( $this->table_exists( true ) ) {
+			// If the legacy table exists the data may be there.
+			$query = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
+			$legacy_raw_results = $this->db->get_results( $query, ARRAY_A );
+			if ( ! is_array( $legacy_raw_results ) ) {
+				$legacy_raw_results = array();
+			}
+			$raw_results = array_merge($raw_results, $legacy_raw_results);
 		}
 
 		return $this->translateToEntities( $raw_results );
@@ -177,11 +185,34 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( ! $this->table_exists() ) {
 			return false;
 		}
-
 		$item = $this->prepare_entity_for_storage( $entity );
-
+		$where = array( 'id' => $entity->getId() );
+		
+		// Check if entity wasn't already migrated and migrate it including the new data.
+		if($this->table_exists( true ) && $this->entity_exists( $entity->getId(), true )){
+			if(1 !== $this->db->update( $this->get_legacy_table_name(), $item, $where )){
+				return false;
+			}
+			// Read from the legacy table
+			$raw_results = $this->db->get_results( "SELECT * FROM {$this->get_legacy_table_name()} WHERE id = {$entity->getId()} LIMIT 1;", ARRAY_A );
+			if ( empty( $raw_results ) ) {
+				return false;
+			}
+			$entity = $this->translateToEntities( $raw_results )[0] ?? null;
+			if ( ! $entity ) {
+				return false;
+			}
+			// Insert into the new table
+			$item = $this->prepare_entity_for_storage( $entity );
+			if( false !== $this->db->insert( $this->get_table_name(), $item )){
+				return false;
+			}
+			// Delete the row from the legacy table
+			$this->db->delete( $this->get_legacy_table_name(), $where );
+			return true;
+		}
 		// Only one record should be updated.
-		return 1 === $this->db->update( $this->get_table_name(), $item, array( 'id' => $entity->getId() ) );
+		return 1 === $this->db->update( $this->get_table_name(), $item, $where );
 	}
 
 	/**
@@ -192,10 +223,16 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return bool TRUE if operation succeeded; otherwise, FALSE.
 	 */
 	public function delete( Entity $entity ) {
-		if ( ! $this->table_exists() ) {
-			return false;
+		$where = array( 'id' => $entity->getId() );
+		$deleted = false;
+		if ( $this->table_exists() ) {
+			$deleted = $deleted || false !== $this->db->delete( $this->get_table_name(), $where );
 		}
-		return false !== $this->db->delete( $this->get_table_name(), array( 'id' => $entity->getId() ) );
+		if( $this->table_exists( true )){
+			// Delete from legacy table
+			$deleted = $deleted || false !== $this->db->delete( $this->get_legacy_table_name(), $where );
+		}
+		return $deleted;
 	}
 
 	/**
@@ -207,9 +244,6 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
 	public function count( QueryFilter $filter = null ) {
-		if ( ! $this->table_exists() ) {
-			return 0;
-		}
 		/**
 		 * Entity object.
 		 *
@@ -222,10 +256,18 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
-
-		$result = $this->db->get_results( $query, ARRAY_A );
-
-		return empty( $result[0]['total'] ) ? 0 : intval( $result[0]['total'] );
+		$count = 0;
+		if ( $this->table_exists() ) {
+			$result = $this->db->get_results( $query, ARRAY_A );
+			$count += empty( $result[0]['total'] ) ? 0 : (int) $result[0]['total'];
+		}
+		if ( $this->table_exists( true ) ) {
+			// If the legacy table exists, count the data there too.
+			$query = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
+			$result = $this->db->get_results( $query, ARRAY_A );
+			$count += empty( $result[0]['total'] ) ? 0 : (int) $result[0]['total'];
+		}
+		return $count;
 	}
 
 	/**
@@ -461,9 +503,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @param string|null $store_id Delete entities from this store. Passing null will delete all entities.
 	 */
 	public function delete_all( $store_id = null ): bool {
-		if ( ! $this->table_exists() ) {
-			return false;
-		}
+		$deleted = false;
 		$sql = 'DELETE FROM ' . \sanitize_text_field( $this->get_table_name() );
 		if ( $store_id ) {
 			$column = $this->get_store_id_index_column();
@@ -472,7 +512,13 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			}
 			$sql .= ' WHERE ' . \sanitize_text_field( $column ) . ' = ' . \sanitize_text_field( $store_id );
 		}
-		return false !== $this->db->query( $sql );
+		if ( $this->table_exists() ) {
+			$deleted = $deleted || false !== $this->db->query( $sql );
+		}
+		if ( $this->table_exists( true ) ) {
+			$deleted = $deleted || false !== $this->db->query( str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $sql ) );
+		}
+		return $deleted;
 	}
 
 	/**
@@ -550,13 +596,8 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( ! $entity ) {
 			return;
 		}
-		// Check if entity already exists in the new table
-		$results = $this->db->get_results( 
-			"SELECT 1 FROM {$this->get_table_name()} WHERE id = {$entity->getId()} LIMIT 1;", 
-			ARRAY_A 
-		);
-		if ( ! empty( $results ) ) {
-			// Entity already exists, skip it
+		// Check if entity already exists in the table
+		if($this->entity_exists($entity->getId())){
 			return;
 		}
 
@@ -686,5 +727,18 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		return array(
 			new Table_Index( $this->get_table_name() . '_type', array( 'type' ) ),
 		);
+	}
+
+	/**
+	 * Check if entity exists in the database.
+	 * 
+	 * @param int $id Entity ID.
+	 * @param bool $legacy If true, check for legacy table.
+	 * @return bool True if entity exists, false otherwise.
+	 */
+	protected function entity_exists($id, $legacy = false): bool {
+		$table_name = $legacy ? $this->get_legacy_table_name() : $this->get_table_name();
+		$raw_results = $this->db->get_results( "SELECT 1 FROM `$table_name` WHERE id = {$id} LIMIT 1;", ARRAY_A );
+		return ! empty( $raw_results );
 	}
 }
