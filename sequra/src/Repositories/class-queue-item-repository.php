@@ -16,6 +16,7 @@ use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\TaskExecution\Exceptions\QueueItemSaveException;
 use SeQura\Core\Infrastructure\TaskExecution\Interfaces\Priority;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
+use SeQura\WC\Dto\Table_Index;
 
 /**
  * Class Base_Repository
@@ -255,5 +256,46 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 */
 	protected function get_store_id_index_column(): string {
 		return '';
+	}
+
+	/**
+	 * Get a list of indexes that are required for the table.
+	 * 
+	 * @return Table_Index[] The list of indexes.
+	 */
+	public function get_required_indexes(){
+		return array_merge(
+			parent::get_required_indexes(),
+			array(
+				new Table_Index( $this->get_table_name() . '_type_index_1', array( 'type', 'index_1' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_2', array( 'type', 'index_2' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_3', array( 'type', 'index_3' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_4', array( 'type', 'index_4' ) ),
+			)
+		);
+	}
+
+	/**
+	 * Get the SQL statement to create the table without the indexes definition.
+	 * Resulting string should include an additional %s placeholder for the indexes.
+	 * 
+	 * @return string The SQL statement to create the table.
+	 */
+	protected function get_create_table_sql() {
+		$charset_collate = $this->db->get_charset_collate();
+		return "CREATE TABLE IF NOT EXISTS {$this->get_table_name()} (
+			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			`type` VARCHAR(255),
+			`index_1` VARCHAR(127),
+			`index_2` VARCHAR(127),
+			`index_3` VARCHAR(127),
+			`index_4` VARCHAR(127),
+			`index_5` VARCHAR(127),
+			`index_6` BIGINT UNSIGNED,
+			`index_7` BIGINT UNSIGNED,
+			`index_8` BIGINT UNSIGNED,
+			`index_9` BIGINT UNSIGNED,
+			`data` LONGTEXT,
+			PRIMARY KEY (id) %s) $charset_collate;";
 	}
 }

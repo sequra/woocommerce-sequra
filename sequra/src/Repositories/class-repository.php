@@ -21,7 +21,7 @@ use wpdb;
 /**
  * Shared repository functionality.
  */
-abstract class Repository implements RepositoryInterface, Interface_Deletable_Repository, Interface_Indexable_Repository {
+abstract class Repository implements RepositoryInterface, Interface_Deletable_Repository, Interface_Table_Migration_Repository {
 
 	/**
 	 * Entity class FQN.
@@ -47,6 +47,15 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	protected function get_table_name(): string {
 		return $this->db->prefix . $this->get_unprefixed_table_name();
+	}
+
+	/**
+	 * Get the name that is set to the original table during the migration.
+	 * 
+	 * @return string The name of the old table.
+	 */
+	public function get_legacy_table_name() {
+		return $this->get_table_name() . '_legacy';
 	}
 
 	/**
@@ -477,9 +486,11 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 	/**
 	 * Check if table exists in the database.
+	 * 
+	 * @param boolean $legacy If true, check for legacy table.
 	 */
-	protected function table_exists(): bool {
-		$table_name = \sanitize_text_field( $this->get_table_name() );
+	protected function table_exists($legacy = false): bool {
+		$table_name = \sanitize_text_field( !$legacy ? $this->get_table_name() : $this->get_legacy_table_name() );
 		return $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
 	}
 
@@ -497,7 +508,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @param Table_Index $index The index to check.
 	 * @return bool True if the index exists, false otherwise.
 	 */
-	public function does_index_exists( $index ) {
+	public function index_exists( $index ) {
 		$indexes = $this->db->get_col( "SHOW INDEX FROM `{$this->get_table_name()}`" );
 		return in_array( $index->name, $indexes, true );
 	}
@@ -506,10 +517,11 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * Add an index to the table.
 	 * 
 	 * @param Table_Index $index The index.
+	 * @return bool True if the index was added or already exists, false otherwise.
 	 */
 	public function add_index( $index ) {
-		if ( $this->does_index_exists( $index ) ) {
-			return;
+		if ( $this->index_exists( $index ) ) {
+			return true;
 		}
 		$index_name = sanitize_key( $index->name );
 		$columns    = $index->columns;
@@ -517,59 +529,143 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			$column = '`' . sanitize_key( $column ) . '`';
 		}
 		$columns = implode( ',', $columns );
-		$this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD INDEX `{$index_name}` ({$columns})" );
+		return false !== $this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD INDEX `{$index_name}` ({$columns})" );
 	}
 
 	/**
-	 * Check if the table is currently busy and cannot be indexed.
+	 * Execute the migration process one by one.
+	 * This implementation is intended for migrations that don't change the table structure.
+	 */
+	public function migrate_next_batch()
+	{
+		if ( ! $this->table_exists() || ! $this->table_exists( true ) ) {
+			return;
+		}
+		$raw_results = $this->db->get_results( "SELECT * FROM {$this->get_legacy_table_name()} LIMIT 1;", ARRAY_A );
+		if ( ! is_array( $raw_results ) ) {
+			return;
+		}
+
+		$entity = $this->translateToEntities( $raw_results )[0] ?? null;
+		if ( ! $entity ) {
+			return;
+		}
+		// Check if entity already exists in the new table
+		$results = $this->db->get_results( 
+			"SELECT id FROM {$this->get_table_name()} WHERE id = {$entity->getId()} LIMIT 1;", 
+			ARRAY_A 
+		);
+		if ( ! empty( $results ) ) {
+			// Entity already exists, skip it
+			return;
+		}
+
+		$storage_item = $this->prepare_entity_for_storage( $entity );
+		$result = $this->db->insert( $this->get_table_name(), $storage_item );
+		if( false !== $result ) {
+			// Delete the row from the legacy table
+			$this->db->delete( $this->get_legacy_table_name(), array( 'id' => $entity->getId() ) );
+		}
+	}
+
+	/**
+	 * Check if the migration process is complete.
+	 * 
+	 * @return bool True if the migration process is complete, false otherwise.
+	 */
+	public function is_migration_complete(){
+		// Check if the legacy table exists.
+		if($this->table_exists(true)){
+			return false;
+		}
+		// Check if the indexes exist.
+		$indexes = $this->get_required_indexes();
+		foreach ( $indexes as $index ) {
+			if ( ! $this->index_exists( $index ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the SQL statement to create the table without the indexes definition.
+	 * Resulting string should include an additional %s placeholder for the indexes.
+	 * 
+	 * @return string The SQL statement to create the table.
+	 */
+	protected function get_create_table_sql() {
+		$charset_collate = $this->db->get_charset_collate();
+		return "CREATE TABLE IF NOT EXISTS {$this->get_table_name()} (
+			`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			`type` VARCHAR(255),
+			`index_1` VARCHAR(127),
+			`index_2` VARCHAR(127),
+			`index_3` VARCHAR(127),
+			`index_4` VARCHAR(127),
+			`index_5` VARCHAR(127),
+			`index_6` VARCHAR(127),
+			`index_7` VARCHAR(127),
+			`data` LONGTEXT,
+			PRIMARY KEY (id) %s) $charset_collate;";
+	}
+
+	/**
+	 * Create the table if it doesn't exist.
+	 * 
+	 * @return bool True if the table was created successfully, false otherwise.
+	 */
+	protected function create_table() {
+		$indexes = array();
+		foreach ( $this->get_required_indexes() as $index ) {
+			$index_name = $index->name;
+			$columns   = $index->columns;
+			foreach ( $columns as &$column ) {
+				$column = '`' . sanitize_key( $column ) . '`';
+			}
+			$columns = implode( ',', $columns );
+			$indexes[] = "KEY `{$index_name}` ({$columns})";
+		}
+		$indexes = implode( ', ', $indexes );
+		if ( ! empty( $indexes ) ) {
+			$indexes = ', ' . $indexes;
+		}
+
+		$sql = sprintf($this->get_create_table_sql(), $indexes);
+		return false !== $this->db->query($sql);
+	}
+
+	/**
+	 * Make sure that the required tables for the migration are created.
 	 * 
 	 * @return bool
 	 */
-	public function is_busy() {
-		$processes = $this->db->query( 'SHOW PROCESSLIST' );
-		if ( is_array( $processes ) ) {
-			foreach ( $processes as $process ) {
-				if ( strpos( $process['Info'], "ALTER TABLE `{$this->get_table_name()}`" ) !== false ) {
-					return true;
-				}
-			}
+	public function prepare_tables_for_migration(){
+		// Rename the table to legacy table
+		if (
+			!$this->table_exists(true)
+			&& false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};")
+		) {
+			return false;
 		}
-		return false;
+
+		// Create the table if not exists
+		if ( !$this->create_table() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
-	 * Get the index name for the type_index_1 index.
+	 * Get a list of indexes that are required for the table.
 	 * 
-	 * @return Table_Index
+	 * @return Table_Index[] The list of indexes.
 	 */
-	public function get_index_type_index_1() {
-		return new Table_Index( $this->get_table_name() . '_type_index_1', array( 'type', 'index_1' ) );
-	}
-
-	/**
-	 * Get the index name for the type_index_2 index.
-	 * 
-	 * @return Table_Index
-	 */
-	public function get_index_type_index_2() {
-		return new Table_Index( $this->get_table_name() . '_type_index_2', array( 'type', 'index_2' ) );
-	}
-
-	/**
-	 * Get the index name for the type_index_3 index.
-	 * 
-	 * @return Table_Index
-	 */
-	public function get_index_type_index_3() {
-		return new Table_Index( $this->get_table_name() . '_type_index_3', array( 'type', 'index_3' ) );
-	}
-
-	/**
-	 * Get the index name for the index_3 index.
-	 * 
-	 * @return Table_Index
-	 */
-	public function get_index_index_3() {
-		return new Table_Index( $this->get_table_name() . '_index_3', array( 'index_3' ) );
+	public function get_required_indexes(){ 
+		return array(
+			new Table_Index( $this->get_table_name() . '_type', array( 'type' ) ),
+		);
 	}
 }
