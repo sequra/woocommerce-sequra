@@ -536,7 +536,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * Execute the migration process one by one.
 	 * This implementation is intended for migrations that don't change the table structure.
 	 */
-	public function migrate_next_batch()
+	public function migrate_next_row()
 	{
 		if ( ! $this->table_exists() || ! $this->table_exists( true ) ) {
 			return;
@@ -552,7 +552,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		}
 		// Check if entity already exists in the new table
 		$results = $this->db->get_results( 
-			"SELECT id FROM {$this->get_table_name()} WHERE id = {$entity->getId()} LIMIT 1;", 
+			"SELECT 1 FROM {$this->get_table_name()} WHERE id = {$entity->getId()} LIMIT 1;", 
 			ARRAY_A 
 		);
 		if ( ! empty( $results ) ) {
@@ -656,6 +656,23 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		}
 
 		return true;
+	}
+
+	/**
+	 * Evaluates if the legacy table should be removed and if so, removes it.
+	 * 
+	 * @return bool True if the legacy table was removed or did not exist, false otherwise.
+	 */
+	public function maybe_remove_legacy_table(){
+		if ( !$this->table_exists( true ) ) {
+			return true;
+		}
+		$raw_results = $this->db->get_results( "SELECT 1 FROM `{$this->get_legacy_table_name()}` LIMIT 1;", ARRAY_A );
+		if ( ! empty( $raw_results ) ) {
+			// Legacy table is not empty, do not remove it.
+			return false;
+		}
+		return false !== $this->db->query( "DROP TABLE IF EXISTS `{$this->get_legacy_table_name()}`;" );
 	}
 
 	/**

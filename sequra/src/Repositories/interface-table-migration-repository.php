@@ -55,7 +55,7 @@ interface Interface_Table_Migration_Repository {
 	/**
 	 * Execute the migration process.
 	 */
-	public function migrate_next_batch();
+	public function migrate_next_row();
 
 	/**
 	 * Make sure that the required tables for the migration are created.
@@ -63,4 +63,11 @@ interface Interface_Table_Migration_Repository {
 	 * @return bool
 	 */
 	public function prepare_tables_for_migration();
+
+	/**
+	 * Evaluates if the legacy table should be removed and if so, removes it.
+	 * 
+	 * @return bool True if the legacy table was removed or did not exist, false otherwise.
+	 */
+	public function maybe_remove_legacy_table();
 }
