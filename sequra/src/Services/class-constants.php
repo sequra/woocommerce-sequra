@@ -219,6 +219,6 @@ class Constants implements Interface_Constants {
 	 * Hook for adding order indexes.
 	 */
 	public function get_hook_add_order_indexes(): string {
-		return 'sequra_add_order_indexes';
+		return 'sequra_order_migration_add_indexes';
 	}
 }

@@ -241,14 +241,14 @@ interface Interface_Order_Service {
 	public function get_merchant_id( $order );
 
 	/**
-	 * Check if the indexing process is done
+	 * Check if the migration process is complete
 	 * 
 	 * @return bool True if they are missing indexes, false otherwise
 	 */
-	public function is_indexing_done();
+	public function is_migration_complete();
 
 	/**
-	 * Add order indexes
+	 * Execute the migration process
 	 */
-	public function add_order_indexes();
+	public function migrate_data();
 }

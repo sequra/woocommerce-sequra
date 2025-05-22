@@ -9,7 +9,6 @@
 namespace SeQura\WC\Services\Order;
 
 use Exception;
-use PhpParser\Builder\Interface_;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
@@ -26,7 +25,7 @@ use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
-use SeQura\WC\Repositories\Interface_Indexable_Repository;
+use SeQura\WC\Repositories\Interface_Table_Migration_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
@@ -106,25 +105,9 @@ class Order_Service implements Interface_Order_Service {
 	private $sequra_order_repository;
 
 	/**
-	 * Deletable repository
-	 *
-	 * @var Interface_Deletable_Repository
-	 */
-	private $deletable_repository;
-
-	/**
-	 * Indexable repository
-	 *
-	 * @var Interface_Indexable_Repository
-	 */
-	private $indexable_repository;
-
-	/**
 	 * Constructor
 	 */
 	public function __construct(
-		Interface_Deletable_Repository $deletable_repository,
-		Interface_Indexable_Repository $indexable_repository,
 		SeQuraOrderRepositoryInterface $sequra_order_repository, 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
@@ -142,8 +125,6 @@ class Order_Service implements Interface_Order_Service {
 		$this->store_context           = $store_context;
 		$this->logger                  = $logger;
 		$this->sequra_order_repository = $sequra_order_repository;
-		$this->deletable_repository    = $deletable_repository;
-		$this->indexable_repository    = $indexable_repository;
 	}
 	
 	/**
@@ -900,19 +881,19 @@ class Order_Service implements Interface_Order_Service {
 	 * @return void
 	 */
 	public function cleanup_orders() {
-		if ( ! $this->deletable_repository instanceof Interface_Deletable_Repository ) {
+		if ( ! $this->sequra_order_repository instanceof Interface_Deletable_Repository ) {
 			$this->logger->log_error(
 				'seQura Orders cleanup CRON JOB skipped: The order deletable repository is not set.',
 				__FUNCTION__,
 				__CLASS__,
 				array(
-					new LogContextData( 'actualType', is_object( $this->deletable_repository ) ? get_class( $this->deletable_repository ) : 'NULL' ),
+					new LogContextData( 'actualType', is_object( $this->sequra_order_repository ) ? get_class( $this->sequra_order_repository ) : 'NULL' ),
 					new LogContextData( 'expectedType', Interface_Deletable_Repository::class ),
 				) 
 			);
 			return;
 		}
-		$this->deletable_repository->delete_old_and_invalid();
+		$this->sequra_order_repository->delete_old_and_invalid();
 	}
 
 	/**
@@ -930,68 +911,51 @@ class Order_Service implements Interface_Order_Service {
 		return $sq_order ? (string) $sq_order->getMerchant()->getId() : null;
 	}
 
-	/**
-	 * Get all indexes
-	 * 
-	 * @return Table_Index[]
-	 */
-	private function get_all_indexes() {
-		return array(
-			$this->indexable_repository->get_index_type_index_1(),
-			$this->indexable_repository->get_index_type_index_2(),
-			$this->indexable_repository->get_index_type_index_3(),
-			$this->indexable_repository->get_index_index_3(),
-		);
-	}
-
 
 	/**
-	 * Check if the indexing process is done
+	 * Check if the migration process is complete
 	 * 
 	 * @return bool True if they are missing indexes, false otherwise
 	 */
-	public function is_indexing_done() {
-		foreach ( $this->get_all_indexes() as $index ) {
-			if ( ! $this->indexable_repository->does_index_exists( $index ) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Add order indexes
-	 * 
-	 * @return bool True if the indexes were added, false otherwise
-	 */
-	public function add_order_indexes() {
-		if ( ! $this->indexable_repository instanceof Interface_Indexable_Repository ) {
+	public function is_migration_complete() {
+		if ( ! $this->sequra_order_repository instanceof Interface_Table_Migration_Repository ) {
 			$this->logger->log_error(
-				'seQura Orders indexing skipped: The order indexable repository is not set.',
+				'seQura migration skipped: The table migration repository is not set.',
 				__FUNCTION__,
 				__CLASS__,
 				array(
-					new LogContextData( 'actualType', is_object( $this->indexable_repository ) ? get_class( $this->indexable_repository ) : 'NULL' ),
-					new LogContextData( 'expectedType', Interface_Indexable_Repository::class ),
+					new LogContextData( 'actualType', is_object( $this->sequra_order_repository ) ? get_class( $this->sequra_order_repository ) : 'NULL' ),
+					new LogContextData( 'expectedType', Interface_Table_Migration_Repository::class ),
+				) 
+			);
+			return false;
+		}
+		return $this->sequra_order_repository->is_migration_complete();
+	}
+
+	/**
+	 * Execute the migration process
+	 */
+	public function migrate_data() {
+		if ( ! $this->sequra_order_repository instanceof Interface_Table_Migration_Repository ) {
+			$this->logger->log_error(
+				'seQura migration skipped: The table migration repository is not set.',
+				__FUNCTION__,
+				__CLASS__,
+				array(
+					new LogContextData( 'actualType', is_object( $this->sequra_order_repository ) ? get_class( $this->sequra_order_repository ) : 'NULL' ),
+					new LogContextData( 'expectedType', Interface_Table_Migration_Repository::class ),
 				) 
 			);
 			return;
-		}   
-		if ( $this->indexable_repository->is_busy() ) {
-			$this->logger->log_error( 'seQura Orders indexing skipped: The order indexable repository is busy.', __FUNCTION__, __CLASS__ );
 		}
 
-		foreach ( $this->get_all_indexes() as $index ) {
-			if ( ! $this->indexable_repository->does_index_exists( $index ) ) {
-				$this->logger->log_info(
-					'seQura Orders indexing: Adding index to the repository.',
-					__FUNCTION__,
-					__CLASS__,
-					array(
-						new LogContextData( 'index', $index->to_array() ),
-					) 
-				);
-				$this->indexable_repository->add_index( $index );
+		$batch_size = (int) apply_filters( 'sequra_migration_batch_size', 100 );
+		for ( $i = 0; $i < $batch_size; $i++ ) {
+			$this->sequra_order_repository->migrate_next_row();
+			if($this->sequra_order_repository->maybe_remove_legacy_table()){
+				// Migration is complete
+				break;
 			}
 		}
 	}

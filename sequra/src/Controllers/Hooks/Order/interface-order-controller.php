@@ -61,14 +61,9 @@ interface Interface_Order_Controller {
 	public function cleanup_orders();
 
 	/**
-	 * Respond to the add_order_indexes hook
+	 * Respond to the sequra_order_migration_add_indexes hook
 	 * 
 	 * @param string $hook Hook name that triggered the action.
 	 */
-	public function add_order_indexes( $hook );
-
-	/**
-	 * Handle the wp_ajax_nopriv_add_order_indexes async request
-	 */
-	public function ajax_add_order_indexes();
+	public function migrate_orders_to_use_indexes( $hook );
 }

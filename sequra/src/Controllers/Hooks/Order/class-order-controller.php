@@ -14,8 +14,6 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
 use WC_Order;
-use SeQura\Core\Infrastructure\Http\HttpClient;
-use SeQura\Core\Infrastructure\ServiceRegister;
 
 /**
  * Handle hooks related to order management
@@ -172,11 +170,11 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	}
 
 	/**
-	 * Respond to the add_order_indexes hook
+	 * Respond to the sequra_order_migration_add_indexes hook
 	 * 
 	 * @param string $hook Hook name that triggered the action.
 	 */
-	public function add_order_indexes( $hook ) {
+	public function migrate_orders_to_use_indexes( $hook ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 
 		// Skip if current time is not between 2AM and 6AM.
@@ -185,36 +183,12 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 			return;
 		}
 
-		if ( $this->order_service->is_indexing_done() ) {
-			$this->logger->log_debug( 'Indexing already done. Job will be unscheduled', __FUNCTION__, __CLASS__ );
+		if ( $this->order_service->is_migration_complete() ) {
+			$this->logger->log_debug( 'Indexing process is done. Job will be unscheduled', __FUNCTION__, __CLASS__ );
 			\wp_clear_scheduled_hook( $hook, array( $hook ) );
 			return;
 		}
 
-		try {
-			$httpClient = ServiceRegister::getService( HttpClient::CLASS_NAME );
-			$httpClient->requestAsync(
-				'POST',
-				\admin_url( 'admin-ajax.php' ),
-				array(
-					'Content-Type' => 'application/x-www-form-urlencoded',
-				),
-				'action=add_order_indexes&nonce=' . \wp_create_nonce( 'add_order_indexes' )
-			);
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-		}
+		$this->order_service->migrate_data();
 	}
-
-	/**
-	 * Handle the wp_ajax_nopriv_add_order_indexes async request
-	 */
-	public function ajax_add_order_indexes() {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( empty( $_POST['nonce'] ) || ! \wp_verify_nonce( $_POST['nonce'], 'add_order_indexes' ) ) {
-			$this->logger->log_debug( 'Nonce verification failed', __FUNCTION__, __CLASS__ );
-			return;
-		}
-		$this->order_service->add_order_indexes();
-	}   
 }

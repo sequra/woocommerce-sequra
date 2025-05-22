@@ -90,11 +90,10 @@ use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Pa
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
-use SeQura\WC\Repositories\Interface_Deletable_Repository;
-use SeQura\WC\Repositories\Interface_Indexable_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Migrations\Migration_Install_312;
 use SeQura\WC\Repositories\Queue_Item_Repository;
+use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Assets\Assets;
 use SeQura\WC\Services\Assets\Interface_Assets;
@@ -470,19 +469,46 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Migration_Manager::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
+					$configuration = Reg::getService( Configuration::CLASS_NAME );
+					$wpdb = Reg::getService( \wpdb::class );
+					/**
+					 * Order repository.
+					 * 
+					 * @var Repository $order_repository
+					 */
+					$order_repository = RepositoryRegistry::getRepository( SeQuraOrder::class );
+					/**
+					 * Entity repository.
+					 * 
+					 * @var Repository $entity_repository
+					 */
+					$entity_repository = RepositoryRegistry::getRepository( ConfigEntity::class );
+
+					/**
+					 * Queue item repository.
+					 * 
+					 * @var Repository $payment_methods_repository
+					 */
+					$queue_item_repository = RepositoryRegistry::getRepository( QueueItem::class );
+
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
 						self::get_constants()->get_plugin_basename(),
-						Reg::getService( Configuration::CLASS_NAME ),
+						$configuration,
 						self::get_constants()->get_plugin_data()['Version'],
 						array(
 							new Migration_Install_300(
-								Reg::getService( \wpdb::class ),
-								Reg::getService( Configuration::CLASS_NAME )
+								$wpdb,
+								$configuration,
+								$order_repository,
+								$entity_repository,
+								$queue_item_repository
 							),
 							new Migration_Install_312(
-								Reg::getService( \wpdb::class ),
-								Reg::getService( Configuration::CLASS_NAME ),
+								$wpdb,
+								$configuration,
 								self::get_constants()->get_hook_add_order_indexes(),
+								$entity_repository,
+								$queue_item_repository
 							),
 						)
 					);
@@ -576,23 +602,7 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Order_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Order_Service::class ] ) ) {
-					/**
-					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository & Interface_Indexable_Repository.
-					 *
-					 * @var Interface_Deletable_Repository $deletable_repo
-					 */
-					$deletable_repo = RepositoryRegistry::getRepository( SeQuraOrder::class );
-					
-					/**
-					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository & Interface_Indexable_Repository.
-					 * 
-					 * @var Interface_Indexable_Repository $indexable_repo
-					 */
-					$indexable_repo = $deletable_repo;
-
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
-						$deletable_repo,
-						$indexable_repo,
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
