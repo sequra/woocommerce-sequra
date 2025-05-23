@@ -129,6 +129,8 @@ use SeQura\WC\Services\Regex\Regex;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 use SeQura\WC\Services\Report\Report_Service;
 use SeQura\WC\Services\Interface_Constants;
+use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
+use SeQura\WC\Services\Time\Time_Checker_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -674,6 +676,15 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Assets::class ];
 			}
 		);
+		Reg::registerService(
+			Interface_Time_Checker_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Time_Checker_Service::class ] ) ) {
+					self::$cache[ Interface_Time_Checker_Service::class ] = new Time_Checker_Service();
+				}
+				return self::$cache[ Interface_Time_Checker_Service::class ];
+			}
+		);
 	}
 
 	/**
@@ -862,7 +873,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Order_Controller::class ] = new Order_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_templates_path(),
-						Reg::getService( Interface_Order_Service::class )
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_Time_Checker_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Order_Controller::class ];

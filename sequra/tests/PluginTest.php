@@ -46,11 +46,11 @@ class PluginTest extends WP_UnitTestCase {
 
 	public function set_up() {
 
-		$this->wp_version  = '5.9';
-		$this->wc_version  = '4.0';
-		$this->base_name   = 'sequra/sequra.php';
-		$this->file_path   = '/var/www/html/wordpress/plugins/sequra/sequra.php';
-		$this->plugin_data = array(
+		$this->wp_version             = '5.9';
+		$this->wc_version             = '4.0';
+		$this->base_name              = 'sequra/sequra.php';
+		$this->file_path              = '/var/www/html/wordpress/plugins/sequra/sequra.php';
+		$this->plugin_data            = array(
 			'Name'        => 'seQura',
 			'TextDomain'  => 'sequra',
 			'DomainPath'  => '/languages',

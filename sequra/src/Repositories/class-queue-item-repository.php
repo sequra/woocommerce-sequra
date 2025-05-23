@@ -75,13 +75,13 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 		}
 		$pending_items = $limit - count( $result );
 
-		if($pending_items > 0 && $this->table_exists(true) ){
+		if ( $pending_items > 0 && $this->table_exists( true ) ) {
 			$legacy_result = $this->db->get_results( str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $sql ), ARRAY_A );
-			if(is_array($legacy_result)){
+			if ( is_array( $legacy_result ) ) {
 				$length = count( $legacy_result );
-				for( $i = 0; $i < $length && $pending_items > 0; $i++ ) {
+				for ( $i = 0; $i < $length && $pending_items > 0; $i++ ) {
 					$result[] = $legacy_result[ $i ];
-					$pending_items--;
+					--$pending_items;
 				}
 			}
 		}
@@ -110,10 +110,10 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 				$item_id = $this->save( $queue_item );
 			} else {
 				$filter = $this->build_query_filter(
-					array_merge( $additional_where, array( 'id' => $queue_item->getId()) )
+					array_merge( $additional_where, array( 'id' => $queue_item->getId() ) )
 				);
 
-				if( null === $this->selectOne( $filter ) ){
+				if ( null === $this->selectOne( $filter ) ) {
 					throw new QueueItemSaveException( \esc_html( 'Failed to save queue item, update condition(s) not met.' ) );
 				}
 				$item_id = $this->save( $queue_item );

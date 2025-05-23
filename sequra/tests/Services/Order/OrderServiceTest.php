@@ -11,6 +11,7 @@ namespace SeQura\WC\Tests\Services\Order;
 // Load required classes.
 require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContextMock.php';
 require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContext.php';
+require_once __DIR__ . '/SequraRepositoryMock.php';
 
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -46,17 +47,16 @@ class OrderServiceTest extends WP_UnitTestCase {
 	private $sequra_order_repository;
 
 	public function set_up(): void {        
-		$this->payment_service                   = $this->createMock( Interface_Payment_Service::class );
-		$this->pricing_service                   = $this->createMock( Interface_Pricing_Service::class );
-		$this->order_status_service              = $this->createMock( Order_Status_Settings_Service::class );
-		$this->configuration                     = $this->createMock( Configuration::class );
-		$this->core_order_service                = $this->createMock( OrderService::class );
-		$this->cart_service                      = $this->createMock( Interface_Cart_Service::class );
-		$this->store_context_mock                = $this->createMock( StoreContextMock::class );
-		$this->logger                            = $this->createMock( Interface_Logger_Service::class );
-		$this->sequra_order_repository           = $this->createMock( SeQuraOrderRepositoryInterface::class );
-		
-		$this->order_service = new Order_Service(
+		$this->payment_service         = $this->createMock( Interface_Payment_Service::class );
+		$this->pricing_service         = $this->createMock( Interface_Pricing_Service::class );
+		$this->order_status_service    = $this->createMock( Order_Status_Settings_Service::class );
+		$this->configuration           = $this->createMock( Configuration::class );
+		$this->core_order_service      = $this->createMock( OrderService::class );
+		$this->cart_service            = $this->createMock( Interface_Cart_Service::class );
+		$this->store_context_mock      = $this->createMock( StoreContextMock::class );
+		$this->logger                  = $this->createMock( Interface_Logger_Service::class );
+		$this->sequra_order_repository = $this->createMock( SeQuraOrderRepositoryInterface::class );
+		$this->order_service           = new Order_Service(
 			$this->sequra_order_repository,
 			$this->payment_service,
 			$this->pricing_service,
@@ -372,5 +372,53 @@ class OrderServiceTest extends WP_UnitTestCase {
 
 		// Execute.
 		$this->order_service->handle_refund( $order, $amount );
+	}
+
+	public function testIsMigrationComplete_MigrationRepositoryNotSet_returnFalse() {
+		// Setup.
+		$this->logger->expects( $this->once() )
+			->method( 'log_error' )
+			->with(
+				'seQura migration skipped: The table migration repository is not set.', 
+				'is_migration_complete', 
+				'SeQura\WC\Services\Order\Order_Service',
+				$this->anything()
+			);
+
+
+		// Execute.
+		$this->assertFalse( $this->order_service->is_migration_complete() );
+	}
+
+	/**
+	 * @dataProvider dataProvider_IsMigrationComplete_happyPath
+	 */
+	public function testIsMigrationComplete_happyPath_CallTheRepository( $complete ) {
+		// Setup.
+		$this->sequra_order_repository = $this->createMock( SequraRepositoryMock::class );
+		$this->order_service           = new Order_Service(
+			$this->sequra_order_repository,
+			$this->payment_service,
+			$this->pricing_service,
+			$this->order_status_service,
+			$this->configuration,
+			$this->cart_service,
+			new StoreContext( $this->store_context_mock ),
+			$this->logger
+		);
+
+		$this->sequra_order_repository->expects( $this->once() )
+			->method( 'is_migration_complete' )
+			->willReturn( $complete );
+
+		// Execute.
+		$this->assertEquals( $complete, $this->order_service->is_migration_complete() );
+	}
+
+	public function dataProvider_IsMigrationComplete_happyPath() {
+		return array(
+			array( true ),
+			array( false ),
+		);
 	}
 }

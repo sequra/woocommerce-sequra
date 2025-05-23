@@ -15,6 +15,7 @@ use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Hooks\Order\Order_Controller;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
+use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use SeQura\WC\Tests\Fixtures\Store;
 use WP_UnitTestCase;
 
@@ -24,16 +25,27 @@ class OrderControllerTest extends WP_UnitTestCase {
 	private $order_service;
 	private $logger;
 	private $store;
+	private $time_checker_service;
+	private $hook_migrate_orders_to_use_indexes;
 	
 	public function set_up() {
-		$this->logger        = $this->createMock( Interface_Logger_Service::class );
-		$this->order_service = $this->createMock( Interface_Order_Service::class );
-		$this->controller    = new Order_Controller( $this->logger, 'path/to/templates', $this->order_service );
-		$this->store         = new Store();
+		$this->hook_migrate_orders_to_use_indexes = 'migrate_orders_to_use_indexes_test_hook';
+		$this->logger                             = $this->createMock( Interface_Logger_Service::class );
+		$this->order_service                      = $this->createMock( Interface_Order_Service::class );
+		$this->time_checker_service               = $this->createMock( Interface_Time_Checker_Service::class );
+		
+		$this->controller = new Order_Controller( 
+			$this->logger, 
+			'path/to/templates', 
+			$this->order_service,
+			$this->time_checker_service
+		);
+		$this->store      = new Store();
 		$this->store->set_up();
 	}
 
 	public function tear_down() {
+		\wp_clear_scheduled_hook( $this->hook_migrate_orders_to_use_indexes, array( $this->hook_migrate_orders_to_use_indexes ) );
 		// clean up database.
 		$this->store->tear_down();
 	}
@@ -114,5 +126,80 @@ class OrderControllerTest extends WP_UnitTestCase {
 			array( 'processing', 'cancelled' ),
 			array( 'pending', 'processing' ),
 		);
+	}
+
+	public function testMigrateOrdersToUseIndexes_currentTimeNotAllowed_Skip() {
+		// Setup.
+		$this->logger->expects( $this->once() )
+			->method( 'log_debug' )
+			->with( 'Hook executed', 'migrate_orders_to_use_indexes', 'SeQura\WC\Controllers\Hooks\Order\Order_Controller' );
+
+		$this->time_checker_service->expects( $this->once() )
+			->method( 'is_current_hour_in_range' )
+			->willReturn( false );
+	
+		$this->order_service->expects( $this->never() )->method( 'is_migration_complete' );
+		$this->order_service->expects( $this->never() )->method( 'migrate_data' );
+
+		// Execute.
+		$this->controller->migrate_orders_to_use_indexes( $this->hook_migrate_orders_to_use_indexes );
+	}
+
+	public function testMigrateOrdersToUseIndexes_migrationComplete_UnscheduleJob() {
+		// Setup.
+		$args = array( $this->hook_migrate_orders_to_use_indexes );
+		\wp_schedule_event( time(), 'hourly', $this->hook_migrate_orders_to_use_indexes, $args );
+
+		$invoked_count = $this->exactly( 2 );
+		$log_messages  = array(
+			'Hook executed',
+			'Indexing process is done. Job will be unscheduled',
+		);
+		$this->logger->expects( $invoked_count )
+		->method( 'log_debug' )
+		->willReturnCallback(
+			function ( $msg, $fn_name, $class_name ) use ( $log_messages, $invoked_count ) {
+				$i = $invoked_count->getInvocationCount() - 1;
+				$this->assertEquals( $msg, $log_messages[ $i ] );
+				$this->assertEquals( $fn_name, 'migrate_orders_to_use_indexes' );
+				$this->assertEquals( $class_name, 'SeQura\WC\Controllers\Hooks\Order\Order_Controller' );
+			}
+		);
+		
+		$this->time_checker_service->expects( $this->once() )
+			->method( 'is_current_hour_in_range' )
+			->willReturn( true );
+	
+		$this->order_service->expects( $this->once() )
+		->method( 'is_migration_complete' )
+		->willReturn( true );
+
+		$this->order_service->expects( $this->never() )->method( 'migrate_data' );
+
+		// Execute.
+		$this->controller->migrate_orders_to_use_indexes( $this->hook_migrate_orders_to_use_indexes );
+
+		$this->assertFalse( \wp_next_scheduled( $this->hook_migrate_orders_to_use_indexes, $args ) );
+	}
+
+	public function testMigrateOrdersToUseIndexes_migrationNotComplete_Migrate() {
+		// Setup.
+		$this->logger->expects( $this->once() )
+			->method( 'log_debug' )
+			->with( 'Hook executed', 'migrate_orders_to_use_indexes', 'SeQura\WC\Controllers\Hooks\Order\Order_Controller' );
+
+		
+		$this->time_checker_service->expects( $this->once() )
+			->method( 'is_current_hour_in_range' )
+			->willReturn( true );
+	
+		$this->order_service->expects( $this->once() )
+		->method( 'is_migration_complete' )
+		->willReturn( false );
+
+		$this->order_service->expects( $this->once() )->method( 'migrate_data' );
+
+		// Execute.
+		$this->controller->migrate_orders_to_use_indexes( $this->hook_migrate_orders_to_use_indexes );
 	}
 }

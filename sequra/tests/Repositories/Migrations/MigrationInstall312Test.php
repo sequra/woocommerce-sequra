@@ -24,9 +24,9 @@ class MigrationInstall312Test extends WP_UnitTestCase {
 	private $hook_name;
 	
 	public function set_up() {
-		$this->hook_name = 'migration_install_312_test_hook';
-		$this->configuration = $this->createMock( Configuration::class );
-		$_wpdb = $this->createMock( \wpdb::class );
+		$this->hook_name         = 'migration_install_312_test_hook';
+		$this->configuration     = $this->createMock( Configuration::class );
+		$_wpdb                   = $this->createMock( \wpdb::class );
 		$this->entity_repository = $this->createMock( Entity_Repository::class );
 		$this->queue_repository  = $this->createMock( Queue_Item_Repository::class );
 
@@ -46,9 +46,9 @@ class MigrationInstall312Test extends WP_UnitTestCase {
 	/**
 	 * @dataProvider dataProvider_Run_cannotAddIndex
 	 */
-	public function testRun_cannotAddIndex_ExceptionIsThrownAndJobIsNotScheduled($ok_repos, $ko_repo) {
+	public function testRun_cannotAddIndex_ExceptionIsThrownAndJobIsNotScheduled( $ok_repos, $ko_repo ) {
 		foreach ( $ok_repos as $i => $attr ) {
-			$index = new Table_Index('migration_install_312_test_index_ok_' . $i, array());
+			$index = new Table_Index( 'migration_install_312_test_index_ok_' . $i, array() );
 
 			$repo = $this->$attr;
 			$repo->expects( $this->once() )
@@ -58,13 +58,13 @@ class MigrationInstall312Test extends WP_UnitTestCase {
 
 			$repo->expects( $this->once() )
 				->method( 'get_required_indexes' )
-				->willReturn( array($index) );
+				->willReturn( array( $index ) );
 		}
 		
-		$index = new Table_Index('migration_install_312_test_index_ko', array());
+		$index      = new Table_Index( 'migration_install_312_test_index_ko', array() );
 		$table_name = 'migration_install_312_test_table_ko';
-		$message = 'Failed to add index ' . $index->name . ' to table ' . $table_name;
-		$repo = $this->$ko_repo;
+		$message    = 'Failed to add index ' . $index->name . ' to table ' . $table_name;
+		$repo       = $this->$ko_repo;
 		$repo->expects( $this->once() )
 			->method( 'add_index' )
 			->with( $index )
@@ -75,7 +75,7 @@ class MigrationInstall312Test extends WP_UnitTestCase {
 		
 		$repo->expects( $this->once() )
 			->method( 'get_required_indexes' )
-			->willReturn( array($index) );
+			->willReturn( array( $index ) );
 		
 		$repo->expects( $this->once() )
 			->method( 'get_table_name' )
@@ -83,18 +83,18 @@ class MigrationInstall312Test extends WP_UnitTestCase {
 
 		$this->migration->run();
 
-		$this->assertFalse(wp_next_scheduled( $this->hook_name, array( $this->hook_name ) ));
+		$this->assertFalse( wp_next_scheduled( $this->hook_name, array( $this->hook_name ) ) );
 	}
 
 	public function dataProvider_Run_cannotAddIndex() {
 		return array(
-			array(array('entity_repository'), 'queue_repository'),
-			array(array(), 'entity_repository'),
+			array( array( 'entity_repository' ), 'queue_repository' ),
+			array( array(), 'entity_repository' ),
 		);
 	}
 
 	public function testRun_happyPath_IndexesExistsAndJobIsScheduled() {
-		foreach ( array($this->entity_repository, $this->queue_repository) as $i => $repo ) {
+		foreach ( array( $this->entity_repository, $this->queue_repository ) as $i => $repo ) {
 			$index_name = 'migration_install_312_test_index_ok_' . $i;
 
 			$repo->expects( $this->once() )
@@ -104,11 +104,11 @@ class MigrationInstall312Test extends WP_UnitTestCase {
 
 			$repo->expects( $this->once() )
 				->method( 'get_required_indexes' )
-				->willReturn( array($index_name) );
+				->willReturn( array( $index_name ) );
 		}
 
 		$this->migration->run();
 		
-		$this->assertIsInt(wp_next_scheduled( $this->hook_name, array( $this->hook_name ) ));
+		$this->assertIsInt( wp_next_scheduled( $this->hook_name, array( $this->hook_name ) ) );
 	}
 }
