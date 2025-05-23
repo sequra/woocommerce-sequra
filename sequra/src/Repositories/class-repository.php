@@ -555,8 +555,8 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return bool True if the index exists, false otherwise.
 	 */
 	public function index_exists( $index ) {
-		$indexes = $this->db->get_col( "SHOW INDEX FROM `{$this->get_table_name()}`" );
-		return in_array( $index->name, $indexes, true );
+		$index_name = \sanitize_key( $index->name );
+		return !empty( $this->db->get_col( "SHOW INDEX FROM `{$this->get_table_name()}` WHERE Key_name = '{$index_name}'" ) );
 	}
 
 	/**
