@@ -134,7 +134,7 @@ class Order_Service implements Interface_Order_Service {
 		$this->store_context           = $store_context;
 		$this->logger                  = $logger;
 		$this->sequra_order_repository = $sequra_order_repository;
-		$this->time_checker_service = $time_checker_service;
+		$this->time_checker_service    = $time_checker_service;
 	}
 	
 	/**

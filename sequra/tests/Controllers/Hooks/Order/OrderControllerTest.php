@@ -15,7 +15,6 @@ use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Hooks\Order\Order_Controller;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
-use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use SeQura\WC\Tests\Fixtures\Store;
 use WP_UnitTestCase;
 
@@ -25,20 +24,17 @@ class OrderControllerTest extends WP_UnitTestCase {
 	private $order_service;
 	private $logger;
 	private $store;
-	private $time_checker_service;
 	private $hook_migrate_orders_to_use_indexes;
 	
 	public function set_up() {
 		$this->hook_migrate_orders_to_use_indexes = 'migrate_orders_to_use_indexes_test_hook';
 		$this->logger                             = $this->createMock( Interface_Logger_Service::class );
 		$this->order_service                      = $this->createMock( Interface_Order_Service::class );
-		$this->time_checker_service               = $this->createMock( Interface_Time_Checker_Service::class );
 		
 		$this->controller = new Order_Controller( 
 			$this->logger, 
 			'path/to/templates', 
-			$this->order_service,
-			$this->time_checker_service
+			$this->order_service
 		);
 		$this->store      = new Store();
 		$this->store->set_up();
@@ -128,23 +124,6 @@ class OrderControllerTest extends WP_UnitTestCase {
 		);
 	}
 
-	public function testMigrateOrdersToUseIndexes_currentTimeNotAllowed_Skip() {
-		// Setup.
-		$this->logger->expects( $this->once() )
-			->method( 'log_debug' )
-			->with( 'Hook executed', 'migrate_orders_to_use_indexes', 'SeQura\WC\Controllers\Hooks\Order\Order_Controller' );
-
-		$this->time_checker_service->expects( $this->once() )
-			->method( 'is_current_hour_in_range' )
-			->willReturn( false );
-	
-		$this->order_service->expects( $this->never() )->method( 'is_migration_complete' );
-		$this->order_service->expects( $this->never() )->method( 'migrate_data' );
-
-		// Execute.
-		$this->controller->migrate_orders_to_use_indexes( $this->hook_migrate_orders_to_use_indexes );
-	}
-
 	public function testMigrateOrdersToUseIndexes_migrationComplete_UnscheduleJob() {
 		// Setup.
 		$args = array( $this->hook_migrate_orders_to_use_indexes );
@@ -165,10 +144,6 @@ class OrderControllerTest extends WP_UnitTestCase {
 				$this->assertEquals( $class_name, 'SeQura\WC\Controllers\Hooks\Order\Order_Controller' );
 			}
 		);
-		
-		$this->time_checker_service->expects( $this->once() )
-			->method( 'is_current_hour_in_range' )
-			->willReturn( true );
 	
 		$this->order_service->expects( $this->once() )
 		->method( 'is_migration_complete' )
@@ -187,11 +162,6 @@ class OrderControllerTest extends WP_UnitTestCase {
 		$this->logger->expects( $this->once() )
 			->method( 'log_debug' )
 			->with( 'Hook executed', 'migrate_orders_to_use_indexes', 'SeQura\WC\Controllers\Hooks\Order\Order_Controller' );
-
-		
-		$this->time_checker_service->expects( $this->once() )
-			->method( 'is_current_hour_in_range' )
-			->willReturn( true );
 	
 		$this->order_service->expects( $this->once() )
 		->method( 'is_migration_complete' )

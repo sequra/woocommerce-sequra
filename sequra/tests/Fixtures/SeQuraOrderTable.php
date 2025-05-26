@@ -29,10 +29,16 @@ class SeQuraOrderTable {
 
 	/**
 	 * Get the table name
+	 * 
+	 * @param bool $legacy If true, returns the legacy table name.
 	 * @return string
 	 */
-	private function table_name() {
-		return $this->db->prefix . 'sequra_order';
+	private function table_name( $legacy = false ) {
+		$table_name = $this->db->prefix . 'sequra_order';
+		if ( $legacy ) {
+			$table_name .= '_legacy';
+		}
+		return $table_name;
 	}
 
 	/**
@@ -119,5 +125,15 @@ class SeQuraOrderTable {
 	 */
 	public function get_ids() {
 		return $this->db->get_col( "SELECT id FROM {$this->table_name()}" );
+	}
+
+	/**
+	 * Get all rows from the table
+	 * 
+	 * @param bool $legacy If true, returns data from the legacy table.
+	 * @return array
+	 */
+	public function get_all( $legacy ) {
+		return $this->db->get_results( "SELECT * FROM {$this->table_name($legacy)}", ARRAY_A );
 	}
 }
