@@ -961,7 +961,7 @@ class Order_Service implements Interface_Order_Service {
 		}
 
 		if ( ! $this->sequra_order_repository->prepare_tables_for_migration() ) {
-			$this->logger->log_info( 'An error occurred while preparing the tables for migration.', __FUNCTION__, __CLASS__ );
+			$this->logger->log_error( 'An error occurred while preparing the tables for migration.', __FUNCTION__, __CLASS__ );
 			return;
 		}
 
