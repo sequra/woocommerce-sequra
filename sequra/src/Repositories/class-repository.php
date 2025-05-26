@@ -684,12 +684,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return bool
 	 */
 	public function prepare_tables_for_migration() {
-		if($this->table_exists( true )){
+		if ( $this->table_exists( true ) ) {
 			// If the legacy table already exists, we don't need to do anything.
 			return true;
 		}
 		// Rename the table to legacy table.
-		if (false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" )) {
+		if ( false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
 			return false;
 		}
 
@@ -698,8 +698,8 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			return false;
 		}
 		// Add the auto-increment next value to the new table.
-		$raw_id = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
-		$auto_increment = null !== $raw_id && is_numeric($raw_id) ? (int) $raw_id + 1 : 1;
+		$raw_id         = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
+		$auto_increment = null !== $raw_id && is_numeric( $raw_id ) ? (int) $raw_id + 1 : 1;
 		if ( false === $this->db->query( "ALTER TABLE {$this->get_table_name()} AUTO_INCREMENT = {$auto_increment};" ) ) {
 			return false;
 		}

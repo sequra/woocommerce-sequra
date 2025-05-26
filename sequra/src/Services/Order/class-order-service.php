@@ -920,7 +920,7 @@ class Order_Service implements Interface_Order_Service {
 	public function is_migration_complete() {
 		if ( ! $this->sequra_order_repository instanceof Interface_Table_Migration_Repository ) {
 			$this->logger->log_error(
-				'seQura migration skipped: The table migration repository is not set.',
+				'SeQura migration skipped: The table migration repository is not set.',
 				__FUNCTION__,
 				__CLASS__,
 				array(
@@ -939,7 +939,7 @@ class Order_Service implements Interface_Order_Service {
 	public function migrate_data() {
 		if ( ! $this->sequra_order_repository instanceof Interface_Table_Migration_Repository ) {
 			$this->logger->log_error(
-				'seQura migration skipped: The table migration repository is not set.',
+				'SeQura migration skipped: The table migration repository is not set.',
 				__FUNCTION__,
 				__CLASS__,
 				array(
@@ -947,6 +947,11 @@ class Order_Service implements Interface_Order_Service {
 					new LogContextData( 'expectedType', Interface_Table_Migration_Repository::class ),
 				) 
 			);
+			return;
+		}
+
+		if ( ! $this->sequra_order_repository->prepare_tables_for_migration() ) {
+			$this->logger->log_info( 'An error occurred while preparing the tables for migration.', __FUNCTION__, __CLASS__ );
 			return;
 		}
 
