@@ -696,6 +696,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( ! $this->create_table() ) {
 			return false;
 		}
+		// Add the auto-increment next value to the new table.
+		$raw_id = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
+		$auto_increment = null !== $raw_id && is_numeric($raw_id) ? (int) $raw_id + 1 : 1;
+		if ( false === $this->db->query( "ALTER TABLE {$this->get_table_name()} AUTO_INCREMENT = {$auto_increment};" ) ) {
+			return false;
+		}
 
 		return true;
 	}
