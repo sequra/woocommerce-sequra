@@ -30,6 +30,7 @@ use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use Throwable;
 use WC_Customer;
 use WC_DateTime;
@@ -105,6 +106,13 @@ class Order_Service implements Interface_Order_Service {
 	private $sequra_order_repository;
 
 	/**
+	 * Time checker service
+	 * 
+	 * @var Interface_Time_Checker_Service
+	 */
+	private $time_checker_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
@@ -115,7 +123,8 @@ class Order_Service implements Interface_Order_Service {
 		Configuration $configuration,
 		Interface_Cart_Service $cart_service,
 		StoreContext $store_context,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		Interface_Time_Checker_Service $time_checker_service
 	) {
 		$this->payment_service         = $payment_service;
 		$this->pricing_service         = $pricing_service;
@@ -125,6 +134,7 @@ class Order_Service implements Interface_Order_Service {
 		$this->store_context           = $store_context;
 		$this->logger                  = $logger;
 		$this->sequra_order_repository = $sequra_order_repository;
+		$this->time_checker_service = $time_checker_service;
 	}
 	
 	/**
@@ -956,9 +966,33 @@ class Order_Service implements Interface_Order_Service {
 		}
 
 		/**
-		 * Filters the batch size for the migration process.
-		 *
+		 * Filters the start hour for the migration process.
+		 * TODO: document this
+		 * 
 		 * @since 3.1.2
+		 * @return int The hour to start the migration process, default is 2 (2AM).
+		 */
+		$from = (int) apply_filters( 'sequra_migration_from', 2 );
+
+		/**
+		 * Filters the end hour for the migration process.
+		 * TODO: document this
+		 * 
+		 * @since 3.1.2
+		 * @return int The hour to end the migration process, default is 6 (6AM).
+		 */
+		$to = (int) apply_filters( 'sequra_migration_to', 6 );
+
+		if ( ! $this->time_checker_service->is_current_hour_in_range( $from, $to ) ) { 
+			return;
+		}
+
+		/**
+		 * Filters the batch size for the migration process.
+		 * TODO: document this
+		 * 
+		 * @since 3.1.2
+		 * @return int The number of rows to process in each batch, default is 100.
 		 */
 		$batch_size = (int) apply_filters( 'sequra_migration_batch_size', 100 );
 		for ( $i = 0; $i < $batch_size; $i++ ) {

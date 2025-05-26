@@ -12,7 +12,6 @@ use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
-use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use Throwable;
 use WC_Order;
 
@@ -29,24 +28,15 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	private $order_service;
 
 	/**
-	 * Time checker service
-	 * 
-	 * @var Interface_Time_Checker_Service
-	 */
-	private $time_checker_service;
-
-	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		Interface_Logger_Service $logger, 
 		string $templates_path,
-		Interface_Order_Service $order_service,
-		Interface_Time_Checker_Service $time_checker_service
+		Interface_Order_Service $order_service
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->order_service        = $order_service;
-		$this->time_checker_service = $time_checker_service;
 
 		\add_action( 'admin_notices', array( $this, 'display_notices' ) );
 	}
@@ -186,11 +176,6 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	 */
 	public function migrate_orders_to_use_indexes( $hook ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-
-		// Skip if current time is not between 2AM and 6AM.
-		if ( ! $this->time_checker_service->is_current_hour_in_range( 2, 6 ) ) { 
-			return;
-		}
 
 		if ( $this->order_service->is_migration_complete() ) {
 			$this->logger->log_debug( 'Indexing process is done. Job will be unscheduled', __FUNCTION__, __CLASS__ );
