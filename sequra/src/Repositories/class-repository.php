@@ -474,6 +474,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			'data'    => \wp_json_encode( $entity->toArray() ),
 		);
 
+		if ( $entity->getId() ) {
+			$storage_item['id'] = $entity->getId();
+		}
+
 		foreach ( $indexes as $index => $value ) {
 			$storage_item[ 'index_' . $index ] = $value;
 		}
