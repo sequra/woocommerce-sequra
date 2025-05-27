@@ -967,7 +967,6 @@ class Order_Service implements Interface_Order_Service {
 
 		/**
 		 * Filters the start hour for the migration process.
-		 * TODO: document this
 		 * 
 		 * @since 3.1.2
 		 * @return int The hour to start the migration process, default is 2 (2AM).
@@ -976,7 +975,6 @@ class Order_Service implements Interface_Order_Service {
 
 		/**
 		 * Filters the end hour for the migration process.
-		 * TODO: document this
 		 * 
 		 * @since 3.1.2
 		 * @return int The hour to end the migration process, default is 6 (6AM).
@@ -989,7 +987,6 @@ class Order_Service implements Interface_Order_Service {
 
 		/**
 		 * Filters the batch size for the migration process.
-		 * TODO: document this
 		 * 
 		 * @since 3.1.2
 		 * @return int The number of rows to process in each batch, default is 100.
