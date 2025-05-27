@@ -204,6 +204,38 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$this->assertEquals( 3, $result );
 	}
 
+	public function testMaybeRemoveLegacyTable_MigrationInCourse_LegacyTableIsNotRemoved() {
+		// Setup.
+		$this->repository->prepare_tables_for_migration();
+		$this->repository->migrate_next_row();
+		
+		// Execute.
+		$result = $this->repository->maybe_remove_legacy_table();
+
+		// Assert.
+		$this->assertFalse( $result );
+		$this->assertTrue( $this->order_table->table_exists( true ) ); // Legacy table should still exist.
+		$this->assertTrue( $this->order_table->table_exists() ); // Table should exist.
+	}
+
+	public function testMaybeRemoveLegacyTable_MigrationIsDone_LegacyTableIsRemoved() {
+		// Setup.
+		$total_rows = count( $this->order_table->get_all( false ) );
+		$this->repository->prepare_tables_for_migration();
+		// Migrate all rows to the new table.
+		for ( $i = 0; $i < $total_rows; $i++ ) {
+			$this->repository->migrate_next_row();
+		}
+		
+		// Execute.
+		$result = $this->repository->maybe_remove_legacy_table();
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertFalse( $this->order_table->table_exists( true ) ); // Legacy table should not exist.
+		$this->assertTrue( $this->order_table->table_exists() ); // Table should exist.
+	}
+
 	/**
 	 * Data provider for testDelete_MigrationInCourse_DataIsDeletedFromBothTables.
 	 * 
