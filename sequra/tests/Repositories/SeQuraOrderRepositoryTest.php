@@ -10,6 +10,10 @@ namespace SeQura\WC\Tests\Controllers\Hooks\Process;
 
 require_once __DIR__ . '/../Fixtures/SeQuraOrderTable.php';
 
+use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
+use SeQura\Core\Infrastructure\ORM\Entity;
+use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
+use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Tests\Fixtures\SeQuraOrderTable;
@@ -31,6 +35,7 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$this->order_table = new SeQuraOrderTable();
 		$this->order_table->fill_with_sample_data();
 		$this->repository = new SeQura_Order_Repository();
+		$this->repository->setEntityClass( SeQuraOrder::class );
 	}
 
 	public function tear_down() {
@@ -83,5 +88,59 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		
 		$table_content = $this->order_table->get_all( false );
 		$this->assertEquals( array( $original_table_content[0] ), $table_content );
+	}
+
+	public function testMigrateNextRow_selectData_DataIsRetrieved() {
+		// Setup.
+		$original_table_content = $this->order_table->get_all( false );
+
+		$this->repository->prepare_tables_for_migration();
+		$this->repository->migrate_next_row();
+
+		$filter_legacy_table = new QueryFilter();
+		$filter_legacy_table->where( 'id', '=', (int) $original_table_content[1]['id'] );
+		$filter_legacy_table->setLimit( 1 );
+		
+		$filter_table = new QueryFilter();
+		$filter_table->where( 'id', '=', (int) $original_table_content[0]['id'] );
+		$filter_table->setLimit( 1 );
+		
+		// Execute.
+		$entity_in_legacy_table = $this->repository->select( $filter_legacy_table )[0];
+		$entity_in_table        = $this->repository->select( $filter_table )[0];
+
+		// Assert.
+		$row_in_legacy_table = $this->order_table->get_all( true )[0];
+		$this->assertEquals( $row_in_legacy_table, $this->entity_to_row( $entity_in_legacy_table ) );
+		$row_in_table = $this->order_table->get_all( false )[0];
+		$this->assertEquals( $row_in_table, $this->entity_to_row( $entity_in_table ) );
+	}
+
+	/**
+	 * Transforms an Entity object into a row array suitable for database storage.
+	 * 
+	 * @param Entity $entity The Entity object to transform.
+	 * @return array The row array representation of the Entity.
+	 */
+	private function entity_to_row( Entity $entity ) {
+		$indexes      = IndexHelper::transformFieldsToIndexes( $entity );
+		$storage_item = array(
+			'id'      => $entity->getId() ? $entity->getId() : null,
+			'type'    => $entity->getConfig()->getType(),
+			'index_1' => null,
+			'index_2' => null,
+			'index_3' => null,
+			'index_4' => null,
+			'index_5' => null,
+			'index_6' => null,
+			'index_7' => null,
+			'data'    => \wp_json_encode( $entity->toArray() ),
+		);
+
+		foreach ( $indexes as $index => $value ) {
+			$storage_item[ 'index_' . $index ] = $value;
+		}
+
+		return $storage_item;
 	}
 }
