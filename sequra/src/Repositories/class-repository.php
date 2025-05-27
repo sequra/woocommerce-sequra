@@ -426,7 +426,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			 */
 			$entity = isset( $data['class_name'] ) ? new $data['class_name']() : new $this->entity_class();
 			$entity->inflate( $data );
-			$entity->setId( $item['id'] );
+			if ( is_numeric( $item['id'] ) ) {
+				$entity->setId( (int) $item['id'] );
+			}
 
 			$entities[] = $entity;
 		}
