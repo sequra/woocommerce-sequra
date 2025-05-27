@@ -1,6 +1,6 @@
 <?php
 /**
- * Post install migration for version 3.1.2 of the plugin.
+ * Post install migration for version 3.2.0 of the plugin.
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -14,9 +14,9 @@ use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Repositories\Repository;
 
 /**
- * Post install migration for version 3.1.2 of the plugin.
+ * Post install migration for version 3.2.0 of the plugin.
  */
-class Migration_Install_312 extends Migration {
+class Migration_Install_320 extends Migration {
 
 	/**
 	 * Hook name.
@@ -62,7 +62,7 @@ class Migration_Install_312 extends Migration {
 	 * Get the plugin version when the changes were made.
 	 */
 	public function get_version(): string {
-		return '3.1.2';
+		return '3.2.0';
 	}
 
 	/**

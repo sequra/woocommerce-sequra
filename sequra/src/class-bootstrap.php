@@ -91,7 +91,7 @@ use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Reposit
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
-use SeQura\WC\Repositories\Migrations\Migration_Install_312;
+use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
@@ -505,7 +505,7 @@ class Bootstrap extends BootstrapComponent {
 								$entity_repository,
 								$queue_item_repository
 							),
-							new Migration_Install_312(
+							new Migration_Install_320(
 								$wpdb,
 								$configuration,
 								self::get_constants()->get_hook_add_order_indexes(),
