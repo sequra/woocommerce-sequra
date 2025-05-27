@@ -90,7 +90,7 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$this->assertEquals( array( $original_table_content[0] ), $table_content );
 	}
 
-	public function testMigrateNextRow_selectData_DataIsRetrieved() {
+	public function testSelect_MigrationInCourse_DataIsRetrievedFromTheCorrectTable() {
 		// Setup.
 		$original_table_content = $this->order_table->get_all( false );
 
@@ -114,6 +114,55 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$this->assertEquals( $row_in_legacy_table, $this->entity_to_row( $entity_in_legacy_table ) );
 		$row_in_table = $this->order_table->get_all( false )[0];
 		$this->assertEquals( $row_in_table, $this->entity_to_row( $entity_in_table ) );
+	}
+
+	/**
+	 * @dataProvider dataProvider_Delete_MigrationInCourse
+	 */
+	public function testDelete_MigrationInCourse_DataIsDeletedFromBothTables( $id ) {
+		// Setup.
+		$original_content = $this->order_table->get_all( false );
+		$migrated_content = array();
+		$legacy_content   = array();
+		
+		foreach ( $original_content as $i => $value ) {
+			if ( $id !== (int) $value['id'] ) {
+				if ( 0 === $i ) {
+					$migrated_content[] = $value;
+				} else {
+					$legacy_content[] = $value;
+				}
+			}
+		}
+
+		$this->repository->prepare_tables_for_migration();
+		$this->repository->migrate_next_row();
+
+		$entity = new SeQuraOrder();
+		$entity->setId( $id );
+		
+		// Execute.
+		$result = $this->repository->delete( $entity );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$legacy_table_content = $this->order_table->get_all( true );
+		
+		$this->assertEquals( $legacy_content, $legacy_table_content );
+		$table_content = $this->order_table->get_all( false );
+		$this->assertEquals( $migrated_content, $table_content );
+	}
+
+	/**
+	 * Data provider for testDelete_MigrationInCourse_DataIsDeletedFromBothTables.
+	 * 
+	 * @return array
+	 */
+	public function dataProvider_Delete_MigrationInCourse() {
+		return array(
+			array( 1 ), // Delete first row.
+			array( 2 ), // Delete second row.
+		);
 	}
 
 	/**
