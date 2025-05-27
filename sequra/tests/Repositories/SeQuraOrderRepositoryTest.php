@@ -192,6 +192,18 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$this->assertEquals( $row, $entity_as_row );
 	}
 
+	public function testCount_MigrationInCourse_ValueIsEqualsToSumOfBothTableTotals() {
+		// Setup.
+		$this->repository->prepare_tables_for_migration();
+		$this->repository->migrate_next_row();
+		
+		// Execute.
+		$result = $this->repository->count();
+
+		// Assert.
+		$this->assertEquals( 3, $result );
+	}
+
 	/**
 	 * Data provider for testDelete_MigrationInCourse_DataIsDeletedFromBothTables.
 	 * 
