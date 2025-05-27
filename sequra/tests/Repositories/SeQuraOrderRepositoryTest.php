@@ -153,6 +153,45 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$this->assertEquals( $migrated_content, $table_content );
 	}
 
+	public function testInsert_MigrationInCourse_DataIsInsertedInTable() {
+		// Setup.
+		$this->repository->prepare_tables_for_migration();
+		$this->repository->migrate_next_row();
+
+		$entity        = $this->entity_instance();
+		$entity_as_row = $this->entity_to_row( $entity );
+		$expected_id   = 4;
+		
+		// Execute.
+		$result = $this->repository->save( $entity );
+
+		// Assert.
+		$this->assertEquals( $expected_id, $result );
+		$content             = $this->order_table->get_all( false );
+		$row                 = end( $content );
+		$entity_as_row['id'] = (string) $expected_id; // Ensure ID is a string as expected in the database.
+		$this->assertEquals( $row, $entity_as_row );
+	}
+
+	public function testUpdate_MigrationInCourse_DataIsUpdatedInTable() {
+		// Setup.
+		$this->repository->prepare_tables_for_migration();
+		$this->repository->migrate_next_row();
+
+		$expected_id   = 2;
+		$entity        = $this->entity_instance( $expected_id );
+		$entity_as_row = $this->entity_to_row( $entity );
+		
+		// Execute.
+		$result = $this->repository->save( $entity );
+
+		// Assert.
+		$this->assertEquals( $expected_id, $result );
+		$content = $this->order_table->get_all( false );
+		$row     = end( $content );
+		$this->assertEquals( $row, $entity_as_row );
+	}
+
 	/**
 	 * Data provider for testDelete_MigrationInCourse_DataIsDeletedFromBothTables.
 	 * 
@@ -174,7 +213,7 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 	private function entity_to_row( Entity $entity ) {
 		$indexes      = IndexHelper::transformFieldsToIndexes( $entity );
 		$storage_item = array(
-			'id'      => $entity->getId() ? $entity->getId() : null,
+			'id'      => $entity->getId() ? (string) $entity->getId() : null,
 			'type'    => $entity->getConfig()->getType(),
 			'index_1' => null,
 			'index_2' => null,
@@ -191,5 +230,153 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		}
 
 		return $storage_item;
+	}
+
+	/**
+	 * Creates an instance of SeQuraOrder with sample data.
+	 * 
+	 * @param int|null $id The ID of the order. If null, a new ID will be generated.
+	 * @return SeQuraOrder An instance of SeQuraOrder with sample data.
+	 */
+	private function entity_instance( $id = null ) {
+		return SeQuraOrder::fromArray(
+			array(
+				'id'                 => $id,
+				'reference'          => 'test_reference',
+				'cartId'             => 'test_cart_id',
+				'orderRef1'          => 'test_order_ref_1',
+				'merchant'           => array(
+					'id' => 'test_merchant_id',
+				),
+				'merchantReference'  => array(
+					'orderRef1' => 'test_merchant_order_ref_1',
+					'orderRef2' => 'test_merchant_order_ref_2',
+				),
+				'merchant_reference' => array(
+					'orderRef1' => 'test_merchant_order_ref_1',
+					'orderRef2' => 'test_merchant_order_ref_2',
+				),
+				'shippedCart'        => array(
+					'currency'          => 'EUR',
+					'gift'              => false,
+					'orderTotalWithTax' => 10000,
+					'cartRef'           => 'test_cart_ref',
+					'createdAt'         => '2023-10-01T12:00:00',
+					'updatedAt'         => '2023-10-01T12:00:00',
+					'items'             => array(),
+				),
+				'shipped_cart'       => array(
+					'currency'          => 'EUR',
+					'gift'              => false,
+					'orderTotalWithTax' => 10000,
+					'cartRef'           => 'test_cart_ref',
+					'createdAt'         => '2023-10-01T12:00:00',
+					'updatedAt'         => '2023-10-01T12:00:00',
+					'items'             => array(),
+				),
+				'unshippedCart'      => array(),
+				'unshipped_cart'     => array(),
+				'state'              => 'test_state',
+				'deliveryMethod'     => array(
+					'name'         => 'Test Delivery Method',
+					'days'         => 3,
+					'provider'     => 'Test Provider',
+					'homeDelivery' => null,
+				),
+				'delivery_method'    => array(
+					'name'         => 'Test Delivery Method',
+					'days'         => 3,
+					'provider'     => 'Test Provider',
+					'homeDelivery' => null,
+				),
+				'deliveryAddress'    => array(
+					'givenNames'   => 'Mengano',
+					'surnames'     => 'De Tal',
+					'company'      => 'Test Company',
+					'addressLine1' => 'Test Address Line 1',
+					'addressLine2' => 'Test Address Line 2',
+					'postalCode'   => '28001',
+					'city'         => 'Test City',
+					'countryCode'  => 'ES',
+					'phone'        => '123456789',
+					'mobilePhone'  => '987654321',
+					'state'        => 'Test State',
+					'extra'        => 'Test Extra',
+					'vatNumber'    => 'ES12345678A',
+				),
+				'delivery_address'   => array(
+					'givenNames'   => 'Mengano',
+					'surnames'     => 'De Tal',
+					'company'      => 'Test Company',
+					'addressLine1' => 'Test Address Line 1',
+					'addressLine2' => 'Test Address Line 2',
+					'postalCode'   => '28001',
+					'city'         => 'Test City',
+					'countryCode'  => 'ES',
+					'phone'        => '123456789',
+					'mobilePhone'  => '987654321',
+					'state'        => 'Test State',
+					'extra'        => 'Test Extra',
+					'vatNumber'    => 'ES12345678A',
+				),
+				'invoiceAddress'     => array(
+					'givenNames'   => 'Mengano',
+					'surnames'     => 'De Tal',
+					'company'      => 'Test Company',
+					'addressLine1' => 'Test Address Line 1',
+					'addressLine2' => 'Test Address Line 2',
+					'postalCode'   => '28001',
+					'city'         => 'Test City',
+					'countryCode'  => 'ES',
+					'phone'        => '123456789',
+					'mobilePhone'  => '987654321',
+					'state'        => 'Test State',
+					'extra'        => 'Test Extra',
+					'vatNumber'    => 'ES12345678A',
+				),
+				'invoice_address'    => array(
+					'givenNames'   => 'Mengano',
+					'surnames'     => 'De Tal',
+					'company'      => 'Test Company',
+					'addressLine1' => 'Test Address Line 1',
+					'addressLine2' => 'Test Address Line 2',
+					'postalCode'   => '28001',
+					'city'         => 'Test City',
+					'countryCode'  => 'ES',
+					'phone'        => '123456789',
+					'mobilePhone'  => '987654321',
+					'state'        => 'Test State',
+					'extra'        => 'Test Extra',
+					'vatNumber'    => 'ES12345678A',
+				),
+				'customer'           => array(
+					'given_names'     => 'Mengano',
+					'surnames'        => 'De Tal',
+					'email'           => 'test@email.com',
+					'logged_in'       => true,
+					'language_code'   => 'en',
+					'ip_number'       => '127.0.0.1',
+					'user_agent'      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+					'ref'             => 1,
+					'company'         => 'Test Company',
+					'vat_number'      => 'ES12345678A',
+					'previous_orders' => array(),
+				),
+				'platform'           => array(
+					'name'           => 'Test Platform',
+					'version'        => '1.0.0',
+					'plugin_version' => '2.0.0',
+					'uname'          => 'Linux',
+					'db_name'        => 'mysql',
+					'db_version'     => '5.7.0',
+					'php_version'    => '7.4.0',
+				),
+				'gui'                => array(
+					'layout' => 'desktop',
+				),
+				'paymentMethod'      => null,
+				'payment_method'     => null,
+			)
+		);
 	}
 }
