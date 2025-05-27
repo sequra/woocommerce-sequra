@@ -226,11 +226,13 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		$where   = array( 'id' => $entity->getId() );
 		$deleted = false;
 		if ( $this->table_exists() ) {
-			$deleted = false !== $this->db->delete( $this->get_table_name(), $where );
+			$result  = $this->db->delete( $this->get_table_name(), $where );
+			$deleted = ! empty( $result );
 		}
 		if ( $this->table_exists( true ) ) {
 			// Delete from legacy table.
-			$deleted = $deleted || false !== $this->db->delete( $this->get_legacy_table_name(), $where );
+			$result  = $this->db->delete( $this->get_legacy_table_name(), $where );
+			$deleted = $deleted || ! empty( $result );
 		}
 		return $deleted;
 	}
@@ -517,10 +519,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			$sql .= ' WHERE ' . \sanitize_text_field( $column ) . ' = ' . \sanitize_text_field( $store_id );
 		}
 		if ( $this->table_exists() ) {
-			$deleted = false !== $this->db->query( $sql );
+			$result  = $this->db->query( $sql );
+			$deleted = ! empty( $result );
 		}
 		if ( $this->table_exists( true ) ) {
-			$deleted = $deleted || false !== $this->db->query( str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $sql ) );
+			$result  = $this->db->query( str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $sql ) );
+			$deleted = $deleted || ! empty( $result );
 		}
 		return $deleted;
 	}
