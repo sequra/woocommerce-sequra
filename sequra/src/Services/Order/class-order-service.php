@@ -19,7 +19,6 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
@@ -113,6 +112,20 @@ class Order_Service implements Interface_Order_Service {
 	private $time_checker_service;
 
 	/**
+	 * Deletable repository
+	 *
+	 * @var Interface_Deletable_Repository
+	 */
+	private $deletable_repository;
+
+	/**
+	 * Table migration repository
+	 *
+	 * @var Interface_Table_Migration_Repository
+	 */
+	private $table_migration_repository;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
@@ -124,17 +137,21 @@ class Order_Service implements Interface_Order_Service {
 		Interface_Cart_Service $cart_service,
 		StoreContext $store_context,
 		Interface_Logger_Service $logger,
-		Interface_Time_Checker_Service $time_checker_service
+		Interface_Time_Checker_Service $time_checker_service,
+		Interface_Deletable_Repository $deletable_repository,
+		Interface_Table_Migration_Repository $table_migration_repository
 	) {
-		$this->payment_service         = $payment_service;
-		$this->pricing_service         = $pricing_service;
-		$this->order_status_service    = $order_status_service;
-		$this->configuration           = $configuration;
-		$this->cart_service            = $cart_service;
-		$this->store_context           = $store_context;
-		$this->logger                  = $logger;
-		$this->sequra_order_repository = $sequra_order_repository;
-		$this->time_checker_service    = $time_checker_service;
+		$this->payment_service            = $payment_service;
+		$this->pricing_service            = $pricing_service;
+		$this->order_status_service       = $order_status_service;
+		$this->configuration              = $configuration;
+		$this->cart_service               = $cart_service;
+		$this->store_context              = $store_context;
+		$this->logger                     = $logger;
+		$this->sequra_order_repository    = $sequra_order_repository;
+		$this->time_checker_service       = $time_checker_service;
+		$this->deletable_repository       = $deletable_repository;
+		$this->table_migration_repository = $table_migration_repository;
 	}
 	
 	/**
@@ -891,19 +908,7 @@ class Order_Service implements Interface_Order_Service {
 	 * @return void
 	 */
 	public function cleanup_orders() {
-		if ( ! $this->sequra_order_repository instanceof Interface_Deletable_Repository ) {
-			$this->logger->log_error(
-				'seQura Orders cleanup CRON JOB skipped: The order deletable repository is not set.',
-				__FUNCTION__,
-				__CLASS__,
-				array(
-					new LogContextData( 'actualType', is_object( $this->sequra_order_repository ) ? get_class( $this->sequra_order_repository ) : 'NULL' ),
-					new LogContextData( 'expectedType', Interface_Deletable_Repository::class ),
-				) 
-			);
-			return;
-		}
-		$this->sequra_order_repository->delete_old_and_invalid();
+		$this->deletable_repository->delete_old_and_invalid();
 	}
 
 	/**
@@ -928,39 +933,14 @@ class Order_Service implements Interface_Order_Service {
 	 * @return bool True if they are missing indexes, false otherwise
 	 */
 	public function is_migration_complete() {
-		if ( ! $this->sequra_order_repository instanceof Interface_Table_Migration_Repository ) {
-			$this->logger->log_error(
-				'SeQura migration skipped: The table migration repository is not set.',
-				__FUNCTION__,
-				__CLASS__,
-				array(
-					new LogContextData( 'actualType', is_object( $this->sequra_order_repository ) ? get_class( $this->sequra_order_repository ) : 'NULL' ),
-					new LogContextData( 'expectedType', Interface_Table_Migration_Repository::class ),
-				) 
-			);
-			return false;
-		}
-		return $this->sequra_order_repository->is_migration_complete();
+		return $this->table_migration_repository->is_migration_complete();
 	}
 
 	/**
 	 * Execute the migration process
 	 */
 	public function migrate_data() {
-		if ( ! $this->sequra_order_repository instanceof Interface_Table_Migration_Repository ) {
-			$this->logger->log_error(
-				'SeQura migration skipped: The table migration repository is not set.',
-				__FUNCTION__,
-				__CLASS__,
-				array(
-					new LogContextData( 'actualType', is_object( $this->sequra_order_repository ) ? get_class( $this->sequra_order_repository ) : 'NULL' ),
-					new LogContextData( 'expectedType', Interface_Table_Migration_Repository::class ),
-				) 
-			);
-			return;
-		}
-
-		if ( ! $this->sequra_order_repository->prepare_tables_for_migration() ) {
+		if ( ! $this->table_migration_repository->prepare_tables_for_migration() ) {
 			$this->logger->log_error( 'An error occurred while preparing the tables for migration.', __FUNCTION__, __CLASS__ );
 			return;
 		}
@@ -993,8 +973,8 @@ class Order_Service implements Interface_Order_Service {
 		 */
 		$batch_size = (int) apply_filters( 'sequra_migration_batch_size', 100 );
 		for ( $i = 0; $i < $batch_size; $i++ ) {
-			$this->sequra_order_repository->migrate_next_row();
-			if ( $this->sequra_order_repository->maybe_remove_legacy_table() ) {
+			$this->table_migration_repository->migrate_next_row();
+			if ( $this->table_migration_repository->maybe_remove_legacy_table() ) {
 				// Migration is complete.
 				break;
 			}

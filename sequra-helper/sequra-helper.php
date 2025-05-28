@@ -41,3 +41,11 @@ require_once __DIR__ . '/src/Task/class-checkout-version-task.php';
 require_once __DIR__ . '/src/Task/class-get-plugin-zip-task.php';
 require_once __DIR__ . '/src/class-plugin.php';
 new SeQura\Helper\Plugin( __FILE__ );
+
+add_filter('sequra_migration_from', function( $hour ){
+ return 0;
+});
+
+add_filter('sequra_migration_to', function( $hour ){
+ return 23;
+});
