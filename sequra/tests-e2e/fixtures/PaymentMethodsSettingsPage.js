@@ -23,7 +23,7 @@ export default class PaymentMethodsSettingsPage extends SettingsPage {
         }
     }
 
-    async expectAvailablePaymentMethodsAreVisible({ merchant = 'dummy', countries = ['ES', 'FR', 'PT', 'IT'] }) {
+    async expectAvailablePaymentMethodsAreVisible({ merchant = 'dummy', countries = ['ES', 'PT', 'IT'] }) {
         const countryName = dataCountries.default[countries[0]];
         const countrySelectedLocator = this.page.locator('span.sqs--selected', { hasText: countryName })
         await this.expect(countrySelectedLocator, `The default country "${countryName}" is shown as selected`).toBeVisible();

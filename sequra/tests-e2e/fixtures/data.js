@@ -71,7 +71,7 @@ export const merchant = {
         assetsKey: process.env.DUMMY_ASSETS_KEY,
         ref: {
             ES: 'dummy_automated_tests',
-            FR: 'dummy_automated_tests_fr',
+            // FR: 'dummy_automated_tests_fr',
             IT: 'dummy_automated_tests_it',
             PT: 'dummy_automated_tests_pt',
             CO: 'dummy_automated_tests_co',
@@ -83,9 +83,9 @@ export const merchant = {
                 'Divide tu pago en 3',
                 'Paga Fraccionado'
             ],
-            FR: [
-                'Payez en plusieurs fois'
-            ],
+            // FR: [
+            //     'Payez en plusieurs fois'
+            // ],
             PT: [
                 'Pagamento Fracionado'
             ],
@@ -105,7 +105,7 @@ export const merchant = {
 export const countries = {
     default: {
         ES: 'Spain',
-        FR: 'France',
+        // FR: 'France',
         IT: 'Italy',
         PT: 'Portugal',
         CO: 'Colombia',

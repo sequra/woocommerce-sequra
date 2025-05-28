@@ -48,6 +48,7 @@ export default class OnboardingSettingsPage extends SettingsPage {
         for (const country of countries) {
             await this.page.locator(this.selector.dropdownListItem, { hasText: dataCountries.default[country] }).click();
         }
+        await this.closeDropdownList(this.page.locator(this.selector.multiSelect));
         for (const country of countries) {
             const merchantRefInput = `[name="country_${country}"]`;
             await this.page.locator(merchantRefInput).click();
@@ -57,6 +58,15 @@ export default class OnboardingSettingsPage extends SettingsPage {
         await this.page.locator(this.selector.primaryBtn).click();
 
         await this.page.waitForSelector(this.selector.onboarding.completedStepCountries, { timeout: 5000 });
+    }
+
+    /**
+     * Close open dropdown
+     * @param {import('@playwright/test').Locator} locator Dropdown locator
+     */
+    async closeDropdownList(locator) {
+        // Do click out of the dropdown list to close it
+        await locator.click({ force: true, position: { x: 0, y: -20 } });
     }
 
     async fillWidgetsForm({ merchant = 'dummy' }) {
