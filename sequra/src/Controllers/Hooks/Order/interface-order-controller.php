@@ -59,4 +59,11 @@ interface Interface_Order_Controller {
 	 * @return void
 	 */
 	public function cleanup_orders();
+
+	/**
+	 * Respond to the sequra_order_migration_add_indexes hook
+	 * 
+	 * @param string $hook Hook name that triggered the action.
+	 */
+	public function migrate_orders_to_use_indexes( $hook );
 }

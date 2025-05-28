@@ -15,12 +15,13 @@ use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryCondition;
 use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
 use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Dto\Table_Index;
 use wpdb;
 
 /**
  * Shared repository functionality.
  */
-abstract class Repository implements RepositoryInterface, Interface_Deletable_Repository {
+abstract class Repository implements RepositoryInterface, Interface_Deletable_Repository, Interface_Table_Migration_Repository {
 
 	/**
 	 * Entity class FQN.
@@ -44,8 +45,17 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Returns full table name.
 	 */
-	protected function get_table_name(): string {
+	public function get_table_name(): string {
 		return $this->db->prefix . $this->get_unprefixed_table_name();
+	}
+
+	/**
+	 * Get the name that is set to the original table during the migration.
+	 * 
+	 * @return string The name of the old table.
+	 */
+	public function get_legacy_table_name() {
+		return $this->get_table_name() . '_legacy';
 	}
 
 	/**
@@ -91,10 +101,6 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
 	public function select( QueryFilter $filter = null ) {
-		if ( ! $this->table_exists() ) {
-			return array();
-		}
-
 		/**
 		 * Entity object.
 		 *
@@ -102,15 +108,27 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		 */
 		$entity = new $this->entity_class();
 		$type   = $entity->getConfig()->getType();
-
+		
 		$query = "SELECT * FROM {$this->get_table_name()} WHERE type = '$type' ";
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
-
-		$raw_results = $this->db->get_results( $query, ARRAY_A );
-		if ( ! is_array( $raw_results ) ) {
-			return array();
+		
+		$raw_results = array();
+		if ( $this->table_exists() ) {
+			$raw_results = $this->db->get_results( $query, ARRAY_A );
+			if ( ! is_array( $raw_results ) ) {
+				$raw_results = array();
+			}
+		}
+		if ( $this->table_exists( true ) ) {
+			// If the legacy table exists the data may be there.
+			$query              = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
+			$legacy_raw_results = $this->db->get_results( $query, ARRAY_A );
+			if ( ! is_array( $legacy_raw_results ) ) {
+				$legacy_raw_results = array();
+			}
+			$raw_results = array_merge( $raw_results, $legacy_raw_results );
 		}
 
 		return $this->translateToEntities( $raw_results );
@@ -167,11 +185,34 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( ! $this->table_exists() ) {
 			return false;
 		}
-
-		$item = $this->prepare_entity_for_storage( $entity );
-
+		$item  = $this->prepare_entity_for_storage( $entity );
+		$where = array( 'id' => $entity->getId() );
+		
+		// Check if entity wasn't already migrated and migrate it including the new data.
+		if ( $this->table_exists( true ) && $this->entity_exists( $entity->getId(), true ) ) {
+			if ( 1 !== $this->db->update( $this->get_legacy_table_name(), $item, $where ) ) {
+				return false;
+			}
+			// Read from the legacy table.
+			$raw_results = $this->db->get_results( "SELECT * FROM {$this->get_legacy_table_name()} WHERE id = {$entity->getId()} LIMIT 1;", ARRAY_A );
+			if ( empty( $raw_results ) ) {
+				return false;
+			}
+			$entity = $this->translateToEntities( $raw_results )[0] ?? null;
+			if ( ! $entity ) {
+				return false;
+			}
+			// Insert into the new table.
+			$item = $this->prepare_entity_for_storage( $entity );
+			if ( false !== $this->db->insert( $this->get_table_name(), $item ) ) {
+				return false;
+			}
+			// Delete the row from the legacy table.
+			$this->db->delete( $this->get_legacy_table_name(), $where );
+			return true;
+		}
 		// Only one record should be updated.
-		return 1 === $this->db->update( $this->get_table_name(), $item, array( 'id' => $entity->getId() ) );
+		return 1 === $this->db->update( $this->get_table_name(), $item, $where );
 	}
 
 	/**
@@ -182,10 +223,18 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return bool TRUE if operation succeeded; otherwise, FALSE.
 	 */
 	public function delete( Entity $entity ) {
-		if ( ! $this->table_exists() ) {
-			return false;
+		$where   = array( 'id' => $entity->getId() );
+		$deleted = false;
+		if ( $this->table_exists() ) {
+			$result  = $this->db->delete( $this->get_table_name(), $where );
+			$deleted = ! empty( $result );
 		}
-		return false !== $this->db->delete( $this->get_table_name(), array( 'id' => $entity->getId() ) );
+		if ( $this->table_exists( true ) ) {
+			// Delete from legacy table.
+			$result  = $this->db->delete( $this->get_legacy_table_name(), $where );
+			$deleted = $deleted || ! empty( $result );
+		}
+		return $deleted;
 	}
 
 	/**
@@ -197,9 +246,6 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
 	public function count( QueryFilter $filter = null ) {
-		if ( ! $this->table_exists() ) {
-			return 0;
-		}
 		/**
 		 * Entity object.
 		 *
@@ -212,10 +258,18 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
-
-		$result = $this->db->get_results( $query, ARRAY_A );
-
-		return empty( $result[0]['total'] ) ? 0 : intval( $result[0]['total'] );
+		$count = 0;
+		if ( $this->table_exists() ) {
+			$result = $this->db->get_results( $query, ARRAY_A );
+			$count += empty( $result[0]['total'] ) || ! is_numeric( $result[0]['total'] ) ? 0 : (int) $result[0]['total'];
+		}
+		if ( $this->table_exists( true ) ) {
+			// If the legacy table exists, count the data there too.
+			$query  = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
+			$result = $this->db->get_results( $query, ARRAY_A );
+			$count += empty( $result[0]['total'] ) || ! is_numeric( $result[0]['total'] ) ? 0 : (int) $result[0]['total'];
+		}
+		return $count;
 	}
 
 	/**
@@ -372,7 +426,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			 */
 			$entity = isset( $data['class_name'] ) ? new $data['class_name']() : new $this->entity_class();
 			$entity->inflate( $data );
-			$entity->setId( $item['id'] );
+			if ( is_numeric( $item['id'] ) ) {
+				$entity->setId( (int) $item['id'] );
+			}
 
 			$entities[] = $entity;
 		}
@@ -422,6 +478,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			'data'    => \wp_json_encode( $entity->toArray() ),
 		);
 
+		if ( $entity->getId() ) {
+			$storage_item['id'] = $entity->getId();
+		}
+
 		foreach ( $indexes as $index => $value ) {
 			$storage_item[ 'index_' . $index ] = $value;
 		}
@@ -451,10 +511,8 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @param string|null $store_id Delete entities from this store. Passing null will delete all entities.
 	 */
 	public function delete_all( $store_id = null ): bool {
-		if ( ! $this->table_exists() ) {
-			return false;
-		}
-		$sql = 'DELETE FROM ' . \sanitize_text_field( $this->get_table_name() );
+		$deleted = false;
+		$sql     = 'DELETE FROM ' . \sanitize_text_field( $this->get_table_name() );
 		if ( $store_id ) {
 			$column = $this->get_store_id_index_column();
 			if ( ! $column ) {
@@ -462,7 +520,15 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			}
 			$sql .= ' WHERE ' . \sanitize_text_field( $column ) . ' = ' . \sanitize_text_field( $store_id );
 		}
-		return false !== $this->db->query( $sql );
+		if ( $this->table_exists() ) {
+			$result  = $this->db->query( $sql );
+			$deleted = ! empty( $result );
+		}
+		if ( $this->table_exists( true ) ) {
+			$result  = $this->db->query( str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $sql ) );
+			$deleted = $deleted || ! empty( $result );
+		}
+		return $deleted;
 	}
 
 	/**
@@ -476,9 +542,11 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 	/**
 	 * Check if table exists in the database.
+	 * 
+	 * @param boolean $legacy If true, check for legacy table.
 	 */
-	protected function table_exists(): bool {
-		$table_name = \sanitize_text_field( $this->get_table_name() );
+	public function table_exists( $legacy = false ): bool {
+		$table_name = \sanitize_text_field( ! $legacy ? $this->get_table_name() : $this->get_legacy_table_name() );
 		return $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
 	}
 
@@ -488,5 +556,205 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	public function delete_old_and_invalid() {
 		// Do nothing by default. Implement in child class if needed.
+	}
+
+	/**
+	 * Check if the index exists.
+	 * 
+	 * @param Table_Index $index The index to check.
+	 * @return bool True if the index exists, false otherwise.
+	 */
+	public function index_exists( $index ) {
+		$index_name = \sanitize_key( $index->name );
+		return ! empty( $this->db->get_col( "SHOW INDEX FROM `{$this->get_table_name()}` WHERE Key_name = '{$index_name}'" ) );
+	}
+
+	/**
+	 * Add an index to the table.
+	 * 
+	 * @param Table_Index $index The index.
+	 * @return bool True if the index was added or already exists, false otherwise.
+	 */
+	public function add_index( $index ) {
+		if ( $this->index_exists( $index ) ) {
+			return true;
+		}
+		$index_name = \sanitize_key( $index->name );
+		$columns    = $index->columns;
+		foreach ( $columns as &$column ) {
+			$column = '`' . \sanitize_key( $column ) . '`';
+		}
+		$columns = implode( ',', $columns );
+		return false !== $this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD INDEX `{$index_name}` ({$columns})" );
+	}
+
+	/**
+	 * Execute the migration process one by one.
+	 * This implementation is intended for migrations that don't change the table structure.
+	 */
+	public function migrate_next_row() {
+		if ( ! $this->table_exists() || ! $this->table_exists( true ) ) {
+			return;
+		}
+		$raw_results = $this->db->get_results( "SELECT * FROM {$this->get_legacy_table_name()} LIMIT 1;", ARRAY_A );
+		if ( ! is_array( $raw_results ) ) {
+			return;
+		}
+
+		$entity = $this->translateToEntities( $raw_results )[0] ?? null;
+		if ( ! $entity ) {
+			return;
+		}
+		// Check if entity already exists in the table.
+		if ( $this->entity_exists( $entity->getId() ) ) {
+			return;
+		}
+
+		$storage_item = $this->prepare_entity_for_storage( $entity );
+		$result       = $this->db->insert( $this->get_table_name(), $storage_item );
+		if ( false !== $result ) {
+			// Delete the row from the legacy table.
+			$this->db->delete( $this->get_legacy_table_name(), array( 'id' => $entity->getId() ) );
+		}
+	}
+
+	/**
+	 * Check if the migration process is complete.
+	 * 
+	 * @return bool True if the migration process is complete, false otherwise.
+	 */
+	public function is_migration_complete() {
+		// Check if the legacy table exists.
+		if ( $this->table_exists( true ) ) {
+			return false;
+		}
+		// Check if the indexes exist.
+		$indexes = $this->get_required_indexes();
+		foreach ( $indexes as $index ) {
+			if ( ! $this->index_exists( $index ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the SQL statement to create the table without the indexes definition.
+	 * Resulting string should include an additional %s placeholder for the indexes.
+	 * 
+	 * @return string The SQL statement to create the table.
+	 */
+	protected function get_create_table_sql() {
+		$charset_collate = $this->db->get_charset_collate();
+		return "CREATE TABLE {$this->get_table_name()} (
+			`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			`type` VARCHAR(255),
+			`index_1` VARCHAR(127),
+			`index_2` VARCHAR(127),
+			`index_3` VARCHAR(127),
+			`index_4` VARCHAR(127),
+			`index_5` VARCHAR(127),
+			`index_6` VARCHAR(127),
+			`index_7` VARCHAR(127),
+			`data` LONGTEXT,
+			PRIMARY KEY (id) %s) $charset_collate;";
+	}
+
+	/**
+	 * Create the table if it doesn't exist.
+	 * 
+	 * @return bool True if the table was created successfully, false otherwise.
+	 */
+	public function create_table() {
+		$indexes = array();
+		foreach ( $this->get_required_indexes() as $index ) {
+			$index_name = $index->name;
+			$columns    = $index->columns;
+			foreach ( $columns as &$column ) {
+				$column = '`' . \sanitize_key( $column ) . '`';
+			}
+			$columns   = implode( ',', $columns );
+			$indexes[] = "KEY `{$index_name}` ({$columns})";
+		}
+		$indexes = implode( ', ', $indexes );
+		if ( ! empty( $indexes ) ) {
+			$indexes = ', ' . $indexes;
+		}
+
+		$sql = sprintf( $this->get_create_table_sql(), $indexes );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\dbDelta( $sql );
+		return $this->table_exists();
+	}
+
+	/**
+	 * Make sure that the required tables for the migration are created.
+	 * 
+	 * @return bool
+	 */
+	public function prepare_tables_for_migration() {
+		if ( $this->table_exists( true ) ) {
+			// If the legacy table already exists, we don't need to do anything.
+			return true;
+		}
+		// Rename the table to legacy table.
+		if ( false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
+			return false;
+		}
+
+		// Create the table if not exists.
+		if ( ! $this->create_table() ) {
+			return false;
+		}
+		// Add the auto-increment next value to the new table.
+		$raw_id         = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
+		$auto_increment = null !== $raw_id && is_numeric( $raw_id ) ? (int) $raw_id + 1 : 1;
+		if ( false === $this->db->query( "ALTER TABLE {$this->get_table_name()} AUTO_INCREMENT = {$auto_increment};" ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Evaluates if the legacy table should be removed and if so, removes it.
+	 * 
+	 * @return bool True if the legacy table was removed or did not exist, false otherwise.
+	 */
+	public function maybe_remove_legacy_table() {
+		if ( ! $this->table_exists( true ) ) {
+			return true;
+		}
+		$raw_results = $this->db->get_results( "SELECT 1 FROM `{$this->get_legacy_table_name()}` LIMIT 1;", ARRAY_A );
+		if ( ! empty( $raw_results ) ) {
+			// Legacy table is not empty, do not remove it.
+			return false;
+		}
+		return false !== $this->db->query( "DROP TABLE IF EXISTS `{$this->get_legacy_table_name()}`;" );
+	}
+
+	/**
+	 * Get a list of indexes that are required for the table.
+	 * 
+	 * @return Table_Index[] The list of indexes.
+	 */
+	public function get_required_indexes() { 
+		return array(
+			new Table_Index( $this->get_table_name() . '_type', array( 'type' ) ),
+		);
+	}
+
+	/**
+	 * Check if entity exists in the database.
+	 * 
+	 * @param int $id Entity ID.
+	 * @param bool $legacy If true, check for legacy table.
+	 * @return bool True if entity exists, false otherwise.
+	 */
+	protected function entity_exists( $id, $legacy = false ): bool {
+		$table_name  = $legacy ? $this->get_legacy_table_name() : $this->get_table_name();
+		$raw_results = $this->db->get_results( "SELECT 1 FROM `$table_name` WHERE id = {$id} LIMIT 1;", ARRAY_A );
+		return ! empty( $raw_results );
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings
+ * Sequra Order Repository
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -8,8 +8,10 @@
 
 namespace SeQura\WC\Repositories;
 
+use SeQura\WC\Dto\Table_Index;
+
 /**
- * Class Base_Repository
+ * Sequra Order Repository
  */
 class SeQura_Order_Repository extends Repository {
 
@@ -41,6 +43,23 @@ class SeQura_Order_Repository extends Repository {
 			JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.unshipped_cart')) = '{}'
 			OR STR_TO_DATE(LEFT(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.unshipped_cart.updated_at')), 19), '%Y-%m-%dT%H:%i:%s') <= CURDATE() - INTERVAL 1 DAY
 		)"
+		);
+	}
+
+	/**
+	 * Get a list of indexes that are required for the table.
+	 * 
+	 * @return Table_Index[] The list of indexes.
+	 */
+	public function get_required_indexes() {
+		return array_merge(
+			parent::get_required_indexes(),
+			array(
+				new Table_Index( $this->get_table_name() . '_index_3', array( 'index_3' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_1', array( 'type', 'index_1' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_2', array( 'type', 'index_2' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_3', array( 'type', 'index_3' ) ),
+			)
 		);
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings
+ * Queue item repository.
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -9,16 +9,16 @@
 namespace SeQura\WC\Repositories;
 
 use SeQura\Core\Infrastructure\ORM\Entity;
-use SeQura\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use SeQura\Core\Infrastructure\ORM\Interfaces\QueueItemRepository;
 use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
 use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\TaskExecution\Exceptions\QueueItemSaveException;
 use SeQura\Core\Infrastructure\TaskExecution\Interfaces\Priority;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
+use SeQura\WC\Dto\Table_Index;
 
 /**
- * Class Base_Repository
+ * Queue item repository.
  */
 class Queue_Item_Repository extends Repository implements QueueItemRepository {
 
@@ -71,7 +71,19 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 
 		$result = $this->db->get_results( $sql, ARRAY_A );
 		if ( ! is_array( $result ) ) {
-			return array();
+			$result = array();
+		}
+		$pending_items = $limit - count( $result );
+
+		if ( $pending_items > 0 && $this->table_exists( true ) ) {
+			$legacy_result = $this->db->get_results( str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $sql ), ARRAY_A );
+			if ( is_array( $legacy_result ) ) {
+				$length = count( $legacy_result );
+				for ( $i = 0; $i < $length && $pending_items > 0; $i++ ) {
+					$result[] = $legacy_result[ $i ];
+					--$pending_items;
+				}
+			}
 		}
 
 		return $this->translateToEntities( $result );
@@ -97,8 +109,14 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 			if ( null === $queue_item_id || $queue_item_id <= 0 ) {
 				$item_id = $this->save( $queue_item );
 			} else {
-				$this->update_queue_item( $queue_item, $additional_where );
-				$item_id = $queue_item_id;
+				$filter = $this->build_query_filter(
+					array_merge( $additional_where, array( 'id' => $queue_item->getId() ) )
+				);
+
+				if ( null === $this->selectOne( $filter ) ) {
+					throw new QueueItemSaveException( \esc_html( 'Failed to save queue item, update condition(s) not met.' ) );
+				}
+				$item_id = $this->save( $queue_item );
 			}
 		} catch ( \Exception $exception ) {
 			throw new QueueItemSaveException(
@@ -121,66 +139,6 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 */
 	public function batchStatusUpdate( array $ids, $status ): void {
 		// Not used in this implementation.
-	}
-
-	/**
-	 * Updates database record with data from provided $queueItem.
-	 *
-	 * @param QueueItem $queue_item Queue item.
-	 * @param mixed[]    $conditions Array of update conditions.
-	 *
-	 * @throws QueueItemSaveException Queue item save exception.
-	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
-	 */
-	private function update_queue_item( QueueItem $queue_item, array $conditions = array() ): void {
-		$conditions = array_merge( $conditions, array( 'id' => $queue_item->getId() ) );
-
-		$item = $this->select_for_update( $conditions );
-		$this->check_if_record_exists( $item );
-
-		if ( null !== $item ) {
-			$this->update_with_condition( $queue_item, $conditions );
-		}
-	}
-
-	/**
-	 * Executes select query for update.
-	 *
-	 * @param mixed[]$conditions Array of update conditions.
-	 *
-	 * @return QueueItem|null First found entity or NULL.
-	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
-	 */
-	private function select_for_update( array $conditions ) {
-		/**
-		 * Entity object.
-		 *
-		 * @var Entity $entity
-		 */
-		$entity          = new $this->entity_class();
-		$type            = $entity->getConfig()->getType();
-		$field_index_map = IndexHelper::mapFieldsToIndexes( $entity );
-
-		$filter = $this->build_query_filter( $conditions );
-
-		$query  = "SELECT * FROM {$this->get_table_name()} WHERE type = '$type' ";
-		$query .= $this->apply_query_filter( $filter, $field_index_map );
-		$query .= ' FOR UPDATE';
-
-		$raw_results = $this->db->get_results( $query, ARRAY_A );
-
-		if ( ! is_array( $raw_results ) ) {
-			return null;
-		}
-
-		/**
-		 * Entities
-		 *
-		 * @var QueueItem[] $entities
-		 */
-		$entities = $this->translateToEntities( $raw_results );
-
-		return ! empty( $entities ) ? $entities[0] : null;
 	}
 
 	/**
@@ -208,52 +166,52 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	}
 
 	/**
-	 * Validates if item exists.
-	 *
-	 * @param QueueItem $item Queue item.
-	 *
-	 * @throws QueueItemSaveException Queue item save exception.
-	 */
-	private function check_if_record_exists( QueueItem $item = null ): void {
-		if ( null === $item ) {
-			$message = 'Failed to save queue item, update condition(s) not met.';
-			throw new QueueItemSaveException( esc_html( $message ) );
-		}
-	}
-
-	/**
-	 * Updates single record.
-	 *
-	 * @param QueueItem $item Queue item.
-	 * @param mixed[]    $conditions List of simple search filters as key-value pair to find records to update.
-	 *
-	 * @return bool TRUE if operation succeeded; otherwise, FALSE.
-	 *
-	 * @throws \InvalidArgumentException Invalid argument.
-	 */
-	private function update_with_condition( QueueItem $item, array $conditions ) {
-		$field_index_map = IndexHelper::mapFieldsToIndexes( $item );
-		$prepared        = $this->prepare_entity_for_storage( $item );
-
-		$indexed_conditions = array();
-		foreach ( $conditions as $key => $value ) {
-			if ( 'id' === $key ) {
-				$indexed_conditions[ $key ] = intval( $value );
-			} else {
-				$indexed_conditions[ 'index_' . $field_index_map[ $key ] ] = IndexHelper::castFieldValue( $value, gettype( $value ) );
-			}
-		}
-
-		// Only one record should be updated.
-		return 1 === $this->db->update( $this->get_table_name(), $prepared, $indexed_conditions );
-	}
-
-	/**
 	 * Get the index column name that stores the store ID.
 	 * 
 	 * @return string Index column name or empty string if not applicable.
 	 */
 	protected function get_store_id_index_column(): string {
 		return '';
+	}
+
+	/**
+	 * Get a list of indexes that are required for the table.
+	 * 
+	 * @return Table_Index[] The list of indexes.
+	 */
+	public function get_required_indexes() {
+		return array_merge(
+			parent::get_required_indexes(),
+			array(
+				new Table_Index( $this->get_table_name() . '_type_index_1', array( 'type', 'index_1' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_2', array( 'type', 'index_2' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_3', array( 'type', 'index_3' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_4', array( 'type', 'index_4' ) ),
+			)
+		);
+	}
+
+	/**
+	 * Get the SQL statement to create the table without the indexes definition.
+	 * Resulting string should include an additional %s placeholder for the indexes.
+	 * 
+	 * @return string The SQL statement to create the table.
+	 */
+	protected function get_create_table_sql() {
+		$charset_collate = $this->db->get_charset_collate();
+		return "CREATE TABLE {$this->get_table_name()} (
+			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			`type` VARCHAR(255),
+			`index_1` VARCHAR(127),
+			`index_2` VARCHAR(127),
+			`index_3` VARCHAR(127),
+			`index_4` VARCHAR(127),
+			`index_5` VARCHAR(127),
+			`index_6` BIGINT UNSIGNED,
+			`index_7` BIGINT UNSIGNED,
+			`index_8` BIGINT UNSIGNED,
+			`index_9` BIGINT UNSIGNED,
+			`data` LONGTEXT,
+			PRIMARY KEY (id) %s) $charset_collate;";
 	}
 }

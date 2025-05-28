@@ -90,9 +90,10 @@ use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Pa
 use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
-use SeQura\WC\Repositories\Interface_Deletable_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
+use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Repositories\Queue_Item_Repository;
+use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Services\Assets\Assets;
 use SeQura\WC\Services\Assets\Interface_Assets;
@@ -128,6 +129,9 @@ use SeQura\WC\Services\Regex\Regex;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 use SeQura\WC\Services\Report\Report_Service;
 use SeQura\WC\Services\Interface_Constants;
+use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
+use SeQura\WC\Services\Time\Time_Checker_Service;
+use SeQura\WC\Repositories\Interface_Deletable_Repository;
 
 /**
  * Implementation for the core bootstrap class.
@@ -468,14 +472,46 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Migration_Manager::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
+					$configuration = Reg::getService( Configuration::CLASS_NAME );
+					$wpdb          = Reg::getService( \wpdb::class );
+					/**
+					 * Order repository.
+					 * 
+					 * @var Repository $order_repository
+					 */
+					$order_repository = RepositoryRegistry::getRepository( SeQuraOrder::class );
+					/**
+					 * Entity repository.
+					 * 
+					 * @var Repository $entity_repository
+					 */
+					$entity_repository = RepositoryRegistry::getRepository( ConfigEntity::class );
+
+					/**
+					 * Queue item repository.
+					 * 
+					 * @var Repository $queue_item_repository
+					 */
+					$queue_item_repository = RepositoryRegistry::getRepository( QueueItem::class );
+
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
 						self::get_constants()->get_plugin_basename(),
-						Reg::getService( Configuration::CLASS_NAME ),
+						$configuration,
 						self::get_constants()->get_plugin_data()['Version'],
 						array(
 							new Migration_Install_300(
-								Reg::getService( \wpdb::class ),
-								Reg::getService( Configuration::CLASS_NAME )
+								$wpdb,
+								$configuration,
+								$order_repository,
+								$entity_repository,
+								$queue_item_repository
+							),
+							new Migration_Install_320(
+								$wpdb,
+								$configuration,
+								self::get_constants()->get_hook_add_order_indexes(),
+								$entity_repository,
+								$queue_item_repository
 							),
 						)
 					);
@@ -570,14 +606,13 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Order_Service::class ] ) ) {
 					/**
-					 * This will return Sequra_Order_Repository that implements Interface_Deletable_Repository.
-					 *
-					 * @var Interface_Deletable_Repository $deletable_repo
+					 * This will return SeQura_Order_Repository that implements Interface_Deletable_Repository and Interface_Table_Migration_Repository.
+					 * 
+					 * @var SeQura_Order_Repository $repository
 					 */
-					$deletable_repo = RepositoryRegistry::getRepository( SeQuraOrder::class );
+					$repository = RepositoryRegistry::getRepository( SeQuraOrder::class );
 
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
-						$deletable_repo,
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
@@ -585,7 +620,10 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Cart_Service::class ),
 						Reg::getService( StoreContext::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Time_Checker_Service::class ),
+						$repository,
+						$repository
 					);
 				}
 				return self::$cache[ Interface_Order_Service::class ];
@@ -647,6 +685,15 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Assets::class ] = new Assets();
 				}
 				return self::$cache[ Interface_Assets::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Time_Checker_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Time_Checker_Service::class ] ) ) {
+					self::$cache[ Interface_Time_Checker_Service::class ] = new Time_Checker_Service();
+				}
+				return self::$cache[ Interface_Time_Checker_Service::class ];
 			}
 		);
 	}

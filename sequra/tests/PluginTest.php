@@ -42,14 +42,15 @@ class PluginTest extends WP_UnitTestCase {
 	private $product_controller;
 	private $async_process_controller;
 	private $order_controller;
+	private $hook_add_order_indexes;
 
 	public function set_up() {
 
-		$this->wp_version  = '5.9';
-		$this->wc_version  = '4.0';
-		$this->base_name   = 'sequra/sequra.php';
-		$this->file_path   = '/var/www/html/wordpress/plugins/sequra/sequra.php';
-		$this->plugin_data = array(
+		$this->wp_version             = '5.9';
+		$this->wc_version             = '4.0';
+		$this->base_name              = 'sequra/sequra.php';
+		$this->file_path              = '/var/www/html/wordpress/plugins/sequra/sequra.php';
+		$this->plugin_data            = array(
 			'Name'        => 'seQura',
 			'TextDomain'  => 'sequra',
 			'DomainPath'  => '/languages',
@@ -58,6 +59,7 @@ class PluginTest extends WP_UnitTestCase {
 			'RequiresWP'  => '5.9',
 			'RequiresWC'  => '4.0',
 		);
+		$this->hook_add_order_indexes = 'hook_add_order_indexes';
 
 		$this->constants                  = $this->createMock( Interface_Constants::class );
 		$this->i18n_controller            = $this->createMock( Interface_I18n_Controller::class );
@@ -81,6 +83,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->constants->method( 'get_environment_data' )->willReturn( array( 'wp_version' => $this->wp_version ) );
 		$this->constants->method( 'get_woocommerce_data' )->willReturn( array( 'Version' => $this->wc_version ) );
 		$this->constants->method( 'get_plugin_data' )->willReturn( $this->plugin_data );
+		$this->constants->method( 'get_hook_add_order_indexes' )->willReturn( $this->hook_add_order_indexes );
 
 		$this->plugin = new Plugin( 
 			$this->constants,
@@ -133,6 +136,8 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this->order_controller, 'handle_custom_query_vars' ) ) );
 		$this->assertEquals( 10, has_action( 'woocommerce_order_status_changed', array( $this->order_controller, 'handle_order_status_changed' ) ) );
 		$this->assertEquals( 10, has_action( 'woocommerce_admin_order_data_after_order_details', array( $this->order_controller, 'show_link_to_sequra_back_office' ) ) );
+		$this->assertEquals( 10, has_action( 'sequra_cleanup_orders', array( $this->order_controller, 'cleanup_orders' ) ) );
+		$this->assertEquals( 10, has_action( $this->hook_add_order_indexes, array( $this->order_controller, 'migrate_orders_to_use_indexes' ) ) );
 		$this->assertEquals( 10, has_action( 'before_woocommerce_init', array( $this->plugin, 'declare_woocommerce_compatibility' ) ) );
 	}
 

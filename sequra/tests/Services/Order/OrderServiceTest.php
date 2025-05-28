@@ -23,6 +23,7 @@ use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
+use SeQura\WC\Repositories\Interface_Table_Migration_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Order_Service;
@@ -30,9 +31,11 @@ use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Tests\Core\Extension\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\WC\Tests\Core\Extension\BusinessLogic\Domain\Multistore\StoreContextMock;
+use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use WC_DateTime;
 use WC_Order;
 
+// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 class OrderServiceTest extends WP_UnitTestCase {
 
 	private $order_service;
@@ -45,22 +48,26 @@ class OrderServiceTest extends WP_UnitTestCase {
 	private $store_context_mock;
 	private $logger;
 	private $sequra_order_repository;
-	private $sequra_order_deletable_repository;
+	private $time_checker_service;
+	private $deletable_repository;
+	private $table_migration_repository;
 
 	public function set_up(): void {        
-		$this->payment_service                   = $this->createMock( Interface_Payment_Service::class );
-		$this->pricing_service                   = $this->createMock( Interface_Pricing_Service::class );
-		$this->order_status_service              = $this->createMock( Order_Status_Settings_Service::class );
-		$this->configuration                     = $this->createMock( Configuration::class );
-		$this->core_order_service                = $this->createMock( OrderService::class );
-		$this->cart_service                      = $this->createMock( Interface_Cart_Service::class );
-		$this->store_context_mock                = $this->createMock( StoreContextMock::class );
-		$this->logger                            = $this->createMock( Interface_Logger_Service::class );
-		$this->sequra_order_repository           = $this->createMock( SeQuraOrderRepositoryInterface::class );
-		$this->sequra_order_deletable_repository = $this->createMock( Interface_Deletable_Repository::class );
-		
+		$this->payment_service            = $this->createMock( Interface_Payment_Service::class );
+		$this->pricing_service            = $this->createMock( Interface_Pricing_Service::class );
+		$this->order_status_service       = $this->createMock( Order_Status_Settings_Service::class );
+		$this->configuration              = $this->createMock( Configuration::class );
+		$this->core_order_service         = $this->createMock( OrderService::class );
+		$this->cart_service               = $this->createMock( Interface_Cart_Service::class );
+		$this->store_context_mock         = $this->createMock( StoreContextMock::class );
+		$this->logger                     = $this->createMock( Interface_Logger_Service::class );
+		$this->sequra_order_repository    = $this->createMock( SeQuraOrderRepositoryInterface::class );
+		$this->time_checker_service       = $this->createMock( Interface_Time_Checker_Service::class );
+		$this->deletable_repository       = $this->createMock( Interface_Deletable_Repository::class );
+		$this->table_migration_repository = $this->createMock( Interface_Table_Migration_Repository::class );
+
+
 		$this->order_service = new Order_Service(
-			$this->sequra_order_deletable_repository,
 			$this->sequra_order_repository,
 			$this->payment_service,
 			$this->pricing_service,
@@ -68,7 +75,10 @@ class OrderServiceTest extends WP_UnitTestCase {
 			$this->configuration,
 			$this->cart_service,
 			new StoreContext( $this->store_context_mock ),
-			$this->logger
+			$this->logger,
+			$this->time_checker_service,
+			$this->deletable_repository,
+			$this->table_migration_repository
 		);
 	}
 
@@ -376,5 +386,132 @@ class OrderServiceTest extends WP_UnitTestCase {
 
 		// Execute.
 		$this->order_service->handle_refund( $order, $amount );
+	}
+
+	/**
+	 * @dataProvider dataProvider_IsMigrationComplete_happyPath
+	 */
+	public function testIsMigrationComplete_happyPath_CallTheRepository( $complete ) {
+		// Setup.
+		$this->table_migration_repository->expects( $this->once() )
+			->method( 'is_migration_complete' )
+			->willReturn( $complete );
+
+		// Execute.
+		$this->assertEquals( $complete, $this->order_service->is_migration_complete() );
+	}
+
+	public function dataProvider_IsMigrationComplete_happyPath() {
+		return array(
+			array( true ),
+			array( false ),
+		);
+	}
+
+	public function testMigrateData_tablesNotPrepared_SkipExecution() {
+		// Setup.
+		$this->logger->expects( $this->once() )
+			->method( 'log_error' )
+			->with(
+				'An error occurred while preparing the tables for migration.', 
+				'migrate_data', 
+				'SeQura\WC\Services\Order\Order_Service',
+				$this->anything()
+			);
+		
+		$this->table_migration_repository->expects( $this->once() )
+		->method( 'prepare_tables_for_migration' )
+		->willReturn( false );
+
+		$this->table_migration_repository->expects( $this->never() )
+		->method( 'migrate_next_row' );
+
+		// Execute.
+		$this->order_service->migrate_data();
+	}
+
+	/**
+	 * @dataProvider dataProvider_MigrateData_currentTimeNotAllowed_SkipExecution
+	 */
+	public function testMigrateData_currentTimeNotAllowed_SkipExecution( $from, $to ) {
+		// Setup.
+		$this->table_migration_repository->expects( $this->once() )
+		->method( 'prepare_tables_for_migration' )
+		->willReturn( true );
+
+		add_filter(
+			'sequra_migration_from',
+			function ( $value ) use ( $from ) {
+				return $from;
+			} 
+		);
+		add_filter(
+			'sequra_migration_to',
+			function ( $value ) use ( $to ) {
+				return $to;
+			} 
+		);
+
+		$this->time_checker_service->expects( $this->once() )
+		->method( 'is_current_hour_in_range' )
+		->with( $from, $to )
+		->willReturn( false );
+
+		$this->table_migration_repository->expects( $this->never() )->method( 'migrate_next_row' );
+
+		// Execute.
+		$this->order_service->migrate_data();
+	}
+
+	public function dataProvider_MigrateData_currentTimeNotAllowed_SkipExecution() {
+		return array(
+			array( 1, 5 ),
+			array( 0, 12 ),
+		);
+	}
+
+	/**
+	 * @dataProvider dataProvider_MigrateData_happyPath_Execute
+	 */
+	public function testMigrateData_happyPath_Execute( $batch_size, $pending_rows ) {
+		// Setup.
+		$this->table_migration_repository->expects( $this->once() )
+			->method( 'prepare_tables_for_migration' )
+			->willReturn( true );
+
+		$this->time_checker_service->expects( $this->once() )
+			->method( 'is_current_hour_in_range' )
+			->willReturn( true );
+
+		add_filter(
+			'sequra_migration_batch_size',
+			function ( $value ) use ( $batch_size ) {
+				return $batch_size;
+			} 
+		);
+		$max_executions = min( $pending_rows, $batch_size );
+	
+		$this->table_migration_repository->expects( $this->exactly( $max_executions ) )
+			->method( 'migrate_next_row' )
+			->willReturn( true );
+
+		$invoked_count = $this->exactly( $max_executions );
+		$this->table_migration_repository->expects( $invoked_count )
+			->method( 'maybe_remove_legacy_table' )
+			->willReturnCallback(
+				function () use ( $invoked_count, $max_executions ) {
+					return $invoked_count->getInvocationCount() === $max_executions;
+				}
+			);
+
+		// Execute.
+		$this->order_service->migrate_data();
+	}
+
+	public function dataProvider_MigrateData_happyPath_Execute() {
+		return array(
+			array( 2, 3 ),
+			array( 10, 1 ),
+		);
 	}
 }

@@ -141,6 +141,7 @@ class Plugin {
 		\add_action( 'woocommerce_order_status_changed', array( $order_controller, 'handle_order_status_changed' ), 10, 4 );
 		\add_action( 'woocommerce_admin_order_data_after_order_details', array( $order_controller, 'show_link_to_sequra_back_office' ) );
 		\add_action( self::HOOK_CLEANUP_ORDERS, array( $order_controller, 'cleanup_orders' ) );
+		\add_action( $constants->get_hook_add_order_indexes(), array( $order_controller, 'migrate_orders_to_use_indexes' ) );
 
 		// WooCommerce Compat.
 		\add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );

@@ -19,16 +19,17 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
+use SeQura\WC\Repositories\Interface_Table_Migration_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use Throwable;
 use WC_Customer;
 use WC_DateTime;
@@ -104,19 +105,30 @@ class Order_Service implements Interface_Order_Service {
 	private $sequra_order_repository;
 
 	/**
+	 * Time checker service
+	 * 
+	 * @var Interface_Time_Checker_Service
+	 */
+	private $time_checker_service;
+
+	/**
 	 * Deletable repository
 	 *
 	 * @var Interface_Deletable_Repository
 	 */
-	private $sequra_order_deletable_repository;
+	private $deletable_repository;
+
+	/**
+	 * Table migration repository
+	 *
+	 * @var Interface_Table_Migration_Repository
+	 */
+	private $table_migration_repository;
 
 	/**
 	 * Constructor
-	 * 
-	 * @param Interface_Deletable_Repository $sequra_order_deletable_repository
 	 */
 	public function __construct(
-		$sequra_order_deletable_repository,
 		SeQuraOrderRepositoryInterface $sequra_order_repository, 
 		Interface_Payment_Service $payment_service,
 		Interface_Pricing_Service $pricing_service,
@@ -124,17 +136,22 @@ class Order_Service implements Interface_Order_Service {
 		Configuration $configuration,
 		Interface_Cart_Service $cart_service,
 		StoreContext $store_context,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		Interface_Time_Checker_Service $time_checker_service,
+		Interface_Deletable_Repository $deletable_repository,
+		Interface_Table_Migration_Repository $table_migration_repository
 	) {
-		$this->payment_service                   = $payment_service;
-		$this->pricing_service                   = $pricing_service;
-		$this->order_status_service              = $order_status_service;
-		$this->configuration                     = $configuration;
-		$this->cart_service                      = $cart_service;
-		$this->store_context                     = $store_context;
-		$this->logger                            = $logger;
-		$this->sequra_order_repository           = $sequra_order_repository;
-		$this->sequra_order_deletable_repository = $sequra_order_deletable_repository;
+		$this->payment_service            = $payment_service;
+		$this->pricing_service            = $pricing_service;
+		$this->order_status_service       = $order_status_service;
+		$this->configuration              = $configuration;
+		$this->cart_service               = $cart_service;
+		$this->store_context              = $store_context;
+		$this->logger                     = $logger;
+		$this->sequra_order_repository    = $sequra_order_repository;
+		$this->time_checker_service       = $time_checker_service;
+		$this->deletable_repository       = $deletable_repository;
+		$this->table_migration_repository = $table_migration_repository;
 	}
 	
 	/**
@@ -891,19 +908,7 @@ class Order_Service implements Interface_Order_Service {
 	 * @return void
 	 */
 	public function cleanup_orders() {
-		if ( ! $this->sequra_order_deletable_repository instanceof Interface_Deletable_Repository ) {
-			$this->logger->log_error(
-				'seQura Orders cleanup CRON JOB skipped: The order deletable repository is not set.',
-				__FUNCTION__,
-				__CLASS__,
-				array(
-					new LogContextData( 'actualType', is_object( $this->sequra_order_deletable_repository ) ? get_class( $this->sequra_order_deletable_repository ) : 'NULL' ),
-					new LogContextData( 'expectedType', Interface_Deletable_Repository::class ),
-				) 
-			);
-			return;
-		}
-		$this->sequra_order_deletable_repository->delete_old_and_invalid();
+		$this->deletable_repository->delete_old_and_invalid();
 	}
 
 	/**
@@ -919,5 +924,60 @@ class Order_Service implements Interface_Order_Service {
 
 		$sq_order = $this->sequra_order_repository->getByShopReference( $order->get_id() );
 		return $sq_order ? (string) $sq_order->getMerchant()->getId() : null;
+	}
+
+
+	/**
+	 * Check if the migration process is complete
+	 * 
+	 * @return bool True if they are missing indexes, false otherwise
+	 */
+	public function is_migration_complete() {
+		return $this->table_migration_repository->is_migration_complete();
+	}
+
+	/**
+	 * Execute the migration process
+	 */
+	public function migrate_data() {
+		if ( ! $this->table_migration_repository->prepare_tables_for_migration() ) {
+			$this->logger->log_error( 'An error occurred while preparing the tables for migration.', __FUNCTION__, __CLASS__ );
+			return;
+		}
+
+		/**
+		 * Filters the start hour for the migration process.
+		 * 
+		 * @since 3.1.2
+		 * @return int The hour to start the migration process, default is 2 (2AM).
+		 */
+		$from = (int) apply_filters( 'sequra_migration_from', 2 );
+
+		/**
+		 * Filters the end hour for the migration process.
+		 * 
+		 * @since 3.1.2
+		 * @return int The hour to end the migration process, default is 6 (6AM).
+		 */
+		$to = (int) apply_filters( 'sequra_migration_to', 6 );
+
+		if ( ! $this->time_checker_service->is_current_hour_in_range( $from, $to ) ) { 
+			return;
+		}
+
+		/**
+		 * Filters the batch size for the migration process.
+		 * 
+		 * @since 3.1.2
+		 * @return int The number of rows to process in each batch, default is 100.
+		 */
+		$batch_size = (int) apply_filters( 'sequra_migration_batch_size', 100 );
+		for ( $i = 0; $i < $batch_size; $i++ ) {
+			$this->table_migration_repository->migrate_next_row();
+			if ( $this->table_migration_repository->maybe_remove_legacy_table() ) {
+				// Migration is complete.
+				break;
+			}
+		}
 	}
 }

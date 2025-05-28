@@ -102,6 +102,11 @@ Contributors:
 == Changelog ==
 = 3.2.0	=
 * Added: Filter to allow modifying the locale.
+* Added: SeQura orders are now indexed on new installations.
+* Fixed: Existing SeQura orders are indexed in batches in the background using a Cron Job to take advantage of the performance boost.
+* Added: Filter to set the start time for running database migrations.
+* Added: Filter to set the end time for running database migrations.
+* Added: Filter to set how many entities will be processed every time the database migration runs.
 = 3.1.1	=
 * Fixed: Use WC Order ID from notification parameters for retrieving the Order for confirmation at seQura.
 * Fixed: Error that prevents the process that handles the deletion of old seQura order data from running.

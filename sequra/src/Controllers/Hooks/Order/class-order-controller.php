@@ -33,7 +33,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	public function __construct( 
 		Interface_Logger_Service $logger, 
 		string $templates_path,
-		Interface_Order_Service $order_service 
+		Interface_Order_Service $order_service
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->order_service = $order_service;
@@ -167,5 +167,22 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	public function cleanup_orders() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$this->order_service->cleanup_orders();
+	}
+
+	/**
+	 * Respond to the sequra_order_migration_add_indexes hook
+	 * 
+	 * @param string $hook Hook name that triggered the action.
+	 */
+	public function migrate_orders_to_use_indexes( $hook ) {
+		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
+
+		if ( $this->order_service->is_migration_complete() ) {
+			$this->logger->log_debug( 'Indexing process is done. Job will be unscheduled', __FUNCTION__, __CLASS__ );
+			\wp_clear_scheduled_hook( $hook, array( $hook ) );
+			return;
+		}
+
+		$this->order_service->migrate_data();
 	}
 }

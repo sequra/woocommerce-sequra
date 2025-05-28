@@ -15,6 +15,8 @@ use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConf
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
+use SeQura\WC\Repositories\Repository;
+use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use Throwable;
 
 /**
@@ -23,10 +25,49 @@ use Throwable;
 class Migration_Install_300 extends Migration {
 
 	/**
+	 * Order repository.
+	 * 
+	 * @var Repository
+	 */
+	private $order_repository;
+
+	/**
+	 * Entity repository.
+	 * 
+	 * @var Repository
+	 */
+	private $entity_repository;
+
+	/**
+	 * Queue repository.
+	 * 
+	 * @var Repository
+	 */
+	private $queue_repository;
+
+	/**
 	 * Get the plugin version when the changes were made.
 	 */
 	public function get_version(): string {
 		return '3.0.0';
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param \wpdb $wpdb Database instance.
+	 */
+	public function __construct( 
+		\wpdb $wpdb, 
+		Configuration $configuration,
+		Repository $order_repository,
+		Repository $entity_repository,
+		Repository $queue_repository
+	) {
+		parent::__construct( $wpdb, $configuration );
+		$this->order_repository  = $order_repository;
+		$this->entity_repository = $entity_repository;
+		$this->queue_repository  = $queue_repository;
 	}
 
 	/**
@@ -46,72 +87,31 @@ class Migration_Install_300 extends Migration {
 	}
 
 	/**
-	 * Check if the table exists in the database
-	 *
-	 * @throws Critical_Migration_Exception
-	 */
-	private function check_if_table_exists( string $table_name ): void {
-		if ( $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) !== $table_name ) {
-			throw new Critical_Migration_Exception( \esc_html( "Could not create the table \"$table_name\"" ) );
-		}
-	}
-
-	/**
 	 * Add new tables to the database.
 	 * 
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
 	private function add_new_tables_to_database(): void {
-		$charset_collate = $this->db->get_charset_collate();
-
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-		foreach ( array( 'sequra_entity', 'sequra_order' ) as $table ) {
-			$table_name = $this->db->prefix . $table;
-			dbDelta(
-				"CREATE TABLE $table_name (
-				`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-				`type` VARCHAR(255),
-				`index_1` VARCHAR(127),
-				`index_2` VARCHAR(127),
-				`index_3` VARCHAR(127),
-				`index_4` VARCHAR(127),
-				`index_5` VARCHAR(127),
-				`index_6` VARCHAR(127),
-				`index_7` VARCHAR(127),
-				`data` LONGTEXT,
-				PRIMARY KEY  (id),
-				KEY `{$table_name}_type_index_1` (`type`, `index_1`),
-				KEY `{$table_name}_type_index_2` (`type`, `index_2`),
-				KEY `{$table_name}_type_index_3` (`type`, `index_3`)
-			) $charset_collate;" 
-			);
-			$this->check_if_table_exists( $table_name );
-		}
-
-		$table_name = $this->db->prefix . 'sequra_queue';
-		dbDelta(
-			"CREATE TABLE $table_name (
-			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-			`type` VARCHAR(255),
-			`index_1` VARCHAR(127),
-			`index_2` VARCHAR(127),
-			`index_3` VARCHAR(127),
-			`index_4` VARCHAR(127),
-			`index_5` VARCHAR(127),
-			`index_6` BIGINT UNSIGNED,
-			`index_7` BIGINT UNSIGNED,
-			`index_8` BIGINT UNSIGNED,
-			`index_9` BIGINT UNSIGNED,
-			`data` LONGTEXT,
-			PRIMARY KEY  (id),
-			KEY `{$table_name}_type_index_1` (`type`, `index_1`),
-			KEY `{$table_name}_type_index_2` (`type`, `index_2`),
-			KEY `{$table_name}_type_index_3` (`type`, `index_3`),
-			KEY `{$table_name}_type_index_4` (`type`, `index_4`)
-		) $charset_collate;" 
+		/**
+		 * Repository instances.
+		 * 
+		 * @var Repository[] $repos
+		 */
+		$repos = array(
+			$this->order_repository,
+			$this->entity_repository,
+			$this->queue_repository,
 		);
-		$this->check_if_table_exists( $table_name );
+
+		foreach ( $repos as $repo ) {
+			// Skip this migration if the table already exists.
+			if ( $repo->table_exists() ) {
+				continue;
+			}
+			if ( ! $repo->create_table() ) {
+				throw new Critical_Migration_Exception( \esc_html( "Could not create the table \"{$repo->get_table_name()}\"" ) );
+			}
+		}
 	}
 
 	/**
