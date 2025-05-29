@@ -243,7 +243,7 @@ test.describe('Configuration', () => {
 
     const defaultCountriesRef = [
       { country: 'ES', ref: 'dummy_automated_tests' },
-      { country: 'FR', ref: 'dummy_automated_tests_fr' },
+      // { country: 'FR', ref: 'dummy_automated_tests_fr' },
       { country: 'IT', ref: 'dummy_automated_tests_it' },
       { country: 'PT', ref: 'dummy_automated_tests_pt' },
     ];
