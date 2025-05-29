@@ -33,7 +33,7 @@
          * @returns {string|null}
          */
         getCheckedPaymentOpt: function () {
-            if ('undefined' === typeof SeQuraCheckout) {
+            if ('undefined' === typeof SeQuraCheckout || 'undefined' === typeof SeQuraCheckout.selectedPaymentMethod) {
                 return null
             }
             return SeQuraCheckout.selectedPaymentMethod;
