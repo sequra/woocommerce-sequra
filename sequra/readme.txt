@@ -2,8 +2,8 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.7.1
-Stable tag: 3.1.1
+Tested up to: 6.8.1
+Stable tag: 3.2.0
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -109,6 +109,7 @@ Contributors:
 * Added: Filter to set how many entities will be processed every time the database migration runs.
 * Added: Filter for delaying the execution of the listener for the WooCommerce updated_checkout JS event.
 * Added: Filter to set the delay in milliseconds of the listener for the WooCommerce updated_checkout JS event.
+* Changed: Tested up to WordPress 6.8.1 and WooCommerce 9.8.5.
 
 = 3.1.1	=
 * Fixed: Use WC Order ID from notification parameters for retrieving the Order for confirmation at seQura.
