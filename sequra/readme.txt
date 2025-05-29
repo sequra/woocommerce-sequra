@@ -107,6 +107,9 @@ Contributors:
 * Added: Filter to set the start time for running database migrations.
 * Added: Filter to set the end time for running database migrations.
 * Added: Filter to set how many entities will be processed every time the database migration runs.
+* Added: Filter for delaying the execution of the listener for the WooCommerce updated_checkout JS event.
+* Added: Filter to set the delay in milliseconds of the listener for the WooCommerce updated_checkout JS event.
+
 = 3.1.1	=
 * Fixed: Use WC Order ID from notification parameters for retrieving the Order for confirmation at seQura.
 * Fixed: Error that prevents the process that handles the deletion of old seQura order data from running.

@@ -322,11 +322,31 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default()
 		);
 
+		/**
+		 * Set the flag to delay the updated checkout event listener
+		 * 
+		 * @since 3.2.0
+		 * @param bool $is_updated_checkout_listener_delayed
+		 * @return bool
+		 */
+		$is_updated_checkout_listener_delayed = (bool) apply_filters( 'sequra_is_updated_checkout_listener_delayed', false );
+
+		/**
+		 * Set the delay for the updated checkout event listener in milliseconds
+		 * 
+		 * @since 3.2.0
+		 * @param int $updated_checkout_listener_delay
+		 * @return int
+		 */
+		$updated_checkout_listener_delay = (int) apply_filters( 'sequra_updated_checkout_listener_delay', 0 );
+
 		\wp_localize_script(
 			self::HANDLE_CHECKOUT,
 			'SeQuraCheckout',
 			array(
-				'isBlockCheckout' => $is_block,
+				'isBlockCheckout'                  => $is_block,
+				'isUpdatedCheckoutListenerDelayed' => $is_updated_checkout_listener_delayed,
+				'updatedCheckoutListenerDelay'     => $updated_checkout_listener_delay,
 			) 
 		);
 		\wp_enqueue_script( self::HANDLE_CHECKOUT );

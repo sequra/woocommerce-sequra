@@ -12,9 +12,33 @@
 
             if (this.isJQueryActive()) {
                 jQuery(document.body).on('updated_checkout', e => {
-                    this.bindEvents()
+                    if(!this.isUpdatedCheckoutListenerDelayed()) {
+                        this.bindEvents();
+                        return;
+                    }
+                    
+                    setTimeout(() => this.bindEvents(), this.getUpdatedCheckoutListenerDelay());
                 });
             }
+        },
+
+        /**
+         * Verifies if the updated checkout listener is delayed. Defaults to false if not defined.
+         * 
+         * @returns {boolean}
+         */
+        isUpdatedCheckoutListenerDelayed: function () {
+            return 'undefined' === typeof SeQuraCheckout || 'undefined' === typeof SeQuraCheckout.isUpdatedCheckoutListenerDelayed ? false : !!SeQuraCheckout.isUpdatedCheckoutListenerDelayed;
+        },
+
+        /**
+         * Returns the delay for the updated checkout listener. Defaults to 0 if not defined.
+         * 
+         * @returns {number}
+         */
+        getUpdatedCheckoutListenerDelay: function () {
+            const delay = 'undefined' === typeof SeQuraCheckout || 'undefined' === typeof SeQuraCheckout.updatedCheckoutListenerDelay ? 0 : parseInt(SeQuraCheckout.updatedCheckoutListenerDelay, 10);
+            return Number.isNaN(delay) ? 0 : delay;
         },
 
         /**
@@ -33,7 +57,7 @@
          * @returns {string|null}
          */
         getCheckedPaymentOpt: function () {
-            if ('undefined' === typeof SeQuraCheckout) {
+            if ('undefined' === typeof SeQuraCheckout || 'undefined' === typeof SeQuraCheckout.selectedPaymentMethod) {
                 return null
             }
             return SeQuraCheckout.selectedPaymentMethod;
