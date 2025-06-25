@@ -71,6 +71,11 @@ class Migration_Install_320 extends Migration {
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
 	public function run(): void {
+		// Schedule indexing of the sequra_order table.
+		$args = array( $this->hook_name );
+		if ( ! \wp_next_scheduled( $this->hook_name, $args ) ) {
+			\wp_schedule_event( time(), 'hourly', $this->hook_name, $args );
+		}
 		// Index tables with almost no data or no data at all (sequra_entity, sequra_queue).
 		$repos = array(
 			$this->entity_repository,
@@ -82,12 +87,6 @@ class Migration_Install_320 extends Migration {
 					throw new Exception( 'Failed to add index ' . \sanitize_key( $index->name ) . ' to table ' . \sanitize_key( $repo->get_table_name() ) );
 				}
 			}
-		}
-		
-		// Schedule indexing of the sequra_order table.
-		$args = array( $this->hook_name );
-		if ( ! \wp_next_scheduled( $this->hook_name, $args ) ) {
-			\wp_schedule_event( time(), 'hourly', $this->hook_name, $args );
 		}
 	}
 }
