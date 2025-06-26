@@ -163,7 +163,7 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 		 */
 		$result = $this->payment_gateway->process_refund( $order->get_id(), $amount );
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$note = 'Refund amount cannot be empty';
+		$note = 'Refund amount must be greater than 0';
 		$this->assertEquals( $note, $result->get_error_message( 'empty_refund_amount' ) );
 		$this->assertContains( $note, $this->store->get_order_notes( $order->get_id() ) );
 	}
