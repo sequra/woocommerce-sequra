@@ -567,7 +567,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		}
 		$amount = (float) $amount;
 		if ( $amount <= 0 ) {
-			$message = __( 'Refund amount cannot be empty', 'sequra' );
+			$message = __( 'Refund amount must be greater than 0', 'sequra' );
 			$order->add_order_note( $message );
 			$this->logger->log_debug( 'Invalid refund amount: ' . $amount, __FUNCTION__, __CLASS__ );
 			return new WP_Error( 'empty_refund_amount', $message );
