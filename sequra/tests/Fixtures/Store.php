@@ -75,6 +75,19 @@ class Store {
 		return $this->orders;
 	}
 
+	/**
+	 * Get Order notes
+	 * @param int $order_id Order ID
+	 * @return string[] Array of order notes
+	 */
+	public function get_order_notes( $order_id ) {
+		$notes = array();
+		foreach ( wc_get_order_notes( array( 'order_id' => $order_id ) ) as $note_obj ) {
+			$notes[] = $note_obj->content;
+		}
+		return $notes;
+	}
+
 	private function populate_db_with_products(): void {
 		$products = array();
 		$data     = array(
