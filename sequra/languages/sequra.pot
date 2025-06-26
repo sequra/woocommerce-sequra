@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: seQura\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-19 14:40+0000\n"
+"POT-Creation-Date: 2025-06-26 15:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.7.1; wp-6.7.1\n"
+"X-Loco-Version: 2.8.0; wp-6.8.1; php-8.2.28\n"
 "X-Domain: sequra"
 
 #. Author of the plugin
@@ -33,11 +33,7 @@ msgstr ""
 msgid "+info"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:578
-msgid "An error occurred while refunding the order in seQura."
-msgstr ""
-
-#: tests/Controllers/Hooks/Order/OrderControllerTest.php:84
+#: tests/Controllers/Hooks/Order/OrderControllerTest.php:92
 #: src/Controllers/Hooks/Order/class-order-controller.php:102
 msgid "An error occurred while updating the order data in seQura."
 msgstr ""
@@ -46,7 +42,7 @@ msgstr ""
 msgid "API docs"
 msgstr ""
 
-#: src/Repositories/class-repository.php:444
+#: src/Repositories/class-repository.php:504
 msgid "Column is not id or index."
 msgstr ""
 
@@ -62,9 +58,9 @@ msgstr ""
 msgid "date or period in ISO8601 format"
 msgstr ""
 
-#: src/Services/Cart/class-cart-service.php:461
-#: src/Services/Cart/class-cart-service.php:482
-#: src/Services/Cart/class-cart-service.php:524
+#: src/Services/Cart/class-cart-service.php:460
+#: src/Services/Cart/class-cart-service.php:481
+#: src/Services/Cart/class-cart-service.php:523
 msgid "Discount"
 msgstr ""
 
@@ -84,8 +80,8 @@ msgstr ""
 msgid "Flexible payment with seQura"
 msgstr ""
 
-#: src/Services/Cart/class-cart-service.php:402
-#: src/Services/Cart/class-cart-service.php:427
+#: src/Services/Cart/class-cart-service.php:401
+#: src/Services/Cart/class-cart-service.php:426
 msgid "Handling cost"
 msgstr ""
 
@@ -106,7 +102,7 @@ msgid "Order cancelled by seQura."
 msgstr ""
 
 #: src/Services/Payment/class-sequra-payment-gateway.php:534
-#: src/Services/Payment/class-sequra-payment-gateway.php:571
+#: src/Services/Payment/class-sequra-payment-gateway.php:566
 msgid "Order not found"
 msgstr ""
 
@@ -138,8 +134,14 @@ msgstr ""
 msgid "Please, select the payment method you want to use"
 msgstr ""
 
-#: src/Services/Payment/class-sequra-payment-gateway.php:566
-msgid "Refund amount cannot be empty"
+#: src/Services/Payment/class-sequra-payment-gateway.php:570
+msgid "Refund amount must be greater than 0"
+msgstr ""
+
+#. %s is the error message.
+#: src/Services/Payment/class-sequra-payment-gateway.php:580
+#, php-format
+msgid "Refund failed in seQura: %s"
 msgstr ""
 
 #: templates/admin/product_metabox.php:75
@@ -173,7 +175,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Services/Cart/class-cart-service.php:436
+#: src/Services/Cart/class-cart-service.php:435
 msgid "Shipping cost"
 msgstr ""
 

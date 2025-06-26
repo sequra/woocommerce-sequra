@@ -560,22 +560,27 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * @return bool|\WP_Error True or false based on success, or a WP_Error object.
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		$amount = (float) $amount;
-		if ( $amount <= 0 ) {
-			$this->logger->log_debug( 'Invalid refund amount: ' . $amount, __FUNCTION__, __CLASS__ );
-			return new WP_Error( 'empty_refund_amount', __( 'Refund amount cannot be empty', 'sequra' ) );
-		}
 		$order = \wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_error( 'Order not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
 			return new WP_Error( 'order_not_found', __( 'Order not found', 'sequra' ) );
 		}
+		$amount = (float) $amount;
+		if ( $amount <= 0 ) {
+			$message = __( 'Refund amount must be greater than 0', 'sequra' );
+			$order->add_order_note( $message );
+			$this->logger->log_debug( 'Invalid refund amount: ' . $amount, __FUNCTION__, __CLASS__ );
+			return new WP_Error( 'empty_refund_amount', $message );
+		}
 		try {
 			$this->order_service->handle_refund( $order, $amount );
 			return true;
 		} catch ( Throwable $e ) {
+			// translators: %s is the error message.
+			$message = sprintf( esc_html__( 'Refund failed in seQura: %s', 'sequra' ), $e->getMessage() );
+			$order->add_order_note( $message );
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			return new WP_Error( 'refund_failed', __( 'An error occurred while refunding the order in seQura.', 'sequra' ) ); // TODO: improve message.
+			return new WP_Error( 'refund_failed', $message );
 		}
 	}
 }

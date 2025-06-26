@@ -152,6 +152,8 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 	 * @dataProvider dataProvider_ProcessRefund_amountIsEmpty_returnError
 	 */
 	public function testProcessRefund_amountIsEmpty_returnError( $amount ) {
+		$this->store->set_up();
+		$order = $this->store->get_orders()[0];
 		$this->logger->expects( $this->once() )
 			->method( 'log_debug' )
 			->with( 'Invalid refund amount: ' . $amount, 'process_refund', 'SeQura\WC\Services\Payment\Sequra_Payment_Gateway' );
@@ -159,9 +161,11 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 		/**
 		 * @var WP_Error $result
 		 */
-		$result = $this->payment_gateway->process_refund( 1, $amount );
+		$result = $this->payment_gateway->process_refund( $order->get_id(), $amount );
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'Refund amount cannot be empty', $result->get_error_message( 'empty_refund_amount' ) );
+		$note = 'Refund amount must be greater than 0';
+		$this->assertEquals( $note, $result->get_error_message( 'empty_refund_amount' ) );
+		$this->assertContains( $note, $this->store->get_order_notes( $order->get_id() ) );
 	}
 
 	public function dataProvider_ProcessRefund_amountIsEmpty_returnError() {
@@ -195,9 +199,11 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 
 	public function testProcessRefund_onException_returnError() {
 		$this->store->set_up();
-		$order  = $this->store->get_orders()[0];
-		$amount = $order->get_total();
-		$e      = new Exception( 'Test exception' );
+		$order             = $this->store->get_orders()[0];
+		$amount            = $order->get_total();
+		$exception_message = 'Test exception';
+		$note              = 'Refund failed in seQura: ' . $exception_message;
+		$e                 = new Exception( $exception_message );
 		
 		$this->logger->expects( $this->once() )
 			->method( 'log_throwable' )
@@ -213,7 +219,8 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 		 */
 		$result = $this->payment_gateway->process_refund( $order->get_id(), $amount );
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'An error occurred while refunding the order in seQura.', $result->get_error_message( 'refund_failed' ) );
+		$this->assertEquals( $note, $result->get_error_message( 'refund_failed' ) );
+		$this->assertContains( $note, $this->store->get_order_notes( $order->get_id() ) );
 	}
 
 	/**
