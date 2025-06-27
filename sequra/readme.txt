@@ -109,6 +109,7 @@ Contributors:
 * Added: Filter to set how many entities will be processed every time the database migration runs.
 * Added: Filter for delaying the execution of the listener for the WooCommerce updated_checkout JS event.
 * Added: Filter to set the delay in milliseconds of the listener for the WooCommerce updated_checkout JS event.
+* Added: Order notes for refund errors.
 * Changed: Tested up to WordPress 6.8.1 and WooCommerce 9.8.5.
 
 = 3.1.1	=
