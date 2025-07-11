@@ -3,18 +3,18 @@ if [ ! -f .env ]; then
     cp .env.sample .env
 fi
 
-install=1
-disable_ngrok=0
+install=0
+ngrok=0
 
 # Parse arguments:
-# --install=0: Skip installation of dependencies
+# --install: Installation of dependencies
+# --ngrok: Use ngrok to expose the site
 # --ngrok-token=YOUR_NGROK_TOKEN: Override the ngrok token in .env
-# --disable-ngrok=1: Skip ngrok setup
 while [[ "$#" -gt 0 ]]; do
-    if [ "$1" == "--install=0" ]; then
-        install=0
-    elif [ "$1" == "--disable-ngrok=1" ]; then
-        disable_ngrok=1
+    if [ "$1" == "--install" ]; then
+        install=1
+    elif [ "$1" == "--ngrok" ]; then
+        ngrok=1
     elif [[ "$1" == --ngrok-token=* ]]; then
         ngrok_token="${1#*=}"
         sed -i.bak "s|NGROK_AUTHTOKEN=.*|NGROK_AUTHTOKEN=$ngrok_token|" .env
@@ -31,7 +31,7 @@ set -o allexport
 source .env
 set +o allexport
 
-if [ $disable_ngrok -eq 0 ]; then
+if [ $ngrok -eq 1 ]; then
 
     if [ -z "$NGROK_AUTHTOKEN" ]; then
         echo "❌ Please set NGROK_AUTHTOKEN with your ngrok auth token in your .env file (get it from https://dashboard.ngrok.com/)"
@@ -76,7 +76,7 @@ else
     echo "Skipping installation of dependencies."   
 fi
 
-docker compose up -d --build
+docker compose up -d --build || exit 1
 
 echo "🚀 Waiting for installation to complete..."
 
