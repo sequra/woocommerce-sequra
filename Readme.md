@@ -55,6 +55,7 @@ This repo contains a group of utility scripts under `bin/` directory. The goal i
 | `./bin/phpcs` | Run PHP code sniffer on the project files |
 | `./bin/phpcbf` | Automatically correct coding standard violations on the project files |
 | `./bin/phpstan` | Run PHPStan on the project files |
+| `bin/php-syntax-check --php=<PHP-VERSION>` | Check if syntax used is compatible with the PHP version |
 | `./bin/cp_sources` | Copy WordPress Core and WooCommerce code to `.devcontainer/` |
 | `./bin/publish_to_wordpress.sh` | Handles the plugin publishing to WordPress.org |
 | `./bin/make_zip` | Make a ZIP of `sequra` or a glue-plugin that is ready to be use for manual installations. The script allows the following arguments: `--branch=<GIT-BRANCH-NAME>` and `--project=<sequra\|sequra-no-address>`. The resulting file will be generated into `zip/` directory.|
