@@ -50,8 +50,8 @@ echo "Installing dependencies and building the project..."
 bin/composer install --no-dev --quiet --no-interaction
 
 if [[ "$PROJECT" == "sequra" ]]; then
-    bin/npm install --no-progress --silent --no-update-notifier
-    bin/npm run build --no-progress --silent --no-update-notifier
+    bin/npm install --no-progress --no-update-notifier
+    bin/npm run build --no-progress --no-update-notifier
     cd "$PROJECT"
 elif [[ "$PROJECT" == "sequra-no-address" ]]; then
     cd "glue-plugins/$PROJECT"

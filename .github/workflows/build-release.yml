@@ -10,8 +10,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Execute make_zip script
         run: |
-          ./bin/make_zip --branch=${{ github.ref_name }} --project=sequra --filename=sequra.zip
-          ./bin/make_zip --branch=${{ github.ref_name }} --project=sequra-no-address --filename=sequra-no-address.zip
+          bash ./bin/make_zip --branch=${{ github.ref_name }} --project=sequra --filename=sequra.zip
+          bash ./bin/make_zip --branch=${{ github.ref_name }} --project=sequra-no-address --filename=sequra-no-address.zip
       - name: Attach ZIP file to release
         run: |
           cd zip
