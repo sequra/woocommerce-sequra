@@ -32,7 +32,7 @@ echo "Creating a zip file for the \"$PROJECT\" project using branch \"$BRANCH\""
 
 GITHUB_REPO_OWNER="sequra"
 GITHUB_REPO_NAME="woocommerce-sequra"
-GIT_REPO="git@github.com:"${GITHUB_REPO_OWNER}"/"${GITHUB_REPO_NAME}".git"
+GIT_REPO="https://github.com/"${GITHUB_REPO_OWNER}"/"${GITHUB_REPO_NAME}".git"
 BASEDIR="$(dirname $(realpath $0))/.."
 
 mkdir -p "$BASEDIR/zip" || true
