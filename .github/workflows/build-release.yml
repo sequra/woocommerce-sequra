@@ -34,13 +34,12 @@ jobs:
           rm -f sequra/*.log
           rm -f sequra/webpack.config.js
           echo "📦 Creating ZIP files"
-          mkdir -p zip
-          cd sequra
-          zip -r9 ../zip/sequra.zip .
-          cd ../glue-plugins/sequra-no-address
-          zip -r9 ../zip/sequra-no-address.zip .
+          zip -r9 sequra.zip sequra
+          cd glue-plugins
+          zip -r9 sequra-no-address.zip sequra-no-address
+          mv sequra-no-address.zip ../sequra-no-address.zip
           echo "📎 Attaching ZIP files to the release"
-          cd zip
+          cd ..
           release_id=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | jq -r .id)
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @sequra.zip "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=sequra-${{ github.ref_name }}.zip"
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @sequra-no-address.zip "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=sequra-no-address-${{ github.ref_name }}.zip"
