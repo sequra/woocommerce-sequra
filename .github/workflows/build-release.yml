@@ -16,7 +16,7 @@ jobs:
           bin/npm install --no-progress --no-update-notifier
           bin/npm run build --no-progress --no-update-notifier
           echo "🧹 Removing unwanted files"
-          rm -Rf sequra/node_modules
+          sudo rm -Rf sequra/node_modules
           rm -Rf sequra/tests
           rm -Rf sequra/tests-e2e
           rm -Rf sequra/apigen
