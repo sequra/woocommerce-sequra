@@ -11,7 +11,7 @@ jobs:
       - name: Make ZIP files
         run: |
           echo "⚙️ Installing Composer dependencies"
-          bin/composer --no-dev --quiet --no-interaction
+          bin/composer install --no-dev --quiet --no-interaction
           echo "⚙️ Installing NPM dependencies and building"
           bin/npm install --no-progress --no-update-notifier
           bin/npm run build --no-progress --no-update-notifier
