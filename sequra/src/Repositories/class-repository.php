@@ -17,6 +17,7 @@ use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
 use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Table_Index;
+use SeQura\WC\Dto\Table_Index_Column;
 use wpdb;
 
 /**
@@ -581,9 +582,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			return true;
 		}
 		$index_name = \sanitize_key( $index->name );
-		$columns    = $index->columns;
-		foreach ( $columns as &$column ) {
-			$column = '`' . \sanitize_key( $column ) . '`';
+		$columns    = array();
+		foreach ( $index->columns as $column ) {
+			$columns[] = '`' . \sanitize_key( $column ) . '`' . ( null !== $column->char_limit ? "({$column->char_limit})" : '' );
 		}
 		$columns = implode( ',', $columns );
 		return false !== $this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD INDEX `{$index_name}` ({$columns})" );
@@ -739,7 +740,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	public function get_required_indexes() { 
 		return array(
-			new Table_Index( $this->get_table_name() . '_type', array( 'type' ) ),
+			new Table_Index( $this->get_table_name() . '_type', array( new Table_Index_Column( 'type', 64 ) ) ),
 		);
 	}
 

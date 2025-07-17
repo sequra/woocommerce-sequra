@@ -20,14 +20,17 @@ class Table_Index extends Dto {
 	public $name;
 
 	/**
-	 * Names of the columns to be indexed
+	 * Columns to be indexed
 	 * 
-	 * @var string[]
+	 * @var Table_Index_Column[]
 	 */
 	public $columns;
 
 	/**
 	 * Constructor
+	 * 
+	 * @param string $name The name of the index.
+	 * @param Table_Index_Column[] $columns The columns to be indexed.
 	 */
 	public function __construct( string $name, array $columns ) {
 		$this->name    = $name;

@@ -16,6 +16,7 @@ use SeQura\Core\Infrastructure\TaskExecution\Exceptions\QueueItemSaveException;
 use SeQura\Core\Infrastructure\TaskExecution\Interfaces\Priority;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
 use SeQura\WC\Dto\Table_Index;
+use SeQura\WC\Dto\Table_Index_Column;
 
 /**
  * Queue item repository.
@@ -180,13 +181,20 @@ class Queue_Item_Repository extends Repository implements QueueItemRepository {
 	 * @return Table_Index[] The list of indexes.
 	 */
 	public function get_required_indexes() {
+
+		$type_col    = new Table_Index_Column( 'type', 64 );
+		$index_1_col = new Table_Index_Column( 'index_1', 64 );
+		$index_2_col = new Table_Index_Column( 'index_2', 64 );
+		$index_3_col = new Table_Index_Column( 'index_3', 64 );
+		$index_4_col = new Table_Index_Column( 'index_4', 64 );
+
 		return array_merge(
 			parent::get_required_indexes(),
 			array(
-				new Table_Index( $this->get_table_name() . '_type_index_1', array( 'type', 'index_1' ) ),
-				new Table_Index( $this->get_table_name() . '_type_index_2', array( 'type', 'index_2' ) ),
-				new Table_Index( $this->get_table_name() . '_type_index_3', array( 'type', 'index_3' ) ),
-				new Table_Index( $this->get_table_name() . '_type_index_4', array( 'type', 'index_4' ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_1', array( $type_col, $index_1_col ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_2', array( $type_col, $index_2_col ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_3', array( $type_col, $index_3_col ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_4', array( $type_col, $index_4_col ) ),
 			)
 		);
 	}
