@@ -694,12 +694,8 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return bool
 	 */
 	public function prepare_tables_for_migration() {
-		if ( $this->table_exists( true ) ) {
-			// If the legacy table already exists, we don't need to do anything.
-			return true;
-		}
-		// Rename the table to legacy table.
-		if ( false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
+		// Rename the table to legacy table if it doesn't exist.
+		if ( !$this->table_exists( true ) && false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
 			return false;
 		}
 
