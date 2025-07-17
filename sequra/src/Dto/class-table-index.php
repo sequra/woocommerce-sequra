@@ -36,4 +36,19 @@ class Table_Index extends Dto {
 		$this->name    = $name;
 		$this->columns = $columns;
 	}
+
+	/**
+	 * Generate SQL definition for the index.
+	 * 
+	 * @return string SQL statement to create the index.
+	 */
+	public function to_sql() {
+		$index_name = \sanitize_key( $this->name );
+		$columns    = array();
+		foreach ( $this->columns as $column ) {
+			$columns[] = '`' . \sanitize_key( $column->name ) . '`' . ( null !== $column->char_limit ? "({$column->char_limit})" : '' );
+		}
+		$columns = implode( ', ', $columns );
+		return "INDEX `{$index_name}` ({$columns})";
+	}
 }

@@ -584,7 +584,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		$index_name = \sanitize_key( $index->name );
 		$columns    = array();
 		foreach ( $index->columns as $column ) {
-			$columns[] = '`' . \sanitize_key( $column ) . '`' . ( null !== $column->char_limit ? "({$column->char_limit})" : '' );
+			$columns[] = '`' . \sanitize_key( $column->name ) . '`' . ( null !== $column->char_limit ? "({$column->char_limit})" : '' );
 		}
 		$columns = implode( ',', $columns );
 		return false !== $this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD INDEX `{$index_name}` ({$columns})" );
@@ -671,13 +671,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	public function create_table() {
 		$indexes = array();
 		foreach ( $this->get_required_indexes() as $index ) {
-			$index_name = $index->name;
-			$columns    = $index->columns;
-			foreach ( $columns as &$column ) {
-				$column = '`' . \sanitize_key( $column ) . '`';
-			}
-			$columns   = implode( ',', $columns );
-			$indexes[] = "KEY `{$index_name}` ({$columns})";
+			$indexes[] = $index->to_sql();
 		}
 		$indexes = implode( ', ', $indexes );
 		if ( ! empty( $indexes ) ) {
