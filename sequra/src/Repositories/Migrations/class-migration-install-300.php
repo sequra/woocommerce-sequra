@@ -108,8 +108,11 @@ class Migration_Install_300 extends Migration {
 			if ( $repo->table_exists() ) {
 				continue;
 			}
-			if ( ! $repo->create_table() ) {
-				throw new Critical_Migration_Exception( \esc_html( "Could not create the table \"{$repo->get_table_name()}\"" ) );
+
+			try {
+				$repo->create_table();
+			} catch ( Throwable $e ) {
+				throw new Critical_Migration_Exception( \esc_html( "Could not create the table \"{$repo->get_table_name()}\". {$e->getMessage()}" ) );
 			}
 		}
 	}

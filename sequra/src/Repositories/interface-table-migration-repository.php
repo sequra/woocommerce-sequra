@@ -60,7 +60,7 @@ interface Interface_Table_Migration_Repository {
 	/**
 	 * Make sure that the required tables for the migration are created.
 	 * 
-	 * @return bool
+	 * @throws Throwable If cannot prepare tables for migration.
 	 */
 	public function prepare_tables_for_migration();
 
@@ -74,7 +74,7 @@ interface Interface_Table_Migration_Repository {
 	/**
 	 * Create the table if it doesn't exist.
 	 * 
-	 * @return bool True if the table was created successfully, false otherwise.
+	 * @throws Throwable If the table could not be created.
 	 */
 	public function create_table();
 

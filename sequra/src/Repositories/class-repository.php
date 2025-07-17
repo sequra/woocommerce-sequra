@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Repositories;
 
+use Exception;
 use SeQura\Core\Infrastructure\ORM\Entity;
 use SeQura\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use SeQura\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
@@ -664,7 +665,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Create the table if it doesn't exist.
 	 * 
-	 * @return bool True if the table was created successfully, false otherwise.
+	 * @throws Exception If the table creation fails.
 	 */
 	public function create_table() {
 		$indexes = array();
@@ -684,33 +685,34 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 		$sql = sprintf( $this->get_create_table_sql(), $indexes );
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		\dbDelta( $sql );
-		return $this->table_exists();
+		$result = \dbDelta( $sql );
+		if ( ! $this->table_exists() ) {
+			throw new Exception( \esc_html( "SQL: $sql\nResult: " . implode( '. ', $result ) ) );
+		}
 	}
 
 	/**
 	 * Make sure that the required tables for the migration are created.
 	 * 
-	 * @return bool
+	 * @throws Exception If cannot prepare tables for migration.
 	 */
 	public function prepare_tables_for_migration() {
 		// Rename the table to legacy table if it doesn't exist.
-		if ( !$this->table_exists( true ) && false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
-			return false;
+		if ( ! $this->table_exists( true ) && false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
+			throw new Exception( \esc_html( "Could not rename table {$this->get_table_name()} to {$this->get_legacy_table_name()}" ) );
 		}
 
-		// Create the table if not exists.
-		if ( ! $this->create_table() ) {
-			return false;
+		if ( ! $this->table_exists() ) { 
+			// Create the table if not exists.
+			$this->create_table();
+			
+			// Add the auto-increment next value to the new table.
+			$raw_id         = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
+			$auto_increment = null !== $raw_id && is_numeric( $raw_id ) ? (int) $raw_id + 1 : 1;
+			if ( false === $this->db->query( "ALTER TABLE {$this->get_table_name()} AUTO_INCREMENT = {$auto_increment};" ) ) {
+				throw new Exception( \esc_html( "Could not set auto-increment value for table {$this->get_table_name()} to {$auto_increment}" ) );
+			}
 		}
-		// Add the auto-increment next value to the new table.
-		$raw_id         = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
-		$auto_increment = null !== $raw_id && is_numeric( $raw_id ) ? (int) $raw_id + 1 : 1;
-		if ( false === $this->db->query( "ALTER TABLE {$this->get_table_name()} AUTO_INCREMENT = {$auto_increment};" ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
