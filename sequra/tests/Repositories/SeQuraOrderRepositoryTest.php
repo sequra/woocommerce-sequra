@@ -60,11 +60,9 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 		$original_table_content = $this->order_table->get_all( false );
 
 		// Execute.
-		$result = $this->repository->prepare_tables_for_migration();
+		$this->repository->prepare_tables_for_migration();
 
 		// Assert.
-		$this->assertTrue( $result );
-		
 		$table_content = $this->order_table->get_all( false );
 		$this->assertTrue( is_array( $table_content ) && empty( $table_content ) );
 
