@@ -940,8 +940,10 @@ class Order_Service implements Interface_Order_Service {
 	 * Execute the migration process
 	 */
 	public function migrate_data() {
-		if ( ! $this->table_migration_repository->prepare_tables_for_migration() ) {
-			$this->logger->log_error( 'An error occurred while preparing the tables for migration.', __FUNCTION__, __CLASS__ );
+		try {
+			$this->table_migration_repository->prepare_tables_for_migration();
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return;
 		}
 

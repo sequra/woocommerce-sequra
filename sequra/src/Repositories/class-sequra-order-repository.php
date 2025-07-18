@@ -9,6 +9,7 @@
 namespace SeQura\WC\Repositories;
 
 use SeQura\WC\Dto\Table_Index;
+use SeQura\WC\Dto\Table_Index_Column;
 
 /**
  * Sequra Order Repository
@@ -52,13 +53,17 @@ class SeQura_Order_Repository extends Repository {
 	 * @return Table_Index[] The list of indexes.
 	 */
 	public function get_required_indexes() {
+		$type_col    = new Table_Index_Column( 'type', 64 );
+		$index_1_col = new Table_Index_Column( 'index_1', 64 );
+		$index_2_col = new Table_Index_Column( 'index_2', 64 );
+		$index_3_col = new Table_Index_Column( 'index_3', 64 );
 		return array_merge(
 			parent::get_required_indexes(),
 			array(
-				new Table_Index( $this->get_table_name() . '_index_3', array( 'index_3' ) ),
-				new Table_Index( $this->get_table_name() . '_type_index_1', array( 'type', 'index_1' ) ),
-				new Table_Index( $this->get_table_name() . '_type_index_2', array( 'type', 'index_2' ) ),
-				new Table_Index( $this->get_table_name() . '_type_index_3', array( 'type', 'index_3' ) ),
+				new Table_Index( $this->get_table_name() . '_index_3', array( $index_3_col ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_1', array( $type_col, $index_1_col ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_2', array( $type_col, $index_2_col ) ),
+				new Table_Index( $this->get_table_name() . '_type_index_3', array( $type_col, $index_3_col ) ),
 			)
 		);
 	}

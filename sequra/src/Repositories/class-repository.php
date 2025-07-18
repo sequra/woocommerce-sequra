@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Repositories;
 
+use Exception;
 use SeQura\Core\Infrastructure\ORM\Entity;
 use SeQura\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use SeQura\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
@@ -16,6 +17,7 @@ use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
 use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Dto\Table_Index;
+use SeQura\WC\Dto\Table_Index_Column;
 use wpdb;
 
 /**
@@ -580,9 +582,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			return true;
 		}
 		$index_name = \sanitize_key( $index->name );
-		$columns    = $index->columns;
-		foreach ( $columns as &$column ) {
-			$column = '`' . \sanitize_key( $column ) . '`';
+		$columns    = array();
+		foreach ( $index->columns as $column ) {
+			$columns[] = '`' . \sanitize_key( $column->name ) . '`' . ( null !== $column->char_limit ? "({$column->char_limit})" : '' );
 		}
 		$columns = implode( ',', $columns );
 		return false !== $this->db->query( "ALTER TABLE `{$this->get_table_name()}` ADD INDEX `{$index_name}` ({$columns})" );
@@ -664,18 +666,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Create the table if it doesn't exist.
 	 * 
-	 * @return bool True if the table was created successfully, false otherwise.
+	 * @throws Exception If the table creation fails.
 	 */
 	public function create_table() {
 		$indexes = array();
 		foreach ( $this->get_required_indexes() as $index ) {
-			$index_name = $index->name;
-			$columns    = $index->columns;
-			foreach ( $columns as &$column ) {
-				$column = '`' . \sanitize_key( $column ) . '`';
-			}
-			$columns   = implode( ',', $columns );
-			$indexes[] = "KEY `{$index_name}` ({$columns})";
+			$indexes[] = $index->to_sql();
 		}
 		$indexes = implode( ', ', $indexes );
 		if ( ! empty( $indexes ) ) {
@@ -684,37 +680,34 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 		$sql = sprintf( $this->get_create_table_sql(), $indexes );
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		\dbDelta( $sql );
-		return $this->table_exists();
+		$result = \dbDelta( $sql );
+		if ( ! $this->table_exists() ) {
+			throw new Exception( \esc_html( "SQL: $sql\nResult: " . implode( '. ', $result ) ) );
+		}
 	}
 
 	/**
 	 * Make sure that the required tables for the migration are created.
 	 * 
-	 * @return bool
+	 * @throws Exception If cannot prepare tables for migration.
 	 */
 	public function prepare_tables_for_migration() {
-		if ( $this->table_exists( true ) ) {
-			// If the legacy table already exists, we don't need to do anything.
-			return true;
-		}
-		// Rename the table to legacy table.
-		if ( false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
-			return false;
+		// Rename the table to legacy table if it doesn't exist.
+		if ( ! $this->table_exists( true ) && false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
+			throw new Exception( \esc_html( "Could not rename table {$this->get_table_name()} to {$this->get_legacy_table_name()}" ) );
 		}
 
-		// Create the table if not exists.
-		if ( ! $this->create_table() ) {
-			return false;
+		if ( ! $this->table_exists() ) { 
+			// Create the table if not exists.
+			$this->create_table();
+			
+			// Add the auto-increment next value to the new table.
+			$raw_id         = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
+			$auto_increment = null !== $raw_id && is_numeric( $raw_id ) ? (int) $raw_id + 1 : 1;
+			if ( false === $this->db->query( "ALTER TABLE {$this->get_table_name()} AUTO_INCREMENT = {$auto_increment};" ) ) {
+				throw new Exception( \esc_html( "Could not set auto-increment value for table {$this->get_table_name()} to {$auto_increment}" ) );
+			}
 		}
-		// Add the auto-increment next value to the new table.
-		$raw_id         = $this->db->get_var( "SELECT MAX(id) FROM {$this->get_legacy_table_name()};" );
-		$auto_increment = null !== $raw_id && is_numeric( $raw_id ) ? (int) $raw_id + 1 : 1;
-		if ( false === $this->db->query( "ALTER TABLE {$this->get_table_name()} AUTO_INCREMENT = {$auto_increment};" ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -741,7 +734,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	public function get_required_indexes() { 
 		return array(
-			new Table_Index( $this->get_table_name() . '_type', array( 'type' ) ),
+			new Table_Index( $this->get_table_name() . '_type', array( new Table_Index_Column( 'type', 64 ) ) ),
 		);
 	}
 

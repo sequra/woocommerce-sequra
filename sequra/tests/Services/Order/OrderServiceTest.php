@@ -410,18 +410,18 @@ class OrderServiceTest extends WP_UnitTestCase {
 
 	public function testMigrateData_tablesNotPrepared_SkipExecution() {
 		// Setup.
+		$throwable = new \Exception( 'A sample error message for testing.' );
 		$this->logger->expects( $this->once() )
-			->method( 'log_error' )
+			->method( 'log_throwable' )
 			->with(
-				'An error occurred while preparing the tables for migration.', 
+				$throwable, 
 				'migrate_data', 
-				'SeQura\WC\Services\Order\Order_Service',
-				$this->anything()
+				'SeQura\WC\Services\Order\Order_Service'
 			);
 		
 		$this->table_migration_repository->expects( $this->once() )
 		->method( 'prepare_tables_for_migration' )
-		->willReturn( false );
+		->willThrowException( $throwable );
 
 		$this->table_migration_repository->expects( $this->never() )
 		->method( 'migrate_next_row' );
