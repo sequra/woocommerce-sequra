@@ -2,8 +2,8 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.8.1
-Stable tag: 3.2.0
+Tested up to: 6.8.2
+Stable tag: 3.2.1
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,10 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.2.1	=
+* Fixed: Allow sequra_order table to be created when migration is running if it does not exists but sequra_order_legacy table does.
+* Changed: Tested up to WordPress 6.8.2 and WooCommerce 10.0.2
+
 = 3.2.0	=
 * Added: Filter to allow modifying the locale.
 * Added: SeQura orders are now indexed on new installations.
