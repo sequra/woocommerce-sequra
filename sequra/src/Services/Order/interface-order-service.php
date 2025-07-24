@@ -251,4 +251,12 @@ interface Interface_Order_Service {
 	 * Execute the migration process
 	 */
 	public function migrate_data();
+
+	/**
+	 * Get the order completion date or current date if not completed.
+	 * 
+	 * @param WC_Order $order
+	 * @return string
+	 */
+	public function get_order_completion_date( $order );
 }

@@ -114,7 +114,7 @@ class Order_Report_Service implements OrderReportServiceInterface {
 					), // Items.
 					$cart_info ? $cart_info->ref : null,
 					$cart_info ? $cart_info->created_at : null, // Created at.
-					( $order->get_date_completed() ?? new \WC_DateTime() )->format( 'Y-m-d H:i:s' ) // Updated At.
+					$this->order_service->get_order_completion_date( $order ) // Updated at.
 				), // Cart.
 				$this->order_service->get_delivery_method( $order ), // Delivery Method.
 				$this->order_service->get_customer( $order, $this->i18n->get_lang() ), // Customer.

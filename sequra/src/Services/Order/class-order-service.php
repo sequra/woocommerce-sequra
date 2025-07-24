@@ -982,4 +982,15 @@ class Order_Service implements Interface_Order_Service {
 			}
 		}
 	}
+
+	/**
+	 * Get the order completion date or current date if not completed.
+	 * 
+	 * @param WC_Order $order
+	 * @return string
+	 */
+	public function get_order_completion_date( $order ) {
+		$datetime = $order instanceof WC_Order ? $order->get_date_completed() : null;
+		return ( $datetime ?? new \WC_DateTime() )->format( 'Y-m-d H:i:s' );
+	}
 }
