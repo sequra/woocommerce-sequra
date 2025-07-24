@@ -780,7 +780,7 @@ class Order_Service implements Interface_Order_Service {
 		$currency      = $order->get_currency( 'edit' );
 		$cart_ref      = $cart_info ? $cart_info->ref : null;
 		$created_at    = $cart_info ? $cart_info->created_at : null;
-		$updated_at    = ( $order->get_date_completed() ?? new \WC_DateTime() )->format( 'Y-m-d H:i:s' );
+		$updated_at    = $this->get_order_completion_date( $order );
 		$shipped_items = array_merge(
 			$this->cart_service->get_items( $order ),
 			$this->cart_service->get_handling_items( $order ),
