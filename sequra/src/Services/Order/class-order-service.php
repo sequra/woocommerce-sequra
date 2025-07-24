@@ -780,7 +780,7 @@ class Order_Service implements Interface_Order_Service {
 		$currency      = $order->get_currency( 'edit' );
 		$cart_ref      = $cart_info ? $cart_info->ref : null;
 		$created_at    = $cart_info ? $cart_info->created_at : null;
-		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+		$updated_at    = $this->get_order_completion_date( $order );
 		$shipped_items = array_merge(
 			$this->cart_service->get_items( $order ),
 			$this->cart_service->get_handling_items( $order ),
@@ -838,7 +838,7 @@ class Order_Service implements Interface_Order_Service {
 		$currency      = $order->get_currency( 'edit' );
 		$cart_ref      = $cart_info ? $cart_info->ref : null;
 		$created_at    = $cart_info ? $cart_info->created_at : null;
-		$updated_at    = $order->get_date_completed()->format( 'Y-m-d H:i:s' );
+		$updated_at    = $this->get_order_completion_date( $order );
 		$shipped_items = array();
 		if ( $order->get_total( 'edit' ) > $amount ) {
 			$shipped_items = array_merge(
@@ -981,5 +981,16 @@ class Order_Service implements Interface_Order_Service {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Get the order completion date or current date if not completed.
+	 * 
+	 * @param WC_Order $order
+	 * @return string
+	 */
+	public function get_order_completion_date( $order ) {
+		$datetime = $order instanceof WC_Order ? $order->get_date_completed() : null;
+		return ( $datetime ?? new \WC_DateTime() )->format( 'Y-m-d H:i:s' );
 	}
 }
