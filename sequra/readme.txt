@@ -100,6 +100,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 3.2.2	=
+* Fixed: Ensure that the order completion date can be retrieved.
+
 = 3.2.1	=
 * Fixed: Allow sequra_order table to be created when migration is running if it does not exists but sequra_order_legacy table does.
 * Changed: Tested up to WordPress 6.8.2 and WooCommerce 10.0.2
