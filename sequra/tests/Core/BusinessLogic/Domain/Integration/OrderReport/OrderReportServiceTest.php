@@ -203,7 +203,7 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 					array(),
 					null,
 					null,
-					$order->get_date_completed()->format( 'Y-m-d H:i:s' )
+					$this->order_service->get_order_completion_date( $order )
 				),
 				$delivery_method,
 				$customer,
