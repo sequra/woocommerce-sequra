@@ -92,7 +92,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$validate_data_args = array_merge(
 			$data_args,
 			array(
-				self::PARAM_MERCHANT_ID => $this->get_arg_string(),
+				self::PARAM_MERCHANT_ID => $this->get_arg_string( false ),
 			)
 		);
 

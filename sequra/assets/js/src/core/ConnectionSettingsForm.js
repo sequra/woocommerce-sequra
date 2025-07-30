@@ -249,9 +249,7 @@ if (!window.SequraFE) {
                 })
             } else {
                 utilities.showLoader();
-
-                const merchantId = configuration.appState === SequraFE.appStates.ONBOARDING ? 'test' : data.countrySettings[0]?.merchantId;
-                api.post(configuration.validateConnectionDataUrl, { ...changedSettings, merchantId: merchantId }, SequraFE.customHeader)
+                api.post(configuration.validateConnectionDataUrl, changedSettings, SequraFE.customHeader)
                     .then((result) => areCredentialsValid(result) ? saveChangedData() : handleValidationError());
             }
         }
