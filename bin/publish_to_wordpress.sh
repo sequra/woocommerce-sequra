@@ -4,13 +4,9 @@
 GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 YELLOW=$(tput setaf 3)
-WHITE=$(tput setaf 7)
-CYAN=$(tput setaf 6)
 NC=$(tput sgr0) # No color
 
 PLUGIN_SLUG="sequra"
-# GITHUB_REPO_OWNER="sequra"
-# GITHUB_REPO_NAME="woocommerce-sequra"
 PLUGIN_FOLDER_IN_REPO="/sequra"
 
 ROOT_PATH=$TMPDIR
