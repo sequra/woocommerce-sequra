@@ -180,8 +180,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 		try {
 			// TODO: complete this.
 			$response = AdminAPI::get()
-			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getDeployments()
+			->deployments( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getAllDeployments()
 			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
@@ -202,7 +202,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		try {
 			// TODO: complete this.
 			$response = AdminAPI::get()
-			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->deployments( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->getNotConnectedDeployments()
 			->toArray();
 		} catch ( \Throwable $e ) {
