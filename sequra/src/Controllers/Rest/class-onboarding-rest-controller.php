@@ -135,13 +135,16 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$this->register_post( "data/{$store_id}", 'save_connection_data', $data_args );
 		$this->register_post( "data/validate/{$store_id}", 'validate_connection_data', $validate_data_args );
 		$this->register_post( "data/disconnect/{$store_id}", 'disconnect', $store_id_args );
-
+		
 		$this->register_get( "widgets/{$store_id}", 'get_widgets', $store_id_args );
 		$this->register_post( "widgets/{$store_id}", 'save_widgets', $widget_args );
 		
 		$this->register_get( "countries/selling/{$store_id}", 'get_selling_countries', $store_id_args );
 		$this->register_get( "countries/{$store_id}", 'get_countries', $store_id_args );
 		$this->register_post( "countries/{$store_id}", 'save_countries', $store_id_args );
+
+		$this->register_get( "deployments/{$store_id}", 'get_deployments', $store_id_args );
+		$this->register_get( "deployments/not-connected/{$store_id}", 'get_not_connected_deployments', $store_id_args );
 	}
 
 	/**
@@ -157,6 +160,50 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$response = AdminAPI::get()
 			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->getOnboardingData()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			$response = new WP_Error( 'error', $e->getMessage() );
+		}
+		return \rest_ensure_response( $response );
+	}
+
+	/**
+	 * Get deployments.
+	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_deployments( WP_REST_Request $request ) {
+		$response = null;
+		try {
+			// TODO: complete this.
+			$response = AdminAPI::get()
+			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getDeployments()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			$response = new WP_Error( 'error', $e->getMessage() );
+		}
+		return \rest_ensure_response( $response );
+	}
+
+	/**
+	 * Get deployments.
+	 * 
+	 * @param WP_REST_Request $request The request.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_not_connected_deployments( WP_REST_Request $request ) {
+		$response = null;
+		try {
+			// TODO: complete this.
+			$response = AdminAPI::get()
+			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getNotConnectedDeployments()
 			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
