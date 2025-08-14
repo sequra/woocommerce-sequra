@@ -152,7 +152,7 @@ window.SequraFE.showDeploymentsModal = function (
                     finalSettings.connectionData.push(updatedConnection);
                 }
 
-                const result = await api.post(configuration.connectUrl, finalSettings);
+                const result = await api.post(configuration.connectUrl, finalSettings, SequraFE.customHeader);
                 if (!areCredentialsValid(result)) {
                     handleValidationError();
 

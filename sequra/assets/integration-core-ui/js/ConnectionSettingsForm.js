@@ -496,7 +496,7 @@ if (!window.SequraFE) {
         const connect = () => {
             utilities.showLoader();
 
-            api.post(configuration.connectUrl, changedSettings)
+            api.post(configuration.connectUrl, changedSettings, SequraFE.customHeader)
                 .then((result) => {
 
                     if (!areCredentialsValid(result)) {
@@ -547,7 +547,7 @@ if (!window.SequraFE) {
 
                 utilities.showLoader();
 
-                api.post(configuration.disconnectUrl, createPayload())
+                api.post(configuration.disconnectUrl, createPayload(), SequraFE.customHeader)
                     .then(() => SequraFE.state.display())
                     .finally(utilities.hideLoader);
             })
