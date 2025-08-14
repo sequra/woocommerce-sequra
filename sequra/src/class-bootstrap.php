@@ -17,7 +17,10 @@ use SeQura\Core\BusinessLogic\DataAccess\SendReport\Entities\SendReport;
 use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalData;
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
+use SeQura\Core\BusinessLogic\DataAccess\Credentials\Entities\Credentials;
+use SeQura\Core\BusinessLogic\DataAccess\Deployments\Entities\Deployment;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\DataAccess\PaymentMethod\Entities\PaymentMethod;
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
@@ -131,7 +134,10 @@ use SeQura\WC\Services\Report\Report_Service;
 use SeQura\WC\Services\Interface_Constants;
 use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use SeQura\WC\Services\Time\Time_Checker_Service;
-use SeQura\WC\Repositories\Interface_Deletable_Repository;
+use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\MiniWidgetMessagesProviderInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Mini_Widget_Messages_Provider;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
 
 /**
  * Implementation for the core bootstrap class.
@@ -696,6 +702,30 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Time_Checker_Service::class ];
 			}
 		);
+
+		Reg::registerService(
+			WidgetConfiguratorInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ WidgetConfiguratorInterface::class ] ) ) {
+					self::$cache[ WidgetConfiguratorInterface::class ] = new Widget_Configurator(
+						Reg::getService( Interface_I18n::class )
+					);
+				}
+				return self::$cache[ WidgetConfiguratorInterface::class ];
+			}
+		);
+		
+		Reg::registerService(
+			MiniWidgetMessagesProviderInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ MiniWidgetMessagesProviderInterface::class ] ) ) {
+					self::$cache[ MiniWidgetMessagesProviderInterface::class ] = new Mini_Widget_Messages_Provider(
+						Reg::getService( Interface_I18n::class )
+					);
+				}
+				return self::$cache[ MiniWidgetMessagesProviderInterface::class ];
+			}
+		);
 	}
 
 	/**
@@ -750,7 +780,9 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( WidgetSettings::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( SendReport::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( TransactionLog::class, Entity_Repository::class );
-		RepositoryRegistry::registerRepository( Payment_Methods::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( PaymentMethod::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
 	}
 
 	/**
@@ -948,7 +980,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Create_Order_Request_Builder::class ),
 						Reg::getService( Interface_Order_Service::class ),
 						Reg::getService( Interface_Logger_Service::class ),
-						RepositoryRegistry::getRepository( Payment_Methods::CLASS_NAME )
+						RepositoryRegistry::getRepository( PaymentMethod::CLASS_NAME )
 					);
 				}
 				return self::$cache[ Interface_Payment_Method_Service::class ];

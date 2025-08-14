@@ -132,7 +132,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			return;
 		}
 		// Styles.
-		\wp_enqueue_style( self::HANDLE_CORE, "{$this->assets_dir_url}/css/sequra-core.css", array(), self::INTEGRATION_CORE_VERSION );
+		\wp_enqueue_style( self::HANDLE_CORE, "{$this->assets_dir_url}/integration-core-ui/css/sequra-core.css", array(), self::INTEGRATION_CORE_VERSION );
 		
 		// Scripts.
 		\wp_register_script( self::HANDLE_SETTINGS_PAGE, "{$this->assets_dir_url}/js/dist/page/settings.min.js", array(), $this->assets_version, true );
@@ -147,7 +147,9 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	private function get_sequra_fe_l10n(): array {
 		$connection_config      = array(
-			'getConnectionDataUrl' => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
+			'getConnectionDataUrl'          => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
+			'getDeploymentsUrl'             => \get_rest_url( null, 'sequra/v1/onboarding/deployments/{storeId}' ),
+			'getNotConnectedDeploymentsUrl' => \get_rest_url( null, 'sequra/v1/onboarding/deployments/not-connected/{storeId}' ),
 		);
 		$payment_page_config    = array_merge(
 			$connection_config,
