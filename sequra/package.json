@@ -4,9 +4,11 @@
     "description": "seQura WordPress plugin",
     "main": "index.js",
     "scripts": {
-        "copy-core-ui-dist": "rm -rf assets/integration-core-ui && mkdir -p assets/integration-core-ui && cp -r node_modules/sequra-core-admin-fe/dist/resources/* assets/integration-core-ui/",
-        "build": "npm run copy-core-ui-dist && webpack --mode production && sass --style=compressed --no-source-map ./assets/css/scss:./assets/css/",
-        "dev": "npm run copy-core-ui-dist && webpack --mode development --progress && sass ./assets/css/scss:./assets/css/"
+        "cp-assets": "cp -r node_modules/sequra-core-admin-fe/dist/resources/assets assets/integration-core-ui/",
+        "cp-css": "cp -r node_modules/sequra-core-admin-fe/dist/resources/css assets/integration-core-ui/",
+        "cp-core-ui-dist": "rm -rf assets/integration-core-ui && mkdir -p assets/integration-core-ui && npm run cp-assets && npm run cp-css",
+        "build": "npm run cp-core-ui-dist && webpack --mode production && sass --style=compressed --no-source-map ./assets/css/scss:./assets/css/",
+        "dev": "npm run cp-core-ui-dist && webpack --mode development --progress && sass ./assets/css/scss:./assets/css/"
     },
     "author": "seQura Tech",
     "license": "GPL-3.0-or-later",
