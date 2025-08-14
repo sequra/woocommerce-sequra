@@ -746,28 +746,6 @@ class Bootstrap extends BootstrapComponent {
 
 		parent::initRepositories();
 
-		// Extend GeneralSettingsRepository.
-		Reg::registerService(
-			GeneralSettingsRepositoryInterface::class,
-			static function () {
-				return new General_Settings_Repository(
-					RepositoryRegistry::getRepository( GeneralSettings::getClassName() ),
-					Reg::getService( StoreContext::class )
-				);
-			}
-		);
-
-		// Extend WidgetSettingsRepository.
-		Reg::registerService(
-			WidgetSettingsRepositoryInterface::class,
-			static function () {
-				return new Widget_Settings_Repository(
-					RepositoryRegistry::getRepository( WidgetSettings::getClassName() ),
-					Reg::getService( StoreContext::class )
-				);
-			}
-		);
-
 		RepositoryRegistry::registerRepository( ConfigEntity::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( QueueItem::class, Queue_Item_Repository::class );
 		RepositoryRegistry::registerRepository( Process::class, Entity_Repository::class );
@@ -792,25 +770,25 @@ class Bootstrap extends BootstrapComponent {
 		parent::initControllers();
 
 		// Extend GeneralSettingsController.
-		Reg::registerService(
-			GeneralSettingsController::class,
-			static function () {
-				return new General_Settings_Controller(
-					Reg::getService( GeneralSettingsService::class ),
-					Reg::getService( CategoryService::class )
-				);
-			}
-		);
+		// Reg::registerService(
+		// 	GeneralSettingsController::class,
+		// 	static function () {
+		// 		return new General_Settings_Controller(
+		// 			Reg::getService( GeneralSettingsService::class ),
+		// 			Reg::getService( CategoryService::class )
+		// 		);
+		// 	}
+		// );
 
 		// Extend PromotionalWidgetsController.
-		Reg::registerService(
-			PromotionalWidgetsController::class,
-			static function () {
-				return new Promotional_Widgets_Controller(
-					Reg::getService( WidgetSettingsService::class )
-				);
-			}
-		);
+		// Reg::registerService(
+		// 	PromotionalWidgetsController::class,
+		// 	static function () {
+		// 		return new Promotional_Widgets_Controller(
+		// 			Reg::getService( WidgetSettingsService::class )
+		// 		);
+		// 	}
+		// );
 
 		// Plugin controllers.
 		Reg::registerService(
