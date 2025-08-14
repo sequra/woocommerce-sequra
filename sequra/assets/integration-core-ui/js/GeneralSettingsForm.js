@@ -404,10 +404,10 @@ if (!window.SequraFE) {
             const promises = [];
 
             haveGeneralSettingsChanged &&
-            promises.push(api.post(configuration.saveGeneralSettingsUrl, changedGeneralSettings));
+            promises.push(api.post(configuration.saveGeneralSettingsUrl, changedGeneralSettings, SequraFE.customHeader));
 
             hasCountryConfigurationChanged &&
-            promises.push(api.post(configuration.saveCountrySettingsUrl, changedCountryConfiguration));
+            promises.push(api.post(configuration.saveCountrySettingsUrl, changedCountryConfiguration, SequraFE.customHeader));
 
             Promise.all(promises)
                 .then(() => {
