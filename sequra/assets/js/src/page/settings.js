@@ -16,6 +16,7 @@ import 'sequra-core-admin-fe/dist/resources/js/MultiItemSelectorComponent';
 import 'sequra-core-admin-fe/dist/resources/js/DataTableComponent';
 import 'sequra-core-admin-fe/dist/resources/js/PageHeaderComponent';
 import 'sequra-core-admin-fe/dist/resources/js/ConnectionSettingsForm';
+import 'sequra-core-admin-fe/dist/resources/js/DeploymentsSettingsForm';
 import 'sequra-core-admin-fe/dist/resources/js/WidgetSettingsForm';
 import 'sequra-core-admin-fe/dist/resources/js/GeneralSettingsForm';
 import 'sequra-core-admin-fe/dist/resources/js/OrderStatusMappingSettingsForm';
