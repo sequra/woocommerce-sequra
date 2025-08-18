@@ -7,8 +7,6 @@
 
 namespace SeQura\WC;
 
-use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\GeneralSettingsController;
-use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\PromotionalWidgetsController;
 use SeQura\Core\BusinessLogic\BootstrapComponent;
 use SeQura\Core\BusinessLogic\DataAccess\ConnectionData\Entities\ConnectionData;
 use SeQura\Core\BusinessLogic\DataAccess\OrderSettings\Entities\OrderStatusSettings;
@@ -22,9 +20,6 @@ use SeQura\Core\BusinessLogic\DataAccess\Deployments\Entities\Deployment;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
 use SeQura\Core\BusinessLogic\DataAccess\PaymentMethod\Entities\PaymentMethod;
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\OrderReport\OrderReportServiceInterface;
@@ -38,8 +33,6 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
-use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\StatisticalDataRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
@@ -86,11 +79,6 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Utility\Encryptor;
 use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Service;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Default_Logger_Adapter;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Shop_Logger_Adapter;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Settings_Controller;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
-use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
-use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Payment_Methods;
-use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
@@ -768,27 +756,6 @@ class Bootstrap extends BootstrapComponent {
 	 */
 	protected static function initControllers(): void {
 		parent::initControllers();
-
-		// Extend GeneralSettingsController.
-		// Reg::registerService(
-		// 	GeneralSettingsController::class,
-		// 	static function () {
-		// 		return new General_Settings_Controller(
-		// 			Reg::getService( GeneralSettingsService::class ),
-		// 			Reg::getService( CategoryService::class )
-		// 		);
-		// 	}
-		// );
-
-		// Extend PromotionalWidgetsController.
-		// Reg::registerService(
-		// 	PromotionalWidgetsController::class,
-		// 	static function () {
-		// 		return new Promotional_Widgets_Controller(
-		// 			Reg::getService( WidgetSettingsService::class )
-		// 		);
-		// 	}
-		// );
 
 		// Plugin controllers.
 		Reg::registerService(
