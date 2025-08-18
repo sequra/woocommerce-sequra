@@ -154,11 +154,11 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$payment_page_config    = array_merge(
 			$connection_config,
 			array(
-				'getPaymentMethodsUrl'      => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}/{merchantId}' ),
-				'getAllPaymentMethodsUrl'   => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}' ),
-				'getSellingCountriesUrl'    => \get_rest_url( null, 'sequra/v1/onboarding/countries/selling/{storeId}' ),
-				'getCountrySettingsUrl'     => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
-				'validateConnectionDataUrl' => \get_rest_url( null, 'sequra/v1/onboarding/data/validate/{storeId}' ),
+				'getPaymentMethodsUrl'             => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}/{merchantId}' ),
+				'getAllAvailablePaymentMethodsUrl' => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}' ),
+				'getSellingCountriesUrl'           => \get_rest_url( null, 'sequra/v1/onboarding/countries/selling/{storeId}' ),
+				'getCountrySettingsUrl'            => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
+				'validateConnectionDataUrl'        => \get_rest_url( null, 'sequra/v1/onboarding/data/validate/{storeId}' ),
 			)
 		);
 		$onboarding_page_config = array_merge(
