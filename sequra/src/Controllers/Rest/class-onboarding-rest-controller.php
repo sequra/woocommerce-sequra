@@ -27,6 +27,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_ENVIRONMENT                                = 'environment';
 	private const PARAM_USERNAME                                   = 'username';
 	private const PARAM_PASSWORD                                   = 'password';
+	private const PARAM_DEPLOYMENT_ID                              = 'deploymentId';
+	private const PARAM_DEPLOYMENT                                 = 'deployment';
+	private const PARAM_CONNECTION_DATA                            = 'connectionData';
 	private const PARAM_SEND_STATISTICAL_DATA                      = 'sendStatisticalData';
 	private const PARAM_USE_WIDGETS                                = 'useWidgets';
 	private const PARAM_ASSETS_KEY                                 = 'assetsKey';
@@ -135,6 +138,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$this->register_post( "data/{$store_id}", 'save_connection_data', $data_args );
 		$this->register_post( "data/validate/{$store_id}", 'validate_connection_data', $validate_data_args );
 		$this->register_post( "data/disconnect/{$store_id}", 'disconnect', $store_id_args );
+		$this->register_post( "data/connect/{$store_id}", 'connect', $store_id_args );
 		
 		$this->register_get( "widgets/{$store_id}", 'get_widgets', $store_id_args );
 		$this->register_post( "widgets/{$store_id}", 'save_widgets', $widget_args );
@@ -229,10 +233,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 					strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
 					strval( $request->get_param( self::PARAM_MERCHANT_ID ) ),
 					strval( $request->get_param( self::PARAM_USERNAME ) ),
-					strval( $request->get_param( self::PARAM_PASSWORD ) )
+					strval( $request->get_param( self::PARAM_PASSWORD ) ),
+					strval( $request->get_param( self::PARAM_DEPLOYMENT_ID ) )
 				)
-			);
-			$response = $response->toArray();
+			)
+			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
@@ -301,6 +306,53 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$response = AdminAPI::get()
 			->disconnect( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->disconnect()
+			->toArray();
+		} catch ( \Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			$response = new WP_Error( 'error', $e->getMessage() );
+		}
+		return \rest_ensure_response( $response );
+	}
+
+	/**
+	 * Disconnects integration from the shop.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function connect( WP_REST_Request $request ) {
+		$response = null;
+		try {
+			/**
+			 * Connection Data
+			 * 
+			 * @var array<array{merchantId?: string,
+			 *     username?: string,
+			 *     password?: string,
+			 *     deployment?: string}> $connection_data_array
+			 */
+			$connection_data_array = $request->get_param( self::PARAM_CONNECTION_DATA ) ?? array();
+
+			$connection_requests = array();
+			foreach ( $connection_data_array as $conn_data ) {
+				$connection_requests[] = new ConnectionRequest(
+					strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
+					strval( $conn_data[ self::PARAM_MERCHANT_ID ] ?? '' ),
+					strval( $conn_data[ self::PARAM_USERNAME ] ?? '' ),
+					strval( $conn_data[ self::PARAM_PASSWORD ] ?? '' ),
+					strval( $conn_data[ self::PARAM_DEPLOYMENT ] ?? '' )
+				);
+			}
+
+			$response = AdminAPI::get()
+			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->connect(
+				new OnboardingRequest(
+					$connection_requests,
+					(bool) $request->get_param( self::PARAM_SEND_STATISTICAL_DATA ),
+				)
+			)
 			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );

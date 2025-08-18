@@ -168,6 +168,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'saveCountrySettingsUrl' => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
 				'getWidgetSettingsUrl'   => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
 				'saveWidgetSettingsUrl'  => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
+				'disconnectUrl'          => \get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
+				'connectUrl'             => \get_rest_url( null, 'sequra/v1/onboarding/data/connect/{storeId}' ),
 			)
 		);
 		$page_config            = array(
@@ -182,7 +184,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 					'getShopOrderStatusesUrl'           => \get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
 					'getOrderStatusMappingSettingsUrl'  => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
 					'saveOrderStatusMappingSettingsUrl' => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
-					'disconnectUrl'                     => \get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
 				)
 			),
 			'payment'      => $payment_page_config,
@@ -212,7 +213,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'pageConfiguration' => $page_config,
 		);
 
-		$sequra_fe     = array(
+		$sequra_fe = array(
 			'translations'      => array(
 				'default' => $this->load_translation(),
 				'current' => $this->load_translation( $this->i18n->get_lang() ),
