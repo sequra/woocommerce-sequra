@@ -212,16 +212,15 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'pageConfiguration' => $page_config,
 		);
 
-		$pages_payment = array( 'methods' );
 		$sequra_fe     = array(
 			'translations'      => array(
 				'default' => $this->load_translation(),
 				'current' => $this->load_translation( $this->i18n->get_lang() ),
 			),
 			'pages'             => array(
-				'onboarding' => array( 'connect', 'countries', 'widgets' ),
+				'onboarding' => array( 'deployments', 'connect', 'countries', 'widgets' ),
 				'settings'   => array( 'general', 'connection', 'order_status', 'widget' ),
-				'payment'    => $pages_payment,
+				'payment'    => array( 'methods' ),
 				'advanced'   => array( 'debug' ),
 			),
 			'integration'       => array(
@@ -443,7 +442,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return mixed[]
 	 */
 	private function load_translation( $lang = 'en' ): array {
-		$path         = "{$this->assets_dir_path}/lang/{$lang}.json";
+		$path         = "{$this->assets_dir_path}/integration-core-ui/lang/{$lang}.json";
 		$translations = array();
 		
 		global $wp_filesystem;
