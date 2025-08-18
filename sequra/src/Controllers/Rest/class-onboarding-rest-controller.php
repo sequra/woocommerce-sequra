@@ -12,7 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
+use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget;
 use SeQura\WC\Services\Interface_Logger_Service;
 use WP_Error;
@@ -32,31 +32,31 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_CONNECTION_DATA                            = 'connectionData';
 	private const PARAM_SEND_STATISTICAL_DATA                      = 'sendStatisticalData';
 	private const PARAM_USE_WIDGETS                                = 'useWidgets';
-	private const PARAM_ASSETS_KEY                                 = 'assetsKey';
 	private const PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE             = 'displayWidgetOnProductPage';
 	private const PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING = 'showInstallmentAmountInProductListing';
 	private const PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE       = 'showInstallmentAmountInCartPage';
-	private const PARAM_MINI_WIDGET_SELECTOR                       = 'miniWidgetSelector';
 	private const PARAM_WIDGET_STYLES                              = 'widgetStyles';
 	private const PARAM_WIDGET_LABELS                              = 'widgetLabels';
-	private const PARAM_SEL_FOR_PRICE                              = 'selForPrice';
-	private const PARAM_SEL_FOR_ALT_PRICE                          = 'selForAltPrice';
-	private const PARAM_SEL_FOR_ALT_PRICE_TRIGGER                  = 'selForAltPriceTrigger';
-	private const PARAM_SEL_FOR_DEFAULT_LOCATION                   = 'selForDefaultLocation';
 	private const PARAM_CUSTOM_LOCATIONS                           = 'customLocations';
 	private const PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET             = 'selForTarget';
-	private const PARAM_CUSTOM_LOCATION_WIDGET_STYLES              = 'widgetStyles';
+	private const PARAM_CUSTOM_LOCATION_WIDGET_STYLES              = self::PARAM_WIDGET_STYLES;
 	private const PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET             = 'displayWidget';
 	private const PARAM_CUSTOM_LOCATION_COUNTRY                    = 'country';
 	private const PARAM_CUSTOM_LOCATION_PRODUCT                    = 'product';
 	private const PARAM_CUSTOM_LOCATION_CAMPAIGN                   = 'campaign';
 
+	private const PARAM_SEL_FOR_PRICE             = 'productPriceSelector';
+	private const PARAM_SEL_FOR_ALT_PRICE         = 'altProductPriceSelector';
+	private const PARAM_SEL_FOR_ALT_PRICE_TRIGGER = 'altProductPriceTriggerSelector';
+	private const PARAM_SEL_FOR_DEFAULT_LOCATION  = 'defaultProductLocationSelector';
 	// Cart widget config.
-	private const PARAM_CART_SEL_FOR_PRICE            = 'selForCartPrice';
-	private const PARAM_CART_SEL_FOR_DEFAULT_LOCATION = 'selForCartLocation';
+	private const PARAM_CART_SEL_FOR_PRICE            = 'cartPriceSelector';
+	private const PARAM_CART_SEL_FOR_DEFAULT_LOCATION = 'cartLocationSelector';
+	private const PARAM_CART_WIDGET_ON_PAGE           = 'widgetOnCartPage';
 	// Product listing widget config.
-	private const PARAM_LISTING_SEL_FOR_PRICE    = 'selForListingPrice';
-	private const PARAM_LISTING_SEL_FOR_LOCATION = 'selForListingLocation';
+	private const PARAM_LISTING_SEL_FOR_PRICE    = 'listingPriceSelector';
+	private const PARAM_LISTING_SEL_FOR_LOCATION = 'listingLocationSelector';
+	private const PARAM_LISTING_WIDGET_ON_PAGE   = 'widgetOnListingPage';
 
 	/**
 	 * Constructor.
@@ -103,11 +103,9 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$store_id_args,
 			array(
 				self::PARAM_USE_WIDGETS                    => $this->get_arg_bool(),
-				self::PARAM_ASSETS_KEY                     => $this->get_arg_string( true, '', array( $this, 'validate_assets_key' ) ),
 				self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE => $this->get_arg_bool(),
 				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING => $this->get_arg_bool(),
 				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE => $this->get_arg_bool(),
-				self::PARAM_MINI_WIDGET_SELECTOR           => $this->get_arg_string( true, '', '__return_true' ), // TODO: Add this field to form in the UI.
 				self::PARAM_WIDGET_STYLES                  => $this->get_arg_string(),
 				self::PARAM_WIDGET_LABELS                  => array(
 					'default'           => array(
@@ -126,9 +124,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 				self::PARAM_CART_SEL_FOR_PRICE             => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
 				self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION  => $this->get_arg_string( true, null, array( $this, 'validate_required_cart_widget_selector' ) ),
+				self::PARAM_CART_WIDGET_ON_PAGE            => $this->get_arg_string( true ),
 
 				self::PARAM_LISTING_SEL_FOR_PRICE          => $this->get_arg_string( true, null, array( $this, 'validate_required_listing_widget_selector' ) ),
 				self::PARAM_LISTING_SEL_FOR_LOCATION       => $this->get_arg_string( true, null, array( $this, 'validate_required_listing_widget_selector' ) ),
+				self::PARAM_LISTING_WIDGET_ON_PAGE         => $this->get_arg_string( true ),
 			)
 		);
 
@@ -478,17 +478,10 @@ class Onboarding_REST_Controller extends REST_Controller {
 	public function save_widgets( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			//phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
-			// $labels               = $request->get_param( 'widgetLabels' );
-			// $messages             = $labels['message'] ? array( $storeConfig->getLocale() => $labels['message'] ) : array();
-			// $messages_below_limit = $labels['messageBelowLimit'] ? array( $storeConfig->getLocale() => $labels['messageBelowLimit'] ) : array();
-			//phpcs:enable
-			$messages             = array();
-			$messages_below_limit = array();
-
 			$store_id = strval( $request->get_param( self::PARAM_STORE_ID ) );
 
 			/**
+			 * TODO: this hook was removed!
 			 * Filter the cart mini widgets.
 			 * This field is not used in the UI and is not documented.
 			 * The filter is intended for future use.
@@ -496,20 +489,21 @@ class Onboarding_REST_Controller extends REST_Controller {
 			 * @since 3.0.0
 			 * @var Mini_Widget[] $cart_mini_widgets The cart mini widgets.
 			 */
-			$cart_mini_widgets = \apply_filters( 'sequra_widget_settings_cart_mini_widgets', array(), $store_id );
-			if ( ! is_array( $cart_mini_widgets ) ) {
-				$this->logger->log_debug( 'Invalid cart mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
-				$cart_mini_widgets = array();
-			}
-			foreach ( $cart_mini_widgets as $mini_widget ) {
-				if ( ! $mini_widget instanceof Mini_Widget ) {
-					$this->logger->log_debug( 'Invalid cart mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
-					$cart_mini_widgets = array();
-					break;
-				}
-			}
+			// $cart_mini_widgets = \apply_filters( 'sequra_widget_settings_cart_mini_widgets', array(), $store_id );
+			// if ( ! is_array( $cart_mini_widgets ) ) {
+			// $this->logger->log_debug( 'Invalid cart mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+			// $cart_mini_widgets = array();
+			// }
+			// foreach ( $cart_mini_widgets as $mini_widget ) {
+			// if ( ! $mini_widget instanceof Mini_Widget ) {
+			// $this->logger->log_debug( 'Invalid cart mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+			// $cart_mini_widgets = array();
+			// break;
+			// }
+			// }
 
 			/**
+			 * TODO: this hook was removed!
 			 * Filter the product listing mini widgets.
 			 * This field is not used in the UI and is not documented.
 			 * The filter is intended for future use.
@@ -517,43 +511,39 @@ class Onboarding_REST_Controller extends REST_Controller {
 			 * @since 3.0.0
 			 * @var Mini_Widget[] $listing_mini_widgets The product listing mini widgets.
 			 */
-			$listing_mini_widgets = \apply_filters( 'sequra_widget_settings_product_listing_mini_widgets', array(), $store_id );
-			if ( ! is_array( $listing_mini_widgets ) ) {
-				$this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
-				$listing_mini_widgets = array();
-			}
-			foreach ( $listing_mini_widgets as $mini_widget ) {
-				if ( ! $mini_widget instanceof Mini_Widget ) {
-					$this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
-					$listing_mini_widgets = array();
-					break;
-				}
-			}
+			// $listing_mini_widgets = \apply_filters( 'sequra_widget_settings_product_listing_mini_widgets', array(), $store_id );
+			// if ( ! is_array( $listing_mini_widgets ) ) {
+			// $this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+			// $listing_mini_widgets = array();
+			// }
+			// foreach ( $listing_mini_widgets as $mini_widget ) {
+			// if ( ! $mini_widget instanceof Mini_Widget ) {
+			// $this->logger->log_debug( 'Invalid product listing mini widgets. ' . Mini_Widget::class . '[] is expected', __FUNCTION__, __CLASS__ );
+			// $listing_mini_widgets = array();
+			// break;
+			// }
+			// }
 
 			$response = AdminAPI::get()
 			->widgetConfiguration( $store_id )
 			->setWidgetSettings(
-				new Widget_Settings_Request(
+				new WidgetSettingsRequest(
 					(bool) $request->get_param( self::PARAM_USE_WIDGETS ),
-					null === $request->get_param( self::PARAM_ASSETS_KEY ) ? null : strval( $request->get_param( self::PARAM_ASSETS_KEY ) ),
 					(bool) $request->get_param( self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE ),
 					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING ),
 					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE ),
-					strval( $request->get_param( self::PARAM_MINI_WIDGET_SELECTOR ) ),
 					strval( $request->get_param( self::PARAM_WIDGET_STYLES ) ),
-					(array) $messages,
-					(array) $messages_below_limit,
 					strval( $request->get_param( self::PARAM_SEL_FOR_PRICE ) ),
-					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
-					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
-					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ),
 					strval( $request->get_param( self::PARAM_CART_SEL_FOR_PRICE ) ),
 					strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
-					$cart_mini_widgets,
+					strval( $request->get_param( self::PARAM_CART_WIDGET_ON_PAGE ) ),
+					strval( $request->get_param( self::PARAM_LISTING_WIDGET_ON_PAGE ) ),
 					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_PRICE ) ),
 					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) ),
-					$listing_mini_widgets
+					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
+					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
+					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ),
 				)
 			)
 			->toArray();
