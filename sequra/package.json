@@ -6,7 +6,8 @@
     "scripts": {
         "cp-assets": "cp -r node_modules/sequra-core-admin-fe/dist/resources/assets assets/integration-core-ui/",
         "cp-css": "cp -r node_modules/sequra-core-admin-fe/dist/resources/css assets/integration-core-ui/",
-        "cp-core-ui-dist": "rm -rf assets/integration-core-ui && mkdir -p assets/integration-core-ui && npm run cp-assets && npm run cp-css",
+        "cp-lang": "cp -r node_modules/sequra-core-admin-fe/dist/resources/lang assets/integration-core-ui/",
+        "cp-core-ui-dist": "rm -rf assets/integration-core-ui && mkdir -p assets/integration-core-ui && npm run cp-assets && npm run cp-css && npm run cp-lang",
         "build": "npm run cp-core-ui-dist && webpack --mode production && sass --style=compressed --no-source-map ./assets/css/scss:./assets/css/",
         "dev": "npm run cp-core-ui-dist && webpack --mode development --progress && sass ./assets/css/scss:./assets/css/"
     },
