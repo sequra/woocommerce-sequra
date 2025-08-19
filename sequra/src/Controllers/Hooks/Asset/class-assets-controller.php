@@ -214,6 +214,9 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		);
 
 		$sequra_fe = array(
+			'flags'             => array(
+				'isShowCheckoutAsHostedPageFieldVisible' => false, // Not used in this implementation.
+			),
 			'translations'      => array(
 				'default' => $this->load_translation(),
 				'current' => $this->load_translation( $this->i18n->get_lang() ),
