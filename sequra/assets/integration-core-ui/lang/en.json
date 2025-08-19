@@ -302,7 +302,7 @@
   },
   "orderStatusSettings": {
     "title": "Order status settings",
-    "description": "Order status Set up your seQura account and choose the environment to start processing payments. ",
+    "description": "Define how seQura statuses map to {shopName} order statuses. The default values should work for most cases, so change them with caution.",
     "paid": {
       "label": "Paid",
       "description": "When a payment has status Paid."

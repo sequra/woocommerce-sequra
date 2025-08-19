@@ -303,7 +303,7 @@
   },
   "orderStatusSettings": {
     "title": "Definições de estado do pedido",
-    "description": "Estado do pedido Configure a sua conta seQura e escolha o ambiente para começar a processar pagamentos. ",
+    "description": "Defina como os status do seQura se relacionam com os status de pedido do {shopName}. Os valores padrão devem funcionar na maioria dos casos, portanto, altere-os com cautela.",
     "paid": {
       "label": "Pago",
       "description": "Quando um pagamento tem estado Pago."

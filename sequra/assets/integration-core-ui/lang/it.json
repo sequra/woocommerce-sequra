@@ -302,7 +302,7 @@
   },
   "orderStatusSettings": {
     "title": "Impostazioni stato ordine",
-    "description": "Configura il tuo account SeQura e scegli l'ambiente per iniziare a elaborare i pagamenti.",
+    "description": "Definisci come gli stati di seQura si mappano sugli stati degli ordini di {shopName}. I valori predefiniti dovrebbero funzionare nella maggior parte dei casi, quindi modificali con cautela.",
     "paid": {
       "label": "Pagato",
       "description": "Quando un pagamento ha stato Pagato."

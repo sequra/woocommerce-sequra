@@ -302,7 +302,7 @@
   },
   "orderStatusSettings": {
     "title": "Paramètres du statut de commande",
-    "description": "Configurez votre compte SeQura et choisissez l'environnement pour commencer à traiter les paiements.",
+    "description": "Définissez comment les statuts seQura sont associés aux statuts de commande de {shopName}. Les valeurs par défaut devraient convenir dans la plupart des cas, modifiez-les donc avec précaution.",
     "paid": {
       "label": "Payé",
       "description": "Lorsqu'un paiement a le statut Payé."

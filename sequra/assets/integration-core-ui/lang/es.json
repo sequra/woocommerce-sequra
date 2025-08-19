@@ -301,7 +301,7 @@
   },
   "orderStatusSettings": {
     "title": "Configuración de estados de pedido",
-    "description": "Descripción de la configuración de estados de pedido",
+    "description": "Define cómo los estados de seQura se asignan a los estados de pedido de {shopName}. Los valores predeterminados deberían funcionar en la mayoría de los casos, así que cámbialos con precaución.",
     "paid": {
       "label": "Pagado",
       "description": "Cuando un pago tiene el estado de Pagado."
