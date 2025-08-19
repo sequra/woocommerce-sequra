@@ -25,6 +25,7 @@ import 'sequra-core-admin-fe/dist/resources/js/StateController';
 import 'sequra-core-admin-fe/dist/resources/js/OnboardingController';
 import 'sequra-core-admin-fe/dist/resources/js/PaymentController';
 import 'sequra-core-admin-fe/dist/resources/js/SettingsController';
+import 'sequra-core-admin-fe/dist/resources/js/DeploymentsModalForm';
 import '../core/AdvancedController'; // TODO: Migrate this to integration-core-ui
 
 document.addEventListener('DOMContentLoaded', () => {
