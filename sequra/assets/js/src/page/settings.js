@@ -1,4 +1,5 @@
 
+import 'sequra-core-admin-fe/dist/resources/js/RepeaterFieldsComponent';
 import 'sequra-core-admin-fe/dist/resources/js/ImagesProvider';
 import 'sequra-core-admin-fe/dist/resources/js/AjaxService';
 import 'sequra-core-admin-fe/dist/resources/js/TranslationService';
