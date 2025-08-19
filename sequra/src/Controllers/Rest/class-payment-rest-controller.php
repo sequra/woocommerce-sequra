@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetFormattedPaymentMethodsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetPaymentMethodsRequest;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -72,11 +73,12 @@ class Payment_REST_Controller extends REST_Controller {
 	public function get_methods( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			$response = $this->payment_method_service->get_all_payment_methods(
-				strval( $request->get_param( self::PARAM_STORE_ID ) ),
-				strval( $request->get_param( self::PARAM_MERCHANT_ID ) ),
-				false
-			);
+			$response = AdminAPI::get()
+			->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getPaymentMethods(
+				new GetPaymentMethodsRequest( strval( $request->get_param( self::PARAM_MERCHANT_ID ) ), true )
+			)
+			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
