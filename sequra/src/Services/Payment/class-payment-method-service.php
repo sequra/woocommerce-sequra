@@ -33,8 +33,8 @@ use WC_Order;
 class Payment_Method_Service implements Interface_Payment_Method_Service {
 
 	// /**
-	//  * Part payment
-	//  */
+	// * Part payment
+	// */
 	// const PART_PAYMENT = 'part_payment';
 	
 	/**
@@ -73,10 +73,10 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	private $logger;
 
 	// /**
-	//  * Payment methods repository
-	//  *
-	//  * @var RepositoryInterface
-	//  */
+	// * Payment methods repository
+	// *
+	// * @var RepositoryInterface
+	// */
 	// private $payment_methods_repo;
 
 	/**
@@ -215,180 +215,180 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	}
 
 	// /**
-	//  * Get all payment methods from cache
-	//  * 
-	//  * @param string $store_id The store ID.
-	//  * @param string $merchant The merchant ID.
-	//  * @return Payment_Methods
-	//  */
+	// * Get all payment methods from cache
+	// * 
+	// * @param string $store_id The store ID.
+	// * @param string $merchant The merchant ID.
+	// * @return Payment_Methods
+	// */
 	// private function get_payment_methods_from_cache( $store_id, $merchant ) {
-	// 	/**
-	// 	 * Payment methods entity 
-	// 	 *
-	// 	 * @var Payment_Methods|null $payment_methods 
-	// 	 */
-	// 	$payment_methods = $this->payment_methods_repo->selectOne(
-	// 		( new QueryFilter() )
-	// 		->where( 'storeId', Operators::EQUALS, $store_id )
-	// 		->where( 'merchantId', Operators::EQUALS, $merchant ) 
-	// 	);
+	// **
+	// * Payment methods entity 
+	// *
+	// * @var Payment_Methods|null $payment_methods 
+	// */
+	// $payment_methods = $this->payment_methods_repo->selectOne(
+	// ( new QueryFilter() )
+	// ->where( 'storeId', Operators::EQUALS, $store_id )
+	// ->where( 'merchantId', Operators::EQUALS, $merchant ) 
+	// );
 
-	// 	return $payment_methods;
+	// return $payment_methods;
 	// }
 
 	// /**
-	//  * Save payment methods to cache
-	//  *
-	//  * @param Payment_Methods $payment_methods The payment methods.
-	//  */
+	// * Save payment methods to cache
+	// *
+	// * @param Payment_Methods $payment_methods The payment methods.
+	// */
 	// private function save_payment_methods_to_cache( $payment_methods ) {
-	// 	/**
-	// 	 * Payment methods entity
-	// 	 *
-	// 	 * @var Payment_Methods|null $payment_methods 
-	// 	 */
-	// 	$entity = $this->get_payment_methods_from_cache( 
-	// 		$payment_methods->getStoreId(),
-	// 		$payment_methods->getMerchantId() 
-	// 	);
-	// 	if ( null === $entity ) {
-	// 		$this->payment_methods_repo->save( $payment_methods );
-	// 	} else {
-	// 		$entity->setPaymentMethods( $payment_methods->getPaymentMethods() );
-	// 		$this->payment_methods_repo->update( $entity );
-	// 	}
+	// **
+	// * Payment methods entity
+	// *
+	// * @var Payment_Methods|null $payment_methods 
+	// */
+	// $entity = $this->get_payment_methods_from_cache( 
+	// $payment_methods->getStoreId(),
+	// $payment_methods->getMerchantId() 
+	// );
+	// if ( null === $entity ) {
+	// $this->payment_methods_repo->save( $payment_methods );
+	// } else {
+	// $entity->setPaymentMethods( $payment_methods->getPaymentMethods() );
+	// $this->payment_methods_repo->update( $entity );
+	// }
 	// }
 
 	// /**
-	//  * Get all payment methods from the API
-	//  * 
-	//  * @param string $store_id The store ID.
-	//  * @param string $merchant The merchant ID.
-	//  * @return Payment_Methods|null
-	//  */
+	// * Get all payment methods from the API
+	// * 
+	// * @param string $store_id The store ID.
+	// * @param string $merchant The merchant ID.
+	// * @return Payment_Methods|null
+	// */
 	// private function get_payment_methods_from_api( $store_id, $merchant ) {
-	// 	try {
-	// 		$response = AdminAPI::get()->paymentMethods( $store_id )->getPaymentMethods( $merchant );
-	// 		if ( ! $response->isSuccessful() ) {
-	// 			return null;
-	// 		}
-	// 		$payment_methods = new Payment_Methods();
-	// 		$payment_methods->setStoreId( $store_id );
-	// 		$payment_methods->setMerchantId( $merchant );
-	// 		$payment_methods->setPaymentMethods( Payment_Method::fromBatch( $response->toArray() ) );
-	// 		return $payment_methods;
-	// 	} catch ( Throwable $e ) {
-	// 		$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__, array( new LogContextData( 'store_id', $store_id ), new LogContextData( 'merchant', $merchant ) ) );
-	// 		return null;
-	// 	}
+	// try {
+	// $response = AdminAPI::get()->paymentMethods( $store_id )->getPaymentMethods( $merchant );
+	// if ( ! $response->isSuccessful() ) {
+	// return null;
+	// }
+	// $payment_methods = new Payment_Methods();
+	// $payment_methods->setStoreId( $store_id );
+	// $payment_methods->setMerchantId( $merchant );
+	// $payment_methods->setPaymentMethods( Payment_Method::fromBatch( $response->toArray() ) );
+	// return $payment_methods;
+	// } catch ( Throwable $e ) {
+	// $this->logger->log_throwable( $e, __FUNCTION__, __CLASS__, array( new LogContextData( 'store_id', $store_id ), new LogContextData( 'merchant', $merchant ) ) );
+	// return null;
+	// }
 	// }
 
 	// /**
-	//  * Get a list of all payment methods defined for store and merchant
-	//  * 
-	//  * @throws Throwable
-	//  * 
-	//  * @param bool $cache Use cache if available.
-	//  * @return array<string, string>[]
-	//  */
+	// * Get a list of all payment methods defined for store and merchant
+	// * 
+	// * @throws Throwable
+	// * 
+	// * @param bool $cache Use cache if available.
+	// * @return array<string, string>[]
+	// */
 	// public function get_all_payment_methods( ?string $store_id, ?string $merchant, $cache = true ): array {
-	// 	if ( ! $store_id || ! $merchant ) {
-	// 		return array();
-	// 	}
+	// if ( ! $store_id || ! $merchant ) {
+	// return array();
+	// }
 
-	// 	$merchant        = strval( $merchant );
-	// 	$store_id        = strval( $store_id );
-	// 	$payment_methods = $cache ? $this->get_payment_methods_from_cache( $store_id, $merchant ) : null;
+	// $merchant        = strval( $merchant );
+	// $store_id        = strval( $store_id );
+	// $payment_methods = $cache ? $this->get_payment_methods_from_cache( $store_id, $merchant ) : null;
 
-	// 	if ( ! $payment_methods ) {
-	// 		$payment_methods = $this->get_payment_methods_from_api( $store_id, $merchant );
-	// 		if ( $payment_methods ) {
-	// 			// Save the payment methods in the cache.
-	// 			$this->save_payment_methods_to_cache( $payment_methods );
-	// 		}
-	// 	}
+	// if ( ! $payment_methods ) {
+	// $payment_methods = $this->get_payment_methods_from_api( $store_id, $merchant );
+	// if ( $payment_methods ) {
+	// Save the payment methods in the cache.
+	// $this->save_payment_methods_to_cache( $payment_methods );
+	// }
+	// }
 
-	// 	if ( ! $payment_methods ) {
-	// 		return array();
-	// 	}
+	// if ( ! $payment_methods ) {
+	// return array();
+	// }
 
-	// 	$arr = array();
-	// 	foreach ( $payment_methods->getPaymentMethods() as $method ) {
-	// 		$arr[] = $method->toArray();
-	// 	}
+	// $arr = array();
+	// foreach ( $payment_methods->getPaymentMethods() as $method ) {
+	// $arr[] = $method->toArray();
+	// }
 
-	// 	return $arr;
+	// return $arr;
 	// }
 
 	// /**
-	//  * Look for available payment methods which can be used with the widget
-	//  * 
-	//  * @throws Throwable
-	//  * 
-	//  * @return array<string, string>[]
-	//  */
+	// * Look for available payment methods which can be used with the widget
+	// * 
+	// * @throws Throwable
+	// * 
+	// * @return array<string, string>[]
+	// */
 	// public function get_all_widget_compatible_payment_methods( string $store_id, ?string $merchant ): array {
-	// 	$compatible_payment_methods = array();
-	// 	foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
-	// 		if ( $method['supportsWidgets'] ) {
-	// 			$compatible_payment_methods[] = $method;
-	// 		}
-	// 	}
-	// 	return $compatible_payment_methods;
+	// $compatible_payment_methods = array();
+	// foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
+	// if ( $method['supportsWidgets'] ) {
+	// $compatible_payment_methods[] = $method;
+	// }
+	// }
+	// return $compatible_payment_methods;
 	// }
 
 	// /**
-	//  * Look for available payment methods that can be used with part payments
-	//  * 
-	//  * @throws Throwable
-	//  * 
-	//  * @return array<string, string>[]
-	//  */
+	// * Look for available payment methods that can be used with part payments
+	// * 
+	// * @throws Throwable
+	// * 
+	// * @return array<string, string>[]
+	// */
 	// public function get_all_mini_widget_compatible_payment_methods( string $store_id, ?string $merchant ): array {
-	// 	$compatible_payment_methods = array();
-	// 	foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
-	// 		if ( $method['supportsInstallmentPayments'] ) {
-	// 			$compatible_payment_methods[] = $method;
-	// 		}
-	// 	}
-	// 	return $compatible_payment_methods;
+	// $compatible_payment_methods = array();
+	// foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
+	// if ( $method['supportsInstallmentPayments'] ) {
+	// $compatible_payment_methods[] = $method;
+	// }
+	// }
+	// return $compatible_payment_methods;
 	// }
 
 	// /**
-	//  * Look for available payment methods which can be used with the widget
-	//  * 
-	//  * @throws Throwable
-	//  * 
-	//  * @return array<string, string>[]
-	//  */
+	// * Look for available payment methods which can be used with the widget
+	// * 
+	// * @throws Throwable
+	// * 
+	// * @return array<string, string>[]
+	// */
 	// public function get_cart_widget( string $store_id, ?string $merchant ): array {
-	// 	$compatible_payment_methods = array();
-	// 	foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
-	// 		if ( $method['supportsWidgets'] ) {
-	// 			$compatible_payment_methods[] = $method;
-	// 		}
-	// 	}
-	// 	return $compatible_payment_methods;
+	// $compatible_payment_methods = array();
+	// foreach ( $this->get_all_payment_methods( $store_id, $merchant ) as $method ) {
+	// if ( $method['supportsWidgets'] ) {
+	// $compatible_payment_methods[] = $method;
+	// }
+	// }
+	// return $compatible_payment_methods;
 	// }
 
 	// /**
-	//  * Check if the payment method can be displayed in the widget
-	//  * 
-	//  * @param array<string, string> $method the payment method. Must contain 'product' at least.
-	//  */
+	// * Check if the payment method can be displayed in the widget
+	// * 
+	// * @param array<string, string> $method the payment method. Must contain 'product' at least.
+	// */
 	// private function supports_widgets( array $method ): bool {
-	// 	return isset( $method['product'] ) && in_array( $method['product'], array( 'i1', 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
+	// return isset( $method['product'] ) && in_array( $method['product'], array( 'i1', 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
 	// }
 
 	// /**
-	//  * Check if the payment method represents a part payment
-	//  * 
-	//  * @param array<string, string> $method the payment method. Must contain 'product' at least.
-	//  */
+	// * Check if the payment method represents a part payment
+	// * 
+	// * @param array<string, string> $method the payment method. Must contain 'product' at least.
+	// */
 	// private function supports_installment_payments( array $method ): bool {
 	// 	// phpcs:ignore
 	// 	// return isset( $method['product'] ) && in_array( $method['product'], array( 'pp5', 'pp3', 'pp6', 'pp9', 'sp1' ), true );
-	// 	return isset( $method['product'] ) && in_array( $method['product'], array( 'pp3' ), true );
+	// return isset( $method['product'] ) && in_array( $method['product'], array( 'pp3' ), true );
 	// }
 
 	/**

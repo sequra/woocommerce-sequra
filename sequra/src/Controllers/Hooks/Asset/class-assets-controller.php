@@ -15,6 +15,10 @@ use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\WC\Services\Regex\Interface_Regex;
+use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
+use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Requests\GetCachedPaymentMethodsRequest;
+use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Responses\CachedPaymentMethodsResponse;
+use Throwable;
 
 /**
  * Define the assets related functionality
@@ -273,8 +277,21 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return array<string, mixed>
 	 */
 	private function get_sequra_config_params_l10n(): array {
-		$merchant = $this->configuration->get_merchant_ref( $this->i18n->get_current_country() );
-		$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $this->configuration->get_store_id(), $merchant );
+
+		$country  = $this->i18n->get_current_country();
+		$merchant = $this->configuration->get_merchant_ref( $country );
+		$methods  = array();
+
+		try {
+			/** @var array<int, array<string, mixed>> $methods */
+			$methods = CheckoutAPI::get()
+			->cachedPaymentMethods( $this->configuration->get_store_id() )
+			->getCachedPaymentMethodsSupportedOnProductPage( new GetCachedPaymentMethodsRequest( $merchant ?? '', $country, $country ) )
+			->toArray();
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+
 		return array(
 			'scriptUri'         => $this->assets->get_cdn_resource_uri( $this->configuration->get_env(), 'sequra-checkout.min.js' ),
 			'thousandSeparator' => \wc_get_price_thousand_separator(),
