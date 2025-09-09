@@ -23,6 +23,7 @@ use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\Co
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\OrderReport\OrderReportServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\Product\ProductServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
@@ -86,8 +87,6 @@ use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
-use SeQura\WC\Services\Assets\Assets;
-use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\Cart\Cart_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Constants;
@@ -124,6 +123,7 @@ use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use SeQura\WC\Services\Time\Time_Checker_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\MiniWidgetMessagesProviderInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Product\Product_Service as Core_Product_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Mini_Widget_Messages_Provider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
 
@@ -673,15 +673,6 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
-			Interface_Assets::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Assets::class ] ) ) {
-					self::$cache[ Interface_Assets::class ] = new Assets();
-				}
-				return self::$cache[ Interface_Assets::class ];
-			}
-		);
-		Reg::registerService(
 			Interface_Time_Checker_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Time_Checker_Service::class ] ) ) {
@@ -691,6 +682,15 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 
+		Reg::registerService(
+			ProductServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ ProductServiceInterface::class ] ) ) {
+					self::$cache[ ProductServiceInterface::class ] = new Core_Product_Service();
+				}
+				return self::$cache[ ProductServiceInterface::class ];
+			}
+		);
 		Reg::registerService(
 			WidgetConfiguratorInterface::class,
 			static function () {
@@ -788,7 +788,6 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_Assets::class ),
 						Reg::getService( Interface_Payment_Method_Service::class ),
 						Reg::getService( Interface_Regex::class )
 					);
@@ -835,7 +834,9 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Payment_Method_Service::class ),
 						Reg::getService( Interface_I18n::class ),
-						Reg::getService( Interface_Regex::class )
+						Reg::getService( Interface_Regex::class ),
+						Reg::getService( Interface_Shopper_Service::class ),
+						Reg::getService( WidgetConfiguratorInterface::class )
 					);
 				}
 				return self::$cache[ Interface_Product_Controller::class ];

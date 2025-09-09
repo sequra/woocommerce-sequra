@@ -8,6 +8,10 @@
 
 namespace SeQura\WC\Controllers\Hooks\Product;
 
+use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
+use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Requests\GetCachedPaymentMethodsRequest;
+use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
+use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
@@ -17,6 +21,7 @@ use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Regex\Regex;
+use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Product;
 use WP_Post;
 
@@ -75,6 +80,20 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	private $regex;
 
 	/**
+	 * Shopper service
+	 *
+	 * @var Interface_Shopper_Service
+	 */
+	private $shopper_service;
+
+	/**
+	 * Widget configurator
+	 *
+	 * @var WidgetConfiguratorInterface
+	 */
+	private $widget_configurator;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -85,7 +104,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		Interface_Payment_Service $payment_service,
 		Interface_Payment_Method_Service $payment_method_service,
 		Interface_I18n $i18n,
-		Regex $regex
+		Regex $regex,
+		Interface_Shopper_Service $shopper_service,
+		WidgetConfiguratorInterface $widget_configurator
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->logger                 = $logger;
@@ -95,6 +116,8 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		$this->payment_method_service = $payment_method_service;
 		$this->i18n                   = $i18n;
 		$this->regex                  = $regex;
+		$this->shopper_service        = $shopper_service;
+		$this->widget_configurator    = $widget_configurator;
 	}
 
 	/**
@@ -110,6 +133,8 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * - is_alt_price: A CSS selector to determine if the product has an alternative price. Optional.
 	 * - reg_amount: The registration amount. Optional.
 	 * - theme: The theme to use. Accepted values are: L, R, legacy, legacyL, legacyR, minimal, minimalL, minimalR or JSON formatted string. Optional.
+	 * - min_amount: The minimum amount to display the widget. Optional.
+	 * - max_amount: The maximum amount to display the widget. Optional.
 	 * 
 	 * @param array<string, string> $atts The shortcode attributes
 	 * @return string
@@ -152,13 +177,15 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'product'      => '',
 				'campaign'     => '',
 				'product_id'   => '',
-				'theme'        => $this->configuration->get_widget_theme( $atts['product'], $campaign, $current_country ),
+				'theme'        => '',
 				'reverse'      => 0,
 				'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
-				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'], $campaign, $current_country ),
-				'price'        => $this->configuration->get_widget_price_css_sel(),
-				'alt_price'    => $this->configuration->get_widget_alt_price_css_sel(),
-				'is_alt_price' => $this->configuration->get_widget_is_alt_price_css_sel(),
+				'dest'         => '',
+				'price'        => '',
+				'alt_price'    => '',
+				'is_alt_price' => '',
+				'min_amount'   => 0,
+				'max_amount'   => null,
 			),
 			$atts,
 			'sequra_widget'
@@ -322,34 +349,93 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		 * @var WC_Product $product
 		 */
 		global $product;
-	
-		$methods = array();
-		try {
-			$store_id = $this->configuration->get_store_id();
-			$merchant = $this->payment_service->get_merchant_id();
-			$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, $merchant );
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+
+		$country = $this->i18n->get_current_country();
+
+		try{
+
+			/** @var GetWidgetsCheckoutResponse $widgets */
+			$widgets = CheckoutAPI::get()->promotionalWidgets($this->configuration->get_store_id())
+			->getAvailableWidgetsForProductPage(new PromotionalWidgetsCheckoutRequest(
+				$country,
+				$country,
+				$this->widget_configurator->getCurrency(),
+				$this->shopper_service->get_ip(),
+				(string)$product->get_id()
+			))
+			->toArray();
+		} catch (\Throwable $e) {
+			$this->logger->log_throwable($e, __FUNCTION__, __CLASS__);
 			return;
 		}
-
-		foreach ( $methods as $method ) {
-			if ( ! $this->product_service->can_display_widget_for_method( $product, $method ) ) {
-				continue;
-			}
 			
+		foreach ($widgets as $widget) {
 			$atts = array(
-				'product'    => $method['product'] ?? '',
-				'campaign'   => $method['campaign'] ?? '',
+				'product'    => $widget['product'] ?? '',
+				'campaign'   => $widget['campaign'] ?? '',
 				'product_id' => $product->get_id(),
+				'theme'      => $widget['theme'] ?? '',
+				'dest'       => $widget['dest'] ?? '',
+				'price'      =>  $widget['priceSel'] ?? '',
+				'alt_price'	=>  $widget['altPriceSel'] ?? '',
+				'is_alt_price' => $widget['altTriggerSelector'] ?? '',
+				'min_amount'  => $widget['minAmount'] ?? 0,
+				'max_amount'  => $widget['maxAmount'] ?? null,
+				
 			);
-
 			$atts_str = '';
-			foreach ( $atts as $key => $value ) {
-				$atts_str .= " $key=\"$value\"";
+			foreach ($atts as $key => $value) {
+				$atts_str .= " $key='$value'";
 			}
-			echo \do_shortcode( "[sequra_widget $atts_str]" );
+			echo \do_shortcode("[sequra_widget $atts_str]");
 		}
+
+		// 'product'      => '',
+		// 'campaign'     => '',
+		// 'product_id'   => '',
+		// 'theme'        => $this->configuration->get_widget_theme( $atts['product'], $campaign, $current_country ),
+		// 'reverse'      => 0,
+		// 'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
+		// 'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'], $campaign, $current_country ),
+		// 'price'        => $this->configuration->get_widget_price_css_sel(),
+		// 'alt_price'    => $this->configuration->get_widget_alt_price_css_sel(),
+		// 'is_alt_price' => $this->configuration->get_widget_is_alt_price_css_sel(),
+	
+		// $methods = array();
+		// try {
+		// 	$country = $this->i18n->get_current_country();
+		// 	// $store_id = $this->configuration->get_store_id();
+		// 	$merchant = $this->payment_service->get_merchant_id();
+
+
+		// 	/** @var array<int, array<string, mixed>> $methods */
+		// 	$methods = CheckoutAPI::get()
+		// 	->cachedPaymentMethods( $this->configuration->get_store_id() )
+		// 	->getCachedPaymentMethodsSupportedOnProductPage( new GetCachedPaymentMethodsRequest( $merchant ?? '', $country, $country ) )
+		// 	->toArray();
+		// 	// $methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, $merchant );
+		// } catch ( \Throwable $e ) {
+		// 	$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		// 	return;
+		// }
+
+		// foreach ( $methods as $method ) {
+		// 	if ( ! $this->product_service->can_display_widget_for_method( $product, $method ) ) {
+		// 		continue;
+		// 	}
+			
+		// 	$atts = array(
+		// 		'product'    => $method['product'] ?? '',
+		// 		'campaign'   => $method['campaign'] ?? '',
+		// 		'product_id' => $product->get_id(),
+		// 	);
+
+		// 	$atts_str = '';
+		// 	foreach ( $atts as $key => $value ) {
+		// 		$atts_str .= " $key=\"$value\"";
+		// 	}
+		// 	echo \do_shortcode( "[sequra_widget $atts_str]" );
+		// }
 	}
 
 	/**

@@ -10,14 +10,12 @@ namespace SeQura\WC\Controllers\Hooks\Asset;
 
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
-use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\WC\Services\Regex\Interface_Regex;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
-use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Requests\GetCachedPaymentMethodsRequest;
-use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Responses\CachedPaymentMethodsResponse;
+use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
 use Throwable;
 
 /**
@@ -108,7 +106,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		Interface_Logger_Service $logger,
 		string $templates_path, 
 		Configuration $configuration,
-		Interface_Assets $assets,
 		Interface_Payment_Method_Service $payment_method_service,
 		Interface_Regex $regex
 	) {
@@ -277,29 +274,26 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return array<string, mixed>
 	 */
 	private function get_sequra_config_params_l10n(): array {
-
-		$country  = $this->i18n->get_current_country();
-		$merchant = $this->configuration->get_merchant_ref( $country );
-		$methods  = array();
-
+		$data = array();
 		try {
-			/** @var array<int, array<string, mixed>> $methods */
-			$methods = CheckoutAPI::get()
-			->cachedPaymentMethods( $this->configuration->get_store_id() )
-			->getCachedPaymentMethodsSupportedOnProductPage( new GetCachedPaymentMethodsRequest( $merchant ?? '', $country, $country ) )
+			$country = $this->i18n->get_current_country();
+			/** @var array<string, mixed> $data */
+			$data = CheckoutAPI::get()
+			->promotionalWidgets( $this->configuration->get_store_id() )
+			->getPromotionalWidgetInitializeData( new PromotionalWidgetsCheckoutRequest( $country, $country ) )
 			->toArray();
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 		}
 
 		return array(
-			'scriptUri'         => $this->assets->get_cdn_resource_uri( $this->configuration->get_env(), 'sequra-checkout.min.js' ),
-			'thousandSeparator' => \wc_get_price_thousand_separator(),
-			'decimalSeparator'  => \wc_get_price_decimal_separator(),
-			'locale'            => $this->i18n->get_locale(),
-			'merchant'          => $merchant,
-			'assetKey'          => $this->configuration->get_assets_key(),
-			'products'          => array_column( $methods, 'product' ),
+			'scriptUri'         => $data['scriptUri'] ?? '',
+			'thousandSeparator' => $data['thousandSeparator'] ?? '',
+			'decimalSeparator'  => $data['decimalSeparator'] ?? '',
+			'locale'            => $data['locale'] ?? '',
+			'merchant'          => $data['merchantId'] ?? '',
+			'assetKey'          => $data['assetKey'] ?? '',
+			'products'          => $data['products'] ?? array(),
 		);
 	}
 

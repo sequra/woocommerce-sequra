@@ -43,5 +43,7 @@ if ( ! isset(
 		variationPriceSel: "<?php echo wp_strip_all_tags( $args['alt_price'] ); ?>",
 		isVariableSel: "<?php echo wp_strip_all_tags( $args['is_alt_price'] ); ?>",
 		registrationAmount: "<?php echo esc_js( $args['reg_amount'] ); ?>",
+		minAmount: <?php echo esc_js( $args['min_amount'] ?? '0' ); ?>,
+		maxAmount: <?php echo esc_js( $args['max_amount'] ?? 'null' ); ?>
 	});
 </script>

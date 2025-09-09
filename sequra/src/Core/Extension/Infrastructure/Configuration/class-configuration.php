@@ -553,7 +553,7 @@ class Configuration extends CoreConfiguration {
 	public function get_widget_dest_css_sel( ?string $payment_method, ?string $campaign, ?string $country ): string {
 		try {
 			$config          = $this->get_widget_settings();
-			$sel             = $config['selForDefaultLocation'];
+			$sel             = $config['defaultProductLocationSelector'];
 			$custom_location = $this->get_widget_custom_location( $payment_method, $campaign, $country );
 			return $custom_location ? $custom_location->get_sel_for_target() : $sel;
 		} catch ( Throwable $e ) {
@@ -663,29 +663,37 @@ class Configuration extends CoreConfiguration {
 		}
 	}
 
-	/**
-	 * Get connection settings as array
-	 *
-	 * @throws Throwable
-	 */
-	private function get_connection_settings(): array {
-		return AdminAPI::get()
-		->connection( $this->get_store_id() )
-		->getConnectionSettings()
-		->toArray();
-	}
+	// /**
+	// * Get connection settings as array
+	// *
+	// * @throws Throwable
+	// */
+	// private function get_connection_settings(): array {
+	// return AdminAPI::get()
+	// ->connection( $this->get_store_id() )
+	// ->getConnectionSettings()
+	// ->toArray();
+	// }
 
 	/**
 	 * Get the environment
 	 */
 	public function get_env(): ?string {
-		$conn = null;
+		$data = null;
 		try {
-			$conn = $this->get_connection_settings();
+			/**
+			 * Onboarding data
+			 * 
+			 * @var array<string, string>
+			 */
+			$data = AdminAPI::get()
+			->connection( $this->get_store_id() )
+			->getOnboardingData()
+			->toArray();
 		} catch ( Throwable $e ) {
 			return null;
 		}
-		return $conn['environment'] ?? null;
+		return $data['environment'] ?? null;
 	}
 
 	/**

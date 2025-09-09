@@ -224,6 +224,19 @@
                     return this.miniWidgets.indexOf(widget) !== -1;
                 },
 
+                isAmountInAllowedRange: function (widget, cents) {
+                    if ('undefined' !== typeof widget.minAmount && widget.minAmount && cents < widget.minAmount) {
+                        return false;
+                    }
+
+                    return !(
+                        'undefined' !== typeof widget.maxAmount &&
+                        widget.maxAmount &&
+                        parseInt(widget.maxAmount, 10) !== 0 &&
+                        widget.maxAmount < cents
+                    );
+                },
+
                 drawMiniWidgetOnElement: function (widget, element, priceElem) {
                     if (!priceElem) {
                         const priceSrc = this.getPriceSelector(widget);
@@ -249,7 +262,7 @@
                         oldWidget.remove();// remove the old widget to draw a new one.
                     }
 
-                    if (widget.maxAmount && widget.maxAmount < cents) {
+                    if (!this.isAmountInAllowedRange(widget, cents)) {
                         return;
                     }
 
@@ -304,6 +317,10 @@
                         }
 
                         oldWidget.remove();// remove the old widget to draw a new one.
+                    }
+
+                    if (!this.isAmountInAllowedRange(widget, cents)) {
+                        return;
                     }
 
                     const promoWidgetNode = document.createElement('div');
