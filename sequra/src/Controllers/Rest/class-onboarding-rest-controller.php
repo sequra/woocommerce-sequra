@@ -41,7 +41,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET             = 'selForTarget';
 	private const PARAM_CUSTOM_LOCATION_WIDGET_STYLES              = self::PARAM_WIDGET_STYLES;
 	private const PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET             = 'displayWidget';
-	private const PARAM_CUSTOM_LOCATION_COUNTRY                    = 'country';
 	private const PARAM_CUSTOM_LOCATION_PRODUCT                    = 'product';
 	private const PARAM_CUSTOM_LOCATION_CAMPAIGN                   = 'campaign';
 
@@ -543,10 +542,12 @@ class Onboarding_REST_Controller extends REST_Controller {
 					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
 					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
-					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS ),
+					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
 				)
-			)
-			->toArray();
+			);
+
+			
+			$response = $response->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
@@ -704,31 +705,26 @@ class Onboarding_REST_Controller extends REST_Controller {
 		foreach ( $param as $location ) {
 			if ( ! isset( 
 				$location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ], 
-				$location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], 
-				$location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ],  
+				$location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ],
 				$location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ], 
 				$location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ] 
 			)
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] )
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
-				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
 				|| ! is_string( $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ] )
 				|| ! is_bool( $location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ] )
 				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
-				|| empty( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
 				) {
 				return false;
 			}
 
-			// check if exists another location with the same country title and product.
-			$country  = $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ];
+			// check if exists another location with the same title and product.
 			$product  = $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ];
 			$campaign = $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ?? null;
 			$found    = \array_filter(
 				$param,
-				function ( $loc ) use ( $country, $product, $campaign ) {
-					return isset( $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ], $loc[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] )
-					&& $loc[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] === $country 
+				function ( $loc ) use ( $product, $campaign ) {
+					return isset( $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] )
 					&& $loc[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] === $product
 					&& ( $loc[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ?? null ) === $campaign;
 				}
@@ -751,7 +747,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 			$location = array(
 				self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_SEL_FOR_TARGET ] ) ),
 				self::PARAM_CUSTOM_LOCATION_PRODUCT        => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_PRODUCT ] ) ),
-				self::PARAM_CUSTOM_LOCATION_COUNTRY        => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_COUNTRY ] ) ),
 				self::PARAM_CUSTOM_LOCATION_CAMPAIGN       => isset( $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ) ? \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_CAMPAIGN ] ) ) : null,
 				self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES  => \sanitize_text_field( strval( $location[ self::PARAM_CUSTOM_LOCATION_WIDGET_STYLES ] ) ),
 				self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET => (bool) $location[ self::PARAM_CUSTOM_LOCATION_DISPLAY_WIDGET ],
