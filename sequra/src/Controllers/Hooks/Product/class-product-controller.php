@@ -9,7 +9,6 @@
 namespace SeQura\WC\Controllers\Hooks\Product;
 
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
-use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Requests\GetCachedPaymentMethodsRequest;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
@@ -218,60 +217,55 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 */
 	public function do_cart_widget_shortcode( $atts ) {
 		$this->logger->log_debug( 'Shortcode called', __FUNCTION__, __CLASS__ );
-		$atts = (array) $atts;
-
-		$current_country = $this->i18n->get_current_country();
-
-		if ( ! $this->configuration->is_cart_widget_enabled( $current_country ) ) {
-			$this->logger->log_info( 'Cart Widget is disabled', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
-			return '';
-		}
-		if ( ! $this->product_service->can_display_mini_widgets() ) {
-			$this->logger->log_info( 'SeQura payment gateway is disabled', __FUNCTION__, __CLASS__ );
-			return '';
-		}
 
 		try {
-			$store_id = $this->configuration->get_store_id();
-			$merchant = $this->payment_service->get_merchant_id();
-			$methods  = $this->payment_method_service->get_all_mini_widget_compatible_payment_methods( $store_id, $merchant );
+			$country = $this->i18n->get_current_country();
 
-			$config = $this->configuration->get_cart_widget_config( $current_country );
-			if ( ! $config ) {
-				$this->logger->log_info( 'Cart Widget configuration not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
+			/** @var array<array<string, mixed>> $widgets */
+            $widgets = CheckoutAPI::get()->promotionalWidgets($this->configuration->get_store_id())
+			->getAvailableWidgetForCartPage(new PromotionalWidgetsCheckoutRequest(
+				$country,
+				$country,
+				$this->widget_configurator->getCurrency(),
+				$this->shopper_service->get_ip() 
+			))
+			->toArray();
+
+			if( empty($widgets) ) {
+				$this->logger->log_info( 'No cart widget available', __FUNCTION__, __CLASS__ );
 				return '';
 			}
 
+			/** @var array<string, mixed> $widget */
+			$widget = $widgets[0];
 
+			$atts = \shortcode_atts(
+				array(
+					'product'             => $widget['product'] ?? '',
+					'campaign'            => $widget['campaign'] ?? '',
+					'dest'                => $widget['dest'] ?? '',
+					'theme'               => $widget['theme'] ?? '',
+					'price'               => $widget['priceSel'] ?? '',
+					'alt_price'           => $widget['altPriceSel'] ?? '',
+					'is_alt_price'        => $widget['altTriggerSelector'] ?? '',
+					'message'             => $widget['miniWidgetMessage'],
+					'message_below_limit' => $widget['miniWidgetBelowLimitMessage'],
+					'min_amount'          => $widget['minAmount'] ?? 0,
+					'max_amount'          => $widget['maxAmount'] ?? null,
+					'reg_amount'          => 0,
+					'reverse'             => 0,
+				),
+				(array) $atts,
+				'sequra_cart_widget'
+			);
 
-			foreach ( $methods as $method ) {
-				if ( $method['product'] !== $config['product'] ) {
-					continue;
-				}
-
-				$atts = \shortcode_atts(
-					array(
-						'product'             => $method['product'] ?? '',
-						'campaign'            => $method['campaign'] ?? '',
-						'dest'                => $config['selForLocation'],
-						'price'               => $config['selForPrice'],
-						'message'             => $config['message'],
-						'message_below_limit' => $config['messageBelowLimit'],
-						'min_amount'          => $method['minAmount'] ?? 0,
-						'max_amount'          => $method['maxAmount'] ?? null,
-					),
-					$atts,
-					'sequra_cart_widget'
-				);
-	
-				ob_start();
-				\wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
-				return ob_get_clean();
-			}
-		} catch ( \Throwable $e ) {
+			ob_start();
+			\wc_get_template( 'front/widget.php', $atts, '', $this->templates_path );
+			return ob_get_clean();
+        } catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			return '';
 		}
-		return '';
 	}
 
 	/**
@@ -350,11 +344,11 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		 */
 		global $product;
 
+		/** @var array<string, mixed> $widget */
+		$widgets = array();
 		$country = $this->i18n->get_current_country();
 
 		try{
-
-			/** @var GetWidgetsCheckoutResponse $widgets */
 			$widgets = CheckoutAPI::get()->promotionalWidgets($this->configuration->get_store_id())
 			->getAvailableWidgetsForProductPage(new PromotionalWidgetsCheckoutRequest(
 				$country,
@@ -389,53 +383,6 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			}
 			echo \do_shortcode("[sequra_widget $atts_str]");
 		}
-
-		// 'product'      => '',
-		// 'campaign'     => '',
-		// 'product_id'   => '',
-		// 'theme'        => $this->configuration->get_widget_theme( $atts['product'], $campaign, $current_country ),
-		// 'reverse'      => 0,
-		// 'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
-		// 'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'], $campaign, $current_country ),
-		// 'price'        => $this->configuration->get_widget_price_css_sel(),
-		// 'alt_price'    => $this->configuration->get_widget_alt_price_css_sel(),
-		// 'is_alt_price' => $this->configuration->get_widget_is_alt_price_css_sel(),
-	
-		// $methods = array();
-		// try {
-		// 	$country = $this->i18n->get_current_country();
-		// 	// $store_id = $this->configuration->get_store_id();
-		// 	$merchant = $this->payment_service->get_merchant_id();
-
-
-		// 	/** @var array<int, array<string, mixed>> $methods */
-		// 	$methods = CheckoutAPI::get()
-		// 	->cachedPaymentMethods( $this->configuration->get_store_id() )
-		// 	->getCachedPaymentMethodsSupportedOnProductPage( new GetCachedPaymentMethodsRequest( $merchant ?? '', $country, $country ) )
-		// 	->toArray();
-		// 	// $methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, $merchant );
-		// } catch ( \Throwable $e ) {
-		// 	$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-		// 	return;
-		// }
-
-		// foreach ( $methods as $method ) {
-		// 	if ( ! $this->product_service->can_display_widget_for_method( $product, $method ) ) {
-		// 		continue;
-		// 	}
-			
-		// 	$atts = array(
-		// 		'product'    => $method['product'] ?? '',
-		// 		'campaign'   => $method['campaign'] ?? '',
-		// 		'product_id' => $product->get_id(),
-		// 	);
-
-		// 	$atts_str = '';
-		// 	foreach ( $atts as $key => $value ) {
-		// 		$atts_str .= " $key=\"$value\"";
-		// 	}
-		// 	echo \do_shortcode( "[sequra_widget $atts_str]" );
-		// }
 	}
 
 	/**

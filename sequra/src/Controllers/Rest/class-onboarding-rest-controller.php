@@ -451,12 +451,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->toArray();
 
 			if ( ! empty( $response ) ) {
-				$response[ self::PARAM_WIDGET_LABELS ]['message']           = ! empty( $response[ self::PARAM_WIDGET_LABELS ]['messages'] ) ?
-				reset( $response[ self::PARAM_WIDGET_LABELS ]['messages'] ) : '';
-				$response[ self::PARAM_WIDGET_LABELS ]['messageBelowLimit'] = ! empty( $response[ self::PARAM_WIDGET_LABELS ]['messagesBelowLimit'] ) ?
-				reset( $response[ self::PARAM_WIDGET_LABELS ]['messagesBelowLimit'] ) : '';
 				$response[ self::PARAM_WIDGET_STYLES ]                      = $response['widgetConfiguration'];
-				unset( $response[ self::PARAM_WIDGET_LABELS ]['messages'], $response[ self::PARAM_WIDGET_LABELS ]['messagesBelowLimit'] );
 				unset( $response['widgetConfiguration'] );
 			}
 		} catch ( \Throwable $e ) {
