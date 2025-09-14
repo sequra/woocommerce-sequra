@@ -74,13 +74,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	private $configuration;
 
 	/**
-	 * Assets service
-	 *
-	 * @var Interface_Assets
-	 */
-	private $assets;
-
-	/**
 	 * Payment method service
 	 * 
 	 * @var Interface_Payment_Method_Service
@@ -116,7 +109,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$this->i18n                   = $i18n;
 		$this->logger                 = $logger;
 		$this->configuration          = $configuration;
-		$this->assets                 = $assets;
 		$this->payment_method_service = $payment_method_service;
 		$this->regex                  = $regex;
 		$this->wp_version             = $wp_version;
@@ -217,6 +209,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$sequra_fe = array(
 			'flags'             => array(
 				'isShowCheckoutAsHostedPageFieldVisible' => false, // Not used in this implementation.
+				'configurableSelectorsForMiniWidgets'    => true,
 			),
 			'translations'      => array(
 				'default' => $this->load_translation(),
