@@ -9,9 +9,10 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\OrderStatusSettings\Requests\OrderStatusSettingsRequest;
+use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
@@ -30,7 +31,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 	const PARAM_EXCLUDED_CATEGORIES                       = 'excludedCategories';
 	const PARAM_ENABLED_FOR_SERVICES                      = 'enabledForServices';
 	const PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY         = 'allowFirstServicePaymentDelay';
-	const PARAM_ALLOW_SERVICE_REG_ITEMS                   = 'allowServiceRegItems';
+	const PARAM_ALLOW_SERVICE_REG_ITEMS                   = 'allowServiceRegistrationItems';
 	const PARAM_DEFAULT_SERVICES_END_DATE                 = 'defaultServicesEndDate';
 	
 	/**
@@ -77,7 +78,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 				self::PARAM_ENABLED_FOR_SERVICES      => $this->get_arg_bool( false, false ),
 				self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY => $this->get_arg_bool( false, true ),
 				self::PARAM_ALLOW_SERVICE_REG_ITEMS   => $this->get_arg_bool( false, true ),
-				self::PARAM_DEFAULT_SERVICES_END_DATE => $this->get_arg_string( false, 'P1Y', array( $this, 'validate_time_duration' ) ),
+				self::PARAM_DEFAULT_SERVICES_END_DATE => $this->get_arg_string( false, GeneralSettings::DEFAULT_SERVICE_END_DATE, array( $this, 'validate_time_duration' ) ),
 			)
 		);
 
@@ -236,7 +237,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 			$response = AdminAPI::get()
 			->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->saveGeneralSettings(
-				new General_Settings_Request(
+				new GeneralSettingsRequest(
 					(bool) $request->get_param( self::PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA ),
 					(bool) $request->get_param( self::PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE ),
 					(array) $request->get_param( self::PARAM_ALLOWED_IP_ADDRESSES ),

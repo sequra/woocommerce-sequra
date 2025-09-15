@@ -245,7 +245,7 @@ class Configuration extends CoreConfiguration {
 	public function allow_service_reg_items(): bool {
 		try {
 			$config = $this->get_general_settings();
-			return ! empty( $config['allowServiceRegItems'] );
+			return ! empty( $config['allowServiceRegistrationItems'] );
 		} catch ( Throwable $e ) {
 			return false;
 		}
