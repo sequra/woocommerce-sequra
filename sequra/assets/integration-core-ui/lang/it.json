@@ -352,7 +352,7 @@
       "label": "Consenti ritardo nel primo pagamento del servizio",
       "description": "Non abilitare tranne su indicazione di seQura."
     },
-    "allowServiceRegItems": {
+    "allowServiceRegistrationItems": {
       "label": "Consenti articoli di registrazione",
       "description": "Consente di configurare una parte del prezzo del prodotto da pagare in anticipo come registrazione. Non abilitare tranne su indicazione di seQura."
     },

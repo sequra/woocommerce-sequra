@@ -352,7 +352,7 @@
       "label": "Autoriser le délai du premier paiement de service",
       "description": "Ne pas activer sauf indication de seQura."
     },
-    "allowServiceRegItems": {
+    "allowServiceRegistrationItems": {
       "label": "Autoriser les articles d'inscription",
       "description": "Permet de configurer une partie du prix du produit à payer à l'avance en tant qu'inscription. Ne pas activer sauf indication de seQura."
     },

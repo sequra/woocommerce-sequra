@@ -352,7 +352,7 @@
       "label": "Allow first service payment delay",
       "description": "Do not enable except by indication of seQura."
     },
-    "allowServiceRegItems": {
+    "allowServiceRegistrationItems": {
       "label": "Allow registration items",
       "description": "Allows configuring part of the product price to be paid in advance as registration. Do not enable except by indication of seQura."
     },

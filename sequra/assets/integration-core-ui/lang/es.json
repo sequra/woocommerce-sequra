@@ -351,7 +351,7 @@
       "label": "Permitir retraso en el primer pago del servicio",
       "description": "No habilitar a menos que lo indique seQura."
     },
-    "allowServiceRegItems": {
+    "allowServiceRegistrationItems": {
       "label": "Permitir artículos de registro",
       "description": "Permite configurar una parte del precio del producto para que se pague por adelantado como registro. No habilitar a menos que lo indique seQura."
     },
