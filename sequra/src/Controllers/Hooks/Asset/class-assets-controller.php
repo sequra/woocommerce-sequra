@@ -13,9 +13,9 @@ use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
-use SeQura\WC\Services\Regex\Interface_Regex;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use Throwable;
 
 /**
@@ -83,7 +83,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	/**
 	 * Regex service
 	 * 
-	 * @var Interface_Regex
+	 * @var RegexProvider
 	 */
 	private $regex;
 
@@ -100,7 +100,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		string $templates_path, 
 		Configuration $configuration,
 		Interface_Payment_Method_Service $payment_method_service,
-		Interface_Regex $regex
+		RegexProvider $regex
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->assets_dir_url         = $assets_dir_url;
@@ -210,6 +210,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'flags'             => array(
 				'isShowCheckoutAsHostedPageFieldVisible' => false, // Not used in this implementation.
 				'configurableSelectorsForMiniWidgets'    => true,
+				'isServiceSellingAllowed'    => true, // TODO: check if this can be dynamic based on the current merchant configuration.
 			),
 			'translations'      => array(
 				'default' => $this->load_translation(),
@@ -235,11 +236,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'isPromotional'     => false,
 			'_state_controller' => $state_controller,
 			'customHeader'      => array( 'X-WP-Nonce' => \wp_create_nonce( 'wp_rest' ) ),
-
-			'regex'             => array(
-				'ip'             => $this->regex->ip( false ),
-				'dateOrDuration' => $this->regex->date_or_duration( false ),
-			),
+			'regex'             => $this->regex->toArray(),
 			'miniWidgetLabels'  => array(
 				'messages'           => $this->configuration->get_mini_widget_default_messages(),
 				'messagesBelowLimit' => $this->configuration->get_mini_widget_default_messages_below_limit(),

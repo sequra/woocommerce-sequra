@@ -13,6 +13,7 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetFormattedPaymentMethodsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetPaymentMethodsRequest;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -35,9 +36,15 @@ class Payment_REST_Controller extends REST_Controller {
 	 * @param string $rest_namespace The namespace.
 	 * @param Interface_Logger_Service $logger         The logger service.
 	 * @param Interface_Payment_Method_Service $payment_method_service The payment method service.
+	 * @param RegexProvider $regex The regex provider.
 	 */
-	public function __construct( $rest_namespace, Interface_Logger_Service $logger, Interface_Payment_Method_Service $payment_method_service ) {
-		parent::__construct( $logger );
+	public function __construct( 
+		$rest_namespace, 
+		Interface_Logger_Service $logger,
+		RegexProvider $regex, 
+		Interface_Payment_Method_Service $payment_method_service 
+		) {
+		parent::__construct( $logger, $regex );
 		$this->namespace              = $rest_namespace;
 		$this->rest_base              = '/payment';
 		$this->payment_method_service = $payment_method_service;

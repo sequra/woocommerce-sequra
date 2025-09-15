@@ -10,11 +10,10 @@ namespace SeQura\WC\Services\Product;
 
 use DateInterval;
 use DateTime;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
-use SeQura\WC\Services\Regex\Interface_Regex;
 use WC_Product;
 
 /**
@@ -45,7 +44,7 @@ class Product_Service implements Interface_Product_Service {
 	/**
 	 * RegEx service
 	 *
-	 * @var Interface_Regex
+	 * @var RegexProvider
 	 */
 	private $regex;
 
@@ -55,7 +54,7 @@ class Product_Service implements Interface_Product_Service {
 	public function __construct(
 		Configuration $configuration,
 		Interface_Pricing_Service $pricing_service,
-		Interface_Regex $regex
+		RegexProvider $regex
 	) {
 		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
@@ -177,7 +176,7 @@ class Product_Service implements Interface_Product_Service {
 		if ( $raw_value ) {
 			return $service_end_date;
 		}
-		if ( ! preg_match( $this->regex->date_or_duration(), $service_end_date ) ) {
+		if ( ! preg_match( $this->regex->getDateOrDurationRegex(), $service_end_date ) ) {
 			$service_end_date = $this->configuration->get_default_services_end_date();
 		}
 		return $service_end_date;

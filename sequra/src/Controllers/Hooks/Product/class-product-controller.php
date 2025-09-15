@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Controllers\Controller;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\I18n\Interface_I18n;
@@ -19,7 +20,6 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
-use SeQura\WC\Services\Regex\Regex;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Product;
 use WP_Post;
@@ -74,7 +74,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	/**
 	 * RegEx service
 	 *
-	 * @var Regex
+	 * @var RegexProvider
 	 */
 	private $regex;
 
@@ -103,7 +103,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		Interface_Payment_Service $payment_service,
 		Interface_Payment_Method_Service $payment_method_service,
 		Interface_I18n $i18n,
-		Regex $regex,
+		RegexProvider $regex,
 		Interface_Shopper_Service $shopper_service,
 		WidgetConfiguratorInterface $widget_configurator
 	) {
@@ -449,7 +449,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			'allow_payment_delay'                          => $this->configuration->allow_first_service_payment_delay(),
 			'service_desired_first_charge_date'            => $this->product_service->get_desired_first_charge_date( $post->ID, true ) ?? '',
 			'service_desired_first_charge_date_field_name' => self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE,
-			'date_or_duration_regex'                       => $this->regex->date_or_duration( false ),
+			'date_or_duration_regex'                       => $this->regex->getDateOrDurationRegex( false ),
 			'allow_registration_items'                     => $this->configuration->allow_service_reg_items(),
 			'service_registration_amount'                  => $this->product_service->get_registration_amount( $post->ID ),
 			'service_registration_amount_field_name'       => self::FIELD_NAME_REGISTRATION_AMOUNT,

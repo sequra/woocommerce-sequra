@@ -9,6 +9,7 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -26,9 +27,14 @@ class Log_REST_Controller extends REST_Controller {
 	 *
 	 * @param string            $rest_namespace The namespace.
 	 * @param Interface_Logger_Service $logger         The logger service.
+	 * @param RegexProvider $regex The regex provider.
 	 */
-	public function __construct( $rest_namespace, Interface_Logger_Service $logger ) {
-		parent::__construct( $logger );
+	public function __construct( 
+		$rest_namespace, 
+		Interface_Logger_Service $logger,
+		RegexProvider $regex
+	) {
+		parent::__construct( $logger, $regex );
 		$this->namespace = $rest_namespace;
 		$this->rest_base = '/log';
 	}

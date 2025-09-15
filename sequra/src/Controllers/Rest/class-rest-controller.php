@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Services\Interface_Logger_Service;
 use WP_REST_Request;
 
@@ -27,12 +28,21 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	protected $logger;
 
 	/**
+	 * RegEx service
+	 *
+	 * @var RegexProvider
+	 */
+	protected $regex;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Interface_Logger_Service $logger         The logger service.
+	 * @param RegexProvider $regex The regex provider.
 	 */
-	public function __construct( Interface_Logger_Service $logger ) {
+	public function __construct( Interface_Logger_Service $logger, RegexProvider $regex ) {
 		$this->logger = $logger;
+		$this->regex  = $regex;
 	}
 
 	/**
@@ -140,8 +150,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * @param string $key The key.
 	 */
 	public function validate_ip_list( $param, $request, $key ): bool {
-		// phpcs:ignore Generic.Files.LineLength.TooLong
-		$ip_regex = '/^(((25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?))|([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}))$/';
+		$ip_regex = $this->regex->getIpRegex();
 		if ( ! is_array( $param ) ) {
 			return false;
 		}
@@ -161,8 +170,7 @@ abstract class REST_Controller extends \WP_REST_Controller {
 	 * @param string $key The key.
 	 */
 	public function validate_time_duration( $param, $request, $key ): bool {
-		// phpcs:ignore Generic.Files.LineLength.TooLong
-		$regex = '/^((?:\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8]))|(?:\d{4}-(?:0[13-9]|1[0-2])-(?:29|30))|(?:\d{4}-(?:0[13578]|1[012])-(?:31))|(?:\d{2}(?:[02468][048]|[13579][26])-(?:02)-29)|(P(?:\d+Y)?(?:\d+M)?(?:\d+W)?(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+S)?)?))$/';
+		$regex = $this->regex->getDateOrDurationRegex();
 		return is_string( $param ) && preg_match( $regex, $param ) === 1 && 'P' !== $param && ! str_ends_with( $param, 'T' );
 	}
 

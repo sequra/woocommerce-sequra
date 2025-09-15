@@ -114,8 +114,6 @@ use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Pricing\Pricing_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Product\Product_Service;
-use SeQura\WC\Services\Regex\Interface_Regex;
-use SeQura\WC\Services\Regex\Regex;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 use SeQura\WC\Services\Report\Report_Service;
 use SeQura\WC\Services\Interface_Constants;
@@ -123,6 +121,7 @@ use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use SeQura\WC\Services\Time\Time_Checker_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\MiniWidgetMessagesProviderInterface;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Product\Product_Service as Core_Product_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Mini_Widget_Messages_Provider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
@@ -523,15 +522,6 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
-			Interface_Regex::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Regex::class ] ) ) {
-					self::$cache[ Interface_Regex::class ] = new Regex();
-				}
-				return self::$cache[ Interface_Regex::class ];
-			}
-		);
-		Reg::registerService(
 			Interface_Report_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Report_Service::class ] ) ) {
@@ -644,7 +634,7 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Product_Service::class ] = new Product_Service(
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
-						Reg::getService( Interface_Regex::class )
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ Interface_Product_Service::class ];
@@ -789,7 +779,7 @@ class Bootstrap extends BootstrapComponent {
 						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Payment_Method_Service::class ),
-						Reg::getService( Interface_Regex::class )
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ Interface_Assets_Controller::class ];
@@ -834,7 +824,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Payment_Method_Service::class ),
 						Reg::getService( Interface_I18n::class ),
-						Reg::getService( Interface_Regex::class ),
+						Reg::getService( RegexProvider::class ),
 						Reg::getService( Interface_Shopper_Service::class ),
 						Reg::getService( WidgetConfiguratorInterface::class )
 					);
@@ -874,7 +864,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Onboarding_REST_Controller::class ] ) ) {
 					self::$cache[ Onboarding_REST_Controller::class ] = new Onboarding_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ Onboarding_REST_Controller::class ];
@@ -887,6 +878,7 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Payment_REST_Controller::class ] = new Payment_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class ),
 						Reg::getService( Interface_Payment_Method_Service::class )
 					);
 				}
@@ -899,7 +891,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ General_Settings_REST_Controller::class ] ) ) {
 					self::$cache[ General_Settings_REST_Controller::class ] = new General_Settings_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ General_Settings_REST_Controller::class ];
@@ -911,7 +904,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Log_REST_Controller::class ] ) ) {
 					self::$cache[ Log_REST_Controller::class ] = new Log_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ Log_REST_Controller::class ];
