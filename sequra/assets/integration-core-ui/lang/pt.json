@@ -115,7 +115,8 @@
     "invalidFieldValue": "O campo deve ser definido como \"%s\".",
     "acceptableRange": "O valor deve estar entre %d e %d.",
     "paymentMethodUnavailable": "Método de pagamento indisponível.",
-    "storeUnavailable": "Loja indisponível."
+    "storeUnavailable": "Loja indisponível.",
+    "invalidTimeDuration": "Este campo deve conter apenas datas como 2017-08-31 ou durações como P3M15D (3 meses e 15 dias). Verifique o formato ISO 8601."
   },
   "payments": {
     "title": "Métodos de pagamento",
@@ -343,6 +344,26 @@
     "excludedProducts": {
       "label": "Produtos excluídos",
       "description": "Os produtos da loja neste campo não serão autorizados a ser comprados com métodos de pagamento SeQura. Por favor, insira um SKU válido para cada produto que gostaria de excluir."
+    },
+    "enabledForServices": {
+      "label": "Habilitado para serviços",
+      "description": "Seu contrato deve permitir a venda de serviços. Somente um produto pode ser comprado por vez."
+    },
+    "allowFirstServicePaymentDelay": {
+      "label": "Permitir atraso no primeiro pagamento do serviço",
+      "description": "Não habilitar exceto se indicado pelo seQura."
+    },
+    "allowServiceRegItems": {
+      "label": "Permitir itens de registro",
+      "description": "Permite configurar uma parte do preço do produto a ser paga antecipadamente como registro. Não habilitar exceto se indicado pelo seQura."
+    },
+    "defaultServicesEndDate": {
+      "label": "Data de término dos serviços padrão",
+      "description": "Datas como 2017-08-31, duração como P3M15D (3 meses e 15 dias). Valor padrão para todos os produtos."
     }
+  },
+  "supportLink": {
+    "label": "Precisa de ajuda?",
+    "link": "https://sqra.es/supportpt"
   }
 }

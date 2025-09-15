@@ -113,7 +113,8 @@
     "invalidFieldValue": "El campo debe estar configurado en \"%s\".",
     "invalidMaxValue": "El valor máximo permitido es %s.",
     "invalidImageType": "Por favor, proporciona un archivo en uno de los tipos de imagen admitidos (PNG, JPG, SVG).",
-    "invalidImageSize": "El archivo seleccionado supera el límite de 10 MB."
+    "invalidImageSize": "El archivo seleccionado supera el límite de 10 MB.",
+    "invalidTimeDuration": "Este campo debe contener fechas como 2017-08-31 o una duración como P3M15D (3 meses y 15 días). Revisa el formato ISO 8601."
   },
   "payments": {
     "title": "Métodos de pago",
@@ -341,6 +342,26 @@
     "excludedProducts": {
       "label": "Productos excluidos",
       "description": "Los productos de la tienda en este campo no podrán ser adquiridos con los métodos de pago de SeQura. Por favor, introduce un SKU válido para cada producto que desees excluir."
+    },
+    "enabledForServices": {
+      "label": "Habilitado para servicios",
+      "description": "Tu contrato debe permitir la venta de servicios."
+    },
+    "allowFirstServicePaymentDelay": {
+      "label": "Permitir retraso en el primer pago del servicio",
+      "description": "No habilitar a menos que lo indique seQura."
+    },
+    "allowServiceRegItems": {
+      "label": "Permitir artículos de registro",
+      "description": "Permite configurar una parte del precio del producto para que se pague por adelantado como registro. No habilitar a menos que lo indique seQura."
+    },
+    "defaultServicesEndDate": {
+      "label": "Fecha de finalización de servicios predeterminada",
+      "description": "Fechas como 2017-08-31, duración como P3M15D (3 meses y 15 días). El valor predeterminado para todos los productos."
     }
+  },
+  "supportLink": {
+    "label": "¿Necesitas ayuda?",
+    "link": "https://sqra.es/supportes"
   }
 }
