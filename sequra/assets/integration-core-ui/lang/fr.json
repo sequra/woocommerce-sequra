@@ -14,6 +14,7 @@
     "merchant": "Commerçant :",
     "settings": "Paramètres",
     "paymentMethods": "Méthodes de paiement",
+    "advanced": "Avancé",
     "changesSaved": "Modifications enregistrées avec succès.",
     "noItemsAvailable": "Aucun élément disponible",
     "and": " et ",
@@ -82,7 +83,9 @@
         "merchantError": "Commerçant avec l'ID %s introuvable.",
         "failedToRegisterWebhook": "Échec de l'enregistrement du webhook.",
         "hmacError": "Erreur lors de la génération du HMAC."
-      }
+      },
+      "failedToRetrieveLog": "Échec de la récupération du contenu du journal.",
+      "failedToRemoveLog": "Échec de la suppression du contenu du journal."
     }
   },
   "sidebar": {
@@ -129,6 +132,24 @@
     "maximumAmount": "Montant maximum",
     "availableFrom": "Disponible à partir de",
     "availableTo": "Disponible jusqu'à"
+  },
+  "debug": {
+    "title": "Activer les journaux",
+    "description": "Aide à diagnostiquer les problèmes avec l'intégration SeQura",
+    "noLogs": "Aucun journal disponible",
+    "log": {
+      "severity": "Gravité",
+      "message": "Message",
+      "datetime": "Date et heure",
+      "removeModal": {
+        "title": "Supprimer les journaux",
+        "message": "Es-tu sûr de vouloir effacer les journaux ? Tu ne pourras pas les récupérer."
+      },
+      "minLevel": "Niveau de gravité minimal",
+      "minLevelDescription": "Définir le niveau de gravité minimal des journaux à écrire dans le fichier de journalisation."
+    },
+    "reload": "Recharger",
+    "remove": "Supprimer"
   },
   "connection": {
     "title": {

@@ -14,6 +14,7 @@
     "merchant": "Merchant:",
     "settings": "Settings",
     "paymentMethods": "Payment methods",
+    "advanced": "Advanced",
     "changesSaved": "Changes saved successfully.",
     "noItemsAvailable": "No items available",
     "and": " and ",
@@ -82,7 +83,9 @@
         "merchantError": "Merchant with id %s not found.",
         "failedToRegisterWebhook": "Failed to register webhook.",
         "hmacError": "Error generating HMAC."
-      }
+      },
+      "failedToRetrieveLog": "Failed to retrieve log content.",
+      "failedToRemoveLog": "Failed to remove log content."
     }
   },
   "sidebar": {
@@ -129,6 +132,24 @@
     "maximumAmount": "Maximum amount",
     "availableFrom": "Available from",
     "availableTo": "Available to"
+  },
+  "debug": {
+    "title": "Enable logs",
+    "description": "Help to diagnose issues with the seQura integration",
+    "noLogs": "There are no logs available",
+    "log": {
+      "severity": "Severity",
+      "message": "Message",
+      "datetime": "Date and time",
+      "removeModal": {
+        "title": "Delete logs",
+        "message": "Are you sure you want to clear the logs? You won't be able to recover them."
+      },
+      "minLevel": "Minimum severity level",
+      "minLevelDescription": "Set the minimum severity level of logs to write to the log file."
+    },
+    "reload": "Reload",
+    "remove": "Remove"
   },
   "connection": {
     "title": {

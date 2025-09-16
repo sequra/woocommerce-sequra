@@ -313,12 +313,25 @@
   color: #00C2A3;
 }
 #sequra-page #sq-page-wrapper .sq-page-content-wrapper.sqv--payments .sq-content-inner .sq-table-heading .sqm--table-dropdown .sqp-field-subtitle {
-  color: #B1AEBA;
+  color: #b1aeba;
 }
 #sequra-page #sq-page-wrapper .sq-page-content-wrapper.sqv--settings .sq-content-inner {
   max-width: 835px;
   width: 100%;
   padding: 32px 48px 52px 48px;
+}
+#sequra-page #sq-page-wrapper .sq-page-content-wrapper.sqv--advanced .sq-content-inner {
+  padding: 44px 36px 36px;
+}
+#sequra-page #sq-page-wrapper .sq-page-content-wrapper.sqv--advanced .sq-content-inner .sq-table-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  column-gap: 36px;
+}
+#sequra-page #sq-page-wrapper .sq-page-content-wrapper.sqv--advanced .sq-content-inner .sq-table-heading .sqp-page-heading {
+  max-width: 800px;
+  width: 100%;
 }
 @media (max-width: 767.98px) {
   #sequra-page #sq-page-wrapper {
@@ -554,14 +567,14 @@
   column-gap: 4px;
   padding: 3px 8px;
   font-size: 13px;
-  color: #EA9D56;
+  color: #ea9d56;
   border-radius: 15px;
-  border: 1px solid #B65700;
+  border: 1px solid #b65700;
   transition: all 0.2s;
 }
 #sequra-page .sq-page-header .sqp-download-version:hover, #sequra-page .sq-page-header .sqp-download-version:focus {
   color: #fff;
-  background: #EA9D56;
+  background: #ea9d56;
 }
 #sequra-page .sq-page-header .sqp-menu-items {
   display: flex;
@@ -571,8 +584,6 @@
   border-radius: 50px;
   overflow: hidden;
   background-color: #f4f4f4;
-  max-width: 300px;
-  width: 100%;
 }
 #sequra-page .sq-page-header .sqp-menu-items a {
   display: flex;
@@ -582,6 +593,7 @@
   font-size: 14px;
   padding: 8px;
   transition: all 0.2s;
+  width: 150px;
 }
 #sequra-page .sq-page-header .sqp-menu-items a:hover, #sequra-page .sq-page-header .sqp-menu-items a:focus {
   color: #ffffff;
@@ -600,11 +612,11 @@
   font-size: 13px;
 }
 #sequra-page .sq-page-header .sq-mode-badge.sqt--live {
-  color: #0ABF53;
+  color: #0abf53;
   background: rgba(10, 191, 83, 0.12);
 }
 #sequra-page .sq-page-header .sq-mode-badge.sqt--test {
-  color: #B65700;
+  color: #b65700;
   background: rgba(234, 157, 86, 0.12);
 }
 
@@ -1474,6 +1486,7 @@
 #sequra-page .sq-table .sq-table__row .sq-table__row-field-wrapper {
   display: grid;
   gap: 4px;
+  margin-bottom: 0;
 }
 #sequra-page .sq-table .sq-table__row .sq-table__row-field-wrapper--grow {
   flex-grow: 1;
@@ -1504,6 +1517,8 @@
   color: #000;
   border: 1px solid #dce0e5;
   border-radius: 6px;
+  margin-left: 0;
+  margin-right: 0;
 }
 #sequra-page .sq-table .sq-table__body {
   display: grid;
@@ -1828,6 +1843,136 @@
   margin-top: 20px;
 }
 
+tr:has(.sqm--log):hover {
+  background: #f4f4f4;
+}
+
+#sequra-page .sqm--log {
+  font-family: monospace;
+  font-size: 12px;
+}
+#sequra-page .sqm--log-info {
+  color: #2196f3;
+}
+#sequra-page .sqm--log-warning {
+  color: #ff9800;
+}
+#sequra-page .sqm--log-error {
+  color: #f44336;
+}
+#sequra-page .sqm--log-debug {
+  color: #000;
+}
+#sequra-page .sqm--log-details {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  background: #fff;
+  border-radius: 20px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-color: transparent;
+}
+#sequra-page .sqm--log-details::before {
+  font-family: "sq-icons";
+  content: "\e91b";
+  line-height: 1;
+  font-weight: 500;
+  font-size: 14px;
+}
+#sequra-page .sqm--log-details > span {
+  display: none;
+}
+#sequra-page .sqm--log-details.sqm--log-details-open {
+  background: #000;
+}
+#sequra-page .sqm--log-details.sqm--log-details-open::before {
+  color: #fff;
+}
+
+#sequra-page .sq-datatable__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  font-size: 15px;
+  align-items: center;
+}
+#sequra-page .sq-datatable__bottom {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 15px;
+  align-items: center;
+}
+#sequra-page .sq-datatable__info {
+  color: #686565;
+}
+#sequra-page .sq-datatable__pagination {
+  justify-self: flex-end;
+}
+#sequra-page .sq-datatable__pagination-list {
+  display: flex;
+  margin-left: auto;
+  margin-right: 0;
+}
+#sequra-page .sq-datatable__pagination-list .datatable-pagination-list-item .datatable-pagination-list-item-link {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 2rem;
+  color: #000;
+  transition: all 0.15s;
+  margin: 0 0.25rem;
+  cursor: pointer;
+}
+#sequra-page .sq-datatable__pagination-list .datatable-pagination-list-item.sq-datatable__active .datatable-pagination-list-item-link, #sequra-page .sq-datatable__pagination-list .datatable-pagination-list-item:hover:not(.datatable-disabled) .datatable-pagination-list-item-link {
+  background-color: #000;
+  color: #fff;
+}
+#sequra-page .sq-datatable__pagination-list .datatable-pagination-list-item.datatable-disabled .datatable-pagination-list-item-link {
+  color: #686565;
+  cursor: not-allowed;
+}
+#sequra-page .sq-datatable__search {
+  justify-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+#sequra-page .sq-datatable__search .sq-field-wrapper {
+  margin-bottom: 0 !important;
+}
+#sequra-page .sq-datatable__search .sq-button {
+  padding: 8px 24px !important;
+}
+#sequra-page .sq-datatable__selector {
+  padding: 8px 16px !important;
+  color: #000 !important;
+  border: 1px solid #dce0e5 !important;
+  border-radius: 6px !important;
+  min-width: 80px !important;
+  outline-color: transparent !important;
+}
+#sequra-page .sq-datatable__selector:focus, #sequra-page .sq-datatable__selector:hover, #sequra-page .sq-datatable__selector:active {
+  border-color: #6fcf97 !important;
+  box-shadow: none !important;
+}
+#sequra-page .sq-datatable__input {
+  padding: 8px 16px !important;
+  color: #000 !important;
+  border: 1px solid #dce0e5 !important;
+  border-radius: 6px !important;
+  min-width: 300px !important;
+  outline-color: transparent !important;
+}
+#sequra-page .sq-datatable__input:focus, #sequra-page .sq-datatable__input:hover, #sequra-page .sq-datatable__input:active {
+  border-color: #6fcf97 !important;
+  box-shadow: none !important;
+}
+
 #sequra-page .sq-table-container {
   overflow-x: auto;
   width: 100%;
@@ -1877,6 +2022,44 @@
 #sequra-page .sq-table-container .sqp-payment-method-cell .sqp-payment-method-description {
   font-size: 13px;
   margin: 0;
+}
+#sequra-page .sq-table-container .sqp-details {
+  background-color: #f3f6f9;
+}
+#sequra-page .sq-table-container .sqp-details .sq-link-button {
+  color: #0075ff;
+  text-decoration: none;
+  display: flex;
+}
+#sequra-page .sq-table-container .sqp-details .sq-link-button::after {
+  font-family: "sq-icons";
+  content: "\e916";
+  line-height: 1;
+  font-weight: 500;
+  font-size: 6px;
+  padding: 5px 0 0 4px;
+}
+#sequra-page .sq-table-container .sqp-details-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+#sequra-page .sq-table-container .sqp-details-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+}
+#sequra-page .sq-table-container .sqp-details-info {
+  display: flex;
+  gap: 5px;
+}
+#sequra-page .sq-table-container .sqp-details-message {
+  white-space: normal;
+  text-align: justify;
+}
+#sequra-page .sq-table-container .sqp-details-label {
+  font-weight: 700;
 }
 
 #sequra-page .sq-modal {

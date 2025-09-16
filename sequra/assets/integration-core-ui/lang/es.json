@@ -14,6 +14,7 @@
     "merchant": "Comerciante:",
     "settings": "Ajustes",
     "paymentMethods": "Métodos de pago",
+    "advanced": "Avanzado",
     "changesSaved": "Cambios guardados exitosamente.",
     "noItemsAvailable": "No hay elementos disponibles",
     "mode": {
@@ -81,7 +82,9 @@
         "merchantError": "Comerciante con ID %s no encontrado.",
         "failedToRegisterWebhook": "Error al registrar el webhook.",
         "hmacError": "Error al generar HMAC."
-      }
+      },
+      "failedToRetrieveLog": "Fallo al recuperar el contenido del registro.",
+      "failedToRemoveLog": "Fallo al eliminar el contenido del registro."
     }
   },
   "sidebar": {
@@ -128,6 +131,24 @@
     "maximumAmount": "Importe máximo",
     "availableFrom": "Disponible desde",
     "availableTo": "Disponible hasta"
+  },
+  "debug": {
+    "title": "Habilitar registros",
+    "description": "Ayuda a diagnosticar problemas con la integración de SeQura",
+    "noLogs": "No hay registros disponibles",
+    "log": {
+      "severity": "Gravedad",
+      "message": "Mensaje",
+      "datetime": "Fecha y hora",
+      "removeModal": {
+        "title": "Eliminar registros",
+        "message": "¿Estás seguro de que deseas borrar los registros? No podrás recuperarlos."
+      },
+      "minLevel": "Nivel de gravedad mínimo",
+      "minLevelDescription": "Configura el nivel de gravedad mínimo de los registros que se escribirán en el archivo de registro."
+    },
+    "reload": "Recargar",
+    "remove": "Eliminar"
   },
   "connection": {
     "title": {
