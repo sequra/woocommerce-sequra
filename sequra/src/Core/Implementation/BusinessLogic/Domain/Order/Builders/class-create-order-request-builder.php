@@ -18,7 +18,6 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Models\OrderRequest\Options as ExtendedOptions;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
@@ -148,7 +147,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 
 		return new CreateOrderRequest(
 			'', // state.
-			$merchant,
 			$this->cart(),
 			$delivery_method,
 			$this->customer(),
@@ -156,6 +154,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			$this->delivery_address(),
 			$this->invoice_address(),
 			$this->gui(),
+			$merchant,
 			$this->merchant_reference(),
 			null // trackings.
 		);
@@ -343,7 +342,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 					$addresses_may_be_missing = null;
 				}
 
-				$options = new ExtendedOptions(
+				$options = new Options(
 					null, // has_jquery.
 					null, // uses_shipped_cart.
 					$addresses_may_be_missing, // addresses_may_be_missing.
