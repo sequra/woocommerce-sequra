@@ -157,7 +157,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$onboarding_page_config = array_merge(
 			$payment_page_config, 
 			array(
-				'saveConnectionDataUrl'  => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
 				'saveCountrySettingsUrl' => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
 				'getWidgetSettingsUrl'   => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
 				'saveWidgetSettingsUrl'  => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
