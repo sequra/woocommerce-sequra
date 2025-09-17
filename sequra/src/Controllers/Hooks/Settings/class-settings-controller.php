@@ -71,7 +71,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * @return void
 	 */
 	public function render_page() {
-		$this->logger->log_info( 'Callback executed', __FUNCTION__, __CLASS__ );
+		$this->logger->log_debug( 'Callback executed', __FUNCTION__, __CLASS__ );
 		\wc_get_template( 'admin/settings_page.php', array(), '', $this->templates_path );
 	}
 
