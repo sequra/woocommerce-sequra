@@ -230,7 +230,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				new PromotionalWidgetsCheckoutRequest(
 					$country,
 					$country,
-					$this->widget_configurator->getCurrency(),
+					$this->widget_configurator->getCurrency() ?? '',
 					$this->shopper_service->get_ip() 
 				)
 			)
@@ -290,17 +290,17 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			/** 
 			 * Fetch promotional widget data from CheckoutAPI
 			 * 
-			 * @var array<string, mixed> $widget */
+			 * @var array<int, array<string, mixed>> $widgets */
 			$widgets = CheckoutAPI::get()->promotionalWidgets( $this->configuration->get_store_id() )
 			->getAvailableMiniWidgetForProductListingPage(
 				new PromotionalWidgetsCheckoutRequest(
 					$country,
 					$country,
-					$this->widget_configurator->getCurrency(),
+					$this->widget_configurator->getCurrency() ?? '',
 					$this->shopper_service->get_ip()
 				)
-			);
-			$widgets = $widgets->toArray();
+			)
+			->toArray();
 
 			if ( empty( $widgets ) ) {
 				$this->logger->log_info( 'No product listing widget available', __FUNCTION__, __CLASS__ );
@@ -354,7 +354,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		/**
 		 * Fetch promotional widget data from CheckoutAPI
 		 *
-		 * @var array<string, mixed> $widget */
+		 * @var array<int, array<string, mixed>> $widgets */
 		$widgets = array();
 		$country = $this->i18n->get_current_country();
 
@@ -364,7 +364,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				new PromotionalWidgetsCheckoutRequest(
 					$country,
 					$country,
-					$this->widget_configurator->getCurrency(),
+					$this->widget_configurator->getCurrency() ?? '',
 					$this->shopper_service->get_ip(),
 					(string) $product->get_id()
 				)
