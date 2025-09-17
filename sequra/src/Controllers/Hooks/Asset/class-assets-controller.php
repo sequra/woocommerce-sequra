@@ -165,8 +165,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			)
 		);
 		$page_config            = array(
-			'onboarding'   => $onboarding_page_config,
-			'settings'     => array_merge(
+			'onboarding' => $onboarding_page_config,
+			'settings'   => array_merge(
 				$onboarding_page_config,
 				array(
 					'getShopCategoriesUrl'              => \get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
@@ -177,8 +177,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 					'saveOrderStatusMappingSettingsUrl' => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
 				)
 			),
-			'payment'      => $payment_page_config,
-			'advanced'     => array_merge(
+			'payment'    => $payment_page_config,
+			'advanced'   => array_merge(
 				$connection_config,
 				array(
 					'getLogsUrl'          => \get_rest_url( null, 'sequra/v1/log/{storeId}' ),
@@ -202,7 +202,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'flags'             => array(
 				'isShowCheckoutAsHostedPageFieldVisible' => false, // Not used in this implementation.
 				'configurableSelectorsForMiniWidgets'    => true,
-				'isServiceSellingAllowed'    => true,
+				'isServiceSellingAllowed'                => true,
 			),
 			'translations'      => array(
 				'default' => $this->load_translation(),
@@ -255,7 +255,10 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$data = array();
 		try {
 			$country = $this->i18n->get_current_country();
-			/** @var array<string, mixed> $data */
+			/**
+			 * Fetch promotional widget data from CheckoutAPI
+			 *  
+			 * @var array<string, mixed> $data */
 			$data = CheckoutAPI::get()
 			->promotionalWidgets( $this->configuration->get_store_id() )
 			->getPromotionalWidgetInitializeData( new PromotionalWidgetsCheckoutRequest( $country, $country ) )

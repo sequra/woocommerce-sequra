@@ -57,7 +57,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_LISTING_SEL_FOR_LOCATION = 'listingLocationSelector';
 	private const PARAM_LISTING_WIDGET_ON_PAGE   = 'widgetOnListingPage';
 
-	private const PARAM_IS_FULL_DISCONNECT   = 'isFullDisconnect';
+	private const PARAM_IS_FULL_DISCONNECT = 'isFullDisconnect';
 
 	/**
 	 * Constructor.
@@ -70,7 +70,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$rest_namespace, 
 		Interface_Logger_Service $logger,
 		RegexProvider $regex 
-		) {
+	) {
 		parent::__construct( $logger, $regex );
 		$this->namespace = $rest_namespace;
 		$this->rest_base = '/onboarding';
@@ -424,7 +424,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->toArray();
 
 			if ( ! empty( $response ) ) {
-				$response[ self::PARAM_WIDGET_STYLES ]                      = $response['widgetConfiguration'];
+				$response[ self::PARAM_WIDGET_STYLES ] = $response['widgetConfiguration'];
 				unset( $response['widgetConfiguration'] );
 			}
 		} catch ( \Throwable $e ) {

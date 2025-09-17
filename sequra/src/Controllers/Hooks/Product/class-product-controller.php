@@ -221,22 +221,30 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		try {
 			$country = $this->i18n->get_current_country();
 
-			/** @var array<array<string, mixed>> $widgets */
-            $widgets = CheckoutAPI::get()->promotionalWidgets($this->configuration->get_store_id())
-			->getAvailableWidgetForCartPage(new PromotionalWidgetsCheckoutRequest(
-				$country,
-				$country,
-				$this->widget_configurator->getCurrency(),
-				$this->shopper_service->get_ip() 
-			))
+			/**
+			 * Fetch promotional widget data from CheckoutAPI
+			 *  
+			 * @var array<array<string, mixed>> $widgets */
+			$widgets = CheckoutAPI::get()->promotionalWidgets( $this->configuration->get_store_id() )
+			->getAvailableWidgetForCartPage(
+				new PromotionalWidgetsCheckoutRequest(
+					$country,
+					$country,
+					$this->widget_configurator->getCurrency(),
+					$this->shopper_service->get_ip() 
+				)
+			)
 			->toArray();
 
-			if( empty($widgets) ) {
+			if ( empty( $widgets ) ) {
 				$this->logger->log_info( 'No cart widget available', __FUNCTION__, __CLASS__ );
 				return '';
 			}
 
-			/** @var array<string, mixed> $widget */
+			/**
+			 * The first available widget.
+			 *  
+			 * @var array<string, mixed> $widget */
 			$widget = $widgets[0];
 
 			$atts = \shortcode_atts(
@@ -262,7 +270,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			ob_start();
 			\wc_get_template( 'front/widget.php', $atts, '', $this->templates_path );
 			return ob_get_clean();
-        } catch ( \Throwable $e ) {
+		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return '';
 		}
@@ -279,22 +287,30 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		
 		try {
 			$country = $this->i18n->get_current_country();
-            /** @var array<string, mixed> $widget */
-            $widgets = CheckoutAPI::get()->promotionalWidgets($this->configuration->get_store_id())
-			->getAvailableMiniWidgetForProductListingPage(new PromotionalWidgetsCheckoutRequest(
-				$country,
-				$country,
-				$this->widget_configurator->getCurrency(),
-				$this->shopper_service->get_ip()
-			));
+			/** 
+			 * Fetch promotional widget data from CheckoutAPI
+			 * 
+			 * @var array<string, mixed> $widget */
+			$widgets = CheckoutAPI::get()->promotionalWidgets( $this->configuration->get_store_id() )
+			->getAvailableMiniWidgetForProductListingPage(
+				new PromotionalWidgetsCheckoutRequest(
+					$country,
+					$country,
+					$this->widget_configurator->getCurrency(),
+					$this->shopper_service->get_ip()
+				)
+			);
 			$widgets = $widgets->toArray();
 
-			if( empty($widgets) ) {
+			if ( empty( $widgets ) ) {
 				$this->logger->log_info( 'No product listing widget available', __FUNCTION__, __CLASS__ );
 				return '';
 			}
 
-			/** @var array<string, mixed> $widget */
+			/**
+			 * The first available widget.
+			 *
+			 * @var array<string, mixed> $widget */
 			$widget = $widgets[0];
 
 			$atts = \shortcode_atts(
@@ -315,8 +331,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			ob_start();
 			\wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
 			return ob_get_clean();
-
-        } catch ( \Throwable $e ) {
+		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return '';
 		}
@@ -336,44 +351,49 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		 */
 		global $product;
 
-		/** @var array<string, mixed> $widget */
+		/**
+		 * Fetch promotional widget data from CheckoutAPI
+		 *
+		 * @var array<string, mixed> $widget */
 		$widgets = array();
 		$country = $this->i18n->get_current_country();
 
-		try{
-			$widgets = CheckoutAPI::get()->promotionalWidgets($this->configuration->get_store_id())
-			->getAvailableWidgetsForProductPage(new PromotionalWidgetsCheckoutRequest(
-				$country,
-				$country,
-				$this->widget_configurator->getCurrency(),
-				$this->shopper_service->get_ip(),
-				(string)$product->get_id()
-			))
+		try {
+			$widgets = CheckoutAPI::get()->promotionalWidgets( $this->configuration->get_store_id() )
+			->getAvailableWidgetsForProductPage(
+				new PromotionalWidgetsCheckoutRequest(
+					$country,
+					$country,
+					$this->widget_configurator->getCurrency(),
+					$this->shopper_service->get_ip(),
+					(string) $product->get_id()
+				)
+			)
 			->toArray();
-		} catch (\Throwable $e) {
-			$this->logger->log_throwable($e, __FUNCTION__, __CLASS__);
+		} catch ( \Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return;
 		}
 			
-		foreach ($widgets as $widget) {
+		foreach ( $widgets as $widget ) {
 			$atts = array(
-				'product'    => $widget['product'] ?? '',
-				'campaign'   => $widget['campaign'] ?? '',
-				'product_id' => $product->get_id(),
-				'theme'      => $widget['theme'] ?? '',
-				'dest'       => $widget['dest'] ?? '',
-				'price'      =>  $widget['priceSel'] ?? '',
-				'alt_price'	=>  $widget['altPriceSel'] ?? '',
+				'product'      => $widget['product'] ?? '',
+				'campaign'     => $widget['campaign'] ?? '',
+				'product_id'   => $product->get_id(),
+				'theme'        => $widget['theme'] ?? '',
+				'dest'         => $widget['dest'] ?? '',
+				'price'        => $widget['priceSel'] ?? '',
+				'alt_price'    => $widget['altPriceSel'] ?? '',
 				'is_alt_price' => $widget['altTriggerSelector'] ?? '',
-				'min_amount'  => $widget['minAmount'] ?? 0,
-				'max_amount'  => $widget['maxAmount'] ?? null,
+				'min_amount'   => $widget['minAmount'] ?? 0,
+				'max_amount'   => $widget['maxAmount'] ?? null,
 				
 			);
 			$atts_str = '';
-			foreach ($atts as $key => $value) {
+			foreach ( $atts as $key => $value ) {
 				$atts_str .= " $key='$value'";
 			}
-			echo \do_shortcode("[sequra_widget $atts_str]");
+			echo \do_shortcode( "[sequra_widget $atts_str]" );
 		}
 	}
 

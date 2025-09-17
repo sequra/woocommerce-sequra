@@ -43,7 +43,7 @@ class Payment_REST_Controller extends REST_Controller {
 		Interface_Logger_Service $logger,
 		RegexProvider $regex, 
 		Interface_Payment_Method_Service $payment_method_service 
-		) {
+	) {
 		parent::__construct( $logger, $regex );
 		$this->namespace              = $rest_namespace;
 		$this->rest_base              = '/payment';
