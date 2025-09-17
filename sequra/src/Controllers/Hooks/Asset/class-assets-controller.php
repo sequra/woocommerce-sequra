@@ -169,7 +169,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'settings'     => array_merge(
 				$onboarding_page_config,
 				array(
-					'getShopPaymentMethodsUrl'          => '', // Not used in this implementation.
 					'getShopCategoriesUrl'              => \get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
 					'getGeneralSettingsUrl'             => \get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
 					'saveGeneralSettingsUrl'            => \get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
@@ -179,12 +178,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				)
 			),
 			'payment'      => $payment_page_config,
-			'transactions' => array_merge(
-				$connection_config,
-				array(
-					'getTransactionLogsUrl' => \get_rest_url( null, 'sequra/v1/log/{storeId}' ),
-				)
-			),
 			'advanced'     => array_merge(
 				$connection_config,
 				array(
@@ -209,7 +202,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'flags'             => array(
 				'isShowCheckoutAsHostedPageFieldVisible' => false, // Not used in this implementation.
 				'configurableSelectorsForMiniWidgets'    => true,
-				'isServiceSellingAllowed'    => true, // TODO: check if this can be dynamic based on the current merchant configuration.
+				'isServiceSellingAllowed'    => true,
 			),
 			'translations'      => array(
 				'default' => $this->load_translation(),
@@ -236,10 +229,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'_state_controller' => $state_controller,
 			'customHeader'      => array( 'X-WP-Nonce' => \wp_create_nonce( 'wp_rest' ) ),
 			'regex'             => $this->regex->toArray(),
-			'miniWidgetLabels'  => array(
-				'messages'           => $this->configuration->get_mini_widget_default_messages(),
-				'messagesBelowLimit' => $this->configuration->get_mini_widget_default_messages_below_limit(),
-			),
 		);
 
 		return $sequra_fe;
