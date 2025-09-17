@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\Disconnect\Requests\DisconnectRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget;
 use SeQura\WC\Services\Interface_Logger_Service;
@@ -58,6 +59,8 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_LISTING_SEL_FOR_LOCATION = 'listingLocationSelector';
 	private const PARAM_LISTING_WIDGET_ON_PAGE   = 'widgetOnListingPage';
 
+	private const PARAM_IS_FULL_DISCONNECT   = 'isFullDisconnect';
+
 	/**
 	 * Constructor.
 	 *
@@ -94,6 +97,14 @@ class Onboarding_REST_Controller extends REST_Controller {
 				self::PARAM_USERNAME              => $this->get_arg_string(),
 				self::PARAM_PASSWORD              => $this->get_arg_string(),
 				self::PARAM_SEND_STATISTICAL_DATA => $this->get_arg_bool(),
+			)
+		);
+
+		$disconnect_args = array_merge(
+			$store_id_args,
+			array(
+				self::PARAM_IS_FULL_DISCONNECT => $this->get_arg_bool(),
+				self::PARAM_DEPLOYMENT_ID      => $this->get_arg_string(),
 			)
 		);
 		
@@ -142,7 +153,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$this->register_get( "data/{$store_id}", 'get_connection_data', $store_id_args );
 		$this->register_post( "data/{$store_id}", 'save_connection_data', $data_args );
 		$this->register_post( "data/validate/{$store_id}", 'validate_connection_data', $validate_data_args );
-		$this->register_post( "data/disconnect/{$store_id}", 'disconnect', $store_id_args );
+		$this->register_post( "data/disconnect/{$store_id}", 'disconnect', $disconnect_args );
 		$this->register_post( "data/connect/{$store_id}", 'connect', $store_id_args );
 		
 		$this->register_get( "widgets/{$store_id}", 'get_widgets', $store_id_args );
@@ -310,7 +321,12 @@ class Onboarding_REST_Controller extends REST_Controller {
 		try {
 			$response = AdminAPI::get()
 			->disconnect( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->disconnect()
+			->disconnect(
+				new DisconnectRequest(
+					strval( $request->get_param( self::PARAM_DEPLOYMENT_ID ) ),
+					(bool) $request->get_param( self::PARAM_IS_FULL_DISCONNECT )
+				)
+			)
 			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
