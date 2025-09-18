@@ -8,10 +8,6 @@
 
 namespace SeQura\WC\Tests\Services\Report;
 
-// Load required classes.
-require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContextMock.php';
-require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContext.php';
-
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\Models\CountryConfiguration;
 use WP_UnitTestCase;
 use SeQura\WC\Services\Report\Report_Service;
@@ -22,7 +18,6 @@ use SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\Statist
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderReport\Service\OrderReportService;
 use SeQura\WC\Services\Order\Interface_Order_Service;
-use SeQura\Core\BusinessLogic\Domain\OrderReport\Tasks\OrderReportTask;
 use SeQura\Core\BusinessLogic\Domain\StatisticalData\Models\StatisticalData;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Tests\Core\Extension\BusinessLogic\Domain\Multistore\StoreContext;
@@ -31,11 +26,17 @@ use WC_Order;
 
 class ReportServiceTest extends WP_UnitTestCase {
 
+	/** @var \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration&\PHPUnit\Framework\MockObject\MockObject */
 	private $configuration;
+	/** @var \SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService&\PHPUnit\Framework\MockObject\MockObject */
 	private $store_service;
+	/** @var \SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService&\PHPUnit\Framework\MockObject\MockObject */
 	private $shop_order_service;
+	/** @var \SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\StatisticalDataRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject */
 	private $statistical_data_repository;
+	/** @var \SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject */
 	private $country_configuration_repository;
+	/** @var \SeQura\WC\Services\Order\Interface_Order_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $order_service;
 	private $report_service;
 	private $store_context_mock;

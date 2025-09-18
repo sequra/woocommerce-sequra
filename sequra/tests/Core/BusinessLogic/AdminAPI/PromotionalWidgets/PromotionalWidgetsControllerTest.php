@@ -7,10 +7,9 @@
 
 namespace SeQura\WC\Tests\Core\Extension\BusinessLogic\PromotionalWidgets;
 
-require_once __DIR__ . '/../../../integration-core-test-autoload.php';
-
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\PromotionalWidgetsController;
+use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Models\WidgetLabels;
@@ -25,6 +24,7 @@ use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widg
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location_Config;
 use SeQura\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
 use SeQura\Core\BusinessLogic\DataAccess\PromotionalWidgets\Entities\WidgetSettings;
+use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Models\WidgetSettings as DomainWidgetSettings;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Mini_Widget_Config;
@@ -47,49 +47,18 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 			}
 		);
 
-		// Extend WidgetSettingsRepository.
-		TestServiceRegister::registerService(
-			WidgetSettingsRepositoryInterface::class,
-			static function () {
-				return new Widget_Settings_Repository(
-					TestRepositoryRegistry::getRepository( WidgetSettings::getClassName() ),
-					TestServiceRegister::getService( StoreContext::class )
-				);
-			}
-		);
-
-		// Extend PromotionalWidgetsController.
-		TestServiceRegister::registerService(
-			PromotionalWidgetsController::class,
-			static function () {
-				return new Promotional_Widgets_Controller(
-					TestServiceRegister::getService( WidgetSettingsService::class )
-				);
-			}
-		);
-
 		$this->widgetSettingsRepository = TestServiceRegister::getService( WidgetSettingsRepositoryInterface::class );
 	}
 
 	public function testGetSettings() {
-		$settings = new Widget_Settings(
+		$settings = new DomainWidgetSettings(
 			true,
-			'qwerty',
 			false,
 			false,
 			false,
-			'',
 			'{"alignment":"center","amount-font-bold":"true","amount-font-color":"#1c1c1c","amount-font-size":"15","background-color":"white","border-color":"#ce5c00","border-radius":"","class":"","font-color":"#1c1c1c","link-font-color":"#1c1c1c","link-underline":"true","no-costs-claim":"","size":"M","starting-text":"only","type":"banner"}',
-			new WidgetLabels(
-				array(
-					'ES' => 'test es',
-					'IT' => 'test it',
-				),
-				array(
-					'ES' => 'test test es',
-					'IT' => 'test test it',
-				)
-			),
+
+			// TODO: refactor this
 			new Widget_Location_Config(
 				'selector-for-price',
 				'selector-for-alt-price',
@@ -217,7 +186,8 @@ class PromotionalWidgetsControllerTest extends BaseTestCase {
 	}
 
 	public function testSetSettings() {
-		$settings = new Widget_Settings_Request(
+		// TODO: Refactor this
+		$settings = new WidgetSettingsRequest(
 			false,
 			'qqqwerty',
 			false,

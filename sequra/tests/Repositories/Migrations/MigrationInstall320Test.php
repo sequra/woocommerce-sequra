@@ -18,14 +18,18 @@ use WP_UnitTestCase;
 class MigrationInstall320Test extends WP_UnitTestCase {
 
 	private $migration;
+	/** @var \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration&\PHPUnit\Framework\MockObject\MockObject */
 	private $configuration;
+	/** @var \SeQura\WC\Repositories\Entity_Repository&\PHPUnit\Framework\MockObject\MockObject */
 	private $entity_repository;
+	/** @var \SeQura\WC\Repositories\Queue_Item_Repository&\PHPUnit\Framework\MockObject\MockObject */
 	private $queue_repository;
 	private $hook_name;
 	
 	public function set_up() {
 		$this->hook_name         = 'migration_install_320_test_hook';
 		$this->configuration     = $this->createMock( Configuration::class );
+		/** @var \wpdb&\PHPUnit\Framework\MockObject\MockObject */
 		$_wpdb                   = $this->createMock( \wpdb::class );
 		$this->entity_repository = $this->createMock( Entity_Repository::class );
 		$this->queue_repository  = $this->createMock( Queue_Item_Repository::class );

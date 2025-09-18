@@ -15,13 +15,15 @@ use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Tests\Fixtures\Store;
 use WP_UnitTestCase;
 
-require_once __DIR__ . '/../../../../Fixtures/Store.php';
-
 class ShopOrderServiceTest extends WP_UnitTestCase {
 
+	/** @var \SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject */
 	private $sq_order_repo;
+	/** @var \SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService&\PHPUnit\Framework\MockObject\MockObject */
 	private $shop_order_service;
+	/** @var \SeQura\WC\Services\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $logger;
+	/** @var \SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder&\PHPUnit\Framework\MockObject\MockObject */
 	private $create_order_request_builder;
 
 	/**

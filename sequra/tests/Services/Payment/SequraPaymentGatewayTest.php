@@ -8,8 +8,6 @@
 
 namespace SeQura\WC\Tests\Services\Payment;
 
-require_once __DIR__ . '/../../Fixtures/Store.php';
-
 use Exception;
 use WP_UnitTestCase;
 use SeQura\Core\Infrastructure\ServiceRegister;

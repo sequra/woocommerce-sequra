@@ -8,10 +8,6 @@
 
 namespace SeQura\WC\Tests\Services\Order;
 
-// Load required classes.
-require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContextMock.php';
-require_once __DIR__ . '/../../Core/BusinessLogic/Domain/Multistore/StoreContext.php';
-
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
@@ -39,17 +35,29 @@ use WC_Order;
 class OrderServiceTest extends WP_UnitTestCase {
 
 	private $order_service;
+	/** @var \SeQura\WC\Services\Payment\Interface_Payment_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $payment_service;
+	/** @var \SeQura\WC\Services\Pricing\Interface_Pricing_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $pricing_service;
+	/** @var \SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $order_status_service;
+	/** @var \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration&\PHPUnit\Framework\MockObject\MockObject */
 	private $configuration;
+	/** @var \SeQura\WC\Core\BusinessLogic\Domain\Order\Service\OrderService&\PHPUnit\Framework\MockObject\MockObject */
 	private $core_order_service;
+	/** @var \SeQura\WC\Services\Cart\Interface_Cart_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $cart_service;
+	/** @var \SeQura\WC\Tests\Core\Extension\BusinessLogic\Domain\Multistore\StoreContextMock&\PHPUnit\Framework\MockObject\MockObject */
 	private $store_context_mock;
+	/** @var \SeQura\WC\Services\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $logger;
+	/** @var \SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject */
 	private $sequra_order_repository;
+	/** @var \SeQura\WC\Services\Time\Interface_Time_Checker_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $time_checker_service;
+	/** @var \SeQura\WC\Repositories\Interface_Deletable_Repository&\PHPUnit\Framework\MockObject\MockObject */
 	private $deletable_repository;
+	/** @var \SeQura\WC\Repositories\Interface_Table_Migration_Repository&\PHPUnit\Framework\MockObject\MockObject */
 	private $table_migration_repository;
 
 	public function set_up(): void {        

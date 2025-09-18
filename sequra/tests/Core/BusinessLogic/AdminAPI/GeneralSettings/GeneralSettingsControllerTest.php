@@ -7,17 +7,18 @@
 
 namespace SeQura\WC\Tests\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings;
 
-require_once __DIR__ . '/../../../integration-core-test-autoload.php';
-
 use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\GeneralSettingsController;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
 use SeQura\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Responses\General_Settings_Response;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\SuccessfulGeneralSettingsResponse;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\GeneralSettings\Models\General_Settings;
+use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Repositories\GeneralSettingsRepository;
+use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings as DomainGeneralSettings;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
@@ -26,8 +27,6 @@ use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use SeQura\Core\Tests\BusinessLogic\Common\MockComponents\MockCategoryService;
 use SeQura\Core\Tests\Infrastructure\Common\TestServiceRegister;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Settings_Controller;
-use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
 
 /**
  * Class GeneralSettingsControllerTest
@@ -47,28 +46,6 @@ class GeneralSettingsControllerTest extends BaseTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Extend GeneralSettingsRepository.
-		TestServiceRegister::registerService(
-			GeneralSettingsRepositoryInterface::class,
-			static function () {
-				return new General_Settings_Repository(
-					TestRepositoryRegistry::getRepository( GeneralSettings::getClassName() ),
-					TestServiceRegister::getService( StoreContext::class )
-				);
-			}
-		);
-
-		// Extend GeneralSettingsController.
-		TestServiceRegister::registerService(
-			GeneralSettingsController::class,
-			static function () {
-				return new General_Settings_Controller(
-					TestServiceRegister::getService( GeneralSettingsService::class ),
-					TestServiceRegister::getService( CategoryService::class )
-				);
-			}
-		);
-
 		TestServiceRegister::registerService(
 			CategoryServiceInterface::class,
 			static function () {
@@ -78,7 +55,7 @@ class GeneralSettingsControllerTest extends BaseTestCase {
 
 		$this->generalSettingsRepository = TestServiceRegister::getService( GeneralSettingsRepositoryInterface::class );
 
-		$this->dummyGeneralSettings = new General_Settings(
+		$this->dummyGeneralSettings = new DomainGeneralSettings(
 			true,
 			true,
 			array( 'address 1', 'address 2' ),
@@ -90,7 +67,7 @@ class GeneralSettingsControllerTest extends BaseTestCase {
 			'P1Y'
 		);
 
-		$this->dummyGeneralSettingsRequest = new General_Settings_Request(
+		$this->dummyGeneralSettingsRequest = new GeneralSettingsRequest(
 			true,
 			true,
 			array( 'address 1', 'address 2' ),
@@ -122,7 +99,7 @@ class GeneralSettingsControllerTest extends BaseTestCase {
 		$generalSettings = $this->dummyGeneralSettings;
 
 		StoreContext::doWithStore( '1', array( $this->generalSettingsRepository, 'setGeneralSettings' ), array( $generalSettings ) );
-		$expectedResponse = new General_Settings_Response( $generalSettings );
+		$expectedResponse = new GeneralSettingsResponse( $generalSettings );
 
 		$response = AdminAPI::get()->generalSettings( '1' )->getGeneralSettings();
 
@@ -180,7 +157,7 @@ class GeneralSettingsControllerTest extends BaseTestCase {
 	public function testIsUpdateResponseSuccessful(): void {
 		StoreContext::doWithStore( '1', array( $this->generalSettingsRepository, 'setGeneralSettings' ), array( $this->dummyGeneralSettings ) );
 
-		$generalSettingsRequest = new General_Settings_Request(
+		$generalSettingsRequest = new GeneralSettingsRequest(
 			false,
 			false,
 			array( 'address 3', 'address 4' ),
@@ -203,7 +180,7 @@ class GeneralSettingsControllerTest extends BaseTestCase {
 	public function testUpdateResponse(): void {
 		StoreContext::doWithStore( '1', array( $this->generalSettingsRepository, 'setGeneralSettings' ), array( $this->dummyGeneralSettings ) );
 
-		$generalSettingsRequest = new General_Settings_Request(
+		$generalSettingsRequest = new GeneralSettingsRequest(
 			false,
 			false,
 			array( 'address 3', 'address 4' ),
@@ -227,7 +204,7 @@ class GeneralSettingsControllerTest extends BaseTestCase {
 	public function testUpdateResponseToArray(): void {
 		StoreContext::doWithStore( '1', array( $this->generalSettingsRepository, 'setGeneralSettings' ), array( $this->dummyGeneralSettings ) );
 
-		$generalSettingsRequest = new General_Settings_Request(
+		$generalSettingsRequest = new GeneralSettingsRequest(
 			false,
 			false,
 			array( 'address 3', 'address 4' ),

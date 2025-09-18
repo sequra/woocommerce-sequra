@@ -8,8 +8,6 @@
 
 namespace SeQura\WC\Tests\Core\BusinessLogic\Domain\Integration\OrderReport;
 
-require_once __DIR__ . '/../../../../../Fixtures/Store.php';
-
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
@@ -30,16 +28,23 @@ use WC_Order;
 
 class OrderReportServiceTest extends WP_UnitTestCase {
 
+	/** @var \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration&\PHPUnit\Framework\MockObject\MockObject */
 	private $configuration;
+	/** @var \SeQura\WC\Services\Order\Interface_Order_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $order_service;
+	/** @var \SeQura\WC\Services\Pricing\Interface_Pricing_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $pricing_service;
+	/** @var \SeQura\WC\Services\Cart\Interface_Cart_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $cart_service;
 	private $wc_data;
 	private $env_data;
 	private $integration_name;
 	private $integration_version;
+	/** @var \SeQura\WC\Services\I18n\Interface_I18n&\PHPUnit\Framework\MockObject\MockObject */
 	private $i18n;
+	/** @var \SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service */
 	private $order_report_service;
+	/** @var Platform */
 	private $platform;
 
 	/**
