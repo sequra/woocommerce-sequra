@@ -191,7 +191,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 * Get registration item instance
 	 */
 	private function get_registration_item( WC_Product $product, int $qty ): ?RegistrationItem {
-		$registration_amount = $this->product_service->get_registration_amount( $product, true );
+		$registration_amount = (int) $this->product_service->get_registration_amount( $product, true );
 		if ( $registration_amount <= 0 ) {
 			return null;
 		}
