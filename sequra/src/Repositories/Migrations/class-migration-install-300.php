@@ -10,10 +10,11 @@ namespace SeQura\WC\Repositories\Migrations;
 
 use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
 use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use Throwable;
@@ -152,9 +153,15 @@ class Migration_Install_300 extends Migration {
 		->connection( $this->configuration->get_store_id() )
 		->saveOnboardingData(
 			new OnboardingRequest(
-				$env_mapping[ $settings['env'] ],
-				strval( $settings['user'] ),
-				strval( $settings['password'] ),
+				array(
+					new ConnectionRequest(
+						$env_mapping[ $settings['env'] ],
+						'',
+						strval( $settings['user'] ),
+						strval( $settings['password'] ),
+						'sequra'
+					),
+				),
 				true
 			)
 		);
@@ -246,7 +253,7 @@ class Migration_Install_300 extends Migration {
 		$response = AdminAPI::get()
 			->generalSettings( $this->configuration->get_store_id() )
 			->saveGeneralSettings(
-				new General_Settings_Request(
+				new GeneralSettingsRequest(
 					true,
 					false,
 					$allowed_ip_addresses,
