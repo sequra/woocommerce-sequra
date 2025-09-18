@@ -58,20 +58,6 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	private $product_service;
 
 	/**
-	 * Payment service
-	 *
-	 * @var Interface_Payment_Service
-	 */
-	private $payment_service;
-
-	/**
-	 * Payment method service
-	 *
-	 * @var Interface_Payment_Method_Service
-	 */
-	private $payment_method_service;
-
-	/**
 	 * RegEx service
 	 *
 	 * @var RegexProvider
@@ -93,6 +79,13 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	private $widget_configurator;
 
 	/**
+	 * Cached available widgets for product page
+	 * 
+	 * @var array<string, array<array<string, mixed>>> The key is the product ID and the value is the array of available widgets
+	 */
+	private $available_widgets_for_product_page = array();
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -100,23 +93,21 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		string $templates_path, 
 		Configuration $configuration,
 		Interface_Product_Service $product_service,
-		Interface_Payment_Service $payment_service,
-		Interface_Payment_Method_Service $payment_method_service,
 		Interface_I18n $i18n,
 		RegexProvider $regex,
 		Interface_Shopper_Service $shopper_service,
 		WidgetConfiguratorInterface $widget_configurator
 	) {
 		parent::__construct( $logger, $templates_path );
-		$this->logger                 = $logger;
-		$this->configuration          = $configuration;
-		$this->product_service        = $product_service;
-		$this->payment_service        = $payment_service;
-		$this->payment_method_service = $payment_method_service;
-		$this->i18n                   = $i18n;
-		$this->regex                  = $regex;
-		$this->shopper_service        = $shopper_service;
-		$this->widget_configurator    = $widget_configurator;
+		$this->logger              = $logger;
+		$this->configuration       = $configuration;
+		$this->product_service     = $product_service;
+		$this->i18n                = $i18n;
+		$this->regex               = $regex;
+		$this->shopper_service     = $shopper_service;
+		$this->widget_configurator = $widget_configurator;
+
+		$this->available_widgets_for_product_page = array();
 	}
 
 	/**
@@ -150,11 +141,21 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			}
 		}
 
-		$current_country = $this->i18n->get_current_country();
-		$campaign        = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : null;
+		$product_id = (int) $atts['product_id'];
+		$product    = $atts['product'];
+		$campaign   = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : '';
 		
-		if ( ! $this->configuration->is_widget_enabled( $atts['product'], $campaign, $current_country ) ) {
-			$this->logger->log_info( 'Widget is disabled', __FUNCTION__, __CLASS__ );
+		if ( ! $this->is_widget_enabled_for_product( $product_id, $product, $campaign ) ) {
+			$this->logger->log_info( 
+				'Widget is disabled',
+				__FUNCTION__,
+				__CLASS__,
+				array( 
+					new LogContextData( 'payment_method', $product ),
+					new LogContextData( 'campaign', $campaign ),
+					new LogContextData( 'product_id', $product_id ),
+				)
+			);
 			return '';
 		}
 
@@ -178,7 +179,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'product_id'   => '',
 				'theme'        => '',
 				'reverse'      => 0,
-				'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
+				'reg_amount'   => $this->product_service->get_registration_amount( $product_id, true ),
 				'dest'         => '',
 				'price'        => '',
 				'alt_price'    => '',
@@ -190,15 +191,15 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			'sequra_widget'
 		);
 
-		if ( ! $this->product_service->can_display_widget_for_method( (int) $atts['product_id'], $atts['product'] ) ) {
+		if ( ! $this->product_service->can_display_widget_for_method( $product_id, $product ) ) {
 			$this->logger->log_info(
 				'Widget cannot be displayed for product', 
 				__FUNCTION__,
 				__CLASS__,
 				array( 
-					new LogContextData( 'payment_method', $atts['product'] ),
-					new LogContextData( 'campaign', $atts['campaign'] ),
-					new LogContextData( 'product_id', $atts['product_id'] ),
+					new LogContextData( 'payment_method', $product ),
+					new LogContextData( 'campaign', $campaign ),
+					new LogContextData( 'product_id', $product_id ),
 				) 
 			);
 			return '';
@@ -338,19 +339,18 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	}
 
 	/**
-	 * Add [sequra_widget] to product page automatically
+	 * Get available widgets for a product page from in-memory cache or CheckoutAPI
+	 * 
+	 * @param int|string $product_id The product ID
+	 * @return array<int, array<string, mixed>>
 	 */
-	private function add_widget_shortcode_to_product_page(): void {
-		if ( ! \is_product() ) {
-			return;
+	private function get_available_widgets_for_product_page( $product_id ): array {
+		
+		$product_id = (string) $product_id;
+		if ( isset( $this->available_widgets_for_product_page[ $product_id ] ) ) {
+			return $this->available_widgets_for_product_page[ $product_id ];
 		}
-		/**
-		 * The current product.
-		 *
-		 * @var WC_Product $product
-		 */
-		global $product;
-
+		
 		/**
 		 * Fetch promotional widget data from CheckoutAPI
 		 *
@@ -366,16 +366,57 @@ class Product_Controller extends Controller implements Interface_Product_Control
 					$country,
 					$this->widget_configurator->getCurrency() ?? '',
 					$this->shopper_service->get_ip(),
-					(string) $product->get_id()
+					(string) $product_id
 				)
 			)
 			->toArray();
+			$this->available_widgets_for_product_page[ $product_id ] = $widgets;
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+		return $widgets;
+	}
+
+	/**
+	 * Check if the widget is enabled
+	 * 
+	 * @param string|int $product_id The WooCommerce product ID
+	 * @param string $product The seQura product identifier
+	 * @param string $campaign The seQura campaign name. Use an empty string to ignore the campaign.
+	 * @return bool
+	 */
+	private function is_widget_enabled_for_product( $product_id, string $product, string $campaign = '' ): bool {
+		/**
+		 * Promotional widget data
+		 *
+		 * @var array<string, mixed> $widget */ 
+		foreach ( $this->get_available_widgets_for_product_page( $product_id ) as $widget ) {
+			if ( $widget['product'] === $product && $widget['campaign'] === $campaign ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Add [sequra_widget] to product page automatically
+	 */
+	private function add_widget_shortcode_to_product_page(): void {
+		if ( ! \is_product() ) {
 			return;
 		}
-			
-		foreach ( $widgets as $widget ) {
+		/**
+		 * The current product.
+		 *
+		 * @var WC_Product $product
+		 */
+		global $product;
+
+		/**
+		 * Promotional widget data
+		 *
+		 * @var array<string, mixed> $widget */ 
+		foreach ( $this->get_available_widgets_for_product_page( $product->get_id() ) as $widget ) {
 			$atts = array(
 				'product'      => $widget['product'] ?? '',
 				'campaign'     => $widget['campaign'] ?? '',
