@@ -29,7 +29,6 @@ use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStat
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\AbstractItemFactory;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
@@ -68,7 +67,6 @@ use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
-use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item_Factory;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
@@ -314,15 +312,6 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Interface_Create_Order_Request_Builder::class ];
-			}
-		);
-		Reg::registerService(
-			AbstractItemFactory::class,
-			static function () {
-				if ( ! isset( self::$cache[ AbstractItemFactory::class ] ) ) {
-					self::$cache[ AbstractItemFactory::class ] = new Item_Factory();
-				}
-				return self::$cache[ AbstractItemFactory::class ];
 			}
 		);
 
@@ -821,8 +810,6 @@ class Bootstrap extends BootstrapComponent {
 						self::get_constants()->get_plugin_templates_path(),
 						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Product_Service::class ),
-						Reg::getService( Interface_Payment_Service::class ),
-						Reg::getService( Interface_Payment_Method_Service::class ),
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( RegexProvider::class ),
 						Reg::getService( Interface_Shopper_Service::class ),
