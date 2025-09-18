@@ -12,9 +12,8 @@ use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
 use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use Throwable;
@@ -280,7 +279,6 @@ class Migration_Install_300 extends Migration {
 		$default_sel_for_alt_price         = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
 		$default_sel_for_alt_price_trigger = '.variations';
 		$sel_for_default_location          = '.summary>.price';
-		$country                           = $this->get_store_country();
 		$custom_locations                  = array();
 		foreach ( $settings as $key => $value ) {
 			if ( false !== strpos( $key, 'enabled_in_product_' ) ) {
@@ -288,39 +286,39 @@ class Migration_Install_300 extends Migration {
 				$enabled            = $enabled || $enabled_in_product;
 				$product_campaign   = str_replace( 'enabled_in_product_', '', $key );
 				$parts              = explode( '_', $product_campaign, 2 );
-				
-				$loc                = new Widget_Location(
-					$enabled_in_product,
-					$settings[ "dest_css_sel_$product_campaign" ] ?? $sel_for_default_location,
-					$this->get_widget_style( $settings[ "widget_theme_$product_campaign" ] ?? null ),
-					$parts[0],
-					$country,
-					$parts[1] ?? null
+
+				$custom_locations[] = array(
+					'selForTarget'  => $settings[ "dest_css_sel_$product_campaign" ] ?? $sel_for_default_location,
+					'product'       => $parts[0],
+					'displayWidget' => $enabled_in_product,
+					'widgetStyles'  => $this->get_widget_style( $settings[ "widget_theme_$product_campaign" ] ?? null ),
 				);
-				$custom_locations[] = $loc->to_array();
 			}
 		}
 
 		$response = AdminAPI::get()
 		->widgetConfiguration( $this->configuration->get_store_id() )
 		->setWidgetSettings(
-			new Widget_Settings_Request(
+			new WidgetSettingsRequest(
 				$enabled,
-				$settings['assets_secret'] ?? '',
 				$enabled,
 				false,
 				false,
-				'',
 				$this->get_widget_style(),
-				array(),
-				array(),
-				$settings['price_css_sel'] ?? null,
+				$settings['price_css_sel'] ?? '',
+				$sel_for_default_location,
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
 				$default_sel_for_alt_price,
 				$default_sel_for_alt_price_trigger,
-				$sel_for_default_location,
 				$custom_locations
 			)
 		);
+
 		if ( ! $response->isSuccessful() ) {
 			throw new Exception( 'Error migrating widget settings' );
 		}
