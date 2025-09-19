@@ -151,7 +151,7 @@ class Migration_Install_300 extends Migration {
 
 		$response = AdminAPI::get()
 		->connection( $this->configuration->get_store_id() )
-		->saveOnboardingData(
+		->connect(
 			new OnboardingRequest(
 				array(
 					new ConnectionRequest(
