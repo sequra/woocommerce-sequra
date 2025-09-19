@@ -84,7 +84,7 @@ class Cart_Service implements Interface_Cart_Service {
 	 *
 	 * @return OtherPaymentItem[] 
 	 */
-	public function get_refund_items( WC_Order $order = null ): array {
+	public function get_refund_items( ?WC_Order $order = null ): array {
 		$items = array();
 		/**
 		 * Order refund

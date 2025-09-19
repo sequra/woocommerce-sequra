@@ -58,10 +58,9 @@ jobs:
         if: github.event_name == 'push'
         run: bin/php-syntax-check --php=8.3
 
-      # TODO: Work on this after integration-core is updated to support PHP 8.4
-      # - name: PHP 8.4 Syntax check
-      #   if: github.event_name == 'push'
-      #   run: bin/php-syntax-check --php=8.4
+      - name: PHP 8.4 Syntax check
+        if: github.event_name == 'push'
+        run: bin/php-syntax-check --php=8.4
 
       - name: Cache NPM dependencies
         if: github.event_name == 'pull_request'

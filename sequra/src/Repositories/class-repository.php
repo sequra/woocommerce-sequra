@@ -97,12 +97,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Executes select query.
 	 *
-	 * @param QueryFilter $filter Filter for query.
+	 * @param QueryFilter|null $filter Filter for query.
 	 *
 	 * @return Entity[] A list of found entities ot empty array.
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
-	public function select( QueryFilter $filter = null ) {
+	public function select( ?QueryFilter $filter = null ) {
 		/**
 		 * Entity object.
 		 *
@@ -139,12 +139,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Executes select query and returns first result.
 	 *
-	 * @param QueryFilter $filter Filter for query.
+	 * @param QueryFilter|null $filter Filter for query.
 	 *
 	 * @return Entity|null First found entity or NULL.
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
-	public function selectOne( QueryFilter $filter = null ) {
+	public function selectOne( ?QueryFilter $filter = null ) {
 		if ( ! $filter ) {
 			$filter = new QueryFilter();
 		}
@@ -242,12 +242,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Counts records that match filter criteria.
 	 *
-	 * @param QueryFilter $filter Filter for query.
+	 * @param QueryFilter|null $filter Filter for query.
 	 *
 	 * @return int Number of records that match filter criteria.
 	 * @throws QueryFilterInvalidParamException If filter condition is invalid.
 	 */
-	public function count( QueryFilter $filter = null ) {
+	public function count( ?QueryFilter $filter = null ) {
 		/**
 		 * Entity object.
 		 *
