@@ -27,8 +27,8 @@ class MigrationInstall320Test extends WP_UnitTestCase {
 	private $hook_name;
 	
 	public function set_up() {
-		$this->hook_name         = 'migration_install_320_test_hook';
-		$this->configuration     = $this->createMock( Configuration::class );
+		$this->hook_name     = 'migration_install_320_test_hook';
+		$this->configuration = $this->createMock( Configuration::class );
 		/** @var \wpdb&\PHPUnit\Framework\MockObject\MockObject */
 		$_wpdb                   = $this->createMock( \wpdb::class );
 		$this->entity_repository = $this->createMock( Entity_Repository::class );
