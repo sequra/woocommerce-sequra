@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.8.2
-Stable tag: 3.2.2
+Stable tag: 4.0.0
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.0.0	=
+* Added: PHP 8.4 compatibility.
+* Changed: Update integration-core library to version v2.5.0.
+* Added: Support for managing multiple deployment targets credentials.
+* Added: Integration-Core-UI library providing the assets required for the configuration page.
+
 = 3.2.2	=
 * Fixed: Ensure that the order completion date can be retrieved.
 * Fixed: A bug in the Onboarding JavaScript that prevented completion of the credentials step.
