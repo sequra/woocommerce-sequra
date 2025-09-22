@@ -45,7 +45,8 @@
         "style-loader": "^3.3.1",
         "terser-webpack-plugin": "~5.3.0",
         "webpack": "^5.89.0",
-        "webpack-cli": "~4.9.0"
+        "webpack-cli": "~4.9.0",
+        "playwright-fixture-for-plugins": "github:sequra/playwright-fixture-for-plugins#feature/woocommerce-compat"
     },
     "dependencies": {
         "sequra-core-admin-fe": "github:sequra/integration-core-ui#release/woocommerce-compat"
