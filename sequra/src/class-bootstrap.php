@@ -123,6 +123,7 @@ use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Product\Product_Service as Core_Product_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Mini_Widget_Messages_Provider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
+use SeQura\WC\Repositories\Migrations\Migration_Install_400;
 
 /**
  * Implementation for the core bootstrap class.
@@ -475,6 +476,12 @@ class Bootstrap extends BootstrapComponent {
 					 * @var Repository $queue_item_repository
 					 */
 					$queue_item_repository = RepositoryRegistry::getRepository( QueueItem::class );
+					/**
+					 * Encryptor service.
+					 *  
+					 * @var EncryptorInterface $encryptor
+					 */
+					$encryptor = Reg::getService( EncryptorInterface::class );
 
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
 						self::get_constants()->get_plugin_basename(),
@@ -494,6 +501,11 @@ class Bootstrap extends BootstrapComponent {
 								self::get_constants()->get_hook_add_order_indexes(),
 								$entity_repository,
 								$queue_item_repository
+							),
+							new Migration_Install_400(
+								$wpdb,
+								$configuration,
+								$encryptor
 							),
 						)
 					);
