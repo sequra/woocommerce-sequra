@@ -13,7 +13,7 @@ use WP_UnitTestCase;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
-use SeQura\WC\Services\Interface_Constants;
+use SeQura\WC\Services\Constants\Interface_Constants;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;

@@ -19,8 +19,8 @@ use WP_REST_Response;
  */
 class Log_REST_Controller extends REST_Controller {
 
-	const PARAM_IS_ENABLED = 'isEnabled';
-	const PARAM_LOG_LEVEL  = 'level';
+	private const PARAM_IS_ENABLED = 'isEnabled';
+	private const PARAM_LOG_LEVEL  = 'level';
 
 	/**
 	 * Constructor.

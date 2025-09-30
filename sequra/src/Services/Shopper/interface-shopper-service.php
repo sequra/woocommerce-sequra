@@ -19,6 +19,13 @@ interface Interface_Shopper_Service {
 	public function get_ip(): string;
 
 	/**
+	 * Check if the IP is allowed in SeQura settings
+	 * 
+	 * @param ?string $ip The IP address to check. If null, the current shopper's IP will be used.
+	 */
+	public function is_ip_allowed( ?string $ip = null ): bool;
+
+	/**
 	 * Get User Agent
 	 */
 	public function get_user_agent(): string;

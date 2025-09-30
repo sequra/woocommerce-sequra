@@ -8,38 +8,34 @@
 namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Order\Builders;
 
 use Exception;
+use SeQura\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFoundException;
+use SeQura\Core\BusinessLogic\Domain\Connection\Exceptions\CredentialsNotFoundException;
+use SeQura\Core\BusinessLogic\Domain\Order\Builders\MerchantOrderRequestBuilder;
+use SeQura\Core\BusinessLogic\Domain\Order\Exceptions\InvalidUrlException;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\CreateOrderRequest;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\EventsWebhook;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Gui;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Order_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
+use SeQura\WC\Services\Platform\Platform_Provider;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
-use WC_Order;
+use Throwable;
 
 /**
  * Implementation of the Create Order Request Builder.
  */
 class Create_Order_Request_Builder implements Interface_Create_Order_Request_Builder {
-
-	/**
-	 * Payment service
-	 *
-	 * @var Interface_Payment_Service
-	 */
-	private $payment_service;
 
 	/**
 	 * Cart service
@@ -49,18 +45,11 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private $cart_service;
 
 	/**
-	 * Current order
+	 * Platform provider
 	 *
-	 * @var WC_Order
+	 * @var Platform_Provider
 	 */
-	private $current_order;
-
-	/**
-	 * Configuration
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
+	private $platform_provider;
 
 	/**
 	 * Product service
@@ -98,59 +87,68 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private $logger;
 
 	/**
+	 * Current order provider
+	 *
+	 * @var Interface_Current_Order_Provider
+	 */
+	private $current_order_provider;
+
+	/**
+	 * Merchant order request builder
+	 *
+	 * @var MerchantOrderRequestBuilder
+	 */
+	private $merchant_order_request_builder;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
-		Interface_Payment_Service $payment_service,
 		Interface_Cart_Service $cart_service,
-		Configuration $configuration,
+		Platform_Provider $platform_provider,
 		Interface_Product_Service $product_service,
 		Interface_Order_Service $order_service,
 		Interface_I18n $i18n,
 		Interface_Shopper_Service $shopper_service,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		Interface_Current_Order_Provider $current_order_provider,
+		MerchantOrderRequestBuilder $merchant_order_request_builder
 	) {
-		$this->payment_service = $payment_service;
-		$this->cart_service    = $cart_service;
-		$this->configuration   = $configuration;
-		$this->product_service = $product_service;
-		$this->order_service   = $order_service;
-		$this->i18n            = $i18n;
-		$this->shopper_service = $shopper_service;
-		$this->logger          = $logger;
-	}
-
-	/**
-	 * Set current order
-	 */
-	public function set_current_order( ?WC_Order $order ): void {
-		$this->current_order = $order;
+		$this->cart_service                   = $cart_service;
+		$this->platform_provider              = $platform_provider;
+		$this->product_service                = $product_service;
+		$this->order_service                  = $order_service;
+		$this->i18n                           = $i18n;
+		$this->shopper_service                = $shopper_service;
+		$this->logger                         = $logger;
+		$this->current_order_provider         = $current_order_provider;
+		$this->merchant_order_request_builder = $merchant_order_request_builder;
 	}
 
 	/**
 	 * Build a CreateOrderRequest instance.
 	 * 
-	 * @throws Exception
+	 * @throws CredentialsNotFoundException|ConnectionDataNotFoundException|InvalidUrlException|Exception
 	 */
 	public function build(): CreateOrderRequest {
 		$merchant = $this->get_merchant();
-		if ( ! $merchant ) {
-			throw new Exception( 'Merchant ID is empty' );
-		}
 
 		/**
 		 * Filter the delivery method options.
 		 *
 		 * @since 3.0.0
 		 */
-		$delivery_method = \apply_filters( 'sequra_create_order_request_delivery_method_options', $this->order_service->get_delivery_method( $this->current_order ) );
+		$delivery_method = \apply_filters( 
+			'sequra_create_order_request_delivery_method_options', 
+			$this->order_service->get_delivery_method( $this->current_order_provider->get() ) 
+		);
 
 		return new CreateOrderRequest(
 			'', // state.
 			$this->cart(),
 			$delivery_method,
 			$this->customer(),
-			$this->configuration->get_platform(),
+			$this->platform_provider->get(),
 			$this->delivery_address(),
 			$this->invoice_address(),
 			$this->gui(),
@@ -165,13 +163,14 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 */
 	private function merchant_reference(): ?MerchantReference {
 		$merchant_reference = null;
-		if ( $this->current_order ) {
+		$current_order      = $this->current_order_provider->get();
+		if ( $current_order ) {
 			/**
 			 * Filter the order_ref_1.
 			 *
 			 * @since 2.0.0
 			 */
-			$ref_1              = \apply_filters( 'woocommerce_sequra_get_order_ref_1', $this->current_order->get_id(), $this->current_order );
+			$ref_1              = \apply_filters( 'woocommerce_sequra_get_order_ref_1', $current_order->get_id(), $current_order );
 			$merchant_reference = new MerchantReference( $ref_1 );
 		}
 
@@ -190,30 +189,31 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get cart payload
 	 */
 	private function cart(): Cart {
-		$cart_info = null;
+		$cart_info     = null;
+		$current_order = $this->current_order_provider->get();
 
-		if ( ! $this->current_order ) {
+		if ( ! $current_order ) {
 			$cart_info = $this->cart_service->get_cart_info_from_session();
 		} else {
 			// Try to get cart info from order.
-			$cart_info = $this->order_service->get_cart_info( $this->current_order );
+			$cart_info = $this->order_service->get_cart_info( $current_order );
 
 			if ( ! $this->cart_service->is_cart_info_valid( $cart_info ) ) {
-				$context = array( new LogContextData( 'order_id', $this->current_order->get_id() ) );
+				$context = array( new LogContextData( 'order_id', $current_order->get_id() ) );
 				// Try to get cart info from session.
 				$this->logger->log_debug( 'Cart info ref for order is missing. Trying to recover from session', __FUNCTION__, __CLASS__, $context );
 				$cart_info = $this->cart_service->get_cart_info_from_session( false );
 				if ( ! $this->cart_service->is_cart_info_valid( $cart_info ) ) {
 					// Try to create a new cart info.
 					$this->logger->log_debug( 'Cart info can\'t be recovered from session. Trying to create one', __FUNCTION__, __CLASS__, $context );
-					$cart_info = $this->order_service->create_cart_info( $this->current_order );
+					$cart_info = $this->order_service->create_cart_info( $current_order );
 	
 					if ( ! $cart_info ) {
 						$this->logger->log_debug( 'Cart info can\'t be created', __FUNCTION__, __CLASS__, $context );
 					}
 				} else {
 					// Set cart info for the order.
-					$this->order_service->set_cart_info( $this->current_order, $cart_info );
+					$this->order_service->set_cart_info( $current_order, $cart_info );
 					$this->logger->log_debug( 'Cart info recovered from session', __FUNCTION__, __CLASS__, $context );
 				}
 			}
@@ -225,9 +225,9 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 * @var Item[] 
 		 */
 		$items = array_merge(
-			$this->cart_service->get_items( $this->current_order ),
-			$this->cart_service->get_handling_items( $this->current_order ),
-			$this->cart_service->get_discount_items( $this->current_order )
+			$this->cart_service->get_items( $current_order ),
+			$this->cart_service->get_handling_items( $current_order ),
+			$this->cart_service->get_discount_items( $current_order )
 		);
 
 		/**
@@ -238,7 +238,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		return apply_filters(
 			'sequra_create_order_request_cart_options',
 			new Cart(
-				$this->current_order ? $this->current_order->get_currency( 'edit' ) : \get_woocommerce_currency(),
+				$current_order ? $current_order->get_currency( 'edit' ) : \get_woocommerce_currency(),
 				false, // gift.
 				$items,
 				$cart_info ? $cart_info->ref : null,
@@ -249,115 +249,52 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	}
 
 	/**
-	 * Get merchant ID
-	 *
-	 * @return string|null
+	 * Try to get the country from the order or the cart.
+	 * 
+	 * @throws Exception
 	 */
-	private function get_merchant_id() {
-		$merchant_id = $this->current_order ? $this->order_service->get_merchant_id( $this->current_order ) : null;
-		return ! $merchant_id ? $this->payment_service->get_merchant_id() : $merchant_id;
+	private function get_country_from_order_or_cart(): string {
+		$current_order = $this->current_order_provider->get();
+		// Try to get the country from the order or the cart.
+		$country = $this->order_service->get_country( $current_order );
+		if ( empty( $country ) ) {
+			throw new Exception( 'Country not found' );
+		}
+		return $country;
+	}
+
+	/**
+	 * Get cart ref from order or cart
+	 */
+	private function get_cart_ref_from_order_or_cart(): string {
+		$current_order = $this->current_order_provider->get();
+		$cart_info     = ! $current_order ? 
+			$this->cart_service->get_cart_info_from_session() :
+			$this->order_service->get_cart_info( $current_order );
+		
+		if ( empty( $cart_info ) || empty( $cart_info->ref ) ) {
+			return '';
+		}
+		return $cart_info->ref;
 	}
 
 	/**
 	 * Get the merchant.
+	 * 
+	 * @throws CredentialsNotFoundException|ConnectionDataNotFoundException|InvalidUrlException|Exception
 	 */
-	private function get_merchant(): ?Merchant {
-		$merchant_id = $this->get_merchant_id();
-
-		if ( ! $merchant_id ) {
-			return null;
-		}
-
-		$notify_url              = null;
-		$notification_parameters = null;
-		$return_url              = null;
-		$events_webhook          = null;
-		$store_id                = $this->configuration->get_store_id();
-
-		if ( $this->current_order ) {
-			$notify_url = $this->order_service->get_ipn_url( $this->current_order, $store_id );
-			$_order     = strval( $this->current_order->get_id() );
-			$_signature = $this->payment_service->sign( $this->current_order->get_id() );
-
-			$notification_parameters = array(
-				'order'     => $_order,
-				'signature' => $_signature,
-				'result'    => '0',
-				'storeId'   => $store_id,
-			);
-
-			$return_url = $this->order_service->get_return_url( $this->current_order );
-
-			$events_webhook = new EventsWebhook(
-				$this->order_service->get_event_url( $this->current_order, $store_id ),
-				array(
-					'order'     => $_order,
-					'signature' => $_signature,
-					'storeId'   => $store_id,
-				) 
-			);
-		}
+	private function get_merchant(): Merchant {
+		$merchant = $this->merchant_order_request_builder->build(
+			$this->get_country_from_order_or_cart(), 
+			$this->get_cart_ref_from_order_or_cart()
+		);
 
 		/**
 		 * Filter the merchant data.
 		 *
 		 * @since 3.0.0
 		 */
-		return \apply_filters(
-			'sequra_create_order_request_merchant_data',
-			new Merchant(
-				$merchant_id,
-				$notify_url,
-				$notification_parameters,
-				$return_url,
-				null, // approved_callback.
-				null, // $edit_url.
-				null, // abort_url.
-				null, // rejected_callback.
-				null, // partpayment_details_getter.
-				null, // approved_url.
-				$this->get_merchant_options(),
-				$events_webhook
-			)
-		);
-	}
-
-	/**
-	 * Get the merchant options.
-	 */
-	private function get_merchant_options(): ?Options {
-		$options = null;
-
-		if ( $this->configuration->allow_first_service_payment_delay() ) {
-			$desired_first_charge_on = $this->cart_service->get_desired_first_charge_on( $this->current_order );
-			if ( $desired_first_charge_on ) {
-				/**
-				* Allow modify the addresses_may_be_missing value.Accept null, true or false.
-				*
-				* @since 3.0.0
-				*/
-				$addresses_may_be_missing = \apply_filters( 'sequra_merchant_options_addresses_may_be_missing', null );
-
-				if ( ! is_bool( $addresses_may_be_missing ) && null !== $addresses_may_be_missing ) {
-					$addresses_may_be_missing = null;
-				}
-
-				$options = new Options(
-					null, // has_jquery.
-					null, // uses_shipped_cart.
-					$addresses_may_be_missing, // addresses_may_be_missing.
-					null, // immutable_customer_data.
-					$desired_first_charge_on
-				);
-			}
-		}
-
-		/**
-		 * Filter the merchant options.
-		 *
-		 * @since 3.0.0
-		 */
-		return \apply_filters( 'sequra_create_order_request_merchant_options', $options );
+		return \apply_filters( 'sequra_create_order_request_merchant_data', $merchant );
 	}
 
 	/**
@@ -384,7 +321,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 */
 		return \apply_filters(
 			'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options',
-			$this->order_service->get_address( $this->current_order, $is_delivery )
+			$this->order_service->get_address( $this->current_order_provider->get(), $is_delivery )
 		);
 	}
 
@@ -400,7 +337,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		return \apply_filters(
 			'sequra_create_order_request_customer_options',
 			$this->order_service->get_customer(
-				$this->current_order,
+				$this->current_order_provider->get(),
 				$this->i18n->get_lang(),
 				\get_current_user_id(),
 				$this->shopper_service->get_ip(),
@@ -432,29 +369,25 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			return false;
 		}
 
-		if ( ! $this->get_merchant_id() ) {
-			$this->logger->log_debug( 'Merchant ID is empty', __FUNCTION__, __CLASS__ );
+		try {
+			$this->merchant_order_request_builder->getMerchantIdByCountryCode( 
+				$this->get_country_from_order_or_cart()
+			);
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return false;
 		}
 
-		if ( ! $this->configuration->is_available_for_ip() ) {
+		if ( ! $this->shopper_service->is_ip_allowed() ) {
 			$this->logger->log_debug( 'Payment gateway is not available for this IP', __FUNCTION__, __CLASS__ );
 			return false;
 		}
 
-		$excluded_products   = $this->configuration->get_excluded_products();
-		$excluded_categories = $this->configuration->get_excluded_categories();
-
-		if ( empty( $excluded_products ) && empty( $excluded_categories ) ) {
+		if ( $this->product_service->is_ban_list_empty() ) {
 			return true;
 		}
 
-		/**
-		 * Product
-		 *
-		 * @var WC_Product $product
-		 */
-		foreach ( $this->cart_service->get_products( $this->current_order ) as $product ) {
+		foreach ( $this->cart_service->get_products( $this->current_order_provider->get() ) as $product ) {
 			if ( $this->product_service->is_banned( $product ) ) {
 				$this->logger->log_debug( 'SeQura is not available: product is banned or is in a banned category', __FUNCTION__, __CLASS__, array( new LogContextData( 'product_id', $product->get_id() ) ) );
 				return false;

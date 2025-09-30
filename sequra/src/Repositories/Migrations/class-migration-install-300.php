@@ -15,6 +15,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use Throwable;
@@ -46,6 +47,13 @@ class Migration_Install_300 extends Migration {
 	private $queue_repository;
 
 	/**
+	 * Store context
+	 * 
+	 * @var StoreContext
+	 */
+	private $store_context;
+
+	/**
 	 * Get the plugin version when the changes were made.
 	 */
 	public function get_version(): string {
@@ -62,12 +70,14 @@ class Migration_Install_300 extends Migration {
 		Configuration $configuration,
 		Repository $order_repository,
 		Repository $entity_repository,
-		Repository $queue_repository
+		Repository $queue_repository,
+		StoreContext $store_context
 	) {
 		parent::__construct( $wpdb, $configuration );
 		$this->order_repository  = $order_repository;
 		$this->entity_repository = $entity_repository;
 		$this->queue_repository  = $queue_repository;
+		$this->store_context     = $store_context;
 	}
 
 	/**
@@ -150,7 +160,7 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-		->connection( $this->configuration->get_store_id() )
+		->connection( $this->store_context->getStoreId() )
 		->connect(
 			new OnboardingRequest(
 				array(
@@ -215,7 +225,7 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-		->countryConfiguration( $this->configuration->get_store_id() )
+		->countryConfiguration( $this->store_context->getStoreId() )
 		->saveCountryConfigurations(
 			new CountryConfigurationRequest(
 				array(
@@ -251,7 +261,7 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-			->generalSettings( $this->configuration->get_store_id() )
+			->generalSettings( $this->store_context->getStoreId() )
 			->saveGeneralSettings(
 				new GeneralSettingsRequest(
 					true,
@@ -304,7 +314,7 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-		->widgetConfiguration( $this->configuration->get_store_id() )
+		->widgetConfiguration( $this->store_context->getStoreId() )
 		->setWidgetSettings(
 			new WidgetSettingsRequest(
 				$enabled,

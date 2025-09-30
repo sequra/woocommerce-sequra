@@ -42,34 +42,6 @@ class Payment_Service implements Interface_Payment_Service {
 		$this->configuration = $configuration;
 		$this->i18n          = $i18n;
 	}
-
-	/**
-	 * Get payment gateway ID
-	 */
-	public function get_payment_gateway_id(): string {
-		return 'sequra';
-	}
-
-	/**
-	 * Get payment gateway webhook identifier
-	 */
-	public function get_event_webhook(): string {
-		return 'woocommerce_' . $this->get_payment_gateway_id();
-	}
-
-	/**
-	 * Get IPN webhook identifier
-	 */
-	public function get_ipn_webhook(): string {
-		return 'woocommerce_' . $this->get_payment_gateway_id() . '_ipn';
-	}
-
-	/**
-	 * Get return URL webhook identifier
-	 */
-	public function get_return_webhook(): string {
-		return 'woocommerce_' . $this->get_payment_gateway_id() . '_return';
-	}
 	
 	/**
 	 * Get current merchant ID

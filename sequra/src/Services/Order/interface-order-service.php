@@ -164,21 +164,6 @@ interface Interface_Order_Service {
 	 * Set cart info if it is not already set
 	 */
 	public function create_cart_info( WC_Order $order ): ?Cart_Info;
-	
-	/**
-	 * Get payment gateway webhook identifier
-	 */
-	public function get_ipn_url( WC_Order $order, string $store_id ): string;
-
-	/**
-	 * Get payment gateway webhook identifier
-	 */
-	public function get_return_url( WC_Order $order ): string;
-
-	/**
-	 * Get payment gateway webhook identifier
-	 */
-	public function get_event_url( WC_Order $order, string $store_id ): string;
 
 	/**
 	 * Get the meta key used to store the sent to seQura value.

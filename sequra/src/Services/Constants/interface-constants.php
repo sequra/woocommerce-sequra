@@ -6,12 +6,17 @@
  * @subpackage SeQura/WC/Services
  */
 
-namespace SeQura\WC\Services;
+namespace SeQura\WC\Services\Constants;
 
 /**
  * Provides methods access application Constants.
  */
 interface Interface_Constants {
+
+	/**
+	 * Get the integration name.
+	 */
+	public function get_integration_name(): string;
 
 	/**
 	 * Get the plugin directory path.
@@ -66,4 +71,26 @@ interface Interface_Constants {
 	 * Hook for adding order indexes.
 	 */
 	public function get_hook_add_order_indexes(): string;
+
+	/**
+	 * Get payment gateway ID
+	 * 
+	 * @return string
+	 */
+	public function get_payment_gateway_id(): string;
+
+	/**
+	 * Get IPN webhook identifier
+	 */
+	public function get_ipn_webhook(): string;
+
+	/**
+	 * Get return URL webhook identifier
+	 */
+	public function get_return_webhook(): string;
+
+	/**
+	 * Get event webhook identifier
+	 */
+	public function get_event_webhook(): string;
 }

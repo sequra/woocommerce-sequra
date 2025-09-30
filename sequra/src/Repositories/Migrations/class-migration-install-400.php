@@ -16,6 +16,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConf
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Requests\GetCachedPaymentMethodsRequest;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
@@ -51,6 +52,13 @@ class Migration_Install_400 extends Migration {
 	private $payment_methods;
 
 	/**
+	 * Store context
+	 * 
+	 * @var StoreContext
+	 */
+	private $store_context;
+
+	/**
 	 * Get the plugin version when the changes were made.
 	 */
 	public function get_version(): string {
@@ -65,11 +73,13 @@ class Migration_Install_400 extends Migration {
 	public function __construct( 
 		\wpdb $wpdb, 
 		Configuration $configuration,
-		EncryptorInterface $encryptor
+		EncryptorInterface $encryptor,
+		StoreContext $store_context
 	) {
 		parent::__construct( $wpdb, $configuration );
-		$this->entity_table = $this->db->prefix . 'sequra_entity';
-		$this->encryptor    = $encryptor;
+		$this->entity_table  = $this->db->prefix . 'sequra_entity';
+		$this->encryptor     = $encryptor;
+		$this->store_context = $store_context;
 	}
 
 	/**
@@ -112,7 +122,7 @@ class Migration_Install_400 extends Migration {
 		$password    = $conn['connectionData']['authorizationCredentials']['password'];
 
 		$response = AdminAPI::get()
-		->connection( $this->configuration->get_store_id() )
+		->connection( $this->store_context->getStoreId() )
 		->connect(
 			new OnboardingRequest(
 				array(
@@ -146,7 +156,7 @@ class Migration_Install_400 extends Migration {
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_country_configuration(): void {
-		$query = $this->db->prepare( 'SELECT `index_2`, `index_3` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'Credentials', $this->configuration->get_store_id() );
+		$query = $this->db->prepare( 'SELECT `index_2`, `index_3` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'Credentials', $this->store_context->getStoreId() );
 		$rows  = $this->db->get_results( $query, ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return;
@@ -171,7 +181,7 @@ class Migration_Install_400 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-		->countryConfiguration( $this->configuration->get_store_id() )
+		->countryConfiguration( $this->store_context->getStoreId() )
 		->saveCountryConfigurations(
 			new CountryConfigurationRequest( $country_configurations ) 
 		);
@@ -200,7 +210,7 @@ class Migration_Install_400 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-		->widgetConfiguration( $this->configuration->get_store_id() )
+		->widgetConfiguration( $this->store_context->getStoreId() )
 		->setWidgetSettings(
 			new WidgetSettingsRequest(
 				$data['widgetSettings']['enabled'],
@@ -250,7 +260,7 @@ class Migration_Install_400 extends Migration {
 		// Force the caching of payment methods for every merchant.
 		foreach ( $this->get_merchant_ids() as $merchant_id ) {
 			$response = CheckoutAPI::get()
-			->cachedPaymentMethods( $this->configuration->get_store_id() )
+			->cachedPaymentMethods( $this->store_context->getStoreId() )
 			->getCachedPaymentMethods(
 				new GetCachedPaymentMethodsRequest( $merchant_id )
 			);
@@ -275,7 +285,7 @@ class Migration_Install_400 extends Migration {
 	 *  }>|null Connection data or null if not found.
 	 */
 	private function get_connection_data(): ?array {
-		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'ConnectionData', $this->configuration->get_store_id() );
+		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'ConnectionData', $this->store_context->getStoreId() );
 		$rows  = $this->db->get_results( $query, ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return null;
@@ -373,7 +383,7 @@ class Migration_Install_400 extends Migration {
 	 *  }|null WidgetSettings or null if not found.
 	 */
 	private function get_widget_settings(): ?array {
-		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s LIMIT 1', $this->entity_table, 'WidgetSettings', $this->configuration->get_store_id() );
+		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s LIMIT 1', $this->entity_table, 'WidgetSettings', $this->store_context->getStoreId() );
 		$row   = $this->db->get_row( $query, ARRAY_A );
 		$data  = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
 
@@ -442,7 +452,7 @@ class Migration_Install_400 extends Migration {
 	 */
 	private function get_first_payment_method_product( $categories ): string {
 		if ( null === $this->payment_methods ) {
-			$query = $this->db->prepare( 'SELECT `data` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'PaymentMethod', $this->configuration->get_store_id() );
+			$query = $this->db->prepare( 'SELECT `data` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'PaymentMethod', $this->store_context->getStoreId() );
 			$rows  = $this->db->get_results( $query, ARRAY_A );
 			if ( ! is_array( $rows ) ) {
 				return '';

@@ -8,12 +8,29 @@
 
 namespace SeQura\WC\Services\Shopper;
 
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
+
 /**
  * Handle use cases related to Shopper
  */
 class Shopper_Service implements Interface_Shopper_Service {
 
 	private const META_KEY_DATE_OF_BIRTH = 'sequra_dob';
+
+	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct( StoreContext $store_context ) {
+		$this->store_context = $store_context;
+	}
 
 	/**
 	 * Get customer IP
@@ -32,6 +49,36 @@ class Shopper_Service implements Interface_Shopper_Service {
 	}
 
 	/**
+	 * Check if the IP is allowed in SeQura settings
+	 * 
+	 * @param ?string $ip The IP address to check. If null, the current shopper's IP will be used.
+	 */
+	public function is_ip_allowed( ?string $ip = null ): bool {
+		$ip = trim( $ip ?? $this->get_ip() );
+		if ( empty( $ip ) ) {
+			return true; // If we can't determine the IP, we assume it's allowed.
+		}
+		/**
+		 * Array containing the general settings
+		 * 
+		 * @var array<string, mixed> $config
+		 */
+		$general_settings = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings()->toArray();
+		if ( empty( $general_settings['allowedIPAddresses'] ) 
+			|| ! is_array( $general_settings['allowedIPAddresses'] ) ) {
+			return true; // No IP restrictions set.
+		}
+		
+		foreach ( $general_settings['allowedIPAddresses'] as $allowed_ip ) {
+			$allowed_ip = trim( (string) $allowed_ip );
+			if ( ! empty( $allowed_ip ) && $allowed_ip === $ip ) {
+				return true; // IP is explicitly allowed.
+			}
+		}
+		return false; // IP is not in the allowed list.
+	}
+
+	/**
 	 * Get User Agent
 	 */
 	public function get_user_agent(): string {
@@ -42,6 +89,8 @@ class Shopper_Service implements Interface_Shopper_Service {
 		// phpcs:enable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
 		return '';
 	}
+
+
 
 	/**
 	 * Check if the User Agent is a bot

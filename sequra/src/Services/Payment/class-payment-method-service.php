@@ -10,13 +10,14 @@ namespace SeQura\WC\Services\Payment;
 
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\Solicitation\Response\SolicitationResponse;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraForm;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Dto\Payment_Method_Option;
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
 use WC_Order;
@@ -25,18 +26,6 @@ use WC_Order;
  * Handle use cases related to payment methods
  */
 class Payment_Method_Service implements Interface_Payment_Method_Service {
-
-	// /**
-	// * Part payment
-	// */
-	// const PART_PAYMENT = 'part_payment';
-	
-	/**
-	 * Configuration
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
 
 	/**
 	 * Payment methods
@@ -66,27 +55,35 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 */
 	private $logger;
 
-	// /**
-	// * Payment methods repository
-	// *
-	// * @var RepositoryInterface
-	// */
-	// private $payment_methods_repo;
+	/**
+	 * Current order provider
+	 *
+	 * @var Interface_Current_Order_Provider
+	 */
+	private $current_order_provider;
+
+	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
 
 	/**
 	 * Constructor
 	 */
-	public function __construct( 
-		Configuration $configuration,
+	public function __construct(
 		Interface_Create_Order_Request_Builder $create_order_request_builder,
 		Interface_Order_Service $order_service,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		Interface_Current_Order_Provider $current_order_provider,
+		StoreContext $store_context
 	) {
-		$this->configuration                = $configuration;
 		$this->create_order_request_builder = $create_order_request_builder;
 		$this->order_service                = $order_service;
 		$this->logger                       = $logger;
-		// $this->payment_methods_repo         = $payment_methods_repo;
+		$this->current_order_provider       = $current_order_provider;
+		$this->store_context                = $store_context;
 	}
 
 	/**
@@ -94,7 +91,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	 */
 	private function request_solicitation( ?WC_Order $order = null ): ?SolicitationResponse {
 		try {
-			$this->create_order_request_builder->set_current_order( $order );
+			$this->current_order_provider->set( $order );
 			
 			if ( ! $this->create_order_request_builder->is_allowed() ) {
 				$ctx = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
@@ -102,9 +99,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 				return null;
 			}
 	
-			$response = CheckoutAPI::get()
-			->solicitation( $this->configuration->get_store_id() )
-			->solicitFor( $this->create_order_request_builder );
+			$response = CheckoutAPI::get()->solicitation( $this->store_context->getStoreId() )->solicitFor( $this->create_order_request_builder );
 			
 			if ( ! $response->isSuccessful() ) {
 				$ctx   = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
@@ -154,7 +149,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 			}
 
 			$response = CheckoutAPI::get()
-			->solicitation( $this->configuration->get_store_id() )
+			->solicitation( $this->store_context->getStoreId() )
 			->getIdentificationForm( 
 				$cart_info->ref, 
 				isset( $opts['product'] ) && '' !== $opts['product'] ? $opts['product'] : null,

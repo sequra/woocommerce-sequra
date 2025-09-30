@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Services
  */
 
-namespace SeQura\WC\Services;
+namespace SeQura\WC\Services\Constants;
 
 /**
  * Provides methods access application Constants.
@@ -142,6 +142,13 @@ class Constants implements Interface_Constants {
 	}
 
 	/**
+	 * Get the integration name.
+	 */
+	public function get_integration_name(): string {
+		return 'WooCommerce';
+	}
+
+	/**
 	 * Get the plugin directory path.
 	 */
 	public function get_plugin_dir_path(): string {
@@ -220,5 +227,33 @@ class Constants implements Interface_Constants {
 	 */
 	public function get_hook_add_order_indexes(): string {
 		return 'sequra_order_migration_add_indexes';
+	}
+
+	/**
+	 * Get payment gateway ID
+	 */
+	public function get_payment_gateway_id(): string {
+		return 'sequra';
+	}
+
+	/**
+	 * Get payment gateway webhook identifier
+	 */
+	public function get_event_webhook(): string {
+		return 'woocommerce_' . $this->get_payment_gateway_id();
+	}
+
+	/**
+	 * Get IPN webhook identifier
+	 */
+	public function get_ipn_webhook(): string {
+		return 'woocommerce_' . $this->get_payment_gateway_id() . '_ipn';
+	}
+
+	/**
+	 * Get return URL webhook identifier
+	 */
+	public function get_return_webhook(): string {
+		return 'woocommerce_' . $this->get_payment_gateway_id() . '_return';
 	}
 }

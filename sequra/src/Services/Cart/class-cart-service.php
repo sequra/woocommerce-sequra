@@ -16,11 +16,11 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\RegistrationItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
+use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Coupon;
 use WC_Order;
 use WC_Order_Item_Coupon;
@@ -44,13 +44,6 @@ class Cart_Service implements Interface_Cart_Service {
 	private $product_service;
 
 	/**
-	 * Configuration
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
-
-	/**
 	 * Pricing service
 	 *
 	 * @var Interface_Pricing_Service
@@ -63,20 +56,27 @@ class Cart_Service implements Interface_Cart_Service {
 	 * @var Interface_Logger_Service
 	 */
 	private $logger;
+
+	/**
+	 * Shopper service
+	 *
+	 * @var Interface_Shopper_Service
+	 */
+	private $shopper_service;
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		Interface_Product_Service $product_service,
-		Configuration $configuration,
 		Interface_Pricing_Service $pricing_service,
-		Interface_Logger_Service $logger
+		Interface_Logger_Service $logger,
+		Interface_Shopper_Service $shopper_service
 	) {
 		$this->product_service = $product_service;
-		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
 		$this->logger          = $logger;
+		$this->shopper_service = $shopper_service;
 	}
 
 	/**
@@ -214,7 +214,7 @@ class Cart_Service implements Interface_Cart_Service {
 	private function get_item( WC_Product $product, float $total_price, ?RegistrationItem $reg_item, int $qty, $item ) {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = \wp_strip_all_tags( $product->get_title() );
-		if ( $this->configuration->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
+		if ( $this->product_service->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
 			/**
 			* Filter the service end date.
 			*
@@ -606,11 +606,11 @@ class Cart_Service implements Interface_Cart_Service {
 	 * Check if conditions are met for showing seQura in checkout
 	 */
 	public function is_available_in_checkout( ?WC_Order $order = null ): bool {
-		$return = ! empty( WC()->cart ) && $this->configuration->is_available_for_ip();
+		$return = ! empty( WC()->cart ) && $this->shopper_service->is_ip_allowed();
 		if ( ! $return ) {
 			$this->logger->log_debug( 'seQura is not available for this IP.', __FUNCTION__, __CLASS__ );
 		} else {
-			$is_enabled_for_services = $this->configuration->is_enabled_for_services();
+			$is_enabled_for_services = $this->product_service->is_enabled_for_services();
 			if ( $is_enabled_for_services && ! $this->is_eligible_for_service_sale() ) {
 					$this->logger->log_debug( 'Order is not eligible for service sale.', __FUNCTION__, __CLASS__ );
 					$return = false;

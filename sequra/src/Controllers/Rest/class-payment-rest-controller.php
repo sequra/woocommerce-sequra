@@ -24,13 +24,6 @@ use WP_REST_Response;
 class Payment_REST_Controller extends REST_Controller {
 
 	/**
-	 * Payment method service
-	 * 
-	 * @var Interface_Payment_Method_Service
-	 */
-	private $payment_method_service;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $rest_namespace The namespace.
@@ -41,13 +34,11 @@ class Payment_REST_Controller extends REST_Controller {
 	public function __construct( 
 		$rest_namespace, 
 		Interface_Logger_Service $logger,
-		RegexProvider $regex, 
-		Interface_Payment_Method_Service $payment_method_service 
+		RegexProvider $regex
 	) {
 		parent::__construct( $logger, $regex );
-		$this->namespace              = $rest_namespace;
-		$this->rest_base              = '/payment';
-		$this->payment_method_service = $payment_method_service;
+		$this->namespace = $rest_namespace;
+		$this->rest_base = '/payment';
 	}
 
 	/**

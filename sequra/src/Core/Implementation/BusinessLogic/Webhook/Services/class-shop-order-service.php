@@ -10,10 +10,10 @@ namespace SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services;
 
 use DateTime;
 use Exception;
+use SeQura\Core\BusinessLogic\Domain\Order\Exceptions\InvalidOrderStateException;
 use SeQura\Core\BusinessLogic\Domain\Order\Exceptions\OrderNotFoundException;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\CreateOrderRequest;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
-use SeQura\Core\BusinessLogic\Domain\Order\OrderRequestStatusMapping;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
@@ -21,7 +21,8 @@ use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
-
+use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
+use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService as SeQuraOrderService;
 use WC_Order;
 
 /**
@@ -51,16 +52,34 @@ class Shop_Order_Service implements ShopOrderService {
 	private $create_order_request_builder;
 
 	/**
+	 * Current order provider
+	 *
+	 * @var Interface_Current_Order_Provider
+	 */
+	private $current_order_provider;
+
+	/**
+	 * SeQura Order Service
+	 *
+	 * @var SeQuraOrderService
+	 */
+	private $sequra_order_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
 		SeQuraOrderRepositoryInterface $sequra_order_repository,
 		Interface_Logger_Service $logger,
-		Interface_Create_Order_Request_Builder $create_order_request_builder
+		Interface_Create_Order_Request_Builder $create_order_request_builder,
+		Interface_Current_Order_Provider $current_order_provider,
+		SequraOrderService $sequra_order_service
 	) {
 		$this->sequra_order_repository      = $sequra_order_repository;
 		$this->logger                       = $logger;
 		$this->create_order_request_builder = $create_order_request_builder;
+		$this->current_order_provider       = $current_order_provider;
+		$this->sequra_order_service         = $sequra_order_service;
 	}
 
 	/**
@@ -77,18 +96,21 @@ class Shop_Order_Service implements ShopOrderService {
 			throw new Exception( 'SeQura order not found. Reference: ' . \esc_html( $orderReference ) );
 		}
 		// TODO: Add unit test for this.
-		$wc_order = $this->get_wc_order( $sq_order );
-		if ( ! $wc_order instanceof \WC_Order ) {
-			throw new Exception( \esc_html( "WC order with ID '{$this->get_wc_order_id($sq_order)}' not found" ) );
+		$wc_order_id = $this->get_wc_order_id( $sq_order );
+		$wc_order    = empty( $wc_order_id ) ? null : \wc_get_order( $wc_order_id );
+		if ( ! $wc_order instanceof WC_Order ) {
+			throw new Exception( \esc_html( "WC order with ID '$wc_order_id' not found" ) );
 		}
 
-		$this->create_order_request_builder->set_current_order( $wc_order );
+		$this->current_order_provider->set( $wc_order );
 		return $this->create_order_request_builder->build();
 	}
 	
 	/**
 	 * Updates status of the order in the shop system based on the provided status.
 	 *
+	 * @throws OrderNotFoundException|InvalidOrderStateException
+	 * 
 	 * @return mixed
 	 */
 	public function updateStatus( Webhook $webhook, string $wc_status, ?int $reason_code = null, ?string $message = null ) {    
@@ -151,15 +173,15 @@ class Shop_Order_Service implements ShopOrderService {
 	/**
 	 * Updates the WC order and SeQuraOrder statuses.
 	 *
-	 * @throws Exception
+	 * @throws InvalidOrderStateException|OrderNotFoundException
 	 */
 	private function update_order_to_status( Webhook $webhook, string $status ): void {
 		$order = $this->get_order( $webhook );
 		if ( ! $order ) {
-			throw new Exception( 'WC Order not found' );
+			throw new OrderNotFoundException( 'WC Order not found' );
 		}
 
-		$this->update_sequra_order_status( $webhook );
+		$this->sequra_order_service->updateSeQuraOrderStatus( $webhook );
 		// translators: %1$d: WooCommerce Order ID.
 		$order->add_order_note( sprintf( esc_html__( 'Order ref sent to seQura: %1$d', 'sequra' ), $order->get_id() ) );
 		
@@ -176,39 +198,13 @@ class Shop_Order_Service implements ShopOrderService {
 	}
 
 	/**
-	 * Updates the SeQuraOrder status.
-	 *
-	 * @throws OrderNotFoundException
-	 * @throws InvalidOrderStateException
-	 */
-	private function update_sequra_order_status( Webhook $webhook ): void {
-		$sq_order = $this->get_sequra_order( $webhook->getOrderRef() );
-		$sq_order->setState( OrderRequestStatusMapping::mapOrderRequestStatus( $webhook->getSqState() ) );
-		$this->sequra_order_repository->setSeQuraOrder( $sq_order );
-	}
-
-	/**
-	 * Gets the SeQura order.
-	 *
-	 * @throws OrderNotFoundException
-	 */
-	private function get_sequra_order( string $order_reference ): SeQuraOrder {
-		$sq_order = $this->sequra_order_repository->getByOrderReference( $order_reference );
-		if ( ! $sq_order ) {
-			throw new OrderNotFoundException( \esc_html( "SeQura order with reference $order_reference is not found." ), 404 );
-		}
-
-		return $sq_order;
-	}
-
-	/**
 	 * Gets the WC order.
 	 *
 	 * @throws OrderNotFoundException
 	 */
 	private function get_order( Webhook $webhook ): ?WC_Order {
-		$sq_order = $this->get_sequra_order( $webhook->getOrderRef() );
-		$order    = $this->get_wc_order( $sq_order );
+		$order_id = $this->sequra_order_service->getOrderReference1( $webhook );
+		$order    = empty( $order_id ) ? null : \wc_get_order( (int) $order_id );
 		
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_debug(
@@ -217,22 +213,13 @@ class Shop_Order_Service implements ShopOrderService {
 				__CLASS__,
 				array( 
 					new LogContextData( 'orderRef', $webhook->getOrderRef() ),
-					new LogContextData( 'orderID', $this->get_wc_order_id( $sq_order ) ),
+					new LogContextData( 'orderID', $order_id ),
 				) 
 			);
 			return null;
 		}
 
 		return $order;
-	}
-
-	/**
-	 * Gets the WC order.
-	 * 
-	 * @param SeQuraOrder $sq_order SeQura order.
-	 */
-	private function get_wc_order( $sq_order ): ?WC_Order {
-		return \wc_get_order( $this->get_wc_order_id( $sq_order ) );
 	}
 
 	/**
@@ -257,7 +244,7 @@ class Shop_Order_Service implements ShopOrderService {
 			throw new OrderNotFoundException( esc_html( "WC order with ID {$webhook->getOrderRef1()} not found." ), 404 );
 		}
 
-		$sq_order = $this->get_sequra_order( $webhook->getOrderRef() );
+		$sq_order = $this->sequra_order_service->getSeQuraOrder( $webhook->getOrderRef() );
 		$this->sequra_order_repository->deleteOrder( $sq_order );
 
 		$order->update_status( $status, esc_html__( 'Order cancelled by seQura.', 'sequra' ) );

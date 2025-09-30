@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\OrderStatusSettings\Requests\OrderStatusSettingsRequest;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
@@ -24,15 +25,22 @@ use WP_REST_Response;
  */
 class General_Settings_REST_Controller extends REST_Controller {
 
-	const PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA = 'sendOrderReportsPeriodicallyToSeQura';
-	const PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE       = 'showSeQuraCheckoutAsHostedPage';
-	const PARAM_ALLOWED_IP_ADDRESSES                      = 'allowedIPAddresses';
-	const PARAM_EXCLUDED_PRODUCTS                         = 'excludedProducts';
-	const PARAM_EXCLUDED_CATEGORIES                       = 'excludedCategories';
-	const PARAM_ENABLED_FOR_SERVICES                      = 'enabledForServices';
-	const PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY         = 'allowFirstServicePaymentDelay';
-	const PARAM_ALLOW_SERVICE_REG_ITEMS                   = 'allowServiceRegistrationItems';
-	const PARAM_DEFAULT_SERVICES_END_DATE                 = 'defaultServicesEndDate';
+	private const PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA = 'sendOrderReportsPeriodicallyToSeQura';
+	private const PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE       = 'showSeQuraCheckoutAsHostedPage';
+	private const PARAM_ALLOWED_IP_ADDRESSES                      = 'allowedIPAddresses';
+	private const PARAM_EXCLUDED_PRODUCTS                         = 'excludedProducts';
+	private const PARAM_EXCLUDED_CATEGORIES                       = 'excludedCategories';
+	private const PARAM_ENABLED_FOR_SERVICES                      = 'enabledForServices';
+	private const PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY         = 'allowFirstServicePaymentDelay';
+	private const PARAM_ALLOW_SERVICE_REG_ITEMS                   = 'allowServiceRegistrationItems';
+	private const PARAM_DEFAULT_SERVICES_END_DATE                 = 'defaultServicesEndDate';
+
+	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
 	
 	/**
 	 * Constructor.
@@ -44,11 +52,13 @@ class General_Settings_REST_Controller extends REST_Controller {
 	public function __construct( 
 		$rest_namespace, 
 		Interface_Logger_Service $logger,
-		RegexProvider $regex
+		RegexProvider $regex,
+		StoreContext $store_context
 	) {
 		parent::__construct( $logger, $regex );
-		$this->namespace = $rest_namespace;
-		$this->rest_base = '/settings';
+		$this->namespace     = $rest_namespace;
+		$this->rest_base     = '/settings';
+		$this->store_context = $store_context;
 	}
 
 	/**
@@ -108,7 +118,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->store( (string) get_current_blog_id() )
+			->store( $this->store_context->getStoreId() )
 			->getCurrentStore()
 			->toArray();
 		} catch ( \Throwable $e ) {

@@ -51,6 +51,11 @@ interface Interface_Product_Service {
 	public function is_banned( $product ): bool;
 
 	/**
+	 * Check if product and category ban lists are empty
+	 */
+	public function is_ban_list_empty(): bool;
+
+	/**
 	 * Update is_banned value
 	 */
 	public function set_is_banned( int $product_id, ?string $value ): void;
@@ -92,22 +97,30 @@ interface Interface_Product_Service {
 	public function set_registration_amount( int $product_id, ?float $value ): void;
 
 	/**
-	 * Check if we can display mini widgets
-	 */
-	public function can_display_mini_widgets(): bool;
-
-	/**
-	 * Check if we can display widgets for a product
-	 *
-	 * @param WC_Product|int $product the product.
-	 */
-	public function can_display_widgets( $product ): bool;
-
-	/**
 	 * Check if we can display widget of a payment method for a product
 	 * 
 	 * @param WC_Product|int $product the product.
 	 * @param array<string, string> $method the payment method. See PaymentMethodsResponse::toArray() output
 	 */
 	public function can_display_widget_for_method( $product, $method ): bool;
+
+	/**
+	 * Get enabledForServices from general settings.
+	 */
+	public function is_enabled_for_services(): bool;
+
+	/**
+	 * Get allowFirstServicePaymentDelay from general settings.
+	 */
+	public function is_allow_first_service_payment_delay(): bool;
+
+	/**
+	 * Get allowServiceRegistrationItems from general settings.
+	 */
+	public function is_allow_service_registration_items(): bool;
+
+	/**
+	 * Get defaultServicesEndDate from general settings.
+	 */
+	public function get_default_services_end_date(): string;
 }

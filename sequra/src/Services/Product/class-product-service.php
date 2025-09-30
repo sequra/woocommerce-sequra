@@ -10,10 +10,13 @@ namespace SeQura\WC\Services\Product;
 
 use DateInterval;
 use DateTime;
+use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
+use Throwable;
 use WC_Product;
 
 /**
@@ -26,13 +29,6 @@ class Product_Service implements Interface_Product_Service {
 	private const META_KEY_IS_SEQURA_BANNED           = 'is_sequra_banned';
 	private const META_KEY_SEQURA_SERVICE_END_DATE    = 'sequra_service_end_date';
 	private const META_KEY_SEQURA_REGISTRATION_AMOUNT = 'sequra_registration_amount';
-
-	/**
-	 * Configuration
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
 
 	/**
 	 * Pricing service
@@ -49,16 +45,23 @@ class Product_Service implements Interface_Product_Service {
 	private $regex;
 
 	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
-		Configuration $configuration,
 		Interface_Pricing_Service $pricing_service,
-		RegexProvider $regex
+		RegexProvider $regex,
+		StoreContext $store_context
 	) {
-		$this->configuration   = $configuration;
 		$this->pricing_service = $pricing_service;
 		$this->regex           = $regex;
+		$this->store_context   = $store_context;
 	}
 
 	/**
@@ -127,6 +130,60 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
+	 * Get banned categories from SeQura configuration
+	 * 
+	 * @return array<string>
+	 */
+	protected function get_banned_products(): array {
+		try {
+			/**
+			 * Array containing the general settings
+			 * 
+			 * @var array<string, mixed> $config
+			 */
+			$config = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings()->toArray();
+			if ( ! empty( $config['excludedProducts'] ) && is_array( $config['excludedProducts'] ) ) {
+				return $config['excludedProducts'];
+			}
+			return array();
+		} catch ( Throwable $e ) {
+			return array();
+		}
+	}
+
+	/**
+	 * Get banned categories from general settings.
+	 * 
+	 * @return array<int>
+	 */
+	protected function get_banned_categories(): array {
+		try {
+			/**
+			 * Array containing the general settings
+			 * 
+			 * @var array<string, mixed> $config
+			 */
+			$config = AdminAPI::get()
+			->generalSettings( $this->store_context->getStoreId() )
+			->getGeneralSettings()
+			->toArray();
+			if ( ! empty( $config['excludedCategories'] ) && is_array( $config['excludedCategories'] ) ) {
+				return array_map( 'absint', $config['excludedCategories'] );
+			}
+			return array();
+		} catch ( Throwable $e ) {
+			return array();
+		}
+	}
+
+	/**
+	 * Check if product and category ban lists are empty
+	 */
+	public function is_ban_list_empty(): bool {
+		return empty( $this->get_banned_products() ) && empty( $this->get_banned_categories() );
+	}
+
+	/**
 	 * Check if product is banned
 	 * 
 	 * @param int|WC_Product $product The product ID or product object
@@ -139,13 +196,11 @@ class Product_Service implements Interface_Product_Service {
 		// TODO: Deprecate the ban using metadata in favor of the configuration.
 		$banned = $this->get_is_banned( $_product );
 		if ( ! $banned ) {
-			// Look for banned product option value in the configuration.
-			$banned_products = $this->configuration->get_excluded_products();
+			$banned_products = $this->get_banned_products();
 			$banned          = in_array( $_product->get_sku(), $banned_products, true ) || in_array( strval( $_product->get_id() ), $banned_products, true );
 
 			if ( ! $banned ) {
-				// Look for banned product category option value in the configuration.
-				$banned_categories = $this->configuration->get_excluded_categories();
+				$banned_categories = $this->get_banned_categories();
 				$banned            = ! empty( $banned_categories ) && ! empty( array_intersect( $banned_categories, $_product->get_category_ids() ) );
 			}
 		}
@@ -177,7 +232,7 @@ class Product_Service implements Interface_Product_Service {
 			return $service_end_date;
 		}
 		if ( ! preg_match( $this->regex->getDateOrDurationRegex(), $service_end_date ) ) {
-			$service_end_date = $this->configuration->get_default_services_end_date();
+			$service_end_date = $this->get_default_services_end_date();
 		}
 		return $service_end_date;
 	}
@@ -194,9 +249,9 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
-	 * Check if we can display mini widgets
+	 * Check if the seQura payment gateway is active
 	 */
-	public function can_display_mini_widgets(): bool {
+	protected function is_payment_gateway_active(): bool {
 		if ( ! function_exists( 'WC' ) ) {
 			return false;
 		}
@@ -225,12 +280,12 @@ class Product_Service implements Interface_Product_Service {
 	 *
 	 * @param WC_Product|int $product the product.
 	 */
-	public function can_display_widgets( $product ): bool {
+	protected function can_display_widgets( $product ): bool {
 		$product = $this->get_product_instance( $product );
 
-		$return = $this->can_display_mini_widgets()
+		$return = $this->is_payment_gateway_active()
 		&& $product
-		&& ( $this->configuration->is_enabled_for_services() || $product->needs_shipping() )
+		&& ( $this->is_enabled_for_services() || $product->needs_shipping() )
 		&& ! $this->is_banned( $product );
 
 		/**
@@ -326,6 +381,86 @@ class Product_Service implements Interface_Product_Service {
 			\delete_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT );
 		} else {
 			\update_post_meta( $product_id, self::META_KEY_SEQURA_REGISTRATION_AMOUNT, $value );
+		}
+	}
+
+	/**
+	 * Get enabledForServices from general settings.
+	 */
+	public function is_enabled_for_services(): bool {
+		try {
+			/**
+			 * Array containing the general settings
+			 * 
+			 * @var array<string, mixed> $config
+			 */
+			$config = AdminAPI::get()
+			->generalSettings( $this->store_context->getStoreId() )
+			->getGeneralSettings()
+			->toArray();
+			return ! empty( $config['enabledForServices'] );
+		} catch ( Throwable $e ) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Get allowFirstServicePaymentDelay from general settings.
+	 */
+	public function is_allow_first_service_payment_delay(): bool {
+		try {
+			/**
+			 * Array containing the general settings
+			 * 
+			 * @var array<string, mixed> $config
+			 */
+			$config = AdminAPI::get()
+			->generalSettings( $this->store_context->getStoreId() )
+			->getGeneralSettings()
+			->toArray();
+			return ! empty( $config['allowFirstServicePaymentDelay'] );
+		} catch ( Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get allowServiceRegistrationItems from general settings.
+	 */
+	public function is_allow_service_registration_items(): bool {
+		try {
+			/**
+			 * Array containing the general settings
+			 * 
+			 * @var array<string, mixed> $config
+			 */
+			$config = AdminAPI::get()
+			->generalSettings( $this->store_context->getStoreId() )
+			->getGeneralSettings()
+			->toArray();
+			return ! empty( $config['allowServiceRegistrationItems'] );
+		} catch ( Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get defaultServicesEndDate from general settings.
+	 */
+	public function get_default_services_end_date(): string {
+		try {
+			/**
+			 * Array containing the general settings
+			 * 
+			 * @var array<string, mixed> $config
+			 */
+			$config = AdminAPI::get()
+			->generalSettings( $this->store_context->getStoreId() )
+			->getGeneralSettings()
+			->toArray();
+			return $config['defaultServicesEndDate'];
+		} catch ( Throwable $e ) {
+			return GeneralSettings::DEFAULT_SERVICE_END_DATE;
 		}
 	}
 }

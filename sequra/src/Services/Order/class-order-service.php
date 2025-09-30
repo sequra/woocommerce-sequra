@@ -8,7 +8,7 @@
 
 namespace SeQura\WC\Services\Order;
 
-use Exception;
+use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Cart;
@@ -19,6 +19,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
+use SeQura\Core\BusinessLogic\SeQuraAPI\BaseProxy;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Cart_Info;
@@ -27,7 +28,6 @@ use SeQura\WC\Repositories\Interface_Deletable_Repository;
 use SeQura\WC\Repositories\Interface_Table_Migration_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Interface_Logger_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use Throwable;
@@ -47,13 +47,6 @@ class Order_Service implements Interface_Order_Service {
 	private const META_KEY_CART_REF        = '_sq_cart_ref';
 	private const META_KEY_CART_CREATED_AT = '_sq_cart_created_at';
 	private const META_KEY_SENT_TO_SEQURA  = '_sq_sent_to_sequra';
-
-	/**
-	 * Payment service
-	 *
-	 * @var Interface_Payment_Service
-	 */
-	private $payment_service;
 
 	/**
 	 * Pricing service
@@ -126,11 +119,31 @@ class Order_Service implements Interface_Order_Service {
 	private $table_migration_repository;
 
 	/**
+	 * Payment gateway ID
+	 *
+	 * @var string
+	 */
+	private $payment_gateway_id;
+
+	/**
+	 * Connection service
+	 *
+	 * @var ConnectionService
+	 */
+	private $connection_service;
+
+	/**
+	 * Order service
+	 *
+	 * @var OrderService
+	 */
+	private $order_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
-		SeQuraOrderRepositoryInterface $sequra_order_repository, 
-		Interface_Payment_Service $payment_service,
+		SeQuraOrderRepositoryInterface $sequra_order_repository,
 		Interface_Pricing_Service $pricing_service,
 		Order_Status_Settings_Service $order_status_service,
 		Configuration $configuration,
@@ -139,9 +152,11 @@ class Order_Service implements Interface_Order_Service {
 		Interface_Logger_Service $logger,
 		Interface_Time_Checker_Service $time_checker_service,
 		Interface_Deletable_Repository $deletable_repository,
-		Interface_Table_Migration_Repository $table_migration_repository
+		Interface_Table_Migration_Repository $table_migration_repository,
+		string $payment_gateway_id,
+		ConnectionService $connection_service,
+		OrderService $order_service
 	) {
-		$this->payment_service            = $payment_service;
 		$this->pricing_service            = $pricing_service;
 		$this->order_status_service       = $order_status_service;
 		$this->configuration              = $configuration;
@@ -152,6 +167,9 @@ class Order_Service implements Interface_Order_Service {
 		$this->time_checker_service       = $time_checker_service;
 		$this->deletable_repository       = $deletable_repository;
 		$this->table_migration_repository = $table_migration_repository;
+		$this->payment_gateway_id         = $payment_gateway_id;
+		$this->connection_service         = $connection_service;
+		$this->order_service              = $order_service;
 	}
 	
 	/**
@@ -542,7 +560,7 @@ class Order_Service implements Interface_Order_Service {
 	 * If the order is not a seQura order an empty string is returned.
 	 */
 	private function get_order_meta( WC_Order $order, $meta_key ): string {
-		if ( $order->get_payment_method() !== $this->payment_service->get_payment_gateway_id() ) {
+		if ( $order->get_payment_method() !== $this->payment_gateway_id ) {
 			return '';
 		}
 		return strval( $order->get_meta( $meta_key, true ) );
@@ -582,48 +600,6 @@ class Order_Service implements Interface_Order_Service {
 				'ref'        => $this->get_order_meta( $order, self::META_KEY_CART_REF ),
 				'created_at' => $this->get_order_meta( $order, self::META_KEY_CART_CREATED_AT ),
 			)
-		);
-	}
-
-	/**
-	 * Get IPN webhook identifier
-	 */
-	public function get_ipn_url( WC_Order $order, string $store_id ): string {
-		return \add_query_arg(
-			array(
-				'order'    => strval( $order->get_id() ),
-				'wc-api'   => $this->payment_service->get_ipn_webhook(),
-				'store_id' => $store_id,
-			),
-			\home_url( '/' )
-		);
-	}
-
-	/**
-	 * Get payment gateway webhook identifier
-	 */
-	public function get_event_url( WC_Order $order, string $store_id ): string {
-		return \add_query_arg(
-			array(
-				'order'    => strval( $order->get_id() ),
-				'wc-api'   => $this->payment_service->get_event_webhook(),
-				'store_id' => $store_id,
-			),
-			\home_url( '/' )
-		);
-	}
-
-	/**
-	 * Get payment gateway webhook identifier
-	 */
-	public function get_return_url( WC_Order $order ): string {
-		return \add_query_arg(
-			array(
-				'order'      => strval( $order->get_id() ),
-				'sq_product' => 'SQ_PRODUCT_CODE',
-				'wc-api'     => $this->payment_service->get_return_webhook(),
-			),
-			\home_url( '/' )
 		);
 	}
 
@@ -757,7 +733,7 @@ class Order_Service implements Interface_Order_Service {
 	 * @throws Throwable
 	 */
 	public function update_sequra_order_status( WC_Order $order, string $old_store_status, string $new_store_status ): void {
-		if ( $order->get_payment_method( 'edit' ) !== $this->payment_service->get_payment_gateway_id()
+		if ( $order->get_payment_method( 'edit' ) !== $this->payment_gateway_id
 			|| ! in_array( $new_store_status, $this->order_status_service->get_shop_status_completed( true ), true ) 
 			|| ! $order->needs_processing() ) {
 			// Prevent updating orders that:
@@ -795,8 +771,7 @@ class Order_Service implements Interface_Order_Service {
 			 * @since 2.0.0
 			 */
 			$ref_1 = \apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
-
-			$this->call_update_order(
+			$this->order_service->updateOrder(
 				new OrderUpdateData(
 					$ref_1, // Order reference.
 					new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
@@ -808,24 +783,6 @@ class Order_Service implements Interface_Order_Service {
 		} catch ( Throwable $e ) {
 			throw $e;
 		}
-	}
-
-	/**
-	 * Get a fresh instance of the core order service
-	 *
-	 * @param OrderUpdateData $order_data Order data
-	 * 
-	 * @throws Exception
-	 */
-	private function call_update_order( $order_data ) {
-		$store_id = $this->configuration->get_store_id();
-		/**
-		 * Order service
-		 *
-		 * @var OrderService $order_service
-		 */
-		$order_service = $this->store_context::doWithStore( $store_id, 'SeQura\Core\Infrastructure\ServiceRegister::getService', array( OrderService::class ) );
-		$this->store_context::doWithStore( $store_id, array( $order_service, 'updateOrder' ), array( $order_data ) );
 	}
 
 	/**
@@ -856,7 +813,7 @@ class Order_Service implements Interface_Order_Service {
 			 * @since 2.0.0
 			 */
 			$ref_1 = \apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
-			$this->call_update_order(
+			$this->order_service->updateOrder(
 				new OrderUpdateData(
 					$ref_1, // Order reference.
 					new Cart( $currency, false, $shipped_items, $cart_ref, $created_at, $updated_at ), // Shipped cart.
@@ -874,17 +831,28 @@ class Order_Service implements Interface_Order_Service {
 	 * Get the link to the SeQura back office for the order
 	 */
 	public function get_link_to_sequra_back_office( WC_Order $order ): ?string {
-		if ( $order->get_payment_method() !== $this->payment_service->get_payment_gateway_id() ) {
+		if ( $order->get_payment_method() !== $this->payment_gateway_id ) {
 			return null;
 		}
-		
-		switch ( $this->configuration->get_env() ) {
-			case 'sandbox':
-				return 'https://simbox.sequrapi.com/orders/' . $order->get_transaction_id();
-			case 'live':
-				return 'https://simba.sequra.es/orders/' . $order->get_transaction_id();
-			default:
-				return null;
+
+		$merchant_id = $this->get_merchant_id( $order );
+		if ( ! $merchant_id ) {
+			return null;
+		}
+
+		try {
+			$conn_data = $this->connection_service->getConnectionDataByMerchantId( $merchant_id );
+			switch ( $conn_data->getEnvironment() ) {
+				case BaseProxy::TEST_MODE:
+					return 'https://simbox.sequrapi.com/orders/' . $order->get_transaction_id();
+				case BaseProxy::LIVE_MODE:
+					return 'https://simba.sequra.es/orders/' . $order->get_transaction_id();
+				default:
+					return null;
+			}
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			return null;
 		}
 	}
 

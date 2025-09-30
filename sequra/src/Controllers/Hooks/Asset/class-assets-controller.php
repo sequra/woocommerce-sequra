@@ -13,10 +13,8 @@ use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
-use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
-use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
-use Throwable;
+use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 
 /**
  * Define the assets related functionality
@@ -88,6 +86,13 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	private $regex;
 
 	/**
+	 * Widgets service
+	 * 
+	 * @var Interface_Widgets_Service
+	 */
+	private $widgets_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
@@ -100,7 +105,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		string $templates_path, 
 		Configuration $configuration,
 		Interface_Payment_Method_Service $payment_method_service,
-		RegexProvider $regex
+		RegexProvider $regex,
+		Interface_Widgets_Service $widgets_service
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->assets_dir_url         = $assets_dir_url;
@@ -112,6 +118,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$this->payment_method_service = $payment_method_service;
 		$this->regex                  = $regex;
 		$this->wp_version             = $wp_version;
+		$this->widgets_service        = $widgets_service;
 	}
 
 	/**
@@ -214,11 +221,6 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'payment'    => array( 'methods' ),
 				'advanced'   => array( 'debug' ),
 			),
-			'integration'       => array(
-				'authToken'    => '', // Not used in this implementation.
-				'isMultistore' => count( $this->configuration->get_stores() ) > 1,
-				'hasVersion'   => version_compare( $this->configuration->get_marketplace_version(), $this->configuration->get_module_version(), '>' ),
-			),
 			'generalSettings'   => array(
 				'useHostedPage'               => false,
 				'useReplacementPaymentMethod' => false,
@@ -252,21 +254,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return array<string, mixed>
 	 */
 	private function get_sequra_config_params_l10n(): array {
-		$data = array();
-		try {
-			$country = $this->i18n->get_current_country();
-			/**
-			 * Fetch promotional widget data from CheckoutAPI
-			 *  
-			 * @var array<string, mixed> $data */
-			$data = CheckoutAPI::get()
-			->promotionalWidgets( $this->configuration->get_store_id() )
-			->getPromotionalWidgetInitializeData( new PromotionalWidgetsCheckoutRequest( $country, $country ) )
-			->toArray();
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-		}
-
+		$data = $this->widgets_service->get_widget_config_params() ?? array();
 		return array(
 			'scriptUri'         => $data['scriptUri'] ?? '',
 			'thousandSeparator' => $data['thousandSeparator'] ?? '',
