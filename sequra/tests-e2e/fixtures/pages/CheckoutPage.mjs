@@ -14,15 +14,19 @@ export default class CheckoutPage extends BaseCheckoutPage {
         return {
             ...super.initLocators(),
             // loader: () => this.page.locator('.loading-mask', { state: 'visible' }),
-            email: () => this.page.locator('#billing_email'),
-            firstName: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_first_name`),
-            lastName: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_last_name`),
-            address1: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_address_1`),
-            country: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_country`),
-            state: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_state`),
-            city: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_city`),
-            postcode: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_postcode`),
-            phone: (isShipping = false) => this.page.locator(`#${isShipping ? 'shipping' : 'billing'}_phone`),
+            prefixedAddressField: (isShipping = false, field) => {
+                const prefix = isShipping ? 'shipping' : 'billing';
+                return this.page.locator(`#${prefix}_${field},#${prefix}-${field}`);
+            },
+            email: () => this.page.locator('#billing_email,#email'),
+            firstName: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'first_name'),
+            lastName: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'last_name'),
+            address1: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'address_1'),
+            country: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'country'),
+            state: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'state'),
+            city: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'city'),
+            postcode: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'postcode'),
+            phone: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'phone'),
             // flatRateShipping: () => this.page.locator('[value="flatrate_flatrate"]'),
             // continueButton: () => this.page.locator('.action.continue'),
             submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])'),
@@ -44,28 +48,6 @@ export default class CheckoutPage extends BaseCheckoutPage {
 
     /**
      * Fill the checkout page's form
-     * @param {Object} options Contains the data to fill the form
-     * @param {string} options.email Email
-     * @param {string} options.firstName First name
-     * @param {string} options.lastName Last name
-     * @param {string} options.address1 Address first line
-     * @param {string} options.country Typically a 2-letter ISO country code
-     * @param {string} options.state Name of the state
-     * @param {string} options.city Name of the city
-     * @param {string} options.postcode Postcode
-     * @param {string} options.phone Phone number
-     * @param {string} options.shippingMethod Shipping method
-     * @returns {Promise<void>}
-     */
-    async fillForm(options) {
-        await this.fillShippingForm(options);
-        // await this.selectShippingMethod(options);
-        // await this.locators.continueButton().click();
-        // await this.#waitForFinishLoading();
-    }
-
-    /**
-     * Fill the shipping form
      * @param {Object} options
      * @param {string} options.email Email
      * @param {string} options.firstName First name
@@ -76,44 +58,21 @@ export default class CheckoutPage extends BaseCheckoutPage {
      * @param {string} options.city Name of the city
      * @param {string} options.postcode Postcode
      * @param {string} options.phone Phone number
+     * @param {boolean} options.isShipping Lookup shipping fields instead of billing
      * @returns {Promise<void>}
      */
-    async fillShippingForm(options) {
-        // await this.page.waitForURL(/#shipping/);
-        // await this.#waitForFinishLoading();
-        const { email, firstName, lastName, address1, country, state, city, postcode, phone } = options;
+    async fillForm(options) {
+        const { email, firstName, lastName, address1, country, state, city, postcode, phone, isShipping } = {isShipping: false, ...options};
         await this.locators.email().fill(email);
-        await this.locators.firstName().fill(firstName);
-        await this.locators.lastName().fill(lastName);
-        await this.locators.address1().fill(address1);
-        await this.locators.country().selectOption(country);
-        await this.locators.state().selectOption({ label: state });
-        await this.locators.city().fill(city);
-        await this.locators.postcode().fill(postcode);
-        await this.locators.phone().fill(phone);
+        await this.locators.firstName(isShipping).fill(firstName);
+        await this.locators.lastName(isShipping).fill(lastName);
+        await this.locators.address1(isShipping).fill(address1);
+        await this.locators.country(isShipping).selectOption(country);
+        await this.locators.state(isShipping).selectOption({ label: state });
+        await this.locators.city(isShipping).fill(city);
+        await this.locators.postcode(isShipping).fill(postcode);
+        await this.locators.phone(isShipping).fill(phone);
     }
-
-    // /**
-    //  * Select the shipping method
-    //  * @param {Object} options
-    //  * @param {string} options.shippingMethod Shipping method
-    //  * @returns {Promise<void>}
-    //  */
-    // async selectShippingMethod(options) {
-    //     await this.page.waitForURL(/#shipping/);
-    //     // await this.#waitForFinishLoading();
-    //     await this.locators.flatRateShipping().click();
-    // }
-
-    // /**
-    //  * Wait for the checkout to finish loading
-    //  * @returns {Promise<void>}
-    //  */
-    // async #waitForFinishLoading() {
-    //     do {
-    //         await this.expect(this.locators.loader().first()).toBeHidden();
-    //     } while ((await this.locators.loader()) > 0);
-    // }
 
     /**
     * Provide the locator to input the payment method

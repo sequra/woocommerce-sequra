@@ -14,11 +14,8 @@ test.describe('Product checkout', () => {
 
     for (const version of ['classic', 'blocks']) {
       await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: version }] });
-      await checkoutPage.goto();
-      await checkoutPage.fillForm(shopper);
-      // if (version === 'blocks') {
-      //   await checkoutPage.expectPaymentMethodsBeingReloaded();
-      // }
+      await checkoutPage.goto({force: true});
+      await checkoutPage.fillForm({isShipping: version === 'blocks', ...shopper});
       for (const paymentMethod of paymentMethods) {
         await checkoutPage.expectPaymentMethodToBeVisible(paymentMethod);
       }
