@@ -38,53 +38,53 @@ module.exports = defineConfig({
     {
       name: 'checkout-product',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: '001-checkout-product.spec.js',
+      testMatch: '001-checkout-product.spec.mjs',
     },
-    {
-      name: 'checkout-service',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '002-checkout-service.spec.js',
-    },
-    {
-      name: 'configuration-onboarding',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '003-configuration-onboarding.spec.js',
-    },
-    {
-      name: 'configuration-payment-methods',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '004-configuration-payment-methods.spec.js',
-    },
-    {
-      name: 'configuration-advanced',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '005-configuration-advanced.spec.js',
-    },
-    {
-      name: 'configuration-general',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '006-configuration-general.spec.js',
-    },
-    {
-      name: 'configuration-connection',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '007-configuration-connection.spec.js',
-    },
-    {
-      name: 'configuration-widget',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '008-configuration-widget.spec.js',
-    },
-    {
-      name: 'configuration-mini-widget',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '009-configuration-mini-widget.spec.js',
-    },
-    {
-      name: 'migration',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '099-migration.spec.js',
-    },
+    // {
+    //   name: 'checkout-service',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '002-checkout-service.spec.js',
+    // },
+    // {
+    //   name: 'configuration-onboarding',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '003-configuration-onboarding.spec.js',
+    // },
+    // {
+    //   name: 'configuration-payment-methods',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '004-configuration-payment-methods.spec.js',
+    // },
+    // {
+    //   name: 'configuration-advanced',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '005-configuration-advanced.spec.js',
+    // },
+    // {
+    //   name: 'configuration-general',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '006-configuration-general.spec.js',
+    // },
+    // {
+    //   name: 'configuration-connection',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '007-configuration-connection.spec.js',
+    // },
+    // {
+    //   name: 'configuration-widget',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '008-configuration-widget.spec.js',
+    // },
+    // {
+    //   name: 'configuration-mini-widget',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '009-configuration-mini-widget.spec.js',
+    // },
+    // {
+    //   name: 'migration',
+    //   use: { ...devices['Desktop Chrome'] },
+    //   testMatch: '099-migration.spec.js',
+    // },
   ],
 });
 

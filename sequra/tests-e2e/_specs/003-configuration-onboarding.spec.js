@@ -1,4 +1,4 @@
-import { test } from '../fixtures/test';
+import { test } from '../fixtures/test.mjs';
 
 test.describe('Configuration Onboarding', () => {
   test('Configure using dummy', async ({ onboardingSettingsPage }) => {

@@ -1,6 +1,6 @@
 import ConnectionSettingsPage from '../fixtures/ConnectionSettingsPage';
 import GeneralSettingsPage from '../fixtures/GeneralSettingsPage';
-import { expect, test } from '../fixtures/test';
+import { expect, test } from '../../fixtures/test';
 import WidgetSettingsPage from '../fixtures/WidgetSettingsPage';
 
 test.describe('Migration', () => {

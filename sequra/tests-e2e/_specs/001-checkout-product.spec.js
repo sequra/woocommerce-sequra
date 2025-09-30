@@ -1,5 +1,5 @@
-import SeQuraHelper from '../fixtures/SeQuraHelper';
-import { test, expect } from '../fixtures/test';
+import SeQuraHelper from '../_fixtures/SeQuraHelper';
+import { test, expect } from '../_fixtures/test';
 
 test.describe('Product checkout', () => {
 

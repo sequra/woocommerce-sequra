@@ -1,5 +1,5 @@
 import { shopper as dataShopper, sqProduct } from './data';
-import SeQuraHelper from './SeQuraHelper';
+import SeQuraHelper from '../SeQuraHelper';
 import WpAdmin from './WpAdmin';
 export default class CheckoutPage {
 

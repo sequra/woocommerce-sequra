@@ -1,5 +1,5 @@
 import SeQuraHelper from '../fixtures/SeQuraHelper';
-import { test, expect } from '../fixtures/test';
+import { test, expect } from '../../fixtures/test';
 
 test.describe('Widget settings', () => {
 

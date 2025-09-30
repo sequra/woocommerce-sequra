@@ -10,7 +10,7 @@ import WidgetSettingsPage from "./WidgetSettingsPage";
 import CartPage from "./CartPage";
 import ShopPage from "./ShopPage";
 import WpAdmin from "./WpAdmin";
-import SeQuraHelper from "./SeQuraHelper";
+import SeQuraHelper from "../SeQuraHelper";
 
 const test = baseTest.extend({
     advancedSettingsPage: async ({ page, baseURL, request }, use) => {

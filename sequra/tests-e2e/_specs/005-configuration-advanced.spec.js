@@ -1,4 +1,4 @@
-import { test } from '../fixtures/test';
+import { test } from '../../fixtures/test';
 
 test.describe('Configuration', () => {
   test('Enable logs', async ({ page, advancedSettingsPage }) => {
