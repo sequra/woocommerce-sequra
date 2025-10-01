@@ -27,8 +27,8 @@ test.describe('Product checkout', () => {
   test('Complete a successful payment with SeQura', async ({ helper, dataProvider, productPage, checkoutPage }) => {
     // Setup
     const { dummy_config, checkout_version } = helper.webhooks;
-    await helper.executeWebhook({ webhook: dummy_config }); // Setup for physical products.
-    await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: 'blocks' }] }); // Use modern checkout.
+    await helper.executeWebhook({ webhook: dummy_config });
+    await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: 'blocks' }] });
     const shopper = dataProvider.shopper();
 
     // Execution
@@ -41,21 +41,23 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
   });
 
-  // test('Complete a successful payment with SVEA', async ({ helper, dataProvider, productPage, checkoutPage }) => {
-  //   // Setup
-  //   const { dummy_config } = helper.webhooks;
-  //   await helper.executeWebhook({ webhook: dummy_config }); // Setup for physical products.
-  //   const shopper = dataProvider.shopper('france');
+  test('Complete a successful payment with SVEA', async ({ helper, dataProvider, productPage, checkoutPage }) => {
+    // Setup
+    const { dummy_config, checkout_version } = helper.webhooks;
+    await helper.executeWebhook({ webhook: dummy_config });
+    await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: 'blocks' }] });
+    const shopper = dataProvider.shopper('france');
 
-  //   // Execution
-  //   await productPage.addToCart({ slug: 'push-it-messenger-bag', quantity: 1 });
-  //   await checkoutPage.goto();
-  //   await checkoutPage.fillForm(shopper);
-  //   await checkoutPage.openAndCloseEducationalPopup({ product: 'pp3' });
-  //   await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
-  //   await checkoutPage.waitForOrderSuccess();
-  //   await checkoutPage.expectOrderHasTheCorrectMerchantId('FR', helper, dataProvider);
-  // });
+    // Execution
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({isShipping: true, ...shopper});
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
+    await checkoutPage.openAndCloseEducationalPopup({ product: 'pp3' });
+    await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
+    await checkoutPage.waitForOrderSuccess();
+    await checkoutPage.expectOrderHasTheCorrectMerchantId('FR', helper, dataProvider);
+  });
 
   // test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
   //   // Setup

@@ -61,13 +61,16 @@ export default class CheckoutPage extends BaseCheckoutPage {
      * @returns {Promise<void>}
      */
     async fillForm(options) {
-        const { email, firstName, lastName, address1, country, state, city, postcode, phone, isShipping } = {isShipping: false, ...options};
+        const { email, firstName, lastName, address1, country, state, city, postcode, phone, isShipping } = { isShipping: false, ...options };
         await this.locators.email().fill(email);
         await this.locators.firstName(isShipping).fill(firstName);
         await this.locators.lastName(isShipping).fill(lastName);
         await this.locators.address1(isShipping).fill(address1);
         await this.locators.country(isShipping).selectOption(country);
-        await this.locators.state(isShipping).selectOption({ label: state });
+        // State field might not exist in some countries.
+        if (await this.locators.state(isShipping).count()) {
+            await this.locators.state(isShipping).selectOption({ label: state });
+        }
         await this.locators.city(isShipping).fill(city);
         await this.locators.postcode(isShipping).fill(postcode);
         await this.locators.phone(isShipping).fill(phone);
@@ -204,5 +207,21 @@ export default class CheckoutPage extends BaseCheckoutPage {
             await this.waitForOrderStatus({ orderNumber, status: fromStatus, waitFor: 10 });
         }
         await this.waitForOrderStatus({ orderNumber, status: toStatus, waitFor });
+    }
+
+    /**
+     * Expect payment methods being reloaded (spinner appears and disappears) multiple times if needed
+     * 
+     * @returns {Promise<void>}
+     */
+    async expectPaymentMethodsBeingReloaded() {
+        while (true) {
+            try {
+                await this.page.waitForSelector('.sq-loader', { state: 'visible', timeout: 5000 });
+                await this.page.waitForSelector('.sq-loader', { state: 'detached', timeout: 5000 });
+            } catch (err) {
+                break;
+            }
+        }
     }
 }
