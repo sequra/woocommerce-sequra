@@ -35,13 +35,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 	private const FORM_FIELD_ENABLED          = 'enabled';
 	private const POST_SQ_PAYMENT_METHOD_DATA = 'sequra_payment_method_data';
-	
-	/**
-	 * Payment service
-	 *
-	 * @var Interface_Payment_Service
-	 */
-	private $payment_service;
 
 	/**
 	 * Payment service
@@ -96,15 +89,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 * @since 2.0.0
 		 */
 		\do_action( 'woocommerce_sequra_before_load', $this );
-
-		
-		/**
-		 * Payment service
-		 *
-		 * @var Interface_Payment_Service $payment_service
-		 */
-		$payment_service       = ServiceRegister::getService( Interface_Payment_Service::class );
-		$this->payment_service = $payment_service;
 
 		/**
 		 * Constants service
@@ -427,15 +411,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Validate payload and exit if it is invalid, giving a proper response
 	 */
 	private function die_on_invalid_payload( array $payload ): void {
-		if ( null === $payload['order'] 
-			|| null === $payload['signature'] 
-			|| null === $payload['storeId']
-			|| $this->payment_service->sign( $payload['order'] ) !== $payload['signature'] ) {
-			$this->logger->log_debug( 'Bad signature', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
-			\status_header( 498 );
-			die( 'Bad signature' );
-		}
-
 		// Check if 'sq_state' is one of the expected values.
 		if ( ! in_array( $payload['sq_state'], OrderStates::toArray(), true ) ) {
 			$this->logger->log_error( 'Invalid sq_state', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
@@ -443,11 +418,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			die( 'Invalid state' );
 		}
 
-		$order = wc_get_order( $payload['order'] );
+		$order = empty( $payload['order'] ) ? null : wc_get_order( $payload['order'] );
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_error( 'No order found', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
 			\status_header( 404 );
-			die( 'No order found id:' . \esc_html( $payload['order'] ) );
+			die( 'No order found id:' . \esc_html( (string) $payload['order'] ) );
 		}
 	}
 

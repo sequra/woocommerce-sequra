@@ -105,9 +105,7 @@ use SeQura\WC\Services\Migration\Migration_Manager;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Order\Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Payment_Method_Service;
-use SeQura\WC\Services\Payment\Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Pricing\Pricing_Service;
@@ -604,18 +602,6 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Interface_Logger_Service::class ];
-			}
-		);
-		Reg::registerService(
-			Interface_Payment_Service::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Payment_Service::class ] ) ) {
-					self::$cache[ Interface_Payment_Service::class ] = new Payment_Service(
-						Reg::getService( Configuration::CLASS_NAME ),
-						Reg::getService( Interface_I18n::class )
-					);
-				}
-				return self::$cache[ Interface_Payment_Service::class ];
 			}
 		);
 
