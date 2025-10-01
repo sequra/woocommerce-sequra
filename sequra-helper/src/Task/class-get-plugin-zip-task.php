@@ -17,7 +17,9 @@ class Get_Plugin_Zip_Task extends Task {
 	/**
 	 * Make a zip file with the content of the current sequra plugin
 	 * 
-	 * @throws \Exception If the task fails
+	 * @param array<string, string> $args Arguments for the task.
+	 * 
+	 * @throws \Exception If the task fails.
 	 */
 	public function execute( array $args = array() ): void {
 		exec(

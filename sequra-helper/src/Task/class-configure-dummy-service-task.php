@@ -111,7 +111,9 @@ class Configure_Dummy_Service_Task extends Task {
 	/**
 	 * Execute the task
 	 * 
-	 * @throws \Exception If the task fails
+	 * @param array<string, string> $args Arguments for the task.
+	 * 
+	 * @throws \Exception If the task fails.
 	 */
 	public function execute( array $args = array() ): void {
 		if ( ! $this->is_dummy_service_config_in_use() ) {

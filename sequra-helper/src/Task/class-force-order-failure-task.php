@@ -17,7 +17,9 @@ class Force_Order_Failure_Task extends Task {
 	/**
 	 * Execute the task
 	 * 
-	 * @throws \Exception If the task fails
+	 * @param array<string, string> $args Arguments for the task.
+	 * 
+	 * @throws \Exception If the task fails.
 	 */
 	public function execute( array $args = array() ): void {
 
@@ -33,6 +35,8 @@ class Force_Order_Failure_Task extends Task {
 
 	/**
 	 * Update the order payload to force failure
+	 * 
+	 * @param int $order_id The order ID.
 	 */
 	private function force_order_failure( int $order_id ): bool {
 		global $wpdb;
