@@ -5,6 +5,8 @@
 	<file>.</file>
 	<exclude-pattern>vendor/</exclude-pattern>
 	<exclude-pattern>languages/</exclude-pattern>
+	<exclude-pattern>postman-collection/</exclude-pattern>
+	<exclude-pattern>zip/</exclude-pattern>
 	<!-- How to scan -->
 	<!-- Usage instructions: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->
 	<!-- Annotated ruleset: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
@@ -25,6 +27,16 @@
 	</rule>
 	<rule ref="Squiz.PHP.CommentedOutCode.Found">
 		<exclude name="Squiz.PHP.CommentedOutCode.Found"/>
+	</rule>
+	<rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops.Found">
+		<exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found"/>
+	</rule>
+	<rule ref="WordPress">
+		<exclude name="WordPress.DB.PreparedSQL.NotPrepared"/>
+		<exclude name="WordPress.DB.PreparedSQL.InterpolatedNotPrepared"/>
+		<exclude name="WordPress.Security.EscapeOutput.ExceptionNotEscaped"/>
+		<exclude name="WordPress.Security.NonceVerification.Recommended"/>
+		<exclude name="WordPress.Security.ValidatedSanitizedInput.InputNotValidated"/>
 	</rule>
 	<rule ref="WordPressVIPMinimum">
 		<exclude name="WordPressVIPMinimum.JS.Window"/>

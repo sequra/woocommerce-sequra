@@ -5,3 +5,6 @@ docker run --rm -v "${BASEDIR}"/sequra:/app -w /app -u $(id -u):$(id -g) php:cli
 
 echo "🔍 Running PHPStan in glue-plugins/sequra-no-address"
 docker run --rm -v "${BASEDIR}"/glue-plugins/sequra-no-address:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon $@ --memory-limit=1G
+
+echo "🔍 Running PHPStan in sequra-helper"
+docker run --rm -v "${BASEDIR}"/sequra-helper:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon $@ --memory-limit=1G
