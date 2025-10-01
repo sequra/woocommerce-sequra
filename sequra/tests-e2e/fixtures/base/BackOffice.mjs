@@ -22,25 +22,37 @@ export default class BackOffice extends BaseBackOffice {
      * @param {Object} options Additional options
      * @returns {Promise<void>}
      */
-    async login(options = { waitUntil: 'load' }) {
-        const user = process.env.M2_ADMIN_USER;
-        const pass = process.env.M2_ADMIN_PASSWORD;
-        const usernameInput = this.locators.usernameInput();
+    async login(options = { waitUntil: 'domcontentloaded', force: false }) {
+        const { force, waitUntil } = { waitUntil: 'domcontentloaded', force: false, ...options };
+        
+        if (!force) {
+            const cookies = await this.page.context().cookies();
+            if (cookies.find(c => -1 !== c.name.search('wordpress_logged_in'))) {
+                return;
+            }
+        }
 
         try {
-            await this.page.goto(`${this.baseURL}/${process.env.M2_BACKEND_FRONTNAME}`, { waitUntil: 'domcontentloaded' });
-            await this.expect(usernameInput, 'Username input is visible').toBeVisible({ timeout: 100 });
+            await this.page.goto(
+                `${this.baseURL}/wp-login.php?redirect_to=${encodeURIComponent(`${this.baseURL}/wp-admin/`)}&reauth=1`,
+                { waitUntil: waitUntil }
+            );
+            await this.expect(this.locators.usernameInput(), 'Username input is visible').toBeVisible({ timeout: 100 });
+            await this.expect(this.locators.passwordInput(), 'Password input is visible').toBeVisible({ timeout: 100 });
         }
         catch {
             return;
         }
 
+        const user = process.env.WP_ADMIN_USER;
+        const pass = process.env.WP_ADMIN_PASSWORD;
+
         console.log(`Logging in as user: "${user}" with password: "${pass}"`);
 
-        await usernameInput.fill(user);
+        await this.locators.usernameInput().fill(user);
         await this.locators.passwordInput().fill(pass);
         await this.locators.loginButton().click();
-        await this.page.waitForURL(/admin/, options);
+        await this.page.waitForURL('./wp-admin/');
     }
 
     /**
@@ -50,12 +62,12 @@ export default class BackOffice extends BaseBackOffice {
      * @returns {Promise<void>}
      */
     async logout(options = {}) {
-        // clear all cookies to remove session.
-        await this.page.context().clearCookies();
+        // Clear WordPress login cookies.
+        await this.page.context().clearCookies({ name: /wordpress_logged_in.*/ });
     }
 
     async #gotoLinkTarget(link, append = '') {
-        const url = (await link.getAttribute('href')) + append;
+        const url = './wp-admin/' + (await link.getAttribute('href')) + append;
         await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     }
 
