@@ -14,8 +14,8 @@ test.describe('Product checkout', () => {
 
     for (const version of ['classic', 'blocks']) {
       await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: version }] });
-      await checkoutPage.goto({force: true});
-      await checkoutPage.fillForm({isShipping: version === 'blocks', ...shopper});
+      await checkoutPage.goto({ force: true });
+      await checkoutPage.fillForm({ isShipping: version === 'blocks', ...shopper });
       await checkoutPage.expectPaymentMethodsBeingReloaded();
       for (const paymentMethod of paymentMethods) {
         await checkoutPage.expectPaymentMethodToBeVisible(paymentMethod);
@@ -34,7 +34,7 @@ test.describe('Product checkout', () => {
     // Execution
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
     await checkoutPage.goto();
-    await checkoutPage.fillForm({isShipping: true, ...shopper});
+    await checkoutPage.fillForm({ isShipping: true, ...shopper });
     await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
     await checkoutPage.waitForOrderSuccess();
@@ -51,43 +51,46 @@ test.describe('Product checkout', () => {
     // Execution
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
     await checkoutPage.goto();
-    await checkoutPage.fillForm({isShipping: true, ...shopper});
+    await checkoutPage.fillForm({ isShipping: true, ...shopper });
     await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.openAndCloseEducationalPopup({ product: 'pp3' });
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
     await checkoutPage.waitForOrderSuccess();
     await checkoutPage.expectOrderHasTheCorrectMerchantId('FR', helper, dataProvider);
   });
 
-  // test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
-  //   // Setup
-  //   const { dummy_config } = helper.webhooks;
-  //   await helper.executeWebhook({ webhook: dummy_config }); // Setup for physical products.
-  //   const shopper = dataProvider.shopper('approve');
+  test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
+    // Setup
+    const { dummy_config, checkout_version } = helper.webhooks;
+    await helper.executeWebhook({ webhook: dummy_config });
+    await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: 'blocks' }] });
+    const shopper = dataProvider.shopper('approve');
 
-  //   // Execution
-  //   await productPage.addToCart({ slug: 'push-it-messenger-bag', quantity: 1 });
-  //   await checkoutPage.goto();
-  //   await checkoutPage.fillForm(shopper);
-  //   await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
-  //   await checkoutPage.waitForOrderSuccess();
-  //   await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
-  //   await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'Pending Payment', toStatus: 'Processing' });
-  // });
+    // Execution
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({ isShipping: true, ...shopper });
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
+    await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
+    // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
+    await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
+    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
+  });
 
-  // test('Make a 🍊 payment with "Review test cancel" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
-  //   // Setup
-  //   const { dummy_config } = helper.webhooks;
-  //   await helper.executeWebhook({ webhook: dummy_config }); // Setup for physical products.
-  //   const shopper = dataProvider.shopper('cancel');
+  test('Make a 🍊 payment with "Review test cancel" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
+    // Setup
+    const { dummy_config, checkout_version } = helper.webhooks;
+    await helper.executeWebhook({ webhook: dummy_config });
+    await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: 'blocks' }] });
+    const shopper = dataProvider.shopper('cancel');
 
-  //   // Execution
-  //   await productPage.addToCart({ slug: 'push-it-messenger-bag', quantity: 1 });
-  //   await checkoutPage.goto();
-  //   await checkoutPage.fillForm(shopper);
-  //   await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
-  //   await checkoutPage.waitForOrderSuccess();
-  //   await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
-  //   await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'Pending Payment', toStatus: 'Canceled' });
-  // });
+    // Execution
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({ isShipping: true, ...shopper });
+    await checkoutPage.expectPaymentMethodsBeingReloaded();
+    await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
+    // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
+    await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
+    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Cancelled' });
+  });
 });

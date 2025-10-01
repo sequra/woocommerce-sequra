@@ -31,8 +31,8 @@ export default class CheckoutPage extends BaseCheckoutPage {
             // continueButton: () => this.page.locator('.action.continue'),
             submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])'),
             // TODO
-            orderRowStatus: orderNumber => this.page.locator(`.data-row:has(td:has-text("${orderNumber}")) td:nth-child(9)`),
-            orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value')
+            orderRowStatus: orderNumber => this.page.locator(`#order-${orderNumber} .column-order_status`),
+            orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong')
         };
     }
 
@@ -166,7 +166,6 @@ export default class CheckoutPage extends BaseCheckoutPage {
      * @returns {Promise<string>}
      */
     async getOrderNumber() {
-        // TODO
         return await this.locators.orderNumber().textContent();
     }
 
@@ -179,16 +178,7 @@ export default class CheckoutPage extends BaseCheckoutPage {
     */
     async expectOrderHasStatus(options) {
         const { orderNumber, status } = options;
-        await this.expect(this.locators.orderRowStatus(orderNumber)).toHaveText(status);
-    }
-
-    /**
-    * The timeout to wait before retrying to check the order status
-    * @param {Object} options 
-    * @returns {int}
-    */
-    getOrderStatusTimeoutInMs(options) {
-        return 0;
+        await this.expect(this.locators.orderRowStatus(orderNumber), `Order ${orderNumber} has status "${status}"`).toHaveText(status, { timeout: 1 });
     }
 
     /**
@@ -215,13 +205,17 @@ export default class CheckoutPage extends BaseCheckoutPage {
      * @returns {Promise<void>}
      */
     async expectPaymentMethodsBeingReloaded() {
-        while (true) {
-            try {
-                await this.page.waitForSelector('.sq-loader', { state: 'visible', timeout: 5000 });
-                await this.page.waitForSelector('.sq-loader', { state: 'detached', timeout: 5000 });
-            } catch (err) {
-                break;
-            }
-        }
+        // TODO: Improve this, sometimes it passes without waiting enough time.
+        // while (true) {
+        //     try {
+        //         await this.page.waitForSelector('.sq-loader', { state: 'visible', timeout: 5000 });
+        //         await this.page.waitForSelector('.sq-loader', { state: 'detached', timeout: 5000 });
+        //     } catch (err) {
+        //         break;
+        //     }
+        // }
+
+        // For now, just wait 10 seconds.
+        await new Promise(resolve => setTimeout(resolve, 10000));
     }
 }
