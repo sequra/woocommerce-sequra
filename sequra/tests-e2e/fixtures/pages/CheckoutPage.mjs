@@ -32,8 +32,7 @@ export default class CheckoutPage extends BaseCheckoutPage {
             submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])'),
             // TODO
             orderRowStatus: orderNumber => this.page.locator(`.data-row:has(td:has-text("${orderNumber}")) td:nth-child(9)`),
-            // TODO
-            orderNumber: () => this.page.locator('.checkout-success p>span')
+            orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value')
         };
     }
 
@@ -143,7 +142,7 @@ export default class CheckoutPage extends BaseCheckoutPage {
      * @returns {import("@playwright/test").Locator}
      */
     moreInfoLinkLocator(options) {
-        return this.page.locator(`label[for="sequra_${options.product}"] .sequra-educational-popup`)
+        return this.page.locator(`.sequra_more_info[data-product="${options.product}"]`);
     }
 
     /**
@@ -152,8 +151,8 @@ export default class CheckoutPage extends BaseCheckoutPage {
     * @param {string} options.expectedMessage The expected message to be shown
     */
     async waitForOrderSuccess(options) {
-        await this.page.waitForURL(/\/checkout\/order-received\//, { timeout: 30000, waitUntil: 'commit' });
-        if('undefined' !== typeof options.expectedMessage) {
+        await this.page.waitForURL(/\/checkout\/order-received\//, { timeout: 30000 });
+        if (options?.expectedMessage) {
             await this.expect(this.page.getByText(options.expectedMessage)).toBeVisible();
         }
     }
