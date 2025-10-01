@@ -525,7 +525,7 @@ class Order_Service implements Interface_Order_Service {
 			 */
 			$customer = WC()->customer;
 			$data     = array(
-				'email'               => $customer->get_email(),
+				'email'               => empty( $customer->get_billing_email() ) ? $customer->get_email() : $customer->get_billing_email(),
 				'billing_first_name'  => $customer->get_billing_first_name(),
 				'billing_last_name'   => $customer->get_billing_last_name(),
 				'billing_company'     => $customer->get_billing_company(),
@@ -695,8 +695,8 @@ class Order_Service implements Interface_Order_Service {
 			$this->get_nin( $order ), // nin.
 			$this->get_company( $order, true ),
 			$this->get_vat( $order, true ), // vatNumber.
-			$this->get_shopper_created_at( $order, true ), // createdAt.
-			$this->get_shopper_updated_at( $order, true ), // updatedAt.
+			$this->get_shopper_created_at( $order ), // createdAt.
+			$this->get_shopper_updated_at( $order ), // updatedAt.
 			$this->get_shopper_rating( $order ), // rating.
 			null, // ninControl.
 			$this->get_previous_orders( $current_user_id ),
