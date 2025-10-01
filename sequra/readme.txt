@@ -105,6 +105,7 @@ Contributors:
 * Changed: Update integration-core library to version v2.5.0.
 * Added: Support for managing multiple deployment targets credentials.
 * Added: Integration-Core-UI library providing the assets required for the configuration page.
+* Fixed: The link to read more about the payment method was not always working.
 
 = 3.2.2	=
 * Fixed: Ensure that the order completion date can be retrieved.
