@@ -31,6 +31,9 @@
 	<rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops.Found">
 		<exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found"/>
 	</rule>
+	<rule ref="Universal.Operators.DisallowShortTernary.Found">
+		<exclude name="Universal.Operators.DisallowShortTernary.Found"/>
+	</rule>
 	<rule ref="WordPress">
 		<exclude name="WordPress.DB.PreparedSQL.NotPrepared"/>
 		<exclude name="WordPress.DB.PreparedSQL.InterpolatedNotPrepared"/>
