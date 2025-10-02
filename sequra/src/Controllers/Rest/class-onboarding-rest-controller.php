@@ -32,7 +32,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 	private const PARAM_DEPLOYMENT                                 = 'deployment';
 	private const PARAM_CONNECTION_DATA                            = 'connectionData';
 	private const PARAM_SEND_STATISTICAL_DATA                      = 'sendStatisticalData';
-	private const PARAM_USE_WIDGETS                                = 'useWidgets';
 	private const PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE             = 'displayWidgetOnProductPage';
 	private const PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING = 'showInstallmentAmountInProductListing';
 	private const PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE       = 'showInstallmentAmountInCartPage';
@@ -116,7 +115,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 		$widget_args = array_merge(
 			$store_id_args,
 			array(
-				self::PARAM_USE_WIDGETS                    => $this->get_arg_bool(),
 				self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE => $this->get_arg_bool(),
 				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING => $this->get_arg_bool(),
 				self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE => $this->get_arg_bool(),
@@ -450,7 +448,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 			->widgetConfiguration( $store_id )
 			->setWidgetSettings(
 				new WidgetSettingsRequest(
-					(bool) $request->get_param( self::PARAM_USE_WIDGETS ),
 					(bool) $request->get_param( self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE ),
 					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING ),
 					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE ),
