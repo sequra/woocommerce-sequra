@@ -260,7 +260,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'thousandSeparator' => $data['thousandSeparator'] ?? '',
 			'decimalSeparator'  => $data['decimalSeparator'] ?? '',
 			'locale'            => $data['locale'] ?? '',
-			'merchant'          => $data['merchantId'] ?? '',
+			'merchant'          => $data['merchant'] ?? '',
 			'assetKey'          => $data['assetKey'] ?? '',
 			'products'          => $data['products'] ?? array(),
 		);
