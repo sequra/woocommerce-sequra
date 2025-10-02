@@ -134,6 +134,8 @@ use SeQura\WC\Services\Platform\Interface_Platform_Provider;
 use SeQura\WC\Services\Platform\Platform_Provider;
 use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use SeQura\WC\Services\Widgets\Widgets_Service;
+use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
 
 /**
  * Implementation for the core bootstrap class.
@@ -309,14 +311,12 @@ class Bootstrap extends BootstrapComponent {
 		 * calls to the cases where it's really necessary to set a different store ID.
 		 */
 		Reg::registerService(
-			StoreContext::class,
+			StoreIdProvider::class,
 			static function () {
-				if ( ! isset( self::$cache[ StoreContext::class ] ) ) {
-					$store_context = StoreContext::getInstance();
-					$store_context->setStoreId( (string) get_current_blog_id() );
-					self::$cache[ StoreContext::class ] = $store_context;
+				if ( ! isset( self::$cache[ StoreIdProvider::class ] ) ) {
+					self::$cache[ StoreIdProvider::class ] = new Store_Id_Provider();
 				}
-				return self::$cache[ StoreContext::class ];
+				return self::$cache[ StoreIdProvider::class ];
 			}
 		);
 
