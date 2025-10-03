@@ -93,9 +93,10 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		/**
 		 * Constants service
 		 * 
-		 * @var Interface_Constants
+		 * @var Interface_Constants $constants
 		 */
-		$this->constants = ServiceRegister::getService( Interface_Constants::class );
+		$constants       = ServiceRegister::getService( Interface_Constants::class );
+		$this->constants = $constants;
 
 		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
 		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
@@ -454,6 +455,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 					) 
 				);
 
+				/**
+				 * Message to show to the user.
+				 * 
+				 * @var string $msg
+				 */
 				$msg = isset( $error['errorMessage'] ) ? $error['errorMessage'] : 'Request failed';
 				
 				$order = \wc_get_order( $payload['order'] );

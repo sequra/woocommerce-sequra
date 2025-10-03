@@ -73,10 +73,10 @@ class Order_Report_Service implements OrderReportServiceInterface {
 		Interface_I18n $i18n
 	) {
 		$this->platform_provider = $platform_provider;
-		$this->pricing_service = $pricing_service;
-		$this->cart_service    = $cart_service;
-		$this->order_service   = $order_service;
-		$this->i18n            = $i18n;
+		$this->pricing_service   = $pricing_service;
+		$this->cart_service      = $cart_service;
+		$this->order_service     = $order_service;
+		$this->i18n              = $i18n;
 	}
 
 	/**

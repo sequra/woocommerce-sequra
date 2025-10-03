@@ -63,11 +63,11 @@ class Migration_Manager implements Interface_Migration_Manager {
 		ConfigurationManager $configuration_manager, 
 		string $current_version, 
 		array $migrations 
-		) {
-		$this->plugin_basename = $plugin_basename;
-		$this->migrations      = $migrations;
-		$this->current_version = $current_version;
-		$this->configuration_manager   = $configuration_manager;
+	) {
+		$this->plugin_basename       = $plugin_basename;
+		$this->migrations            = $migrations;
+		$this->current_version       = $current_version;
+		$this->configuration_manager = $configuration_manager;
 	}
 
 	/**

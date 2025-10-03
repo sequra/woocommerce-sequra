@@ -40,7 +40,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->settings_service = $settings_service;
-		$this->plugin_basename = $plugin_basename;
+		$this->plugin_basename  = $plugin_basename;
 	}
 
 	/**

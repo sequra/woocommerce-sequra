@@ -28,7 +28,7 @@ class Configuration extends CoreConfiguration {
 		 * 
 		 * @var Interface_Constants $constants
 		 */
-		$constants = ServiceRegister::getService(Interface_Constants::class);
+		$constants = ServiceRegister::getService( Interface_Constants::class );
 		return $constants->get_integration_name();
 	}
 

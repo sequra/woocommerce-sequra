@@ -61,7 +61,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 		/**
 		 * Array containing the general settings
 		 * 
-		 * @var array<string, mixed> $config
+		 * @var array<string, mixed> $general_settings
 		 */
 		$general_settings = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings()->toArray();
 		if ( empty( $general_settings['allowedIPAddresses'] ) 
