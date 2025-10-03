@@ -247,18 +247,6 @@ class Onboarding_REST_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check if the assets key is valid.
-	 * 
-	 * @param mixed $param The parameter.
-	 * @param WP_REST_Request $request The request.
-	 * @param string $key The key.
-	 */
-	public function validate_assets_key( $param, $request, $key ): bool {
-		return is_string( $param ) 
-		&& ( ! boolval( $request->get_param( self::PARAM_USE_WIDGETS ) ) || '' !== trim( $param ) );
-	}
-
-	/**
 	 * Disconnects integration from the shop.
 	 *
 	 * @param WP_REST_Request $request The request.
