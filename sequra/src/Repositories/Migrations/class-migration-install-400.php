@@ -19,7 +19,6 @@ use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Requests\GetCachedPayme
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use Throwable;
 
 /**
@@ -71,12 +70,11 @@ class Migration_Install_400 extends Migration {
 	 * @param \wpdb $wpdb Database instance.
 	 */
 	public function __construct( 
-		\wpdb $wpdb, 
-		Configuration $configuration,
+		\wpdb $wpdb,
 		EncryptorInterface $encryptor,
 		StoreContext $store_context
 	) {
-		parent::__construct( $wpdb, $configuration );
+		parent::__construct( $wpdb );
 		$this->entity_table  = $this->db->prefix . 'sequra_entity';
 		$this->encryptor     = $encryptor;
 		$this->store_context = $store_context;
@@ -213,7 +211,6 @@ class Migration_Install_400 extends Migration {
 		->widgetConfiguration( $this->store_context->getStoreId() )
 		->setWidgetSettings(
 			new WidgetSettingsRequest(
-				$data['widgetSettings']['enabled'],
 				$data['widgetSettings']['displayOnProductPage'],
 				$data['widgetSettings']['showInstallmentsInProductListing'],
 				$data['widgetSettings']['showInstallmentsInCartPage'],

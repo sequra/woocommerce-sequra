@@ -17,7 +17,6 @@ use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsR
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\WC\Repositories\Repository;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use Throwable;
 
 /**
@@ -66,14 +65,13 @@ class Migration_Install_300 extends Migration {
 	 * @param \wpdb $wpdb Database instance.
 	 */
 	public function __construct( 
-		\wpdb $wpdb, 
-		Configuration $configuration,
+		\wpdb $wpdb,
 		Repository $order_repository,
 		Repository $entity_repository,
 		Repository $queue_repository,
 		StoreContext $store_context
 	) {
-		parent::__construct( $wpdb, $configuration );
+		parent::__construct( $wpdb );
 		$this->order_repository  = $order_repository;
 		$this->entity_repository = $entity_repository;
 		$this->queue_repository  = $queue_repository;
@@ -317,7 +315,6 @@ class Migration_Install_300 extends Migration {
 		->widgetConfiguration( $this->store_context->getStoreId() )
 		->setWidgetSettings(
 			new WidgetSettingsRequest(
-				$enabled,
 				$enabled,
 				false,
 				false,

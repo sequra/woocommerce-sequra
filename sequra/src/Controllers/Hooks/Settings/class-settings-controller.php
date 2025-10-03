@@ -9,8 +9,8 @@
 namespace SeQura\WC\Controllers\Hooks\Settings;
 
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Service\Interface_Settings_Service;
 
 /**
  * Implementation for the settings controller.
@@ -18,11 +18,11 @@ use SeQura\WC\Services\Interface_Logger_Service;
 class Settings_Controller extends Controller implements Interface_Settings_Controller {
 
 	/**
-	 * Configuration service.
+	 * Settings service.
 	 *
-	 * @var Configuration
+	 * @var Interface_Settings_Service
 	 */
-	private $configuration;
+	private $settings_service;
 
 	/**
 	 * Plugin basename.
@@ -34,12 +34,12 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 */
 	public function __construct( 
 		string $templates_path, 
-		Configuration $configuration, 
+		Interface_Settings_Service $settings_service, 
 		Interface_Logger_Service $logger,
 		string $plugin_basename
 	) {
 		parent::__construct( $logger, $templates_path );
-		$this->configuration   = $configuration;
+		$this->settings_service = $settings_service;
 		$this->plugin_basename = $plugin_basename;
 	}
 
@@ -51,16 +51,16 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	public function register_page() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		\add_submenu_page(
-			$this->configuration->get_parent_page(),
+			$this->settings_service->get_parent_page(),
 			__( 'seQura', 'sequra' ),
 			__( 'seQura', 'sequra' ),
 			'manage_options',
-			$this->configuration->get_page(),
+			$this->settings_service->get_page(),
 			array( $this, 'render_page' )
 		);
 
 		// Additionally remove WP version footer text if we are in the settings page.
-		if ( $this->configuration->is_settings_page() ) {
+		if ( $this->settings_service->is_settings_page() ) {
 			\remove_filter( 'update_footer', 'core_update_footer' );
 		}
 	}
@@ -82,7 +82,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 * @return string
 	 */
 	public function get_settings_page_url( $url = null ) {
-		return \admin_url( 'admin.php?page=' . $this->configuration->get_page() );
+		return \admin_url( 'admin.php?page=' . $this->settings_service->get_page() );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class Settings_Controller extends Controller implements Interface_Settings_Contr
 	 */
 	public function remove_footer_admin( $text ) {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		if ( ! $this->configuration->is_settings_page() ) {
+		if ( ! $this->settings_service->is_settings_page() ) {
 			return $text;
 		}
 		return '';

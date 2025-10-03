@@ -9,11 +9,11 @@
 namespace SeQura\WC\Controllers\Hooks\Asset;
 
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
+use SeQura\WC\Services\Service\Interface_Settings_Service;
 use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 
 /**
@@ -67,9 +67,9 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	/**
 	 * Settings service
 	 *
-	 * @var Configuration
+	 * @var Interface_Settings_Service
 	 */
-	private $configuration;
+	private $settings_service;
 
 	/**
 	 * Payment method service
@@ -103,7 +103,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		Interface_I18n $i18n, 
 		Interface_Logger_Service $logger,
 		string $templates_path, 
-		Configuration $configuration,
+		Interface_Settings_Service $settings_service,
 		Interface_Payment_Method_Service $payment_method_service,
 		RegexProvider $regex,
 		Interface_Widgets_Service $widgets_service
@@ -114,7 +114,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$this->assets_version         = $assets_version;
 		$this->i18n                   = $i18n;
 		$this->logger                 = $logger;
-		$this->configuration          = $configuration;
+		$this->settings_service       = $settings_service;
 		$this->payment_method_service = $payment_method_service;
 		$this->regex                  = $regex;
 		$this->wp_version             = $wp_version;
@@ -128,7 +128,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	public function enqueue_admin() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		if ( ! $this->configuration->is_settings_page() ) {
+		if ( ! $this->settings_service->is_settings_page() ) {
 			return;
 		}
 		// Styles.

@@ -17,6 +17,7 @@ use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Order\Interface_Order_Service;
+use SeQura\WC\Services\Platform\Interface_Platform_Provider;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Pricing\Pricing_Service;
 use WC_Order;
@@ -27,11 +28,11 @@ use WC_Order;
 class Order_Report_Service implements OrderReportServiceInterface {
 
 	/**
-	 * Configuration instance.
+	 * Platform provider.
 	 *
-	 * @var Configuration
+	 * @var Interface_Platform_Provider
 	 */
-	private $configuration;
+	private $platform_provider;
 
 	/**
 	 * Pricing service.
@@ -65,13 +66,13 @@ class Order_Report_Service implements OrderReportServiceInterface {
 	 * Constructor.
 	 */
 	public function __construct( 
-		Configuration $configuration, 
+		Interface_Platform_Provider $platform_provider, 
 		Interface_Pricing_Service $pricing_service,
 		Interface_Cart_Service $cart_service,
 		Interface_Order_Service $order_service,
 		Interface_I18n $i18n
 	) {
-		$this->configuration   = $configuration;
+		$this->platform_provider = $platform_provider;
 		$this->pricing_service = $pricing_service;
 		$this->cart_service    = $cart_service;
 		$this->order_service   = $order_service;
@@ -171,7 +172,7 @@ class Order_Report_Service implements OrderReportServiceInterface {
 	 * @return Platform
 	 */
 	public function getPlatform(): Platform {
-		return $this->configuration->get_platform();
+		return $this->platform_provider->get();
 	}
 
 	/**

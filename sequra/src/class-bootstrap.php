@@ -135,7 +135,10 @@ use SeQura\WC\Services\Platform\Platform_Provider;
 use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use SeQura\WC\Services\Widgets\Widgets_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
+use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
+use SeQura\WC\Services\Service\Interface_Settings_Service;
+use SeQura\WC\Services\Service\Settings_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -296,12 +299,12 @@ class Bootstrap extends BootstrapComponent {
 		);
 		// Extend Configuration.
 		Reg::registerService(
-			Configuration::CLASS_NAME,
+			Configuration::class,
 			static function () {
-				if ( ! isset( self::$cache[ Configuration::CLASS_NAME ] ) ) {
-					self::$cache[ Configuration::CLASS_NAME ] = \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration::getInstance();
+				if ( ! isset( self::$cache[ Configuration::class ] ) ) {
+					self::$cache[ Configuration::class ] = \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration::getInstance();
 				}
-				return self::$cache[ Configuration::CLASS_NAME ];
+				return self::$cache[ Configuration::class ];
 			}
 		);
 		
@@ -371,7 +374,7 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ OrderReportServiceInterface::class ] ) ) {
 					self::$cache[ OrderReportServiceInterface::class ] = new Order_Report_Service(
-						Reg::getService( Configuration::CLASS_NAME ),
+						Reg::getService( Interface_Platform_Provider::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
 						Reg::getService( Interface_Cart_Service::class ),
 						Reg::getService( Interface_Order_Service::class ),
@@ -502,7 +505,7 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Migration_Manager::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
-					$configuration = Reg::getService( Configuration::CLASS_NAME );
+					$configuration = Reg::getService( ConfigurationManager::CLASS_NAME );
 					$wpdb          = Reg::getService( \wpdb::class );
 					/**
 					 * Order repository.
@@ -544,7 +547,6 @@ class Bootstrap extends BootstrapComponent {
 						array(
 							new Migration_Install_300(
 								$wpdb,
-								$configuration,
 								$order_repository,
 								$entity_repository,
 								$queue_item_repository,
@@ -552,14 +554,12 @@ class Bootstrap extends BootstrapComponent {
 							),
 							new Migration_Install_320(
 								$wpdb,
-								$configuration,
 								self::get_constants()->get_hook_add_order_indexes(),
 								$entity_repository,
 								$queue_item_repository
 							),
 							new Migration_Install_400(
 								$wpdb,
-								$configuration,
 								$encryptor,
 								$store_context,
 							),
@@ -806,6 +806,16 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Widgets_Service::class ];
 			}
 		);
+		
+		Reg::registerService(
+			Interface_Settings_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Settings_Service::class ] ) ) {
+					self::$cache[ Interface_Settings_Service::class ] = new Settings_Service();
+				}
+				return self::$cache[ Interface_Settings_Service::class ];
+			}
+		);
 	}
 
 	/**
@@ -879,7 +889,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_templates_path(),
-						Reg::getService( Configuration::CLASS_NAME ),
+						Reg::getService( Interface_Settings_Service::class ),
 						Reg::getService( Interface_Payment_Method_Service::class ),
 						Reg::getService( RegexProvider::class ),
 						Reg::getService( Interface_Widgets_Service::class )
@@ -894,7 +904,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Settings_Controller::class ] ) ) {
 					self::$cache[ Interface_Settings_Controller::class ] = new Settings_Controller(
 						self::get_constants()->get_plugin_templates_path(),
-						Reg::getService( Configuration::CLASS_NAME ),
+						Reg::getService( Interface_Settings_Service::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_basename()
 					);

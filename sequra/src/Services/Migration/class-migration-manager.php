@@ -8,7 +8,7 @@
 
 namespace SeQura\WC\Services\Migration;
 
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
+use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\WC\Repositories\Migrations\Critical_Migration_Exception;
 use SeQura\WC\Repositories\Migrations\Migration;
 use Throwable;
@@ -17,6 +17,11 @@ use Throwable;
  * Run migrations to make changes to the database.
  */
 class Migration_Manager implements Interface_Migration_Manager {
+
+	/**
+	 * Configuration key for the module version.
+	 */
+	private const CONF_VERSION = 'version';
 
 	/**
 	 * Migration list.
@@ -40,11 +45,11 @@ class Migration_Manager implements Interface_Migration_Manager {
 	private $plugin_basename;
 
 	/**
-	 * Configuration service.
+	 * Configuration manager.
 	 * 
-	 * @var Configuration
+	 * @var ConfigurationManager
 	 */
-	private $configuration;
+	private $configuration_manager;
 
 	private const MIGRATION_LOCK = 'sequra_migration_lock';
 
@@ -53,18 +58,23 @@ class Migration_Manager implements Interface_Migration_Manager {
 	 *
 	 * @param Migration[]         $migrations Migration list.
 	 */
-	public function __construct( string $plugin_basename, Configuration $configuration, string $current_version, array $migrations ) {
+	public function __construct( 
+		string $plugin_basename, 
+		ConfigurationManager $configuration_manager, 
+		string $current_version, 
+		array $migrations 
+		) {
 		$this->plugin_basename = $plugin_basename;
 		$this->migrations      = $migrations;
 		$this->current_version = $current_version;
-		$this->configuration   = $configuration;
+		$this->configuration_manager   = $configuration_manager;
 	}
 
 	/**
 	 * Migration to run when the plugin was updated.
 	 */
 	public function run_install_migrations(): void {
-		$db_module_version = $this->configuration->get_module_version();
+		$db_module_version = $this->get_module_version();
 		if ( -1 !== version_compare( $db_module_version, $this->current_version ) ) {
 			return;
 		}
@@ -80,11 +90,11 @@ class Migration_Manager implements Interface_Migration_Manager {
 			foreach ( $this->migrations as $migration ) {
 				if ( -1 === version_compare( $db_module_version, $migration->get_version() ) ) {
 					$migration->run();
-					$this->configuration->set_module_version( $migration->get_version() );
+					$this->set_module_version( $migration->get_version() );
 				}
 			}
 			// Prevent the migrations from running again for the same plugin version.
-			$this->configuration->set_module_version( $this->current_version );
+			$this->set_module_version( $this->current_version );
 		} catch ( Critical_Migration_Exception $e ) {
 			// ! Critical migration failed and the plugin cannot work properly. Deactivate the plugin and log the error.
 			$deactivate = true;
@@ -129,5 +139,21 @@ class Migration_Manager implements Interface_Migration_Manager {
 			);
 			// phpcs:enable WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		}
+	}
+
+	/**
+	 * Gets the current version of the module/integration.
+	 */
+	public function get_module_version(): string {
+		return strval( $this->configuration_manager->getConfigValue( self::CONF_VERSION, '' ) );
+	}
+
+	/**
+	 * Gets the current version of the module/integration.
+	 *
+	 * @param string $version The version number.
+	 */
+	public function set_module_version( $version ): void {
+		$this->configuration_manager->saveConfigValue( self::CONF_VERSION, $version );
 	}
 }
