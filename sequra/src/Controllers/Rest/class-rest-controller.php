@@ -9,7 +9,7 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use WP_REST_Request;
 
 /**

@@ -8,18 +8,11 @@
 
 namespace SeQura\WC\Controllers\Hooks\Product;
 
-use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
-use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
-use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
-use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Models\Widget;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
-use SeQura\WC\Services\I18n\Interface_I18n;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
-use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use WC_Product;
 use WP_Post;

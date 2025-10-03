@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Services
  */
 
-namespace SeQura\WC\Services;
+namespace SeQura\WC\Services\Log;
 
 /**
  * Provides methods to perform read and write operations on a log file.

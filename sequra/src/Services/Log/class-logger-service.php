@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Services
  */
 
-namespace SeQura\WC\Services;
+namespace SeQura\WC\Services\Log;
 
 use Exception;
 use SeQura\Core\Infrastructure\Logger\LogContextData;

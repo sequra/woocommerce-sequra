@@ -27,7 +27,7 @@ use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
 use SeQura\WC\Repositories\Interface_Table_Migration_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use Throwable;

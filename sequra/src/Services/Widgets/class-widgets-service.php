@@ -13,7 +13,7 @@ use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\Promotiona
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\WC\Services\I18n\Interface_I18n;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 
 /**

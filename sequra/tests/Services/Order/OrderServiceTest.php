@@ -21,7 +21,7 @@ use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\O
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
 use SeQura\WC\Repositories\Interface_Table_Migration_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
@@ -49,7 +49,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 	private $cart_service;
 	/** @var \SeQura\WC\Tests\Core\Extension\BusinessLogic\Domain\Multistore\StoreContextMock&\PHPUnit\Framework\MockObject\MockObject */
 	private $store_context_mock;
-	/** @var \SeQura\WC\Services\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
+	/** @var \SeQura\WC\Services\Log\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $logger;
 	/** @var \SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject */
 	private $sequra_order_repository;

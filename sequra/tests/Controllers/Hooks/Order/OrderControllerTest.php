@@ -11,7 +11,7 @@ namespace SeQura\WC\Tests\Controllers\Hooks\Process;
 use Exception;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Hooks\Order\Order_Controller;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Tests\Fixtures\Store;
 use WP_UnitTestCase;
@@ -21,7 +21,7 @@ class OrderControllerTest extends WP_UnitTestCase {
 	private $controller;
 	/** @var \SeQura\WC\Services\Order\Interface_Order_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $order_service;
-	/** @var \SeQura\WC\Services\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
+	/** @var \SeQura\WC\Services\Log\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $logger;
 	private $store;
 	private $hook_migrate_orders_to_use_indexes;
