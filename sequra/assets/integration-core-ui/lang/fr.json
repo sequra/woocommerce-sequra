@@ -232,7 +232,8 @@
     "PE": {
       "label": "Pérou",
       "description": "Veuillez saisir l'ID commerçant SeQura à utiliser pour les clients péruviens."
-    }
+    },
+    "enabledCountries": "Activé pour {countries}."
   },
   "widgets": {
     "title": {
@@ -360,15 +361,15 @@
     },
     "enabledForServices": {
       "label": "Activé pour les services",
-      "description": "Votre contrat doit permettre la vente de services. Un seul produit peut être acheté à la fois."
+      "description": "Votre contrat doit permettre la vente de services. "
     },
     "allowFirstServicePaymentDelay": {
       "label": "Autoriser le délai du premier paiement de service",
-      "description": "Ne pas activer sauf indication de seQura."
+      "description": ""
     },
     "allowServiceRegistrationItems": {
       "label": "Autoriser les articles d'inscription",
-      "description": "Permet de configurer une partie du prix du produit à payer à l'avance en tant qu'inscription. Ne pas activer sauf indication de seQura."
+      "description": "Permet de configurer une partie du prix du produit à payer à l'avance en tant qu'inscription. "
     },
     "defaultServicesEndDate": {
       "label": "Date de fin des services par défaut",

@@ -231,7 +231,8 @@
     "PE": {
       "label": "Perú",
       "description": "Por favor, introduce la ID de comerciante de SeQura que se debe utilizar para los clientes peruanos."
-    }
+    },
+    "enabledCountries": "Habilitado para {countries}."
   },
   "widgets": {
     "title": {
@@ -359,15 +360,15 @@
     },
     "enabledForServices": {
       "label": "Habilitado para servicios",
-      "description": "Tu contrato debe permitir la venta de servicios."
+      "description": "Tu contrato debe permitir la venta de servicios. "
     },
     "allowFirstServicePaymentDelay": {
       "label": "Permitir retraso en el primer pago del servicio",
-      "description": "No habilitar a menos que lo indique seQura."
+      "description": ""
     },
     "allowServiceRegistrationItems": {
       "label": "Permitir artículos de registro",
-      "description": "Permite configurar una parte del precio del producto para que se pague por adelantado como registro. No habilitar a menos que lo indique seQura."
+      "description": "Permite configurar una parte del precio del producto para que se pague por adelantado como registro. "
     },
     "defaultServicesEndDate": {
       "label": "Fecha de finalización de servicios predeterminada",

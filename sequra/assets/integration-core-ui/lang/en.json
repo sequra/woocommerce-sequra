@@ -232,7 +232,8 @@
     "PE": {
       "label": "Peru",
       "description": "Please enter SeQura merchant ID that should be used for Peruvian customers."
-    }
+    },
+    "enabledCountries": "Enabled for {countries}."
   },
   "widgets": {
     "title": {
@@ -360,15 +361,15 @@
     },
     "enabledForServices": {
       "label": "Enabled for services",
-      "description": "Your contract must allow selling services."
+      "description": "Your contract must allow selling services. "
     },
     "allowFirstServicePaymentDelay": {
       "label": "Allow first service payment delay",
-      "description": "Do not enable except by indication of seQura."
+      "description": ""
     },
     "allowServiceRegistrationItems": {
       "label": "Allow registration items",
-      "description": "Allows configuring part of the product price to be paid in advance as registration. Do not enable except by indication of seQura."
+      "description": "Allows configuring part of the product price to be paid in advance as registration. "
     },
     "defaultServicesEndDate": {
       "label": "Default services end date",
