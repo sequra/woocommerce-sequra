@@ -30,9 +30,6 @@ class General_Settings_REST_Controller extends REST_Controller {
 	private const PARAM_ALLOWED_IP_ADDRESSES                      = 'allowedIPAddresses';
 	private const PARAM_EXCLUDED_PRODUCTS                         = 'excludedProducts';
 	private const PARAM_EXCLUDED_CATEGORIES                       = 'excludedCategories';
-	private const PARAM_ENABLED_FOR_SERVICES                      = 'enabledForServices';
-	private const PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY         = 'allowFirstServicePaymentDelay';
-	private const PARAM_ALLOW_SERVICE_REG_ITEMS                   = 'allowServiceRegistrationItems';
 	private const PARAM_DEFAULT_SERVICES_END_DATE                 = 'defaultServicesEndDate';
 
 	/**
@@ -85,9 +82,6 @@ class General_Settings_REST_Controller extends REST_Controller {
 					'validate_callback' => array( $this, 'validate_array_of_product_cat' ),
 					'sanitize_callback' => array( $this, 'sanitize_array_of_ids' ),
 				),
-				self::PARAM_ENABLED_FOR_SERVICES      => $this->get_arg_bool( false, false ),
-				self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY => $this->get_arg_bool( false, true ),
-				self::PARAM_ALLOW_SERVICE_REG_ITEMS   => $this->get_arg_bool( false, true ),
 				self::PARAM_DEFAULT_SERVICES_END_DATE => $this->get_arg_string( false, GeneralSettings::DEFAULT_SERVICE_END_DATE, array( $this, 'validate_time_duration' ) ),
 			)
 		);
@@ -253,9 +247,6 @@ class General_Settings_REST_Controller extends REST_Controller {
 					(array) $request->get_param( self::PARAM_ALLOWED_IP_ADDRESSES ),
 					(array) $request->get_param( self::PARAM_EXCLUDED_PRODUCTS ),
 					(array) $request->get_param( self::PARAM_EXCLUDED_CATEGORIES ),
-					(bool) $request->get_param( self::PARAM_ENABLED_FOR_SERVICES ),
-					(bool) $request->get_param( self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY ),
-					(bool) $request->get_param( self::PARAM_ALLOW_SERVICE_REG_ITEMS ),
 					strval( $request->get_param( self::PARAM_DEFAULT_SERVICES_END_DATE ) )
 				)
 			)

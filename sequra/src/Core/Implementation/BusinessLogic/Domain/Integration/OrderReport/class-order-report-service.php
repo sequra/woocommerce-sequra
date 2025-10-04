@@ -16,6 +16,9 @@ use SeQura\Core\BusinessLogic\Domain\OrderReport\Models\OrderStatistics;
 use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
+use SeQura\WC\Services\Order\Interface_Order_Customer_Builder;
+use SeQura\WC\Services\Order\Interface_Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Platform\Interface_Platform_Provider;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
@@ -63,6 +66,27 @@ class Order_Report_Service implements OrderReportServiceInterface {
 	private $i18n;
 
 	/**
+	 * Order delivery method builder.
+	 *
+	 * @var Interface_Order_Delivery_Method_Builder
+	 */
+	private $delivery_method_builder;
+
+	/**
+	 * Order address builder.
+	 *
+	 * @var Interface_Order_Address_Builder
+	 */
+	private $address_builder;
+
+	/**
+	 * Order customer builder.
+	 *
+	 * @var Interface_Order_Customer_Builder
+	 */
+	private $customer_builder;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct( 
@@ -70,13 +94,19 @@ class Order_Report_Service implements OrderReportServiceInterface {
 		Interface_Pricing_Service $pricing_service,
 		Interface_Cart_Service $cart_service,
 		Interface_Order_Service $order_service,
-		Interface_I18n $i18n
+		Interface_I18n $i18n,
+		Interface_Order_Delivery_Method_Builder $delivery_method_builder,
+		Interface_Order_Address_Builder $address_builder,
+		Interface_Order_Customer_Builder $customer_builder
 	) {
-		$this->platform_provider = $platform_provider;
-		$this->pricing_service   = $pricing_service;
-		$this->cart_service      = $cart_service;
-		$this->order_service     = $order_service;
-		$this->i18n              = $i18n;
+		$this->platform_provider       = $platform_provider;
+		$this->pricing_service         = $pricing_service;
+		$this->cart_service            = $cart_service;
+		$this->order_service           = $order_service;
+		$this->i18n                    = $i18n;
+		$this->delivery_method_builder = $delivery_method_builder;
+		$this->address_builder         = $address_builder;
+		$this->customer_builder        = $customer_builder;
 	}
 
 	/**
@@ -117,13 +147,13 @@ class Order_Report_Service implements OrderReportServiceInterface {
 					$cart_info ? $cart_info->created_at : null, // Created at.
 					$this->order_service->get_order_completion_date( $order ) // Updated at.
 				), // Cart.
-				$this->order_service->get_delivery_method( $order ), // Delivery Method.
-				$this->order_service->get_customer( $order, $this->i18n->get_lang() ), // Customer.
+				$this->delivery_method_builder->build( $order ), // Delivery Method.
+				$this->customer_builder->build( $order, $this->i18n->get_lang() ), // Customer.
 				null, // Sent at.
 				null, // Trackings.
 				null, // Remaining cart.
-				$this->order_service->get_address( $order, true ), // Delivery Address.
-				$this->order_service->get_address( $order, false ) // Invoice Address.
+				$this->address_builder->build( $order, true ), // Delivery Address.
+				$this->address_builder->build( $order, false ) // Invoice Address.
 			);
 		}
 		return $order_reports;

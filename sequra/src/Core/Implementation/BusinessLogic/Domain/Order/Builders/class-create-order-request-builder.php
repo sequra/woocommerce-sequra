@@ -25,7 +25,10 @@ use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Creat
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
+use SeQura\WC\Services\Order\Interface_Order_Customer_Builder;
+use SeQura\WC\Services\Order\Interface_Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Platform\Platform_Provider;
 use SeQura\WC\Services\Product\Interface_Product_Service;
@@ -101,6 +104,27 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private $merchant_order_request_builder;
 
 	/**
+	 * Order delivery method builder
+	 *
+	 * @var Interface_Order_Delivery_Method_Builder
+	 */
+	private $delivery_method_builder;
+
+	/**
+	 * Order address builder
+	 *
+	 * @var Interface_Order_Address_Builder
+	 */
+	private $address_builder;
+
+	/**
+	 * Order customer builder
+	 *
+	 * @var Interface_Order_Customer_Builder
+	 */
+	private $customer_builder;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
@@ -112,7 +136,10 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		Interface_Shopper_Service $shopper_service,
 		Interface_Logger_Service $logger,
 		Interface_Current_Order_Provider $current_order_provider,
-		MerchantOrderRequestBuilder $merchant_order_request_builder
+		MerchantOrderRequestBuilder $merchant_order_request_builder,
+		Interface_Order_Delivery_Method_Builder $delivery_method_builder,
+		Interface_Order_Address_Builder $address_builder,
+		Interface_Order_Customer_Builder $customer_builder
 	) {
 		$this->cart_service                   = $cart_service;
 		$this->platform_provider              = $platform_provider;
@@ -123,6 +150,9 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		$this->logger                         = $logger;
 		$this->current_order_provider         = $current_order_provider;
 		$this->merchant_order_request_builder = $merchant_order_request_builder;
+		$this->delivery_method_builder        = $delivery_method_builder;
+		$this->address_builder                = $address_builder;
+		$this->customer_builder               = $customer_builder;
 	}
 
 	/**
@@ -138,9 +168,9 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 *
 		 * @since 3.0.0
 		 */
-		$delivery_method = \apply_filters( 
-			'sequra_create_order_request_delivery_method_options', 
-			$this->order_service->get_delivery_method( $this->current_order_provider->get() ) 
+		$delivery_method = \apply_filters(
+			'sequra_create_order_request_delivery_method_options',
+			$this->delivery_method_builder->build( $this->current_order_provider->get() )
 		);
 
 		return new CreateOrderRequest(
@@ -256,7 +286,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private function get_country_from_order_or_cart(): string {
 		$current_order = $this->current_order_provider->get();
 		// Try to get the country from the order or the cart.
-		$country = $this->order_service->get_country( $current_order );
+		$country = $this->shopper_service->get_country( $current_order );
 		if ( empty( $country ) ) {
 			throw new Exception( 'Country not found' );
 		}
@@ -321,7 +351,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 */
 		return \apply_filters(
 			'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options',
-			$this->order_service->get_address( $this->current_order_provider->get(), $is_delivery )
+			$this->address_builder->build( $this->current_order_provider->get(), $is_delivery )
 		);
 	}
 
@@ -336,7 +366,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 */
 		return \apply_filters(
 			'sequra_create_order_request_customer_options',
-			$this->order_service->get_customer(
+			$this->customer_builder->build(
 				$this->current_order_provider->get(),
 				$this->i18n->get_lang(),
 				\get_current_user_id(),

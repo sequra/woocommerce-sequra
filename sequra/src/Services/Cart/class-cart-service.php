@@ -211,10 +211,10 @@ class Cart_Service implements Interface_Cart_Service {
 	 * @param mixed $item The product item.
 	 * @return ProductItem|ServiceItem
 	 */
-	private function get_item( WC_Product $product, float $total_price, ?RegistrationItem $reg_item, int $qty, $item ) {
+	private function get_item( WC_Product $product, float $total_price, ?RegistrationItem $reg_item, int $qty, $item, string $country ) {
 		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
 		$name = \wp_strip_all_tags( $product->get_title() );
-		if ( $this->product_service->is_enabled_for_services() && $this->product_service->is_service( $product ) ) {
+		if ( $this->product_service->is_enabled_for_services( $country ) && $this->product_service->is_service( $product ) ) {
 			/**
 			* Filter the service end date.
 			*
@@ -269,7 +269,8 @@ class Cart_Service implements Interface_Cart_Service {
 	 */
 	public function get_items( ?WC_Order $order ): array {
 
-		$items = array();
+		$items   = array();
+		$country = $this->shopper_service->get_country( $order );
 		
 		if ( ! $order && null !== WC()->cart ) {
 			// Cart items.
@@ -290,7 +291,8 @@ class Cart_Service implements Interface_Cart_Service {
 					(float) $cart_item['line_subtotal'] + (float) $cart_item['line_subtotal_tax'],
 					$reg_item, 
 					(int) $cart_item['quantity'], 
-					$cart_item
+					$cart_item,
+					$country
 				);
 			}
 		} elseif ( $order ) {
@@ -319,7 +321,8 @@ class Cart_Service implements Interface_Cart_Service {
 					(float) $item->get_subtotal( 'edit' ) + (float) $item->get_subtotal_tax( 'edit' ),
 					$reg_item, 
 					(int) $item->get_quantity( 'edit' ), 
-					$item
+					$item,
+					$country
 				);
 			}
 		}
@@ -610,7 +613,8 @@ class Cart_Service implements Interface_Cart_Service {
 		if ( ! $return ) {
 			$this->logger->log_debug( 'seQura is not available for this IP.', __FUNCTION__, __CLASS__ );
 		} else {
-			$is_enabled_for_services = $this->product_service->is_enabled_for_services();
+			$country                 = $this->shopper_service->get_country( $order );
+			$is_enabled_for_services = $this->product_service->is_enabled_for_services( $country );
 			if ( $is_enabled_for_services && ! $this->is_eligible_for_service_sale() ) {
 					$this->logger->log_debug( 'Order is not eligible for service sale.', __FUNCTION__, __CLASS__ );
 					$return = false;

@@ -137,6 +137,12 @@ use SeQura\WC\Services\Widgets\Widgets_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
+use SeQura\WC\Services\Order\Builder\Order_Address_Builder;
+use SeQura\WC\Services\Order\Interface_Order_Customer_Builder;
+use SeQura\WC\Services\Order\Interface_Order_Delivery_Method_Builder;
+use SeQura\WC\Services\Order\Order_Customer_Builder;
+use SeQura\WC\Services\Order\Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Service\Interface_Settings_Service;
 use SeQura\WC\Services\Service\Settings_Service;
 
@@ -336,7 +342,10 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Shopper_Service::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( Interface_Current_Order_Provider::class ),
-						Reg::getService( MerchantOrderRequestBuilder::class )
+						Reg::getService( MerchantOrderRequestBuilder::class ),
+						Reg::getService( Interface_Order_Delivery_Method_Builder::class ),
+						Reg::getService( Interface_Order_Address_Builder::class ),
+						Reg::getService( Interface_Order_Customer_Builder::class )
 					);
 				}
 				return self::$cache[ Interface_Create_Order_Request_Builder::class ];
@@ -378,7 +387,10 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Pricing_Service::class ),
 						Reg::getService( Interface_Cart_Service::class ),
 						Reg::getService( Interface_Order_Service::class ),
-						Reg::getService( Interface_I18n::class )
+						Reg::getService( Interface_I18n::class ),
+						Reg::getService( Interface_Order_Delivery_Method_Builder::class ),
+						Reg::getService( Interface_Order_Address_Builder::class ),
+						Reg::getService( Interface_Order_Customer_Builder::class )
 					);
 				}
 				return self::$cache[ OrderReportServiceInterface::class ];
@@ -393,6 +405,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Constants::class ),
 						Reg::getService( Interface_Product_Service::class ),
 						Reg::getService( Interface_Cart_Service::class ),
+						Reg::getService( Interface_Shopper_Service::class ),
 						Reg::getService( StoreContext::class )
 					);
 				}
@@ -642,9 +655,7 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
 						Reg::getService( OrderStatusSettingsService::class ),
-						Reg::getService( Configuration::CLASS_NAME ),
 						Reg::getService( Interface_Cart_Service::class ),
-						Reg::getService( StoreContext::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( Interface_Time_Checker_Service::class ),
 						$repository,
@@ -806,7 +817,6 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Widgets_Service::class ];
 			}
 		);
-		
 		Reg::registerService(
 			Interface_Settings_Service::class,
 			static function () {
@@ -814,6 +824,39 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Settings_Service::class ] = new Settings_Service();
 				}
 				return self::$cache[ Interface_Settings_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Address_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Address_Builder::class ] ) ) {
+					self::$cache[ Interface_Order_Address_Builder::class ] = new Order_Address_Builder(
+						Reg::getService( Interface_Shopper_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Order_Address_Builder::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Customer_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Customer_Builder::class ] ) ) {
+					self::$cache[ Interface_Order_Customer_Builder::class ] = new Order_Customer_Builder(
+						Reg::getService( Interface_Shopper_Service::class ),
+						Reg::getService( OrderStatusSettingsService::class ),
+						Reg::getService( Interface_Pricing_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Order_Customer_Builder::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Delivery_Method_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Delivery_Method_Builder::class ] ) ) {
+					self::$cache[ Interface_Order_Delivery_Method_Builder::class ] = new Order_Delivery_Method_Builder();
+				}
+				return self::$cache[ Interface_Order_Delivery_Method_Builder::class ];
 			}
 		);
 	}

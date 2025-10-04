@@ -7,13 +7,16 @@
 
 namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Order;
 
+use PhpParser\Builder\Interface_;
 use SeQura\Core\BusinessLogic\Domain\Integration\Order\MerchantDataProviderInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Constants\Interface_Constants;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
+use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
+use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 
 /**
  * Implementation of the MerchantDataProviderInterface.
@@ -50,6 +53,13 @@ class Merchant_Data_Provider implements MerchantDataProviderInterface {
 	private $cart_service;
 
 	/**
+	 * Shopper service
+	 *
+	 * @var Interface_Shopper_Service
+	 */
+	private $shopper_service;
+
+	/**
 	 * Store context
 	 *
 	 * @var StoreContext
@@ -64,12 +74,14 @@ class Merchant_Data_Provider implements MerchantDataProviderInterface {
 		Interface_Constants $constants,
 		Interface_Product_Service $product_service,
 		Interface_Cart_Service $cart_service,
+		Interface_Shopper_Service $shopper_service,
 		StoreContext $store_context
 	) {
 		$this->current_order_provider = $current_order_provider;
 		$this->constants              = $constants;
 		$this->product_service        = $product_service;
 		$this->cart_service           = $cart_service;
+		$this->shopper_service        = $shopper_service;
 		$this->store_context          = $store_context;
 	}
 
@@ -178,8 +190,9 @@ class Merchant_Data_Provider implements MerchantDataProviderInterface {
 	 */
 	public function getOptions(): ?Options {
 		$options = null;
+		$country = $this->shopper_service->get_country( $this->current_order_provider->get() );
 
-		if ( $this->product_service->is_allow_first_service_payment_delay() ) {
+		if ( $this->product_service->is_allow_first_service_payment_delay( $country ) ) {
 			$desired_first_charge_on = $this->cart_service->get_desired_first_charge_on( $this->current_order_provider->get() );
 			if ( $desired_first_charge_on ) {
 				/**

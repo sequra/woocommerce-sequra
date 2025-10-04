@@ -107,17 +107,17 @@ interface Interface_Product_Service {
 	/**
 	 * Get enabledForServices from general settings.
 	 */
-	public function is_enabled_for_services(): bool;
+	public function is_enabled_for_services( ?string $country = null ): bool;
 
 	/**
 	 * Get allowFirstServicePaymentDelay from general settings.
 	 */
-	public function is_allow_first_service_payment_delay(): bool;
+	public function is_allow_first_service_payment_delay( ?string $country = null ): bool;
 
 	/**
 	 * Get allowServiceRegistrationItems from general settings.
 	 */
-	public function is_allow_service_registration_items(): bool;
+	public function is_allow_service_registration_items( ?string $country = null ): bool;
 
 	/**
 	 * Get defaultServicesEndDate from general settings.

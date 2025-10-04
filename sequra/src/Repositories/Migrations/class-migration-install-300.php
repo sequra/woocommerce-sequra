@@ -267,9 +267,6 @@ class Migration_Install_300 extends Migration {
 					$allowed_ip_addresses,
 					null,
 					null,
-					strval( $settings['enable_for_virtual'] ?? 'no' ) === 'yes',
-					strval( $settings['allow_payment_delay'] ?? 'no' ) === 'yes',
-					strval( $settings['allow_registration_items'] ?? 'no' ) === 'yes',
 					strval( $settings['default_service_end_date'] ?? 'P1Y' )
 				)
 			);

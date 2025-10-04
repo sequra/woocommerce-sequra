@@ -387,7 +387,7 @@ class Product_Service implements Interface_Product_Service {
 	/**
 	 * Get enabledForServices from general settings.
 	 */
-	public function is_enabled_for_services(): bool {
+	public function is_enabled_for_services( ?string $country = null ): bool {
 		try {
 			/**
 			 * Array containing the general settings
@@ -398,7 +398,7 @@ class Product_Service implements Interface_Product_Service {
 			->generalSettings( $this->store_context->getStoreId() )
 			->getGeneralSettings()
 			->toArray();
-			return ! empty( $config['enabledForServices'] );
+			return $this->validate_config_array_for_country( $config, 'enabledForServices', $country );
 		} catch ( Throwable $e ) {
 			return false;
 		}
@@ -407,7 +407,7 @@ class Product_Service implements Interface_Product_Service {
 	/**
 	 * Get allowFirstServicePaymentDelay from general settings.
 	 */
-	public function is_allow_first_service_payment_delay(): bool {
+	public function is_allow_first_service_payment_delay( ?string $country = null ): bool {
 		try {
 			/**
 			 * Array containing the general settings
@@ -418,7 +418,7 @@ class Product_Service implements Interface_Product_Service {
 			->generalSettings( $this->store_context->getStoreId() )
 			->getGeneralSettings()
 			->toArray();
-			return ! empty( $config['allowFirstServicePaymentDelay'] );
+			return $this->validate_config_array_for_country( $config, 'allowFirstServicePaymentDelay', $country );
 		} catch ( Throwable $e ) {
 			return false;
 		}
@@ -427,7 +427,7 @@ class Product_Service implements Interface_Product_Service {
 	/**
 	 * Get allowServiceRegistrationItems from general settings.
 	 */
-	public function is_allow_service_registration_items(): bool {
+	public function is_allow_service_registration_items( ?string $country = null ): bool {
 		try {
 			/**
 			 * Array containing the general settings
@@ -438,10 +438,25 @@ class Product_Service implements Interface_Product_Service {
 			->generalSettings( $this->store_context->getStoreId() )
 			->getGeneralSettings()
 			->toArray();
-			return ! empty( $config['allowServiceRegistrationItems'] );
+			return $this->validate_config_array_for_country( $config, 'allowServiceRegistrationItems', $country );
 		} catch ( Throwable $e ) {
 			return false;
 		}
+	}
+
+	/**
+	 * Validate config array and optionally filter by country
+	 *
+	 * @param array<string, mixed> $config Configuration array
+	 * @param string $key Configuration key to validate
+	 * @param string|null $country Optional country to filter by
+	 * @return bool
+	 */
+	private function validate_config_array_for_country( array $config, string $key, ?string $country = null ): bool {
+		if ( empty( $config[ $key ] ) || ! is_array( $config[ $key ] ) ) {
+			return false;
+		}
+		return ! empty( $country ) ? in_array( $country, $config[ $key ], true ) : true;
 	}
 
 	/**
