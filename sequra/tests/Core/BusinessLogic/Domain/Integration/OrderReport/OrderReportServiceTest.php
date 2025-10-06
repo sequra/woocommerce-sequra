@@ -17,19 +17,20 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Platform;
 use SeQura\Core\BusinessLogic\Domain\OrderReport\Models\OrderReport;
 use SeQura\Core\BusinessLogic\Domain\OrderReport\Models\OrderStatistics;
 use WP_UnitTestCase;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
+use SeQura\WC\Services\Order\Interface_Order_Customer_Builder;
+use SeQura\WC\Services\Order\Interface_Order_Delivery_Method_Builder;
+use SeQura\WC\Services\Platform\Interface_Platform_Provider;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Tests\Fixtures\Store;
 use WC_Order;
 
 class OrderReportServiceTest extends WP_UnitTestCase {
 
-	/** @var \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration&\PHPUnit\Framework\MockObject\MockObject */
-	private $configuration;
 	/** @var \SeQura\WC\Services\Order\Interface_Order_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $order_service;
 	/** @var \SeQura\WC\Services\Pricing\Interface_Pricing_Service&\PHPUnit\Framework\MockObject\MockObject */
@@ -47,6 +48,18 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 	/** @var Platform */
 	private $platform;
 
+	/** @var \SeQura\WC\Services\Platform\Interface_Platform_Provider&\PHPUnit\Framework\MockObject\MockObject */
+	private $platform_provider;
+
+	/** @var \SeQura\WC\Services\Order\Interface_Order_Delivery_Method_Builder&\PHPUnit\Framework\MockObject\MockObject */
+	private $delivery_method_builder;
+
+	/** @var \SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder&\PHPUnit\Framework\MockObject\MockObject */
+	private $address_builder;
+
+	/** @var \SeQura\WC\Services\Order\Interface_Order_Customer_Builder&\PHPUnit\Framework\MockObject\MockObject */
+	private $customer_builder;
+
 	/**
 	 * Store instance.
 	 * @var Store
@@ -56,13 +69,7 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 	public function set_up(): void {        
 		$this->integration_name    = 'WC';
 		$this->integration_version = '99.99.99';
-		
-		$this->configuration = $this->createMock( Configuration::class );
-		$this->configuration->method( 'getIntegrationName' )->willReturn( $this->integration_name );
-		$this->configuration->method( 'get_module_version' )->willReturn( $this->integration_version );
-		
 
-		
 		$this->wc_data  = array(
 			'Version' => '99.99.99',
 		);
@@ -83,19 +90,24 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 			$this->env_data['php_version']
 		);
 
-		$this->configuration->method( 'get_platform' )->willReturn( $this->platform );
-
-		$this->pricing_service = $this->createMock( Interface_Pricing_Service::class );
-		$this->cart_service    = $this->createMock( Interface_Cart_Service::class );
-		$this->order_service   = $this->createMock( Interface_Order_Service::class );
-		$this->i18n            = $this->createMock( Interface_I18n::class );
+		$this->pricing_service         = $this->createMock( Interface_Pricing_Service::class );
+		$this->cart_service            = $this->createMock( Interface_Cart_Service::class );
+		$this->order_service           = $this->createMock( Interface_Order_Service::class );
+		$this->i18n                    = $this->createMock( Interface_I18n::class );
+		$this->platform_provider       = $this->createMock( Interface_Platform_Provider::class );
+		$this->delivery_method_builder = $this->createMock( Interface_Order_Delivery_Method_Builder::class );
+		$this->address_builder         = $this->createMock( Interface_Order_Address_Builder::class );
+		$this->customer_builder        = $this->createMock( Interface_Order_Customer_Builder::class );
 
 		$this->order_report_service = new Order_Report_Service(
-			$this->configuration,
+			$this->platform_provider,
 			$this->pricing_service,
 			$this->cart_service,
 			$this->order_service,
-			$this->i18n
+			$this->i18n,
+			$this->delivery_method_builder,
+			$this->address_builder,
+			$this->customer_builder
 		);
 
 		$this->store = new Store();
@@ -108,18 +120,12 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 	}
 
 	public function testGetPlatform() {
-		$this->assertEquals(
-			$this->order_report_service->getPlatform(),
-			new Platform(
-				$this->integration_name,
-				$this->wc_data['Version'],
-				$this->env_data['uname'],
-				$this->env_data['db_name'],
-				$this->env_data['db_version'],
-				$this->integration_version,
-				$this->env_data['php_version']
-			)
-		);
+		$this->platform_provider
+		->expects( $this->once() )
+		->method( 'get' )
+		->willReturn( $this->platform );
+
+		$this->assertEquals( $this->order_report_service->getPlatform(), $this->platform );
 	}
 
 	public function testGetOrderReports() {
@@ -141,8 +147,8 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 		->willReturn( null );
 
 		$delivery_method = new DeliveryMethod( 'delivery_method' );
-		$this->order_service->expects( $this->once() )
-		->method( 'get_delivery_method' )
+		$this->delivery_method_builder->expects( $this->once() )
+		->method( 'build' )
 		->with( $order )
 		->willReturn( $delivery_method );
 
@@ -156,8 +162,8 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 			'127.0.0.1',
 			'User Agent'
 		);
-		$this->order_service->expects( $this->once() )
-		->method( 'get_customer' )
+		$this->customer_builder->expects( $this->once() )
+		->method( 'build' )
 		->with( $order, 'es' )
 		->willReturn( $customer );
 
@@ -169,13 +175,16 @@ class OrderReportServiceTest extends WP_UnitTestCase {
 			'Barcelona',
 			'ES'
 		);
-		$this->order_service->expects( $this->exactly( 2 ) )
-		->method( 'get_address' )
-		->withConsecutive( 
-			array( $order, true ),
-			array( $order, false )
-		)
-		->willReturnOnConsecutiveCalls( $address, $address );
+		
+		$invoked_count = $this->exactly( 2 );
+		$this->address_builder->expects( $invoked_count )
+		->method( 'build' )
+		->willReturnCallback(
+			function ( $order, $billing ) use ( $address, $invoked_count ) {
+				$this->assertEquals( $invoked_count->getInvocationCount() === 1, $billing );
+				return $address;
+			}
+		);
 
 		$this->cart_service->expects( $this->once() )
 		->method( 'get_items' )

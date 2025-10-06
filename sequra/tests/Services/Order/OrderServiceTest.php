@@ -10,12 +10,13 @@ namespace SeQura\WC\Tests\Services\Order;
 
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderUpdateData;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use WP_UnitTestCase;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
@@ -23,9 +24,7 @@ use SeQura\WC\Repositories\Interface_Table_Migration_Repository;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Order_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
-use SeQura\WC\Tests\Core\Extension\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\WC\Tests\Core\Extension\BusinessLogic\Domain\Multistore\StoreContextMock;
 use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use WC_DateTime;
@@ -35,15 +34,13 @@ use WC_Order;
 class OrderServiceTest extends WP_UnitTestCase {
 
 	private $order_service;
-	/** @var \SeQura\WC\Services\Payment\Interface_Payment_Service&\PHPUnit\Framework\MockObject\MockObject */
-	private $payment_service;
 	/** @var \SeQura\WC\Services\Pricing\Interface_Pricing_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $pricing_service;
 	/** @var \SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $order_status_service;
 	/** @var \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration&\PHPUnit\Framework\MockObject\MockObject */
 	private $configuration;
-	/** @var \SeQura\WC\Core\BusinessLogic\Domain\Order\Service\OrderService&\PHPUnit\Framework\MockObject\MockObject */
+	/** @var OrderService&MockObject */
 	private $core_order_service;
 	/** @var \SeQura\WC\Services\Cart\Interface_Cart_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $cart_service;
@@ -60,11 +57,19 @@ class OrderServiceTest extends WP_UnitTestCase {
 	/** @var \SeQura\WC\Repositories\Interface_Table_Migration_Repository&\PHPUnit\Framework\MockObject\MockObject */
 	private $table_migration_repository;
 
-	public function set_up(): void {        
-		$this->payment_service            = $this->createMock( Interface_Payment_Service::class );
+	/**
+	 * @var string $payment_gateway_id
+	 */
+	private $payment_gateway_id;
+
+	/**
+	 * @var ConnectionService&MockObject
+	 */
+	private $connection_service;
+
+	public function set_up(): void {
 		$this->pricing_service            = $this->createMock( Interface_Pricing_Service::class );
 		$this->order_status_service       = $this->createMock( Order_Status_Settings_Service::class );
-		$this->configuration              = $this->createMock( Configuration::class );
 		$this->core_order_service         = $this->createMock( OrderService::class );
 		$this->cart_service               = $this->createMock( Interface_Cart_Service::class );
 		$this->store_context_mock         = $this->createMock( StoreContextMock::class );
@@ -73,20 +78,21 @@ class OrderServiceTest extends WP_UnitTestCase {
 		$this->time_checker_service       = $this->createMock( Interface_Time_Checker_Service::class );
 		$this->deletable_repository       = $this->createMock( Interface_Deletable_Repository::class );
 		$this->table_migration_repository = $this->createMock( Interface_Table_Migration_Repository::class );
-
+		$this->payment_gateway_id         = 'sequra';
+		$this->connection_service         = $this->createMock( ConnectionService::class );
 
 		$this->order_service = new Order_Service(
 			$this->sequra_order_repository,
-			$this->payment_service,
 			$this->pricing_service,
 			$this->order_status_service,
-			$this->configuration,
 			$this->cart_service,
-			new StoreContext( $this->store_context_mock ),
 			$this->logger,
 			$this->time_checker_service,
 			$this->deletable_repository,
-			$this->table_migration_repository
+			$this->table_migration_repository,
+			$this->payment_gateway_id,
+			$this->connection_service,
+			$this->core_order_service
 		);
 	}
 
@@ -142,10 +148,6 @@ class OrderServiceTest extends WP_UnitTestCase {
 		->willReturn( $refund_items );
 	}
 
-	private function setupPaymentServiceMock( $gateway_id = 'sequra' ) {
-		$this->payment_service->method( 'get_payment_gateway_id' )->willReturn( $gateway_id );
-	}
-
 	private function setupOrderStatusServiceMock( $completed_status = array( 'completed' ) ) {
 		$this->order_status_service->expects( $this->once() )
 		->method( 'get_shop_status_completed' )
@@ -156,16 +158,17 @@ class OrderServiceTest extends WP_UnitTestCase {
 	public function testUpdateSequraOrderStatus_onException_throwException() {
 		// Setup.
 		$order = $this->setupOrderMock();
-		$this->setupPaymentServiceMock();
+		
 		$this->setupCartServiceMock();
 		$this->setupOrderStatusServiceMock();
-		
-		$this->configuration->expects( $this->once() )
-		->method( 'get_store_id' )
-		->willThrowException( new Exception( 'Test exception' ) );
+
+		$exception_message = 'Test exception';
+		$this->core_order_service->expects( $this->once() )
+		->method( 'updateOrder' )
+		->willThrowException( new Exception( $exception_message ) );
 
 		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Test exception' );
+		$this->expectExceptionMessage( $exception_message );
 
 		// Execute.
 		$this->order_service->update_sequra_order_status( $order, 'processing', 'completed' );
@@ -175,49 +178,32 @@ class OrderServiceTest extends WP_UnitTestCase {
 		// Setup.
 		$date  = new WC_DateTime();
 		$order = $this->setupOrderMock( $date );
-		$this->setupPaymentServiceMock();
+		
 		$items = array(
 			new ProductItem( 'reference', 'Product', 100, 1, 100, false ),
 		);
 		$this->setupCartServiceMock( $items );
 		$this->setupOrderStatusServiceMock();
-		
-		$store_id = '1';
-		$this->configuration->expects( $this->once() )
-		->method( 'get_store_id' )
-		->willReturn( $store_id );
 
-		$invoked_count      = $this->exactly( 2 );
-		$core_order_service = $this->core_order_service;
-		$this->store_context_mock->expects( $invoked_count )
-		->method( 'do_with_store' )
+		$invoked_count = $this->exactly( 1 );
+		$sequra_order  = new SeQuraOrder();
+		$this->core_order_service->expects( $invoked_count )
+		->method( 'updateOrder' )
 		->willReturnCallback(
-			function ( $storeId, $callback, $params ) use ( $core_order_service, $store_id, $invoked_count, $items, $date ) {
-				$this->assertEquals( $store_id, $storeId );
-				
-				if ( 1 === $invoked_count->getInvocationCount() ) {
-					return $core_order_service;
-				}
-		
-				if ( 2 === $invoked_count->getInvocationCount() ) {
-					/**
-					* @var OrderUpdateData $order_data
-					*/
-					$order_data = $params[0];
-					$this->assertTrue( $order_data instanceof OrderUpdateData );
-					$this->assertFalse( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null );
-					$shipped_cart = $order_data->getShippedCart();
-					$this->assertFalse(
-						$shipped_cart->getCurrency() !== 'EUR'
-						|| $shipped_cart->isGift() !== false
-						|| $shipped_cart->getItems() !== $items
-						|| $shipped_cart->getCartRef() !== 'cart_ref'
-						|| $shipped_cart->getCreatedAt() !== 'cart_created_at'
-						|| $shipped_cart->getUpdatedAt() !== $date->format( 'Y-m-d H:i:s' )
-					);
-					$unshipped_cart = $order_data->getUnshippedCart();
-					$this->assertFalse( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) );
-				}
+			function ( $order_data ) use ( $items, $date, $sequra_order ) {
+				$this->assertFalse( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null );
+				$shipped_cart = $order_data->getShippedCart();
+				$this->assertFalse(
+					$shipped_cart->getCurrency() !== 'EUR'
+					|| $shipped_cart->isGift() !== false
+					|| $shipped_cart->getItems() !== $items
+					|| $shipped_cart->getCartRef() !== 'cart_ref'
+					|| $shipped_cart->getCreatedAt() !== 'cart_created_at'
+					|| $shipped_cart->getUpdatedAt() !== $date->format( 'Y-m-d H:i:s' )
+				);
+				$unshipped_cart = $order_data->getUnshippedCart();
+				$this->assertFalse( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) );
+				return $sequra_order;
 			}
 		);
 
@@ -228,7 +214,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 	public function testUpdateSequraOrderStatus_notPaidWithSeQura_skipExecution() {
 		// Setup.
 		$order = $this->setupOrderMock( new WC_DateTime(), true, 'other_payment_method' );
-		$this->setupPaymentServiceMock();
+		
 		$this->store_context_mock->expects( $this->never() )->method( 'do_with_store' );
 
 		// Execute.
@@ -239,7 +225,7 @@ class OrderServiceTest extends WP_UnitTestCase {
 		// Setup.
 		$order = $this->setupOrderMock( new WC_DateTime(), false );
 		$this->setupOrderStatusServiceMock();
-		$this->setupPaymentServiceMock();
+		
 		
 		$this->store_context_mock->expects( $this->never() )->method( 'do_with_store' );
 
@@ -274,11 +260,9 @@ class OrderServiceTest extends WP_UnitTestCase {
 	public function testHandleRefund_onException_throwException() {
 		// Setup.
 		$order = $this->setupOrderMock();
-		$this->setupPaymentServiceMock();
-		// $this->setupCartServiceMock();
 		
-		$this->configuration->expects( $this->once() )
-		->method( 'get_store_id' )
+		$this->core_order_service->expects( $this->once() )
+		->method( 'updateOrder' )
 		->willThrowException( new Exception( 'Test exception' ) );
 
 		$this->expectException( Exception::class );
@@ -331,8 +315,6 @@ class OrderServiceTest extends WP_UnitTestCase {
 			) 
 		);
 
-		$this->payment_service->method( 'get_payment_gateway_id' )->willReturn( 'sequra' );
-
 		$this->cart_service->expects( $this->exactly( $expected_get_items_calls ) )
 		->method( 'get_items' )
 		->with( $order )
@@ -352,43 +334,26 @@ class OrderServiceTest extends WP_UnitTestCase {
 		->method( 'get_refund_items' )
 		->with( $order )
 		->willReturn( $refund_items );
-		
-		$store_id = '1';
-		$this->configuration->expects( $this->once() )
-		->method( 'get_store_id' )
-		->willReturn( $store_id );
 
-		$invoked_count      = $this->exactly( 2 );
-		$core_order_service = $this->core_order_service;
-		$this->store_context_mock->expects( $invoked_count )
-		->method( 'do_with_store' )
+		$invoked_count = $this->exactly( 1 );
+		$sequra_order  = new SeQuraOrder();
+		$this->core_order_service->expects( $invoked_count )
+		->method( 'updateOrder' )
 		->willReturnCallback(
-			function ( $storeId, $callback, $params ) use ( $core_order_service, $store_id, $invoked_count, $shipped_items, $date ) {
-				$this->assertEquals( $store_id, $storeId );
-				if ( 1 === $invoked_count->getInvocationCount() ) {
-					return $core_order_service;
-				}
-		
-				if ( 2 === $invoked_count->getInvocationCount() ) {
-					/**
-					 * @var OrderUpdateData $order_data
-					 */
-					$order_data = $params[0];
-					$this->assertTrue( $order_data instanceof OrderUpdateData );
-					$this->assertFalse( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null );
-					$shipped_cart = $order_data->getShippedCart();
-					$this->assertFalse(
-						$shipped_cart->getCurrency() !== 'EUR'
-						|| $shipped_cart->isGift() !== false
-						|| $shipped_cart->getItems() !== $shipped_items
-						|| $shipped_cart->getCartRef() !== 'cart_ref'
-						|| $shipped_cart->getCreatedAt() !== 'cart_created_at'
-						|| $shipped_cart->getUpdatedAt() !== $date->format( 'Y-m-d H:i:s' )
-					);
-					$unshipped_cart = $order_data->getUnshippedCart();
-					$this->assertFalse( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) );
-					return;
-				}
+			function ( $order_data ) use ( $shipped_items, $date, $sequra_order ) {
+				$this->assertFalse( $order_data->getOrderShopReference() !== '1' || $order_data->getDeliveryAddress() !== null || $order_data->getInvoiceAddress() !== null );
+				$shipped_cart = $order_data->getShippedCart();
+				$this->assertFalse(
+					$shipped_cart->getCurrency() !== 'EUR'
+					|| $shipped_cart->isGift() !== false
+					|| $shipped_cart->getItems() !== $shipped_items
+					|| $shipped_cart->getCartRef() !== 'cart_ref'
+					|| $shipped_cart->getCreatedAt() !== 'cart_created_at'
+					|| $shipped_cart->getUpdatedAt() !== $date->format( 'Y-m-d H:i:s' )
+				);
+				$unshipped_cart = $order_data->getUnshippedCart();
+				$this->assertFalse( $unshipped_cart->getCurrency() !== 'EUR' || ! empty( $unshipped_cart->getItems() ) );
+				return $sequra_order;
 			}
 		);
 
