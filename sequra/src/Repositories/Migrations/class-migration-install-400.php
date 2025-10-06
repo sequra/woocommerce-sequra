@@ -100,7 +100,7 @@ class Migration_Install_400 extends Migration {
 	private function migrate_connection_data(): void {
 		$connections = $this->get_connection_data();
 
-		if ( null === $connections ) {
+		if ( empty( $connections ) ) {
 			// No connection data found, nothing to migrate.
 			return;
 		}
