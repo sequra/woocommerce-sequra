@@ -1,6 +1,9 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 concurrency:
   # For pull requests, cancel all currently-running jobs for this workflow
@@ -32,25 +35,32 @@ jobs:
         run: ./bin/composer install --quiet --no-interaction
 
       - name: PHP 7.3 Syntax check
+        if: github.event_name == 'push'
         run: bin/php-syntax-check --php=7.3
 
       - name: PHP 7.4 Syntax check
+        if: github.event_name == 'push'
         run: bin/php-syntax-check --php=7.4
 
       - name: PHP 8.0 Syntax check
+        if: github.event_name == 'push'
         run: bin/php-syntax-check --php=8.0
 
       - name: PHP 8.1 Syntax check
+        if: github.event_name == 'push'
         run: bin/php-syntax-check --php=8.1
 
       - name: PHP 8.2 Syntax check
+        if: github.event_name == 'push'
         run: bin/php-syntax-check --php=8.2
 
       - name: PHP 8.3 Syntax check
+        if: github.event_name == 'push'
         run: bin/php-syntax-check --php=8.3
 
       # TODO: Work on this after integration-core is updated to support PHP 8.4
       # - name: PHP 8.4 Syntax check
+      #   if: github.event_name == 'push'
       #   run: bin/php-syntax-check --php=8.4
 
       - name: Cache NPM dependencies
