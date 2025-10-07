@@ -25,6 +25,7 @@
     "errors": {
       "InvalidOperationException": "Une erreur s'est produite côté serveur. Veuillez vérifier les données et réessayer.",
       "unknown": "Une erreur inconnue s'est produite. Veuillez réessayer plus tard.",
+      "backgroundDataFetchFailure": "Une erreur s'est produite lors de l'actualisation des données en arrière-plan. Veuillez recharger la page pour voir les dernières données.",
       "empty": "Le paramètre ne peut pas être vide.",
       "saveEntityFailed": "Échec de l'enregistrement de l'entité car %s",
       "getEntityFailed": "Échec de la récupération de l'entité car %s",

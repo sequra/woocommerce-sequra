@@ -25,6 +25,7 @@
     "errors": {
       "InvalidOperationException": "An error occurred on the server side. Please check the data and try again.",
       "unknown": "An unknown error occurred. Please try again later.",
+      "backgroundDataFetchFailure": "An error occurred while refreshing data in the background. Please reload the page to see the latest data.",
       "empty": "Parameter can't be empty.",
       "saveEntityFailed": "Failed to save entity because %s",
       "getEntityFailed": "Failed to retrieve entity because %s",

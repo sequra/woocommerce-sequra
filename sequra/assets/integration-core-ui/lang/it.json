@@ -25,6 +25,7 @@
     "errors": {
       "InvalidOperationException": "Si è verificato un errore lato server. Controlla i dati e riprova.",
       "unknown": "Si è verificato un errore sconosciuto. Riprova più tardi.",
+      "backgroundDataFetchFailure": "Si è verificato un errore durante l'aggiornamento dei dati in background. Ricarica la pagina per vedere gli ultimi dati.",
       "empty": "Il parametro non può essere vuoto.",
       "saveEntityFailed": "Impossibile salvare l'entità perché %s",
       "getEntityFailed": "Impossibile recuperare l'entità perché %s",

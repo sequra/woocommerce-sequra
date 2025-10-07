@@ -24,6 +24,7 @@
     "errors": {
       "InvalidOperationException": "Se produjo un error en el servidor. Por favor, verifica los datos e inténtalo de nuevo.",
       "unknown": "Se produjo un error desconocido. Por favor, inténtalo de nuevo más tarde.",
+      "backgroundDataFetchFailure": "Se produjo un error al actualizar los datos en segundo plano. Por favor, recarga la página para ver los últimos datos.",
       "empty": "El parámetro no puede estar vacío.",
       "saveEntityFailed": "Error al guardar la entidad porque %s",
       "getEntityFailed": "Error al recuperar la entidad porque %s",
