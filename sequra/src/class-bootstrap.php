@@ -20,6 +20,7 @@ use SeQura\Core\BusinessLogic\DataAccess\Deployments\Entities\Deployment;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
 use SeQura\Core\BusinessLogic\DataAccess\PaymentMethod\Entities\PaymentMethod;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use SeQura\Core\BusinessLogic\Domain\Connection\Services\CredentialsService;
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
@@ -345,7 +346,8 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( MerchantOrderRequestBuilder::class ),
 						Reg::getService( Interface_Order_Delivery_Method_Builder::class ),
 						Reg::getService( Interface_Order_Address_Builder::class ),
-						Reg::getService( Interface_Order_Customer_Builder::class )
+						Reg::getService( Interface_Order_Customer_Builder::class ),
+						Reg::getService( CredentialsService::class )
 					);
 				}
 				return self::$cache[ Interface_Create_Order_Request_Builder::class ];

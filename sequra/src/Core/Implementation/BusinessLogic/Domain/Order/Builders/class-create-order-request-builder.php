@@ -10,6 +10,7 @@ namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Order\Builders;
 use Exception;
 use SeQura\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFoundException;
 use SeQura\Core\BusinessLogic\Domain\Connection\Exceptions\CredentialsNotFoundException;
+use SeQura\Core\BusinessLogic\Domain\Connection\Services\CredentialsService;
 use SeQura\Core\BusinessLogic\Domain\Order\Builders\MerchantOrderRequestBuilder;
 use SeQura\Core\BusinessLogic\Domain\Order\Exceptions\InvalidUrlException;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Address;
@@ -125,6 +126,13 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private $customer_builder;
 
 	/**
+	 * Credentials service
+	 *
+	 * @var CredentialsService
+	 */
+	private $credentials_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
@@ -139,7 +147,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		MerchantOrderRequestBuilder $merchant_order_request_builder,
 		Interface_Order_Delivery_Method_Builder $delivery_method_builder,
 		Interface_Order_Address_Builder $address_builder,
-		Interface_Order_Customer_Builder $customer_builder
+		Interface_Order_Customer_Builder $customer_builder,
+		CredentialsService $credentials_service
 	) {
 		$this->cart_service                   = $cart_service;
 		$this->platform_provider              = $platform_provider;
@@ -153,6 +162,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		$this->delivery_method_builder        = $delivery_method_builder;
 		$this->address_builder                = $address_builder;
 		$this->customer_builder               = $customer_builder;
+		$this->credentials_service            = $credentials_service;
 	}
 
 	/**
@@ -400,7 +410,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		}
 
 		try {
-			$this->merchant_order_request_builder->getMerchantIdByCountryCode( 
+			$this->credentials_service->getMerchantIdByCountryCode( 
 				$this->get_country_from_order_or_cart()
 			);
 		} catch ( Throwable $e ) {
