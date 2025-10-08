@@ -40,6 +40,7 @@
 		<exclude name="WordPress.Security.EscapeOutput.ExceptionNotEscaped"/>
 		<exclude name="WordPress.Security.NonceVerification.Recommended"/>
 		<exclude name="WordPress.Security.ValidatedSanitizedInput.InputNotValidated"/>
+		<exclude name="WordPress.WP.AlternativeFunctions.json_encode_json_encode"/>
 	</rule>
 	<rule ref="WordPressVIPMinimum">
 		<exclude name="WordPressVIPMinimum.JS.Window"/>
