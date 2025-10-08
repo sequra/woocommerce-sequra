@@ -106,6 +106,8 @@ Contributors:
 * Added: Support for managing multiple deployment targets credentials.
 * Added: Integration-Core-UI library providing the assets required for the configuration page.
 * Fixed: The link to read more about the payment method was not always working.
+* Added: The service related configuration is automatically set based on the available contract options and the enabled countries.
+* Changed: Tested up to WordPress 6.8.3 and WooCommerce 10.2.2
 
 = 3.2.2	=
 * Fixed: Ensure that the order completion date can be retrieved.
