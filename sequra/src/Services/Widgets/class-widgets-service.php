@@ -10,6 +10,7 @@ namespace SeQura\WC\Services\Widgets;
 
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
+use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Responses\GetWidgetsCheckoutResponse;
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\WC\Services\I18n\Interface_I18n;
@@ -156,31 +157,32 @@ class Widgets_Service implements Interface_Widgets_Service {
 	 * @return WidgetDataArray[]|null The available widgets, or null if cannot be determined
 	 */
 	public function get_widgets_for_product_page( string $product_id ): ?array {
-		try {
-			$country = $this->i18n->get_current_country();
-
-			/**
-			 * Fetch promotional widget data from CheckoutAPI
-			 *  
-			 * @var WidgetDataArray[] $widgets */
-			$widgets = CheckoutAPI::get()
-			->promotionalWidgets( $this->store_context->getStoreId() )
-			->getAvailableWidgetsForProductPage(
-				new PromotionalWidgetsCheckoutRequest(
-					$country,
-					$country,
-					$this->widget_configurator->getCurrency() ?? '',
-					$this->shopper_service->get_ip(),
-					$product_id
-				)
+		$country = $this->i18n->get_current_country();
+		/**
+		 * Response from CheckoutAPI
+		 *  
+		 * @var GetWidgetsCheckoutResponse $response */
+		$response = CheckoutAPI::get()
+		->promotionalWidgets( $this->store_context->getStoreId() )
+		->getAvailableWidgetsForProductPage(
+			new PromotionalWidgetsCheckoutRequest(
+				$country,
+				$country,
+				$this->widget_configurator->getCurrency() ?? '',
+				$this->shopper_service->get_ip(),
+				$product_id
 			)
-			->toArray();
+		);
 
-			return $widgets;
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		if( !$response->isSuccessful() ) {
 			return null;
 		}
+		
+		/**
+		 * @var WidgetDataArray[] $widgets
+		 */
+		$widgets = $response->toArray();
+		return $widgets;
 	}
 
 	/**
