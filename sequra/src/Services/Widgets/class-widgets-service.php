@@ -174,15 +174,11 @@ class Widgets_Service implements Interface_Widgets_Service {
 			)
 		);
 
-		if( !$response->isSuccessful() ) {
+		if ( ! $response->isSuccessful() ) {
 			return null;
 		}
 		
-		/**
-		 * @var WidgetDataArray[] $widgets
-		 */
-		$widgets = $response->toArray();
-		return $widgets;
+		return $response->toArray();
 	}
 
 	/**
