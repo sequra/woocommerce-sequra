@@ -11,7 +11,7 @@ export default class SeQuraHelper extends BaseSeQuraHelper {
         return {
             clear_config: 'clear_config',
             dummy_config: 'dummy_config',
-            dummy_service_config: 'dummy_services_config',
+            dummy_services_config: 'dummy_services_config',
             clear_front_end_cache: 'clear_front_end_cache',
             verify_order_has_merchant_id: 'verify_order_has_merchant_id',
             remove_log: 'remove_log',
