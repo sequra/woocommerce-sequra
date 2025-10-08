@@ -38,7 +38,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
     await checkoutPage.waitForOrderSuccess();
-    await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
   });
 
   test('Complete a successful payment with SVEA', async ({ helper, dataProvider, productPage, checkoutPage }) => {
@@ -55,7 +55,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
     await checkoutPage.waitForOrderSuccess();
-    await checkoutPage.expectOrderHasTheCorrectMerchantId('FR', helper, dataProvider);
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
   });
 
   test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
@@ -72,7 +72,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
     // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
-    await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
     await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
   });
 
@@ -90,7 +90,7 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
     // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
-    await checkoutPage.expectOrderHasTheCorrectMerchantId('ES', helper, dataProvider);
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
     await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Cancelled' });
   });
 });
