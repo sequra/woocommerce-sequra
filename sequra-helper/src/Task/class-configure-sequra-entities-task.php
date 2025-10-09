@@ -123,6 +123,32 @@ abstract class Configure_Sequra_Entities_Task extends Task {
 		),
 	);
 
+	protected const BLOCKS  = 'blocks';
+	protected const CLASSIC = 'classic';
+
+	protected const WIDGET_SELECTORS = array(
+		self::BLOCKS  => array(
+			'productPriceSelector'           => '.wc-block-components-product-price>.amount,.wc-block-components-product-price ins .amount',
+			'productLocationSelector'        => '.wc-block-components-product-price',
+			'productAltPriceSelector'        => '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
+			'productAltPriceTriggerSelector' => '.variations',
+			'cartPriceSelector'              => '.wp-block-woocommerce-cart-totals-block .wc-block-components-totals-footer-item .wc-block-components-totals-item__value',
+			'cartLocationSelector'           => '.wp-block-woocommerce-cart-totals-block .wc-block-components-totals-footer-item',
+			'listingPriceSelector'           => '.product .wc-block-components-product-price>.amount:first-child,.product .wc-block-components-product-price ins .amount',
+			'listingLocationSelector'        => '.product .wc-block-components-product-price',
+		),
+		self::CLASSIC => array(
+			'productPriceSelector'           => '.summary .price>.amount,.summary .price ins .amount',
+			'productLocationSelector'        => '.summary>.price',
+			'productAltPriceSelector'        => '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
+			'productAltPriceTriggerSelector' => '.variations',
+			'cartPriceSelector'              => '.order-total .amount',
+			'cartLocationSelector'           => '.order-total',
+			'listingPriceSelector'           => '.product .price>.amount:first-child,.product .price ins .amount',
+			'listingLocationSelector'        => '.product .price',
+		),
+	);
+
 	/**
 	 * Use self::DUMMY or self::DUMMY_SERVICES
 	 * 
@@ -382,20 +408,32 @@ abstract class Configure_Sequra_Entities_Task extends Task {
 	/**
 	 * Set WidgetSettings entity
 	 * 
-	 * @param bool $display_widgets Whether to display widgets on product page, cart page and product listing page.
+	 * @param bool   $display_widgets Whether to display widgets on product page, cart page and product listing page.
+	 * @param string $version Use self::BLOCKS or self::CLASSIC.
 	 */
-	protected function set_widget_settings( bool $display_widgets ): void {
+	protected function set_widget_settings( bool $display_widgets, string $version = self::BLOCKS ): void {
 		global $wpdb;
 		$table_name = $this->get_sequra_entity_table_name();
 		$id         = $this->get_current_id( $table_name );
 		$display    = $display_widgets ? 'true' : 'false';
+
+		$product_price_selector             = self::WIDGET_SELECTORS[ $version ]['productPriceSelector'];
+		$product_location_selector          = self::WIDGET_SELECTORS[ $version ]['productLocationSelector'];
+		$product_alt_price_selector         = self::WIDGET_SELECTORS[ $version ]['productAltPriceSelector'];
+		$product_alt_price_trigger_selector = self::WIDGET_SELECTORS[ $version ]['productAltPriceTriggerSelector'];
+		$cart_price_selector                = self::WIDGET_SELECTORS[ $version ]['cartPriceSelector'];
+		$cart_location_selector             = self::WIDGET_SELECTORS[ $version ]['cartLocationSelector'];
+		$listing_price_selector             = self::WIDGET_SELECTORS[ $version ]['listingPriceSelector'];
+		$listing_location_selector          = self::WIDGET_SELECTORS[ $version ]['listingLocationSelector'];
+		$widget_configuration               = '{\"alignment\":\"center\",\"amount-font-bold\":\"true\",\"amount-font-color\":\"#1C1C1C\",\"amount-font-size\":\"15\",\"background-color\":\"white\",\"border-color\":\"#B1AEBA\",\"border-radius\":\"\",\"class\":\"\",\"font-color\":\"#1C1C1C\",\"link-font-color\":\"#1C1C1C\",\"link-underline\":\"true\",\"no-costs-claim\":\"\",\"size\":\"M\",\"starting-text\":\"only\",\"type\":\"banner\"}';
+
 		$wpdb->insert(
 			$table_name,
 			array(
 				'id'      => ++$id,
 				'type'    => 'WidgetSettings',
 				'index_1' => '1',
-				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\PromotionalWidgets\\\\Entities\\\\WidgetSettings","id":' . $id . ',"storeId":"1","widgetSettings":{"displayOnProductPage":' . $display . ',"showInstallmentsInProductListing":' . $display . ',"showInstallmentsInCartPage":' . $display . ',"widgetConfiguration":"{\"alignment\":\"center\",\"amount-font-bold\":\"true\",\"amount-font-color\":\"#1C1C1C\",\"amount-font-size\":\"15\",\"background-color\":\"white\",\"border-color\":\"#B1AEBA\",\"border-radius\":\"\",\"class\":\"\",\"font-color\":\"#1C1C1C\",\"link-font-color\":\"#1C1C1C\",\"link-underline\":\"true\",\"no-costs-claim\":\"\",\"size\":\"M\",\"starting-text\":\"only\",\"type\":\"banner\"}","widgetSettingsForProduct":{"priceSelector":".summary .price>.amount,.summary .price ins .amount","locationSelector":".summary>.price","altPriceSelector":".woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount","altPriceTriggerSelector":".variations","customWidgetSettings":[{"customLocationSelector":".summary .price>.amount,.summary .price ins .amount","product":"i1","displayWidget":true,"customWidgetStyle":"{\"alignment\":\"left\"}"},{"customLocationSelector":".summary .price>.amount,.summary .price ins .amount","product":"sp1","displayWidget":true,"customWidgetStyle":"{\"alignment\":\"left\"}"},{"customLocationSelector":".summary .price>.amount,.summary .price ins .amount","product":"pp3","displayWidget":true,"customWidgetStyle":"{\"alignment\":\"left\"}"}]},"widgetSettingsForCart":{"priceSelector":"","locationSelector":"","widgetProduct":"pp3"},"widgetSettingsForListing":{"priceSelector":"","locationSelector":"","widgetProduct":"pp3"}}}',
+				'data'    => '{"class_name":"SeQura\\\\Core\\\\BusinessLogic\\\\DataAccess\\\\PromotionalWidgets\\\\Entities\\\\WidgetSettings","id":' . $id . ',"storeId":"1","widgetSettings":{"displayOnProductPage":' . $display . ',"showInstallmentsInProductListing":' . $display . ',"showInstallmentsInCartPage":' . $display . ',"widgetConfiguration":"' . $widget_configuration . '","widgetSettingsForProduct":{"priceSelector":"' . $product_price_selector . '","locationSelector":"' . $product_location_selector . '","altPriceSelector":"' . $product_alt_price_selector . '","altPriceTriggerSelector":"' . $product_alt_price_trigger_selector . '","customWidgetSettings":[{"customLocationSelector":"' . $product_location_selector . '","product":"i1","displayWidget":true,"customWidgetStyle":"' . $widget_configuration . '"},{"customLocationSelector":"' . $product_location_selector . '","product":"sp1","displayWidget":true,"customWidgetStyle":"' . $widget_configuration . '"},{"customLocationSelector":"' . $product_location_selector . '","product":"pp3","displayWidget":true,"customWidgetStyle":"' . $widget_configuration . '"}]},"widgetSettingsForCart":{"priceSelector":"' . $cart_price_selector . '","locationSelector":"' . $cart_location_selector . '","widgetProduct":"pp3"},"widgetSettingsForListing":{"priceSelector":"' . $listing_price_selector . '","locationSelector":"' . $listing_location_selector . '","widgetProduct":"pp3"}}}',
 			)
 		);
 	}
@@ -443,11 +481,16 @@ abstract class Configure_Sequra_Entities_Task extends Task {
 	/**
 	 * Set configuration for the merchant
 	 * 
-	 * @param bool $widgets Whether to include widget settings.
+	 * @param bool   $widgets Whether to include widget settings.
+	 * @param string $version Use self::BLOCKS or self::CLASSIC.
 	 * 
 	 * @throws Exception When any of the configuration steps fail.
 	 */
-	private function set_merchant_configuration( bool $widgets ): void {
+	private function set_merchant_configuration( bool $widgets, string $version ): void {
+		if ( ! in_array( $version, array( self::BLOCKS, self::CLASSIC ), true ) ) {
+			throw new Exception( 'Invalid version specified: ' . $version . '. Use ' . self::BLOCKS . ' or ' . self::CLASSIC . '.' );
+		}
+
 		$this->set_connection_data( $this->current_merchant_id );
 		$this->set_country_configuration( $this->current_merchant_id );
 		$this->set_credentials( $this->current_merchant_id );
@@ -455,7 +498,7 @@ abstract class Configure_Sequra_Entities_Task extends Task {
 		$this->set_payment_method( $this->current_merchant_id );
 		$this->set_report();
 		$this->set_statistical_data();
-		$this->set_widget_settings( $widgets );
+		$this->set_widget_settings( $widgets, $version );
 	}
 
 	/**
@@ -467,9 +510,11 @@ abstract class Configure_Sequra_Entities_Task extends Task {
 	 */
 	public function execute( array $args = array() ): void {
 		$widgets = isset( $args['widgets'] ) ? (bool) $args['widgets'] : true;
+		$version = isset( $args['version'] ) ? (string) $args['version'] : self::BLOCKS;
+
 		if ( ! $this->is_merchant_configured( $widgets ) ) {
 			$this->recreate_entity_table_in_database();
-			$this->set_merchant_configuration( $widgets );
+			$this->set_merchant_configuration( $widgets, $version );
 		}
 	}
 }
