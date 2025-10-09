@@ -128,11 +128,11 @@ class Onboarding_REST_Controller extends REST_Controller {
 
 				self::PARAM_CART_SEL_FOR_PRICE             => $this->get_arg_string( true, '', array( $this, 'validate_required_cart_widget_selector' ) ),
 				self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION  => $this->get_arg_string( true, '', array( $this, 'validate_required_cart_widget_selector' ) ),
-				self::PARAM_CART_WIDGET_ON_PAGE            => $this->get_arg_string( true ),
+				self::PARAM_CART_WIDGET_ON_PAGE            => $this->get_arg_string( true, '', array( $this, 'validate_required_cart_widget_selector' ) ),
 
 				self::PARAM_LISTING_SEL_FOR_PRICE          => $this->get_arg_string( true, '', array( $this, 'validate_required_listing_widget_selector' ) ),
 				self::PARAM_LISTING_SEL_FOR_LOCATION       => $this->get_arg_string( true, '', array( $this, 'validate_required_listing_widget_selector' ) ),
-				self::PARAM_LISTING_WIDGET_ON_PAGE         => $this->get_arg_string( true ),
+				self::PARAM_LISTING_WIDGET_ON_PAGE         => $this->get_arg_string( true, '', array( $this, 'validate_required_listing_widget_selector' ) ),
 			)
 		);
 
