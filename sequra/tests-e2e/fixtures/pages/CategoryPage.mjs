@@ -1,5 +1,4 @@
 import { CategoryPage as BaseCategoryPage } from "playwright-fixture-for-plugins";
-// TODO: pending review
 /**
  * Category page
  */
@@ -13,6 +12,6 @@ export default class CategoryPage extends BaseCategoryPage {
     */
     categoryUrl(options) {
         const { slug } = options;
-        return `${this.baseURL}/${slug}.html`;
+        return `${this.baseURL}/${slug}/`;
     }
 }
