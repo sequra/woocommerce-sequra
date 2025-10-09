@@ -52,6 +52,6 @@
     },
     "prefer-stable": true,
     "require": {
-        "sequra/integration-core": "dev-release/woocommerce-compat"
+        "sequra/integration-core": "v3.0.0-rc.2"
     }
 }
