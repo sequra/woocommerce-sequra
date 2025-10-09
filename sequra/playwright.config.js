@@ -45,11 +45,11 @@ module.exports = defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: '002-checkout-service.spec.mjs',
     },
-    // {
-    //   name: 'configuration-onboarding',
-    //   use: { ...devices['Desktop Chrome'] },
-    //   testMatch: '003-configuration-onboarding.spec.js',
-    // },
+    {
+      name: 'configuration-onboarding',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '003-configuration-onboarding.spec.mjs',
+    },
     // {
     //   name: 'configuration-payment-methods',
     //   use: { ...devices['Desktop Chrome'] },
