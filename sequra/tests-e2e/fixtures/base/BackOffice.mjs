@@ -24,7 +24,7 @@ export default class BackOffice extends BaseBackOffice {
      */
     async login(options = { waitUntil: 'domcontentloaded', force: false }) {
         const { force, waitUntil } = { waitUntil: 'domcontentloaded', force: false, ...options };
-        
+
         if (!force) {
             const cookies = await this.page.context().cookies();
             if (cookies.find(c => -1 !== c.name.search('wordpress_logged_in'))) {
@@ -47,9 +47,9 @@ export default class BackOffice extends BaseBackOffice {
         const user = process.env.WP_ADMIN_USER;
         const pass = process.env.WP_ADMIN_PASSWORD;
 
-        console.log(`Logging in as user: "${user}" with password: "${pass}"`);
-
+        await this.locators.usernameInput().fill(''); // ensure empty
         await this.locators.usernameInput().fill(user);
+        await this.locators.passwordInput().fill(''); // ensure empty
         await this.locators.passwordInput().fill(pass);
         await this.locators.loginButton().click();
         await this.page.waitForURL('./wp-admin/');
