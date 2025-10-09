@@ -60,11 +60,11 @@ module.exports = defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: '005-configuration-advanced.spec.mjs',
     },
-    // {
-    //   name: 'configuration-general',
-    //   use: { ...devices['Desktop Chrome'] },
-    //   testMatch: '006-configuration-general.spec.js',
-    // },
+    {
+      name: 'configuration-general',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '006-configuration-general.spec.mjs',
+    },
     // {
     //   name: 'configuration-connection',
     //   use: { ...devices['Desktop Chrome'] },

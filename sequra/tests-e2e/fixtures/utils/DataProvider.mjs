@@ -86,9 +86,7 @@ export default class DataProvider extends BaseDataProvider {
             return null;
         }
         return {
-            "fusion-backpack": { amount: 5900, registrationAmount: null },
-            "push-it-messenger-bag": { amount: 4500, registrationAmount: null },
-
+            "sunglasses": { amount: 9000, registrationAmount: null }
         }[options.slug] || null;
     }
 }
