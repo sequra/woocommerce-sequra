@@ -248,8 +248,6 @@
                     }
                     const cents = this.nodeToCents(priceElem);
 
-
-
                     const className = 'sequra-educational-popup';
                     const modifierClassName = className + '--' + widget.product;
 
@@ -267,7 +265,7 @@
                     }
 
                     const widgetNode = document.createElement('small');
-                    widgetNode.className = className + ' ' + modifierClassName;
+                    widgetNode.className = `sequra-promotion-miniwidget ${className} ${modifierClassName}`;
                     widgetNode.setAttribute('data-amount', cents);
                     widgetNode.setAttribute('data-product', widget.product);
 
@@ -291,11 +289,10 @@
 
                     if (element.nextSibling) {//Insert after
                         element.parentNode.insertBefore(widgetNode, element.nextSibling);
-                        this.refreshComponents();
                     } else {
                         element.parentNode.appendChild(widgetNode);
                     }
-
+                    this.refreshComponents();
                 },
 
                 drawWidgetOnElement: function (widget, element) {
@@ -347,10 +344,10 @@
 
                     if (element.nextSibling) {//Insert after
                         element.parentNode.insertBefore(promoWidgetNode, element.nextSibling);
-                        this.refreshComponents();
                     } else {
                         element.parentNode.appendChild(promoWidgetNode);
                     }
+                    this.refreshComponents();
                 }
             }
         };
