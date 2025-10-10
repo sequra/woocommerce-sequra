@@ -151,11 +151,11 @@ test.describe('Configuration', () => {
     await helper.executeWebhook({ webhook: clear_config }); // Clear the configuration.
     await helper.executeWebhook({ webhook: dummy_config, args: [{ name: 'widgets', value: '1' }] });
 
-    const sku = '24-WB04';// The product SKU.
+    const sku = 'woo-sunglasses';// The product SKU.
     const allowedValuesMatrix = [
       [],
-      ['24-UG05'],
-      ['24-UG05', '24-MG02']
+      ['woo-hoodie'],
+      ['woo-hoodie', 'woo-hoodie-blue-logo']
     ];
     const notAllowedValuesMatrix = [
       [sku],
