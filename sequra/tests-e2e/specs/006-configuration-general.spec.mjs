@@ -1,12 +1,13 @@
+import { DataProvider } from 'playwright-fixture-for-plugins';
 import { test, expect } from '../fixtures/test';
 
 async function assertWidgetAndPaymentMethodVisibility(available, productPage, cartPage, checkoutPage, dataProvider, helper) {
   const slugOpt = { slug: 'sunglasses' };
   await productPage.goto(slugOpt);
   if (available) {
-    await productPage.expectWidgetToBeVisible(dataProvider.pp3FrontEndWidgetOptions(slugOpt));
-    await productPage.expectWidgetToBeVisible(dataProvider.sp1FrontEndWidgetOptions(slugOpt));
-    await productPage.expectWidgetToBeVisible(dataProvider.i1FrontEndWidgetOptions(slugOpt));
+    await productPage.expectWidgetToBeVisible(dataProvider.pp3FrontEndWidgetOptions({...slugOpt, widgetType: DataProvider.PRODUCT_WIDGET}));
+    await productPage.expectWidgetToBeVisible(dataProvider.sp1FrontEndWidgetOptions({...slugOpt, widgetType: DataProvider.PRODUCT_WIDGET}));
+    await productPage.expectWidgetToBeVisible(dataProvider.i1FrontEndWidgetOptions({...slugOpt, widgetType: DataProvider.PRODUCT_WIDGET}));
   } else {
     await productPage.expectWidgetsNotToBeVisible();
   }
@@ -15,7 +16,7 @@ async function assertWidgetAndPaymentMethodVisibility(available, productPage, ca
   // await cartPage.goto();
   // if (available) {
   //   await cartPage.expectWidgetToBeVisible(
-  //     dataProvider.cartFrontEndWidgetOptions({ amount: 4500, registrationAmount: null })
+  //     dataProvider.cartFrontEndWidgetOptions(dataProvider.pp3FrontEndWidgetOptions({ amount: 10000, registrationAmount: null, widgetType: DataProvider.CART_WIDGET}))
   //   );
   // } else {
   //   await cartPage.expectWidgetsNotToBeVisible();
