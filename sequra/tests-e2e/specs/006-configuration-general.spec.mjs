@@ -27,7 +27,7 @@ async function assertWidgetAndPaymentMethodVisibility(available, productPage, ca
 }
 
 async function assertMiniWidgetVisibility(available, categoryPage) {
-  await categoryPage.goto({ slug: 'music' });
+  await categoryPage.goto({ slug: 'accessories' });
   if (available) {
     await categoryPage.expectAnyVisibleMiniWidget('pp3');
   } else {
@@ -107,13 +107,11 @@ test.describe('Configuration', () => {
 
     const allowedCategoriesMatrix = [
       [],
-      ['Watches']
-      ['Tops', 'Default Category'],
+      ['Hoodies'],
     ];
-
+    
     const notAllowedCategoriesMatrix = [
-      ['Bags'],
-      ['Bags', 'Video Download'],
+      ['Accessories'],
     ];
 
     const fillAndAssert = async (categories, available) => {
