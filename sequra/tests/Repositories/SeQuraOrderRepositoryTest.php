@@ -8,8 +8,6 @@
 
 namespace SeQura\WC\Tests\Controllers\Hooks\Process;
 
-require_once __DIR__ . '/../Fixtures/SeQuraOrderTable.php';
-
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\Infrastructure\ORM\Entity;
 use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;

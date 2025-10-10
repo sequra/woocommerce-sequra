@@ -17,7 +17,9 @@ class Cart_Version_Task extends WC_UI_Version_Task {
 	/**
 	 * Get the post content for the cart page
 	 * 
-	 * @throws \Exception If the version is invalid
+	 * @param string $version The cart version.
+	 * 
+	 * @throws \Exception If the version is invalid.
 	 */
 	private function get_post_content( string $version ): string {
 		switch ( $version ) {
@@ -111,7 +113,9 @@ class Cart_Version_Task extends WC_UI_Version_Task {
 	/**
 	 * Execute the task
 	 * 
-	 * @throws \Exception If the task fails
+	 * @param array<string, string> $args Arguments for the task.
+	 * 
+	 * @throws \Exception If the task fails.
 	 */
 	public function execute( array $args = array() ): void {
 		$version      = $this->get_version( $args );

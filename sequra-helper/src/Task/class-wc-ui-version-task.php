@@ -14,13 +14,15 @@ namespace SeQura\Helper\Task;
  */
 abstract class WC_UI_Version_Task extends Task {
 
-	const CLASSIC = 'classic';
-	const BLOCKS  = 'blocks';
+	protected const CLASSIC = 'classic';
+	protected const BLOCKS  = 'blocks';
 
 	/**
 	 * Get version passed in the arguments
 	 * 
-	 * @throws \Exception If the version is invalid
+	 * @param array<string, string> $args The arguments.
+	 * 
+	 * @throws \Exception If the version is invalid.
 	 */
 	protected function get_version( array $args = array() ): string {
 		if ( ! isset( $args['version'] ) ) {

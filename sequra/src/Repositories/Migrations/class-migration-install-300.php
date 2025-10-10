@@ -10,13 +10,13 @@ namespace SeQura\WC\Repositories\Migrations;
 
 use Exception;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\Widget_Settings_Request;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\PromotionalWidgets\Models\Widget_Location;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\WC\Repositories\Repository;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use Throwable;
 
 /**
@@ -46,6 +46,13 @@ class Migration_Install_300 extends Migration {
 	private $queue_repository;
 
 	/**
+	 * Store context
+	 * 
+	 * @var StoreContext
+	 */
+	private $store_context;
+
+	/**
 	 * Get the plugin version when the changes were made.
 	 */
 	public function get_version(): string {
@@ -58,16 +65,17 @@ class Migration_Install_300 extends Migration {
 	 * @param \wpdb $wpdb Database instance.
 	 */
 	public function __construct( 
-		\wpdb $wpdb, 
-		Configuration $configuration,
+		\wpdb $wpdb,
 		Repository $order_repository,
 		Repository $entity_repository,
-		Repository $queue_repository
+		Repository $queue_repository,
+		StoreContext $store_context
 	) {
-		parent::__construct( $wpdb, $configuration );
+		parent::__construct( $wpdb );
 		$this->order_repository  = $order_repository;
 		$this->entity_repository = $entity_repository;
 		$this->queue_repository  = $queue_repository;
+		$this->store_context     = $store_context;
 	}
 
 	/**
@@ -150,12 +158,18 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-		->connection( $this->configuration->get_store_id() )
-		->saveOnboardingData(
+		->connection( $this->store_context->getStoreId() )
+		->connect(
 			new OnboardingRequest(
-				$env_mapping[ $settings['env'] ],
-				strval( $settings['user'] ),
-				strval( $settings['password'] ),
+				array(
+					new ConnectionRequest(
+						$env_mapping[ $settings['env'] ],
+						'',
+						strval( $settings['user'] ),
+						strval( $settings['password'] ),
+						'sequra'
+					),
+				),
 				true
 			)
 		);
@@ -209,7 +223,7 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-		->countryConfiguration( $this->configuration->get_store_id() )
+		->countryConfiguration( $this->store_context->getStoreId() )
 		->saveCountryConfigurations(
 			new CountryConfigurationRequest(
 				array(
@@ -245,17 +259,14 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$response = AdminAPI::get()
-			->generalSettings( $this->configuration->get_store_id() )
+			->generalSettings( $this->store_context->getStoreId() )
 			->saveGeneralSettings(
-				new General_Settings_Request(
+				new GeneralSettingsRequest(
 					true,
 					false,
 					$allowed_ip_addresses,
 					null,
 					null,
-					strval( $settings['enable_for_virtual'] ?? 'no' ) === 'yes',
-					strval( $settings['allow_payment_delay'] ?? 'no' ) === 'yes',
-					strval( $settings['allow_registration_items'] ?? 'no' ) === 'yes',
 					strval( $settings['default_service_end_date'] ?? 'P1Y' )
 				)
 			);
@@ -280,7 +291,6 @@ class Migration_Install_300 extends Migration {
 		$default_sel_for_alt_price         = '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount';
 		$default_sel_for_alt_price_trigger = '.variations';
 		$sel_for_default_location          = '.summary>.price';
-		$country                           = $this->get_store_country();
 		$custom_locations                  = array();
 		foreach ( $settings as $key => $value ) {
 			if ( false !== strpos( $key, 'enabled_in_product_' ) ) {
@@ -288,39 +298,38 @@ class Migration_Install_300 extends Migration {
 				$enabled            = $enabled || $enabled_in_product;
 				$product_campaign   = str_replace( 'enabled_in_product_', '', $key );
 				$parts              = explode( '_', $product_campaign, 2 );
-				
-				$loc                = new Widget_Location(
-					$enabled_in_product,
-					$settings[ "dest_css_sel_$product_campaign" ] ?? $sel_for_default_location,
-					$this->get_widget_style( $settings[ "widget_theme_$product_campaign" ] ?? null ),
-					$parts[0],
-					$country,
-					$parts[1] ?? null
+
+				$custom_locations[] = array(
+					'selForTarget'  => $settings[ "dest_css_sel_$product_campaign" ] ?? $sel_for_default_location,
+					'product'       => $parts[0],
+					'displayWidget' => $enabled_in_product,
+					'widgetStyles'  => $this->get_widget_style( $settings[ "widget_theme_$product_campaign" ] ?? null ),
 				);
-				$custom_locations[] = $loc->to_array();
 			}
 		}
 
 		$response = AdminAPI::get()
-		->widgetConfiguration( $this->configuration->get_store_id() )
+		->widgetConfiguration( $this->store_context->getStoreId() )
 		->setWidgetSettings(
-			new Widget_Settings_Request(
-				$enabled,
-				$settings['assets_secret'] ?? '',
+			new WidgetSettingsRequest(
 				$enabled,
 				false,
 				false,
-				'',
 				$this->get_widget_style(),
-				array(),
-				array(),
-				$settings['price_css_sel'] ?? null,
+				$settings['price_css_sel'] ?? '',
+				$sel_for_default_location,
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
 				$default_sel_for_alt_price,
 				$default_sel_for_alt_price_trigger,
-				$sel_for_default_location,
 				$custom_locations
 			)
 		);
+
 		if ( ! $response->isSuccessful() ) {
 			throw new Exception( 'Error migrating widget settings' );
 		}

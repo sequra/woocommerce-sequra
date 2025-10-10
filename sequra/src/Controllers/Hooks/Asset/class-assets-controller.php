@@ -9,12 +9,12 @@
 namespace SeQura\WC\Controllers\Hooks\Asset;
 
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
-use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\I18n\Interface_I18n;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
-use SeQura\WC\Services\Regex\Interface_Regex;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
+use SeQura\WC\Services\Service\Interface_Settings_Service;
+use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 
 /**
  * Define the assets related functionality
@@ -67,16 +67,9 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	/**
 	 * Settings service
 	 *
-	 * @var Configuration
+	 * @var Interface_Settings_Service
 	 */
-	private $configuration;
-
-	/**
-	 * Assets service
-	 *
-	 * @var Interface_Assets
-	 */
-	private $assets;
+	private $settings_service;
 
 	/**
 	 * Payment method service
@@ -88,9 +81,16 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	/**
 	 * Regex service
 	 * 
-	 * @var Interface_Regex
+	 * @var RegexProvider
 	 */
 	private $regex;
+
+	/**
+	 * Widgets service
+	 * 
+	 * @var Interface_Widgets_Service
+	 */
+	private $widgets_service;
 
 	/**
 	 * Constructor
@@ -103,10 +103,10 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		Interface_I18n $i18n, 
 		Interface_Logger_Service $logger,
 		string $templates_path, 
-		Configuration $configuration,
-		Interface_Assets $assets,
+		Interface_Settings_Service $settings_service,
 		Interface_Payment_Method_Service $payment_method_service,
-		Interface_Regex $regex
+		RegexProvider $regex,
+		Interface_Widgets_Service $widgets_service
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->assets_dir_url         = $assets_dir_url;
@@ -114,11 +114,11 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 		$this->assets_version         = $assets_version;
 		$this->i18n                   = $i18n;
 		$this->logger                 = $logger;
-		$this->configuration          = $configuration;
-		$this->assets                 = $assets;
+		$this->settings_service       = $settings_service;
 		$this->payment_method_service = $payment_method_service;
 		$this->regex                  = $regex;
 		$this->wp_version             = $wp_version;
+		$this->widgets_service        = $widgets_service;
 	}
 
 	/**
@@ -128,11 +128,11 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	public function enqueue_admin() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		if ( ! $this->configuration->is_settings_page() ) {
+		if ( ! $this->settings_service->is_settings_page() ) {
 			return;
 		}
 		// Styles.
-		\wp_enqueue_style( self::HANDLE_CORE, "{$this->assets_dir_url}/css/sequra-core.css", array(), self::INTEGRATION_CORE_VERSION );
+		\wp_enqueue_style( self::HANDLE_CORE, "{$this->assets_dir_url}/integration-core-ui/css/sequra-core.css", array(), self::INTEGRATION_CORE_VERSION );
 		
 		// Scripts.
 		\wp_register_script( self::HANDLE_SETTINGS_PAGE, "{$this->assets_dir_url}/js/dist/page/settings.min.js", array(), $this->assets_version, true );
@@ -147,50 +147,45 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 */
 	private function get_sequra_fe_l10n(): array {
 		$connection_config      = array(
-			'getConnectionDataUrl' => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
+			'getConnectionDataUrl'          => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
+			'getDeploymentsUrl'             => \get_rest_url( null, 'sequra/v1/onboarding/deployments/{storeId}' ),
+			'getNotConnectedDeploymentsUrl' => \get_rest_url( null, 'sequra/v1/onboarding/deployments/not-connected/{storeId}' ),
 		);
 		$payment_page_config    = array_merge(
 			$connection_config,
 			array(
-				'getPaymentMethodsUrl'      => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}/{merchantId}' ),
-				'getAllPaymentMethodsUrl'   => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}' ),
-				'getSellingCountriesUrl'    => \get_rest_url( null, 'sequra/v1/onboarding/countries/selling/{storeId}' ),
-				'getCountrySettingsUrl'     => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
-				'validateConnectionDataUrl' => \get_rest_url( null, 'sequra/v1/onboarding/data/validate/{storeId}' ),
+				'getPaymentMethodsUrl'             => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}/{merchantId}' ),
+				'getAllAvailablePaymentMethodsUrl' => \get_rest_url( null, 'sequra/v1/payment/methods/{storeId}' ),
+				'getSellingCountriesUrl'           => \get_rest_url( null, 'sequra/v1/onboarding/countries/selling/{storeId}' ),
+				'getCountrySettingsUrl'            => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
+				'validateConnectionDataUrl'        => \get_rest_url( null, 'sequra/v1/onboarding/data/validate/{storeId}' ),
 			)
 		);
 		$onboarding_page_config = array_merge(
 			$payment_page_config, 
 			array(
-				'saveConnectionDataUrl'  => \get_rest_url( null, 'sequra/v1/onboarding/data/{storeId}' ),
 				'saveCountrySettingsUrl' => \get_rest_url( null, 'sequra/v1/onboarding/countries/{storeId}' ),
 				'getWidgetSettingsUrl'   => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
 				'saveWidgetSettingsUrl'  => \get_rest_url( null, 'sequra/v1/onboarding/widgets/{storeId}' ),
+				'disconnectUrl'          => \get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
+				'connectUrl'             => \get_rest_url( null, 'sequra/v1/onboarding/data/connect/{storeId}' ),
 			)
 		);
 		$page_config            = array(
-			'onboarding'   => $onboarding_page_config,
-			'settings'     => array_merge(
+			'onboarding' => $onboarding_page_config,
+			'settings'   => array_merge(
 				$onboarding_page_config,
 				array(
-					'getShopPaymentMethodsUrl'          => '', // Not used in this implementation.
 					'getShopCategoriesUrl'              => \get_rest_url( null, 'sequra/v1/settings/shop-categories/{storeId}' ),
 					'getGeneralSettingsUrl'             => \get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
 					'saveGeneralSettingsUrl'            => \get_rest_url( null, 'sequra/v1/settings/general/{storeId}' ),
 					'getShopOrderStatusesUrl'           => \get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
 					'getOrderStatusMappingSettingsUrl'  => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
 					'saveOrderStatusMappingSettingsUrl' => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
-					'disconnectUrl'                     => \get_rest_url( null, 'sequra/v1/onboarding/data/disconnect/{storeId}' ),
 				)
 			),
-			'payment'      => $payment_page_config,
-			'transactions' => array_merge(
-				$connection_config,
-				array(
-					'getTransactionLogsUrl' => \get_rest_url( null, 'sequra/v1/log/{storeId}' ),
-				)
-			),
-			'advanced'     => array_merge(
+			'payment'    => $payment_page_config,
+			'advanced'   => array_merge(
 				$connection_config,
 				array(
 					'getLogsUrl'          => \get_rest_url( null, 'sequra/v1/log/{storeId}' ),
@@ -210,22 +205,21 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'pageConfiguration' => $page_config,
 		);
 
-		$pages_payment = array( 'methods' );
-		$sequra_fe     = array(
+		$sequra_fe = array(
+			'flags'             => array(
+				'isShowCheckoutAsHostedPageFieldVisible' => false, // Not used in this implementation.
+				'configurableSelectorsForMiniWidgets'    => true,
+				'isServiceSellingAllowed'                => true,
+			),
 			'translations'      => array(
 				'default' => $this->load_translation(),
 				'current' => $this->load_translation( $this->i18n->get_lang() ),
 			),
 			'pages'             => array(
-				'onboarding' => array( 'connect', 'countries', 'widgets' ),
+				'onboarding' => array( 'deployments', 'connect', 'countries', 'widgets' ),
 				'settings'   => array( 'general', 'connection', 'order_status', 'widget' ),
-				'payment'    => $pages_payment,
+				'payment'    => array( 'methods' ),
 				'advanced'   => array( 'debug' ),
-			),
-			'integration'       => array(
-				'authToken'    => '', // Not used in this implementation.
-				'isMultistore' => count( $this->configuration->get_stores() ) > 1,
-				'hasVersion'   => version_compare( $this->configuration->get_marketplace_version(), $this->configuration->get_module_version(), '>' ),
 			),
 			'generalSettings'   => array(
 				'useHostedPage'               => false,
@@ -236,15 +230,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 			'isPromotional'     => false,
 			'_state_controller' => $state_controller,
 			'customHeader'      => array( 'X-WP-Nonce' => \wp_create_nonce( 'wp_rest' ) ),
-
-			'regex'             => array(
-				'ip'             => $this->regex->ip( false ),
-				'dateOrDuration' => $this->regex->date_or_duration( false ),
-			),
-			'miniWidgetLabels'  => array(
-				'messages'           => $this->configuration->get_mini_widget_default_messages(),
-				'messagesBelowLimit' => $this->configuration->get_mini_widget_default_messages_below_limit(),
-			),
+			'regex'             => $this->regex->toArray(),
 		);
 
 		return $sequra_fe;
@@ -268,16 +254,15 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return array<string, mixed>
 	 */
 	private function get_sequra_config_params_l10n(): array {
-		$merchant = $this->configuration->get_merchant_ref( $this->i18n->get_current_country() );
-		$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $this->configuration->get_store_id(), $merchant );
+		$data = $this->widgets_service->get_widget_config_params() ?? array();
 		return array(
-			'scriptUri'         => $this->assets->get_cdn_resource_uri( $this->configuration->get_env(), 'sequra-checkout.min.js' ),
-			'thousandSeparator' => \wc_get_price_thousand_separator(),
-			'decimalSeparator'  => \wc_get_price_decimal_separator(),
-			'locale'            => $this->i18n->get_locale(),
-			'merchant'          => $merchant,
-			'assetKey'          => $this->configuration->get_assets_key(),
-			'products'          => array_column( $methods, 'product' ),
+			'scriptUri'         => $data['scriptUri'] ?? '',
+			'thousandSeparator' => $data['thousandSeparator'] ?? '',
+			'decimalSeparator'  => $data['decimalSeparator'] ?? '',
+			'locale'            => $data['locale'] ?? '',
+			'merchant'          => $data['merchant'] ?? '',
+			'assetKey'          => $data['assetKey'] ?? '',
+			'products'          => $data['products'] ?? array(),
 		);
 	}
 
@@ -441,7 +426,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 	 * @return mixed[]
 	 */
 	private function load_translation( $lang = 'en' ): array {
-		$path         = "{$this->assets_dir_path}/lang/{$lang}.json";
+		$path         = "{$this->assets_dir_path}/integration-core-ui/lang/{$lang}.json";
 		$translations = array();
 		
 		global $wp_filesystem;

@@ -20,8 +20,7 @@ use SeQura\Helper\Task\Remove_Db_Tables_Task;
 use SeQura\Helper\Task\Remove_Log_Task;
 use SeQura\Helper\Task\Set_Theme_Task;
 use SeQura\Helper\Task\Task;
-
-// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Recommended
+use SeQura\Helper\Task\Verify_Order_Has_Merchant_Id_Task;
 
 /**
  * SeQura Helper Plugin
@@ -37,6 +36,8 @@ class Plugin {
 	
 	/**
 	 * Constructor
+	 * 
+	 * @param string $file_path The plugin file path.
 	 */
 	public function __construct( string $file_path ) {
 		$this->file_path = $file_path;
@@ -53,28 +54,31 @@ class Plugin {
 	/**
 	 * Disable heartbeat to ease debugging
 	 */
-	public function stop_heartbeat() {
+	public function stop_heartbeat(): void {
 		wp_deregister_script( 'heartbeat' );
 	}
 
 	/**
 	 * Get task for webhook
+	 * 
+	 * @param string $webhook The webhook name.
 	 */
 	private function get_task_for_webhook( $webhook ): Task {
 
 		$map = array(
-			'dummy_services_config' => Configure_Dummy_Service_Task::class,
-			'dummy_config'          => Configure_Dummy_Task::class,
-			'clear_config'          => Clear_Configuration_Task::class,
-			'force_order_failure'   => Force_Order_Failure_Task::class,
-			'remove_log'            => Remove_Log_Task::class,
-			'print_logs'            => Print_Logs_Task::class,
-			'set_theme'             => Set_Theme_Task::class,
-			'cart_version'          => Cart_Version_Task::class,
-			'checkout_version'      => Checkout_Version_Task::class,
-			'plugin_zip'            => Get_Plugin_Zip_Task::class,
-			'remove_db_tables'      => Remove_Db_Tables_Task::class,
-			'v2_config'             => Configure_V2_Task::class,
+			'dummy_services_config'        => Configure_Dummy_Service_Task::class,
+			'dummy_config'                 => Configure_Dummy_Task::class,
+			'clear_config'                 => Clear_Configuration_Task::class,
+			'force_order_failure'          => Force_Order_Failure_Task::class,
+			'remove_log'                   => Remove_Log_Task::class,
+			'print_logs'                   => Print_Logs_Task::class,
+			'set_theme'                    => Set_Theme_Task::class,
+			'cart_version'                 => Cart_Version_Task::class,
+			'checkout_version'             => Checkout_Version_Task::class,
+			'plugin_zip'                   => Get_Plugin_Zip_Task::class,
+			'remove_db_tables'             => Remove_Db_Tables_Task::class,
+			'v2_config'                    => Configure_V2_Task::class,
+			'verify_order_has_merchant_id' => Verify_Order_Has_Merchant_Id_Task::class,
 
 		);
 
@@ -106,7 +110,7 @@ class Plugin {
 	/**
 	 * Declare WooCommerce compatibility.
 	 */
-	public function declare_woocommerce_compatibility() {
+	public function declare_woocommerce_compatibility(): void {
 		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', $this->file_path, true );
 		}

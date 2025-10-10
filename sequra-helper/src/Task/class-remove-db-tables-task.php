@@ -15,7 +15,9 @@ class Remove_Db_Tables_Task extends Task {
 	/**
 	 * Execute the task
 	 * 
-	 * @throws \Exception If the task fails
+	 * @param array<string, string> $args Arguments for the task.
+	 * 
+	 * @throws \Exception If the task fails.
 	 */
 	public function execute( array $args = array() ): void {
 		$this->drop_tables_in_database(

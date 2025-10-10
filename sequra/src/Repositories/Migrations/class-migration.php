@@ -8,8 +8,6 @@
 
 namespace SeQura\WC\Repositories\Migrations;
 
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
-
 /**
  * Database migration interface
  */
@@ -23,20 +21,12 @@ abstract class Migration {
 	protected $db;
 
 	/**
-	 * Configuration service.
-	 *
-	 * @var Configuration
-	 */
-	protected $configuration;
-
-	/**
 	 * Constructor
 	 *
 	 * @param \wpdb $wpdb Database instance.
 	 */
-	public function __construct( \wpdb $wpdb, Configuration $configuration ) {
-		$this->db            = $wpdb;
-		$this->configuration = $configuration;
+	public function __construct( \wpdb $wpdb ) {
+		$this->db = $wpdb;
 	}
 
 	/**

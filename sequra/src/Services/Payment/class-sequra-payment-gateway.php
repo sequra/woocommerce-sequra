@@ -14,14 +14,14 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 
 use SeQura\Core\BusinessLogic\Domain\Order\Exceptions\OrderNotFoundException;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
+use SeQura\Core\BusinessLogic\WebhookAPI\Controller\WebhookController;
 use SeQura\Core\BusinessLogic\WebhookAPI\WebhookAPI;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\Core\Infrastructure\ServiceRegister;
-use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
-use SeQura\WC\Services\Interface_Constants;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Constants\Interface_Constants;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
 use WC_Order;
@@ -34,16 +34,7 @@ use WP_Error;
 class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 
 	private const FORM_FIELD_ENABLED          = 'enabled';
-	private const FORM_FIELD_TITLE            = 'title';
-	private const FORM_FIELD_DESC             = 'description';
 	private const POST_SQ_PAYMENT_METHOD_DATA = 'sequra_payment_method_data';
-	
-	/**
-	 * Payment service
-	 *
-	 * @var Interface_Payment_Service
-	 */
-	private $payment_service;
 
 	/**
 	 * Payment service
@@ -81,11 +72,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	private $logger;
 
 	/**
-	 * Order status service
-	 * 
-	 * @var Order_Status_Settings_Service
+	 * Constants
+	 *
+	 * @var Interface_Constants
 	 */
-	private $order_status_service;
+	private $constants;
 
 	/**
 	 * Constructor
@@ -99,30 +90,23 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		 */
 		\do_action( 'woocommerce_sequra_before_load', $this );
 
-		
-		/**
-		 * Payment service
-		 *
-		 * @var Interface_Payment_Service $payment_service
-		 */
-		$payment_service              = ServiceRegister::getService( Interface_Payment_Service::class );
-		$this->payment_service        = $payment_service;
-		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
-		$this->order_status_service   = ServiceRegister::getService( Order_Status_Settings_Service::class );
-		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
-		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
 		/**
 		 * Constants service
-		 *
+		 * 
 		 * @var Interface_Constants $constants
 		 */
-		$constants                = ServiceRegister::getService( Interface_Constants::class );
-		$this->templates_path     = $constants->get_plugin_templates_path();
-		$this->logger             = ServiceRegister::getService( Interface_Logger_Service::class );
-		$this->id                 = $this->payment_service->get_payment_gateway_id();
-		$this->has_fields         = true;
-		$this->method_title       = __( 'seQura', 'sequra' );
-		$this->method_description = sprintf(
+		$constants       = ServiceRegister::getService( Interface_Constants::class );
+		$this->constants = $constants;
+
+		$this->cart_service           = ServiceRegister::getService( Interface_Cart_Service::class );
+		$this->order_service          = ServiceRegister::getService( Interface_Order_Service::class );
+		$this->payment_method_service = ServiceRegister::getService( Interface_Payment_Method_Service::class );
+		$this->templates_path         = $this->constants->get_plugin_templates_path();
+		$this->logger                 = ServiceRegister::getService( Interface_Logger_Service::class );
+		$this->id                     = $this->constants->get_payment_gateway_id();
+		$this->has_fields             = true;
+		$this->method_title           = __( 'seQura', 'sequra' );
+		$this->method_description     = sprintf(
 			'%1$s <a href="%2$s">%3$s</a>',
 			esc_html__( 'seQura payment method\'s configuration.', 'sequra' ),
 			/**
@@ -148,9 +132,9 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		\add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		\add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'redirect_to_payment' ) );
-		\add_action( 'woocommerce_api_' . $this->payment_service->get_ipn_webhook(), array( $this, 'process_ipn' ) );
-		\add_action( 'woocommerce_api_' . $this->payment_service->get_event_webhook(), array( $this, 'process_event' ) );
-		\add_action( 'woocommerce_api_' . $this->payment_service->get_return_webhook(), array( $this, 'handle_return' ) );
+		\add_action( 'woocommerce_api_' . $this->constants->get_ipn_webhook(), array( $this, 'process_ipn' ) );
+		\add_action( 'woocommerce_api_' . $this->constants->get_event_webhook(), array( $this, 'process_event' ) );
+		\add_action( 'woocommerce_api_' . $this->constants->get_return_webhook(), array( $this, 'handle_return' ) );
 
 		\add_action( 'load-woocommerce_page_wc-settings', array( $this, 'redirect_to_settings_page' ) );
 
@@ -351,7 +335,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Webhook to process IPN callback
 	 */
 	public function process_ipn() {
-		$this->handle_webhook( $this->payment_service->get_ipn_webhook() );
+		$this->handle_webhook( $this->constants->get_ipn_webhook() );
 	}
 
 	/**
@@ -428,15 +412,6 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Validate payload and exit if it is invalid, giving a proper response
 	 */
 	private function die_on_invalid_payload( array $payload ): void {
-		if ( null === $payload['order'] 
-			|| null === $payload['signature'] 
-			|| null === $payload['storeId']
-			|| $this->payment_service->sign( $payload['order'] ) !== $payload['signature'] ) {
-			$this->logger->log_debug( 'Bad signature', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
-			\status_header( 498 );
-			die( 'Bad signature' );
-		}
-
 		// Check if 'sq_state' is one of the expected values.
 		if ( ! in_array( $payload['sq_state'], OrderStates::toArray(), true ) ) {
 			$this->logger->log_error( 'Invalid sq_state', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
@@ -444,11 +419,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			die( 'Invalid state' );
 		}
 
-		$order = wc_get_order( $payload['order'] );
+		$order = empty( $payload['order'] ) ? null : wc_get_order( $payload['order'] );
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger->log_error( 'No order found', __FUNCTION__, __CLASS__, array( new LogContextData( 'payload', $payload ) ) );
 			\status_header( 404 );
-			die( 'No order found id:' . \esc_html( $payload['order'] ) );
+			die( 'No order found id:' . \esc_html( (string) $payload['order'] ) );
 		}
 	}
 
@@ -480,6 +455,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 					) 
 				);
 
+				/**
+				 * Message to show to the user.
+				 * 
+				 * @var string $msg
+				 */
 				$msg = isset( $error['errorMessage'] ) ? $error['errorMessage'] : 'Request failed';
 				
 				$order = \wc_get_order( $payload['order'] );
@@ -518,7 +498,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		if ( isset( $_POST['event'] ) && 'cancelled' !== \sanitize_text_field( \wp_unslash( $_POST['event'] ) ) ) {
 			return;
 		}
-		$this->handle_webhook( $this->payment_service->get_event_webhook() );
+		$this->handle_webhook( $this->constants->get_event_webhook() );
 	}
 
 	/**

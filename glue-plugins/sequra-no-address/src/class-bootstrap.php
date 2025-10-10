@@ -13,7 +13,7 @@ use SeQura\WC\NoAddress\Controller\Hooks\Order\Order_Controller;
 use SeQura\WC\NoAddress\Services\Constants;
 use SeQura\WC\NoAddress\Services\Interface_Constants;
 use SeQura\WC\Services\Interface_Constants as Interface_Base_Constants;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 
 /**
  * Implementation for the core bootstrap class.

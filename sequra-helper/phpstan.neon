@@ -1,0 +1,13 @@
+parameters:
+    level: 9
+    errorFormat: table
+    treatPhpDocTypesAsCertain: false
+    paths:
+        - sequra-helper.php
+        - src/
+    ignoreErrors:
+        - '#Cannot access offset .* on mixed#'
+        - '#Argument of an invalid type mixed supplied for foreach#'
+        - '#Cannot cast mixed to int#'
+        - '#Call to static method getService\(\) on an unknown class SeQura\\Core\\Infrastructure\\ServiceRegister#'
+        - '#Function is_shop|is_cart|is_product|wc_get_price_decimal_separator|wc_get_price_thousand_separator|str_starts_with|str_ends_with|wc_get_endpoint_url|wc_get_product|wc_print_notice|wc_add_notice|wc_get_checkout_url|wc_get_order_status_name|wc_get_orders|get_woocommerce_currency|wc_get_template|wc_get_order_statuses|is_checkout|wc_print_notices|WC|wc_get_product_category_list|wc_get_order not found#'
