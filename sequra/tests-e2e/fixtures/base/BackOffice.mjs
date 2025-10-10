@@ -62,8 +62,8 @@ export default class BackOffice extends BaseBackOffice {
      * @returns {Promise<void>}
      */
     async logout(options = {}) {
-        // Clear WordPress login cookies.
-        await this.page.context().clearCookies({ name: /wordpress_logged_in.*/ });
+        // Clear all cookies to remove session.
+        await this.page.context().clearCookies();
     }
 
     async #gotoLinkTarget(link, append = '') {
