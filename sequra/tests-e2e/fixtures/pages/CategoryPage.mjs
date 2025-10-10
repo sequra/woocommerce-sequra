@@ -12,6 +12,6 @@ export default class CategoryPage extends BaseCategoryPage {
     */
     categoryUrl(options) {
         const { slug } = options;
-        return `${this.baseURL}/${slug}/`;
+        return `${this.baseURL}/product-category/${slug}/`;
     }
 }
