@@ -2,35 +2,71 @@ import { DataProvider as BaseDataProvider } from 'playwright-fixture-for-plugins
 // TODO: pending review
 export default class DataProvider extends BaseDataProvider {
 
+    static UI_BLOCKS = 'blocks';
+    static UI_CLASSIC = 'classic';
+
     /**
     * Configuration for the widget form with all options enabled
-    * @returns {WidgetOptions} Configuration for the widget
+    * @param {Object} options Allows extending the default behavior by defining additional options.
+    * @param {string} options.uiVersion The UI version to use. One of DataProvider.UI_BLOCKS or DataProvider.UI_CLASSIC
+    * @returns {import('playwright-fixture-for-plugins/src/utils/DataProvider').WidgetOptions} Configuration for the widget
     */
-    widgetOptions() {
-        const widgetOptions = super.widgetOptions();
-        return {
+    widgetOptions(options = {}) {
+        options = { uiVersion: DataProvider.UI_BLOCKS, ...options };
+        if (options.uiVersion !== DataProvider.UI_BLOCKS && options.uiVersion !== DataProvider.UI_CLASSIC) {
+            throw new Error(`Invalid UI version: ${JSON.stringify(options)}. Must be one of DataProvider.UI_BLOCKS or DataProvider.UI_CLASSIC`);
+        }
+        const widgetOptions = super.widgetOptions(options);
+        const commonOptions = {
             ...widgetOptions,
             product: {
                 ...widgetOptions.product,
-                priceSel: '.product-info-price [data-price-type="finalPrice"] .price',
-                locationSel: '.product.info',
-                customLocations: [
-                    {
-                        ...widgetOptions.product.customLocations[0],
-                        locationSel: '#product-addtocart-button'
-                    }
-                ]
-            },
-            cart: {
-                ...widgetOptions.cart,
-                priceSel: '.cart-totals .grand.totals .price',
-                locationSel: '.cart-totals',
-            },
-            productListing: {
-                ...widgetOptions.productListing,
-                useSelectors: false, // Disable selectors for product listing.
+                altPriceSel: '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
+                altPriceTriggerSel: '.variations',
+                customLocations: widgetOptions.product.customLocations.map(cl => ({
+                    ...cl,
+                    locationSel: cl.product === 'i1' ? 'form.cart' : cl.locationSel
+                }))
             }
-        }
+        };
+        return ({
+            [DataProvider.UI_BLOCKS]: {
+                ...commonOptions,
+                product: {
+                    ...commonOptions.product,
+                    priceSel: '.wc-block-components-product-price>.amount,.wc-block-components-product-price ins .amount',
+                    locationSel: '.wc-block-components-product-price'
+                },
+                cart: {
+                    ...commonOptions.cart,
+                    priceSel: '.wp-block-woocommerce-cart-totals-block .wc-block-components-totals-footer-item .wc-block-components-totals-item__value',
+                    locationSel: '.wp-block-woocommerce-cart-totals-block .wc-block-components-totals-footer-item'
+                },
+                productListing: {
+                    ...commonOptions.productListing,
+                    priceSel: '.product .wc-block-components-product-price>.amount:first-child,.product .wc-block-components-product-price ins .amount',
+                    locationSel: '.product .wc-block-components-product-price'
+                }
+            },
+            [DataProvider.UI_CLASSIC]: {
+                ...commonOptions,
+                product: {
+                    ...commonOptions.product,
+                    priceSel: '.summary .price>.amount,.summary .price ins .amount',
+                    locationSel: '.summary>.price'
+                },
+                cart: {
+                    ...commonOptions.cart,
+                    priceSel: '.order-total .amount',
+                    locationSel: '.order-total'
+                },
+                productListing: {
+                    ...commonOptions.productListing,
+                    priceSel: '.product .price>.amount:first-child,.product .price ins .amount',
+                    locationSel: '.product .price'
+                }
+            }
+        })[options.uiVersion];
     }
 
     /**
@@ -43,7 +79,7 @@ export default class DataProvider extends BaseDataProvider {
         if (!args) {
             throw new Error(`No front-end widget arguments found for slug: ${JSON.stringify(options)}`);
         }
-        return this.frontEndWidgetOptions('pp3', null, args.amount, args.registrationAmount);
+        return this.frontEndWidgetOptions('pp3', null, args.amount, args.registrationAmount, options);
     }
 
     /**
@@ -55,7 +91,7 @@ export default class DataProvider extends BaseDataProvider {
         if (!args) {
             throw new Error(`No front-end widget arguments found for slug: ${JSON.stringify(options)}`);
         }
-        return this.frontEndWidgetOptions('sp1', 'permanente', args.amount, args.registrationAmount);
+        return this.frontEndWidgetOptions('sp1', 'permanente', args.amount, args.registrationAmount, options);
     }
 
     /**
@@ -67,12 +103,13 @@ export default class DataProvider extends BaseDataProvider {
         if (!args) {
             throw new Error(`No front-end widget arguments found for slug: ${JSON.stringify(options)}`);
         }
-        const widget = this.widgetOptions();
-        return {
-            ...this.frontEndWidgetOptions('i1', null, args.amount, args.registrationAmount),
-            locationSel: widget.product.customLocations[0].locationSel || widget.product.locationSel,
-            widgetConfig: widget.product.customLocations[0].widgetConfig || widget.product.widgetConfig,
-        };
+        return this.frontEndWidgetOptions('i1', null, args.amount, args.registrationAmount, options);
+        // const widget = this.widgetOptions();
+        // return {
+        //     ...this.frontEndWidgetOptions('i1', null, args.amount, args.registrationAmount),
+        //     locationSel: widget.product.customLocations[0].locationSel || widget.product.locationSel,
+        //     widgetConfig: widget.product.customLocations[0].widgetConfig || widget.product.widgetConfig,
+        // };
     }
 
     /**
