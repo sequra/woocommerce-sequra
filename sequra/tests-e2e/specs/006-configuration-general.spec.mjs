@@ -25,7 +25,6 @@ async function assertWidgetAndPaymentMethodVisibility(available, productPage, ca
 }
 
 async function assertMiniWidgetVisibility(available, categoryPage) {
-  return; // TODO: Sometimes fails here but the widget is showing, investigate why.
   await categoryPage.goto({ slug: 'accessories' });
   if (available) {
     await categoryPage.expectAnyVisibleMiniWidget('pp3');
@@ -61,8 +60,8 @@ test.describe('Configuration', () => {
       await generalSettingsPage.fillAllowedIPAddresses(ipAddresses);
       await generalSettingsPage.save({ skipIfDisabled: true });
       await backOffice.logout();
-      await assertWidgetAndPaymentMethodVisibility(available, productPage, cartPage, checkoutPage, dataProvider, helper);
       await assertMiniWidgetVisibility(available, categoryPage);
+      await assertWidgetAndPaymentMethodVisibility(available, productPage, cartPage, checkoutPage, dataProvider, helper);
       await generalSettingsPage.goto();
       await generalSettingsPage.expectLoadingShowAndHide();
     }
@@ -117,8 +116,10 @@ test.describe('Configuration', () => {
       await generalSettingsPage.selectExcludedCategories(categories);
       await generalSettingsPage.save({ skipIfDisabled: true });
       await backOffice.logout();
+      // TODO: There's no way to apply an availability filter to product listing widgets based on current category..
+      // In the future, if we add a product filter by category, we can test both available and not available scenarios.
+      // await assertMiniWidgetVisibility(available, categoryPage);
       await assertWidgetAndPaymentMethodVisibility(available, productPage, cartPage, checkoutPage, dataProvider, helper);
-      await assertMiniWidgetVisibility(available, categoryPage);
       await generalSettingsPage.goto();
       await generalSettingsPage.expectLoadingShowAndHide();
     }
