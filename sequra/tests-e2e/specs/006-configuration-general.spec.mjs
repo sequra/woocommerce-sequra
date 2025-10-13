@@ -96,7 +96,7 @@ test.describe('Configuration', () => {
     }
   });
 
-  test('Change excluded categories', async ({ helper, dataProvider, backOffice, generalSettingsPage, productPage, checkoutPage, cartPage, categoryPage }) => {
+  test('Change excluded categories', async ({ helper, dataProvider, backOffice, generalSettingsPage, productPage, checkoutPage, cartPage }) => {
 
     // Setup
     const { dummy_config, clear_config } = helper.webhooks;
@@ -191,7 +191,7 @@ test.describe('Configuration', () => {
     }
   });
 
-  test('Change available countries', async ({ helper, dataProvider, page, generalSettingsPage, checkoutPage }) => {
+  test('Change available countries', async ({ helper, dataProvider, page, generalSettingsPage }) => {
     // Setup
     const { dummy_config, clear_config } = helper.webhooks;
     await helper.executeWebhook({ webhook: clear_config }); // Clear the configuration.
@@ -216,5 +216,73 @@ test.describe('Configuration', () => {
     await page.reload();
     await generalSettingsPage.expectLoadingShowAndHide();
     await generalSettingsPage.expectAvailableCountries({ countries: onlyFrance });
+  });
+
+  test('Service selling configuration is displayed correctly', async ({ helper, page, generalSettingsPage }) => {
+    // Setup
+    const { dummy_config, dummy_services_config, clear_config } = helper.webhooks;
+    await helper.executeWebhooksSequentially([{ webhook: clear_config }, { webhook: dummy_config }]);
+
+    // Execution
+    // Case 1: Configuration does not allows to sell services.
+    await generalSettingsPage.goto();
+    await generalSettingsPage.expectLoadingShowAndHide();
+    await generalSettingsPage.expectServicesConfiguration();
+    // Case 2: Configuration allows to sell services.
+    const configuration = {
+      enabledForServices: ['ES'],
+      allowRegistrationItems: ['ES'],
+      allowFirstServicePaymentDelay: ['ES'],
+      defaultServicesEndDate: 'P1Y'
+    };
+    await helper.executeWebhooksSequentially([{ webhook: clear_config }, { webhook: dummy_services_config }]);
+    await page.reload();
+    await generalSettingsPage.expectLoadingShowAndHide();
+    await generalSettingsPage.expectServicesConfiguration(configuration);
+    // Test the form fields.
+    const notAllowedValues = [
+      '',
+      'abc',
+      '2017/08/31',
+      '2023-02-29',
+      '2023-02-30',
+      '2023-02-31',
+      '2023-01-32',
+      '2023-04-31',
+      '2023-00-00',
+      '2023-01-31abc',
+      'P1Y23',
+      'P',
+      'P1Y2M3MT',
+      '2023-01-31P1Y',
+    ];
+    const allowedValues = [
+      '2030-12-31',
+      '2024-02-29',
+      'P5Y',
+      'P2Y3M',
+    ];
+    // Test cancellation of the changes
+    await generalSettingsPage.fillDefaultServicesEndDate(allowedValues[0]);
+    await generalSettingsPage.cancel();
+    await generalSettingsPage.expectServicesConfiguration(configuration);
+    // Test valid and invalid values.
+    const fillDefaultServiceEndDateAndAssert = async (configuration, newValue, isValid) => {
+      await generalSettingsPage.fillDefaultServicesEndDate(newValue);
+      await generalSettingsPage.save({ expectLoadingShowAndHide: isValid, skipIfDisabled: true });
+      if (!isValid) {
+        await expect(page.getByText('This field must contain only dates as 2017-08-31 or time duration as P3M15D (3 months and 15 days). Check ISO 8601'), 'The error message under "Default services end date" field should be visible').toBeVisible();
+      } else {
+        configuration.defaultServicesEndDate = newValue;
+      }
+      await page.reload();
+      await generalSettingsPage.expectServicesConfiguration(configuration);
+    }
+    for (const value of notAllowedValues) {
+      await fillDefaultServiceEndDateAndAssert(configuration, value, false);
+    }
+    for (const value of allowedValues) {
+      await fillDefaultServiceEndDateAndAssert(configuration, value, true);
+    }
   });
 });
