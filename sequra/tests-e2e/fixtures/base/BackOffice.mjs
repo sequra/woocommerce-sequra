@@ -48,6 +48,7 @@ export default class BackOffice extends BaseBackOffice {
         const user = process.env.WP_ADMIN_USER;
         const pass = process.env.WP_ADMIN_PASSWORD;
 
+        await this.page.waitForTimeout(1000); // Sometimes WP resets the inputs after they are fulfilled and that leads to issues.
         await this.locators.usernameInput().fill(''); // ensure empty
         await this.locators.usernameInput().fill(user);
         await this.locators.passwordInput().fill(''); // ensure empty
