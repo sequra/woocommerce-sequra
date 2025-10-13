@@ -1,12 +1,19 @@
 import { test } from '../fixtures/test.mjs';
+import DataProvider from '../fixtures/utils/DataProvider.mjs';
 
 test.describe('Service checkout', () => {
 
   test('Order of virtual product is set as processing after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
-    const { dummy_services_config, checkout_version } = helper.webhooks;
-    await helper.executeWebhook({ webhook: dummy_services_config });
-    await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: 'blocks' }] });
+    const uiVersion = DataProvider.UI_BLOCKS;
+    const theme = dataProvider.themeForUiVersion(uiVersion);
+    const { clear_config, dummy_services_config, checkout_version, set_theme } = helper.webhooks;
+    await helper.executeWebhooksSequentially([
+      { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
+      { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: clear_config },
+      { webhook: dummy_services_config }
+    ]);
     const shopper = dataProvider.shopper();
 
     // Execution
@@ -21,9 +28,15 @@ test.describe('Service checkout', () => {
 
   test('Order of virtual & downloadable product is set as completed after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
-    const { dummy_services_config, checkout_version } = helper.webhooks;
-    await helper.executeWebhook({ webhook: dummy_services_config });
-    await helper.executeWebhook({ webhook: checkout_version, args: [{ name: 'version', value: 'blocks' }] });
+    const uiVersion = DataProvider.UI_BLOCKS;
+    const theme = dataProvider.themeForUiVersion(uiVersion);
+    const { clear_config, dummy_services_config, checkout_version, set_theme } = helper.webhooks;
+    await helper.executeWebhooksSequentially([
+      { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
+      { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: clear_config },
+      { webhook: dummy_services_config }
+    ]);
     const shopper = dataProvider.shopper();
 
     // Execution
