@@ -74,17 +74,7 @@ module.exports = defineConfig({
       name: 'configuration-widget',
       use: { ...devices['Desktop Chrome'] },
       testMatch: '008-configuration-widget.spec.mjs',
-    },
-    // {
-    //   name: 'configuration-mini-widget',
-    //   use: { ...devices['Desktop Chrome'] },
-    //   testMatch: '009-configuration-mini-widget.spec.js',
-    // },
-    // {
-    //   name: 'migration',
-    //   use: { ...devices['Desktop Chrome'] },
-    //   testMatch: '099-migration.spec.js',
-    // },
+    }
   ],
 });
 
