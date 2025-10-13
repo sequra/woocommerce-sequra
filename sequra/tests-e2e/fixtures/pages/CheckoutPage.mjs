@@ -117,10 +117,9 @@ export default class CheckoutPage extends BaseCheckoutPage {
     * @param {string[]} options.otp Digits of the OTP
     */
     async placeOrder(options) {
-        await this.locators.paymentMethodInput({ ...options, checked: false }).click();
-        // await this.#waitForFinishLoading();
+        await this.selectPaymentMethod(options);
+
         await this.locators.submitCheckout().click();
-        // await this.#waitForFinishLoading();
         // Fill checkout form.
         switch (options.product) {
             case 'i1':
@@ -216,6 +215,41 @@ export default class CheckoutPage extends BaseCheckoutPage {
         // }
 
         // For now, just wait 10 seconds.
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await this.page.waitForTimeout(10000);
+    }
+
+    /**
+     * Select the payment method, waiting for it to be available if needed
+     *
+     * @param {string} product seQura product (i1, pp3, etc)
+     * @returns {Promise<void>}
+     */
+    async selectPaymentMethod(options) {
+        const { paymentMethodInput } = this.locators;
+        const interval = 1000;
+        const timeout = 10000;
+        let currentTimeout = 0;
+
+        while (currentTimeout < timeout) {
+            await this.page.waitForTimeout(interval);
+            currentTimeout += interval;
+
+            // see if there is a checked input already
+            const isChecked = await paymentMethodInput({ ...options, checked: true }).count();
+            if (isChecked) {
+                continue;
+            }
+            // If not checked, try to click it.
+            try {
+                await paymentMethodInput({ ...options, checked: false }).click();
+                // A success means the input was redrawn and we need to wait again to see if it remains checked.
+                currentTimeout = 0;
+            } catch (error) {
+                // A failure means the input is not visible yet.
+            }
+        }
+        if (!(await paymentMethodInput({ ...options, checked: true }).count())) {
+            throw new Error(`Could not select the payment method for product ${options.product} after ${timeout}ms`);
+        }
     }
 }

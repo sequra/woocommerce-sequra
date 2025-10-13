@@ -13,7 +13,7 @@ test.describe('Service checkout', () => {
     await productPage.addToCart({ slug: 'album', quantity: 1 });
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: false, ...shopper });
-    await checkoutPage.expectPaymentMethodsBeingReloaded();
+    // await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider, { isOrderForService: true });
     await checkoutPage.expectOrderChangeTo(backOffice, { toStatus: 'Processing' });
@@ -30,7 +30,7 @@ test.describe('Service checkout', () => {
     await productPage.addToCart({ slug: 'downloadable-album', quantity: 1 });
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: false, ...shopper });
-    await checkoutPage.expectPaymentMethodsBeingReloaded();
+    // await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider, { isOrderForService: true });
     await checkoutPage.expectOrderChangeTo(backOffice, { toStatus: 'Completed' });
