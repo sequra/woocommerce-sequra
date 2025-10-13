@@ -128,8 +128,8 @@ abstract class Configure_Sequra_Entities_Task extends Task {
 
 	protected const WIDGET_SELECTORS = array(
 		self::BLOCKS  => array(
-			'productPriceSelector'           => '.wc-block-components-product-price>.amount,.wc-block-components-product-price ins .amount',
-			'productLocationSelector'        => '.wc-block-components-product-price',
+			'productPriceSelector'           => 'main .wc-block-components-product-price>.amount,main .wc-block-components-product-price ins .amount',
+			'productLocationSelector'        => 'main .wc-block-components-product-price',
 			'productAltPriceSelector'        => '.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
 			'productAltPriceTriggerSelector' => '.variations',
 			'cartPriceSelector'              => '.wp-block-woocommerce-cart-totals-block .wc-block-components-totals-footer-item .wc-block-components-totals-item__value',
