@@ -34,8 +34,8 @@ export default class DataProvider extends BaseDataProvider {
                 ...commonOptions,
                 product: {
                     ...commonOptions.product,
-                    priceSel: '.wc-block-components-product-price>.amount,.wc-block-components-product-price ins .amount',
-                    locationSel: '.wc-block-components-product-price'
+                    priceSel: 'main .wc-block-components-product-price>.amount,main .wc-block-components-product-price ins .amount',
+                    locationSel: 'main .wc-block-components-product-price'
                 },
                 cart: {
                     ...commonOptions.cart,
