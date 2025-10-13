@@ -124,7 +124,9 @@ test.describe('Widget settings', () => {
     const { dummy_config, clear_config, set_theme } = helper.webhooks;
     await helper.executeWebhook({ webhook: clear_config }); // Clear the configuration.
     await helper.executeWebhook({ webhook: dummy_config, args: [{ name: 'widgets', value: '0' }] }); // Setup with widgets disabled.
-    await helper.executeWebhook({ webhook: set_theme, args: [{ name: 'theme', value: DataProvider.UI_BLOCKS }] });
+    const uiVersion = DataProvider.UI_BLOCKS;
+    const theme = dataProvider.themeForUiVersion(uiVersion);
+    await helper.executeWebhook({ webhook: set_theme, args: [{ name: 'theme', value: theme }] });
 
     const widgetOptions = dataProvider.onlyProductWidgetOptions();
     widgetOptions.product.customLocations[0].locationSel = '#product-addtocart-button-bad-selector';
@@ -146,10 +148,12 @@ test.describe('Widget settings', () => {
 
   test('Do not display the widget on the product page when custom location is disabled', async ({ backOffice, helper, widgetSettingsPage, dataProvider, productPage }) => {
     // Setup
-    const { dummy_config, clear_config } = helper.webhooks;
+    const { dummy_config, clear_config, set_theme } = helper.webhooks;
     await helper.executeWebhook({ webhook: clear_config }); // Clear the configuration.
     await helper.executeWebhook({ webhook: dummy_config, args: [{ name: 'widgets', value: '0' }] }); // Setup with widgets disabled.
-    await helper.executeWebhook({ webhook: set_theme, args: [{ name: 'theme', value: DataProvider.UI_BLOCKS }] });
+    const uiVersion = DataProvider.UI_BLOCKS;
+    const theme = dataProvider.themeForUiVersion(uiVersion);
+    await helper.executeWebhook({ webhook: set_theme, args: [{ name: 'theme', value: theme }] });
 
     const widgetOptions = dataProvider.onlyProductWidgetOptions();
     widgetOptions.product.customLocations[0].display = false;
