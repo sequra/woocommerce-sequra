@@ -6,6 +6,23 @@ export default class DataProvider extends BaseDataProvider {
     static UI_CLASSIC = 'classic';
 
     /**
+     * Map the UI version to a theme that uses that UI version
+     * @param {string} uiVersion One of DataProvider.UI_BLOCKS or DataProvider.UI_CLASSIC
+     * @throws {Error} If the UI version is not recognized
+     * @returns {string} The theme that uses that UI version
+     */
+    themeForUiVersion(uiVersion) {
+        const themes = {
+            [DataProvider.UI_BLOCKS]: 'twentytwentyfour',
+            [DataProvider.UI_CLASSIC]: 'storefront',
+        }
+        if ('undefined' === typeof themes[uiVersion]) {
+            throw new Error(`Invalid UI version: ${JSON.stringify(uiVersion)}. Must be one of DataProvider.UI_BLOCKS or DataProvider.UI_CLASSIC`);
+        }
+        return themes[uiVersion];
+    }
+
+    /**
     * Configuration for the widget form with all options enabled
     * @param {Object} options Allows extending the default behavior by defining additional options.
     * @param {string} options.uiVersion The UI version to use. One of DataProvider.UI_BLOCKS or DataProvider.UI_CLASSIC
@@ -123,7 +140,8 @@ export default class DataProvider extends BaseDataProvider {
             return null;
         }
         return {
-            "sunglasses": { amount: 9000, registrationAmount: null }
+            "sunglasses": { amount: 9000, registrationAmount: null },
+            "hoodie": { amount: 8000, registrationAmount: null }
         }[options.slug] || null;
     }
 }

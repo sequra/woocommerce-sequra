@@ -28,6 +28,7 @@ export default class BackOffice extends BaseBackOffice {
         if (!force) {
             const cookies = await this.page.context().cookies();
             if (cookies.find(c => -1 !== c.name.search('wordpress_logged_in'))) {
+                await this.page.goto(`${this.baseURL}/wp-admin/`, { waitUntil: waitUntil });
                 return;
             }
         }
