@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Tests
  */
 
-namespace SeQura\WC\Tests\Controllers\Hooks\Process;
+namespace SeQura\WC\Tests\Repositories\Migrations;
 
 use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Dto\Table_Index;

@@ -222,17 +222,34 @@ class Migration_Install_300 extends Migration {
 			return;
 		}
 
+		$merchant_id            = strval( $settings['merchantref'] );
+		$raw_results            = $this->db->get_results(
+			$this->db->prepare(
+				'SELECT `index_2` FROM %i WHERE `type` = %s AND `index_1` = %s AND `index_3` = %s',
+				$this->entity_repository->get_table_name(),
+				'Credentials',
+				$this->store_context->getStoreId(),
+				$merchant_id
+			),
+			ARRAY_A 
+		);
+		$country_configurations = array();
+		if ( is_array( $raw_results ) ) {   
+			foreach ( $raw_results as $row ) {
+				if ( ! isset( $row['index_2'] ) ) {
+					continue;
+				}
+				$country_configurations[] = array(
+					'countryCode' => $row['index_2'],
+					'merchantId'  => $merchant_id,
+				);
+			}
+		}
+
 		$response = AdminAPI::get()
 		->countryConfiguration( $this->store_context->getStoreId() )
 		->saveCountryConfigurations(
-			new CountryConfigurationRequest(
-				array(
-					array(
-						'countryCode' => $this->get_store_country(),
-						'merchantId'  => strval( $settings['merchantref'] ),
-					),
-				) 
-			) 
+			new CountryConfigurationRequest( $country_configurations ) 
 		);
 		if ( ! $response->isSuccessful() ) {
 			throw new Exception( 'Error migrating country settings' );
