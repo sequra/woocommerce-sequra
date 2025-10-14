@@ -377,14 +377,17 @@ class Order_Service implements Interface_Order_Service {
 
 		try {
 			$conn_data = $this->connection_service->getConnectionDataByMerchantId( $merchant_id );
-			switch ( $conn_data->getEnvironment() ) {
-				case BaseProxy::TEST_MODE:
-					return 'https://simbox.sequrapi.com/orders/' . $order->get_transaction_id();
-				case BaseProxy::LIVE_MODE:
-					return 'https://simba.sequra.es/orders/' . $order->get_transaction_id();
-				default:
-					return null;
-			}
+			$base_url  = array(
+				'sequra' => array(
+					BaseProxy::TEST_MODE => 'https://simbox.sequrapi.com',
+					BaseProxy::LIVE_MODE => 'https://simba.sequra.es',
+				),
+				'svea'   => array(
+					BaseProxy::TEST_MODE => 'https://simbox.sequra.svea.com',
+					BaseProxy::LIVE_MODE => 'https://simba.sequra.svea.com',
+				),
+			);
+			return ! isset( $base_url[ $conn_data->getDeployment() ][ $conn_data->getEnvironment() ] ) ? null : $base_url[ $conn_data->getDeployment() ][ $conn_data->getEnvironment() ] . '/orders/' . $order->get_transaction_id();
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			return null;
