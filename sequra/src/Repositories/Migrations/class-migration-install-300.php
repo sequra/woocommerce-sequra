@@ -87,6 +87,7 @@ class Migration_Install_300 extends Migration {
 		$this->add_new_tables_to_database();
 		$woocommerce_sequra_settings = (array) \get_option( 'woocommerce_sequra_settings', array() );
 		if ( ! empty( $woocommerce_sequra_settings ) ) {
+			$this->fetch_deployments();
 			$this->migrate_connection_configuration( $woocommerce_sequra_settings );
 			$this->migrate_general_settings_configuration( $woocommerce_sequra_settings );
 			$this->migrate_country_configuration( $woocommerce_sequra_settings );
@@ -135,6 +136,21 @@ class Migration_Install_300 extends Migration {
 		return is_array( $result ) && count( $result ) > 0;
 	}
 
+	/**
+	 * Fetch deployment targets and save them to the database
+	 *
+	 * @throws \Exception
+	 */
+	private function fetch_deployments(): void {
+		$response = AdminAPI::get()
+			->deployments( $this->store_context->getStoreId() )
+			->getAllDeployments();
+		
+		if ( ! $response->isSuccessful() ) {
+			throw new Exception( 'Error fetching deployment targets' );
+		}
+	}
+
 	/** Migrate connection settings from v2
 	 *
 	 * @param string[] $settings
@@ -177,14 +193,6 @@ class Migration_Install_300 extends Migration {
 		if ( ! $response->isSuccessful() ) {
 			throw new Exception( 'Error migrating connection settings' );
 		}
-	}
-
-	/**
-	 * Get the store country code.
-	 */
-	private function get_store_country(): string {
-		$country = strval( get_option( 'woocommerce_default_country', 'ES' ) );
-		return strtoupper( explode( ':', $country )[0] );
 	}
 
 	/**

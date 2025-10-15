@@ -13,9 +13,12 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\ConnectionRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Requests\GetCachedPaymentMethodsRequest;
+use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\DataAccess\PromotionalWidgets\Entities\WidgetSettings;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
@@ -86,10 +89,27 @@ class Migration_Install_400 extends Migration {
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
 	public function run(): void {
+		$this->fetch_deployments();
 		$this->migrate_connection_data();
+		$this->migrate_general_settings();
 		$this->migrate_country_configuration();
 		$this->migrate_payment_methods();
 		$this->migrate_widget_settings();
+	}
+
+	/**
+	 * Fetch deployment targets and save them to the database
+	 *
+	 * @throws Exception
+	 */
+	private function fetch_deployments(): void {
+		$response = AdminAPI::get()
+			->deployments( $this->store_context->getStoreId() )
+			->getAllDeployments();
+		
+		if ( ! $response->isSuccessful() ) {
+			throw new Exception( 'Error fetching deployment targets' );
+		}
 	}
 
 	/**
@@ -243,6 +263,41 @@ class Migration_Install_400 extends Migration {
 			throw new Exception( 'Error migrating WidgetSettings' );
 		}
 	}
+	/**
+	 * Migrate GeneralSettings to the new schema.
+	 * 
+	 * @throws Throwable|Exception
+	 */
+	private function migrate_general_settings(): void {
+
+		$data = $this->get_general_settings();
+		if ( null === $data ) {
+			// No widget settings found, nothing to migrate.
+			return;
+		}
+
+		// Remove old GeneralSettings to prevent errors due to non-existing classes.
+		if ( ! $this->db->delete( $this->entity_table, array( 'id' => $data['id'] ) ) ) {
+			throw new Exception( 'Error removing old GeneralSettings' );
+		}
+
+		$response = AdminAPI::get()
+			->generalSettings( $this->store_context->getStoreId() )
+			->saveGeneralSettings(
+				new GeneralSettingsRequest(
+					$data['generalSettings']['sendOrderReportsPeriodicallyToSeQura'],
+					$data['generalSettings']['showSeQuraCheckoutAsHostedPage'],
+					$data['generalSettings']['allowedIPAddresses'],
+					$data['generalSettings']['excludedProducts'],
+					$data['generalSettings']['excludedCategories'],
+					$data['generalSettings']['defaultServicesEndDate']
+				)
+			);
+			
+		if ( ! $response->isSuccessful() ) {
+			throw new Exception( 'Error migrating GeneralSettings' );
+		}
+	}
 
 	/**
 	 * Migrate payment methods to the new schema.
@@ -349,7 +404,6 @@ class Migration_Install_400 extends Migration {
 	 * @return array{
 	 *      id: int,
 	 *      widgetSettings: array{
-	 *          enabled: bool,
 	 *          displayOnProductPage: bool,
 	 *          showInstallmentsInProductListing: bool,
 	 *          showInstallmentsInCartPage: bool,
@@ -388,6 +442,11 @@ class Migration_Install_400 extends Migration {
 			return null;
 		}
 
+		if ( WidgetSettings::class === strval( $data['class_name'] ?? '' ) ) {
+			// Data is already in the new format, nothing to migrate.
+			return null;
+		}
+
 		$custom_widget_settings = array();
 		$source                 = $data['widgetSettings']['widgetSettingsForProduct']['customWidgetSettings'] ?? ( $data['widgetSettings']['widgetLocationConfiguration']['customLocations'] ?? array() );
 		foreach ( $source as $value ) {
@@ -415,7 +474,6 @@ class Migration_Install_400 extends Migration {
 		return array(
 			'id'             => (int) $row['id'],
 			'widgetSettings' => array(
-				'enabled'                          => $data['widgetSettings']['enabled'] ?? false,
 				'displayOnProductPage'             => $data['widgetSettings']['displayOnProductPage'] ?? false,
 				'showInstallmentsInProductListing' => $data['widgetSettings']['showInstallmentsInProductListing'] ?? false,
 				'showInstallmentsInCartPage'       => $data['widgetSettings']['showInstallmentsInCartPage'] ?? false,
@@ -437,6 +495,67 @@ class Migration_Install_400 extends Migration {
 					'locationSelector' => $data['widgetSettings']['widgetSettingsForListing']['locationSelector'] ?? ( $data['widgetSettings']['listingMiniWidgetConfiguration']['selForDefaultLocation'] ?? '' ),
 					'widgetProduct'    => $listing_widget_product,
 				),
+			),
+		);
+	}
+
+	
+	/**
+	 * Process an string array and sanitize each entry
+	 *
+	 * @param mixed $arr
+	 * @return string[]
+	 */
+	private function sanitize_array_of_strings( $arr ): array {
+		$result = array();
+		if ( is_array( $arr ) ) {
+			foreach ( $arr as $item ) {
+				if ( is_string( $item ) && '' !== $item ) {
+					$result[] = $item;
+				}
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Get GeneralSettings from the database.
+	 *
+	 * @return array{
+	 *      id: int,
+	 *      generalSettings: array{
+	 *          sendOrderReportsPeriodicallyToSeQura: bool,
+	 *          showSeQuraCheckoutAsHostedPage: bool,
+	 *          allowedIPAddresses: string[],
+	 *          excludedProducts: string[],
+	 *          excludedCategories: string[],
+	 *          defaultServicesEndDate: string
+	 *      }
+	 *  }|null GeneralSettings or null if not found.
+	 */
+	private function get_general_settings(): ?array {
+		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s LIMIT 1', $this->entity_table, 'GeneralSettings', $this->store_context->getStoreId() );
+		$row   = $this->db->get_row( $query, ARRAY_A );
+		$data  = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
+
+		if ( ! is_array( $data ) || ! isset( $row['id'] ) ) {
+			return null;
+		}
+
+		if ( GeneralSettings::class === strval( $data['class_name'] ?? '' ) ) {
+			// Data is already in the new format, nothing to migrate.
+			return null;
+		}
+
+		return array(
+			'id'              => (int) $row['id'],
+			'generalSettings' => array(
+				'sendOrderReportsPeriodicallyToSeQura' => ! empty( $data['generalSettings']['sendOrderReportsPeriodicallyToSeQura'] ?? false ),
+				'showSeQuraCheckoutAsHostedPage'       => ! empty( $data['generalSettings']['showSeQuraCheckoutAsHostedPage'] ?? false ),
+				'allowedIPAddresses'                   => $this->sanitize_array_of_strings( $data['generalSettings']['allowedIPAddresses'] ?? array() ),
+				'excludedProducts'                     => $this->sanitize_array_of_strings( $data['generalSettings']['excludedProducts'] ?? array() ),
+				'excludedCategories'                   => $this->sanitize_array_of_strings( $data['generalSettings']['excludedCategories'] ?? array() ),
+				'defaultServicesEndDate'               => strval( $data['generalSettings']['defaultServicesEndDate'] ?? '' ),
 			),
 		);
 	}
