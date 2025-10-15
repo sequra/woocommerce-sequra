@@ -12,9 +12,6 @@ use SeQura\Helper\Task\Checkout_Version_Task;
 use SeQura\Helper\Task\Clear_Configuration_Task;
 use SeQura\Helper\Task\Configure_Dummy_Service_Task;
 use SeQura\Helper\Task\Configure_Dummy_Task;
-use SeQura\Helper\Task\Configure_V2_Task;
-use SeQura\Helper\Task\Force_Order_Failure_Task;
-use SeQura\Helper\Task\Get_Plugin_Zip_Task;
 use SeQura\Helper\Task\Print_Logs_Task;
 use SeQura\Helper\Task\Remove_Db_Tables_Task;
 use SeQura\Helper\Task\Remove_Log_Task;
@@ -69,15 +66,12 @@ class Plugin {
 			'dummy_services_config'        => Configure_Dummy_Service_Task::class,
 			'dummy_config'                 => Configure_Dummy_Task::class,
 			'clear_config'                 => Clear_Configuration_Task::class,
-			'force_order_failure'          => Force_Order_Failure_Task::class,
 			'remove_log'                   => Remove_Log_Task::class,
 			'print_logs'                   => Print_Logs_Task::class,
 			'set_theme'                    => Set_Theme_Task::class,
 			'cart_version'                 => Cart_Version_Task::class,
 			'checkout_version'             => Checkout_Version_Task::class,
-			'plugin_zip'                   => Get_Plugin_Zip_Task::class,
 			'remove_db_tables'             => Remove_Db_Tables_Task::class,
-			'v2_config'                    => Configure_V2_Task::class,
 			'verify_order_has_merchant_id' => Verify_Order_Has_Merchant_Id_Task::class,
 
 		);
