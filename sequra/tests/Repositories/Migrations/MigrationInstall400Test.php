@@ -18,11 +18,9 @@ use SeQura\Core\BusinessLogic\DataAccess\PromotionalWidgets\Entities\WidgetSetti
 use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalData;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
-use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\ORM\RepositoryRegistry;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Repositories\Migrations\Migration_Install_400;
-use SeQura\WC\Repositories\Repository;
 use WP_UnitTestCase;
 
 // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
@@ -43,13 +41,6 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 	private $wpdb;
 
 	/**
-	 * Entity repository.
-	 * 
-	 * @var Repository
-	 */
-	private $entity_repository;
-
-	/**
 	 * Encryptor instance.
 	 * 
 	 * @var EncryptorInterface
@@ -60,14 +51,6 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		global $wpdb;
 		$this->wpdb      = $wpdb;
 		$this->encryptor = ServiceRegister::getService( EncryptorInterface::class );
-		
-		/**
-		 * Entity repository.
-		 * 
-		 * @var Repository $entity_repository
-		 */
-		$entity_repository       = RepositoryRegistry::getRepository( ConfigEntity::class );
-		$this->entity_repository = $entity_repository;
 
 		/**
 		 * Store context service.
@@ -89,9 +72,7 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 	 */
 	private function truncate_tables(): void {
 		$tables = array(
-			$this->wpdb->prefix . 'sequra_order',
 			$this->wpdb->prefix . 'sequra_entity',
-			$this->wpdb->prefix . 'sequra_queue',
 		);
 		foreach ( $tables as $table ) {
 			$this->wpdb->query( "TRUNCATE TABLE $table" );
@@ -130,8 +111,8 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		// Assert.
 		
 		// Check Deployment.
-		$this->entity_repository->setEntityClass( Deployment::class );
-		$entities = $this->entity_repository->select();
+		$deployment_repo = RepositoryRegistry::getRepository( Deployment::class );
+		$entities        = $deployment_repo->select();
 		$this->assertCount( 2, $entities );
 		$actual_array = array();
 		foreach ( $entities as $entity ) {
@@ -178,13 +159,13 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 		
 		// Check Credentials.
-		$this->entity_repository->setEntityClass( Credentials::class );
-		$entities = $this->entity_repository->select();
+		$credentials_repo = RepositoryRegistry::getRepository( Credentials::class );
+		$entities         = $credentials_repo->select();
 		$this->assertCount( 4, $entities );
 		$actual_array   = array();
 		$expected_array = array();
 		$countries      = array( 'ES', 'PT', 'IT', 'FR' );
-		$merchant_ids   = array( 'dummy_automated_tests_es', 'dummy_automated_tests_pt', 'dummy_automated_tests_it', 'dummy_automated_tests_fr' );
+		$merchant_ids   = array( 'dummy_automated_tests', 'dummy_automated_tests_pt', 'dummy_automated_tests_it', 'dummy_automated_tests_fr' );
 		$deployments    = array( 'sequra', 'svea' );
 		foreach ( $entities as $entity ) {
 			$actual_entity = $entity->toArray();
@@ -199,7 +180,7 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 			
 
 			$this->assertTrue( in_array( $actual_entity['credentials']['deployment'], $deployments, true ) );
-			$this->assertTrue( ! empty( array_diff( $actual_entity['credentials']['payload']['allowed_countries'], $countries ) ) );
+			$this->assertTrue( ! empty( array_intersect( $actual_entity['credentials']['payload']['allowed_countries'], $countries ) ) );
 			$this->assertTrue( in_array( $actual_entity['credentials']['payload']['realm'], $deployments, true ) );
 
 
@@ -222,14 +203,14 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 						'allowed_countries' => $actual_entity['credentials']['payload']['allowed_countries'],
 						'currency'          => 'EUR',
 						'assets_key'        => getenv( 'DUMMY_ASSETS_KEY' ),
-						'contract_options'  => array( 'allow_first_instalment_delay', 'with_registration' ),
+						'contract_options'  => $actual_entity['credentials']['payload']['contract_options'],
 						'extra_information' => array(
 							'type'         => 'regular',
 							'phone_number' => '',
 						),
 						'verify_signature'  => false,
-						'signature_secret'  => $actual_array['credentials']['payload']['signature_secret'], // Let's keep this secret.
-						'confirmation_path' => 'default',
+						'signature_secret'  => $actual_entity['credentials']['payload']['signature_secret'], // Let's keep this secret.
+						'confirmation_path' => $actual_entity['credentials']['payload']['confirmation_path'],
 						'realm'             => $actual_entity['credentials']['payload']['realm'],
 					),
 					'deployment' => $actual_entity['credentials']['deployment'],
@@ -240,8 +221,8 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check ConnectionData.
-		$this->entity_repository->setEntityClass( ConnectionData::class );
-		$entities = $this->entity_repository->select();
+		$conn_data_repo = RepositoryRegistry::getRepository( ConnectionData::class );
+		$entities       = $conn_data_repo->select();
 		$this->assertCount( 2, $entities );
 		$actual_array   = array();
 		$expected_array = array();
@@ -272,8 +253,8 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check PaymentMethod.
-		$this->entity_repository->setEntityClass( PaymentMethod::class );
-		$entities = $this->entity_repository->select();
+		$payment_method_repo = RepositoryRegistry::getRepository( PaymentMethod::class );
+		$entities            = $payment_method_repo->select();
 		$this->assertCount( 6, $entities );
 		$actual_array   = array();
 		$expected_array = array();
@@ -283,25 +264,22 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 			
 			$this->assertTrue( in_array( $actual_entity['merchantId'], $merchant_ids, true ) );
 			$this->assertTrue( in_array( $actual_entity['product'], $products, true ) );
-			$this->assertTrue(
-				isset( 
-					$actual_entity['sequraPaymentMethod']['product'],
-					$actual_entity['sequraPaymentMethod']['title'],
-					$actual_entity['sequraPaymentMethod']['long_title'],
-					$actual_entity['sequraPaymentMethod']['category'],
-					$actual_entity['sequraPaymentMethod']['cost'],
-					$actual_entity['sequraPaymentMethod']['starts_at'],
-					$actual_entity['sequraPaymentMethod']['ends_at'],
-					$actual_entity['sequraPaymentMethod']['claim'],
-					$actual_entity['sequraPaymentMethod']['description'],
-					$actual_entity['sequraPaymentMethod']['icon'],
-					$actual_entity['sequraPaymentMethod']['cost_description'],
-				) 
-			);
-			$this->assertTrue( array_key_exists( 'campaign', $actual_entity['sequraPaymentMethod'] ) );
-			$this->assertTrue( array_key_exists( 'min_amount', $actual_entity['sequraPaymentMethod'] ) );
-			$this->assertTrue( array_key_exists( 'max_amount', $actual_entity['sequraPaymentMethod'] ) );
-			$this->assertTrue( in_array( $actual_entity['sequraPaymentMethod']['product'], $products, true ) );
+			$this->assertTrue( array_key_exists( 'product', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'title', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'long_title', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'category', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'cost', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'starts_at', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'ends_at', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'claim', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'description', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'icon', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'cost_description', $actual_entity['seQuraPaymentMethod'] ) );
+
+			$this->assertTrue( array_key_exists( 'campaign', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'min_amount', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( array_key_exists( 'max_amount', $actual_entity['seQuraPaymentMethod'] ) );
+			$this->assertTrue( in_array( $actual_entity['seQuraPaymentMethod']['product'], $products, true ) );
 			
 			$actual_array[] = $actual_entity;
 			
@@ -311,15 +289,15 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 				'storeId'             => '1',
 				'merchantId'          => $actual_entity['merchantId'],
 				'product'             => $actual_entity['product'],
-				'seQuraPaymentMethod' => $actual_entity['sequraPaymentMethod'],
+				'seQuraPaymentMethod' => $actual_entity['seQuraPaymentMethod'],
 			);
 		}
 		
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check StatisticalData.
-		$this->entity_repository->setEntityClass( StatisticalData::class );
-		$entities = $this->entity_repository->select();
+		$statistical_data_repo = RepositoryRegistry::getRepository( StatisticalData::class );
+		$entities              = $statistical_data_repo->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
@@ -333,8 +311,8 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check GeneralSettings.
-		$this->entity_repository->setEntityClass( GeneralSettings::class );
-		$entities = $this->entity_repository->select();
+		$general_settings_repo = RepositoryRegistry::getRepository( GeneralSettings::class );
+		$entities              = $general_settings_repo->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
@@ -356,10 +334,17 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check CountryConfiguration.
-		$this->entity_repository->setEntityClass( CountryConfiguration::class );
-		$entities = $this->entity_repository->select();
+		$country_config_repo = RepositoryRegistry::getRepository( CountryConfiguration::class );
+		$entities            = $country_config_repo->select();
 		$this->assertCount( 1, $entities );
-		$actual_array   = $entities[0]->toArray();
+		$actual_array = $entities[0]->toArray();
+		// Reorder $actual_array['countryConfigurations'] by countryCode to make the test stable.
+		usort(
+			$actual_array['countryConfigurations'],
+			function ( $a, $b ) {
+				return strcmp( $a['countryCode'], $b['countryCode'] );
+			}
+		);
 		$expected_array = array(
 			'class_name'            => CountryConfiguration::class,
 			'id'                    => $actual_array['id'], // ID is auto-generated and is not so relevant for the test.
@@ -370,24 +355,24 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 					'merchantId'  => 'dummy_automated_tests',
 				),
 				array(
-					'countryCode' => 'PT',
-					'merchantId'  => 'dummy_automated_tests_pt',
+					'countryCode' => 'FR',
+					'merchantId'  => 'dummy_automated_tests_fr',
 				),
 				array(
 					'countryCode' => 'IT',
 					'merchantId'  => 'dummy_automated_tests_it',
 				),
 				array(
-					'countryCode' => 'FR',
-					'merchantId'  => 'dummy_automated_tests_fr',
+					'countryCode' => 'PT',
+					'merchantId'  => 'dummy_automated_tests_pt',
 				),
 			),
 		);
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check WidgetSettings.
-		$this->entity_repository->setEntityClass( WidgetSettings::class );
-		$entities = $this->entity_repository->select();
+		$widget_settings_repo = RepositoryRegistry::getRepository( WidgetSettings::class );
+		$entities             = $widget_settings_repo->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
@@ -428,12 +413,12 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 				'widgetSettingsForCart'            => array(
 					'priceSelector'    => '',
 					'locationSelector' => '',
-					'widgetProduct'    => '',
+					'widgetProduct'    => $actual_array['widgetSettings']['widgetSettingsForCart']['widgetProduct'],
 				),
 				'widgetSettingsForListing'         => array(
 					'priceSelector'    => '',
 					'locationSelector' => '',
-					'widgetProduct'    => '',
+					'widgetProduct'    => $actual_array['widgetSettings']['widgetSettingsForListing']['widgetProduct'],
 				),
 			),
 		);

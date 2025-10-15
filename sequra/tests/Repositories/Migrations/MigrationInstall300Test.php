@@ -51,25 +51,6 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 	private $v2_settings;
 
 	/**
-	 * Order repository.
-	 * 
-	 * @var Repository
-	 */
-	private $order_repository;
-	/**
-	 * Entity repository.
-	 * 
-	 * @var Repository
-	 */
-	private $entity_repository;
-	/**
-	 * Queue item repository.
-	 * 
-	 * @var Repository
-	 */
-	private $queue_item_repository;
-
-	/**
 	 * Encryptor instance.
 	 * 
 	 * @var EncryptorInterface
@@ -115,23 +96,19 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 		 * 
 		 * @var Repository $order_repository
 		 */
-		$order_repository       = RepositoryRegistry::getRepository( SeQuraOrder::class );
-		$this->order_repository = $order_repository;
+		$order_repository = RepositoryRegistry::getRepository( SeQuraOrder::class );
 		/**
 		 * Entity repository.
 		 * 
 		 * @var Repository $entity_repository
 		 */
-		$entity_repository       = RepositoryRegistry::getRepository( ConfigEntity::class );
-		$this->entity_repository = $entity_repository;
-
+		$entity_repository = RepositoryRegistry::getRepository( ConfigEntity::class );
 		/**
 		 * Queue item repository.
 		 * 
 		 * @var Repository $queue_item_repository
 		 */
-		$queue_item_repository       = RepositoryRegistry::getRepository( QueueItem::class );
-		$this->queue_item_repository = $queue_item_repository;
+		$queue_item_repository = RepositoryRegistry::getRepository( QueueItem::class );
 
 		/**
 		 * Store context service.
@@ -142,9 +119,9 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 
 		$this->migration = new Migration_Install_300(
 			$this->wpdb,
-			$this->order_repository,
-			$this->entity_repository,
-			$this->queue_item_repository,
+			$order_repository,
+			$entity_repository,
+			$queue_item_repository,
 			$store_context
 		);
 		$this->set_v2_data();
@@ -188,19 +165,29 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 
 	public function testRun() {
 		$this->migration->run();
-		$this->assertSame(
-			$this->v2_settings,
-			get_option( self::V2_OPTION_NAME )
-		);
-		
+		$this->assertSame( $this->v2_settings, get_option( self::V2_OPTION_NAME ) );
+
+		/** @var Repository */
+		$order_repository = RepositoryRegistry::getRepository( SeQuraOrder::class );
+		/** @var Repository */
+		$queue_item_repository = RepositoryRegistry::getRepository( QueueItem::class );
+		/** @var Repository */
+		$entity_repository                = RepositoryRegistry::getRepository( ConfigEntity::class );
+		$deployment_repository            = RepositoryRegistry::getRepository( Deployment::class );
+		$credentials_repository           = RepositoryRegistry::getRepository( Credentials::class );
+		$connection_data_repository       = RepositoryRegistry::getRepository( ConnectionData::class );
+		$statistical_data_repository      = RepositoryRegistry::getRepository( StatisticalData::class );
+		$general_settings_repository      = RepositoryRegistry::getRepository( GeneralSettings::class );
+		$country_configuration_repository = RepositoryRegistry::getRepository( CountryConfiguration::class );
+		$widget_settings_repository       = RepositoryRegistry::getRepository( WidgetSettings::class );
+
 		// Check tables exist.
-		$this->assertTrue( $this->order_repository->table_exists() );
-		$this->assertTrue( $this->entity_repository->table_exists() );
-		$this->assertTrue( $this->queue_item_repository->table_exists() );
+		$this->assertTrue( $order_repository->table_exists() );
+		$this->assertTrue( $entity_repository->table_exists() );
+		$this->assertTrue( $queue_item_repository->table_exists() );
 		
 		// Check Deployment.
-		$this->entity_repository->setEntityClass( Deployment::class );
-		$entities = $this->entity_repository->select();
+		$entities = $deployment_repository->select();
 		$this->assertCount( 2, $entities );
 		$actual_array = array();
 		foreach ( $entities as $entity ) {
@@ -247,8 +234,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 		
 		// Check Credentials.
-		$this->entity_repository->setEntityClass( Credentials::class );
-		$entities = $this->entity_repository->select();
+		$entities = $credentials_repository->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
@@ -285,8 +271,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check ConnectionData.
-		$this->entity_repository->setEntityClass( ConnectionData::class );
-		$entities = $this->entity_repository->select();
+		$entities = $connection_data_repository->select();
 		$this->assertCount( 1, $entities );
 		$actual_array = $entities[0]->toArray();
 		$actual_array['connectionData']['authorizationCredentials']['password'] = $this->encryptor->decrypt( $actual_array['connectionData']['authorizationCredentials']['password'] );
@@ -308,8 +293,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check StatisticalData.
-		$this->entity_repository->setEntityClass( StatisticalData::class );
-		$entities = $this->entity_repository->select();
+		$entities = $statistical_data_repository->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
@@ -323,8 +307,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check GeneralSettings.
-		$this->entity_repository->setEntityClass( GeneralSettings::class );
-		$entities = $this->entity_repository->select();
+		$entities = $general_settings_repository->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
@@ -346,8 +329,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check CountryConfiguration.
-		$this->entity_repository->setEntityClass( CountryConfiguration::class );
-		$entities = $this->entity_repository->select();
+		$entities = $country_configuration_repository->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
@@ -364,8 +346,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 		$this->assertSame( $expected_array, $actual_array );
 
 		// Check WidgetSettings.
-		$this->entity_repository->setEntityClass( WidgetSettings::class );
-		$entities = $this->entity_repository->select();
+		$entities = $widget_settings_repository->select();
 		$this->assertCount( 1, $entities );
 		$actual_array   = $entities[0]->toArray();
 		$expected_array = array(
