@@ -7,14 +7,12 @@
 
 namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Order;
 
-use PhpParser\Builder\Interface_;
 use SeQura\Core\BusinessLogic\Domain\Integration\Order\MerchantDataProviderInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Options;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Constants\Interface_Constants;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
-use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 
