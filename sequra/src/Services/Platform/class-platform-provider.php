@@ -80,7 +80,7 @@ class Platform_Provider implements Interface_Platform_Provider {
 			 *
 			 * @since 3.0.0
 			 */
-			return \apply_filters(
+			$this->platform = \apply_filters(
 				'sequra_platform_options',
 				new Platform(
 					$this->constants->get_integration_name(),
