@@ -17,7 +17,7 @@ class Settings_Service implements Interface_Settings_Service {
 	 * Check if the current page is the settings page.
 	 */
 	public function is_settings_page(): bool {
-		return is_admin() && isset( $_GET['page'] ) && $this->get_page() === $_GET['page']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return is_admin() && isset( $_GET['page'] ) && $this->get_page() === sanitize_text_field( $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
