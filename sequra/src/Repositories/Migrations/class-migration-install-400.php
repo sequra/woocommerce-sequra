@@ -174,7 +174,8 @@ class Migration_Install_400 extends Migration {
 	 * @throws Throwable|Exception
 	 */
 	private function migrate_country_configuration(): void {
-		$query = $this->db->prepare( 'SELECT `index_2`, `index_3` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'Credentials', $this->store_context->getStoreId() );
+		// @phpstan-ignore-next-line
+		$query = $this->db->prepare( 'SELECT `index_2`, `index_3` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s', 'Credentials', $this->store_context->getStoreId() );
 		$rows  = $this->db->get_results( $query, ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return;
@@ -337,7 +338,8 @@ class Migration_Install_400 extends Migration {
 	 *  }>|null Connection data or null if not found.
 	 */
 	private function get_connection_data(): ?array {
-		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'ConnectionData', $this->store_context->getStoreId() );
+		// @phpstan-ignore-next-line
+		$query = $this->db->prepare( 'SELECT `id`, `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s', 'ConnectionData', $this->store_context->getStoreId() );
 		$rows  = $this->db->get_results( $query, ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return null;
@@ -384,7 +386,8 @@ class Migration_Install_400 extends Migration {
 	 * @return array<string> Merchant ids.
 	 */
 	private function get_merchant_ids(): array {
-		$query = $this->db->prepare( 'SELECT DISTINCT `index_3` FROM %i WHERE `type` = %s', $this->entity_table, 'Credentials' );
+		// @phpstan-ignore-next-line
+		$query = $this->db->prepare( 'SELECT DISTINCT `index_3` FROM ' . $this->entity_table . ' WHERE `type` = %s', 'Credentials' );
 		$rows  = $this->db->get_results( $query, ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return array();
@@ -434,7 +437,8 @@ class Migration_Install_400 extends Migration {
 	 *  }|null WidgetSettings or null if not found.
 	 */
 	private function get_widget_settings(): ?array {
-		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s LIMIT 1', $this->entity_table, 'WidgetSettings', $this->store_context->getStoreId() );
+		// @phpstan-ignore-next-line
+		$query = $this->db->prepare( 'SELECT `id`, `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'WidgetSettings', $this->store_context->getStoreId() );
 		$row   = $this->db->get_row( $query, ARRAY_A );
 		$data  = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
 
@@ -534,7 +538,8 @@ class Migration_Install_400 extends Migration {
 	 *  }|null GeneralSettings or null if not found.
 	 */
 	private function get_general_settings(): ?array {
-		$query = $this->db->prepare( 'SELECT `id`, `data` FROM %i WHERE `type` = %s AND `index_1` = %s LIMIT 1', $this->entity_table, 'GeneralSettings', $this->store_context->getStoreId() );
+		// @phpstan-ignore-next-line
+		$query = $this->db->prepare( 'SELECT `id`, `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'GeneralSettings', $this->store_context->getStoreId() );
 		$row   = $this->db->get_row( $query, ARRAY_A );
 		$data  = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
 
@@ -568,7 +573,8 @@ class Migration_Install_400 extends Migration {
 	 */
 	private function get_first_payment_method_product( $categories ): string {
 		if ( null === $this->payment_methods ) {
-			$query = $this->db->prepare( 'SELECT `data` FROM %i WHERE `type` = %s AND `index_1` = %s', $this->entity_table, 'PaymentMethod', $this->store_context->getStoreId() );
+			// @phpstan-ignore-next-line
+			$query = $this->db->prepare( 'SELECT `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s', 'PaymentMethod', $this->store_context->getStoreId() );
 			$rows  = $this->db->get_results( $query, ARRAY_A );
 			if ( ! is_array( $rows ) ) {
 				return '';

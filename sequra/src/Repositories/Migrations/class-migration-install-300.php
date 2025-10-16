@@ -130,9 +130,10 @@ class Migration_Install_300 extends Migration {
 	 * Check if the entity exists in the database.
 	 */
 	private function entity_exists( string $type ): bool {
-		$table_name = $this->db->prefix . 'sequra_entity';
-		$query      = $this->db->prepare( 'SELECT id FROM %i WHERE `type` = %s LIMIT 1', $table_name, $type );
-		$result     = $this->db->get_results( $query );
+		$table_name = \esc_sql( $this->entity_repository->get_table_name() );
+		// @phpstan-ignore-next-line
+		$query  = $this->db->prepare( 'SELECT id FROM ' . $table_name . ' WHERE `type` = %s LIMIT 1', $type );
+		$result = $this->db->get_results( $query );
 		return is_array( $result ) && count( $result ) > 0;
 	}
 
@@ -231,14 +232,10 @@ class Migration_Install_300 extends Migration {
 		}
 
 		$merchant_id = strval( $settings['merchantref'] );
+		$table_name  = \esc_sql( $this->entity_repository->get_table_name() );
 		$raw_results = $this->db->get_results(
-			$this->db->prepare(
-				'SELECT `index_2` FROM %i WHERE `type` = %s AND `index_1` = %s AND `index_3` = %s',
-				$this->entity_repository->get_table_name(),
-				'Credentials',
-				$this->store_context->getStoreId(),
-				$merchant_id
-			),
+			// @phpstan-ignore-next-line
+			$this->db->prepare( 'SELECT `index_2` FROM ' . $table_name . ' WHERE `type` = %s AND `index_1` = %s AND `index_3` = %s', 'Credentials', $this->store_context->getStoreId(), $merchant_id ),
 			ARRAY_A 
 		);
 
