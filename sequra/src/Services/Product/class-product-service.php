@@ -53,6 +53,13 @@ class Product_Service implements Interface_Product_Service {
 	private $store_context;
 
 	/**
+	 * Cached general settings responses, indexed by store ID
+	 *
+	 * @var array<int, GeneralSettingsResponse>
+	 */
+	private $cached_general_settings = array();
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
@@ -136,12 +143,7 @@ class Product_Service implements Interface_Product_Service {
 	 * @return array<string>
 	 */
 	protected function get_banned_products(): array {
-		/**
-		 * Response
-		 * 
-		 * @var GeneralSettingsResponse $response
-		 */
-		$response = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings();
+		$response = $this->get_general_settings();
 		if ( ! $response->isSuccessful() ) {
 			return array();
 		}
@@ -155,23 +157,12 @@ class Product_Service implements Interface_Product_Service {
 	 * @return array<int>
 	 */
 	protected function get_banned_categories(): array {
-		try {
-			/**
-			 * Array containing the general settings
-			 * 
-			 * @var array<string, mixed> $config
-			 */
-			$config = AdminAPI::get()
-			->generalSettings( $this->store_context->getStoreId() )
-			->getGeneralSettings()
-			->toArray();
-			if ( ! empty( $config['excludedCategories'] ) && is_array( $config['excludedCategories'] ) ) {
-				return array_map( 'absint', $config['excludedCategories'] );
-			}
-			return array();
-		} catch ( Throwable $e ) {
+		$response = $this->get_general_settings();
+		if ( ! $response->isSuccessful() ) {
 			return array();
 		}
+		$arr = $response->toArray();
+		return ! empty( $arr['excludedCategories'] ) && is_array( $arr['excludedCategories'] ) ? array_map( 'absint', $arr['excludedCategories'] ) : array();
 	}
 
 	/**
@@ -386,60 +377,33 @@ class Product_Service implements Interface_Product_Service {
 	 * Get enabledForServices from general settings.
 	 */
 	public function is_enabled_for_services( ?string $country = null ): bool {
-		try {
-			/**
-			 * Array containing the general settings
-			 * 
-			 * @var array<string, mixed> $config
-			 */
-			$config = AdminAPI::get()
-			->generalSettings( $this->store_context->getStoreId() )
-			->getGeneralSettings()
-			->toArray();
-			return $this->validate_config_array_for_country( $config, 'enabledForServices', $country );
-		} catch ( Throwable $e ) {
+		$response = $this->get_general_settings();
+		if ( ! $response->isSuccessful() ) {
 			return false;
 		}
+		return $this->validate_config_array_for_country( $response->toArray(), 'enabledForServices', $country );
 	}
 	
 	/**
 	 * Get allowFirstServicePaymentDelay from general settings.
 	 */
 	public function is_allow_first_service_payment_delay( ?string $country = null ): bool {
-		try {
-			/**
-			 * Array containing the general settings
-			 * 
-			 * @var array<string, mixed> $config
-			 */
-			$config = AdminAPI::get()
-			->generalSettings( $this->store_context->getStoreId() )
-			->getGeneralSettings()
-			->toArray();
-			return $this->validate_config_array_for_country( $config, 'allowFirstServicePaymentDelay', $country );
-		} catch ( Throwable $e ) {
+		$response = $this->get_general_settings();
+		if ( ! $response->isSuccessful() ) {
 			return false;
 		}
+		return $this->validate_config_array_for_country( $response->toArray(), 'allowFirstServicePaymentDelay', $country );
 	}
 
 	/**
 	 * Get allowServiceRegistrationItems from general settings.
 	 */
 	public function is_allow_service_registration_items( ?string $country = null ): bool {
-		try {
-			/**
-			 * Array containing the general settings
-			 * 
-			 * @var array<string, mixed> $config
-			 */
-			$config = AdminAPI::get()
-			->generalSettings( $this->store_context->getStoreId() )
-			->getGeneralSettings()
-			->toArray();
-			return $this->validate_config_array_for_country( $config, 'allowServiceRegistrationItems', $country );
-		} catch ( Throwable $e ) {
+		$response = $this->get_general_settings();
+		if ( ! $response->isSuccessful() ) {
 			return false;
 		}
+		return $this->validate_config_array_for_country( $response->toArray(), 'allowServiceRegistrationItems', $country );
 	}
 
 	/**
@@ -461,12 +425,7 @@ class Product_Service implements Interface_Product_Service {
 	 * Get defaultServicesEndDate from general settings.
 	 */
 	public function get_default_services_end_date(): string {
-		/**
-		 * Response containing the general settings
-		 * 
-		 * @var GeneralSettingsResponse
-		 */
-		$response = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings();
+		$response = $this->get_general_settings();
 		$arr      = $response->isSuccessful() ? $response->toArray() : array();
 		return strval( $arr['defaultServicesEndDate'] ?? GeneralSettings::DEFAULT_SERVICE_END_DATE );
 	}
@@ -483,5 +442,22 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function get_name( WC_Product $product ): string {
 		return \wp_strip_all_tags( $product->get_title() );
+	}
+
+	/**
+	 * Get GeneralSettingsResponse for the current store context
+	 */
+	private function get_general_settings(): GeneralSettingsResponse {
+		$store_id = $this->store_context->getStoreId();
+		if ( ! isset( $this->cached_general_settings[ $store_id ] ) ) {
+			/**
+			 * Response
+			 * 
+			 * @var GeneralSettingsResponse $response
+			 */
+			$response                                   = AdminAPI::get()->generalSettings( $store_id )->getGeneralSettings();
+			$this->cached_general_settings[ $store_id ] = $response;
+		}
+		return $this->cached_general_settings[ $store_id ];
 	}
 }
