@@ -131,25 +131,22 @@ class Product_Service implements Interface_Product_Service {
 	}
 
 	/**
-	 * Get banned categories from SeQura configuration
+	 * Get banned products from SeQura configuration
 	 * 
 	 * @return array<string>
 	 */
 	protected function get_banned_products(): array {
-		try {
-			/**
-			 * Array containing the general settings
-			 * 
-			 * @var array<string, mixed> $config
-			 */
-			$config = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings()->toArray();
-			if ( ! empty( $config['excludedProducts'] ) && is_array( $config['excludedProducts'] ) ) {
-				return $config['excludedProducts'];
-			}
-			return array();
-		} catch ( Throwable $e ) {
+		/**
+		 * Response
+		 * 
+		 * @var GeneralSettingsResponse $response
+		 */
+		$response = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings();
+		if ( ! $response->isSuccessful() ) {
 			return array();
 		}
+		$arr = $response->toArray();
+		return ! empty( $arr['excludedProducts'] ) && is_array( $arr['excludedProducts'] ) ? $arr['excludedProducts'] : array();
 	}
 
 	/**
