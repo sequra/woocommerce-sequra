@@ -123,4 +123,14 @@ interface Interface_Product_Service {
 	 * Get defaultServicesEndDate from general settings.
 	 */
 	public function get_default_services_end_date(): string;
+
+	/**
+	 * Get the reference of a given product
+	 */
+	public function get_reference( WC_Product $product ): string;
+
+	/**
+	 * Get product name
+	 */
+	public function get_name( WC_Product $product ): string;
 }

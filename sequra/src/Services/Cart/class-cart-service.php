@@ -212,53 +212,68 @@ class Cart_Service implements Interface_Cart_Service {
 	 * @return ProductItem|ServiceItem
 	 */
 	private function get_item( WC_Product $product, float $total_price, ?RegistrationItem $reg_item, int $qty, $item, string $country ) {
-		$ref  = $product->get_sku() ? $product->get_sku() : $product->get_id();
-		$name = \wp_strip_all_tags( $product->get_title() );
 		if ( $this->product_service->is_enabled_for_services( $country ) && $this->product_service->is_service( $product ) ) {
-			/**
-			* Filter the service end date.
-			*
-			* @since 2.0.0
-			*/
-			$service_end_date = \apply_filters(
-				'woocommerce_sequra_add_service_end_date',
-				$this->product_service->get_service_end_date( $product->get_parent_id() ? $product->get_parent_id() : $product->get_id() ),
-				$product,
-				$item
-			);
-
-			$is_duration = 0 === strpos( $service_end_date, 'P' );
-
-			return new ServiceItem(
-				$ref,
-				$name,
-				$this->pricing_service->to_cents( $total_price / $qty ),
-				$qty,
-				$product->is_downloadable(),
-				$this->pricing_service->to_cents( $total_price ) - ( $reg_item ? $reg_item->getTotalWithTax() : 0 ),
-				! $is_duration ? $service_end_date : null,
-				$is_duration ? $service_end_date : null,
-				null, // supplier.
-				null // rendered.
-			);
+			return $this->get_service_item( $product, $total_price, $qty, $reg_item, $item );
 		} 
+		return $this->get_product_item( $product, $total_price, $qty );
+	}
+
+	/**
+	 * Get ProductItem instance
+	 */
+	private function get_product_item( WC_Product $product, float $total_price, int $qty ): ProductItem {
 		return new ProductItem(
-			$ref,
-			$name,
+			$this->product_service->get_reference( $product ),
+			$this->product_service->get_name( $product ),
 			$this->pricing_service->to_cents( $total_price / $qty ),
 			$qty,
 			$this->pricing_service->to_cents( $total_price ),
 			$product->is_downloadable(),
-			null, // perishable.
-			null, // personalized.
-			null, // restockable.
+			null,
+			null,
+			null,
 			\wc_get_product_category_list( $product->get_id() ),
 			$product->get_description(),
-			null, // manufacturer.
-			null, // supplier.
+			null,
+			null,
 			$product->get_id(),
 			$product->get_permalink(),
-			null // tracking reference.
+			null
+		);
+	}
+
+	/**
+	 * Get ServiceItem instance
+	 * 
+	 * @param mixed $item The product item.
+	 */
+	private function get_service_item( WC_Product $product, float $total_price, int $qty, ?RegistrationItem $reg_item, $item ): ServiceItem {
+		/**
+		* Filter the service end date.
+		*
+		* @since 2.0.0
+		*/
+		$service_end_date = \apply_filters(
+			'woocommerce_sequra_add_service_end_date',
+			$this->product_service->get_service_end_date( $product->get_parent_id() ? $product->get_parent_id() : $product->get_id() ),
+			$product,
+			$item
+		);
+		$service_end_date = strval( $service_end_date );
+
+		$is_duration = 0 === strpos( $service_end_date, 'P' );
+
+		return new ServiceItem(
+			$this->product_service->get_reference( $product ),
+			$this->product_service->get_name( $product ),
+			$this->pricing_service->to_cents( $total_price / $qty ),
+			$qty,
+			$product->is_downloadable(),
+			$this->pricing_service->to_cents( $total_price ) - ( $reg_item ? $reg_item->getTotalWithTax() : 0 ),
+			! $is_duration ? $service_end_date : null,
+			$is_duration ? $service_end_date : null,
+			null, // supplier.
+			null // rendered.
 		);
 	}
 

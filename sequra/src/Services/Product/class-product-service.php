@@ -473,4 +473,18 @@ class Product_Service implements Interface_Product_Service {
 		$arr      = $response->isSuccessful() ? $response->toArray() : array();
 		return strval( $arr['defaultServicesEndDate'] ?? GeneralSettings::DEFAULT_SERVICE_END_DATE );
 	}
+
+	/**
+	 * Get the reference of a given product
+	 */
+	public function get_reference( WC_Product $product ): string {
+		return $product->get_sku() ? $product->get_sku() : (string) $product->get_id();
+	}
+
+	/**
+	 * Get product name
+	 */
+	public function get_name( WC_Product $product ): string {
+		return \wp_strip_all_tags( $product->get_title() );
+	}
 }
