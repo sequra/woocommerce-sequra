@@ -11,6 +11,7 @@ namespace SeQura\WC\Services\Product;
 use DateInterval;
 use DateTime;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
@@ -463,19 +464,13 @@ class Product_Service implements Interface_Product_Service {
 	 * Get defaultServicesEndDate from general settings.
 	 */
 	public function get_default_services_end_date(): string {
-		try {
-			/**
-			 * Array containing the general settings
-			 * 
-			 * @var array<string, mixed> $config
-			 */
-			$config = AdminAPI::get()
-			->generalSettings( $this->store_context->getStoreId() )
-			->getGeneralSettings()
-			->toArray();
-			return $config['defaultServicesEndDate'];
-		} catch ( Throwable $e ) {
-			return GeneralSettings::DEFAULT_SERVICE_END_DATE;
-		}
+		/**
+		 * Response containing the general settings
+		 * 
+		 * @var GeneralSettingsResponse
+		 */
+		$response = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings();
+		$arr      = $response->isSuccessful() ? $response->toArray() : array();
+		return strval( $arr['defaultServicesEndDate'] ?? GeneralSettings::DEFAULT_SERVICE_END_DATE );
 	}
 }
