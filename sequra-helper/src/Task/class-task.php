@@ -17,7 +17,9 @@ class Task {
 	/**
 	 * Execute the task
 	 * 
-	 * @throws \Exception If the task fails
+	 * @param array<string, string> $args Arguments for the task.
+	 * 
+	 * @throws \Exception If the task fails.
 	 */
 	public function execute( array $args = array() ): void {
 		throw new \Exception( 'Task not implemented', 500 );
@@ -50,7 +52,9 @@ class Task {
 	/**
 	 * Drop tables in the database
 	 * 
-	 * @throws \Exception If the task fails
+	 * @param string[] $tables The tables to drop.
+	 * 
+	 * @throws \Exception If the task fails.
 	 */
 	protected function drop_tables_in_database( $tables = array() ): void {
 		if ( empty( $tables ) ) {
@@ -67,6 +71,16 @@ class Task {
 	}
 
 	/**
+	 * Get the current id of the entity table
+	 * 
+	 * @param string $table_name The table name.
+	 */
+	protected function get_current_id( $table_name ): int {
+		global $wpdb;
+		return max( (int) $wpdb->get_var( "SELECT MAX(id) FROM $table_name" ), 0 );
+	}
+
+	/**
 	 * Recreate tables in the database
 	 */
 	protected function recreate_entity_table_in_database(): void {
@@ -78,7 +92,7 @@ class Task {
 		
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta(
-			"CREATE TABLE IF NOT EXISTS $table_name (
+			"CREATE TABLE $table_name (
             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             `type` VARCHAR(255),
             `index_1` VARCHAR(127),
@@ -89,30 +103,30 @@ class Task {
             `index_6` VARCHAR(127),
             `index_7` VARCHAR(127),
             `data` LONGTEXT,
-            PRIMARY KEY  (id)
+            PRIMARY KEY  (id),
+            INDEX `{$table_name}_type` (`type`(64))
             ) $charset_collate"
 		);
 
+		$id = $this->get_current_id( $table_name );
 		// Insert version to prevent migration from running.
 		$wpdb->insert(
 			$table_name,
 			array(
-				'id'      => 7,
+				'id'      => ++$id,
 				'type'    => 'Configuration',
 				'index_1' => 'version',
 				'index_2' => '',
-				'index_3' => null,
-				'index_4' => null,
-				'index_5' => null,
-				'index_6' => null,
-				'index_7' => null,
-				'data'    => '{"class_name":"SeQura\\\\Core\\\\Infrastructure\\\\Configuration\\\\ConfigEntity","id":null,"name":"version","value":"3.0.0","context":""}',
+				'data'    => '{"class_name":"SeQura\\Core\\Infrastructure\\Configuration\\ConfigEntity","id":' . $id . ',"name":"version","value":"4.0.0","context":""}',
 			)
 		);
 	}
 
 	/**
 	 * Response with an error message
+	 * 
+	 * @param string $message The error message.
+	 * @param int    $error_code The error code.
 	 */
 	public function http_error_response( string $message, int $error_code ): void {
 		header( 'Content-Type: application/json' );
@@ -125,5 +139,19 @@ class Task {
 	public function http_success_response(): void {
 		header( 'Content-Type: application/json' );
 		wp_send_json_success( array( 'message' => 'Task executed' ) );
+	}
+
+	/**
+	 * Time to string
+	 *
+	 * @param int $timestamp Timestamp to convert.
+	 */
+	protected function time_to_string( int $timestamp ): string {
+		$time = (string) $timestamp;
+		// Append 0s to the left until reach 11 characters.
+		while ( strlen( $time ) < 11 ) {
+			$time = '0' . $time;
+		}
+		return $time;
 	}
 }

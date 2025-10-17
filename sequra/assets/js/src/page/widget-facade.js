@@ -224,6 +224,19 @@
                     return this.miniWidgets.indexOf(widget) !== -1;
                 },
 
+                isAmountInAllowedRange: function (widget, cents) {
+                    if ('undefined' !== typeof widget.minAmount && widget.minAmount && cents < widget.minAmount) {
+                        return false;
+                    }
+
+                    return !(
+                        'undefined' !== typeof widget.maxAmount &&
+                        widget.maxAmount &&
+                        parseInt(widget.maxAmount, 10) !== 0 &&
+                        widget.maxAmount < cents
+                    );
+                },
+
                 drawMiniWidgetOnElement: function (widget, element, priceElem) {
                     if (!priceElem) {
                         const priceSrc = this.getPriceSelector(widget);
@@ -234,8 +247,6 @@
                         }
                     }
                     const cents = this.nodeToCents(priceElem);
-
-
 
                     const className = 'sequra-educational-popup';
                     const modifierClassName = className + '--' + widget.product;
@@ -249,12 +260,12 @@
                         oldWidget.remove();// remove the old widget to draw a new one.
                     }
 
-                    if (widget.maxAmount && widget.maxAmount < cents) {
+                    if (!this.isAmountInAllowedRange(widget, cents)) {
                         return;
                     }
 
                     const widgetNode = document.createElement('small');
-                    widgetNode.className = className + ' ' + modifierClassName;
+                    widgetNode.className = `sequra-promotion-miniwidget ${className} ${modifierClassName}`;
                     widgetNode.setAttribute('data-amount', cents);
                     widgetNode.setAttribute('data-product', widget.product);
 
@@ -278,11 +289,10 @@
 
                     if (element.nextSibling) {//Insert after
                         element.parentNode.insertBefore(widgetNode, element.nextSibling);
-                        this.refreshComponents();
                     } else {
                         element.parentNode.appendChild(widgetNode);
                     }
-
+                    this.refreshComponents();
                 },
 
                 drawWidgetOnElement: function (widget, element) {
@@ -304,6 +314,10 @@
                         }
 
                         oldWidget.remove();// remove the old widget to draw a new one.
+                    }
+
+                    if (!this.isAmountInAllowedRange(widget, cents)) {
+                        return;
                     }
 
                     const promoWidgetNode = document.createElement('div');
@@ -330,10 +344,10 @@
 
                     if (element.nextSibling) {//Insert after
                         element.parentNode.insertBefore(promoWidgetNode, element.nextSibling);
-                        this.refreshComponents();
                     } else {
                         element.parentNode.appendChild(promoWidgetNode);
                     }
+                    this.refreshComponents();
                 }
             }
         };

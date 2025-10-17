@@ -12,8 +12,8 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\DiscountItem
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\HandlingItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\OtherPaymentItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ProductItem;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\RegistrationItem;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\ServiceItem;
-use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Registration_Item;
 use SeQura\WC\Dto\Cart_Info;
 use WC_Order;
 use WC_Product;
@@ -50,7 +50,7 @@ interface Interface_Cart_Service {
 	/**
 	 * Get items in cart
 	 *
-	 * @return array<ProductItem|ServiceItem|Registration_Item>
+	 * @return array<ProductItem|ServiceItem|RegistrationItem>
 	 */
 	public function get_items( ?WC_Order $order ): array;
 
@@ -80,7 +80,7 @@ interface Interface_Cart_Service {
 	 *
 	 * @return OtherPaymentItem[]
 	 */
-	public function get_refund_items( WC_Order $order = null ): array;
+	public function get_refund_items( ?WC_Order $order = null ): array;
 
 	/**
 	 * Create refund item instance

@@ -9,7 +9,6 @@ namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Disconn
 
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\WC\Repositories\Interface_Deletable_Repository;
-use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 
 /**
  * Implementation of the Disconnect service.
@@ -36,9 +35,8 @@ class Disconnect_Service implements DisconnectServiceInterface {
 	 * Disconnect integration from store.
 	 */
 	public function disconnect(): void {
-		$store_id = (string) StoreContext::getInstance()->getStoreId();
 		foreach ( $this->repositories as $repository ) {
-			$repository->delete_all( $store_id );
+			$repository->delete_all();
 		}
 	}
 }

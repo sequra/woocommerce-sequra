@@ -8,18 +8,15 @@
 
 namespace SeQura\WC\Tests\Services\Payment;
 
-require_once __DIR__ . '/../../Fixtures/Store.php';
-
 use Exception;
 use WP_UnitTestCase;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
-use SeQura\WC\Services\Interface_Constants;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Constants\Interface_Constants;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Tests\Fixtures\Store;
 use WP_Error;
@@ -27,34 +24,26 @@ use WP_Error;
 class SequraPaymentGatewayTest extends WP_UnitTestCase {
 
 	private $payment_gateway;
-	private $payment_service;
-	private $payment_method_service;
-	private $cart_service;
 	private $order_service;
-	private $templates_path;
 	private $logger;
 	private $store;
 	private $settings_url;
-	private $order_status_settings_service;
-
 
 	public function set_up(): void {        
-		$payment_service = $this->createMock( Interface_Payment_Service::class );
-		$payment_service->method( 'get_payment_gateway_id' )->willReturn( 'sequra' );
-		$payment_service->method( 'get_ipn_webhook' )->willReturn( 'woocommerce_sequra_ipn' );
-		$payment_service->method( 'get_event_webhook' )->willReturn( 'woocommerce_sequra' );
-		$payment_service->method( 'get_return_webhook' )->willReturn( 'woocommerce_sequra_return' );
-		$this->payment_service = $payment_service;
-
+		$constants = $this->createMock( Interface_Constants::class );
+		$constants->method( 'get_payment_gateway_id' )->willReturn( 'sequra' );
+		$constants->method( 'get_ipn_webhook' )->willReturn( 'woocommerce_sequra_ipn' );
+		$constants->method( 'get_event_webhook' )->willReturn( 'woocommerce_sequra' );
+		$constants->method( 'get_return_webhook' )->willReturn( 'woocommerce_sequra_return' );
+		$constants->method( 'get_plugin_templates_path' )->willReturn( 'path/to/templates' );
 		ServiceRegister::registerService(
-			Interface_Payment_Service::class,
-			function () use ( $payment_service ) {
-				return $payment_service;
+			Interface_Constants::class,
+			function () use ( $constants ) {
+				return $constants;
 			} 
 		);
 		
-		$cart_service       = $this->createMock( Interface_Cart_Service::class );
-		$this->cart_service = $cart_service;
+		$cart_service = $this->createMock( Interface_Cart_Service::class );
 		ServiceRegister::registerService(
 			Interface_Cart_Service::class,
 			function () use ( $cart_service ) {
@@ -71,21 +60,11 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 			} 
 		);
 
-		$payment_method_service       = $this->createMock( Interface_Payment_Method_Service::class );
-		$this->payment_method_service = $payment_method_service;
+		$payment_method_service = $this->createMock( Interface_Payment_Method_Service::class );
 		ServiceRegister::registerService(
 			Interface_Payment_Method_Service::class,
 			function () use ( $payment_method_service ) {
 				return $payment_method_service;
-			} 
-		);
-
-		$constants = $this->createMock( Interface_Constants::class );
-		$constants->method( 'get_plugin_templates_path' )->willReturn( 'path/to/templates' );
-		ServiceRegister::registerService(
-			Interface_Constants::class,
-			function () use ( $constants ) {
-				return $constants;
 			} 
 		);
 		
@@ -98,8 +77,7 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 			} 
 		);
 
-		$order_status_settings_service       = $this->createMock( Order_Status_Settings_Service::class );
-		$this->order_status_settings_service = $order_status_settings_service;
+		$order_status_settings_service = $this->createMock( Order_Status_Settings_Service::class );
 		ServiceRegister::registerService(
 			Order_Status_Settings_Service::class,
 			function () use ( $order_status_settings_service ) {

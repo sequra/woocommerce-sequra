@@ -9,20 +9,30 @@
 namespace SeQura\WC\Tests\Core\BusinessLogic\Webhook\Services;
 
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Service;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
+use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Tests\Fixtures\Store;
 use WP_UnitTestCase;
 
-require_once __DIR__ . '/../../../../Fixtures/Store.php';
-
 class ShopOrderServiceTest extends WP_UnitTestCase {
 
+	/** @var \SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject */
 	private $sq_order_repo;
+	/** @var \SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService&\PHPUnit\Framework\MockObject\MockObject */
 	private $shop_order_service;
+	/** @var \SeQura\WC\Services\Log\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $logger;
+	/** @var \SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder&\PHPUnit\Framework\MockObject\MockObject */
 	private $create_order_request_builder;
+
+	/** @var \SeQura\WC\Services\Order\Interface_Current_Order_Provider&\PHPUnit\Framework\MockObject\MockObject */
+	private $current_order_provider;
+
+	/** @var \SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService&\PHPUnit\Framework\MockObject\MockObject */
+	private $order_service;
 
 	/**
 	 * Store instance.
@@ -34,8 +44,16 @@ class ShopOrderServiceTest extends WP_UnitTestCase {
 		$this->sq_order_repo                = $this->createMock( SeQuraOrderRepositoryInterface::class );
 		$this->logger                       = $this->createMock( Interface_Logger_Service::class );
 		$this->create_order_request_builder = $this->createMock( Interface_Create_Order_Request_Builder::class );
+		$this->current_order_provider       = $this->createMock( Interface_Current_Order_Provider::class );
+		$this->order_service                = $this->createMock( OrderService::class );
 
-		$this->shop_order_service = new Shop_Order_Service( $this->sq_order_repo, $this->logger, $this->create_order_request_builder );
+		$this->shop_order_service = new Shop_Order_Service( 
+			$this->sq_order_repo, 
+			$this->logger, 
+			$this->create_order_request_builder,
+			$this->current_order_provider,
+			$this->order_service
+		);
 
 		$this->store = new Store();
 		$this->store->set_up();

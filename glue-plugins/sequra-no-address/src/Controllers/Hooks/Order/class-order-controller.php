@@ -54,12 +54,12 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 			return $options;
 		}
 		
-		return new \SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Models\OrderRequest\Options(
+		return new Options(
 			$is_instance_of_options ? $options->getHasJquery() : null,
 			$is_instance_of_options ? $options->getUsesShippedCart() : null,
 			true, // addressesMayBeMissing.
 			$is_instance_of_options ? $options->getImmutableCustomerData() : null,
-			! $options instanceof \SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Models\OrderRequest\Options ? null : $options->get_desired_first_charge_on()
+			$is_instance_of_options ? $options->getDesiredFirstChargeOn() : null
 		);
 	}
 }

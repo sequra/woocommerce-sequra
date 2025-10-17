@@ -2,11 +2,26 @@
 # export GITHUB_TOKEN=$GITHUB_TOKEN
 BASEDIR="$(dirname $(realpath $0))/.."
 
-# Check if auth.json exists
-if [ ! -f "$BASEDIR/auth.json" ]; then
-    docker run --rm -v "$BASEDIR/sequra":/app -w /app -u $(id -u):$(id -g) composer:latest composer $@
-    docker run --rm -v "$BASEDIR/glue-plugins/sequra-no-address":/app -w /app -u $(id -u):$(id -g) composer:latest composer $@
-else
-    docker run --rm -v "$BASEDIR/sequra":/app -v "$(pwd)"/auth.json:/tmp/auth.json -w /app -u $(id -u):$(id -g) composer:latest composer $@
-    docker run --rm -v "$BASEDIR/glue-plugins/sequra-no-address":/app -v "$(pwd)"/auth.json:/tmp/auth.json -w /app -u $(id -u):$(id -g) composer:latest composer $@
+# Define project directories
+PROJECTS=(
+    "$BASEDIR/sequra"
+    "$BASEDIR/glue-plugins/sequra-no-address"
+    "$BASEDIR/sequra-helper"
+)
+
+# Set auth volume mount if auth.json exists
+AUTH_MOUNT=""
+if [ -f "$BASEDIR/auth.json" ]; then
+    AUTH_MOUNT="-v $(pwd)/auth.json:/tmp/auth.json"
 fi
+
+# Run composer for each project
+for project in "${PROJECTS[@]}"; do
+    docker run --rm \
+        -v "$project":/app \
+        $AUTH_MOUNT \
+        -w /app \
+        -u $(id -u):$(id -g) \
+        composer:latest \
+        composer "$@"
+done

@@ -6,10 +6,9 @@
  * @subpackage SeQura/WC/Tests
  */
 
-namespace SeQura\WC\Tests\Controllers\Hooks\Process;
+namespace SeQura\WC\Tests\Repositories\Migrations;
 
 use SeQura\WC\Repositories\Migrations\Migration_Install_320;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Dto\Table_Index;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Queue_Item_Repository;
@@ -18,21 +17,21 @@ use WP_UnitTestCase;
 class MigrationInstall320Test extends WP_UnitTestCase {
 
 	private $migration;
-	private $configuration;
+	/** @var \SeQura\WC\Repositories\Entity_Repository&\PHPUnit\Framework\MockObject\MockObject */
 	private $entity_repository;
+	/** @var \SeQura\WC\Repositories\Queue_Item_Repository&\PHPUnit\Framework\MockObject\MockObject */
 	private $queue_repository;
 	private $hook_name;
 	
 	public function set_up() {
-		$this->hook_name         = 'migration_install_320_test_hook';
-		$this->configuration     = $this->createMock( Configuration::class );
+		$this->hook_name = 'migration_install_320_test_hook';
+		/** @var \wpdb&\PHPUnit\Framework\MockObject\MockObject */
 		$_wpdb                   = $this->createMock( \wpdb::class );
 		$this->entity_repository = $this->createMock( Entity_Repository::class );
 		$this->queue_repository  = $this->createMock( Queue_Item_Repository::class );
 
 		$this->migration = new Migration_Install_320(
 			$_wpdb, 
-			$this->configuration, 
 			$this->hook_name, 
 			$this->entity_repository, 
 			$this->queue_repository
