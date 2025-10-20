@@ -2,7 +2,7 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.8.2
+Tested up to: 6.8.3
 Stable tag: 4.0.0
 Requires PHP: 7.3
 License: GPL-3.0+
