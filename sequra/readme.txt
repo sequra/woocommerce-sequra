@@ -102,7 +102,7 @@ Contributors:
 == Changelog ==
 = 4.0.0	=
 * Added: PHP 8.4 compatibility.
-* Changed: Update integration-core library to version v2.5.0.
+* Changed: Update integration-core library to version v3.0.0.
 * Added: Support for managing multiple deployment targets credentials.
 * Added: Integration-Core-UI library providing the assets required for the configuration page.
 * Fixed: The link to read more about the payment method was not always working.
