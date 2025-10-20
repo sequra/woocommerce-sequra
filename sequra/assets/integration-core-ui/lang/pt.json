@@ -120,7 +120,7 @@
     "acceptableRange": "O valor deve estar entre %d e %d.",
     "paymentMethodUnavailable": "Método de pagamento indisponível.",
     "storeUnavailable": "Loja indisponível.",
-    "invalidTimeDuration": "Este campo deve conter apenas datas como 2017-08-31 ou durações como P3M15D (3 meses e 15 dias). Verifique o formato ISO 8601."
+    "invalidTimeDuration": "Este campo deve conter apenas datas como 2017-08-31 ou durações como P3M15D (3 meses e 15 dias). Verifique o formato ISO 8601"
   },
   "payments": {
     "title": "Métodos de pagamento",

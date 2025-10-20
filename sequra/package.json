@@ -49,6 +49,6 @@
         "playwright-fixture-for-plugins": "github:sequra/playwright-fixture-for-plugins#1.0.0"
     },
     "dependencies": {
-        "sequra-core-admin-fe": "github:sequra/integration-core-ui#release/woocommerce-compat"
+        "sequra-core-admin-fe": "github:sequra/integration-core-ui#2.0.0"
     }
 }
