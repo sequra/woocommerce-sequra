@@ -8,9 +8,13 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
+use WP;
+use WP_Error;
 use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * Helper for REST Controllers
@@ -307,5 +311,28 @@ abstract class REST_Controller extends \WP_REST_Controller {
 			default:
 				return '';
 		}
+	}
+
+	/**
+	 * Build a valid response for the REST API
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	protected function build_response( Response $response ) {
+		return $this->build_response_from_array( $response->toArray(), $response->isSuccessful() );
+	}
+
+	/**
+	 * Build a valid response for the REST API from an array
+	 * 
+	 * @return WP_REST_Response|WP_Error
+	 */
+	protected function build_response_from_array( array $response_array, bool $is_successful ) {
+		if ( ! $is_successful ) {
+			$code    = strval( $response_array['statusCode'] ?? '500' );
+			$message = strval( $response_array['errorMessage'] ?? 'Unknown error' );
+			return new WP_Error( $code, $message );
+		}
+		return \rest_ensure_response( $response_array );
 	}
 }

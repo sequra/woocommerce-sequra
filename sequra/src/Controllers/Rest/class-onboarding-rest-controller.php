@@ -14,6 +14,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\Connection\Requests\OnboardingRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConfigurationRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\Disconnect\Requests\DisconnectRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
@@ -162,17 +163,14 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_connection_data( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getOnboardingData()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getOnboardingData();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -183,17 +181,14 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_deployments( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->deployments( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getAllDeployments()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->deployments( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getAllDeployments();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -204,17 +199,14 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_not_connected_deployments( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->deployments( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getNotConnectedDeployments()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->deployments( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getNotConnectedDeployments();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -225,25 +217,22 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function validate_connection_data( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->isConnectionDataValid(
-				new ConnectionRequest(
-					strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
-					strval( $request->get_param( self::PARAM_MERCHANT_ID ) ),
-					strval( $request->get_param( self::PARAM_USERNAME ) ),
-					strval( $request->get_param( self::PARAM_PASSWORD ) ),
-					strval( $request->get_param( self::PARAM_DEPLOYMENT_ID ) )
-				)
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->isConnectionDataValid(
+			new ConnectionRequest(
+				strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
+				strval( $request->get_param( self::PARAM_MERCHANT_ID ) ),
+				strval( $request->get_param( self::PARAM_USERNAME ) ),
+				strval( $request->get_param( self::PARAM_PASSWORD ) ),
+				strval( $request->get_param( self::PARAM_DEPLOYMENT_ID ) )
 			)
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		);
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -254,22 +243,19 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function disconnect( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->disconnect( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->disconnect(
-				new DisconnectRequest(
-					strval( $request->get_param( self::PARAM_DEPLOYMENT_ID ) ),
-					(bool) $request->get_param( self::PARAM_IS_FULL_DISCONNECT )
-				)
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->disconnect( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->disconnect(
+			new DisconnectRequest(
+				strval( $request->get_param( self::PARAM_DEPLOYMENT_ID ) ),
+				(bool) $request->get_param( self::PARAM_IS_FULL_DISCONNECT )
 			)
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		);
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -280,43 +266,38 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function connect( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			/**
-			 * Connection Data
-			 * 
-			 * @var array<array{merchantId?: string,
-			 *     username?: string,
-			 *     password?: string,
-			 *     deployment?: string}> $connection_data_array
-			 */
-			$connection_data_array = $request->get_param( self::PARAM_CONNECTION_DATA ) ?? array();
-
-			$connection_requests = array();
-			foreach ( $connection_data_array as $conn_data ) {
-				$connection_requests[] = new ConnectionRequest(
-					strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
-					strval( $conn_data[ self::PARAM_MERCHANT_ID ] ?? '' ),
-					strval( $conn_data[ self::PARAM_USERNAME ] ?? '' ),
-					strval( $conn_data[ self::PARAM_PASSWORD ] ?? '' ),
-					strval( $conn_data[ self::PARAM_DEPLOYMENT ] ?? '' )
-				);
-			}
-
-			$response = AdminAPI::get()
-			->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->connect(
-				new OnboardingRequest(
-					$connection_requests,
-					(bool) $request->get_param( self::PARAM_SEND_STATISTICAL_DATA ),
-				)
-			)
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
+		/**
+		 * Connection Data
+		 * 
+		 * @var array<array{merchantId?: string,
+		 *     username?: string,
+		 *     password?: string,
+		 *     deployment?: string}> $connection_data_array */
+		$connection_data_array = $request->get_param( self::PARAM_CONNECTION_DATA ) ?? array();
+		$connection_requests   = array();
+		foreach ( $connection_data_array as $conn_data ) {
+			$connection_requests[] = new ConnectionRequest(
+				strval( $request->get_param( self::PARAM_ENVIRONMENT ) ),
+				strval( $conn_data[ self::PARAM_MERCHANT_ID ] ?? '' ),
+				strval( $conn_data[ self::PARAM_USERNAME ] ?? '' ),
+				strval( $conn_data[ self::PARAM_PASSWORD ] ?? '' ),
+				strval( $conn_data[ self::PARAM_DEPLOYMENT ] ?? '' )
+			);
 		}
-		return \rest_ensure_response( $response );
+
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->connection( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->connect(
+			new OnboardingRequest(
+				$connection_requests,
+				(bool) $request->get_param( self::PARAM_SEND_STATISTICAL_DATA ),
+			)
+		);
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -327,17 +308,14 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_selling_countries( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getSellingCountries()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getSellingCountries();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -348,17 +326,14 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_countries( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getCountryConfigurations()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getCountryConfigurations();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -373,25 +348,20 @@ class Onboarding_REST_Controller extends REST_Controller {
 		if ( ! $this->validate_countries( $request ) ) {
 			return new WP_REST_Response( 'Invalid data', 400 );
 		}
+		/**
+		 * Data
+		 *
+		 * @var array<int, array<string, string>> $data */
+		$data = (array) json_decode( $request->get_body(), true );
 
-		$response = null;
-		try {
-			/**
-			 * Data
-			 *
-			 * @var array<int, array<string, string>> $data The data.
-			 */
-			$data = (array) json_decode( $request->get_body(), true );
-
-			$response = AdminAPI::get()
-			->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->saveCountryConfigurations( new CountryConfigurationRequest( $data ) )
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->saveCountryConfigurations( new CountryConfigurationRequest( $data ) );
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -402,22 +372,25 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_widgets( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->widgetConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getWidgetSettings()
-			->toArray();
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->widgetConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getWidgetSettings();
 
-			if ( ! empty( $response ) ) {
-				$response[ self::PARAM_WIDGET_STYLES ] = $response['widgetConfiguration'];
-				unset( $response['widgetConfiguration'] );
-			}
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
+		$arr = $response->toArray();
+		if ( ! $response->isSuccessful() ) {
+			return $this->build_response_from_array( $arr, false );
 		}
-		return \rest_ensure_response( $response );
+		$widget_configuration = '';
+		if ( isset( $arr['widgetConfiguration'] ) ) {
+			$widget_configuration = $arr['widgetConfiguration'];
+			unset( $arr['widgetConfiguration'] );
+		}
+		$arr[ self::PARAM_WIDGET_STYLES ] = $widget_configuration;
+		return $this->build_response_from_array( $arr, true );
 	}
 
 	/**
@@ -428,37 +401,33 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function save_widgets( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$store_id = strval( $request->get_param( self::PARAM_STORE_ID ) );
-			$response = AdminAPI::get()
-			->widgetConfiguration( $store_id )
-			->setWidgetSettings(
-				new WidgetSettingsRequest(
-					(bool) $request->get_param( self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE ),
-					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING ),
-					(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE ),
-					strval( $request->get_param( self::PARAM_WIDGET_STYLES ) ),
-					strval( $request->get_param( self::PARAM_SEL_FOR_PRICE ) ),
-					strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
-					strval( $request->get_param( self::PARAM_CART_SEL_FOR_PRICE ) ),
-					strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
-					strval( $request->get_param( self::PARAM_CART_WIDGET_ON_PAGE ) ),
-					strval( $request->get_param( self::PARAM_LISTING_WIDGET_ON_PAGE ) ),
-					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_PRICE ) ),
-					strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) ),
-					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
-					strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
-					(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
-				)
-			);
-			$response = $response->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+	public function save_widgets( WP_REST_Request $request ) {          
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->widgetConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->setWidgetSettings(
+			new WidgetSettingsRequest(
+				(bool) $request->get_param( self::PARAM_DISPLAY_WIDGET_ON_PRODUCT_PAGE ),
+				(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_PRODUCT_LISTING ),
+				(bool) $request->get_param( self::PARAM_SHOW_INSTALLMENT_AMOUNT_IN_CART_PAGE ),
+				strval( $request->get_param( self::PARAM_WIDGET_STYLES ) ),
+				strval( $request->get_param( self::PARAM_SEL_FOR_PRICE ) ),
+				strval( $request->get_param( self::PARAM_SEL_FOR_DEFAULT_LOCATION ) ),
+				strval( $request->get_param( self::PARAM_CART_SEL_FOR_PRICE ) ),
+				strval( $request->get_param( self::PARAM_CART_SEL_FOR_DEFAULT_LOCATION ) ),
+				strval( $request->get_param( self::PARAM_CART_WIDGET_ON_PAGE ) ),
+				strval( $request->get_param( self::PARAM_LISTING_WIDGET_ON_PAGE ) ),
+				strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_PRICE ) ),
+				strval( $request->get_param( self::PARAM_LISTING_SEL_FOR_LOCATION ) ),
+				strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE ) ),
+				strval( $request->get_param( self::PARAM_SEL_FOR_ALT_PRICE_TRIGGER ) ),
+				(array) $request->get_param( self::PARAM_CUSTOM_LOCATIONS )
+			)
+		);
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -467,30 +436,33 @@ class Onboarding_REST_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request.
 	 */
 	public function validate_countries( WP_REST_Request $request ): bool {
-		try {
-			$data = json_decode( $request->get_body(), true );
-			if ( ! is_array( $data ) ) {
+		$data = json_decode( $request->get_body(), true );
+		if ( ! is_array( $data ) ) {
+			return false;
+		}
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getSellingCountries();
+
+		if ( ! $response->isSuccessful() ) {
+			return false;
+		}
+
+		$allowed_countries = array_column( $response->toArray(), 'code' );
+
+		foreach ( $data as $country ) {
+			if ( ! isset( $country['countryCode'] ) 
+			|| ! isset( $country['merchantId'] ) 
+			|| ! is_string( $country['countryCode'] ) 
+			|| ! is_string( $country['merchantId'] )
+			|| ! in_array( $country['countryCode'], $allowed_countries, true )
+			) {
 				return false;
 			}
-			$allowed_countries = AdminAPI::get()
-			->countryConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getSellingCountries()
-			->toArray();
-
-			$allowed_countries = array_column( $allowed_countries, 'code' );
-
-			foreach ( $data as $country ) {
-				if ( ! isset( $country['countryCode'] ) 
-				|| ! isset( $country['merchantId'] ) 
-				|| ! is_string( $country['countryCode'] ) 
-				|| ! is_string( $country['merchantId'] )
-				|| ! in_array( $country['countryCode'], $allowed_countries, true )
-				) {
-					return false;
-				}
-			}
-		} catch ( \Throwable $e ) {
-			return false;
 		}
 		return true;
 	}
