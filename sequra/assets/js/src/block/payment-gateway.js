@@ -45,10 +45,15 @@ const Content = (props) => {
         });
         document.addEventListener('canMakePaymentReady', (event) => {
             setContent(event.detail.content);
-            if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents && 'function' === typeof Sequra.onLoad) {
-                Sequra.onLoad(() => Sequra.refreshComponents());
-            }
+            setTimeout(() => {
+                if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents) {
+                    Sequra.refreshComponents();
+                }
+            }, 0);
         });
+        if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents && 'function' === typeof Sequra.onLoad) {
+            Sequra.onLoad(Sequra.refreshComponents());
+        }
     }, []);
 
     return <div dangerouslySetInnerHTML={{ __html: decodeEntities(content) }} />

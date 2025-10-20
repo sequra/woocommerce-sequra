@@ -11,7 +11,7 @@ use SeQura\Core\Infrastructure\Logger\Interfaces\DefaultLoggerAdapter;
 use SeQura\Core\Infrastructure\Logger\LogData;
 use SeQura\Core\Infrastructure\Logger\Logger;
 use SeQura\Core\Infrastructure\Utility\TimeProvider;
-use SeQura\WC\Services\Interface_Log_File;
+use SeQura\WC\Services\Log\Interface_Log_File;
 use Throwable;
 
 /**

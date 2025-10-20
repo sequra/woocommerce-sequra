@@ -58,10 +58,9 @@ jobs:
         if: github.event_name == 'push'
         run: bin/php-syntax-check --php=8.3
 
-      # TODO: Work on this after integration-core is updated to support PHP 8.4
-      # - name: PHP 8.4 Syntax check
-      #   if: github.event_name == 'push'
-      #   run: bin/php-syntax-check --php=8.4
+      - name: PHP 8.4 Syntax check
+        if: github.event_name == 'push'
+        run: bin/php-syntax-check --php=8.4
 
       - name: Cache NPM dependencies
         if: github.event_name == 'pull_request'
@@ -101,7 +100,16 @@ jobs:
 
       - name: Setup Environment
         if: github.event_name == 'pull_request'
-        run: ./setup.sh --install=0 --disable-ngrok=1
+        env:
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+        run: |
+          cp .env.sample .env
+          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
+          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
+          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          ./setup.sh --install=0 --disable-ngrok=1
 
       - name: Setup Tests
         if: github.event_name == 'pull_request'

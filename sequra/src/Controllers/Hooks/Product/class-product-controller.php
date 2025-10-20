@@ -9,19 +9,18 @@
 namespace SeQura\WC\Controllers\Hooks\Product;
 
 use SeQura\Core\Infrastructure\Logger\LogContextData;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
-use SeQura\WC\Services\I18n\Interface_I18n;
-use SeQura\WC\Services\Interface_Logger_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
-use SeQura\WC\Services\Regex\Regex;
+use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use WC_Product;
 use WP_Post;
 
 /**
  * Product Controller implementation
+ * 
+ * @phpstan-import-type WidgetDataArray from Interface_Widgets_Service
  */
 class Product_Controller extends Controller implements Interface_Product_Controller {
 
@@ -33,20 +32,6 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	private const NONCE_SEQURA_PRODUCT                         = '_sequra_product_nonce';
 
 	/**
-	 * I18n service
-	 *
-	 * @var Interface_I18n
-	 */
-	private $i18n;
-
-	/**
-	 * Settings service
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
-
-	/**
 	 * Product service
 	 *
 	 * @var Interface_Product_Service
@@ -54,47 +39,42 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	private $product_service;
 
 	/**
-	 * Payment service
-	 *
-	 * @var Interface_Payment_Service
-	 */
-	private $payment_service;
-
-	/**
-	 * Payment method service
-	 *
-	 * @var Interface_Payment_Method_Service
-	 */
-	private $payment_method_service;
-
-	/**
 	 * RegEx service
 	 *
-	 * @var Regex
+	 * @var RegexProvider
 	 */
 	private $regex;
+
+	/**
+	 * Cached available widgets for product page
+	 * 
+	 * @var array<WidgetDataArray[]>
+	 */
+	private $available_widgets_for_product_page;
+
+	/**
+	 * Widgets service
+	 * 
+	 * @var Interface_Widgets_Service
+	 */
+	private $widgets_service;
 
 	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		Interface_Logger_Service $logger,
-		string $templates_path, 
-		Configuration $configuration,
+		string $templates_path,
 		Interface_Product_Service $product_service,
-		Interface_Payment_Service $payment_service,
-		Interface_Payment_Method_Service $payment_method_service,
-		Interface_I18n $i18n,
-		Regex $regex
+		RegexProvider $regex,
+		Interface_Widgets_Service $widgets_service
 	) {
 		parent::__construct( $logger, $templates_path );
-		$this->logger                 = $logger;
-		$this->configuration          = $configuration;
-		$this->product_service        = $product_service;
-		$this->payment_service        = $payment_service;
-		$this->payment_method_service = $payment_method_service;
-		$this->i18n                   = $i18n;
-		$this->regex                  = $regex;
+		$this->logger                             = $logger;
+		$this->product_service                    = $product_service;
+		$this->regex                              = $regex;
+		$this->widgets_service                    = $widgets_service;
+		$this->available_widgets_for_product_page = array();
 	}
 
 	/**
@@ -110,6 +90,8 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * - is_alt_price: A CSS selector to determine if the product has an alternative price. Optional.
 	 * - reg_amount: The registration amount. Optional.
 	 * - theme: The theme to use. Accepted values are: L, R, legacy, legacyL, legacyR, minimal, minimalL, minimalR or JSON formatted string. Optional.
+	 * - min_amount: The minimum amount to display the widget. Optional.
+	 * - max_amount: The maximum amount to display the widget. Optional.
 	 * 
 	 * @param array<string, string> $atts The shortcode attributes
 	 * @return string
@@ -126,11 +108,21 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			}
 		}
 
-		$current_country = $this->i18n->get_current_country();
-		$campaign        = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : null;
+		$product_id = (int) $atts['product_id'];
+		$product    = $atts['product'];
+		$campaign   = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : '';
 		
-		if ( ! $this->configuration->is_widget_enabled( $atts['product'], $campaign, $current_country ) ) {
-			$this->logger->log_info( 'Widget is disabled', __FUNCTION__, __CLASS__ );
+		if ( ! $this->is_widget_enabled_for_product( $product_id, $product, $campaign ) ) {
+			$this->logger->log_info( 
+				'Widget is disabled',
+				__FUNCTION__,
+				__CLASS__,
+				array( 
+					new LogContextData( 'payment_method', $product ),
+					new LogContextData( 'campaign', $campaign ),
+					new LogContextData( 'product_id', $product_id ),
+				)
+			);
 			return '';
 		}
 
@@ -152,27 +144,29 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'product'      => '',
 				'campaign'     => '',
 				'product_id'   => '',
-				'theme'        => $this->configuration->get_widget_theme( $atts['product'], $campaign, $current_country ),
+				'theme'        => '',
 				'reverse'      => 0,
-				'reg_amount'   => $this->product_service->get_registration_amount( (int) $atts['product_id'], true ),
-				'dest'         => $this->configuration->get_widget_dest_css_sel( $atts['product'], $campaign, $current_country ),
-				'price'        => $this->configuration->get_widget_price_css_sel(),
-				'alt_price'    => $this->configuration->get_widget_alt_price_css_sel(),
-				'is_alt_price' => $this->configuration->get_widget_is_alt_price_css_sel(),
+				'reg_amount'   => $this->product_service->get_registration_amount( $product_id, true ),
+				'dest'         => '',
+				'price'        => '',
+				'alt_price'    => '',
+				'is_alt_price' => '',
+				'min_amount'   => 0,
+				'max_amount'   => null,
 			),
 			$atts,
 			'sequra_widget'
 		);
 
-		if ( ! $this->product_service->can_display_widget_for_method( (int) $atts['product_id'], $atts['product'] ) ) {
+		if ( ! $this->product_service->can_display_widget_for_method( $product_id, $product ) ) {
 			$this->logger->log_info(
 				'Widget cannot be displayed for product', 
 				__FUNCTION__,
 				__CLASS__,
 				array( 
-					new LogContextData( 'payment_method', $atts['product'] ),
-					new LogContextData( 'campaign', $atts['campaign'] ),
-					new LogContextData( 'product_id', $atts['product_id'] ),
+					new LogContextData( 'payment_method', $product ),
+					new LogContextData( 'campaign', $campaign ),
+					new LogContextData( 'product_id', $product_id ),
 				) 
 			);
 			return '';
@@ -191,60 +185,35 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 */
 	public function do_cart_widget_shortcode( $atts ) {
 		$this->logger->log_debug( 'Shortcode called', __FUNCTION__, __CLASS__ );
-		$atts = (array) $atts;
 
-		$current_country = $this->i18n->get_current_country();
-
-		if ( ! $this->configuration->is_cart_widget_enabled( $current_country ) ) {
-			$this->logger->log_info( 'Cart Widget is disabled', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
-			return '';
-		}
-		if ( ! $this->product_service->can_display_mini_widgets() ) {
-			$this->logger->log_info( 'SeQura payment gateway is disabled', __FUNCTION__, __CLASS__ );
+		$widget = $this->widgets_service->get_widget_for_cart_page();
+		if ( ! $widget ) {
 			return '';
 		}
 
-		try {
-			$store_id = $this->configuration->get_store_id();
-			$merchant = $this->payment_service->get_merchant_id();
-			$methods  = $this->payment_method_service->get_all_mini_widget_compatible_payment_methods( $store_id, $merchant );
+		$atts = \shortcode_atts(
+			array(
+				'product'             => $widget['product'] ?? '',
+				'campaign'            => $widget['campaign'] ?? '',
+				'dest'                => $widget['dest'] ?? '',
+				'theme'               => $widget['theme'] ?? '',
+				'price'               => $widget['priceSel'] ?? '',
+				'alt_price'           => $widget['altPriceSel'] ?? '',
+				'is_alt_price'        => $widget['altTriggerSelector'] ?? '',
+				'message'             => $widget['miniWidgetMessage'],
+				'message_below_limit' => $widget['miniWidgetBelowLimitMessage'],
+				'min_amount'          => $widget['minAmount'] ?? 0,
+				'max_amount'          => $widget['maxAmount'] ?? null,
+				'reg_amount'          => 0,
+				'reverse'             => 0,
+			),
+			(array) $atts,
+			'sequra_cart_widget'
+		);
 
-			$config = $this->configuration->get_cart_widget_config( $current_country );
-			if ( ! $config ) {
-				$this->logger->log_info( 'Cart Widget configuration not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
-				return '';
-			}
-
-
-
-			foreach ( $methods as $method ) {
-				if ( $method['product'] !== $config['product'] ) {
-					continue;
-				}
-
-				$atts = \shortcode_atts(
-					array(
-						'product'             => $method['product'] ?? '',
-						'campaign'            => $method['campaign'] ?? '',
-						'dest'                => $config['selForLocation'],
-						'price'               => $config['selForPrice'],
-						'message'             => $config['message'],
-						'message_below_limit' => $config['messageBelowLimit'],
-						'min_amount'          => $method['minAmount'] ?? 0,
-						'max_amount'          => $method['maxAmount'] ?? null,
-					),
-					$atts,
-					'sequra_cart_widget'
-				);
-	
-				ob_start();
-				\wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
-				return ob_get_clean();
-			}
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-		}
-		return '';
+		ob_start();
+		\wc_get_template( 'front/widget.php', $atts, '', $this->templates_path );
+		return ob_get_clean();
 	}
 
 	/**
@@ -255,58 +224,73 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 */
 	public function do_product_listing_widget_shortcode( $atts ) {
 		$this->logger->log_debug( 'Shortcode called', __FUNCTION__, __CLASS__ );
-		$atts = (array) $atts;
-
-		$current_country = $this->i18n->get_current_country();
-		
-		if ( ! $this->configuration->is_product_listing_widget_enabled( $current_country ) ) {
-			$this->logger->log_info( 'Product listing Widget is disabled', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
+		$widget = $this->widgets_service->get_widget_for_product_listing_page();
+		if ( ! $widget ) {
 			return '';
 		}
-		if ( ! $this->product_service->can_display_mini_widgets() ) {
-			$this->logger->log_info( 'SeQura payment gateway is disabled', __FUNCTION__, __CLASS__ );
-			return '';
+
+		$atts = \shortcode_atts(
+			array(
+				'product'             => $widget['product'] ?? '',
+				'campaign'            => $widget['campaign'] ?? '',
+				'dest'                => $widget['dest'],
+				'price'               => $widget['priceSel'],
+				'message'             => $widget['miniWidgetMessage'],
+				'message_below_limit' => $widget['miniWidgetBelowLimitMessage'],
+				'min_amount'          => $widget['minAmount'] ?? 0,
+				'max_amount'          => $widget['maxAmount'] ?? null,
+			),
+			(array) $atts,
+			'sequra_product_listing_widget'
+		);
+
+		ob_start();
+		\wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get available widgets for a product page from in-memory cache or CheckoutAPI
+	 * 
+	 * @param int|string $product_id The product ID
+	 * @return WidgetDataArray[] The available widgets
+	 */
+	private function get_available_widgets_for_product_page( $product_id ): array {
+		
+		$product_id = (string) $product_id;
+		if ( isset( $this->available_widgets_for_product_page[ $product_id ] ) ) {
+			return $this->available_widgets_for_product_page[ $product_id ];
 		}
 		
-		try {
-			$store_id = $this->configuration->get_store_id();
-			$merchant = $this->payment_service->get_merchant_id();
-			$methods  = $this->payment_method_service->get_all_mini_widget_compatible_payment_methods( $store_id, $merchant );
+		$widgets = $this->widgets_service->get_widgets_for_product_page( $product_id );
 
-			$config = $this->configuration->get_product_listing_widget_config( $current_country );
-			if ( ! $config ) {
-				$this->logger->log_info( 'Product listing Widget configuration not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'country', $current_country ) ) );
-				return '';
-			}
-
-			foreach ( $methods as $method ) {
-				if ( $method['product'] !== $config['product'] ) {
-					continue;
-				}
-
-				$atts = \shortcode_atts(
-					array(
-						'product'             => $method['product'] ?? '',
-						'campaign'            => $method['campaign'] ?? '',
-						'dest'                => $config['selForLocation'],
-						'price'               => $config['selForPrice'],
-						'message'             => $config['message'],
-						'message_below_limit' => $config['messageBelowLimit'],
-						'min_amount'          => $method['minAmount'] ?? 0,
-						'max_amount'          => $method['maxAmount'] ?? null,
-					),
-					$atts,
-					'sequra_product_listing_widget'
-				);
-	
-				ob_start();
-				\wc_get_template( 'front/mini_widget.php', $atts, '', $this->templates_path );
-				return ob_get_clean();
-			}
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		if ( ! $widgets ) {
+			return array();
 		}
-		return '';
+
+		$this->available_widgets_for_product_page[ $product_id ] = $widgets;
+		return $widgets;
+	}
+
+	/**
+	 * Check if the widget is enabled
+	 * 
+	 * @param string|int $product_id The WooCommerce product ID
+	 * @param string $product The seQura product identifier
+	 * @param string $campaign The seQura campaign name. Use an empty string to ignore the campaign.
+	 * @return bool
+	 */
+	private function is_widget_enabled_for_product( $product_id, string $product, string $campaign = '' ): bool {
+		/**
+		 * Promotional widget data
+		 *
+		 * @var array<string, mixed> $widget */ 
+		foreach ( $this->get_available_widgets_for_product_page( $product_id ) as $widget ) {
+			if ( $widget['product'] === $product && $widget['campaign'] === $campaign ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -322,31 +306,24 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		 * @var WC_Product $product
 		 */
 		global $product;
-	
-		$methods = array();
-		try {
-			$store_id = $this->configuration->get_store_id();
-			$merchant = $this->payment_service->get_merchant_id();
-			$methods  = $this->payment_method_service->get_all_widget_compatible_payment_methods( $store_id, $merchant );
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			return;
-		}
 
-		foreach ( $methods as $method ) {
-			if ( ! $this->product_service->can_display_widget_for_method( $product, $method ) ) {
-				continue;
-			}
-			
+		foreach ( $this->get_available_widgets_for_product_page( $product->get_id() ) as $widget ) {
 			$atts = array(
-				'product'    => $method['product'] ?? '',
-				'campaign'   => $method['campaign'] ?? '',
-				'product_id' => $product->get_id(),
+				'product'      => $widget['product'] ?? '',
+				'campaign'     => $widget['campaign'] ?? '',
+				'product_id'   => $product->get_id(),
+				'theme'        => $widget['theme'] ?? '',
+				'dest'         => $widget['dest'] ?? '',
+				'price'        => $widget['priceSel'] ?? '',
+				'alt_price'    => $widget['altPriceSel'] ?? '',
+				'is_alt_price' => $widget['altTriggerSelector'] ?? '',
+				'min_amount'   => $widget['minAmount'] ?? 0,
+				'max_amount'   => $widget['maxAmount'] ?? null,
+				
 			);
-
 			$atts_str = '';
 			foreach ( $atts as $key => $value ) {
-				$atts_str .= " $key=\"$value\"";
+				$atts_str .= " $key='$value'";
 			}
 			echo \do_shortcode( "[sequra_widget $atts_str]" );
 		}
@@ -415,17 +392,17 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		$args = array(
 			'is_banned'                                    => $this->product_service->get_is_banned( $post->ID ),
 			'is_banned_field_name'                         => self::FIELD_NAME_IS_BANNED,
-			'enabled_for_services'                         => $this->configuration->is_enabled_for_services(),
+			'enabled_for_services'                         => $this->product_service->is_enabled_for_services(),
 			'is_service'                                   => $this->product_service->is_service( $post->ID ),
 			'is_service_field_name'                        => self::FIELD_NAME_IS_SERVICE,
-			'service_end_date_default'                     => $this->configuration->get_default_services_end_date(),
+			'service_end_date_default'                     => $this->product_service->get_default_services_end_date(),
 			'service_end_date'                             => $this->product_service->get_service_end_date( $post->ID, true ),
 			'service_end_date_field_name'                  => self::FIELD_NAME_SERVICE_END_DATE,
-			'allow_payment_delay'                          => $this->configuration->allow_first_service_payment_delay(),
+			'allow_payment_delay'                          => $this->product_service->is_allow_first_service_payment_delay(),
 			'service_desired_first_charge_date'            => $this->product_service->get_desired_first_charge_date( $post->ID, true ) ?? '',
 			'service_desired_first_charge_date_field_name' => self::FIELD_NAME_SERVICE_DESIRED_FIRST_CHARGE_DATE,
-			'date_or_duration_regex'                       => $this->regex->date_or_duration( false ),
-			'allow_registration_items'                     => $this->configuration->allow_service_reg_items(),
+			'date_or_duration_regex'                       => $this->regex->getDateOrDurationRegex( false ),
+			'allow_registration_items'                     => $this->product_service->is_allow_service_registration_items(),
 			'service_registration_amount'                  => $this->product_service->get_registration_amount( $post->ID ),
 			'service_registration_amount_field_name'       => self::FIELD_NAME_REGISTRATION_AMOUNT,
 			'nonce_name'                                   => self::NONCE_SEQURA_PRODUCT,

@@ -9,7 +9,7 @@
 namespace SeQura\WC\Controllers\Hooks\Process;
 
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 
 /**

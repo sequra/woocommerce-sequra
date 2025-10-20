@@ -9,9 +9,10 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
-use SeQura\Core\Infrastructure\Logger\LogContextData;
-use SeQura\WC\Services\Interface_Logger_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
+use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetFormattedPaymentMethodsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetPaymentMethodsRequest;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,24 +23,20 @@ use WP_REST_Response;
 class Payment_REST_Controller extends REST_Controller {
 
 	/**
-	 * Payment method service
-	 * 
-	 * @var Interface_Payment_Method_Service
-	 */
-	private $payment_method_service;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $rest_namespace The namespace.
 	 * @param Interface_Logger_Service $logger         The logger service.
-	 * @param Interface_Payment_Method_Service $payment_method_service The payment method service.
+	 * @param RegexProvider $regex The regex provider.
 	 */
-	public function __construct( $rest_namespace, Interface_Logger_Service $logger, Interface_Payment_Method_Service $payment_method_service ) {
-		parent::__construct( $logger );
-		$this->namespace              = $rest_namespace;
-		$this->rest_base              = '/payment';
-		$this->payment_method_service = $payment_method_service;
+	public function __construct( 
+		$rest_namespace, 
+		Interface_Logger_Service $logger,
+		RegexProvider $regex
+	) {
+		parent::__construct( $logger, $regex );
+		$this->namespace = $rest_namespace;
+		$this->rest_base = '/payment';
 	}
 
 	/**
@@ -72,11 +69,12 @@ class Payment_REST_Controller extends REST_Controller {
 	public function get_methods( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			$response = $this->payment_method_service->get_all_payment_methods(
-				strval( $request->get_param( self::PARAM_STORE_ID ) ),
-				strval( $request->get_param( self::PARAM_MERCHANT_ID ) ),
-				false
-			);
+			$response = AdminAPI::get()
+			->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getPaymentMethods(
+				new GetPaymentMethodsRequest( strval( $request->get_param( self::PARAM_MERCHANT_ID ) ), true )
+			)
+			->toArray();
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );
@@ -92,39 +90,14 @@ class Payment_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_all_methods( WP_REST_Request $request ) {
-		$response = array();
+		$response = null;
 		try {
-			$store_id = strval( $request->get_param( self::PARAM_STORE_ID ) );
-
-			$countries = AdminAPI::get()
-			->countryConfiguration( $store_id )
-			->getCountryConfigurations()
+			$response = AdminAPI::get()
+			->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+			->getAllAvailablePaymentMethods(
+				new GetFormattedPaymentMethodsRequest( true )
+			)
 			->toArray();
-
-			foreach ( $countries as $country ) {
-				if ( ! isset( $country['merchantId'] ) ) {
-					$this->logger->log_debug( 'Merchant ID not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'countryConfiguration', $country ) ) );
-					continue;
-				}
-				
-				$payment_methods = $this->payment_method_service->get_all_payment_methods( $store_id, strval( $country['merchantId'] ) );
-
-				foreach ( $payment_methods as $payment_method ) {
-					if ( ! isset( $country['countryCode'], $payment_method['product'], $payment_method['title'] ) ) {
-						$this->logger->log_debug( 'Required properties not found', __FUNCTION__, __CLASS__, array( new LogContextData( 'countryConfiguration', $country ), new LogContextData( 'paymentMethod', $payment_method ) ) );
-						continue;
-					}
-
-					$response[] = array(
-						'countryCode'                 => $country['countryCode'],
-						'product'                     => $payment_method['product'],
-						'title'                       => $payment_method['title'],
-						'campaign'                    => $payment_method['campaign'] ?? null,
-						'supportsWidgets'             => $payment_method['supportsWidgets'],
-						'supportsInstallmentPayments' => $payment_method['supportsInstallmentPayments'],
-					);
-				}
-			}
 		} catch ( \Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 			$response = new WP_Error( 'error', $e->getMessage() );

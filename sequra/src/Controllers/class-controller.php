@@ -8,7 +8,7 @@
 
 namespace SeQura\WC\Controllers;
 
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 
 /**
  * Controller

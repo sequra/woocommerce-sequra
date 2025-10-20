@@ -9,7 +9,7 @@
 namespace SeQura\WC\Controllers\Hooks\I18n;
 
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 
 /**
  * Define the internationalization functionality

@@ -17,7 +17,7 @@ use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Plugin;
 use SeQura\WC\Controllers\Rest\REST_Controller;
-use SeQura\WC\Services\Interface_Constants;
+use SeQura\WC\Services\Constants\Interface_Constants;
 use SeQura\WC\Services\Migration\Interface_Migration_Manager;
 use WP_UnitTestCase;
 

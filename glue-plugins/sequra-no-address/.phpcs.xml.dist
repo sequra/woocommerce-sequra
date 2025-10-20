@@ -26,11 +26,22 @@
 	<rule ref="Squiz.PHP.CommentedOutCode.Found">
 		<exclude name="Squiz.PHP.CommentedOutCode.Found"/>
 	</rule>
+	<rule ref="WordPressVIPMinimum">
+		<exclude name="WordPressVIPMinimum.JS.Window"/>
+		<exclude name="WordPressVIPMinimum.JS.DangerouslySetInnerHTML"/>
+		<exclude name="WordPressVIPMinimum.JS.InnerHTML"/>
+		<exclude name="WordPressVIPMinimum.JS.StrippingTags"/>
+		<exclude name="WordPressVIPMinimum.JS.StringConcat"/>
+		<exclude name="WordPressVIPMinimum.JS.HTMLExecutingFunctions"/>
+	</rule>
 	<rule ref="WordPressVIPMinimum" />
 	<rule ref="WooCommerce-Core" />
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="sequra,woocommerce"/>
+			<property name="text_domain" type="array">
+				<element value="sequra"/>
+				<element value="woocommerce"/>
+			</property>
 		</properties>
 	</rule>
 	<rule ref="WordPress.WhiteSpace.ControlStructureSpacing">

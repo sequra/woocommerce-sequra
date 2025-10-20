@@ -7,8 +7,6 @@
 
 namespace SeQura\WC;
 
-use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\GeneralSettingsController;
-use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\PromotionalWidgetsController;
 use SeQura\Core\BusinessLogic\BootstrapComponent;
 use SeQura\Core\BusinessLogic\DataAccess\ConnectionData\Entities\ConnectionData;
 use SeQura\Core\BusinessLogic\DataAccess\OrderSettings\Entities\OrderStatusSettings;
@@ -17,28 +15,29 @@ use SeQura\Core\BusinessLogic\DataAccess\SendReport\Entities\SendReport;
 use SeQura\Core\BusinessLogic\DataAccess\StatisticalData\Entities\StatisticalData;
 use SeQura\Core\BusinessLogic\DataAccess\TransactionLog\Entities\TransactionLog;
 use SeQura\Core\BusinessLogic\DataAccess\CountryConfiguration\Entities\CountryConfiguration;
+use SeQura\Core\BusinessLogic\DataAccess\Credentials\Entities\Credentials;
+use SeQura\Core\BusinessLogic\DataAccess\Deployments\Entities\Deployment;
 use SeQura\Core\BusinessLogic\DataAccess\GeneralSettings\Entities\GeneralSettings;
+use SeQura\Core\BusinessLogic\DataAccess\PaymentMethod\Entities\PaymentMethod;
+use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use SeQura\Core\BusinessLogic\Domain\Connection\Services\CredentialsService;
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\RepositoryContracts\GeneralSettingsRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\CategoryService;
-use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Services\GeneralSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\Order\MerchantDataProviderInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\Order\OrderCreationInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\OrderReport\OrderReportServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\Product\ProductServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\SellingCountries\SellingCountriesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\ShopOrderStatuses\ShopOrderStatusesServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Version\VersionServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
-use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\AbstractItemFactory;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\RepositoryContracts\OrderStatusSettingsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSettingsService;
-use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\RepositoryContracts\WidgetSettingsRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\StatisticalDataRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
 use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
@@ -71,10 +70,8 @@ use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
-use SeQura\WC\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item_Factory;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Category\Category_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Disconnect\Disconnect_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\ShopOrderStatuses\Shop_Order_Status_Service;
@@ -83,11 +80,6 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Utility\Encryptor;
 use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Service;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Default_Logger_Adapter;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Shop_Logger_Adapter;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\General_Settings_Controller;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\PromotionalWidgets\Promotional_Widgets_Controller;
-use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\GeneralSettings\Repositories\General_Settings_Repository;
-use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PaymentMethods\Entities\Payment_Methods;
-use SeQura\WC\Core\Extension\BusinessLogic\DataAccess\PromotionalWidgets\Repositories\Widget_Settings_Repository;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
 use SeQura\WC\Repositories\Entity_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
@@ -95,11 +87,9 @@ use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Repositories\Queue_Item_Repository;
 use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
-use SeQura\WC\Services\Assets\Assets;
-use SeQura\WC\Services\Assets\Interface_Assets;
 use SeQura\WC\Services\Cart\Cart_Service;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
-use SeQura\WC\Services\Constants;
+use SeQura\WC\Services\Constants\Constants;
 use SeQura\WC\Services\Core\Selling_Countries_Service;
 use SeQura\WC\Services\Core\Store_Service;
 use SeQura\WC\Services\Core\Version_Service;
@@ -107,31 +97,55 @@ use SeQura\WC\Services\Shopper\Shopper_Service;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use SeQura\WC\Services\I18n\I18n;
 use SeQura\WC\Services\I18n\Interface_I18n;
-use SeQura\WC\Services\Interface_Log_File;
-use SeQura\WC\Services\Interface_Logger_Service;
-use SeQura\WC\Services\Log_File;
-use SeQura\WC\Services\Logger_Service;
+use SeQura\WC\Services\Log\Interface_Log_File;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Log_File;
+use SeQura\WC\Services\Log\Logger_Service;
 use SeQura\WC\Services\Migration\Interface_Migration_Manager;
 use SeQura\WC\Services\Migration\Migration_Manager;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Order\Order_Service;
 use SeQura\WC\Services\Payment\Interface_Payment_Method_Service;
-use SeQura\WC\Services\Payment\Interface_Payment_Service;
 use SeQura\WC\Services\Payment\Payment_Method_Service;
-use SeQura\WC\Services\Payment\Payment_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Services\Pricing\Pricing_Service;
 use SeQura\WC\Services\Product\Interface_Product_Service;
 use SeQura\WC\Services\Product\Product_Service;
-use SeQura\WC\Services\Regex\Interface_Regex;
-use SeQura\WC\Services\Regex\Regex;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 use SeQura\WC\Services\Report\Report_Service;
-use SeQura\WC\Services\Interface_Constants;
+use SeQura\WC\Services\Constants\Interface_Constants;
 use SeQura\WC\Services\Time\Interface_Time_Checker_Service;
 use SeQura\WC\Services\Time\Time_Checker_Service;
-use SeQura\WC\Repositories\Interface_Deletable_Repository;
+use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\MiniWidgetMessagesProviderInterface;
+use SeQura\Core\BusinessLogic\Domain\Order\Builders\MerchantOrderRequestBuilder;
+use SeQura\Core\BusinessLogic\Domain\Order\Service\OrderService;
+use SeQura\Core\Infrastructure\Configuration\Configuration;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Order\Merchant_Data_Provider;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Order\Order_Creation;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Product\Product_Service as Core_Product_Service;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Mini_Widget_Messages_Provider;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
+use SeQura\WC\Repositories\Migrations\Migration_Install_400;
+use SeQura\WC\Services\Order\Current_Order_Provider;
+use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
+use SeQura\WC\Services\Platform\Interface_Platform_Provider;
+use SeQura\WC\Services\Platform\Platform_Provider;
+use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
+use SeQura\WC\Services\Widgets\Widgets_Service;
+use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
+use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
+use SeQura\WC\Services\Order\Builder\Order_Address_Builder;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Customer_Builder;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Delivery_Method_Builder;
+use SeQura\WC\Services\Order\Builder\Order_Customer_Builder;
+use SeQura\WC\Services\Order\Builder\Order_Delivery_Method_Builder;
+use SeQura\WC\Services\Service\Interface_Settings_Service;
+use SeQura\WC\Services\Service\Settings_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -290,46 +304,53 @@ class Bootstrap extends BootstrapComponent {
 				return Reg::getService( Order_Status_Settings_Service::class );
 			}
 		);
+		// Extend Configuration.
 		Reg::registerService(
 			Configuration::class,
 			static function () {
 				if ( ! isset( self::$cache[ Configuration::class ] ) ) {
-					self::$cache[ Configuration::class ] = Configuration::getInstance();
+					self::$cache[ Configuration::class ] = \SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration::getInstance();
 				}
 				return self::$cache[ Configuration::class ];
 			}
 		);
+		
+		/**
+		 * Initialize StoreContext with default store ID so any service that depends on StoreContext
+		 * will have the correct store ID set from the beginning. This will reduce the StoreContext::doWithStore 
+		 * calls to the cases where it's really necessary to set a different store ID.
+		 */
 		Reg::registerService(
-			\SeQura\Core\Infrastructure\Configuration\Configuration::CLASS_NAME,
+			StoreIdProvider::class,
 			static function () {
-				return Reg::getService( Configuration::class );
+				if ( ! isset( self::$cache[ StoreIdProvider::class ] ) ) {
+					self::$cache[ StoreIdProvider::class ] = new Store_Id_Provider();
+				}
+				return self::$cache[ StoreIdProvider::class ];
 			}
 		);
+
 		Reg::registerService(
 			Interface_Create_Order_Request_Builder::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Create_Order_Request_Builder::class ] ) ) {
 					self::$cache[ Interface_Create_Order_Request_Builder::class ] = new Create_Order_Request_Builder(
-						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Cart_Service::class ),
-						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Platform_Provider::class ),
 						Reg::getService( Interface_Product_Service::class ),
 						Reg::getService( Interface_Order_Service::class ),
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Shopper_Service::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Current_Order_Provider::class ),
+						Reg::getService( MerchantOrderRequestBuilder::class ),
+						Reg::getService( Interface_Order_Delivery_Method_Builder::class ),
+						Reg::getService( Interface_Order_Address_Builder::class ),
+						Reg::getService( Interface_Order_Customer_Builder::class ),
+						Reg::getService( CredentialsService::class )
 					);
 				}
 				return self::$cache[ Interface_Create_Order_Request_Builder::class ];
-			}
-		);
-		Reg::registerService(
-			AbstractItemFactory::class,
-			static function () {
-				if ( ! isset( self::$cache[ AbstractItemFactory::class ] ) ) {
-					self::$cache[ AbstractItemFactory::class ] = new Item_Factory();
-				}
-				return self::$cache[ AbstractItemFactory::class ];
 			}
 		);
 
@@ -353,8 +374,6 @@ class Bootstrap extends BootstrapComponent {
 							RepositoryRegistry::getRepository( StatisticalData::class ),
 							RepositoryRegistry::getRepository( SendReport::class ),
 							RepositoryRegistry::getRepository( QueueItem::class ),
-							//phpcs:ignore
-							// RepositoryRegistry::getRepository( SeQuraOrder::class ),
 						)
 					);
 				}
@@ -366,14 +385,42 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ OrderReportServiceInterface::class ] ) ) {
 					self::$cache[ OrderReportServiceInterface::class ] = new Order_Report_Service(
-						Reg::getService( Configuration::CLASS_NAME ),
+						Reg::getService( Interface_Platform_Provider::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
 						Reg::getService( Interface_Cart_Service::class ),
 						Reg::getService( Interface_Order_Service::class ),
-						Reg::getService( Interface_I18n::class )
+						Reg::getService( Interface_I18n::class ),
+						Reg::getService( Interface_Order_Delivery_Method_Builder::class ),
+						Reg::getService( Interface_Order_Address_Builder::class ),
+						Reg::getService( Interface_Order_Customer_Builder::class )
 					);
 				}
 				return self::$cache[ OrderReportServiceInterface::class ];
+			}
+		);
+		Reg::registerService(
+			MerchantDataProviderInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ MerchantDataProviderInterface::class ] ) ) {
+					self::$cache[ MerchantDataProviderInterface::class ] = new Merchant_Data_Provider(
+						Reg::getService( Interface_Current_Order_Provider::class ),
+						Reg::getService( Interface_Constants::class ),
+						Reg::getService( Interface_Product_Service::class ),
+						Reg::getService( Interface_Cart_Service::class ),
+						Reg::getService( Interface_Shopper_Service::class ),
+						Reg::getService( StoreContext::class )
+					);
+				}
+				return self::$cache[ MerchantDataProviderInterface::class ];
+			}
+		);
+		Reg::registerService(
+			OrderCreationInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ OrderCreationInterface::class ] ) ) {
+					self::$cache[ OrderCreationInterface::class ] = new Order_Creation();
+				}
+				return self::$cache[ OrderCreationInterface::class ];
 			}
 		);
 
@@ -462,7 +509,8 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Log_File::class ] ) ) {
 					self::$cache[ Interface_Log_File::class ] = new Log_File(
-						self::get_constants()->get_plugin_log_file_path()
+						self::get_constants()->get_plugin_log_file_path(),
+						Reg::getService( StoreContext::class )
 					);
 				}
 				return self::$cache[ Interface_Log_File::class ];
@@ -472,7 +520,7 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Migration_Manager::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Migration_Manager::class ] ) ) {
-					$configuration = Reg::getService( Configuration::CLASS_NAME );
+					$configuration = Reg::getService( ConfigurationManager::CLASS_NAME );
 					$wpdb          = Reg::getService( \wpdb::class );
 					/**
 					 * Order repository.
@@ -493,6 +541,19 @@ class Bootstrap extends BootstrapComponent {
 					 * @var Repository $queue_item_repository
 					 */
 					$queue_item_repository = RepositoryRegistry::getRepository( QueueItem::class );
+					/**
+					 * Encryptor service.
+					 *  
+					 * @var EncryptorInterface $encryptor
+					 */
+					$encryptor = Reg::getService( EncryptorInterface::class );
+
+					/**
+					 * Store context service.
+					 *  
+					 * @var StoreContext $store_context
+					 */
+					$store_context = Reg::getService( StoreContext::class );
 
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
 						self::get_constants()->get_plugin_basename(),
@@ -501,17 +562,21 @@ class Bootstrap extends BootstrapComponent {
 						array(
 							new Migration_Install_300(
 								$wpdb,
-								$configuration,
 								$order_repository,
 								$entity_repository,
-								$queue_item_repository
+								$queue_item_repository,
+								$store_context
 							),
 							new Migration_Install_320(
 								$wpdb,
-								$configuration,
 								self::get_constants()->get_hook_add_order_indexes(),
 								$entity_repository,
 								$queue_item_repository
+							),
+							new Migration_Install_400(
+								$wpdb,
+								$encryptor,
+								$store_context,
 							),
 						)
 					);
@@ -529,26 +594,14 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
-			Interface_Regex::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Regex::class ] ) ) {
-					self::$cache[ Interface_Regex::class ] = new Regex();
-				}
-				return self::$cache[ Interface_Regex::class ];
-			}
-		);
-		Reg::registerService(
 			Interface_Report_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Report_Service::class ] ) ) {
 					self::$cache[ Interface_Report_Service::class ] = new Report_Service(
-						Reg::getService( Configuration::class ),
-						Reg::getService( StoreService::class ),
 						Reg::getService( ShopOrderService::class ),
 						Reg::getService( StatisticalDataRepositoryInterface::class ),
 						Reg::getService( CountryConfigurationRepositoryInterface::class ),
-						Reg::getService( Interface_Order_Service::class ),
-						Reg::getService( StoreContext::class )
+						Reg::getService( Interface_Order_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Report_Service::class ];
@@ -564,18 +617,6 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Interface_Logger_Service::class ];
-			}
-		);
-		Reg::registerService(
-			Interface_Payment_Service::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Payment_Service::class ] ) ) {
-					self::$cache[ Interface_Payment_Service::class ] = new Payment_Service(
-						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_I18n::class )
-					);
-				}
-				return self::$cache[ Interface_Payment_Service::class ];
 			}
 		);
 
@@ -614,16 +655,16 @@ class Bootstrap extends BootstrapComponent {
 
 					self::$cache[ Interface_Order_Service::class ] = new Order_Service(
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
-						Reg::getService( Interface_Payment_Service::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
 						Reg::getService( OrderStatusSettingsService::class ),
-						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Cart_Service::class ),
-						Reg::getService( StoreContext::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( Interface_Time_Checker_Service::class ),
 						$repository,
-						$repository
+						$repository,
+						self::get_constants()->get_payment_gateway_id(),
+						Reg::getService( ConnectionService::class ),
+						Reg::getService( OrderService::class )
 					);
 				}
 				return self::$cache[ Interface_Order_Service::class ];
@@ -635,9 +676,9 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Cart_Service::class ] ) ) {
 					self::$cache[ Interface_Cart_Service::class ] = new Cart_Service(
 						Reg::getService( Interface_Product_Service::class ),
-						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Shopper_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Cart_Service::class ];
@@ -648,9 +689,9 @@ class Bootstrap extends BootstrapComponent {
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Product_Service::class ] ) ) {
 					self::$cache[ Interface_Product_Service::class ] = new Product_Service(
-						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Pricing_Service::class ),
-						Reg::getService( Interface_Regex::class )
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( StoreContext::class )
 					);
 				}
 				return self::$cache[ Interface_Product_Service::class ];
@@ -660,7 +701,9 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Shopper_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Shopper_Service::class ] ) ) {
-					self::$cache[ Interface_Shopper_Service::class ] = new Shopper_Service();
+					self::$cache[ Interface_Shopper_Service::class ] = new Shopper_Service(
+						Reg::getService( StoreContext::class )
+					);
 				}
 				return self::$cache[ Interface_Shopper_Service::class ];
 			}
@@ -672,19 +715,12 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ ShopOrderService::class ] = new Shop_Order_Service(
 						Reg::getService( SeQuraOrderRepositoryInterface::class ),
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( Interface_Create_Order_Request_Builder::class )
+						Reg::getService( Interface_Create_Order_Request_Builder::class ),
+						Reg::getService( Interface_Current_Order_Provider::class ),
+						Reg::getService( OrderService::class )
 					);
 				}
 				return self::$cache[ ShopOrderService::class ];
-			}
-		);
-		Reg::registerService(
-			Interface_Assets::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Assets::class ] ) ) {
-					self::$cache[ Interface_Assets::class ] = new Assets();
-				}
-				return self::$cache[ Interface_Assets::class ];
 			}
 		);
 		Reg::registerService(
@@ -694,6 +730,135 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Time_Checker_Service::class ] = new Time_Checker_Service();
 				}
 				return self::$cache[ Interface_Time_Checker_Service::class ];
+			}
+		);
+
+		Reg::registerService(
+			ProductServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ ProductServiceInterface::class ] ) ) {
+					self::$cache[ ProductServiceInterface::class ] = new Core_Product_Service();
+				}
+				return self::$cache[ ProductServiceInterface::class ];
+			}
+		);
+		Reg::registerService(
+			WidgetConfiguratorInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ WidgetConfiguratorInterface::class ] ) ) {
+					self::$cache[ WidgetConfiguratorInterface::class ] = new Widget_Configurator(
+						Reg::getService( Interface_I18n::class )
+					);
+				}
+				return self::$cache[ WidgetConfiguratorInterface::class ];
+			}
+		);
+		
+		Reg::registerService(
+			MiniWidgetMessagesProviderInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ MiniWidgetMessagesProviderInterface::class ] ) ) {
+					self::$cache[ MiniWidgetMessagesProviderInterface::class ] = new Mini_Widget_Messages_Provider(
+						Reg::getService( Interface_I18n::class )
+					);
+				}
+				return self::$cache[ MiniWidgetMessagesProviderInterface::class ];
+			}
+		);
+
+		Reg::registerService(
+			Interface_Current_Order_Provider::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Current_Order_Provider::class ] ) ) {
+					self::$cache[ Interface_Current_Order_Provider::class ] = new Current_Order_Provider();
+				}
+				return self::$cache[ Interface_Current_Order_Provider::class ];
+			}
+		);
+
+		Reg::registerService(
+			Interface_Platform_Provider::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Platform_Provider::class ] ) ) {
+					self::$cache[ Interface_Platform_Provider::class ] = new Platform_Provider(
+						Reg::getService( Interface_Constants::class )
+					);
+				}
+				return self::$cache[ Interface_Platform_Provider::class ];
+			}
+		);
+
+		Reg::registerService(
+			Interface_Payment_Method_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Payment_Method_Service::class ] ) ) {
+					self::$cache[ Interface_Payment_Method_Service::class ] = new Payment_Method_Service(
+						Reg::getService( Interface_Create_Order_Request_Builder::class ),
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_Current_Order_Provider::class ),
+						Reg::getService( StoreContext::class )
+					);
+				}
+				return self::$cache[ Interface_Payment_Method_Service::class ];
+			}
+		);
+
+		Reg::registerService(
+			Interface_Widgets_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Widgets_Service::class ] ) ) {
+					self::$cache[ Interface_Widgets_Service::class ] = new Widgets_Service(
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( Interface_I18n::class ),
+						Reg::getService( Interface_Shopper_Service::class ),
+						Reg::getService( WidgetConfiguratorInterface::class ),
+						Reg::getService( StoreContext::class )
+					);
+				}
+				return self::$cache[ Interface_Widgets_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Settings_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Settings_Service::class ] ) ) {
+					self::$cache[ Interface_Settings_Service::class ] = new Settings_Service();
+				}
+				return self::$cache[ Interface_Settings_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Address_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Address_Builder::class ] ) ) {
+					self::$cache[ Interface_Order_Address_Builder::class ] = new Order_Address_Builder(
+						Reg::getService( Interface_Shopper_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Order_Address_Builder::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Customer_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Customer_Builder::class ] ) ) {
+					self::$cache[ Interface_Order_Customer_Builder::class ] = new Order_Customer_Builder(
+						Reg::getService( Interface_Shopper_Service::class ),
+						Reg::getService( OrderStatusSettingsService::class ),
+						Reg::getService( Interface_Pricing_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Order_Customer_Builder::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Order_Delivery_Method_Builder::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Order_Delivery_Method_Builder::class ] ) ) {
+					self::$cache[ Interface_Order_Delivery_Method_Builder::class ] = new Order_Delivery_Method_Builder();
+				}
+				return self::$cache[ Interface_Order_Delivery_Method_Builder::class ];
 			}
 		);
 	}
@@ -716,28 +881,6 @@ class Bootstrap extends BootstrapComponent {
 
 		parent::initRepositories();
 
-		// Extend GeneralSettingsRepository.
-		Reg::registerService(
-			GeneralSettingsRepositoryInterface::class,
-			static function () {
-				return new General_Settings_Repository(
-					RepositoryRegistry::getRepository( GeneralSettings::getClassName() ),
-					Reg::getService( StoreContext::class )
-				);
-			}
-		);
-
-		// Extend WidgetSettingsRepository.
-		Reg::registerService(
-			WidgetSettingsRepositoryInterface::class,
-			static function () {
-				return new Widget_Settings_Repository(
-					RepositoryRegistry::getRepository( WidgetSettings::getClassName() ),
-					Reg::getService( StoreContext::class )
-				);
-			}
-		);
-
 		RepositoryRegistry::registerRepository( ConfigEntity::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( QueueItem::class, Queue_Item_Repository::class );
 		RepositoryRegistry::registerRepository( Process::class, Entity_Repository::class );
@@ -750,7 +893,9 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( WidgetSettings::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( SendReport::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( TransactionLog::class, Entity_Repository::class );
-		RepositoryRegistry::registerRepository( Payment_Methods::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( PaymentMethod::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
 	}
 
 	/**
@@ -758,27 +903,6 @@ class Bootstrap extends BootstrapComponent {
 	 */
 	protected static function initControllers(): void {
 		parent::initControllers();
-
-		// Extend GeneralSettingsController.
-		Reg::registerService(
-			GeneralSettingsController::class,
-			static function () {
-				return new General_Settings_Controller(
-					Reg::getService( GeneralSettingsService::class ),
-					Reg::getService( CategoryService::class )
-				);
-			}
-		);
-
-		// Extend PromotionalWidgetsController.
-		Reg::registerService(
-			PromotionalWidgetsController::class,
-			static function () {
-				return new Promotional_Widgets_Controller(
-					Reg::getService( WidgetSettingsService::class )
-				);
-			}
-		);
 
 		// Plugin controllers.
 		Reg::registerService(
@@ -810,10 +934,10 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_I18n::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_templates_path(),
-						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_Assets::class ),
+						Reg::getService( Interface_Settings_Service::class ),
 						Reg::getService( Interface_Payment_Method_Service::class ),
-						Reg::getService( Interface_Regex::class )
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( Interface_Widgets_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Assets_Controller::class ];
@@ -825,7 +949,7 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Interface_Settings_Controller::class ] ) ) {
 					self::$cache[ Interface_Settings_Controller::class ] = new Settings_Controller(
 						self::get_constants()->get_plugin_templates_path(),
-						Reg::getService( Configuration::class ),
+						Reg::getService( Interface_Settings_Service::class ),
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_basename()
 					);
@@ -853,12 +977,9 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Product_Controller::class ] = new Product_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_templates_path(),
-						Reg::getService( Configuration::class ),
 						Reg::getService( Interface_Product_Service::class ),
-						Reg::getService( Interface_Payment_Service::class ),
-						Reg::getService( Interface_Payment_Method_Service::class ),
-						Reg::getService( Interface_I18n::class ),
-						Reg::getService( Interface_Regex::class )
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( Interface_Widgets_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Product_Controller::class ];
@@ -896,7 +1017,8 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Onboarding_REST_Controller::class ] ) ) {
 					self::$cache[ Onboarding_REST_Controller::class ] = new Onboarding_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ Onboarding_REST_Controller::class ];
@@ -909,7 +1031,7 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Payment_REST_Controller::class ] = new Payment_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( Interface_Payment_Method_Service::class )
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ Payment_REST_Controller::class ];
@@ -921,7 +1043,9 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ General_Settings_REST_Controller::class ] ) ) {
 					self::$cache[ General_Settings_REST_Controller::class ] = new General_Settings_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( StoreContext::class )
 					);
 				}
 				return self::$cache[ General_Settings_REST_Controller::class ];
@@ -933,25 +1057,11 @@ class Bootstrap extends BootstrapComponent {
 				if ( ! isset( self::$cache[ Log_REST_Controller::class ] ) ) {
 					self::$cache[ Log_REST_Controller::class ] = new Log_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
-						Reg::getService( Interface_Logger_Service::class )
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class )
 					);
 				}
 				return self::$cache[ Log_REST_Controller::class ];
-			}
-		);
-		Reg::registerService(
-			Interface_Payment_Method_Service::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Payment_Method_Service::class ] ) ) {
-					self::$cache[ Interface_Payment_Method_Service::class ] = new Payment_Method_Service(
-						Reg::getService( Configuration::class ),
-						Reg::getService( Interface_Create_Order_Request_Builder::class ),
-						Reg::getService( Interface_Order_Service::class ),
-						Reg::getService( Interface_Logger_Service::class ),
-						RepositoryRegistry::getRepository( Payment_Methods::CLASS_NAME )
-					);
-				}
-				return self::$cache[ Interface_Payment_Method_Service::class ];
 			}
 		);
 	}

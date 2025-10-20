@@ -9,10 +9,13 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\OrderStatusSettings\Requests\OrderStatusSettingsRequest;
+use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
-use SeQura\WC\Core\Extension\BusinessLogic\AdminAPI\GeneralSettings\Requests\General_Settings_Request;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
+use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,26 +25,37 @@ use WP_REST_Response;
  */
 class General_Settings_REST_Controller extends REST_Controller {
 
-	const PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA = 'sendOrderReportsPeriodicallyToSeQura';
-	const PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE       = 'showSeQuraCheckoutAsHostedPage';
-	const PARAM_ALLOWED_IP_ADDRESSES                      = 'allowedIPAddresses';
-	const PARAM_EXCLUDED_PRODUCTS                         = 'excludedProducts';
-	const PARAM_EXCLUDED_CATEGORIES                       = 'excludedCategories';
-	const PARAM_ENABLED_FOR_SERVICES                      = 'enabledForServices';
-	const PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY         = 'allowFirstServicePaymentDelay';
-	const PARAM_ALLOW_SERVICE_REG_ITEMS                   = 'allowServiceRegItems';
-	const PARAM_DEFAULT_SERVICES_END_DATE                 = 'defaultServicesEndDate';
+	private const PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA = 'sendOrderReportsPeriodicallyToSeQura';
+	private const PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE       = 'showSeQuraCheckoutAsHostedPage';
+	private const PARAM_ALLOWED_IP_ADDRESSES                      = 'allowedIPAddresses';
+	private const PARAM_EXCLUDED_PRODUCTS                         = 'excludedProducts';
+	private const PARAM_EXCLUDED_CATEGORIES                       = 'excludedCategories';
+	private const PARAM_DEFAULT_SERVICES_END_DATE                 = 'defaultServicesEndDate';
+
+	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
 	
 	/**
 	 * Constructor.
 	 *
 	 * @param string            $rest_namespace The namespace.
 	 * @param Interface_Logger_Service $logger         The logger service.
+	 * @param RegexProvider $regex The regex provider.
 	 */
-	public function __construct( $rest_namespace, Interface_Logger_Service $logger ) {
-		parent::__construct( $logger );
-		$this->namespace = $rest_namespace;
-		$this->rest_base = '/settings';
+	public function __construct( 
+		$rest_namespace, 
+		Interface_Logger_Service $logger,
+		RegexProvider $regex,
+		StoreContext $store_context
+	) {
+		parent::__construct( $logger, $regex );
+		$this->namespace     = $rest_namespace;
+		$this->rest_base     = '/settings';
+		$this->store_context = $store_context;
 	}
 
 	/**
@@ -68,10 +82,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 					'validate_callback' => array( $this, 'validate_array_of_product_cat' ),
 					'sanitize_callback' => array( $this, 'sanitize_array_of_ids' ),
 				),
-				self::PARAM_ENABLED_FOR_SERVICES      => $this->get_arg_bool( false, false ),
-				self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY => $this->get_arg_bool( false, true ),
-				self::PARAM_ALLOW_SERVICE_REG_ITEMS   => $this->get_arg_bool( false, true ),
-				self::PARAM_DEFAULT_SERVICES_END_DATE => $this->get_arg_string( false, 'P1Y', array( $this, 'validate_time_duration' ) ),
+				self::PARAM_DEFAULT_SERVICES_END_DATE => $this->get_arg_string( false, GeneralSettings::DEFAULT_SERVICE_END_DATE, array( $this, 'validate_time_duration' ) ),
 			)
 		);
 
@@ -101,7 +112,7 @@ class General_Settings_REST_Controller extends REST_Controller {
 		$response = null;
 		try {
 			$response = AdminAPI::get()
-			->store( (string) get_current_blog_id() )
+			->store( $this->store_context->getStoreId() )
 			->getCurrentStore()
 			->toArray();
 		} catch ( \Throwable $e ) {
@@ -230,15 +241,12 @@ class General_Settings_REST_Controller extends REST_Controller {
 			$response = AdminAPI::get()
 			->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 			->saveGeneralSettings(
-				new General_Settings_Request(
+				new GeneralSettingsRequest(
 					(bool) $request->get_param( self::PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA ),
 					(bool) $request->get_param( self::PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE ),
 					(array) $request->get_param( self::PARAM_ALLOWED_IP_ADDRESSES ),
 					(array) $request->get_param( self::PARAM_EXCLUDED_PRODUCTS ),
 					(array) $request->get_param( self::PARAM_EXCLUDED_CATEGORIES ),
-					(bool) $request->get_param( self::PARAM_ENABLED_FOR_SERVICES ),
-					(bool) $request->get_param( self::PARAM_ALLOW_FIRST_SERVICE_PAYMENT_DELAY ),
-					(bool) $request->get_param( self::PARAM_ALLOW_SERVICE_REG_ITEMS ),
 					strval( $request->get_param( self::PARAM_DEFAULT_SERVICES_END_DATE ) )
 				)
 			)

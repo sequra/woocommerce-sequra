@@ -11,7 +11,7 @@ namespace SeQura\WC\Controllers\Hooks\Payment;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Controllers\Controller;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway_Block_Support;

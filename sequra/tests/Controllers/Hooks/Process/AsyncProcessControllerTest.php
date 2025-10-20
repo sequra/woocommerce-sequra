@@ -10,14 +10,16 @@ namespace SeQura\WC\Tests\Controllers\Hooks\Process;
 
 use Exception;
 use SeQura\WC\Controllers\Hooks\Process\Async_Process_Controller;
-use SeQura\WC\Services\Interface_Logger_Service;
+use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Report\Interface_Report_Service;
 use WP_UnitTestCase;
 
 class AsyncProcessControllerTest extends WP_UnitTestCase {
 
 	private $controller;
+	/** @var \SeQura\WC\Services\Report\Interface_Report_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $report_service;
+	/** @var \SeQura\WC\Services\Log\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $logger;
 	
 	public function set_up() {

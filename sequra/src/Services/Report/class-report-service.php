@@ -9,33 +9,17 @@
 namespace SeQura\WC\Services\Report;
 
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\OrderReport\Tasks\OrderReportTask;
 use SeQura\Core\BusinessLogic\Domain\StatisticalData\RepositoryContracts\StatisticalDataRepositoryInterface;
-use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\BusinessLogic\Webhook\Services\ShopOrderService;
-use SeQura\WC\Core\Extension\Infrastructure\Configuration\Configuration;
 use SeQura\WC\Services\Order\Interface_Order_Service;
+use Throwable;
 use WC_Order;
 
 /**
  * Report service
  */
 class Report_Service implements Interface_Report_Service {
-
-	/**
-	 * Configuration
-	 *
-	 * @var Configuration
-	 */
-	private $configuration;
-
-	/**
-	 * Store service
-	 *
-	 * @var StoreService
-	 */
-	private $store_service;
 
 	/**
 	 * Shop order service
@@ -66,31 +50,18 @@ class Report_Service implements Interface_Report_Service {
 	private $order_service;
 
 	/**
-	 * Store context
-	 *
-	 * @var StoreContext
-	 */
-	private $store_context;
-
-	/**
 	 * Constructor.
 	 */
-	public function __construct( 
-		Configuration $configuration,
-		StoreService $store_service,
+	public function __construct(
 		ShopOrderService $shop_order_service,
 		StatisticalDataRepositoryInterface $statistical_data_repository,
 		CountryConfigurationRepositoryInterface $country_configuration_repository,
-		Interface_Order_Service $order_service,
-		StoreContext $store_context
+		Interface_Order_Service $order_service
 	) {
-		$this->configuration                    = $configuration;
-		$this->store_service                    = $store_service;
 		$this->shop_order_service               = $shop_order_service;
 		$this->statistical_data_repository      = $statistical_data_repository;
 		$this->country_configuration_repository = $country_configuration_repository;
 		$this->order_service                    = $order_service;
-		$this->store_context                    = $store_context;
 	}
 
 	/**
@@ -99,8 +70,7 @@ class Report_Service implements Interface_Report_Service {
 	 * @throws Throwable
 	 */
 	public function send_delivery_report_for_current_store(): void {
-		$store_id = $this->configuration->get_store_id();
-		$this->store_context::doWithStore( $store_id, array( $this, 'send_delivery_report' ) );
+		$this->send_delivery_report();
 	}
 
 
