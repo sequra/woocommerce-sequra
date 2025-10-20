@@ -6,7 +6,7 @@
  * @subpackage SeQura/WC/Services
  */
 
-namespace SeQura\WC\Services\Order;
+namespace SeQura\WC\Services\Order\Builder;
 
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Customer;
 use WC_Order;

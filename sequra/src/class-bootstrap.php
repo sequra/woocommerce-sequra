@@ -140,10 +140,10 @@ use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
 use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
 use SeQura\WC\Services\Order\Builder\Order_Address_Builder;
-use SeQura\WC\Services\Order\Interface_Order_Customer_Builder;
-use SeQura\WC\Services\Order\Interface_Order_Delivery_Method_Builder;
-use SeQura\WC\Services\Order\Order_Customer_Builder;
-use SeQura\WC\Services\Order\Order_Delivery_Method_Builder;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Customer_Builder;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Delivery_Method_Builder;
+use SeQura\WC\Services\Order\Builder\Order_Customer_Builder;
+use SeQura\WC\Services\Order\Builder\Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Service\Interface_Settings_Service;
 use SeQura\WC\Services\Service\Settings_Service;
 

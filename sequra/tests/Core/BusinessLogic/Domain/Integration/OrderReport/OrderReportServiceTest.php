@@ -22,8 +22,8 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\O
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\I18n\Interface_I18n;
 use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
-use SeQura\WC\Services\Order\Interface_Order_Customer_Builder;
-use SeQura\WC\Services\Order\Interface_Order_Delivery_Method_Builder;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Customer_Builder;
+use SeQura\WC\Services\Order\Builder\Interface_Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Platform\Interface_Platform_Provider;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
 use SeQura\WC\Tests\Fixtures\Store;
