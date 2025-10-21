@@ -12,6 +12,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetFormattedPaymentMethodsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PaymentMethods\Requests\GetPaymentMethodsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
 use WP_REST_Request;
@@ -67,19 +68,16 @@ class Payment_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_methods( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getPaymentMethods(
-				new GetPaymentMethodsRequest( strval( $request->get_param( self::PARAM_MERCHANT_ID ) ), true )
-			)
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getPaymentMethods(
+			new GetPaymentMethodsRequest( strval( $request->get_param( self::PARAM_MERCHANT_ID ) ), true )
+		);
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -90,18 +88,15 @@ class Payment_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_all_methods( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getAllAvailablePaymentMethods(
-				new GetFormattedPaymentMethodsRequest( true )
-			)
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->paymentMethods( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getAllAvailablePaymentMethods(
+			new GetFormattedPaymentMethodsRequest( true )
+		);
+		return $this->build_response( $response );
 	}
 }

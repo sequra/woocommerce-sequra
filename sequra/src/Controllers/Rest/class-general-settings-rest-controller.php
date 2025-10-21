@@ -11,6 +11,7 @@ namespace SeQura\WC\Controllers\Rest;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\OrderStatusSettings\Requests\OrderStatusSettingsRequest;
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
@@ -109,17 +110,12 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_current_store() {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->store( $this->store_context->getStoreId() )
-			->getCurrentStore()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()->store( $this->store_context->getStoreId() )->getCurrentStore();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -130,17 +126,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_version( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getVersion()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getVersion();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -151,17 +144,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_stores( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->store( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getStores()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->store( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getStores();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -172,17 +162,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_state( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getUIState( true ) // Pass false if the Onboarding does not configure widgets. 
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getUIState( true ); // Pass false if the Onboarding does not configure widgets. 
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -193,17 +180,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_general( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getGeneralSettings()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getGeneralSettings();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -214,17 +198,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_shop_name( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getShopName()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->integration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getShopName();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -236,26 +217,23 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_general( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->saveGeneralSettings(
-				new GeneralSettingsRequest(
-					(bool) $request->get_param( self::PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA ),
-					(bool) $request->get_param( self::PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE ),
-					(array) $request->get_param( self::PARAM_ALLOWED_IP_ADDRESSES ),
-					(array) $request->get_param( self::PARAM_EXCLUDED_PRODUCTS ),
-					(array) $request->get_param( self::PARAM_EXCLUDED_CATEGORIES ),
-					strval( $request->get_param( self::PARAM_DEFAULT_SERVICES_END_DATE ) )
-				)
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->saveGeneralSettings(
+			new GeneralSettingsRequest(
+				(bool) $request->get_param( self::PARAM_SEND_ORDER_REPORTS_PERIODICALLY_TO_SEQURA ),
+				(bool) $request->get_param( self::PARAM_SHOW_SEQURA_CHECKOUT_AS_HOSTED_PAGE ),
+				(array) $request->get_param( self::PARAM_ALLOWED_IP_ADDRESSES ),
+				(array) $request->get_param( self::PARAM_EXCLUDED_PRODUCTS ),
+				(array) $request->get_param( self::PARAM_EXCLUDED_CATEGORIES ),
+				strval( $request->get_param( self::PARAM_DEFAULT_SERVICES_END_DATE ) )
 			)
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		);
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -266,17 +244,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_shop_categories( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getShopCategories()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->generalSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getShopCategories();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -287,17 +262,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_list_order_status( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getShopOrderStatuses()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getShopOrderStatuses();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -308,17 +280,14 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_order_status( WP_REST_Request $request ) {
-		$response = null;
-		try {
-			$response = AdminAPI::get()
-			->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getOrderStatusSettings()
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getOrderStatusSettings();
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -332,26 +301,19 @@ class General_Settings_REST_Controller extends REST_Controller {
 		if ( ! $this->validate_order_status( $request ) ) {
 			return new WP_REST_Response( 'Invalid data', 400 );
 		}
-
-		$response = null;
-		try {
-
-			/**
-			 * Order status mappings.
-			 *
-			 * @var array<string> $order_status_mappings
-			 */
-			$order_status_mappings = (array) json_decode( $request->get_body(), true );
-
-			$response = AdminAPI::get()
-			->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->saveOrderStatusSettings( new OrderStatusSettingsRequest( $order_status_mappings ) )
-			->toArray();
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		/**
+		 * Order status mappings.
+		 *
+		 * @var array<string> $order_status_mappings */
+		$order_status_mappings = (array) json_decode( $request->get_body(), true );
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->saveOrderStatusSettings( new OrderStatusSettingsRequest( $order_status_mappings ) );
+		return $this->build_response( $response );
 	}
 
 	/**
@@ -400,31 +362,34 @@ class General_Settings_REST_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request.
 	 */
 	public function validate_order_status( WP_REST_Request $request ): bool {
-		try {
-			$data = json_decode( $request->get_body(), true );
-			if ( ! is_array( $data ) ) {
+		$data = json_decode( $request->get_body(), true );
+		if ( ! is_array( $data ) ) {
+			return false;
+		}
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = AdminAPI::get()
+		->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
+		->getShopOrderStatuses();
+
+		if ( ! $response->isSuccessful() ) {
+			return false;
+		}
+		$allowed_shop_statuses   = array_column( $response->toArray(), 'id' );
+		$allowed_sequra_statuses = OrderStates::toArray();
+
+		foreach ( $data as $status_map ) {
+			if ( ! isset( $status_map['sequraStatus'] ) 
+			|| ! isset( $status_map['shopStatus'] ) 
+			|| ! is_string( $status_map['sequraStatus'] ) 
+			|| ! is_string( $status_map['shopStatus'] )
+			|| ! in_array( $status_map['sequraStatus'], $allowed_sequra_statuses, true )
+			|| ! in_array( $status_map['shopStatus'], $allowed_shop_statuses, true )
+			) {
 				return false;
 			}
-			$allowed_shop_statuses   = AdminAPI::get()
-			->orderStatusSettings( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
-			->getShopOrderStatuses()
-			->toArray();
-			$allowed_shop_statuses   = array_column( $allowed_shop_statuses, 'id' );
-			$allowed_sequra_statuses = OrderStates::toArray();
-
-			foreach ( $data as $status_map ) {
-				if ( ! isset( $status_map['sequraStatus'] ) 
-				|| ! isset( $status_map['shopStatus'] ) 
-				|| ! is_string( $status_map['sequraStatus'] ) 
-				|| ! is_string( $status_map['shopStatus'] )
-				|| ! in_array( $status_map['sequraStatus'], $allowed_sequra_statuses, true )
-				|| ! in_array( $status_map['shopStatus'], $allowed_shop_statuses, true )
-				) {
-					return false;
-				}
-			}
-		} catch ( \Throwable $e ) {
-			return false;
 		}
 		return true;
 	}
