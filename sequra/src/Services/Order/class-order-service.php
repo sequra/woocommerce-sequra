@@ -379,12 +379,12 @@ class Order_Service implements Interface_Order_Service {
 			$conn_data = $this->connection_service->getConnectionDataByMerchantId( $merchant_id );
 			$base_url  = array(
 				'sequra' => array(
-					BaseProxy::TEST_MODE => 'https://simbox.sequrapi.com',
-					BaseProxy::LIVE_MODE => 'https://simba.sequra.es',
+					BaseProxy::TEST_MODE => 'https://portal-sandbox.sequra.com',
+					BaseProxy::LIVE_MODE => 'https://portal.sequra.com',
 				),
 				'svea'   => array(
-					BaseProxy::TEST_MODE => 'https://simbox.sequra.svea.com',
-					BaseProxy::LIVE_MODE => 'https://simba.sequra.svea.com',
+					BaseProxy::TEST_MODE => 'https://portal-sandbox.sequra.com',
+					BaseProxy::LIVE_MODE => 'https://portal.sequra.com',
 				),
 			);
 			return ! isset( $base_url[ $conn_data->getDeployment() ][ $conn_data->getEnvironment() ] ) ? null : $base_url[ $conn_data->getDeployment() ][ $conn_data->getEnvironment() ] . '/orders/' . $order->get_transaction_id();
