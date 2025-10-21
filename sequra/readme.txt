@@ -101,6 +101,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 Contributors:
 == Changelog ==
 = 4.1.0	=
+* Changed: Remove duplicated code and improve error handling.
 
 = 4.0.0	=
 * Added: PHP 8.4 compatibility.

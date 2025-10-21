@@ -9,6 +9,7 @@
 namespace SeQura\WC\Services\Shopper;
 
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use WC_Customer;
 use WC_Order;
@@ -62,17 +63,25 @@ class Shopper_Service implements Interface_Shopper_Service {
 			return true; // If we can't determine the IP, we assume it's allowed.
 		}
 		/**
-		 * Array containing the general settings
+		 * Response
 		 * 
-		 * @var array<string, mixed> $general_settings
-		 */
-		$general_settings = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings()->toArray();
-		if ( empty( $general_settings['allowedIPAddresses'] ) 
-			|| ! is_array( $general_settings['allowedIPAddresses'] ) ) {
+		 * @var Response $response */
+		$response = AdminAPI::get()->generalSettings( $this->store_context->getStoreId() )->getGeneralSettings();
+
+		if ( ! $response->isSuccessful() ) {
+			return true; // If we can't retrieve settings, we assume IP is allowed.
+		}
+		
+		/**
+		 * Array containing the General Settings
+		 * 
+		 * @var array<string, mixed> $arr */
+		$arr = $response->toArray();
+		if ( empty( $arr['allowedIPAddresses'] ) || ! is_array( $arr['allowedIPAddresses'] ) ) {
 			return true; // No IP restrictions set.
 		}
 		
-		foreach ( $general_settings['allowedIPAddresses'] as $allowed_ip ) {
+		foreach ( $arr['allowedIPAddresses'] as $allowed_ip ) {
 			$allowed_ip = trim( (string) $allowed_ip );
 			if ( ! empty( $allowed_ip ) && $allowed_ip === $ip ) {
 				return true; // IP is explicitly allowed.
