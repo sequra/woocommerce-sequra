@@ -13,7 +13,6 @@ done
 
 docker run --rm \
   -v "$BASEDIR"/sequra:/app/sequra \
-  -v "$BASEDIR"/glue-plugins/sequra-no-address:/app/sequra-no-address \
   -v "$BASEDIR"/sequra-helper:/app/sequra-helper \
   -w /app \
   php:"$PHP_VERSION"-cli-alpine sh -c "! (find . -type f -name \"*.php\" \
@@ -21,7 +20,6 @@ docker run --rm \
     ! -path \"./sequra/tests-e2e/*\" \
     ! -path \"./sequra/node_modules/*\" \
     ! -path \"./sequra/vendor/*\" \
-    ! -path \"./sequra-no-address/vendor/*\" \
     ! -path \"./sequra-helper/vendor/*\" \
     ! -path \"./sequra-helper/sample-data/*\" \
     ! -path \"./sequra-helper/postman-collection/*\" \

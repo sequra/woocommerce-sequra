@@ -23,7 +23,6 @@ services:
       - ./.devcontainer/xdebug:/tmp/xdebug
       - ./sequra:/var/www/html/wp-content/plugins/_sequra
       - ./sequra-helper:/var/www/html/wp-content/plugins/sequra-helper
-      - ./glue-plugins/sequra-no-address:/var/www/html/wp-content/plugins/_sequra-no-address
   db:
     image: mariadb:$MARIADB_TAG
     ports:

@@ -5,7 +5,6 @@ BASEDIR="$(dirname $(realpath $0))/.."
 # Define project directories
 PROJECTS=(
     "$BASEDIR/sequra"
-    "$BASEDIR/glue-plugins/sequra-no-address"
     "$BASEDIR/sequra-helper"
 )
 

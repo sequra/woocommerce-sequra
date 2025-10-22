@@ -20,14 +20,14 @@ jobs:
           rm -Rf sequra/tests
           rm -Rf sequra/tests-e2e
           rm -Rf sequra/apigen
-          rm -f sequra/.gitignore glue-plugins/sequra-no-address/.gitignore
+          rm -f sequra/.gitignore
           rm -f sequra/package.json
           rm -f sequra/package-lock.json
-          rm -f sequra/composer.json glue-plugins/sequra-no-address/composer.json
-          rm -f sequra/composer.lock glue-plugins/sequra-no-address/composer.lock
-          rm -f sequra/.phpcs.xml.dist glue-plugins/sequra-no-address/.phpcs.xml.dist
+          rm -f sequra/composer.json
+          rm -f sequra/composer.lock
+          rm -f sequra/.phpcs.xml.dist
           rm -f sequra/babel.config.json
-          rm -f sequra/phpstan.neon glue-plugins/sequra-no-address/phpstan.neon
+          rm -f sequra/phpstan.neon
           rm -f sequra/phpunit.xml.dist
           rm -f sequra/playwright.config.js
           rm -f sequra/postcss.config.js
@@ -35,11 +35,5 @@ jobs:
           rm -f sequra/webpack.config.js
           echo "📦 Creating ZIP files"
           zip -r9 sequra.zip sequra
-          cd glue-plugins
-          zip -r9 sequra-no-address.zip sequra-no-address
-          mv sequra-no-address.zip ../sequra-no-address.zip
-          echo "📎 Attaching ZIP files to the release"
-          cd ..
           release_id=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | jq -r .id)
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @sequra.zip "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=sequra-${{ github.ref_name }}.zip"
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @sequra-no-address.zip "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=sequra-no-address-${{ github.ref_name }}.zip"
