@@ -188,7 +188,7 @@ class Merchant_Data_Provider implements MerchantDataProviderInterface {
 	 */
 	public function getOptions(): ?Options {
 		$options = null;
-		$order = $this->current_order_provider->get();
+		$order   = $this->current_order_provider->get();
 		$country = $this->shopper_service->get_country( $order );
 
 		if ( $this->product_service->is_enabled_for_services( $country ) ) {
@@ -198,7 +198,10 @@ class Merchant_Data_Provider implements MerchantDataProviderInterface {
 			 *
 			 * @since 3.0.0
 			 */
-			$addresses_may_be_missing = boolval( \apply_filters( 'sequra_merchant_options_addresses_may_be_missing', true ) );
+			$addresses_may_be_missing = \apply_filters( 'sequra_merchant_options_addresses_may_be_missing', true );
+			if ( ! is_bool( $addresses_may_be_missing ) ) {
+				$addresses_may_be_missing = true;
+			}
 
 			$options = new Options(
 				false,
