@@ -3,7 +3,7 @@ import DataProvider from '../fixtures/utils/DataProvider.mjs';
 
 test.describe('Service checkout', () => {
 
-  test('Order of virtual product is set as processing after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
+  test('Multiple services order is set as processing after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
@@ -17,7 +17,7 @@ test.describe('Service checkout', () => {
     const shopper = dataProvider.shopper();
 
     // Execution
-    await productPage.addToCart({ slug: 'album', quantity: 1 });
+    await productPage.addToCart({ slug: 'album', quantity: 2 });
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: false, ...shopper });
     // await checkoutPage.expectPaymentMethodsBeingReloaded();
@@ -26,7 +26,7 @@ test.describe('Service checkout', () => {
     await checkoutPage.expectOrderChangeTo(backOffice, { toStatus: 'Processing' });
   });
 
-  test('Order of virtual & downloadable product is set as completed after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
+  test('Service order of virtual & downloadable product is set as completed after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
