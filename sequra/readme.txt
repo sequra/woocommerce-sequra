@@ -103,6 +103,7 @@ Contributors:
 = 4.1.0	=
 * Changed: Remove duplicated code and improve error handling.
 * Fixed: Allow selling multiple services in the same order.
+* Added: The shopper address information is by default optional when service selling is available.
 
 = 4.0.0	=
 * Added: PHP 8.4 compatibility.
