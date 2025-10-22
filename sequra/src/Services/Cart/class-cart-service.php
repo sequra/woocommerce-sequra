@@ -607,7 +607,7 @@ class Cart_Service implements Interface_Cart_Service {
 		} else {
 			$country = $this->shopper_service->get_country( $order );
 			if ( ! $this->product_service->is_enabled_for_services( $country ) && ! $this->is_eligible_for_product_sale() ) {
-				$this->logger->log_debug( 'Order is not eligible for for product sale.', __FUNCTION__, __CLASS__ );
+				$this->logger->log_debug( 'Order is not eligible for product sale.', __FUNCTION__, __CLASS__ );
 				$return = false;
 			}
 			if ( $return ) {
