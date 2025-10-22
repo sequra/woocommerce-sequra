@@ -12,7 +12,7 @@ export default class BackOffice extends BaseBackOffice {
             passwordInput: () => this.page.locator('#user_pass'),
             loginButton: () => this.page.locator('#wp-submit'),
             menuBarItemSeQuraLink: () => this.page.locator('[href="admin.php?page=sequra"]'),
-            menuBarItemOrdersLink: () => this.page.locator('[href="admin.php?page=wc-orders"]'),
+            menuBarItemOrdersLink: () => this.page.locator('[href="edit.php?post_type=shop_order"]')
         };
     }
 

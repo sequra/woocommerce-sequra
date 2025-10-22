@@ -556,29 +556,6 @@ class Cart_Service implements Interface_Cart_Service {
 	}
 
 	/**
-	 * Check if cart is eligible for service sale
-	 */
-	private function is_eligible_for_service_sale(): bool {
-		if ( ! WC()->cart ) {
-			return false;
-		}
-		$eligible       = false;
-		$services_count = 0;
-		foreach ( WC()->cart->cart_contents as $values ) {
-			if ( $this->product_service->is_service( $values['product_id'] ) ) {
-				$services_count += (int) $values['quantity'];
-				$eligible        = ( 1 === $services_count );
-			}
-		}
-		/**
-		 * Filter if cart is eligible for service sale
-		 *
-		 * @since 2.0.0
-		 */
-		return \apply_filters( 'woocommerce_cart_is_elegible_for_service_sale', $eligible );
-	}
-
-	/**
 	 * Check if cart is eligible for product sale
 	 */
 	private function is_eligible_for_product_sale(): bool {
@@ -628,14 +605,9 @@ class Cart_Service implements Interface_Cart_Service {
 		if ( ! $return ) {
 			$this->logger->log_debug( 'seQura is not available for this IP.', __FUNCTION__, __CLASS__ );
 		} else {
-			$country                 = $this->shopper_service->get_country( $order );
-			$is_enabled_for_services = $this->product_service->is_enabled_for_services( $country );
-			if ( $is_enabled_for_services && ! $this->is_eligible_for_service_sale() ) {
-					$this->logger->log_debug( 'Order is not eligible for service sale.', __FUNCTION__, __CLASS__ );
-					$return = false;
-			}
-			if ( ! $is_enabled_for_services && ! $this->is_eligible_for_product_sale() ) {
-				$this->logger->log_debug( 'Order is not eligible for for product sale.', __FUNCTION__, __CLASS__ );
+			$country = $this->shopper_service->get_country( $order );
+			if ( ! $this->product_service->is_enabled_for_services( $country ) && ! $this->is_eligible_for_product_sale() ) {
+				$this->logger->log_debug( 'Order is not eligible for product sale.', __FUNCTION__, __CLASS__ );
 				$return = false;
 			}
 			if ( $return ) {
