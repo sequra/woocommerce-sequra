@@ -58,7 +58,7 @@ This repo contains a group of utility scripts under `bin/` directory. The goal i
 | `bin/php-syntax-check --php=<PHP-VERSION>` | Check if syntax used is compatible with the PHP version |
 | `./bin/cp_sources` | Copy WordPress Core and WooCommerce code to `.devcontainer/` |
 | `./bin/publish_to_wordpress.sh` | Handles the plugin publishing to WordPress.org |
-| `./bin/make_zip` | Make a ZIP of `sequra` or a glue-plugin that is ready to be use for manual installations. The script allows the following arguments: `--branch=<GIT-BRANCH-NAME>` and `--project=<sequra\|sequra-no-address>`. The resulting file will be generated into `zip/` directory.|
+| `./bin/make_zip` | Make a ZIP of `sequra` or a glue-plugin that is ready to be use for manual installations. The script allows the following arguments: `--branch=<GIT-BRANCH-NAME>` and `--project=<sequra>`. The resulting file will be generated into `zip/` directory.|
 | `./bin/playwright` | Run E2E in `sequra/tests-e2e` directory tests using Playwright using a Docker container |
 
 If you require a composer dependency from a GitHub repository, you need to create a `auth.json` file in the root of the repository. Set this as the file content, replacing `GITHUB_TOKEN` with your access token:
@@ -92,8 +92,7 @@ Then, you need to configure VS Code to listen for XDebug connections. Add this c
 					"port": 9003,
 					"pathMappings": {
 						"/var/www/html/wp-content/plugins/_sequra/": "${workspaceFolder}/sequra/",
-						"/var/www/html/wp-content/plugins/sequra-helper/": "${workspaceFolder}/sequra-helper/",
-						"/var/www/html/wp-content/plugins/sequra-no-address/": "${workspaceFolder}/glue-plugins/sequra-no-address",
+						"/var/www/html/wp-content/plugins/sequra-helper/": "${workspaceFolder}/sequra-helper/"
 					}
 				},
 			]
