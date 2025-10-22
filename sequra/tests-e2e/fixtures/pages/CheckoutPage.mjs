@@ -31,7 +31,7 @@ export default class CheckoutPage extends BaseCheckoutPage {
             // continueButton: () => this.page.locator('.action.continue'),
             submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])'),
             // TODO
-            orderRowStatus: orderNumber => this.page.locator(`#order-${orderNumber} .column-order_status`),
+            orderRowStatus: orderNumber => this.page.locator(`#post-${orderNumber} .column-order_status`),
             orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong')
         };
     }
