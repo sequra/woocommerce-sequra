@@ -83,8 +83,8 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * Expected attributes:
 	 * - product: The seQura product identifier. Required.
 	 * - campaign: The seQura campaign name. Optional.
-	 * - dest: A CSS selector to place the widget. Required.
-	 * - product_id: The WooCommerce product identifier. Required
+	 * - dest: A CSS selector to place the widget. Optional.
+	 * - product_id: The WooCommerce product identifier. Optional.
 	 * - price: A CSS selector to get the product price. Optional.
 	 * - alt_price: An alternative CSS selector to retrieve the product price for special product page layouts. Optional.
 	 * - is_alt_price: A CSS selector to determine if the product has an alternative price. Optional.
@@ -101,18 +101,18 @@ class Product_Controller extends Controller implements Interface_Product_Control
 		$atts = (array) $atts;
 		
 		// Check for required attributes.
-		foreach ( array( 'product', 'product_id' ) as $required ) {
+		foreach ( array( 'product' ) as $required ) {
 			if ( ! isset( $atts[ $required ] ) ) {
 				$this->logger->log_error( "\"$required\" attribute is required", __FUNCTION__, __CLASS__ );
 				return '';
 			}
 		}
 
-		$product_id = (int) $atts['product_id'];
+		$product_id = intval( $atts['product_id'] ?? 0 );
 		$product    = $atts['product'];
 		$campaign   = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : '';
-		
-		if ( ! $this->is_widget_enabled_for_product( $product_id, $product, $campaign ) ) {
+		$widget     = $this->get_widget_for_product( $product_id, $product, $campaign );
+		if ( ! $widget ) {
 			$this->logger->log_info( 
 				'Widget is disabled',
 				__FUNCTION__,
@@ -120,8 +120,22 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				array( 
 					new LogContextData( 'payment_method', $product ),
 					new LogContextData( 'campaign', $campaign ),
-					new LogContextData( 'product_id', $product_id ),
+					new LogContextData( 'product_id', value: $product_id ),
 				)
+			);
+			return '';
+		}
+
+		if ( ! $this->product_service->can_display_widget_for_method( $product_id, $product ) ) {
+			$this->logger->log_info(
+				'Widget cannot be displayed for product', 
+				__FUNCTION__,
+				__CLASS__,
+				array( 
+					new LogContextData( 'payment_method', $product ),
+					new LogContextData( 'campaign', $campaign ),
+					new LogContextData( 'product_id', $product_id ),
+				) 
 			);
 			return '';
 		}
@@ -141,36 +155,21 @@ class Product_Controller extends Controller implements Interface_Product_Control
 
 		$atts = \shortcode_atts(
 			array(
-				'product'      => '',
-				'campaign'     => '',
-				'product_id'   => '',
-				'theme'        => '',
-				'reverse'      => 0,
+				'product'      => $widget['product'] ?? '',
+				'campaign'     => $widget['campaign'] ?? '',
+				'theme'        => $widget['theme'] ?? '',
+				'reverse'      => $widget['reverse'] ?? '0',
 				'reg_amount'   => $this->product_service->get_registration_amount( $product_id, true ),
-				'dest'         => '',
-				'price'        => '',
-				'alt_price'    => '',
-				'is_alt_price' => '',
-				'min_amount'   => 0,
-				'max_amount'   => null,
+				'dest'         => $widget['dest'] ?? '',
+				'price'        => $widget['priceSel'] ?? '',
+				'alt_price'    => $widget['altPriceSel'] ?? '',
+				'is_alt_price' => $widget['altTriggerSelector'] ?? '',
+				'min_amount'   => $widget['minAmount'] ?? 0,
+				'max_amount'   => $widget['maxAmount'] ?? null,
 			),
 			$atts,
 			'sequra_widget'
 		);
-
-		if ( ! $this->product_service->can_display_widget_for_method( $product_id, $product ) ) {
-			$this->logger->log_info(
-				'Widget cannot be displayed for product', 
-				__FUNCTION__,
-				__CLASS__,
-				array( 
-					new LogContextData( 'payment_method', $product ),
-					new LogContextData( 'campaign', $campaign ),
-					new LogContextData( 'product_id', $product_id ),
-				) 
-			);
-			return '';
-		}
 
 		ob_start();
 		\wc_get_template( 'front/widget.php', $atts, '', $this->templates_path );
@@ -273,24 +272,25 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	}
 
 	/**
-	 * Check if the widget is enabled
+	 * Get the widget for a product if enabled
 	 * 
-	 * @param string|int $product_id The WooCommerce product ID
+	 * @param string|int $product_id The WooCommerce product ID. Pass and empty value to ignore it.
 	 * @param string $product The seQura product identifier
 	 * @param string $campaign The seQura campaign name. Use an empty string to ignore the campaign.
-	 * @return bool
+	 * 
+	 * @return WidgetDataArray|null The widget data if enabled, null otherwise
 	 */
-	private function is_widget_enabled_for_product( $product_id, string $product, string $campaign = '' ): bool {
+	private function get_widget_for_product( $product_id, string $product, string $campaign = '' ): ?array {
 		/**
 		 * Promotional widget data
 		 *
 		 * @var array<string, mixed> $widget */ 
 		foreach ( $this->get_available_widgets_for_product_page( $product_id ) as $widget ) {
 			if ( $widget['product'] === $product && $widget['campaign'] === $campaign ) {
-				return true;
+				return $widget;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/**
