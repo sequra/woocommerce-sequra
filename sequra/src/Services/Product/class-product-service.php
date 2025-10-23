@@ -12,12 +12,13 @@ use DateInterval;
 use DateTime;
 use SeQura\Core\BusinessLogic\AdminAPI\AdminAPI;
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Responses\GeneralSettingsResponse;
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
+use SeQura\Core\BusinessLogic\AdminAPI\Response\TranslatableErrorResponse;
 use SeQura\Core\BusinessLogic\Domain\GeneralSettings\Models\GeneralSettings;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Services\Payment\Sequra_Payment_Gateway;
 use SeQura\WC\Services\Pricing\Interface_Pricing_Service;
-use Throwable;
 use WC_Product;
 
 /**
@@ -55,7 +56,7 @@ class Product_Service implements Interface_Product_Service {
 	/**
 	 * Cached general settings responses, indexed by store ID
 	 *
-	 * @var array<int, GeneralSettingsResponse>
+	 * @var array<int, Response>
 	 */
 	private $cached_general_settings = array();
 
@@ -447,14 +448,13 @@ class Product_Service implements Interface_Product_Service {
 	/**
 	 * Get GeneralSettingsResponse for the current store context
 	 */
-	private function get_general_settings(): GeneralSettingsResponse {
+	private function get_general_settings(): Response {
 		$store_id = $this->store_context->getStoreId();
 		if ( ! isset( $this->cached_general_settings[ $store_id ] ) ) {
 			/**
 			 * Response
 			 * 
-			 * @var GeneralSettingsResponse $response
-			 */
+			 * @var GeneralSettingsResponse|TranslatableErrorResponse $response */
 			$response                                   = AdminAPI::get()->generalSettings( $store_id )->getGeneralSettings();
 			$this->cached_general_settings[ $store_id ] = $response;
 		}
