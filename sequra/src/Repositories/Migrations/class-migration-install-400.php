@@ -89,12 +89,12 @@ class Migration_Install_400 extends Migration {
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
 	public function run(): void {
+		$this->migrate_general_settings();
+		$this->migrate_widget_settings();
 		$this->fetch_deployments();
 		$this->migrate_connection_data();
-		$this->migrate_general_settings();
 		$this->migrate_country_configuration();
 		$this->migrate_payment_methods();
-		$this->migrate_widget_settings();
 	}
 
 	/**
@@ -115,22 +115,40 @@ class Migration_Install_400 extends Migration {
 	/**
 	 * Migrate connection data to the new schema.
 	 *
-	 * @throws Throwable|Exception
+	 * @throws Critical_Migration_Exception
+	 * @throws Exception
 	 */
 	private function migrate_connection_data(): void {
 		$connections = $this->get_connection_data();
+
+		// Remove old ConnectionData.
+		if ( false === $this->db->delete(
+			$this->entity_table,
+			array(
+				'type'    => 'ConnectionData',
+				'index_1' => $this->store_context->getStoreId(),
+			) 
+		) ) {
+			// Having an entry with an old format is a critical issue that will lead to further problems.
+			throw new Critical_Migration_Exception( 'Error removing old ConnectionData' );
+		}
+
+		// Remove also old credentials data to avoid issues if the authentication fails for some deployments.
+		if ( false === $this->db->delete(
+			$this->entity_table,
+			array(
+				'type'    => 'Credentials',
+				'index_1' => $this->store_context->getStoreId(),
+			) 
+		) ) {
+			// Having obsolete Credentials is a critical issue that will lead to further problems.
+			throw new Critical_Migration_Exception( 'Error removing old Credentials' );
+		}
 
 		if ( empty( $connections ) ) {
 			// No connection data found, nothing to migrate.
 			return;
 		}
-
-		// Remove old connection data.
-		foreach ( $connections as $conn ) {
-			$this->db->delete( $this->entity_table, array( 'id' => $conn['id'] ) );
-		}
-		// Remove also old credentials data to avoid issues if the authentication fails for some deployments.
-		$this->db->delete( $this->entity_table, array( 'type' => 'Credentials' ) );
 
 		// Take the first connection only.
 		$conn = $connections[0];
@@ -171,18 +189,28 @@ class Migration_Install_400 extends Migration {
 	/**
 	 * Migrate country configuration to the new schema.
 	 *
-	 * @throws Throwable|Exception
+	 * @throws Critical_Migration_Exception
+	 * @throws Exception
 	 */
 	private function migrate_country_configuration(): void {
+		// Remove old CountryConfiguration.
+		if ( false === $this->db->delete(
+			$this->entity_table,
+			array(
+				'type'    => 'CountryConfiguration',
+				'index_1' => $this->store_context->getStoreId(),
+			) 
+		) ) {
+			// Having entries with obsolete values is a critical issue that will lead to further problems.
+			throw new Critical_Migration_Exception( 'Error removing old CountryConfiguration' );
+		}
+
 		// @phpstan-ignore-next-line
 		$query = $this->db->prepare( 'SELECT `index_2`, `index_3` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s', 'Credentials', $this->store_context->getStoreId() );
 		$rows  = $this->db->get_results( $query, ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return;
 		}
-		
-		// Remove old connection data.
-		$this->db->delete( $this->entity_table, array( 'type' => 'CountryConfiguration' ) );
 
 		$country_configurations = array();
 		foreach ( $rows as $row ) {
@@ -213,7 +241,8 @@ class Migration_Install_400 extends Migration {
 	/**
 	 * Migrate widget settings to the new schema.
 	 * 
-	 * @throws Throwable|Exception
+	 * @throws Critical_Migration_Exception
+	 * @throws Exception
 	 */
 	private function migrate_widget_settings(): void {
 
@@ -224,8 +253,9 @@ class Migration_Install_400 extends Migration {
 		}
 
 		// Remove old widget settings to prevent errors due to non-existing classes.
-		if ( ! $this->db->delete( $this->entity_table, array( 'id' => $data['id'] ) ) ) {
-			throw new Exception( 'Error removing old WidgetSettings' );
+		if ( false === $this->db->delete( $this->entity_table, array( 'id' => $data['id'] ) ) ) {
+			// Having an entry with an old format is a critical issue that will lead to further problems.
+			throw new Critical_Migration_Exception( \esc_html( 'Error removing old WidgetSettings with id: ' . $data['id'] ) );
 		}
 
 		$response = AdminAPI::get()
@@ -267,7 +297,8 @@ class Migration_Install_400 extends Migration {
 	/**
 	 * Migrate GeneralSettings to the new schema.
 	 * 
-	 * @throws Throwable|Exception
+	 * @throws Critical_Migration_Exception
+	 * @throws Exception
 	 */
 	private function migrate_general_settings(): void {
 
@@ -278,8 +309,9 @@ class Migration_Install_400 extends Migration {
 		}
 
 		// Remove old GeneralSettings to prevent errors due to non-existing classes.
-		if ( ! $this->db->delete( $this->entity_table, array( 'id' => $data['id'] ) ) ) {
-			throw new Exception( 'Error removing old GeneralSettings' );
+		if ( false === $this->db->delete( $this->entity_table, array( 'id' => $data['id'] ) ) ) {
+			// Having an entry with an old format is a critical issue that will lead to further problems.
+			throw new Critical_Migration_Exception( 'Error removing old GeneralSettings' );
 		}
 
 		$response = AdminAPI::get()
@@ -303,12 +335,29 @@ class Migration_Install_400 extends Migration {
 	/**
 	 * Migrate payment methods to the new schema.
 	 * 
-	 * @throws Throwable|Exception
+	 * @throws Critical_Migration_Exception
+	 * @throws Exception
 	 */
 	private function migrate_payment_methods(): void {
 		// Remove old payment methods if any.
-		$this->db->delete( $this->entity_table, array( 'type' => 'PaymentMethods' ) );
-		$this->db->delete( $this->entity_table, array( 'type' => 'PaymentMethod' ) );
+		if ( false === $this->db->delete(
+			$this->entity_table,
+			array(
+				'type'    => 'PaymentMethods',
+				'index_1' => $this->store_context->getStoreId(),
+			) 
+		) ) {
+			throw new Critical_Migration_Exception( \esc_html( 'Error removing PaymentMethods entities from ' . $this->entity_table ) );
+		}
+		if ( false === $this->db->delete(
+			$this->entity_table,
+			array(
+				'type'    => 'PaymentMethod',
+				'index_1' => $this->store_context->getStoreId(),
+			) 
+		) ) {
+			throw new Critical_Migration_Exception( \esc_html( 'Error removing PaymentMethod entities from ' . $this->entity_table ) );
+		}
 
 		// Force the caching of payment methods for every merchant.
 		foreach ( $this->get_merchant_ids() as $merchant_id ) {
@@ -435,14 +484,28 @@ class Migration_Install_400 extends Migration {
 	 *          }
 	 *      }
 	 *  }|null WidgetSettings or null if not found.
+	 * 
+	 * @throws Critical_Migration_Exception
 	 */
 	private function get_widget_settings(): ?array {
 		// @phpstan-ignore-next-line
-		$query = $this->db->prepare( 'SELECT `id`, `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'WidgetSettings', $this->store_context->getStoreId() );
-		$row   = $this->db->get_row( $query, ARRAY_A );
-		$data  = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
+		$query  = $this->db->prepare( 'SELECT `id`, `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'WidgetSettings', $this->store_context->getStoreId() );
+		$row    = $this->db->get_row( $query, ARRAY_A );
+		$row_id = isset( $row['id'] ) ? intval( $row['id'] ) : null;
+		$data   = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
 
-		if ( ! is_array( $data ) || ! isset( $row['id'] ) ) {
+		if ( ! $row_id || ! is_array( $data ) ) {
+			// Remove invalid WidgetSettings to prevent issues.
+			if ( false === $this->db->delete(
+				$this->entity_table,
+				array(
+					'type'    => 'WidgetSettings',
+					'index_1' => $this->store_context->getStoreId(),
+				) 
+			) ) {
+				// Having corrupted data is a critical issue that will lead to further problems.
+				throw new Critical_Migration_Exception( 'Error removing invalid WidgetSettings' );
+			}
 			return null;
 		}
 
@@ -476,7 +539,7 @@ class Migration_Install_400 extends Migration {
 		}
 
 		return array(
-			'id'             => (int) $row['id'],
+			'id'             => $row_id,
 			'widgetSettings' => array(
 				'displayOnProductPage'             => $data['widgetSettings']['displayOnProductPage'] ?? false,
 				'showInstallmentsInProductListing' => $data['widgetSettings']['showInstallmentsInProductListing'] ?? false,
@@ -536,14 +599,28 @@ class Migration_Install_400 extends Migration {
 	 *          defaultServicesEndDate: string
 	 *      }
 	 *  }|null GeneralSettings or null if not found.
+	 * 
+	 * @throws Critical_Migration_Exception
 	 */
 	private function get_general_settings(): ?array {
 		// @phpstan-ignore-next-line
-		$query = $this->db->prepare( 'SELECT `id`, `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'GeneralSettings', $this->store_context->getStoreId() );
-		$row   = $this->db->get_row( $query, ARRAY_A );
-		$data  = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
+		$query  = $this->db->prepare( 'SELECT `id`, `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'GeneralSettings', $this->store_context->getStoreId() );
+		$row    = $this->db->get_row( $query, ARRAY_A );
+		$row_id = isset( $row['id'] ) ? intval( $row['id'] ) : null;
+		$data   = isset( $row['data'] ) && is_string( $row['data'] ) ? json_decode( $row['data'], true ) : null;
 
-		if ( ! is_array( $data ) || ! isset( $row['id'] ) ) {
+		if ( ! $row_id || ! is_array( $data ) ) {
+			// Remove invalid GeneralSettings to prevent issues.
+			if ( false === $this->db->delete(
+				$this->entity_table,
+				array(
+					'type'    => 'GeneralSettings',
+					'index_1' => $this->store_context->getStoreId(),
+				) 
+			) ) {
+				// Having corrupted data is a critical issue that will lead to further problems.
+				throw new Critical_Migration_Exception( 'Error removing invalid GeneralSettings' );
+			}
 			return null;
 		}
 
@@ -553,7 +630,7 @@ class Migration_Install_400 extends Migration {
 		}
 
 		return array(
-			'id'              => (int) $row['id'],
+			'id'              => $row_id,
 			'generalSettings' => array(
 				'sendOrderReportsPeriodicallyToSeQura' => ! empty( $data['generalSettings']['sendOrderReportsPeriodicallyToSeQura'] ?? false ),
 				'showSeQuraCheckoutAsHostedPage'       => ! empty( $data['generalSettings']['showSeQuraCheckoutAsHostedPage'] ?? false ),
