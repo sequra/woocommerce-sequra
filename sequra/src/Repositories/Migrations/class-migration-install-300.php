@@ -87,11 +87,11 @@ class Migration_Install_300 extends Migration {
 		$this->add_new_tables_to_database();
 		$woocommerce_sequra_settings = (array) \get_option( 'woocommerce_sequra_settings', array() );
 		if ( ! empty( $woocommerce_sequra_settings ) ) {
+			$this->migrate_general_settings_configuration( $woocommerce_sequra_settings );
+			$this->migrate_widget_configuration( $woocommerce_sequra_settings );
 			$this->fetch_deployments();
 			$this->migrate_connection_configuration( $woocommerce_sequra_settings );
-			$this->migrate_general_settings_configuration( $woocommerce_sequra_settings );
 			$this->migrate_country_configuration( $woocommerce_sequra_settings );
-			$this->migrate_widget_configuration( $woocommerce_sequra_settings );
 		}
 	}
 
