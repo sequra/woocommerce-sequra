@@ -104,6 +104,7 @@ Contributors:
 * Changed: Remove duplicated code and improve error handling.
 * Fixed: Allow selling multiple services in the same order.
 * Added: The shopper address information is by default optional when service selling is available.
+* Fixed: Payment gateway availability check was not using the data returned from the solicitation process, which caused errors when trying to determine the country in some cases.
 
 = 4.0.0	=
 * Added: PHP 8.4 compatibility.
