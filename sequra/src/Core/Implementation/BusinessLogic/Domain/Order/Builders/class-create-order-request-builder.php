@@ -21,6 +21,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Gui;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference;
+use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
@@ -133,6 +134,13 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	private $credentials_service;
 
 	/**
+	 * SeQura Order repository
+	 *
+	 * @var SeQuraOrderRepositoryInterface
+	 */
+	private $sequra_order_repository;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct(
@@ -148,7 +156,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		Interface_Order_Delivery_Method_Builder $delivery_method_builder,
 		Interface_Order_Address_Builder $address_builder,
 		Interface_Order_Customer_Builder $customer_builder,
-		CredentialsService $credentials_service
+		CredentialsService $credentials_service,
+		SeQuraOrderRepositoryInterface $sequra_order_repository
 	) {
 		$this->cart_service                   = $cart_service;
 		$this->platform_provider              = $platform_provider;
@@ -163,6 +172,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		$this->address_builder                = $address_builder;
 		$this->customer_builder               = $customer_builder;
 		$this->credentials_service            = $credentials_service;
+		$this->sequra_order_repository        = $sequra_order_repository;
 	}
 
 	/**
@@ -409,14 +419,12 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			return false;
 		}
 
-		try {
-			$this->credentials_service->getMerchantIdByCountryCode( 
-				$this->get_country_from_order_or_cart()
-			);
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		$merchant_id = $this->get_merchant_id();
+		if ( ! $merchant_id ) {
+			$this->logger->log_debug( 'Payment gateway is not available: Merchant ID not found', __FUNCTION__, __CLASS__ );
 			return false;
 		}
+		
 
 		if ( ! $this->shopper_service->is_ip_allowed() ) {
 			$this->logger->log_debug( 'Payment gateway is not available for this IP', __FUNCTION__, __CLASS__ );
@@ -435,5 +443,32 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get merchantId from the current cart or order
+	 */
+	private function get_merchant_id(): ?string {
+		// Try to get the merchantId using the current cartId.
+		$cart_id = $this->get_cart_ref_from_order_or_cart();
+		if ( $cart_id ) {
+			try {
+				$sequra_order = $this->sequra_order_repository->getByCartId( $cart_id );
+				if ( $sequra_order ) {
+					// If SeQuraOrder found, return the merchantId.
+					return (string) $sequra_order->getMerchant()->getId();
+				}
+			} catch ( Throwable $e ) {
+				$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+			}
+		}
+		// Fallback: try to get the merchantId using the country.
+		try {
+			$country = $this->get_country_from_order_or_cart();
+			return $this->credentials_service->getMerchantIdByCountryCode( $country );
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+		return null;
 	}
 }
