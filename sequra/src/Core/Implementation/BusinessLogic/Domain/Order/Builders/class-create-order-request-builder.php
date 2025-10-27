@@ -21,6 +21,7 @@ use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Gui;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Item\Item;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\Merchant;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\OrderRequest\MerchantReference;
+use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraOrder;
 use SeQura\Core\BusinessLogic\Domain\Order\RepositoryContracts\SeQuraOrderRepositoryInterface;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
@@ -334,10 +335,12 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * @throws CredentialsNotFoundException|ConnectionDataNotFoundException|InvalidUrlException|Exception
 	 */
 	private function get_merchant(): Merchant {
-		$merchant = $this->merchant_order_request_builder->build(
-			$this->get_country_from_order_or_cart(), 
-			$this->get_cart_ref_from_order_or_cart()
-		);
+		$cart_id = $this->get_cart_ref_from_order_or_cart();
+		$country = $this->get_country( $cart_id );
+		if ( ! $country ) {
+			throw new Exception( 'Country not found.' );
+		}
+		$merchant = $this->merchant_order_request_builder->build( $country, $cart_id );
 
 		/**
 		 * Filter the merchant data.
@@ -450,25 +453,63 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 */
 	private function get_merchant_id(): ?string {
 		// Try to get the merchantId using the current cartId.
-		$cart_id = $this->get_cart_ref_from_order_or_cart();
-		if ( $cart_id ) {
-			try {
-				$sequra_order = $this->sequra_order_repository->getByCartId( $cart_id );
-				if ( $sequra_order ) {
-					// If SeQuraOrder found, return the merchantId.
-					return (string) $sequra_order->getMerchant()->getId();
-				}
-			} catch ( Throwable $e ) {
-				$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-			}
+		$cart_id      = $this->get_cart_ref_from_order_or_cart();
+		$sequra_order = $this->get_sequra_order_by_cart_id( $cart_id );
+		if ( $sequra_order ) {
+			// If SeQuraOrder found, return the merchantId.
+			return (string) $sequra_order->getMerchant()->getId();
 		}
 		// Fallback: try to get the merchantId using the country.
 		try {
-			$country = $this->get_country_from_order_or_cart();
-			return $this->credentials_service->getMerchantIdByCountryCode( $country );
+			$country = $this->get_country();
+			if ( $country ) {
+				return $this->credentials_service->getMerchantIdByCountryCode( $country );
+			}
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 		}
+		return null;
+	}
+
+	/**
+	 * Get SeQuraOrder by cart ID
+	 */
+	private function get_sequra_order_by_cart_id( string $cart_id ): ?SeQuraOrder {
+		if ( ! $cart_id ) {
+			return null;
+		}
+		try {
+			return $this->sequra_order_repository->getByCartId( $cart_id );
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+		return null;
+	}
+
+	/**
+	 * Get country code from cart ID or current order/session
+	 */
+	private function get_country( ?string $cart_id = null ): ?string {
+		if ( $cart_id ) {
+			$sequra_order = $this->get_sequra_order_by_cart_id( $cart_id );
+			if ( $sequra_order ) {
+				$country = $sequra_order->getDeliveryAddress()->getCountryCode();
+				if ( ! empty( $country ) ) {
+					return $country;
+				}
+				$country = $sequra_order->getInvoiceAddress()->getCountryCode();
+				if ( ! empty( $country ) ) {
+					return $country;
+				}
+			}
+		}
+
+		try {
+			return $this->get_country_from_order_or_cart();
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+		
 		return null;
 	}
 }
