@@ -105,6 +105,9 @@ Contributors:
 * Fixed: Allow selling multiple services in the same order.
 * Added: The shopper address information is by default optional when service selling is available.
 * Fixed: Payment gateway availability check was not using the data returned from the solicitation process, which caused errors when trying to determine the country in some cases.
+* Added: Allow showing product promotional widget on any page via shortcode.
+* Added: The promotional widget shortcode also accepts the price as a numeric value.
+* Changed: If no destination CSS selector is provided, the promotional widget will be displayed in the same container as the shortcode.
 
 = 4.0.0	=
 * Added: PHP 8.4 compatibility.
