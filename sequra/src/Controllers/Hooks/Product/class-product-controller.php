@@ -83,9 +83,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 	 * Expected attributes:
 	 * - product: The seQura product identifier. Required.
 	 * - campaign: The seQura campaign name. Optional.
-	 * - dest: A CSS selector to place the widget. Optional.
+	 * - dest: A CSS selector to place the widget. Optional. If not provided, the widget will be placed in the same container as the shortcode.
 	 * - product_id: The WooCommerce product identifier. Optional.
-	 * - price: A CSS selector to get the product price. Optional.
+	 * - price: A CSS selector to get the product price or the price itself as a string. Optional.
 	 * - alt_price: An alternative CSS selector to retrieve the product price for special product page layouts. Optional.
 	 * - is_alt_price: A CSS selector to determine if the product has an alternative price. Optional.
 	 * - reg_amount: The registration amount. Optional.
@@ -120,7 +120,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				array( 
 					new LogContextData( 'payment_method', $product ),
 					new LogContextData( 'campaign', $campaign ),
-					new LogContextData( 'product_id', value: $product_id ),
+					new LogContextData( 'product_id', $product_id ),
 				)
 			);
 			return '';
@@ -160,7 +160,7 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'theme'        => $widget['theme'] ?? '',
 				'reverse'      => $widget['reverse'] ?? '0',
 				'reg_amount'   => $this->product_service->get_registration_amount( $product_id, true ),
-				'dest'         => $widget['dest'] ?? '',
+				'dest'         => '',
 				'price'        => $widget['priceSel'] ?? '',
 				'alt_price'    => $widget['altPriceSel'] ?? '',
 				'is_alt_price' => $widget['altTriggerSelector'] ?? '',

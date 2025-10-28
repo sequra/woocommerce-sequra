@@ -30,8 +30,18 @@ if ( ! isset(
 ) ) {
 	return;
 }
+$price            = wp_strip_all_tags( strval( $args['price'] ) );
+$is_price_numeric = preg_match( '/^[0-9]+(?:[.,][0-9]+)*$/', $price );
+$dest_id          = '';
+if ( empty( $args['dest'] ) ) {
+	$dest_id      = str_replace( '.', '', uniqid( 'sequra-widget-', true ) );
+	$args['dest'] = '#' . $dest_id;
+}
+
 //phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-?>
+if ( ! empty( $dest_id ) ) : ?>
+<div id="<?php echo esc_attr( $dest_id ); ?>" style="display: none;" aria-hidden="true"><?php echo $is_price_numeric ? esc_html( $price ) : ''; ?></div>
+<?php endif; ?>
 <script type='text/javascript'>
 	SequraWidgetFacade.widgets && SequraWidgetFacade.widgets.push({
 		product: "<?php echo esc_js( $args['product'] ); ?>",
@@ -39,9 +49,9 @@ if ( ! isset(
 		theme: "<?php echo esc_js( $args['theme'] ); ?>",
 		reverse: "<?php echo esc_js( $args['reverse'] ); ?>",
 		campaign: "<?php echo esc_js( $args['campaign'] ); ?>",
-		priceSel: "<?php echo wp_strip_all_tags( $args['price'] ); ?>",
-		variationPriceSel: "<?php echo wp_strip_all_tags( $args['alt_price'] ); ?>",
-		isVariableSel: "<?php echo wp_strip_all_tags( $args['is_alt_price'] ); ?>",
+		priceSel: "<?php echo $is_price_numeric ? wp_strip_all_tags( $args['dest'] ) : $price; ?>",
+		variationPriceSel: "<?php echo $is_price_numeric ? 'null' : wp_strip_all_tags( $args['alt_price'] ); ?>",
+		isVariableSel: "<?php echo $is_price_numeric ? 'null' : wp_strip_all_tags( $args['is_alt_price'] ); ?>",
 		registrationAmount: "<?php echo esc_js( $args['reg_amount'] ); ?>",
 		minAmount: <?php echo esc_js( $args['min_amount'] ?? '0' ); ?>,
 		maxAmount: <?php echo esc_js( $args['max_amount'] ?? 'null' ); ?>
