@@ -105,6 +105,8 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     
     wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Flexible payment with seQura","description":"Please, select the payment method you want to use"}' --allow-root
 
+    # Remove original sample page to import the one in the sample xml
+    wp post delete 2 --force --allow-root
     wp import --allow-root wp-content/plugins/sequra-helper/sample-data/sample_products.xml --authors=create
 
     wp option set permalink_structure '/%postname%/' --allow-root
