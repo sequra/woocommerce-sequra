@@ -180,7 +180,7 @@ class Widgets_Service implements Interface_Widgets_Service {
 				$country,
 				$this->widget_configurator->getCurrency() ?? '',
 				$this->shopper_service->get_ip(),
-				$product_id
+				empty( $product_id ) ? '' : $product_id
 			)
 		);
 

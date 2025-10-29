@@ -234,7 +234,10 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function get_registration_amount( $product, bool $to_cents = false ): float {
 		$product = $this->get_product_instance( $product );
-		$value   = (float) $product->get_meta( self::META_KEY_SEQURA_REGISTRATION_AMOUNT, true );
+		if ( ! $product ) {
+			return 0;
+		}
+		$value = (float) $product->get_meta( self::META_KEY_SEQURA_REGISTRATION_AMOUNT, true );
 		return $to_cents ? $this->pricing_service->to_cents( $value ) : $value;
 	}
 
@@ -301,15 +304,16 @@ class Product_Service implements Interface_Product_Service {
 	 */
 	public function can_display_widget_for_method( $product, $method ): bool {
 		$product = $this->get_product_instance( $product );
-		
-		$return = $product 
-		&& $this->can_display_widgets( $product )
-		// Check if price is too high.
-		&& ( empty( $method['maxAmount'] ) || $method['maxAmount'] >= $this->pricing_service->to_cents( (float) $product->get_price( 'edit' ) ) )
-		// Check if is too early to display the widget.
-		&& ( empty( $method['startsAt'] ) || time() >= strtotime( $method['startsAt'] ) )
-		// Check if is too late to display the widget.
-		&& ( empty( $method['endsAt'] ) || strtotime( $method['endsAt'] ) >= time() ); 
+		$return  = true;
+		if ( $product ) {
+			$return = $this->can_display_widgets( $product )
+			// Check if price is too high.
+			&& ( empty( $method['maxAmount'] ) || $method['maxAmount'] >= $this->pricing_service->to_cents( (float) $product->get_price( 'edit' ) ) )
+			// Check if is too early to display the widget.
+			&& ( empty( $method['startsAt'] ) || time() >= strtotime( $method['startsAt'] ) )
+			// Check if is too late to display the widget.
+			&& ( empty( $method['endsAt'] ) || strtotime( $method['endsAt'] ) >= time() ); 
+		}
 
 		/**
 		* Filter widget availability for a given seQura method

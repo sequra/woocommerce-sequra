@@ -30,18 +30,26 @@ if ( ! isset(
 ) ) {
 	return;
 }
+$price                    = wp_strip_all_tags( strval( $args['price'] ) );
+$is_price_numeric         = preg_match( '/^[0-9]+(?:[.,][0-9]+)*$/', $price );
+$in_place_widget_id       = str_replace( '.', '', uniqid( 'sequra-widget-', true ) );
+$in_place_widget_selector = '#' . $in_place_widget_id;
+$dest                     = empty( $args['dest'] ) ? $in_place_widget_selector : wp_strip_all_tags( $args['dest'] );
+
 //phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-?>
+if ( $is_price_numeric || empty( $args['dest'] ) ) : ?>
+<div id="<?php echo esc_attr( $in_place_widget_id ); ?>" style="display: none;" aria-hidden="true"><?php echo $is_price_numeric ? esc_html( $price ) : ''; ?></div>
+<?php endif; ?>
 <script type='text/javascript'>
 	SequraWidgetFacade.widgets && SequraWidgetFacade.widgets.push({
 		product: "<?php echo esc_js( $args['product'] ); ?>",
-		dest: "<?php echo wp_strip_all_tags( $args['dest'] ); ?>",
+		dest: "<?php echo $dest; ?>",
 		theme: "<?php echo esc_js( $args['theme'] ); ?>",
 		reverse: "<?php echo esc_js( $args['reverse'] ); ?>",
 		campaign: "<?php echo esc_js( $args['campaign'] ); ?>",
-		priceSel: "<?php echo wp_strip_all_tags( $args['price'] ); ?>",
-		variationPriceSel: "<?php echo wp_strip_all_tags( $args['alt_price'] ); ?>",
-		isVariableSel: "<?php echo wp_strip_all_tags( $args['is_alt_price'] ); ?>",
+		priceSel: "<?php echo $is_price_numeric ? $in_place_widget_selector : $price; ?>",
+		variationPriceSel: "<?php echo $is_price_numeric ? 'null' : wp_strip_all_tags( $args['alt_price'] ); ?>",
+		isVariableSel: "<?php echo $is_price_numeric ? 'null' : wp_strip_all_tags( $args['is_alt_price'] ); ?>",
 		registrationAmount: "<?php echo esc_js( $args['reg_amount'] ); ?>",
 		minAmount: <?php echo esc_js( $args['min_amount'] ?? '0' ); ?>,
 		maxAmount: <?php echo esc_js( $args['max_amount'] ?? 'null' ); ?>
