@@ -12,6 +12,7 @@ use SeQura\Helper\Task\Checkout_Version_Task;
 use SeQura\Helper\Task\Clear_Configuration_Task;
 use SeQura\Helper\Task\Configure_Dummy_Service_Task;
 use SeQura\Helper\Task\Configure_Dummy_Task;
+use SeQura\Helper\Task\Remove_Address_Fields_Task;
 use SeQura\Helper\Task\Print_Logs_Task;
 use SeQura\Helper\Task\Remove_Db_Tables_Task;
 use SeQura\Helper\Task\Remove_Log_Task;
@@ -46,6 +47,79 @@ class Plugin {
 		}
 		// This disable entirely the coming soon page functionality from WooCommerce that affects the E2E tests.
 		add_filter( 'woocommerce_coming_soon_exclude', '__return_true', 10 );
+
+		if ( Remove_Address_Fields_Task::is_option_enabled() ) {
+			add_filter( 'woocommerce_checkout_fields', array( $this, 'remove_checkout_fields_classic' ) );
+			add_filter( 'woocommerce_get_country_locale', array( $this, 'remove_checkout_fields_blocks' ) );
+		}
+	}
+
+	/**
+	 * Remove address fields from classic checkout form
+	 *
+	 * @param array<string, array<string, mixed>> $fields Fields.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function remove_checkout_fields_classic( $fields ) {
+		unset( $fields['billing']['billing_company'] );
+		unset( $fields['billing']['billing_address_1'] );
+		unset( $fields['billing']['billing_address_2'] );
+		unset( $fields['billing']['billing_city'] );
+		unset( $fields['billing']['billing_postcode'] );
+		unset( $fields['billing']['billing_country'] );
+		unset( $fields['billing']['billing_state'] );
+
+		unset( $fields['shipping']['shipping_company'] );
+		unset( $fields['shipping']['shipping_address_1'] );
+		unset( $fields['shipping']['shipping_address_2'] );
+		unset( $fields['shipping']['shipping_city'] );
+		unset( $fields['shipping']['shipping_postcode'] );
+		unset( $fields['shipping']['shipping_country'] );
+		unset( $fields['shipping']['shipping_state'] );
+
+		return $fields;
+	}
+	/**
+	 * Remove address fields from blocks based checkout form
+	 *
+	 * @param array<string, array<string, mixed>> $locale Locale.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function remove_checkout_fields_blocks( $locale ) {
+		// Loop every country locale we sell to and hide specific fields.
+		foreach ( $locale as $country_code => $fields ) {
+			$locale[ $country_code ]['address_1'] = array(
+				'required' => false,
+				'hidden'   => true,
+			);
+
+			$locale[ $country_code ]['address_2'] = array(
+				'required' => false,
+				'hidden'   => true,
+			);
+
+			$locale[ $country_code ]['city'] = array(
+				'required' => false,
+				'hidden'   => true,
+			);
+
+			$locale[ $country_code ]['postcode'] = array(
+				'required' => false,
+				'hidden'   => true,
+			);
+
+			$locale[ $country_code ]['state'] = array(
+				'required' => false,
+				'hidden'   => true,
+			);
+
+			$locale[ $country_code ]['company'] = array(
+				'required' => false,
+				'hidden'   => true,
+			);
+		}
+
+		return $locale;
 	}
 
 	/**
@@ -73,7 +147,7 @@ class Plugin {
 			'checkout_version'             => Checkout_Version_Task::class,
 			'remove_db_tables'             => Remove_Db_Tables_Task::class,
 			'verify_order_has_merchant_id' => Verify_Order_Has_Merchant_Id_Task::class,
-
+			'remove_address_fields'        => Remove_Address_Fields_Task::class,
 		);
 
 		return ! isset( $map[ $webhook ] ) ? new Task() : new $map[ $webhook ]();
