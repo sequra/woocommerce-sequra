@@ -30,11 +30,11 @@ if ( ! isset(
 ) ) {
 	return;
 }
-$price            = wp_strip_all_tags( strval( $args['price'] ) );
-$is_price_numeric = preg_match( '/^[0-9]+(?:[.,][0-9]+)*$/', $price );
-$in_place_widget_id          = str_replace( '.', '', uniqid( 'sequra-widget-', true ) );
-$in_place_widget_selector  = '#' . $in_place_widget_id;
-$dest = empty( $args['dest'] ) ? $in_place_widget_selector : wp_strip_all_tags( $args['dest'] );
+$price                    = wp_strip_all_tags( strval( $args['price'] ) );
+$is_price_numeric         = preg_match( '/^[0-9]+(?:[.,][0-9]+)*$/', $price );
+$in_place_widget_id       = str_replace( '.', '', uniqid( 'sequra-widget-', true ) );
+$in_place_widget_selector = '#' . $in_place_widget_id;
+$dest                     = empty( $args['dest'] ) ? $in_place_widget_selector : wp_strip_all_tags( $args['dest'] );
 
 //phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 if ( $is_price_numeric || empty( $args['dest'] ) ) : ?>
