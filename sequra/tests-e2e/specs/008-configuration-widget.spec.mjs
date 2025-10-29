@@ -119,6 +119,28 @@ test.describe('Widget settings', () => {
     }
   });
 
+  test('Show widget on non-product page using shortcode', async ({ page, helper, dataProvider, productPage }) => {
+    // Setup
+    const { dummy_config, clear_config } = helper.webhooks;
+    await helper.executeWebhook({ webhook: clear_config }); // Clear the configuration.
+    await helper.executeWebhook({ webhook: dummy_config, args: [{ name: 'widgets', value: '1' }] }); // Setup with widgets enabled.
+
+    // Execution
+    for (const uiVersion of [DataProvider.UI_BLOCKS, DataProvider.UI_CLASSIC]) {
+      // Set the UI version and a compatible theme.
+      const theme = dataProvider.themeForUiVersion(uiVersion);
+      await helper.executeWebhook({ webhook: helper.webhooks.set_theme, args: [{ name: 'theme', value: theme }] });
+
+      // Non-product page.
+      const options = {
+        ...dataProvider.frontEndWidgetOptions('pp3', null, 5000, null),
+        locationSel: '[id^="sequra-widget-"]'
+      }
+      await page.goto('/sample-page/', { waitUntil: 'commit' });
+      await productPage.expectWidgetToBeVisible({...options, timeout: 10000 });
+    }
+  });
+
   test('Do not display the widget on the product page when the selector is invalid', async ({ backOffice, helper, widgetSettingsPage, dataProvider, productPage }) => {
     // Setup
     const { dummy_config, clear_config, set_theme } = helper.webhooks;
