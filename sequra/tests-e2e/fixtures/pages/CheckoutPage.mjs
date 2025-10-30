@@ -65,14 +65,26 @@ export default class CheckoutPage extends BaseCheckoutPage {
         await this.locators.email().fill(email);
         await this.locators.firstName(isShipping).fill(firstName);
         await this.locators.lastName(isShipping).fill(lastName);
-        await this.locators.address1(isShipping).fill(address1);
-        await this.locators.country(isShipping).selectOption(country);
+        // Address1 field might not exist in some setups.
+        if(await this.locators.address1(isShipping).count()) {
+            await this.locators.address1(isShipping).fill(address1);
+        }
+        // Country field might not exist in some setups.
+        if(await this.locators.country(isShipping).count()) {
+            await this.locators.country(isShipping).selectOption(country);
+        }
         // State field might not exist in some countries.
         if (await this.locators.state(isShipping).count()) {
             await this.locators.state(isShipping).selectOption({ label: state });
         }
-        await this.locators.city(isShipping).fill(city);
-        await this.locators.postcode(isShipping).fill(postcode);
+        // City field might not exist in some setups.
+        if (await this.locators.city(isShipping).count()) {
+            await this.locators.city(isShipping).fill(city);
+        }
+        // Postcode field might not exist in some setups.
+        if (await this.locators.postcode(isShipping).count()) {
+            await this.locators.postcode(isShipping).fill(postcode);
+        }
         await this.locators.phone(isShipping).fill(phone);
     }
 
