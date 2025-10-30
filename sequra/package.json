@@ -46,7 +46,7 @@
         "terser-webpack-plugin": "~5.3.0",
         "webpack": "^5.89.0",
         "webpack-cli": "~4.9.0",
-        "playwright-fixture-for-plugins": "github:sequra/playwright-fixture-for-plugins#1.0.0"
+        "playwright-fixture-for-plugins": "github:sequra/playwright-fixture-for-plugins#refactor/PAR-624-Extract-CheckoutForm-fixture-from-the-CheckoutPage-one"
     },
     "dependencies": {
         "sequra-core-admin-fe": "github:sequra/integration-core-ui#2.0.0"
