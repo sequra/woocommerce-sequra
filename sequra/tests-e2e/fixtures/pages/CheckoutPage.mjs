@@ -1,5 +1,4 @@
 import { BackOffice, CheckoutPage as BaseCheckoutPage } from "playwright-fixture-for-plugins";
-// TODO: pending review
 /**
  * Checkout page
  */
@@ -29,9 +28,8 @@ export default class CheckoutPage extends BaseCheckoutPage {
             phone: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'phone'),
             // flatRateShipping: () => this.page.locator('[value="flatrate_flatrate"]'),
             // continueButton: () => this.page.locator('.action.continue'),
-            submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])'),
-            // TODO
-            orderRowStatus: orderNumber => this.page.locator(`#post-${orderNumber} .column-order_status`),
+            submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"]),#place_order'),
+            orderRowStatus: orderNumber => this.page.locator(`#post-${orderNumber} .column-order_status, #order-${orderNumber} .column-order_status`),
             orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong')
         };
     }
