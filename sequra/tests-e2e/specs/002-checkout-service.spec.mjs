@@ -5,7 +5,8 @@ test.describe('Service checkout', () => {
 
   test('Multiple services order is set as processing after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
-    const uiVersion = DataProvider.UI_BLOCKS;
+    // We use UI_CLASSIC because UI_BLOCKS has issues with missing address fields in Gutenberg checkout.
+    const uiVersion = DataProvider.UI_CLASSIC;
     const theme = dataProvider.themeForUiVersion(uiVersion);
     const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
     await helper.executeWebhooksSequentially([
@@ -29,7 +30,8 @@ test.describe('Service checkout', () => {
 
   test('Service order of virtual & downloadable product is set as completed after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
-    const uiVersion = DataProvider.UI_BLOCKS;
+    // We use UI_CLASSIC because UI_BLOCKS has issues with missing address fields in Gutenberg checkout.
+    const uiVersion = DataProvider.UI_CLASSIC;
     const theme = dataProvider.themeForUiVersion(uiVersion);
     const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
     await helper.executeWebhooksSequentially([
