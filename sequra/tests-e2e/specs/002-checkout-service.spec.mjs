@@ -23,7 +23,7 @@ test.describe('Service checkout', () => {
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: false, ...shopper });
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
-    await checkoutPage.waitForOrderSuccess(); // remove this line once the issue is resolved
+    await checkoutPage.waitForOrderSuccess();
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider, { isOrderForService: true });
     await checkoutPage.expectOrderChangeTo(backOffice, { toStatus: 'Processing' });
   });
@@ -48,7 +48,7 @@ test.describe('Service checkout', () => {
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: false, ...shopper });
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
-    await checkoutPage.waitForOrderSuccess(); // remove this line once the issue is resolved
+    await checkoutPage.waitForOrderSuccess();
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider, { isOrderForService: true });
     await checkoutPage.expectOrderChangeTo(backOffice, { toStatus: 'Completed' });
   });
