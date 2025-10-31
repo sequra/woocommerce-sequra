@@ -37,6 +37,6 @@ class Remove_Address_Fields_Task extends Task {
 	 * Check if the option is enabled
 	 */
 	public static function is_option_enabled(): bool {
-		return strval( get_option( self::OPTION, self::TRUE ) ) === self::TRUE;
+		return strval( get_option( self::OPTION, self::FALSE ) ) === self::TRUE;
 	}
 }
