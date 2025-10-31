@@ -51,6 +51,7 @@ class Plugin {
 		if ( Remove_Address_Fields_Task::is_option_enabled() ) {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'remove_checkout_fields_classic' ) );
 			add_filter( 'woocommerce_get_country_locale', array( $this, 'remove_checkout_fields_blocks' ) );
+			add_filter( 'sequra_merchant_options_addresses_may_be_missing', '__return_true' );
 		}
 	}
 
