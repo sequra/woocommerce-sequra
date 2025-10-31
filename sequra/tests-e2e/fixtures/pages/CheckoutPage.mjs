@@ -64,7 +64,7 @@ export default class CheckoutPage extends BaseCheckoutPage {
         await this.locators.firstName(isShipping).fill(firstName);
         await this.locators.lastName(isShipping).fill(lastName);
         // Address1 field might not exist in some setups.
-        if(await this.locators.address1(isShipping).count()) {
+        if (await this.locators.address1(isShipping).count()) {
             await this.locators.address1(isShipping).fill(address1);
         }
         // Country field might not exist in some setups.
