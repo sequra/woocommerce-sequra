@@ -108,6 +108,7 @@ Contributors:
 * Added: Allow showing product promotional widget on any page via shortcode.
 * Added: The promotional widget shortcode also accepts the price as a numeric value.
 * Changed: If no destination CSS selector is provided, the promotional widget will be displayed in the same container as the shortcode.
+* Changed: Tested up to WooCommerce 10.3.3
 
 = 4.0.0	=
 * Added: PHP 8.4 compatibility.
