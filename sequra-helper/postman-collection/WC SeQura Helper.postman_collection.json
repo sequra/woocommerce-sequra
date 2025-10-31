@@ -35,7 +35,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}?{{webhook}}=dummy_config",
+							"raw": "{{baseUrl}}?{{webhook}}=dummy_config&widgets=1&version=blocks",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -43,6 +43,19 @@
 								{
 									"key": "{{webhook}}",
 									"value": "dummy_config"
+								},
+								{
+									"key": "widgets",
+									"value": "1"
+								},
+								{
+									"key": "version",
+									"value": "classic",
+									"disabled": true
+								},
+								{
+									"key": "version",
+									"value": "blocks"
 								}
 							]
 						}
@@ -84,31 +97,6 @@
 									"key": "{{webhook}}",
 									"value": "remove_db_tables",
 									"description": "Remove v3 tables from database"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Set v2",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}?{{webhook}}=v2_config&merchant_ref=dummy",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"query": [
-								{
-									"key": "{{webhook}}",
-									"value": "v2_config"
-								},
-								{
-									"key": "merchant_ref",
-									"value": "dummy",
-									"description": "This is optional, dummy is the only supported value"
 								}
 							]
 						}
@@ -165,27 +153,33 @@
 			"description": "Contains webhooks to modify log's content"
 		},
 		{
-			"name": "Orders",
+			"name": "Checkout",
 			"item": [
 				{
-					"name": "Force failure",
+					"name": "Remove Address Fields",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}?{{webhook}}=force_order_failure&order_id=ORDER_ID",
+							"raw": "{{baseUrl}}?{{webhook}}=remove_address_fields&value=1",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"query": [
 								{
 									"key": "{{webhook}}",
-									"value": "force_order_failure"
+									"value": "remove_address_fields"
 								},
 								{
-									"key": "order_id",
-									"value": "ORDER_ID",
-									"description": "The ID of the WooCommerce order"
+									"key": "value",
+									"value": "1",
+									"description": "Remove the address fields from the form"
+								},
+								{
+									"key": "value",
+									"value": "0",
+									"description": "Show the address fields in the form",
+									"disabled": true
 								}
 							]
 						}
@@ -193,7 +187,7 @@
 					"response": []
 				}
 			],
-			"description": "Contains webhooks to modify orders in the database"
+			"description": "Contains webhooks to modify the checkout experience"
 		},
 		{
 			"name": "UI",
@@ -275,32 +269,6 @@
 				}
 			],
 			"description": "Webhooks to change the user interface settings, such as the WP theme and components style"
-		},
-		{
-			"name": "Zip",
-			"item": [
-				{
-					"name": "Plugin ZIP",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}?{{webhook}}=plugin_zip",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"query": [
-								{
-									"key": "{{webhook}}",
-									"value": "plugin_zip"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"description": "Webhooks to provide zipped production-ready version of the plugin"
 		}
 	],
 	"event": [
@@ -309,6 +277,7 @@
 			"script": {
 				"type": "text/javascript",
 				"packages": {},
+				"requests": {},
 				"exec": [
 					""
 				]
@@ -319,6 +288,7 @@
 			"script": {
 				"type": "text/javascript",
 				"packages": {},
+				"requests": {},
 				"exec": [
 					""
 				]
@@ -327,14 +297,12 @@
 	],
 	"variable": [
 		{
-			"key": "baseUrl",
-			"value": "https://sq.wp.michel.ngrok.dev/",
-			"type": "string"
+			"key": "webhook",
+			"value": "sq-webhook"
 		},
 		{
-			"key": "webhook",
-			"value": "sq-webhook",
-			"type": "string"
+			"key": "baseUrl",
+			"value": "http://localhost/"
 		}
 	]
 }
