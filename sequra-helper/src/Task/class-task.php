@@ -14,6 +14,9 @@ namespace SeQura\Helper\Task;
  */
 class Task {
 
+	public const TRUE  = '1';
+	public const FALSE = '0';
+
 	/**
 	 * Execute the task
 	 * 
@@ -153,5 +156,25 @@ class Task {
 			$time = '0' . $time;
 		}
 		return $time;
+	}
+
+	/**
+	 * Get boolean argument from args
+	 *
+	 * @param array<string, string> $args Arguments array.
+	 * @param string                $key  Key to get.
+	 * @throws \Exception If the argument is missing or invalid.
+	 */
+	protected function get_boolean_arg( array $args, string $key ): string {
+		if ( ! isset( $args[ $key ] ) ) {
+			throw new \Exception( "Missing $key argument", 400 );
+		}
+
+		$value = sanitize_text_field( wp_unslash( $args[ $key ] ) );
+		if ( ! in_array( $value, array( self::TRUE, self::FALSE ), true ) ) {
+			throw new \Exception( "Invalid value for $key argument", 400 );
+		}
+
+		return $value;
 	}
 }

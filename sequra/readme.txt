@@ -103,7 +103,7 @@ Contributors:
 = 4.1.0	=
 * Changed: Remove duplicated code and improve error handling.
 * Fixed: Allow selling multiple services in the same order.
-* Added: The shopper address information is by default optional when service selling is available.
+* Added: The shopper address information can be set to optional when service selling is available using the sequra_merchant_options_addresses_may_be_missing hook.
 * Fixed: Payment gateway availability check was not using the data returned from the solicitation process, which caused errors when trying to determine the country in some cases.
 * Added: Allow showing product promotional widget on any page via shortcode.
 * Added: The promotional widget shortcode also accepts the price as a numeric value.

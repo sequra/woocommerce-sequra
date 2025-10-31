@@ -193,14 +193,17 @@ class Merchant_Data_Provider implements MerchantDataProviderInterface {
 
 		if ( $this->product_service->is_enabled_for_services( $country ) ) {
 			$desired_first_charge_on = $this->product_service->is_allow_first_service_payment_delay( $country ) ? $this->cart_service->get_desired_first_charge_on( $order ) : null;
+			// Some issues with Gutenberg checkout and missing address fields has been detected preventing order completion after IPN is received.
+			// Therefore, by default, we set addresses_may_be_missing to false until further investigation.
+			$default_addresses_may_be_missing = false;
 			/**
-			 * Allow modify the addresses_may_be_missing value.Accept null, true or false.
+			 * Allow modify the addresses_may_be_missing value. Accept true or false.
 			 *
 			 * @since 3.0.0
 			 */
-			$addresses_may_be_missing = \apply_filters( 'sequra_merchant_options_addresses_may_be_missing', true );
+			$addresses_may_be_missing = \apply_filters( 'sequra_merchant_options_addresses_may_be_missing', $default_addresses_may_be_missing );
 			if ( ! is_bool( $addresses_may_be_missing ) ) {
-				$addresses_may_be_missing = true;
+				$addresses_may_be_missing = $default_addresses_may_be_missing;
 			}
 
 			$options = new Options(

@@ -11,7 +11,6 @@ namespace SeQura\WC\Services\Payment;
 use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\Solicitation\Response\IdentificationFormResponse;
-use SeQura\Core\BusinessLogic\CheckoutAPI\Solicitation\Response\SolicitationResponse;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraForm;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
@@ -21,7 +20,6 @@ use SeQura\WC\Dto\Payment_Method_Option;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Order_Service;
-use Throwable;
 use WC_Order;
 
 /**
@@ -91,7 +89,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	/**
 	 * Request solicitation
 	 */
-	private function request_solicitation( ?WC_Order $order = null ): ?SolicitationResponse {
+	private function request_solicitation( ?WC_Order $order = null ): ?Response {
 		$this->current_order_provider->set( $order );
 		
 		if ( ! $this->create_order_request_builder->is_allowed() ) {
@@ -103,7 +101,7 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 		/**
 		 * Response
 		 *
-		 * @var SolicitationResponse $response */
+		 * @var Response $response */
 		$response = CheckoutAPI::get()->solicitation( $this->store_context->getStoreId() )->solicitFor( $this->create_order_request_builder );
 		if ( ! $response->isSuccessful() ) {
 			$ctx   = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
