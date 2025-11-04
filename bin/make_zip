@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Set default values
-# Argument --project. Supported values: "sequra", "sequra-no-address"
+# Argument --project. Supported values: "sequra"
 PROJECT="sequra"
 # Argument --branch. Name of the Git branch to checkout
 BRANCH="master"
@@ -12,8 +12,8 @@ while [[ "$#" -gt 0 ]]; do
     if [[ "$1" == --project=* ]]; then
         PROJECT="${1#*=}"
         # Check if the project is supported
-        if [[ "$PROJECT" != "sequra" && "$PROJECT" != "sequra-no-address" ]]; then
-            echo "❌ The project \"$PROJECT\" is not supported. Choose between \"sequra\" and \"sequra-no-address\""
+        if [[ "$PROJECT" != "sequra" ]]; then
+            echo "❌ The project \"$PROJECT\" is not supported. Supported project is \"sequra\""
             exit 1
         fi
 
@@ -53,8 +53,6 @@ if [[ "$PROJECT" == "sequra" ]]; then
     bin/npm install --no-progress --no-update-notifier
     bin/npm run build --no-progress --no-update-notifier
     cd "$PROJECT"
-elif [[ "$PROJECT" == "sequra-no-address" ]]; then
-    cd "glue-plugins/$PROJECT"
 fi
 
 # Read plugin version from headers something like  * Version:           3.0.4

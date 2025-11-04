@@ -8,8 +8,9 @@
 
 namespace SeQura\WC\Services\Payment;
 
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
-use SeQura\Core\BusinessLogic\CheckoutAPI\Solicitation\Response\SolicitationResponse;
+use SeQura\Core\BusinessLogic\CheckoutAPI\Solicitation\Response\IdentificationFormResponse;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\Order\Models\SeQuraForm;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
@@ -19,7 +20,6 @@ use SeQura\WC\Dto\Payment_Method_Option;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Order_Service;
-use Throwable;
 use WC_Order;
 
 /**
@@ -89,29 +89,27 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	/**
 	 * Request solicitation
 	 */
-	private function request_solicitation( ?WC_Order $order = null ): ?SolicitationResponse {
-		try {
-			$this->current_order_provider->set( $order );
-			
-			if ( ! $this->create_order_request_builder->is_allowed() ) {
-				$ctx = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
-				$this->logger->log_debug( 'Order is not allowed for solicitation', __FUNCTION__, __CLASS__, $ctx );
-				return null;
-			}
-	
-			$response = CheckoutAPI::get()->solicitation( $this->store_context->getStoreId() )->solicitFor( $this->create_order_request_builder );
-			
-			if ( ! $response->isSuccessful() ) {
-				$ctx   = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
-				$ctx[] = new LogContextData( 'response', $response->toArray() );
-				$this->logger->log_error( 'Solicitation response is not successful', __FUNCTION__, __CLASS__, $ctx );
-			}
-
-			return $response instanceof SolicitationResponse ? $response : null;
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+	private function request_solicitation( ?WC_Order $order = null ): ?Response {
+		$this->current_order_provider->set( $order );
+		
+		if ( ! $this->create_order_request_builder->is_allowed() ) {
+			$ctx = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
+			$this->logger->log_debug( 'Order is not allowed for solicitation', __FUNCTION__, __CLASS__, $ctx );
 			return null;
 		}
+	
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = CheckoutAPI::get()->solicitation( $this->store_context->getStoreId() )->solicitFor( $this->create_order_request_builder );
+		if ( ! $response->isSuccessful() ) {
+			$ctx   = $order ? array( new LogContextData( 'order_id', $order->get_id() ) ) : array();
+			$ctx[] = new LogContextData( 'response', $response->toArray() );
+			$this->logger->log_error( 'Solicitation response is not successful', __FUNCTION__, __CLASS__, $ctx );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -140,45 +138,44 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 			array() 
 		);
 
-		try {
-			$cart_info = $this->order_service->get_cart_info( $order );
+		$cart_info = $this->order_service->get_cart_info( $order );
 
-			if ( ! $cart_info ) {
-				$this->logger->log_error( 'Cart info is null', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order->get_id() ) ) );
-				return null;
-			}
-
-			$response = CheckoutAPI::get()
-			->solicitation( $this->store_context->getStoreId() )
-			->getIdentificationForm( 
-				$cart_info->ref, 
-				isset( $opts['product'] ) && '' !== $opts['product'] ? $opts['product'] : null,
-				isset( $opts['campaign'] ) && '' !== $opts['campaign'] ? $opts['campaign'] : null
-			);
-
-			if ( ! $response ) {
-				$this->logger->log_error( 'Identification form response is null', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order->get_id() ) ) );
-				return null;
-			}
-
-			if ( ! $response->isSuccessful() ) {
-				$this->logger->log_error(
-					'Identification form response is not successful',
-					__FUNCTION__,
-					__CLASS__,
-					array( 
-						new LogContextData( 'response', $response->toArray() ),
-						new LogContextData( 'order_id', $order->get_id() ),
-					)
-				);
-				return null;
-			}
-
-			return $response->getIdentificationForm();
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		if ( ! $cart_info ) {
+			$this->logger->log_error( 'Cart info is null', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order->get_id() ) ) );
 			return null;
 		}
+
+		/**
+		 * Response
+		 *
+		 * @var IdentificationFormResponse $response */
+		$response = CheckoutAPI::get()
+		->solicitation( $this->store_context->getStoreId() )
+		->getIdentificationForm( 
+			$cart_info->ref, 
+			isset( $opts['product'] ) && '' !== $opts['product'] ? $opts['product'] : null,
+			isset( $opts['campaign'] ) && '' !== $opts['campaign'] ? $opts['campaign'] : null
+		);
+
+		if ( ! $response ) {
+			$this->logger->log_error( 'Identification form response is null', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order->get_id() ) ) );
+			return null;
+		}
+
+		if ( ! $response->isSuccessful() ) {
+			$this->logger->log_error(
+				'Identification form response is not successful',
+				__FUNCTION__,
+				__CLASS__,
+				array( 
+					new LogContextData( 'response', $response->toArray() ),
+					new LogContextData( 'order_id', $order->get_id() ),
+				)
+			);
+			return null;
+		}
+
+		return $response->getIdentificationForm();
 	}
 
 	/**

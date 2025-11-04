@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.8.3
-Stable tag: 4.0.0
+Stable tag: 4.1.0
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,16 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.1.0	=
+* Changed: Remove duplicated code and improve error handling.
+* Fixed: Allow selling multiple services in the same order.
+* Added: The shopper address information can be set to optional when service selling is available using the sequra_merchant_options_addresses_may_be_missing hook.
+* Fixed: Payment gateway availability check was not using the data returned from the solicitation process, which caused errors when trying to determine the country in some cases.
+* Added: Allow showing product promotional widget on any page via shortcode.
+* Added: The promotional widget shortcode also accepts the price as a numeric value.
+* Changed: If no destination CSS selector is provided, the promotional widget will be displayed in the same container as the shortcode.
+* Changed: Tested up to WooCommerce 10.3.3
+
 = 4.0.0	=
 * Added: PHP 8.4 compatibility.
 * Changed: Update integration-core library to version v3.0.0.

@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Services\Widgets;
 
+use SeQura\Core\BusinessLogic\AdminAPI\Response\Response;
 use SeQura\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Requests\PromotionalWidgetsCheckoutRequest;
 use SeQura\Core\BusinessLogic\CheckoutAPI\PromotionalWidgets\Responses\GetWidgetsCheckoutResponse;
@@ -83,35 +84,40 @@ class Widgets_Service implements Interface_Widgets_Service {
 	 * @return WidgetDataArray|null The available widget, or null if cannot be determined
 	 */
 	public function get_widget_for_cart_page(): ?array {
-		try {
-			$country = $this->i18n->get_current_country();
+		$country = $this->i18n->get_current_country();
 
-			/**
-			 * Fetch promotional widget data from CheckoutAPI
-			 *  
-			 * @var WidgetDataArray[] $widgets */
-			$widgets = CheckoutAPI::get()
-			->promotionalWidgets( $this->store_context->getStoreId() )
-			->getAvailableWidgetForCartPage(
-				new PromotionalWidgetsCheckoutRequest(
-					$country,
-					$country,
-					$this->widget_configurator->getCurrency() ?? '',
-					$this->shopper_service->get_ip() 
-				)
+		/**
+		 * Response
+		 * 
+		 * @var Response $response */
+		$response = CheckoutAPI::get()
+		->promotionalWidgets( $this->store_context->getStoreId() )
+		->getAvailableWidgetForCartPage(
+			new PromotionalWidgetsCheckoutRequest(
+				$country,
+				$country,
+				$this->widget_configurator->getCurrency() ?? '',
+				$this->shopper_service->get_ip() 
 			)
-			->toArray();
+		);
 
-			if ( empty( $widgets ) ) {
-				$this->logger->log_info( 'No cart widget available', __FUNCTION__, __CLASS__ );
-				return null;
-			}
-
-			return $widgets[0];
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		if ( ! $response->isSuccessful() ) {
+			$this->logger->log_debug( 'Cannot retrieve cart widget', __FUNCTION__, __CLASS__ );
 			return null;
 		}
+
+		/**
+		 * Promotional widgets
+		 *  
+		 * @var WidgetDataArray[] $widgets */
+		$widgets = $response->toArray();
+
+		if ( empty( $widgets ) ) {
+			$this->logger->log_info( 'No cart widget available', __FUNCTION__, __CLASS__ );
+			return null;
+		}
+
+		return $widgets[0];
 	}
 
 	/**
@@ -120,35 +126,39 @@ class Widgets_Service implements Interface_Widgets_Service {
 	 * @return WidgetDataArray|null The available widget, or null if cannot be determined
 	 */
 	public function get_widget_for_product_listing_page(): ?array {
-		try {
-			$country = $this->i18n->get_current_country();
+		$country = $this->i18n->get_current_country();
 
-			/**
-			 * Fetch promotional widget data from CheckoutAPI
-			 *  
-			 * @var WidgetDataArray[] $widgets */
-			$widgets = CheckoutAPI::get()
-			->promotionalWidgets( $this->store_context->getStoreId() )
-			->getAvailableMiniWidgetForProductListingPage(
-				new PromotionalWidgetsCheckoutRequest(
-					$country,
-					$country,
-					$this->widget_configurator->getCurrency() ?? '',
-					$this->shopper_service->get_ip() 
-				)
+		/**
+		 * Response
+		 *
+		 * @var Response $response */
+		$response = CheckoutAPI::get()
+		->promotionalWidgets( $this->store_context->getStoreId() )
+		->getAvailableMiniWidgetForProductListingPage(
+			new PromotionalWidgetsCheckoutRequest(
+				$country,
+				$country,
+				$this->widget_configurator->getCurrency() ?? '',
+				$this->shopper_service->get_ip() 
 			)
-			->toArray();
+		);
 
-			if ( empty( $widgets ) ) {
-				$this->logger->log_info( 'No product listing widget available', __FUNCTION__, __CLASS__ );
-				return null;
-			}
-
-			return $widgets[0];
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		if ( ! $response->isSuccessful() ) {
+			$this->logger->log_debug( 'Cannot retrieve product listing widget', __FUNCTION__, __CLASS__ );
 			return null;
 		}
+
+		/**
+		 * Promotional widgets
+		 *  
+		 * @var WidgetDataArray[] $widgets */
+		$widgets = $response->toArray();
+		if ( empty( $widgets ) ) {
+			$this->logger->log_info( 'No product listing widget available', __FUNCTION__, __CLASS__ );
+			return null;
+		}
+
+		return $widgets[0];
 	}
 
 	/**
@@ -170,11 +180,12 @@ class Widgets_Service implements Interface_Widgets_Service {
 				$country,
 				$this->widget_configurator->getCurrency() ?? '',
 				$this->shopper_service->get_ip(),
-				$product_id
+				empty( $product_id ) ? '' : $product_id
 			)
 		);
 
 		if ( ! $response->isSuccessful() ) {
+			$this->logger->log_debug( 'Cannot retrieve product page widgets', __FUNCTION__, __CLASS__ );
 			return null;
 		}
 		
@@ -187,24 +198,23 @@ class Widgets_Service implements Interface_Widgets_Service {
 	 * @return WidgetConfigParamsDataArray|null The configuration parameters, or null if cannot be determined
 	 */
 	public function get_widget_config_params(): ?array {
-		try {
-			$country = $this->i18n->get_current_country();
+		$country = $this->i18n->get_current_country();
+		/**
+		 * Response
+		 * 
+		 * @var Response $response
+		 */
+		$response = CheckoutAPI::get()
+		->promotionalWidgets( $this->store_context->getStoreId() )
+		->getPromotionalWidgetInitializeData(
+			new PromotionalWidgetsCheckoutRequest( $country, $country )
+		);
 
-			/**
-			 * Fetch promotional widget data from CheckoutAPI
-			 *  
-			 * @var WidgetConfigParamsDataArray $config */
-			$config = CheckoutAPI::get()
-			->promotionalWidgets( $this->store_context->getStoreId() )
-			->getPromotionalWidgetInitializeData(
-				new PromotionalWidgetsCheckoutRequest( $country, $country )
-			)
-			->toArray();
-
-			return $config;
-		} catch ( \Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		if ( ! $response->isSuccessful() ) {
+			$this->logger->log_debug( 'Cannot retrieve widget configuration parameters', __FUNCTION__, __CLASS__ );
 			return null;
 		}
+
+		return $response->toArray();
 	}
 }

@@ -347,7 +347,8 @@ class Bootstrap extends BootstrapComponent {
 						Reg::getService( Interface_Order_Delivery_Method_Builder::class ),
 						Reg::getService( Interface_Order_Address_Builder::class ),
 						Reg::getService( Interface_Order_Customer_Builder::class ),
-						Reg::getService( CredentialsService::class )
+						Reg::getService( CredentialsService::class ),
+						Reg::getService( SeQuraOrderRepositoryInterface::class )
 					);
 				}
 				return self::$cache[ Interface_Create_Order_Request_Builder::class ];

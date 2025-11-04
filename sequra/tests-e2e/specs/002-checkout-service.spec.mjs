@@ -3,39 +3,43 @@ import DataProvider from '../fixtures/utils/DataProvider.mjs';
 
 test.describe('Service checkout', () => {
 
-  test('Order of virtual product is set as processing after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
+  test('Multiple services order is set as processing after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
-    const uiVersion = DataProvider.UI_BLOCKS;
+    // We use UI_CLASSIC because UI_BLOCKS has issues with missing address fields in Gutenberg checkout.
+    const uiVersion = DataProvider.UI_CLASSIC;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_services_config, checkout_version, set_theme } = helper.webhooks;
+    const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
-      { webhook: dummy_services_config }
+      { webhook: dummy_services_config },
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '1' }] }
     ]);
     const shopper = dataProvider.shopper();
 
     // Execution
-    await productPage.addToCart({ slug: 'album', quantity: 1 });
+    await productPage.addToCart({ slug: 'album', quantity: 2 });
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: false, ...shopper });
-    // await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
+    await checkoutPage.waitForOrderSuccess();
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider, { isOrderForService: true });
     await checkoutPage.expectOrderChangeTo(backOffice, { toStatus: 'Processing' });
   });
 
-  test('Order of virtual & downloadable product is set as completed after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
+  test('Service order of virtual & downloadable product is set as completed after checkout', async ({ helper, dataProvider, productPage, checkoutPage, backOffice }) => {
     // Setup
-    const uiVersion = DataProvider.UI_BLOCKS;
+    // We use UI_CLASSIC because UI_BLOCKS has issues with missing address fields in Gutenberg checkout.
+    const uiVersion = DataProvider.UI_CLASSIC;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_services_config, checkout_version, set_theme } = helper.webhooks;
+    const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
-      { webhook: dummy_services_config }
+      { webhook: dummy_services_config },
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '1' }] }
     ]);
     const shopper = dataProvider.shopper();
 
@@ -43,8 +47,8 @@ test.describe('Service checkout', () => {
     await productPage.addToCart({ slug: 'downloadable-album', quantity: 1 });
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: false, ...shopper });
-    // await checkoutPage.expectPaymentMethodsBeingReloaded();
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
+    await checkoutPage.waitForOrderSuccess();
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider, { isOrderForService: true });
     await checkoutPage.expectOrderChangeTo(backOffice, { toStatus: 'Completed' });
   });

@@ -1,5 +1,4 @@
 import { BackOffice, CheckoutPage as BaseCheckoutPage } from "playwright-fixture-for-plugins";
-// TODO: pending review
 /**
  * Checkout page
  */
@@ -29,9 +28,8 @@ export default class CheckoutPage extends BaseCheckoutPage {
             phone: (isShipping = false) => this.locators.prefixedAddressField(isShipping, 'phone'),
             // flatRateShipping: () => this.page.locator('[value="flatrate_flatrate"]'),
             // continueButton: () => this.page.locator('.action.continue'),
-            submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"])'),
-            // TODO
-            orderRowStatus: orderNumber => this.page.locator(`#order-${orderNumber} .column-order_status`),
+            submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"]),#place_order'),
+            orderRowStatus: orderNumber => this.page.locator(`#post-${orderNumber} .column-order_status, #order-${orderNumber} .column-order_status`),
             orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong')
         };
     }
@@ -65,14 +63,26 @@ export default class CheckoutPage extends BaseCheckoutPage {
         await this.locators.email().fill(email);
         await this.locators.firstName(isShipping).fill(firstName);
         await this.locators.lastName(isShipping).fill(lastName);
-        await this.locators.address1(isShipping).fill(address1);
-        await this.locators.country(isShipping).selectOption(country);
+        // Address1 field might not exist in some setups.
+        if (await this.locators.address1(isShipping).count()) {
+            await this.locators.address1(isShipping).fill(address1);
+        }
+        // Country field might not exist in some setups.
+        if (await this.locators.country(isShipping).count()) {
+            await this.locators.country(isShipping).selectOption(country);
+        }
         // State field might not exist in some countries.
         if (await this.locators.state(isShipping).count()) {
             await this.locators.state(isShipping).selectOption({ label: state });
         }
-        await this.locators.city(isShipping).fill(city);
-        await this.locators.postcode(isShipping).fill(postcode);
+        // City field might not exist in some setups.
+        if (await this.locators.city(isShipping).count()) {
+            await this.locators.city(isShipping).fill(city);
+        }
+        // Postcode field might not exist in some setups.
+        if (await this.locators.postcode(isShipping).count()) {
+            await this.locators.postcode(isShipping).fill(postcode);
+        }
         await this.locators.phone(isShipping).fill(phone);
     }
 
