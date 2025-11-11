@@ -52,6 +52,6 @@
     },
     "prefer-stable": true,
     "require": {
-        "sequra/integration-core": "v3.0.1"
+        "sequra/integration-core": "^3.0.2"
     }
 }
