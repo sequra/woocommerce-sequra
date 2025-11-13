@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.8.3
-Stable tag: 4.1.1
+Stable tag: 4.1.2
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.1.2	=
+* Fixed: Add filter to map custom order ID back to its original value.
+
 = 4.1.1	=
 * Fixed: Show widgets for products not having a SKU.
 
