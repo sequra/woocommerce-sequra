@@ -204,6 +204,12 @@ class Shop_Order_Service implements ShopOrderService {
 	 */
 	private function get_order( Webhook $webhook ): ?WC_Order {
 		$order_id = $this->sequra_order_service->getOrderReference1( $webhook );
+		/**
+		 * Allow reverting modification of the original order ID so it can be retrieved.
+		 *
+		 * @since 4.2.0
+		 */
+		$order_id = apply_filters( 'sequra_order_ref_1_to_wc_order_id', $order_id );
 		$order    = empty( $order_id ) ? null : \wc_get_order( (int) $order_id );
 		
 		if ( ! $order instanceof WC_Order ) {
