@@ -208,6 +208,7 @@ class Shop_Order_Service implements ShopOrderService {
 		 * Allow reverting modification of the original order ID so it can be retrieved.
 		 *
 		 * @since 4.2.0
+		 * @param string|int $order_id The order reference ID from SeQura.
 		 */
 		$order_id = apply_filters( 'sequra_order_ref_1_to_wc_order_id', $order_id );
 		$order    = empty( $order_id ) ? null : \wc_get_order( (int) $order_id );
