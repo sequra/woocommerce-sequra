@@ -101,7 +101,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 Contributors:
 == Changelog ==
 = 4.1.2	=
-* Fixed: Add filter to map custom order ID back to its original value.
+* Fixed: Order not confirmed when a custom ID is in use.
+* Changed: Tested up to WooCommerce 10.3.5.
 
 = 4.1.1	=
 * Fixed: Show widgets for products not having a SKU.
