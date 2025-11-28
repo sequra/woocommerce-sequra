@@ -509,7 +509,14 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 		}
-		
-		return null;
+
+		/**
+		 * Allow changing the country of the shopper.
+		 *
+		 * @since 3.0.7
+		 * @param string|null $country The country code.
+		 * @return string The country code. Must be in ISO-3166-1 alpha-2 format.
+		 */
+		return strval( apply_filters( 'sequra_shopper_country', $this->i18n->get_lang() ) );
 	}
 }
