@@ -102,6 +102,7 @@ Contributors:
 == Changelog ==
 = 4.1.3	=
 * Fixed: Country resolution issues during solicitation process.
+* Fixed: Error displayed on the admin page when a category is named "0".
 
 = 4.1.2	=
 * Fixed: Order not confirmed when a custom ID is in use.
