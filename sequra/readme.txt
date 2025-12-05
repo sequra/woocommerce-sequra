@@ -2,7 +2,7 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.8.3
+Tested up to: 6.9.0
 Stable tag: 4.1.3
 Requires PHP: 7.3
 License: GPL-3.0+
@@ -103,6 +103,7 @@ Contributors:
 = 4.1.3	=
 * Fixed: Country resolution issues during solicitation process.
 * Fixed: Error displayed on the admin page when a category is named "0".
+* Changed: Tested up to WooCommerce 10.3.6 and WordPress 6.9.
 
 = 4.1.2	=
 * Fixed: Order not confirmed when a custom ID is in use.
