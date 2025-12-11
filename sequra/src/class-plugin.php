@@ -82,6 +82,7 @@ class Plugin {
 		REST_Controller $rest_onboarding_controller,
 		REST_Controller $rest_payment_controller,
 		REST_Controller $rest_log_controller,
+		REST_Controller $rest_store_integration_controller,
 		Interface_Product_Controller $product_controller,
 		Interface_Async_Process_Controller $async_process_controller,
 		Interface_Order_Controller $order_controller
@@ -114,6 +115,7 @@ class Plugin {
 		\add_action( 'rest_api_init', array( $rest_onboarding_controller, 'register_routes' ) );
 		\add_action( 'rest_api_init', array( $rest_payment_controller, 'register_routes' ) );
 		\add_action( 'rest_api_init', array( $rest_log_controller, 'register_routes' ) );
+		\add_action( 'rest_api_init', array( $rest_store_integration_controller, 'register_routes' ) );
 
 		// Payment hooks.
 		\add_filter( 'woocommerce_payment_gateways', array( $payment_controller, 'register_gateway_classes' ) );
