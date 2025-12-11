@@ -67,10 +67,10 @@ class Widget_Configurator implements WidgetConfiguratorInterface {
 	}
 
 	/**
-     * Returns an instance of WidgetSettings having the default values.
-     * See SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Models\WidgetSettings::createDefault().
-     */
-    public function getDefaultWidgetSettings(): WidgetSettings {
+	 * Returns an instance of WidgetSettings having the default values.
+	 * See SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Models\WidgetSettings::createDefault().
+	 */
+	public function getDefaultWidgetSettings(): WidgetSettings {
 		return WidgetSettings::createDefault(
 			'.summary .price>.amount,.summary .price ins .amount',
 			'.summary>.price',

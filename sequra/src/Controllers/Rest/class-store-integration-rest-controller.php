@@ -45,8 +45,8 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	) {
 		parent::__construct( $logger, $regex );
 		$this->store_integration_service = $store_integration_service;
-		$this->namespace     = $rest_namespace;
-		$this->rest_base     = $this->store_integration_service->get_rest_base();
+		$this->namespace                 = $rest_namespace;
+		$this->rest_base                 = $this->store_integration_service->get_rest_base();
 	}
 
 	/**
@@ -77,7 +77,7 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	 */
 	public function handle_get( WP_REST_Request $request ) {
 		// todo: implement GET handling.
-		return $this->build_response( new ErrorResponse(new Exception("Not implemented")) );
+		return $this->build_response( new ErrorResponse( new Exception( 'Not implemented' ) ) );
 	}
 
 	/**
@@ -90,6 +90,6 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	 */
 	public function handle_post( WP_REST_Request $request ) {
 		// todo: implement POST handling.
-		return $this->build_response( new ErrorResponse(new Exception("Not implemented")) );
+		return $this->build_response( new ErrorResponse( new Exception( 'Not implemented' ) ) );
 	}
 }
