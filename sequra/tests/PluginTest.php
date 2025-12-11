@@ -38,6 +38,7 @@ class PluginTest extends WP_UnitTestCase {
 	private $rest_onboarding_controller;
 	private $rest_payment_controller;
 	private $rest_log_controller;
+	private $rest_store_integration_controller;
 	private $migration_manager;
 	private $product_controller;
 	private $async_process_controller;
@@ -71,6 +72,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->rest_onboarding_controller = $this->createMock( REST_Controller::class );
 		$this->rest_payment_controller    = $this->createMock( REST_Controller::class );
 		$this->rest_log_controller        = $this->createMock( REST_Controller::class );
+		$this->rest_store_integration_controller        = $this->createMock( REST_Controller::class );
 		$this->product_controller         = $this->createMock( Interface_Product_Controller::class );
 		$this->async_process_controller   = $this->createMock( Interface_Async_Process_Controller::class );
 		$this->order_controller           = $this->createMock( Interface_Order_Controller::class );
@@ -96,6 +98,7 @@ class PluginTest extends WP_UnitTestCase {
 			$this->rest_onboarding_controller,
 			$this->rest_payment_controller,
 			$this->rest_log_controller,
+			$this->rest_store_integration_controller,
 			$this->product_controller,
 			$this->async_process_controller,
 			$this->order_controller
@@ -105,7 +108,7 @@ class PluginTest extends WP_UnitTestCase {
 	public function testConstructor_happyPath_hooksAreRegistered() {
 		$this->setup_plugin_instance();
 
-		$this->assertEquals( 10, has_action( 'plugins_loaded', array( $this->plugin, 'install' ) ) );
+		$this->assertEquals( 10, has_action( 'init', array( $this->plugin, 'install' ) ) );
 		$this->assertEquals( 10, has_action( 'plugins_loaded', array( $this->i18n_controller, 'load_text_domain' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( $this->asset_controller, 'enqueue_admin' ) ) );
 		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $this->asset_controller, 'enqueue_front' ) ) );
@@ -118,6 +121,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_onboarding_controller, 'register_routes' ) ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_payment_controller, 'register_routes' ) ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_log_controller, 'register_routes' ) ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', array( $this->rest_store_integration_controller, 'register_routes' ) ) );
 		
 		$this->assertEquals( 10, has_filter( 'woocommerce_payment_gateways', array( $this->payment_controller, 'register_gateway_classes' ) ) );
 		$this->assertEquals( 10, has_action( 'woocommerce_blocks_loaded', array( $this->payment_controller, 'register_gateway_gutenberg_block' ) ) );
