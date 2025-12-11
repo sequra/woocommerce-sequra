@@ -8,6 +8,7 @@
 namespace SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets;
 
 use SeQura\Core\BusinessLogic\Domain\Integration\PromotionalWidgets\WidgetConfiguratorInterface;
+use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Models\WidgetSettings;
 use SeQura\WC\Services\I18n\Interface_I18n;
 
 /**
@@ -63,5 +64,22 @@ class Widget_Configurator implements WidgetConfiguratorInterface {
 	 */
 	public function getThousandsSeparator(): string {
 		return \wc_get_price_thousand_separator();
+	}
+
+	/**
+	 * Returns an instance of WidgetSettings having the default values.
+	 * See SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Models\WidgetSettings::createDefault().
+	 */
+	public function getDefaultWidgetSettings(): WidgetSettings {
+		return WidgetSettings::createDefault(
+			'.summary .price>.amount,.summary .price ins .amount',
+			'.summary>.price',
+			'.order-total .amount',
+			'.order-total',
+			'.product .price>.amount:first-child,.product .price ins .amount',
+			'.product .price',
+			'.woocommerce-variation-price .price>.amount,.woocommerce-variation-price .price ins .amount',
+			'.variations'
+		);
 	}
 }

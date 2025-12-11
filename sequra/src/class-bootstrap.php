@@ -136,8 +136,11 @@ use SeQura\WC\Services\Platform\Platform_Provider;
 use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use SeQura\WC\Services\Widgets\Widgets_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
+use SeQura\Core\BusinessLogic\Domain\Integration\StoreIntegration\StoreIntegrationServiceInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
+use SeQura\WC\Controllers\Rest\Store_Integration_REST_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreIntegration\Store_Integration_Service;
 use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
 use SeQura\WC\Services\Order\Builder\Order_Address_Builder;
 use SeQura\WC\Services\Order\Builder\Interface_Order_Customer_Builder;
@@ -181,6 +184,7 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Onboarding_REST_Controller::class ),
 					Reg::getService( Payment_REST_Controller::class ),
 					Reg::getService( Log_REST_Controller::class ),
+					Reg::getService( Store_Integration_REST_Controller::class ),
 					Reg::getService( Interface_Product_Controller::class ),
 					Reg::getService( Interface_Async_Process_Controller::class ),
 					Reg::getService( Interface_Order_Controller::class )
@@ -501,6 +505,16 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ DefaultLoggerAdapter::CLASS_NAME ];
+			}
+		);
+		
+		Reg::registerService(
+			StoreIntegrationServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ StoreIntegrationServiceInterface::class ] ) ) {
+					self::$cache[ StoreIntegrationServiceInterface::class ] = new Store_Integration_Service();
+				}
+				return self::$cache[ StoreIntegrationServiceInterface::class ];
 			}
 		);
 
@@ -1063,6 +1077,20 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ Log_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Store_Integration_REST_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Store_Integration_REST_Controller::class ] ) ) {
+					self::$cache[ Store_Integration_REST_Controller::class ] = new Store_Integration_REST_Controller(
+						self::get_constants()->get_plugin_rest_namespace(),
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( StoreIntegrationServiceInterface::class )
+					);
+				}
+				return self::$cache[ Store_Integration_REST_Controller::class ];
 			}
 		);
 	}
