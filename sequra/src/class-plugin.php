@@ -94,7 +94,7 @@ class Plugin {
 		$this->base_name         = $constants->get_plugin_basename();
 		$this->migration_manager = $migration_manager;
 
-		\add_action( 'plugins_loaded', array( $this, 'install' ) );
+		\add_action( 'init', array( $this, 'install' ) );
 
 		// I18n.
 		\add_action( 'plugins_loaded', array( $i18n_controller, 'load_text_domain' ) );
