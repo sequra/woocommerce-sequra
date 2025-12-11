@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "b802e423b6562c9a0b424f1cbad75ee16602fce6"
+                "reference": "a58b811c1e9a5f1c92ec92bac5728b9232d35f55"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/b802e423b6562c9a0b424f1cbad75ee16602fce6",
-                "reference": "b802e423b6562c9a0b424f1cbad75ee16602fce6",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/a58b811c1e9a5f1c92ec92bac5728b9232d35f55",
+                "reference": "a58b811c1e9a5f1c92ec92bac5728b9232d35f55",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                 "issues": "https://github.com/sequra/integration-core/issues",
                 "source": "https://github.com/sequra/integration-core/tree/feature/LIS-90"
             },
-            "time": "2025-12-08T09:33:33+00:00"
+            "time": "2025-12-11T11:01:59+00:00"
         }
     ],
     "packages-dev": [
