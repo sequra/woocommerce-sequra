@@ -12,19 +12,19 @@ use SeQura\Core\BusinessLogic\Domain\Integration\StoreIntegration\StoreIntegrati
 /**
  * Store Integration Extension
  */
-interface Interface_Store_Integration_Service extends StoreIntegrationServiceInterface
-{
-    /**
-     * Returns the REST endpoint.
-     *
-     * @return string
-     */
-    public function get_endpoint(): string;
+interface Interface_Store_Integration_Service extends StoreIntegrationServiceInterface {
 
-    /**
-     * The base of this REST route.
-     *
-     * @return string
-     */
-    public function get_rest_base(): string;
+	/**
+	 * Returns the REST endpoint.
+	 *
+	 * @return string
+	 */
+	public function get_endpoint(): string;
+
+	/**
+	 * The base of this REST route.
+	 *
+	 * @return string
+	 */
+	public function get_rest_base(): string;
 }
