@@ -6,9 +6,6 @@ publish.sh
 .history
 .DS_Store
 .vscode
-woocommerce-sequra/composer.lock
-sequra/composer.lock
-sequra-legacy/composer.lock
 sequra-helper/zip
 node-modules
 e2e-tests/node_modules/*

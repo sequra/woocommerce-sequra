@@ -246,6 +246,7 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 						'username' => 'dummy_automated_tests',
 						'password' => getenv( 'DUMMY_PASSWORD' ),
 					),
+					'integrationId'            => $actual_entity['connectionData']['integrationId'],
 				),
 			);
 		}
