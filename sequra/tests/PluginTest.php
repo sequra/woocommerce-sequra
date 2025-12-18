@@ -62,20 +62,20 @@ class PluginTest extends WP_UnitTestCase {
 		);
 		$this->hook_add_order_indexes = 'hook_add_order_indexes';
 
-		$this->constants                  = $this->createMock( Interface_Constants::class );
-		$this->i18n_controller            = $this->createMock( Interface_I18n_Controller::class );
-		$this->migration_manager          = $this->createMock( Interface_Migration_Manager::class );
-		$this->asset_controller           = $this->createMock( Interface_Assets_Controller::class );
-		$this->settings_controller        = $this->createMock( Interface_Settings_Controller::class );
-		$this->payment_controller         = $this->createMock( Interface_Payment_Controller::class );
-		$this->rest_settings_controller   = $this->createMock( REST_Controller::class );
-		$this->rest_onboarding_controller = $this->createMock( REST_Controller::class );
-		$this->rest_payment_controller    = $this->createMock( REST_Controller::class );
-		$this->rest_log_controller        = $this->createMock( REST_Controller::class );
-		$this->rest_store_integration_controller        = $this->createMock( REST_Controller::class );
-		$this->product_controller         = $this->createMock( Interface_Product_Controller::class );
-		$this->async_process_controller   = $this->createMock( Interface_Async_Process_Controller::class );
-		$this->order_controller           = $this->createMock( Interface_Order_Controller::class );
+		$this->constants                         = $this->createMock( Interface_Constants::class );
+		$this->i18n_controller                   = $this->createMock( Interface_I18n_Controller::class );
+		$this->migration_manager                 = $this->createMock( Interface_Migration_Manager::class );
+		$this->asset_controller                  = $this->createMock( Interface_Assets_Controller::class );
+		$this->settings_controller               = $this->createMock( Interface_Settings_Controller::class );
+		$this->payment_controller                = $this->createMock( Interface_Payment_Controller::class );
+		$this->rest_settings_controller          = $this->createMock( REST_Controller::class );
+		$this->rest_onboarding_controller        = $this->createMock( REST_Controller::class );
+		$this->rest_payment_controller           = $this->createMock( REST_Controller::class );
+		$this->rest_log_controller               = $this->createMock( REST_Controller::class );
+		$this->rest_store_integration_controller = $this->createMock( REST_Controller::class );
+		$this->product_controller                = $this->createMock( Interface_Product_Controller::class );
+		$this->async_process_controller          = $this->createMock( Interface_Async_Process_Controller::class );
+		$this->order_controller                  = $this->createMock( Interface_Order_Controller::class );
 	}
 
 	private function setup_plugin_instance() {
