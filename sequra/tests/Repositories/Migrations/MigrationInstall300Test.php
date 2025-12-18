@@ -288,7 +288,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 					'username' => 'dummy_automated_tests',
 					'password' => getenv( 'DUMMY_PASSWORD' ),
 				),
-				'integrationId' => $actual_array['connectionData']['integrationId'],
+				'integrationId'            => $actual_array['connectionData']['integrationId'],
 			),
 		);
 		$this->assertSame( $expected_array, $actual_array );
