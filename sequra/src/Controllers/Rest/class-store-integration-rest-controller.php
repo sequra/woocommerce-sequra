@@ -56,7 +56,6 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	 */
 	public function register_routes() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		$this->register_get( $this->store_integration_service->get_endpoint(), 'handle_get', array(), 'check_permissions' );
 		$this->register_post( $this->store_integration_service->get_endpoint(), 'handle_post', array(), 'check_permissions' );
 	}
 
@@ -66,18 +65,6 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	public function check_permissions(): bool {
 		// TODO: implement permission checks.
 		return true;
-	}
-
-	/**
-	 * Handle GET request.
-	 * 
-	 * @param WP_REST_Request $request The request.
-	 * 
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function handle_get( WP_REST_Request $request ) {
-		// todo: implement GET handling.
-		return $this->build_response( new ErrorResponse( new Exception( 'Not implemented' ) ) );
 	}
 
 	/**
