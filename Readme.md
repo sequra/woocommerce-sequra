@@ -250,15 +250,15 @@ Add this configuration to project workspace's settings:
 
 First, install NPM on your local machine (NVM is recommended) (See system requirements at: https://playwright.dev/docs/intro#system-requirements).
 
-Then, Install required Node packages by running the following command from the root directory:
+Then, install required Node packages by running the following command from the root directory – if you haven't done it yet:
 
 ```bash
-npx playwright install
+bin/npm install
 ```
-Last, install browsers using this command:
+Last, install browsers using this command from the `sequra/` directory:
 
 ```bash
-npx playwright install
+npx playwright install --with-deps
 ```
 
 ### Usage
