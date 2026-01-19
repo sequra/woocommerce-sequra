@@ -250,7 +250,7 @@ Add this configuration to project workspace's settings:
 
 First, install NPM on your local machine (NVM is recommended) (See system requirements at: https://playwright.dev/docs/intro#system-requirements).
 
-Then, install required Node packages by running the following command from the root directory – if you don't did it yet:
+Then, install required Node packages by running the following command from the root directory – if you haven't done it yet:
 
 ```bash
 bin/npm install
