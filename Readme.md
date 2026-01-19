@@ -250,6 +250,13 @@ Add this configuration to project workspace's settings:
 
 First, install NPM on your local machine (NVM is recommended) (See system requirements at: https://playwright.dev/docs/intro#system-requirements).
 
+Install Node 24 LTS version using NVM:
+
+```bash
+nvm install v24 && \
+nvm use v24
+```
+
 Then, install required Node packages by running the following command from the root directory – if you haven't done it yet:
 
 ```bash
@@ -258,7 +265,14 @@ bin/npm install
 Last, install browsers using this command from the `sequra/` directory:
 
 ```bash
-npx playwright install --with-deps
+cd sequra && \
+npx playwright install chromium chromium-headless-shell chromium-tip-of-tree-headless-shell --with-deps --force
+```
+
+> [!IMPORTANT]
+> If you face any issue with the installation of the browsers, try to remove the cached packages and retry the installation command again. To remove the cached packages, run the following command:
+```bash
+rm -rf ~/Library/Caches/ms-playwright 
 ```
 
 ### Usage
