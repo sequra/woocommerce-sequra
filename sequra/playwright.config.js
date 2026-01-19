@@ -40,45 +40,9 @@ module.exports = defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'checkout-product',
+      name: 'chromium',
       use: { ...devices['Desktop Chromium'] },
-      testMatch: '001-checkout-product.spec.mjs',
     },
-    {
-      name: 'checkout-service',
-      use: { ...devices['Desktop Chromium'] },
-      testMatch: '002-checkout-service.spec.mjs',
-    },
-    {
-      name: 'configuration-onboarding',
-      use: { ...devices['Desktop Chromium'] },
-      testMatch: '003-configuration-onboarding.spec.mjs',
-    },
-    {
-      name: 'configuration-payment-methods',
-      use: { ...devices['Desktop Chromium'] },
-      testMatch: '004-configuration-payment-methods.spec.mjs',
-    },
-    {
-      name: 'configuration-advanced',
-      use: { ...devices['Desktop Chromium'] },
-      testMatch: '005-configuration-advanced.spec.mjs',
-    },
-    {
-      name: 'configuration-general',
-      use: { ...devices['Desktop Chromium'] },
-      testMatch: '006-configuration-general.spec.mjs',
-    },
-    {
-      name: 'configuration-connection',
-      use: { ...devices['Desktop Chromium'] },
-      testMatch: '007-configuration-connection.spec.mjs',
-    },
-    {
-      name: 'configuration-widget',
-      use: { ...devices['Desktop Chromium'] },
-      testMatch: '008-configuration-widget.spec.mjs',
-    }
   ],
 });
 
