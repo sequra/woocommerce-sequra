@@ -266,7 +266,7 @@ Last, install browsers using this command from the `sequra/` directory:
 
 ```bash
 cd sequra && \
-npx playwright install chromium chromium-headless-shell chromium-tip-of-tree-headless-shell --with-deps --force
+npx playwright install chromium chromium-headless-shell --with-deps --force
 ```
 
 > [!IMPORTANT]
