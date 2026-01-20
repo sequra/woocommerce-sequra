@@ -11,3 +11,8 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${NGROK_CONTAINER_NAME}$"; the
   docker rm -f $NGROK_CONTAINER_NAME > /dev/null 2>&1
   echo " ${GREEN}✔${NC} Ngrok container removed"
 fi
+
+if docker ps -a --format '{{.Names}}' | grep -q "^${CLOUDFLARED_CONTAINER_NAME}$"; then
+  docker rm -f $CLOUDFLARED_CONTAINER_NAME > /dev/null 2>&1
+  echo " ${GREEN}✔${NC} Cloudflared container removed"
+fi
