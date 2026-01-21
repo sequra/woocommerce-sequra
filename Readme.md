@@ -28,11 +28,11 @@ This repository contains the plugin seQura Payment Gateway for WooCommerce.
   - [Running with VSCode](#running-with-vscode)
 - [End to end Tests](#end-to-end-tests)
   - [Tunnel requirements](#tunnel-requirements)
-	- [Ngrok setup notes](#ngrok-setup-notes)
-	- [Cloudflared setup notes](#cloudflared-setup-notes)
+  - [Ngrok setup notes](#ngrok-setup-notes)
+  - [Cloudflared setup notes](#cloudflared-setup-notes)
   - [Installation](#installation)
   - [Usage](#usage)
-	- [Running using UI mode](#running-using-ui-mode)
+  - [Running using UI mode](#running-using-ui-mode)
 
 ## How to use
 
