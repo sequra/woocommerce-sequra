@@ -31,50 +31,18 @@ module.exports = defineConfig({
     baseURL: process.env.PUBLIC_URL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    /* Add ngrok-skip-browser-warning header to all HTTP requests */
+    extraHTTPHeaders: {
+      'ngrok-skip-browser-warning': '1',
+    },
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'checkout-product',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '001-checkout-product.spec.mjs',
+      name: 'chromium',
+      use: { ...devices['Desktop Chromium'] },
     },
-    {
-      name: 'checkout-service',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '002-checkout-service.spec.mjs',
-    },
-    {
-      name: 'configuration-onboarding',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '003-configuration-onboarding.spec.mjs',
-    },
-    {
-      name: 'configuration-payment-methods',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '004-configuration-payment-methods.spec.mjs',
-    },
-    {
-      name: 'configuration-advanced',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '005-configuration-advanced.spec.mjs',
-    },
-    {
-      name: 'configuration-general',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '006-configuration-general.spec.mjs',
-    },
-    {
-      name: 'configuration-connection',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '007-configuration-connection.spec.mjs',
-    },
-    {
-      name: 'configuration-widget',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: '008-configuration-widget.spec.mjs',
-    }
   ],
 });
 

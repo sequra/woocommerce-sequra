@@ -5,19 +5,28 @@ fi
 
 install=0
 ngrok=0
+cloudflared=0
 
 # Parse arguments:
 # --install: Installation of dependencies
 # --ngrok: Use ngrok to expose the site
 # --ngrok-token=YOUR_NGROK_TOKEN: Override the ngrok token in .env
+# --cloudflared: Use cloudflared to expose the site
+# --cloudflared-token=YOUR_CLOUDFLARED_TOKEN: Override the cloudflared token in .env
 while [[ "$#" -gt 0 ]]; do
     if [ "$1" == "--install" ]; then
         install=1
     elif [ "$1" == "--ngrok" ]; then
         ngrok=1
+    elif [ "$1" == "--cloudflared" ]; then
+        cloudflared=1
     elif [[ "$1" == --ngrok-token=* ]]; then
         ngrok_token="${1#*=}"
         sed -i.bak "s|NGROK_AUTHTOKEN=.*|NGROK_AUTHTOKEN=$ngrok_token|" .env
+        rm .env.bak
+    elif [[ "$1" == --cloudflared-token=* ]]; then
+        cloudflared_token="${1#*=}"
+        sed -i.bak "s|CLOUDFLARED_TUNNEL_TOKEN=.*|CLOUDFLARED_TUNNEL_TOKEN=$cloudflared_token|" .env
         rm .env.bak
     fi
     shift
@@ -38,7 +47,11 @@ if [ $ngrok -eq 1 ]; then
         exit 1
     fi
     
-    echo "🚀 Starting ngrok..."
+    echo "🔗 Starting ngrok tunnel..."
+
+    if [ -z "$NGROK_CONTAINER_NAME" ]; then
+        NGROK_CONTAINER_NAME=woocommerce-sequra-ngrok
+    fi
 
     docker run -d -e NGROK_AUTHTOKEN=$NGROK_AUTHTOKEN \
         -p $NGROK_PORT:4040 \
@@ -66,6 +79,36 @@ if [ $ngrok -eq 1 ]; then
     rm .env.bak
 
     echo "✅ Ngrok started. Public URL: $WP_URL"
+elif [ $cloudflared -eq 1 ]; then
+    
+    if [ -z "$CLOUDFLARED_TUNNEL_TOKEN" ]; then
+        echo "❌ Please set CLOUDFLARED_TUNNEL_TOKEN with your cloudflared tunnel token in your .env file (get it from https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/)"
+        exit 1
+    fi
+
+    if [ -z "$CLOUDFLARED_TUNNEL_URL" ]; then
+        echo "❌ Please set CLOUDFLARED_TUNNEL_URL with your cloudflared tunnel URL in your .env file"
+        exit 1
+    fi
+
+    echo "🔗 Starting cloudflared tunnel..."
+
+    if [ -z "$CLOUDFLARED_CONTAINER_NAME" ]; then
+        CLOUDFLARED_CONTAINER_NAME=woocommerce-sequra-cloudflared
+    fi
+
+    docker run -d \
+        --name $CLOUDFLARED_CONTAINER_NAME \
+        --add-host=host:host-gateway \
+        cloudflare/cloudflared:latest \
+        tunnel --no-autoupdate run --token $CLOUDFLARED_TUNNEL_TOKEN
+
+     # Overwrite PUBLIC_URL inside .env
+    WP_URL=$CLOUDFLARED_TUNNEL_URL
+    sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=$WP_URL|" .env
+    rm .env.bak
+
+    echo "✅ Cloudflared started. Public URL: $WP_URL"
 fi
 
 if [ $install -eq 1 ]; then
