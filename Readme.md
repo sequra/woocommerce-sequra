@@ -343,10 +343,27 @@ npx playwright install chromium chromium-headless-shell --with-deps --force
 
 The `chromium` browser is used for standard Playwright runs, while `chromium-headless-shell` matches the headless Chromium build used in the official Playwright Docker image. The `--with-deps` flag installs any system dependencies Playwright needs. The `--force` flag forces Playwright to re-download the specified browsers instead of relying on any cached versions; you can omit it for a first-time install, but it is useful if a previous download is corrupted or out of date.
 > [!IMPORTANT]
-> If you face any issue with the installation of the browsers (for example, due to a corrupted cached download), try to remove the cached packages and retry the installation command again (optionally keeping the `--force` flag to ensure a fresh download). To remove the cached packages, run the following command:
-```bash
-rm -rf ~/Library/Caches/ms-playwright 
-```
+> If you face any issue with the installation of the browsers (for example, due to a corrupted cached download), try to remove the cached packages and retry the installation command again (optionally keeping the `--force` flag to ensure a fresh download). To remove the cached packages, run the following command based on your operating system:
+>
+> **macOS:**
+> ```bash
+> rm -rf ~/Library/Caches/ms-playwright
+> ```
+>
+> **Linux:**
+> ```bash
+> rm -rf ~/.cache/ms-playwright
+> ```
+>
+> **Windows (PowerShell):**
+> ```powershell
+> Remove-Item -Recurse -Force $env:USERPROFILE\AppData\Local\ms-playwright
+> ```
+>
+> **Windows (Command Prompt):**
+> ```cmd
+> rmdir /s /q %USERPROFILE%\AppData\Local\ms-playwright
+> ```
 
 ### Usage
 
