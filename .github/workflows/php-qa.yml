@@ -32,7 +32,7 @@ jobs:
   # 2. Install composer dependencies
   # ---------------------------------
   composer-install:
-    name: Composer install (${{ matrix.directory }})
+    name: Install Composer dependencies
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
