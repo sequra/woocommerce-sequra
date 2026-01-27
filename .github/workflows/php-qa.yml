@@ -1,0 +1,29 @@
+name: PHP Quality Assurance
+
+on:
+  push: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: php-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # ---------------------------------
+  # 1. Syntax check across PHP versions
+  # ---------------------------------
+  syntax-lint:
+    name: PHP ${{ matrix.php }} syntax check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint PHP files
+        run: bin/php-syntax-check --php=${{ matrix.php }}
