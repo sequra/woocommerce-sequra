@@ -23,7 +23,34 @@ jobs:
         php: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Lint PHP files
         run: bin/php-syntax-check --php=${{ matrix.php }}
+
+  # ---------------------------------
+  # 2. Install composer dependencies
+  # ---------------------------------
+  composer-install:
+    name: Install ${{ matrix.directory }} composer dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        directory: ['sequra', 'sequra-helper']
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: ${{ matrix.directory }}-composer-cache
+        with:
+          path: |
+            ${{ matrix.directory }}/vendor
+            ${{ matrix.directory }}/composer.lock
+          key: ${{ matrix.directory }}-composer-cache-${{ hashFiles('${{ matrix.directory }}/composer.lock') }}
+
+      - name: Install dependencies
+        if: steps.${{ matrix.directory }}-composer-cache.outputs.cache-hit != 'true'
+        run: |
+          docker run --rm -v ${{ matrix.directory }}:/app -w /app composer:latest composer install --quiet --no-interaction"
