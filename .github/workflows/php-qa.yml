@@ -31,26 +31,42 @@ jobs:
   # ---------------------------------
   # 2. Install composer dependencies
   # ---------------------------------
-  composer-install:
-    name: Install Composer dependencies
+  composer-install-sequra:
+    name: Install Composer dependencies (sequra)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        directory: ['sequra', 'sequra-helper']
 
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions/cache@v5
-        id: ${{ matrix.directory }}-composer-cache
+        id: sequra-composer-cache
         with:
           path: |
-            ${{ matrix.directory }}/vendor
-            ${{ matrix.directory }}/composer.lock
-          key: ${{ matrix.directory }}-composer-cache-${{ hashFiles('${{ matrix.directory }}/composer.lock') }}
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
 
       - name: Install dependencies
-        if: steps.${{ matrix.directory }}-composer-cache.outputs.cache-hit != 'true'
+        if: steps.sequra-composer-cache.outputs.cache-hit != 'true'
         run: |
-          docker run --rm -v ${{ matrix.directory }}:/app -w /app composer:latest composer install --quiet --no-interaction
+          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app composer:latest composer install --quiet --no-interaction
+
+  composer-install-sequra-helper:
+    name: Install Composer dependencies (sequra-helper)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-helper-composer-cache
+        with:
+          path: |
+            sequra-helper/vendor
+            sequra-helper/composer.lock
+          key: sequra-helper-composer-cache-${{ hashFiles('sequra-helper/composer.lock') }}
+
+      - name: Install dependencies
+        if: steps.sequra-helper-composer-cache.outputs.cache-hit != 'true'
+        run: |
+          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app composer:latest composer install --quiet --no-interaction
