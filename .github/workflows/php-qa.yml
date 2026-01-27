@@ -32,7 +32,7 @@ jobs:
   # 2. Install composer dependencies
   # ---------------------------------
   composer-install:
-    name: Install ${{ matrix.directory }} composer dependencies
+    name: Composer install (${{ matrix.directory }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -53,4 +53,4 @@ jobs:
       - name: Install dependencies
         if: steps.${{ matrix.directory }}-composer-cache.outputs.cache-hit != 'true'
         run: |
-          docker run --rm -v ${{ matrix.directory }}:/app -w /app composer:latest composer install --quiet --no-interaction"
+          docker run --rm -v ${{ matrix.directory }}:/app -w /app composer:latest composer install --quiet --no-interaction
