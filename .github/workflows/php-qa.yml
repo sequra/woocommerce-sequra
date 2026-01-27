@@ -53,11 +53,11 @@ jobs:
 
       - name: PHPCS
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpcs $@ --standard=.phpcs.xml.dist .
+          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
       
       - name: PHPStan
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon $@ --memory-limit=1G
+          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G
 
   code-quality-sequra-helper:
     name: Composer Install + PHPCS + PHPStan (sequra-helper)
@@ -81,8 +81,8 @@ jobs:
       
       - name: PHPCS
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpcs $@ --standard=.phpcs.xml.dist .
+          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
       
       - name: PHPStan
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon $@ --memory-limit=1G
+          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app -u $(id -u):$(id -g) php:cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G
