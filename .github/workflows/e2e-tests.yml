@@ -138,7 +138,7 @@ jobs:
           DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
           DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
           DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
-          PUBLIC_URL: http://localhost:8080
+          PUBLIC_URL: http://host:8080
         run: |
           cp .env.sample .env
           sed -i "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env
@@ -149,4 +149,4 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          docker run --env-file .env --rm -v ${{ github.workspace }}/sequra:/app -w /app mcr.microsoft.com/playwright:v1.57.0 bash -c "npx playwright test ${{ matrix.suite }} --reporter=dot" 
+          docker run --add-host=host:host-gateway --env-file .env --rm -v ${{ github.workspace }}/sequra:/app -w /app mcr.microsoft.com/playwright:v1.57.0 bash -c "npx playwright test ${{ matrix.suite }} --reporter=dot" 
