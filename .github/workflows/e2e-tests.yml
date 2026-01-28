@@ -85,7 +85,129 @@ jobs:
         run: |
           npx playwright install chromium-headless-shell --with-deps
 
-  checkout-tests:
+  tests-001:
+    needs: [composer, npm, install-browsers]
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use vendor cache
+        uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+
+      - name: Use node_modules cache
+        uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: Use assets cache
+        uses: actions/cache@v5
+        id: sequra-assets-cache
+        with:
+          path: |
+            sequra/assets
+          key: sequra-assets-cache-${{ github.run_id }}
+      
+      - name: Use Playwright browsers cache 
+        uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Setup the environment
+        env:
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+          CLOUDFLARED_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARED_TUNNEL_TOKEN_001 }}
+          CLOUDFLARED_TUNNEL_URL: ${{ secrets.CLOUDFLARED_TUNNEL_URL_001 }}
+        run: |
+          cp .env.sample .env
+          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
+          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
+          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          sed -i "s/^CLOUDFLARED_TUNNEL_TOKEN=.*/CLOUDFLARED_TUNNEL_TOKEN=$CLOUDFLARED_TUNNEL_TOKEN/" .env
+          sed -i "s/^CLOUDFLARED_TUNNEL_URL=.*/CLOUDFLARED_TUNNEL_URL=$CLOUDFLARED_TUNNEL_URL/" .env
+          ./setup.sh --cloudflared
+
+      - name: Run Checkout tests
+        run: bin/playwright 001
+
+  tests-002:
+    needs: [composer, npm, install-browsers]
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use vendor cache
+        uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+
+      - name: Use node_modules cache
+        uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: Use assets cache
+        uses: actions/cache@v5
+        id: sequra-assets-cache
+        with:
+          path: |
+            sequra/assets
+          key: sequra-assets-cache-${{ github.run_id }}
+      
+      - name: Use Playwright browsers cache 
+        uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Setup the environment
+        env:
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+          CLOUDFLARED_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARED_TUNNEL_TOKEN_002 }}
+          CLOUDFLARED_TUNNEL_URL: ${{ secrets.CLOUDFLARED_TUNNEL_URL_002 }}
+        run: |
+          cp .env.sample .env
+          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
+          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
+          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          sed -i "s/^CLOUDFLARED_TUNNEL_TOKEN=.*/CLOUDFLARED_TUNNEL_TOKEN=$CLOUDFLARED_TUNNEL_TOKEN/" .env
+          sed -i "s/^CLOUDFLARED_TUNNEL_URL=.*/CLOUDFLARED_TUNNEL_URL=$CLOUDFLARED_TUNNEL_URL/" .env
+          ./setup.sh --cloudflared
+
+      - name: Run Checkout tests
+        run: bin/playwright 002
+
+  tests-003:
     needs: [composer, npm, install-browsers]
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
@@ -140,9 +262,9 @@ jobs:
           ./setup.sh
 
       - name: Run Checkout tests
-        run: bin/playwright checkout
+        run: bin/playwright 003
 
-  configuration-tests:
+  tests-004:
     needs: [composer, npm, install-browsers]
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
@@ -196,5 +318,5 @@ jobs:
           sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
           ./setup.sh
 
-      - name: Run Configuration tests
-        run: bin/playwright configuration
+      - name: Run Checkout tests
+        run: bin/playwright 004
