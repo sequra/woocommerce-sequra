@@ -154,11 +154,11 @@ jobs:
           CLOUDFLARED_TUNNEL_URL: ${{ secrets[matrix.tunnel_url_secret] }}
         run: |
           cp .env.sample .env
-          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
-          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
-          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
-          sed -i "s/^CLOUDFLARED_TUNNEL_TOKEN=.*/CLOUDFLARED_TUNNEL_TOKEN=$CLOUDFLARED_TUNNEL_TOKEN/" .env
-          sed -i "s/^CLOUDFLARED_TUNNEL_URL=.*/CLOUDFLARED_TUNNEL_URL=$CLOUDFLARED_TUNNEL_URL/" .env
+          sed -i "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env
+          sed -i "s|^DUMMY_PASSWORD=.*|DUMMY_PASSWORD=$DUMMY_PASSWORD|" .env
+          sed -i "s|^DUMMY_SERVICE_PASSWORD=.*|DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD|" .env
+          sed -i "s|^CLOUDFLARED_TUNNEL_TOKEN=.*|CLOUDFLARED_TUNNEL_TOKEN=$CLOUDFLARED_TUNNEL_TOKEN|" .env
+          sed -i "s|^CLOUDFLARED_TUNNEL_URL=.*|CLOUDFLARED_TUNNEL_URL=$CLOUDFLARED_TUNNEL_URL|" .env
           ./setup.sh --cloudflared
 
       - name: Setup the environment (without cloudflared)
@@ -169,9 +169,9 @@ jobs:
           DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
         run: |
           cp .env.sample .env
-          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
-          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
-          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          sed -i "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env
+          sed -i "s|^DUMMY_PASSWORD=.*|DUMMY_PASSWORD=$DUMMY_PASSWORD|" .env
+          sed -i "s|^DUMMY_SERVICE_PASSWORD=.*|DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD|" .env
           ./setup.sh
 
       - name: Run E2E tests
