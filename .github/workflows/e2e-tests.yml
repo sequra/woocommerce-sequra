@@ -1,0 +1,200 @@
+name: E2E tests
+
+on:
+  pull_request:
+    types: [synchronize]
+
+concurrency:
+  group: e2e-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  composer:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+
+      - name: Composer install
+        if: steps.sequra-composer-cache.outputs.cache-hit != 'true'
+        run: |
+          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app composer:latest composer install --quiet --no-interaction
+
+  npm:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: NPM install
+        if: steps.sequra-npm-cache.outputs.cache-hit != 'true'
+        run: bin/npm install --no-progress --silent --no-update-notifier
+
+      - uses: actions/cache@v5
+        id: sequra-assets-cache
+        with:
+          path: |
+            sequra/assets
+          key: sequra-assets-cache-${{ github.run_id }}
+      
+      - name: Build Assets
+        if: steps.sequra-assets-cache.outputs.cache-hit != 'true'
+        run: bin/npm run build --no-progress --silent --no-update-notifier
+
+  install-browsers:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    needs: [npm]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Install Playwright Browsers
+        run: |
+          npx playwright install chromium-headless-shell --with-deps
+
+  checkout-tests:
+    needs: [composer, npm, install-browsers]
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use vendor cache
+        uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+
+      - name: Use node_modules cache
+        uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: Use assets cache
+        uses: actions/cache@v5
+        id: sequra-assets-cache
+        with:
+          path: |
+            sequra/assets
+          key: sequra-assets-cache-${{ github.run_id }}
+      
+      - name: Use Playwright browsers cache 
+        uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Setup the environment
+        env:
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+        run: |
+          cp .env.sample .env
+          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
+          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
+          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          ./setup.sh
+
+      - name: Run Checkout tests
+        run: bin/playwright checkout
+
+  configuration-tests:
+    needs: [composer, npm, install-browsers]
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use vendor cache
+        uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+
+      - name: Use node_modules cache
+        uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: Use assets cache
+        uses: actions/cache@v5
+        id: sequra-assets-cache
+        with:
+          path: |
+            sequra/assets
+          key: sequra-assets-cache-${{ github.run_id }}
+      
+      - name: Use Playwright browsers cache 
+        uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Setup the environment
+        env:
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+        run: |
+          cp .env.sample .env
+          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
+          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
+          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          ./setup.sh
+
+      - name: Run Configuration tests
+        run: bin/playwright configuration
