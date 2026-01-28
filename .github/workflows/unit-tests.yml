@@ -1,0 +1,93 @@
+name: Unit tests
+
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - '**.php'
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  composer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+
+      - name: Composer install
+        if: steps.sequra-composer-cache.outputs.cache-hit != 'true'
+        run: |
+          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app composer:latest composer install --quiet --no-interaction
+
+  npm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: NPM install
+        if: steps.sequra-npm-cache.outputs.cache-hit != 'true'
+        run: bin/npm install --no-progress --silent --no-update-notifier
+
+      - name: Build Assets
+        run: bin/npm run build --no-progress --silent --no-update-notifier
+
+  phpunit:
+    needs: [composer, npm]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+      
+      - uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Setup the environment
+        env:
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+        run: |
+          cp .env.sample .env
+          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
+          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
+          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          ./setup.sh
+
+      - name: Setup the tests
+        run: docker compose exec web /usr/local/bin/setup-tests.sh
+
+      - name: Run the tests
+        run: docker compose exec web /usr/local/bin/run-tests.sh
