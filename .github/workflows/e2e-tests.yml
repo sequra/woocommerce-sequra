@@ -175,4 +175,5 @@ jobs:
           ./setup.sh
 
       - name: Run E2E tests
-        run: bin/playwright ${{ matrix.suite }}
+        run: |
+          docker run --env-file .env --rm -v ${{ github.workspace }}/sequra:/app -w /app mcr.microsoft.com/playwright:v1.57.0 bash -c "npx playwright test ${{ matrix.suite }}"
