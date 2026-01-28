@@ -182,6 +182,9 @@ jobs:
           ./setup.sh
 
       - name: Run E2E tests
-        run: |  
+        run: |
+          set -a
+          source .env
+          set +a  
           cd sequra
           npx playwright test ${{ matrix.suite }}
