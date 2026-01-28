@@ -7,6 +7,11 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 // require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
+const extraHTTPHeaders = {};
+if (process.env.PUBLIC_URL.includes('ngrok')) {
+  extraHTTPHeaders['ngrok-skip-browser-warning'] = '1';
+}
+
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
@@ -18,8 +23,7 @@ module.exports = defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  // retries: process.env.CI ? 1 : 0,
-  retries: 0,
+  retries: 1,
   /* Opt out of parallel tests on CI. */
   // workers: process.env.CI ? 1 : undefined,
   workers: 1,
@@ -32,9 +36,7 @@ module.exports = defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     /* Add ngrok-skip-browser-warning header to all HTTP requests */
-    extraHTTPHeaders: {
-      'ngrok-skip-browser-warning': '1',
-    },
+    extraHTTPHeaders: extraHTTPHeaders,
   },
 
   /* Configure projects for major browsers */
