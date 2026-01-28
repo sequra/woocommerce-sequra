@@ -6,6 +6,7 @@ fi
 install=0
 ngrok=0
 cloudflared=0
+build=1
 
 # Parse arguments:
 # --install: Installation of dependencies
@@ -13,6 +14,7 @@ cloudflared=0
 # --ngrok-token=YOUR_NGROK_TOKEN: Override the ngrok token in .env
 # --cloudflared: Use cloudflared to expose the site
 # --cloudflared-token=YOUR_CLOUDFLARED_TOKEN: Override the cloudflared token in .env
+# --skip-build: Skip the build step
 while [[ "$#" -gt 0 ]]; do
     if [ "$1" == "--install" ]; then
         install=1
@@ -28,6 +30,8 @@ while [[ "$#" -gt 0 ]]; do
         cloudflared_token="${1#*=}"
         sed -i.bak "s|CLOUDFLARED_TUNNEL_TOKEN=.*|CLOUDFLARED_TUNNEL_TOKEN=$cloudflared_token|" .env
         rm .env.bak
+    elif [ "$1" == "--skip-build" ]; then
+        build=0
     fi
     shift
 done
@@ -119,7 +123,14 @@ else
     echo "Skipping installation of dependencies."   
 fi
 
-docker compose up -d --build || exit 1
+if [ $build -eq 1 ]; then
+    echo "🔨 Building Docker images..."
+    docker compose build || exit 1
+else
+    echo "Skipping Docker build step."
+fi
+
+docker compose up -d || exit 1
 
 echo "🚀 Waiting for installation to complete..."
 
