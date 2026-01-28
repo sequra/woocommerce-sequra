@@ -151,6 +151,11 @@ jobs:
             ~/.cache/ms-playwright
           key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
 
+      - name: Prepare test results directory
+        run: |
+          rm -rf sequra/test-results
+          mkdir -p sequra/test-results
+
       - name: Setup the environment (with cloudflared)
         if: matrix.cloudflared == true
         env:
@@ -182,13 +187,6 @@ jobs:
           sed -i "s|^DUMMY_SERVICE_PASSWORD=.*|DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD|" .env
           sed -i "s|^PUBLIC_URL=.*|PUBLIC_URL=$PUBLIC_URL|" .env
           ./setup.sh
-
-      - name: Prepare test results directory
-        run: |
-          cd sequra
-          rm -rf test-results
-          mkdir -p test-results
-          chmod 755 test-results
 
       - name: Run E2E tests
         run: |
