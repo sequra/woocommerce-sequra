@@ -64,36 +64,8 @@ jobs:
           cd sequra
           npm run build --silent --no-progress --no-update-notifier
 
-  install-browsers:
-    runs-on: ubuntu-latest
-    #if: github.event.pull_request.draft == false
-    needs: [npm]
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/cache@v5
-        id: sequra-npm-cache
-        with:
-          path: |
-            sequra/node_modules
-          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
-
-      - uses: actions/cache@v5
-        id: playwright-browser-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
-
-      - name: Install Playwright Browsers
-        if: steps.playwright-browser-cache.outputs.cache-hit != 'true'
-        run: |
-          cd sequra
-          npx playwright install chromium-headless-shell --with-deps
-
   e2e-tests:
-    needs: [composer, npm, install-browsers]
+    needs: [composer, npm]
     runs-on: ubuntu-latest
     #if: github.event.pull_request.draft == false
     
@@ -142,19 +114,6 @@ jobs:
           path: |
             sequra/assets
           key: sequra-assets-cache-${{ github.run_id }}
-      
-      - name: Use Playwright browsers cache 
-        uses: actions/cache@v5
-        id: playwright-browser-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
-
-      - name: Prepare test results directory
-        run: |
-          rm -rf sequra/test-results
-          mkdir -p sequra/test-results
 
       - name: Setup the environment (with cloudflared)
         if: matrix.cloudflared == true
@@ -190,8 +149,4 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          set -a
-          source .env
-          set +a  
-          cd sequra
-          npx playwright test ${{ matrix.suite }}
+          docker run --env-file .env --rm -v ${{ github.workspace }}/sequra:/app -w /app mcr.microsoft.com/playwright:v1.57.0 bash -c "npx playwright test ${{ matrix.suite }} --reporter=dot" 
