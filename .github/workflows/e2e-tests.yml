@@ -89,6 +89,7 @@ jobs:
       - name: Install Playwright Browsers
         if: steps.playwright-browser-cache.outputs.cache-hit != 'true'
         run: |
+          cd sequra
           npx playwright install chromium-headless-shell --with-deps
 
   e2e-tests:
