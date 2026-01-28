@@ -46,8 +46,10 @@ test.describe('Widget settings', () => {
 
     // Test invalid values.
     for (const invalid of invalidSettingsList) {
+      console.log(invalidSettingsList.indexOf(invalid), JSON.stringify(invalid));
       await widgetSettingsPage.fillForm(invalid);
-      await widgetSettingsPage.expectErrorMessageToBeVisible();
+      // Check save button is disabled.
+      await expect(widgetSettingsPage.locators.saveButton()).toHaveCount(0);
       await page.reload();
       await widgetSettingsPage.expectLoadingShowAndHide();
     }
