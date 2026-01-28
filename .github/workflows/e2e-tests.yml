@@ -183,6 +183,13 @@ jobs:
           sed -i "s|^PUBLIC_URL=.*|PUBLIC_URL=$PUBLIC_URL|" .env
           ./setup.sh
 
+      - name: Prepare test results directory
+        run: |
+          cd sequra
+          rm -rf test-results
+          mkdir -p test-results
+          chmod 755 test-results
+
       - name: Run E2E tests
         run: |
           set -a
