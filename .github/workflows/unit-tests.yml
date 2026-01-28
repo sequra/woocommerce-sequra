@@ -52,7 +52,8 @@ jobs:
   #       run: bin/npm install --no-progress --silent --no-update-notifier
 
   phpunit:
-    needs: [composer, npm]
+    # needs: [composer, npm]
+    needs: [composer]
     runs-on: ubuntu-latest
 
     steps:
