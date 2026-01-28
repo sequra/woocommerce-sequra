@@ -87,6 +87,7 @@ jobs:
           key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
 
       - name: Install Playwright Browsers
+        if: steps.playwright-browser-cache.outputs.cache-hit != 'true'
         run: |
           npx playwright install chromium-headless-shell --with-deps
 
