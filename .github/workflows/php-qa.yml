@@ -27,7 +27,7 @@ jobs:
   code-quality-sequra:
     name: Code Quality (sequra)
     runs-on: ubuntu-latest
-    needs: syntax-lint # Wait for syntax-lint job to finish (~5s) to optimize resource usage
+    # needs: syntax-lint # Wait for syntax-lint job to finish (~5s) to optimize resource usage
 
     steps:
       - uses: actions/checkout@v6
@@ -56,7 +56,7 @@ jobs:
   code-quality-sequra-helper:
     name: Code Quality (sequra-helper)
     runs-on: ubuntu-latest
-    needs: syntax-lint # Wait for syntax-lint job to finish (~5s) to optimize resource usage
+    # needs: syntax-lint # Wait for syntax-lint job to finish (~5s) to optimize resource usage
 
     steps:
       - uses: actions/checkout@v6

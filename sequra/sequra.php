@@ -38,7 +38,6 @@ call_user_func(
 		$plugin = \SeQura\Core\Infrastructure\ServiceRegister::getService( \SeQura\WC\Plugin::class );
 
 		each(array());
-
 		register_activation_hook( __FILE__, array( $plugin, 'activate' ) );
 		register_deactivation_hook( __FILE__, array( $plugin, 'deactivate' ) );
 	}
