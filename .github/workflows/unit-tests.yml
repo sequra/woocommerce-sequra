@@ -30,26 +30,26 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app composer:latest composer install --quiet --no-interaction
 
-  npm:
-    runs-on: ubuntu-latest
+  # Theres is currently no need for assets for the tests to succeed
+  # hence, we are commenting this out to save CI resources but keeping
+  # it here for future reference.
+  # npm:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v6
+  #   steps:
+  #     - uses: actions/checkout@v6
 
-      - uses: actions/cache@v5
-        id: sequra-npm-cache
-        with:
-          path: |
-            sequra/node_modules
-            sequra/package-lock.json
-          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+  #     - uses: actions/cache@v5
+  #       id: sequra-npm-cache
+  #       with:
+  #         path: |
+  #           sequra/node_modules
+  #           sequra/package-lock.json
+  #         key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
       
-      - name: NPM install
-        if: steps.sequra-npm-cache.outputs.cache-hit != 'true'
-        run: bin/npm install --no-progress --silent --no-update-notifier
-
-      - name: Build Assets
-        run: bin/npm run build --no-progress --silent --no-update-notifier
+  #     - name: NPM install
+  #       if: steps.sequra-npm-cache.outputs.cache-hit != 'true'
+  #       run: bin/npm install --no-progress --silent --no-update-notifier
 
   phpunit:
     needs: [composer, npm]
@@ -66,13 +66,19 @@ jobs:
             sequra/composer.lock
           key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
       
-      - uses: actions/cache@v5
-        id: sequra-npm-cache
-        with:
-          path: |
-            sequra/node_modules
-            sequra/package-lock.json
-          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      # Theres is currently no need for assets for the tests to succeed
+      # hence, we are commenting this out to save CI resources but keeping
+      # it here for future reference.
+      # - uses: actions/cache@v5
+      #   id: sequra-npm-cache
+      #   with:
+      #     path: |
+      #       sequra/node_modules
+      #       sequra/package-lock.json
+      #     key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      # - name: Build Assets
+      #   run: bin/npm run build --no-progress --silent --no-update-notifier
 
       - name: Setup the environment
         env:
