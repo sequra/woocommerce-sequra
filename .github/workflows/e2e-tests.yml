@@ -17,17 +17,18 @@ jobs:
       - uses: actions/checkout@v6
 
       - uses: actions/cache@v5
-        id: sequra-composer-cache
+        id: sequra-composer-prod-cache
         with:
           path: |
             sequra/vendor
             sequra/composer.lock
-          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock') }}
 
       - name: Composer install
-        if: steps.sequra-composer-cache.outputs.cache-hit != 'true'
+        if: steps.sequra-composer-prod-cache.outputs.cache-hit != 'true'
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app composer:latest composer install --quiet --no-interaction
+          cd sequra
+          composer install --no-dev --quiet --no-interaction
 
   npm:
     runs-on: ubuntu-latest
@@ -46,7 +47,9 @@ jobs:
       
       - name: NPM install
         if: steps.sequra-npm-cache.outputs.cache-hit != 'true'
-        run: bin/npm install --no-progress --silent --no-update-notifier
+        run: |
+          cd sequra
+          npm install --silent --no-progress --no-update-notifier
 
       - uses: actions/cache@v5
         id: sequra-assets-cache
@@ -57,7 +60,9 @@ jobs:
       
       - name: Build Assets
         if: steps.sequra-assets-cache.outputs.cache-hit != 'true'
-        run: bin/npm run build --no-progress --silent --no-update-notifier
+        run: |
+          cd sequra
+          npm run build --silent --no-progress --no-update-notifier
 
   install-browsers:
     runs-on: ubuntu-latest
@@ -112,12 +117,12 @@ jobs:
 
       - name: Use vendor cache
         uses: actions/cache@v5
-        id: sequra-composer-cache
+        id: sequra-composer-prod-cache
         with:
           path: |
             sequra/vendor
             sequra/composer.lock
-          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock') }}
 
       - name: Use node_modules cache
         uses: actions/cache@v5
@@ -167,13 +172,16 @@ jobs:
           DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
           DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
           DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+          PUBLIC_URL: http://localhost:8080
         run: |
           cp .env.sample .env
           sed -i "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env
           sed -i "s|^DUMMY_PASSWORD=.*|DUMMY_PASSWORD=$DUMMY_PASSWORD|" .env
           sed -i "s|^DUMMY_SERVICE_PASSWORD=.*|DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD|" .env
+          sed -i "s|^PUBLIC_URL=.*|PUBLIC_URL=$PUBLIC_URL|" .env
           ./setup.sh
 
       - name: Run E2E tests
-        run: |
-          docker run --env-file .env --rm -v ${{ github.workspace }}/sequra:/app -w /app mcr.microsoft.com/playwright:v1.57.0 bash -c "npx playwright test ${{ matrix.suite }}"
+        run: |  
+          cd sequra
+          npx playwright test ${{ matrix.suite }}
