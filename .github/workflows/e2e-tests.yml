@@ -70,7 +70,7 @@ jobs:
         id: playwright-browser-cache
         with:
           path: |
-            ~/.cache/ms-playwright
+            /home/runner/.cache/ms-playwright
           key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
 
       - name: Install Playwright Browsers
@@ -134,7 +134,7 @@ jobs:
         id: playwright-browser-cache
         with:
           path: |
-            ~/.cache/ms-playwright
+            /home/runner/.cache/ms-playwright
           key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
 
       - name: Setup the environment (with cloudflared)
