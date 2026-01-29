@@ -13,13 +13,15 @@ const { defineConfig, devices } = require('@playwright/test');
 module.exports = defineConfig({
   testDir: './tests-e2e/specs',
   outputDir: process.env.CI ? '/tmp/test-results' : './tests-e2e/test-results/',
-  timeout: 5 * 60 * 1000, // 5 minutes
+  // timeout: 5 * 60 * 1000, // 5 minutes
+  timeout: 1 * 60 * 1000, // 1 minute
   /* Run tests in files in parallel */
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: 1,
+  // retries: 1,
+  retries: 0,
   /* Opt out of parallel tests on CI. */
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
