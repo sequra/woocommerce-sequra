@@ -66,6 +66,19 @@ jobs:
           cd sequra
           npm run build --silent --no-progress --no-update-notifier
 
+      - uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-browser-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra
+          npx playwright install chromium-headless-shell --with-deps
+
   e2e-tests:
     needs: [composer, npm]
     runs-on: ubuntu-latest
@@ -117,6 +130,13 @@ jobs:
             sequra/assets
           key: sequra-assets-cache-${{ github.run_id }}
 
+      - uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
       - name: Setup the environment (with cloudflared)
         if: matrix.cloudflared == true
         env:
@@ -151,8 +171,11 @@ jobs:
 
       - name: Run E2E tests
         run: |
+          set -a
+          source .env
+          set +a
           cd sequra
-          npx playwright test ${{ matrix.suite }} --reporter=dot
+          npx playwright test ${{ matrix.suite }}
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
