@@ -160,7 +160,7 @@ jobs:
           DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
           DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
           DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
-          PUBLIC_URL: http://host:8080
+          PUBLIC_URL: http://localhost:8000
         run: |
           cp .env.sample .env
           sed -i.bak "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env && rm .env.bak
