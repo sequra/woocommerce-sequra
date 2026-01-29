@@ -7,13 +7,6 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 // require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
-const extraHTTPHeaders = {};
-if (process.env.PUBLIC_URL.includes('ngrok')) {
-  extraHTTPHeaders['ngrok-skip-browser-warning'] = '1';
-}
-
-console.log('Playwright baseURL:', process.env.PUBLIC_URL);
-
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
@@ -28,10 +21,9 @@ module.exports = defineConfig({
   /* Retry on CI only */
   retries: 1,
   /* Opt out of parallel tests on CI. */
-  // workers: process.env.CI ? 1 : undefined,
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? 'dot' : 'list',
+  reporter: 'list',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -39,7 +31,7 @@ module.exports = defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     /* Add ngrok-skip-browser-warning header to all HTTP requests */
-    extraHTTPHeaders: extraHTTPHeaders,
+    extraHTTPHeaders: process.env.PUBLIC_URL?.includes('ngrok') ? { 'ngrok-skip-browser-warning': '1' } : undefined,
   },
 
   /* Configure projects for major browsers */
