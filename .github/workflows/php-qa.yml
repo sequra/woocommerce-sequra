@@ -43,15 +43,18 @@ jobs:
       - name: Install dependencies
         if: steps.sequra-composer-cache.outputs.cache-hit != 'true'
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app composer:latest composer install --quiet --no-interaction
+          cd sequra
+          composer install --quiet --no-interaction
 
       - name: PHPCS
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app -u $(id -u):$(id -g) php:8.4-cli-alpine php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
+          cd sequra
+          php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
       
       - name: PHPStan
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app -u $(id -u):$(id -g) php:8.4-cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G
+          cd sequra
+          php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G
 
   code-quality-sequra-helper:
     name: Code Quality (sequra-helper)
@@ -71,12 +74,15 @@ jobs:
       - name: Install dependencies
         if: steps.sequra-helper-composer-cache.outputs.cache-hit != 'true'
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app composer:latest composer install --quiet --no-interaction
+          cd sequra-helper
+          composer install --quiet --no-interaction
       
       - name: PHPCS
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app -u $(id -u):$(id -g) php:8.4-cli-alpine php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
+          cd sequra-helper
+          php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
       
       - name: PHPStan
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra-helper:/app -w /app -u $(id -u):$(id -g) php:8.4-cli-alpine php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G
+          cd sequra-helper
+          php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G
