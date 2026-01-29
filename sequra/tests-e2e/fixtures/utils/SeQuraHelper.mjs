@@ -23,6 +23,7 @@ export default class SeQuraHelper extends BaseSeQuraHelper {
             remove_db_tables: 'remove_db_tables',
             v2_config: 'v2_config',
             remove_address_fields: 'remove_address_fields',
+            get_ip: 'get_ip',
         };
     }
 

@@ -48,13 +48,16 @@ test.describe('Configuration', () => {
       { webhook: dummy_config, args: [{ name: 'widgets', value: '1' }] }
     ]);
 
+    const response = await helper.executeWebhook({ webhook: 'get_ip', returnResponse: true });
+    const publicIP = response.data.ip_address;
+    console.log(response, publicIP);
+
     const badIPAddressesMatrix = [
       ['a.b.c.d'],
       ['a.b.c.d', '1.1.1.256'],
       ['a.b.c.d', '1.1.1.256', 'lorem ipsum']
     ]
 
-    const publicIP = await dataProvider.publicIP();
     const notAllowedIPAddressesMatrix = [
       ['8.8.8.8']
     ]

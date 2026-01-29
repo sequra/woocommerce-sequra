@@ -12,6 +12,7 @@ use SeQura\Helper\Task\Checkout_Version_Task;
 use SeQura\Helper\Task\Clear_Configuration_Task;
 use SeQura\Helper\Task\Configure_Dummy_Service_Task;
 use SeQura\Helper\Task\Configure_Dummy_Task;
+use SeQura\Helper\Task\Get_IP_Task;
 use SeQura\Helper\Task\Remove_Address_Fields_Task;
 use SeQura\Helper\Task\Print_Logs_Task;
 use SeQura\Helper\Task\Remove_Db_Tables_Task;
@@ -151,6 +152,7 @@ class Plugin {
 			'remove_db_tables'             => Remove_Db_Tables_Task::class,
 			'verify_order_has_merchant_id' => Verify_Order_Has_Merchant_Id_Task::class,
 			'remove_address_fields'        => Remove_Address_Fields_Task::class,
+			'get_ip'                       => Get_IP_Task::class,
 		);
 
 		return ! isset( $map[ $webhook ] ) ? new Task() : new $map[ $webhook ]();

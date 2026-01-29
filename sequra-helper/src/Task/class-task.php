@@ -141,7 +141,16 @@ class Task {
 	 */
 	public function http_success_response(): void {
 		header( 'Content-Type: application/json' );
-		wp_send_json_success( array( 'message' => 'Task executed' ) );
+		wp_send_json_success( $this->response_payload() );
+	}
+
+	/**
+	 * Override to provide response payload
+	 * 
+	 * @return array<string, string> The response payload.
+	 */
+	protected function response_payload(): array {
+		return array( 'message' => 'Task executed' );
 	}
 
 	/**
