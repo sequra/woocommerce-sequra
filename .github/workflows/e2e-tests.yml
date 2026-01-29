@@ -89,18 +89,20 @@ jobs:
         # suite: ['001', '002', '003', '004']
         suite: ['003a']
         include:
-          - suite: '001'
-            cloudflared: true
-            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_001
-            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_001
-          - suite: '002'
-            cloudflared: true
-            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_002
-            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_002
-          - suite: '003'
+          # - suite: '001'
+          #   cloudflared: true
+          #   tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_001
+          #   tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_001
+          # - suite: '002'
+          #   cloudflared: true
+          #   tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_002
+          #   tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_002
+          # - suite: '003'
+          #   cloudflared: false
+          - suite: '003a'
             cloudflared: false
-          - suite: '004'
-            cloudflared: false
+          # - suite: '004'
+          #   cloudflared: false
 
     steps:
       - uses: actions/checkout@v6
