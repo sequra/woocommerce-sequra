@@ -100,7 +100,7 @@ jobs:
     
     strategy:
       matrix:
-        suite: ['001', '002', '003', '004']
+        suite: ['001', '002', '003', '004', '005', '006']
         include:
           - suite: '001'
             cloudflared: true
@@ -111,10 +111,15 @@ jobs:
             tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_002
             tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_002
           - suite: '003'
-            cloudflared: false
+            cloudflared: true
+            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_003
+            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_003
           - suite: '004'
             cloudflared: false
-
+          - suite: '005'
+            cloudflared: false
+          - suite: '006'
+            cloudflared: false
     steps:
       - uses: actions/checkout@v6
 
