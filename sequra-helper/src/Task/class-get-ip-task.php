@@ -31,12 +31,12 @@ class Get_IP_Task extends Task {
 	 * 
 	 * @throws \Exception If the task fails.
 	 */
-	public function execute( array $args = array() ): void {	
+	public function execute( array $args = array() ): void {    
 		/** Service
 		 *
 		 * @var Interface_Shopper_Service $service
 		 */
-		$service = ServiceRegister::getService( Interface_Shopper_Service::class );
+		$service          = ServiceRegister::getService( Interface_Shopper_Service::class );
 		$this->ip_address = $service->get_ip();
 	}
 
