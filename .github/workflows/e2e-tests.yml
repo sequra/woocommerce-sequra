@@ -26,10 +26,24 @@ jobs:
             sequra/composer.lock
           key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock') }}
 
-      - name: Composer install
+      - name: Composer install (sequra)
         if: steps.sequra-composer-prod-cache.outputs.cache-hit != 'true'
         run: |
           cd sequra
+          composer install --no-dev --quiet --no-interaction
+
+      - uses: actions/cache@v5
+        id: sequra-helper-composer-prod-cache
+        with:
+          path: |
+            sequra-helper/vendor
+            sequra-helper/composer.lock
+          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock') }}
+
+      - name: Composer install (sequra-helper)
+        if: steps.sequra-helper-composer-prod-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra-helper
           composer install --no-dev --quiet --no-interaction
 
   npm:
@@ -77,7 +91,7 @@ jobs:
         if: steps.playwright-browser-cache.outputs.cache-hit != 'true'
         run: |
           cd sequra
-          npx playwright install chromium chromium-headless-shell --with-deps
+          npx playwright install chromium-headless-shell --with-deps
 
   e2e-tests:
     needs: [composer, npm]
@@ -107,7 +121,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Use vendor cache
+      - name: Use vendor cache (sequra)
         uses: actions/cache@v5
         id: sequra-composer-prod-cache
         with:
@@ -115,6 +129,15 @@ jobs:
             sequra/vendor
             sequra/composer.lock
           key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock') }}
+
+      - name: Use vendor cache (sequra-helper)
+        uses: actions/cache@v5
+        id: sequra-helper-composer-prod-cache
+        with:
+          path: |
+            sequra-helper/vendor
+            sequra-helper/composer.lock
+          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock') }}
 
       - name: Use node_modules cache
         uses: actions/cache@v5
@@ -133,7 +156,8 @@ jobs:
             sequra/assets
           key: sequra-assets-cache-${{ github.run_id }}
 
-      - uses: actions/cache@v5
+      - name: Use Playwright browser cache
+        uses: actions/cache@v5
         id: playwright-browser-cache
         with:
           path: |
