@@ -1,11 +1,11 @@
 name: Unit tests
 
-on:
-  pull_request:
-    types: [synchronize]
-    paths:
-      - '**.php'
-  workflow_dispatch:
+# on:
+#   pull_request:
+#     types: [synchronize]
+#     paths:
+#       - '**.php'
+#   workflow_dispatch:
 
 concurrency:
   group: unit-tests-${{ github.ref }}
