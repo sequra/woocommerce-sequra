@@ -1,10 +1,9 @@
 name: PHP Quality Assurance
 
-# on:
-#   push:
-#     paths:
-#       - '**.php'
-#   workflow_dispatch:
+on:
+  push:
+    paths:
+      - '**.php'
 
 concurrency:
   group: php-qa-${{ github.ref }}

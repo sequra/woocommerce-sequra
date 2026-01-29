@@ -100,23 +100,20 @@ jobs:
     
     strategy:
       matrix:
-        # suite: ['001', '002', '003', '004']
-        suite: ['003a']
+        suite: ['001', '002', '003', '004']
         include:
-          # - suite: '001'
-          #   cloudflared: true
-          #   tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_001
-          #   tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_001
-          # - suite: '002'
-          #   cloudflared: true
-          #   tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_002
-          #   tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_002
-          # - suite: '003'
-          #   cloudflared: false
-          - suite: '003a'
+          - suite: '001'
+            cloudflared: true
+            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_001
+            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_001
+          - suite: '002'
+            cloudflared: true
+            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_002
+            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_002
+          - suite: '003'
             cloudflared: false
-          # - suite: '004'
-          #   cloudflared: false
+          - suite: '004'
+            cloudflared: false
 
     steps:
       - uses: actions/checkout@v6
@@ -208,4 +205,7 @@ jobs:
         with:
           name: test-results-${{ matrix.suite }}
           path: /tmp/test-results
-          retention-days: 7 
+          retention-days: 7
+      
+      - name: Tear down the environment
+        run: ./teardown.sh
