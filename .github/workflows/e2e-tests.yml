@@ -149,19 +149,15 @@ jobs:
           sed -i.bak "s|^PUBLIC_URL=.*|PUBLIC_URL=$PUBLIC_URL|" .env && rm .env.bak
           ./setup.sh
 
-      - name: Prepare test results directory
-        run: |
-          sudo rm -rf sequra/test-results
-          mkdir -p sequra/test-results
-
       - name: Run E2E tests
         run: |
-          docker run --add-host=host:host-gateway --env-file .env --rm -v ${{ github.workspace }}/sequra:/app -w /app mcr.microsoft.com/playwright:v1.57.0 bash -c "npx playwright test ${{ matrix.suite }} --reporter=dot"
+          cd sequra
+          npx playwright test ${{ matrix.suite }} --reporter=dot
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: test-results-${{ matrix.suite }}
-          path: sequra/test-results
+          path: /tmp/test-results
           retention-days: 7 

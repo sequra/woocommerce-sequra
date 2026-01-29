@@ -17,6 +17,7 @@ if (process.env.PUBLIC_URL.includes('ngrok')) {
  */
 module.exports = defineConfig({
   testDir: './tests-e2e/specs',
+  outputDir: process.env.CI ? '/tmp/test-results' : './tests-e2e/test-results/',
   timeout: 5 * 60 * 1000, // 5 minutes
   /* Run tests in files in parallel */
   fullyParallel: false,
