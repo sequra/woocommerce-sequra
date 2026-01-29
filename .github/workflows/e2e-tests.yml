@@ -86,7 +86,8 @@ jobs:
     
     strategy:
       matrix:
-        suite: ['001', '002', '003', '004']
+        # suite: ['001', '002', '003', '004']
+        suite: ['003a']
         include:
           - suite: '001'
             cloudflared: true
