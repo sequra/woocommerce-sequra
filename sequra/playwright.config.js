@@ -12,6 +12,8 @@ if (process.env.PUBLIC_URL.includes('ngrok')) {
   extraHTTPHeaders['ngrok-skip-browser-warning'] = '1';
 }
 
+console.log('Playwright baseURL:', process.env.PUBLIC_URL);
+
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
