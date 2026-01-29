@@ -163,13 +163,11 @@ jobs:
           DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
           DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
           DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
-          PUBLIC_URL: http://localhost:8000
         run: |
           cp .env.sample .env
           sed -i.bak "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env && rm .env.bak
           sed -i.bak "s|^DUMMY_PASSWORD=.*|DUMMY_PASSWORD=$DUMMY_PASSWORD|" .env && rm .env.bak
           sed -i.bak "s|^DUMMY_SERVICE_PASSWORD=.*|DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD|" .env && rm .env.bak
-          sed -i.bak "s|^PUBLIC_URL=.*|PUBLIC_URL=$PUBLIC_URL|" .env && rm .env.bak
           ./setup.sh
 
       - name: Run E2E tests

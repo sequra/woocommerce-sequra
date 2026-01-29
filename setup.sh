@@ -36,8 +36,9 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# Reset PUBLIC_URL inside .env
-sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=|" .env
+# Extract WP_URL from .env and set PUBLIC_URL to that value
+WP_URL=$(grep '^WP_URL=' .env | cut -d'=' -f2)
+sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=$WP_URL|" .env
 rm .env.bak
 
 set -o allexport
