@@ -1,10 +1,11 @@
 name: Unit tests
 
-# on:
-#   pull_request:
-#     types: [synchronize]
-#     paths:
-#       - '**.php'
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - '**.php'
+  workflow_dispatch:
 
 concurrency:
   group: unit-tests-${{ github.ref }}
@@ -28,7 +29,7 @@ jobs:
       - name: Composer install
         if: steps.sequra-composer-cache.outputs.cache-hit != 'true'
         run: |
-          docker run --rm -v ${{ github.workspace }}/sequra:/app -w /app composer:latest composer install --quiet --no-interaction
+          composer install --quiet --no-interaction
 
   # Theres is currently no need for assets for the tests to succeed
   # hence, we are commenting this out to save CI resources but keeping
@@ -49,7 +50,7 @@ jobs:
       
   #     - name: NPM install
   #       if: steps.sequra-npm-cache.outputs.cache-hit != 'true'
-  #       run: bin/npm install --no-progress --silent --no-update-notifier
+  #       run: npm install --no-progress --silent --no-update-notifier
 
   phpunit:
     # needs: [composer, npm]
@@ -88,9 +89,9 @@ jobs:
           DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
         run: |
           cp .env.sample .env
-          sed -i "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env
-          sed -i "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env
-          sed -i "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env
+          sed -i.bak "s/^DUMMY_ASSETS_KEY=.*/DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY/" .env && rm .env.bak
+          sed -i.bak "s/^DUMMY_PASSWORD=.*/DUMMY_PASSWORD=$DUMMY_PASSWORD/" .env && rm .env.bak
+          sed -i.bak "s/^DUMMY_SERVICE_PASSWORD=.*/DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD/" .env && rm .env.bak
           ./setup.sh
 
       - name: Setup the tests
