@@ -47,6 +47,8 @@ class Plugin {
 		}
 		// This disable entirely the coming soon page functionality from WooCommerce that affects the E2E tests.
 		add_filter( 'woocommerce_coming_soon_exclude', '__return_true', 10 );
+		// Prevent automatic wizard redirect.
+		add_filter( 'woocommerce_prevent_automatic_wizard_redirect', '__return_true' );
 
 		if ( Remove_Address_Fields_Task::is_option_enabled() ) {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'remove_checkout_fields_classic' ) );
