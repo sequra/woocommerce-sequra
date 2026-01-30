@@ -52,6 +52,3 @@ jobs:
 
       - name: Run the tests
         run: docker compose exec web /usr/local/bin/run-tests.sh
-      
-      - name: Tear down the environment
-        run: ./teardown.sh
