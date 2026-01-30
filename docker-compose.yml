@@ -7,7 +7,7 @@ services:
     image: sequra/wordpress:$WP_TAG
     build:
       dockerfile: Dockerfile
-      context: ./.devcontainer
+      context: ./docker
       args:
         WP_TAG: $WP_TAG
     depends_on:
@@ -20,7 +20,7 @@ services:
     <<: *env_file
     volumes:
       - sq_wordpress:/var/www/html
-      - ./.devcontainer/xdebug:/tmp/xdebug
+      - ./docker/xdebug:/tmp/xdebug
       - ./sequra:/var/www/html/wp-content/plugins/_sequra
       - ./sequra-helper:/var/www/html/wp-content/plugins/sequra-helper
   db:

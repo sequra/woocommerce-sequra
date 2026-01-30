@@ -12,15 +12,15 @@ e2e-tests/node_modules/*
 # Ignore Vscode workspace files
 *.code-workspace
 # Ignore WordPress source files copied to the workspace during development
-.devcontainer/wp-admin
-.devcontainer/wp-includes
-.devcontainer/wp-content
-.devcontainer/wordpress-tests-lib
+docker/wp-admin
+docker/wp-includes
+docker/wp-content
+docker/wordpress-tests-lib
 *.log
 override.env
 .DS_Store
 .env
 auth.json
 zip/
-.devcontainer/xdebug
+docker/xdebug
 .actrc

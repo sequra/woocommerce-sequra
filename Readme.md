@@ -90,7 +90,7 @@ This repo contains a group of utility scripts under `bin/` directory. The goal i
 | `./bin/phpcbf` | Automatically correct coding standard violations on the project files |
 | `./bin/phpstan` | Run PHPStan on the project files |
 | `bin/php-syntax-check --php=<PHP-VERSION>` | Check if syntax used is compatible with the PHP version |
-| `./bin/cp_sources` | Copy WordPress Core and WooCommerce code to `.devcontainer/` |
+| `./bin/cp_sources` | Copy WordPress Core and WooCommerce code to `docker/` |
 | `./bin/publish_to_wordpress.sh` | Handles the plugin publishing to WordPress.org |
 | `./bin/make_zip` | Make a ZIP of `sequra` or a glue-plugin that is ready to be use for manual installations. The script allows the following arguments: `--branch=<GIT-BRANCH-NAME>` and `--project=<sequra>`. The resulting file will be generated into `zip/` directory.|
 | `./bin/playwright` | Run E2E in `sequra/tests-e2e` directory tests using Playwright using a Docker container |
@@ -148,7 +148,7 @@ XDebug includes a profiler that can be used to analyze the performance of the co
 ```bash
 docker compose exec web toggle-xdebug --mode=profile
 ```
-Each time a page loads in the browser, one ore more files will be generated at `/tmp/xdebug` directory inside the container. This path is mapped to the `.devcontainer/xdebug` directory in the host machine. You can use a tool like [QCacheGrind](https://sourceforge.net/projects/qcachegrind/) to analyze the generated files.
+Each time a page loads in the browser, one ore more files will be generated at `/tmp/xdebug` directory inside the container. This path is mapped to the `docker/xdebug` directory in the host machine. You can use a tool like [QCacheGrind](https://sourceforge.net/projects/qcachegrind/) to analyze the generated files.
 
 To install QCacheGrind in macOS you can use [Homebrew](https://brew.sh/):
 
