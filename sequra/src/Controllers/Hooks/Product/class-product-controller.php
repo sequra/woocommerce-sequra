@@ -321,11 +321,8 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'max_amount'   => $widget['maxAmount'] ?? null,
 				
 			);
-			$atts_str = '';
-			foreach ( $atts as $key => $value ) {
-				$atts_str .= " $key='$value'";
-			}
-			echo \do_shortcode( "[sequra_widget $atts_str]" );
+			// Call the shortcode function directly to avoid escaping issues with quotes in CSS selectors
+			echo $this->do_widget_shortcode( $atts );
 		}
 	}
 
