@@ -72,7 +72,7 @@ jobs:
         with:
           path: |
             sequra/assets
-          key: sequra-assets-cache-${{ github.run_id }}
+          key: sequra-assets-cache-${{ hashFiles('sequra/package-lock.json', 'sequra/webpack.config.js', 'sequra/assets/index.php', 'sequra/assets/js/**/*.js', 'sequra/assets/css/**/*.scss') }}
       
       - name: Build Assets
         if: steps.sequra-assets-cache.outputs.cache-hit != 'true'
@@ -156,7 +156,7 @@ jobs:
         with:
           path: |
             sequra/assets
-          key: sequra-assets-cache-${{ github.run_id }}
+          key: sequra-assets-cache-${{ hashFiles('sequra/package-lock.json', 'sequra/webpack.config.js', 'sequra/assets/index.php', 'sequra/assets/js/**/*.js', 'sequra/assets/css/**/*.scss') }}
 
       - name: Use Playwright browser cache
         uses: actions/cache@v5
