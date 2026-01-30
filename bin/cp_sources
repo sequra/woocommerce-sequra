@@ -10,17 +10,17 @@ if [ -z "$container_id" ]; then
 else
     echo "Copying source files from container $container_id to host..."
     # wp-includes
-    docker cp "$container_id":/var/www/html/wp-includes "${BASEDIR}"/.devcontainer
+    docker cp "$container_id":/var/www/html/wp-includes "${BASEDIR}"/docker
     # wp-admin
-    docker cp "$container_id":/var/www/html/wp-admin "${BASEDIR}"/.devcontainer
+    docker cp "$container_id":/var/www/html/wp-admin "${BASEDIR}"/docker
     # plugins
-    mkdir -p "${BASEDIR}"/.devcontainer/wp-content/plugins
-    docker cp "$container_id":/var/www/html/wp-content/plugins/woocommerce "${BASEDIR}"/.devcontainer/wp-content/plugins || true
-    docker cp "$container_id":/var/www/html/wp-content/plugins/learnpress "${BASEDIR}"/.devcontainer/wp-content/plugins || true
+    mkdir -p "${BASEDIR}"/docker/wp-content/plugins
+    docker cp "$container_id":/var/www/html/wp-content/plugins/woocommerce "${BASEDIR}"/docker/wp-content/plugins || true
+    docker cp "$container_id":/var/www/html/wp-content/plugins/learnpress "${BASEDIR}"/docker/wp-content/plugins || true
     # Wordpress Test libs
-    mkdir -p "${BASEDIR}"/.devcontainer/wordpress-tests-lib
-    docker cp "$container_id":/tmp/wordpress-tests-lib/data "${BASEDIR}"/.devcontainer/wordpress-tests-lib || true
-    docker cp "$container_id":/tmp/wordpress-tests-lib/includes "${BASEDIR}"/.devcontainer/wordpress-tests-lib || true
+    mkdir -p "${BASEDIR}"/docker/wordpress-tests-lib
+    docker cp "$container_id":/tmp/wordpress-tests-lib/data "${BASEDIR}"/docker/wordpress-tests-lib || true
+    docker cp "$container_id":/tmp/wordpress-tests-lib/includes "${BASEDIR}"/docker/wordpress-tests-lib || true
     
     echo "Done!"
 fi
