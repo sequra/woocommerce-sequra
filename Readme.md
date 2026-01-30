@@ -9,6 +9,7 @@ This repository contains the plugin seQura Payment Gateway for WooCommerce.
   - [Starting the environment](#starting-the-environment)
   - [Stopping the environment](#stopping-the-environment)
 - [Utilities](#utilities)
+- [Building Docker images](#building-docker-images)
 - [Debugging](#debugging)
 - [Using the profiler](#using-the-profiler)
 - [seQura Helper plugin](#sequra-helper-plugin)
@@ -101,6 +102,28 @@ If you require a composer dependency from a GitHub repository, you need to creat
     }
 }
 ```
+
+## Building Docker images
+
+The `docker-compose.yml` file uses a customized WordPress Docker image available at GitHub Packages Registry. Since the image is private, you need to authenticate to pull it. To do so, you need to create a GitHub Personal Access Token and store it in the `.env` file under the `GITHUB_TOKEN` variable. Despite this requirements, the `setup.sh` script will handle the login process for you, and also it will build the image locally if it doesn't exist in the registry.
+
+Tools for building and pushing the Docker image are available in the `docker/` directory. You can easily build and push the image by running the following commands:
+
+```bash
+docker/build-image.sh
+```
+The behavior of the script can be customized by setting the following arguments:
+
+| Argument | Description |
+| -------- | ------------------------------------------------------------------ |
+| `--push` | Push the image to the GitHub Packages Registry. Authentication is required. |
+| `--wp=<VERSION>` | The WordPress version to use. |
+
+If arguments are not provided, the script will build the image using the values defined in the `.env` file.
+
+> [!NOTE]  
+> For pushing the image, you need a token with the `read:packages` and `write:packages` scopes. The token must be stored in the `.env` file under the `GITHUB_TOKEN` variable or as a global environment variable.
+
 ## Debugging
 
 Debugging using XDebug is possible but you need to enable it first because is turned off by default in sake of performance. Use the following command to activate it:
