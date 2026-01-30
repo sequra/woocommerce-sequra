@@ -54,9 +54,6 @@ The repository includes a docker-compose file to easily test the module. You can
 ```bash
 ./setup.sh
 ```
-> [!IMPORTANT]
-> Make sure you have the line `127.0.0.1	localhost.sequrapi.com` added in your hosts file.
-
 > [!NOTE]
 > Once the setup is complete, the WordPress root URL, wp-admin URL, and user credentials (including the password) will be displayed in your terminal.
 
@@ -367,7 +364,7 @@ The `chromium` browser is used for standard Playwright runs, while `chromium-hea
 
 ### Usage
 
-You can use the provided utility `bin/playwright` to run E2E tests defined in `tests-e2e` directory. This utility will run tests in a headless mode inside of a Docker container of the official image provided by the Playwright team.
+You can use the provided utility `bin/playwright` to run E2E tests defined in `tests-e2e` directory. This utility will run tests in a headless mode.
 
 Also, you can pass additional arguments to the utility to configure test execution. Some examples of arguments you can append to the command above:
 
@@ -378,9 +375,6 @@ Also, you can pass additional arguments to the utility to configure test executi
 | `./tests-e2e/example.spec.js` | Execute specific test file. Supports multiple file paths space separated. Also supports file name without extension and path like this: `example` |
 
 More info at: https://playwright.dev/docs/intro
-
-> [!IMPORTANT]
-> In order for some tests to succeed, you must expose your Magento container to the internet, so that the callbacks made by SeQura can work. Make sure that you run the setup script passing the `--ngrok` argument.
 
 > [!IMPORTANT]
 > Make sure you wrote values for `DUMMY_PASSWORD`, `DUMMY_SERVICE_PASSWORD` and `DUMMY_ASSETS_KEY` in the `.env` file before launching e2e tests.
@@ -416,11 +410,3 @@ The following command can be used to extract the strings from the plugin to the 
 docker compose exec -u www-data web wp loco extract sequra
 ```
 This guarantees that the `.pot` file is always up to date with the plugin strings and should be run on every release branch before merging it to the main branch.
-
-## Hidden pages
-
-### Order status settings
-
-Append the anchor `#settings-order_status` to the settings page to access the hidden configuration page, like this:
-
-http://localhost.sequrapi.com:8000/wp-admin/options-general.php?page=sequra#settings-order_status
