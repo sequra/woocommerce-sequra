@@ -6,6 +6,7 @@ fi
 install=0
 ngrok=0
 cloudflared=0
+BASEDIR="$(dirname $(realpath $0))"
 
 # Parse arguments:
 # --install: Installation of dependencies
@@ -137,8 +138,6 @@ if [ -z "$IMAGE_EXISTS" ]; then
         echo "🐳 Image ghcr.io/sequra/woocommerce-sequra:$WP_TAG pulled from the registry."
     else
         echo "🐳 Image ghcr.io/sequra/woocommerce-sequra:$WP_TAG not found in the registry. It will be built now..."
-        
-        BASEDIR="$(dirname $(realpath $0))"
         $BASEDIR/docker/build-image.sh --wp=$WP_TAG || (echo "❌ Docker image build failed" && exit 1)
     fi
 fi
