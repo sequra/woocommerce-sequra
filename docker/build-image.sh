@@ -52,7 +52,7 @@ if [ $PUSH -eq 1 ]; then
         exit 1
     fi
 
-    echo $GITHUB_TOKEN | docker login ghcr.io -u sequra --password-stdin || (echo "${RED}Login failed${NC}" && exit 1)
+    echo "$GITHUB_TOKEN" | docker login ghcr.io -u sequra --password-stdin || (echo "${RED}Login failed${NC}" && exit 1)
     echo "The resulting image will be pushed to the GitHub Container Registry"
 
     if [ -z "$PLATFORMS_ARG" ]; then

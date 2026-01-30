@@ -126,7 +126,7 @@ if [ -z "$IMAGE_EXISTS" ]; then
     if [ -n "$GITHUB_TOKEN" ]; then
         # Log in to GitHub Container Registry
         echo "🔐 Logging in to the GitHub Container Registry..."
-        echo $GITHUB_TOKEN | docker login ghcr.io -u sequra --password-stdin || (echo "❌ Cannot log in to GitHub Container Registry" && exit 1)
+        echo "$GITHUB_TOKEN" | docker login ghcr.io -u sequra --password-stdin || (echo "❌ Cannot log in to GitHub Container Registry" && exit 1)
         echo "🔍 Checking if image ghcr.io/sequra/woocommerce-sequra:$WP_TAG exists in the GitHub Container Registry..."
 
         if docker pull ghcr.io/sequra/woocommerce-sequra:$WP_TAG > /dev/null 2>&1; then
