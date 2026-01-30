@@ -220,3 +220,7 @@ jobs:
           name: test-results-${{ matrix.suite }}
           path: /tmp/test-results
           retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: ./teardown.sh

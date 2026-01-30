@@ -53,3 +53,7 @@ jobs:
 
       - name: Run the tests
         run: docker compose exec web /usr/local/bin/run-tests.sh
+      
+      - name: Cleanup
+        if: always()
+        run: ./teardown.sh
