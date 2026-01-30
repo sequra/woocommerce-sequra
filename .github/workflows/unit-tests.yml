@@ -37,6 +37,7 @@ jobs:
 
       - name: Setup the environment
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
           DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
           DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
