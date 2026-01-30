@@ -10,8 +10,6 @@ namespace SeQura\Helper\Task;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 
-// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.Security.EscapeOutput.ExceptionNotEscaped
-
 /**
  * Task class
  */
