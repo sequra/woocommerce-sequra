@@ -25,7 +25,7 @@ module.exports = defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     /* Add ngrok-skip-browser-warning header to all HTTP requests */
-    extraHTTPHeaders: process.env.PUBLIC_URL?.includes('ngrok') ? { 'ngrok-skip-browser-warning': '1' } : undefined,
+    extraHTTPHeaders: process.env.PUBLIC_URL && process.env.PUBLIC_URL.includes('ngrok') ? { 'ngrok-skip-browser-warning': '1' } : undefined,
   },
 
   /* Configure projects for major browsers */
