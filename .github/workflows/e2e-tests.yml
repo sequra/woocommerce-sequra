@@ -130,7 +130,7 @@ jobs:
           path: |
             sequra/vendor
             sequra/composer.lock
-          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock') }}
+          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock', 'sequra/src/**/*.php') }}
 
       - name: Use vendor cache (sequra-helper)
         uses: actions/cache@v5
@@ -139,7 +139,7 @@ jobs:
           path: |
             sequra-helper/vendor
             sequra-helper/composer.lock
-          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock') }}
+          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock', 'sequra-helper/src/**/*.php') }}
 
       - name: Use node_modules cache
         uses: actions/cache@v5
