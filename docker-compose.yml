@@ -4,12 +4,7 @@ x-env_file: &env_file
 
 services:
   web:
-    image: sequra/wordpress:$WP_TAG
-    build:
-      dockerfile: Dockerfile
-      context: ./docker
-      args:
-        WP_TAG: $WP_TAG
+    image: ghcr.io/sequra/woocommerce-sequra:$WP_TAG
     depends_on:
       - db
     ports:
