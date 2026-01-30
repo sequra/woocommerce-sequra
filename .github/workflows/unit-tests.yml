@@ -1,10 +1,13 @@
 name: Unit tests
 
-# on:
-#   pull_request:
-#     types: [synchronize]
-#     paths:
-#       - '**.php'
+on:
+  pull_request:
+    branches:
+      - master
+    types: [synchronize]
+    paths:
+      - 'sequra/**/*.php'
+      - 'sequra/composer.lock'
 
 concurrency:
   group: unit-tests-${{ github.ref }}
@@ -13,6 +16,7 @@ concurrency:
 jobs:
   phpunit:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
 
     steps:
       - uses: actions/checkout@v6

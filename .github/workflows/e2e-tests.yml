@@ -5,6 +5,13 @@ on:
     branches:
       - master
     types: [synchronize]
+    paths:
+      - '**.php'
+      - 'sequra/composer.lock'
+      - 'sequra/assets/**'
+      - 'sequra/webpack.config.js'
+      - 'sequra/package-lock.json'
+      - 'sequra/tests-e2e/**'
 
 concurrency:
   group: e2e-tests-${{ github.ref }}
@@ -13,7 +20,7 @@ concurrency:
 jobs:
   composer:
     runs-on: ubuntu-latest
-    #if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
 
     steps:
       - uses: actions/checkout@v6
@@ -48,7 +55,7 @@ jobs:
 
   npm:
     runs-on: ubuntu-latest
-    #if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
 
     steps:
       - uses: actions/checkout@v6
@@ -96,7 +103,7 @@ jobs:
   e2e-tests:
     needs: [composer, npm]
     runs-on: ubuntu-latest
-    #if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
     
     strategy:
       matrix:
