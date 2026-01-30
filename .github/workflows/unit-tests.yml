@@ -23,7 +23,7 @@ jobs:
           path: |
             sequra/vendor
             sequra/composer.lock
-          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock') }}
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock', 'sequra/src/**/*.php') }}
 
       - name: Composer install
         if: steps.sequra-composer-cache.outputs.cache-hit != 'true'

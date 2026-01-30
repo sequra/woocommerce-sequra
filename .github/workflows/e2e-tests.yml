@@ -24,7 +24,7 @@ jobs:
           path: |
             sequra/vendor
             sequra/composer.lock
-          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock') }}
+          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock', 'sequra/src/**/*.php') }}
 
       - name: Composer install (sequra)
         if: steps.sequra-composer-prod-cache.outputs.cache-hit != 'true'
@@ -38,7 +38,7 @@ jobs:
           path: |
             sequra-helper/vendor
             sequra-helper/composer.lock
-          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock') }}
+          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock', 'sequra-helper/src/**/*.php') }}
 
       - name: Composer install (sequra-helper)
         if: steps.sequra-helper-composer-prod-cache.outputs.cache-hit != 'true'
