@@ -1,0 +1,87 @@
+name: PHP Quality Assurance
+
+on:
+  push:
+    paths:
+      - '**.php'
+
+concurrency:
+  group: php-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  syntax-lint:
+    name: PHP ${{ matrix.php }} syntax check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Lint PHP files
+        run: bin/php-syntax-check --php=${{ matrix.php }}
+
+  code-quality-sequra:
+    name: Code Quality (sequra)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-composer-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-cache-${{ hashFiles('sequra/composer.lock', 'sequra/src/**/*.php') }}
+
+      - name: Install dependencies
+        if: steps.sequra-composer-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra
+          composer install --quiet --no-interaction
+
+      - name: PHPCS
+        run: |
+          cd sequra
+          php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
+      
+      - name: PHPStan
+        run: |
+          cd sequra
+          php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G
+
+  code-quality-sequra-helper:
+    name: Code Quality (sequra-helper)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-helper-composer-cache
+        with:
+          path: |
+            sequra-helper/vendor
+            sequra-helper/composer.lock
+          key: sequra-helper-composer-cache-${{ hashFiles('sequra-helper/composer.lock', 'sequra-helper/src/**/*.php') }}
+
+      - name: Install dependencies
+        if: steps.sequra-helper-composer-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra-helper
+          composer install --quiet --no-interaction
+      
+      - name: PHPCS
+        run: |
+          cd sequra-helper
+          php vendor/bin/phpcs -q --standard=.phpcs.xml.dist .
+      
+      - name: PHPStan
+        run: |
+          cd sequra-helper
+          php vendor/bin/phpstan analyse -c phpstan.neon --error-format=github --no-progress --memory-limit=1G

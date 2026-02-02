@@ -1,6 +1,7 @@
 ARG WP_TAG=latest
 
 FROM wordpress:${WP_TAG}
+LABEL org.opencontainers.image.source=https://github.com/sequra/woocommerce-sequra
 
 ENV WP_LOCALE="es_ES"
 ENV WP_THEME="twentytwentyfour"

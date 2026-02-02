@@ -6,7 +6,7 @@
 /e2e-tests
 /.sfdx
 /glue_plugins
-/.devcontainer
+/docker
 .gitattributes
 .gitignore
 package.json

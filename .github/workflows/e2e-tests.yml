@@ -1,0 +1,226 @@
+name: E2E tests
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [synchronize]
+    paths:
+      - '**.php'
+      - 'sequra/composer.lock'
+      - 'sequra/assets/**'
+      - 'sequra/webpack.config.js'
+      - 'sequra/package-lock.json'
+      - 'sequra/tests-e2e/**'
+
+concurrency:
+  group: e2e-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  composer:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-composer-prod-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock', 'sequra/src/**/*.php') }}
+
+      - name: Composer install (sequra)
+        if: steps.sequra-composer-prod-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra
+          composer install --no-dev --quiet --no-interaction
+
+      - uses: actions/cache@v5
+        id: sequra-helper-composer-prod-cache
+        with:
+          path: |
+            sequra-helper/vendor
+            sequra-helper/composer.lock
+          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock', 'sequra-helper/src/**/*.php') }}
+
+      - name: Composer install (sequra-helper)
+        if: steps.sequra-helper-composer-prod-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra-helper
+          composer install --no-dev --quiet --no-interaction
+
+  npm:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: NPM install
+        if: steps.sequra-npm-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra
+          npm install --silent --no-progress --no-update-notifier
+
+      - uses: actions/cache@v5
+        id: sequra-assets-cache
+        with:
+          path: |
+            sequra/assets
+          key: sequra-assets-cache-${{ hashFiles('sequra/package-lock.json', 'sequra/webpack.config.js', 'sequra/assets/index.php', 'sequra/assets/js/**/*.js', 'sequra/assets/css/**/*.scss') }}
+      
+      - name: Build Assets
+        if: steps.sequra-assets-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra
+          npm run build --silent --no-progress --no-update-notifier
+
+      - uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            /home/runner/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-browser-cache.outputs.cache-hit != 'true'
+        run: |
+          cd sequra
+          npx playwright install chromium-headless-shell --with-deps
+
+  e2e-tests:
+    needs: [composer, npm]
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    strategy:
+      matrix:
+        suite: ['001', '002', '003', '004', '005', '006']
+        include:
+          - suite: '001'
+            cloudflared: true
+            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_001
+            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_001
+          - suite: '002'
+            cloudflared: true
+            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_002
+            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_002
+          - suite: '003'
+            cloudflared: true
+            tunnel_token_secret: CLOUDFLARED_TUNNEL_TOKEN_003
+            tunnel_url_secret: CLOUDFLARED_TUNNEL_URL_003
+          - suite: '004'
+            cloudflared: false
+          - suite: '005'
+            cloudflared: false
+          - suite: '006'
+            cloudflared: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use vendor cache (sequra)
+        uses: actions/cache@v5
+        id: sequra-composer-prod-cache
+        with:
+          path: |
+            sequra/vendor
+            sequra/composer.lock
+          key: sequra-composer-prod-cache-${{ hashFiles('sequra/composer.lock', 'sequra/src/**/*.php') }}
+
+      - name: Use vendor cache (sequra-helper)
+        uses: actions/cache@v5
+        id: sequra-helper-composer-prod-cache
+        with:
+          path: |
+            sequra-helper/vendor
+            sequra-helper/composer.lock
+          key: sequra-helper-composer-prod-cache-${{ hashFiles('sequra-helper/composer.lock', 'sequra-helper/src/**/*.php') }}
+
+      - name: Use node_modules cache
+        uses: actions/cache@v5
+        id: sequra-npm-cache
+        with:
+          path: |
+            sequra/node_modules
+            sequra/package-lock.json
+          key: sequra-npm-cache-${{ hashFiles('sequra/package-lock.json') }}
+      
+      - name: Use assets cache
+        uses: actions/cache@v5
+        id: sequra-assets-cache
+        with:
+          path: |
+            sequra/assets
+          key: sequra-assets-cache-${{ hashFiles('sequra/package-lock.json', 'sequra/webpack.config.js', 'sequra/assets/index.php', 'sequra/assets/js/**/*.js', 'sequra/assets/css/**/*.scss') }}
+
+      - name: Use Playwright browser cache
+        uses: actions/cache@v5
+        id: playwright-browser-cache
+        with:
+          path: |
+            /home/runner/.cache/ms-playwright
+          key: playwright-browser-cache-${{ hashFiles('sequra/package-lock.json') }}
+
+      - name: Setup the environment (with cloudflared)
+        if: matrix.cloudflared == true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+          CLOUDFLARED_TUNNEL_TOKEN: ${{ secrets[matrix.tunnel_token_secret] }}
+          CLOUDFLARED_TUNNEL_URL: ${{ secrets[matrix.tunnel_url_secret] }}
+        run: |
+          cp .env.sample .env
+          sed -i.bak "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env && rm .env.bak
+          sed -i.bak "s|^DUMMY_PASSWORD=.*|DUMMY_PASSWORD=$DUMMY_PASSWORD|" .env && rm .env.bak
+          sed -i.bak "s|^DUMMY_SERVICE_PASSWORD=.*|DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD|" .env && rm .env.bak
+          sed -i.bak "s|^CLOUDFLARED_TUNNEL_TOKEN=.*|CLOUDFLARED_TUNNEL_TOKEN=$CLOUDFLARED_TUNNEL_TOKEN|" .env && rm .env.bak
+          sed -i.bak "s|^CLOUDFLARED_TUNNEL_URL=.*|CLOUDFLARED_TUNNEL_URL=$CLOUDFLARED_TUNNEL_URL|" .env && rm .env.bak
+          ./setup.sh --cloudflared
+
+      - name: Setup the environment (without cloudflared)
+        if: matrix.cloudflared == false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DUMMY_ASSETS_KEY: ${{ secrets.DUMMY_ASSETS_KEY }}
+          DUMMY_PASSWORD: ${{ secrets.DUMMY_PASSWORD }}
+          DUMMY_SERVICE_PASSWORD: ${{ secrets.DUMMY_SERVICE_PASSWORD }}
+        run: |
+          cp .env.sample .env
+          sed -i.bak "s|^DUMMY_ASSETS_KEY=.*|DUMMY_ASSETS_KEY=$DUMMY_ASSETS_KEY|" .env && rm .env.bak
+          sed -i.bak "s|^DUMMY_PASSWORD=.*|DUMMY_PASSWORD=$DUMMY_PASSWORD|" .env && rm .env.bak
+          sed -i.bak "s|^DUMMY_SERVICE_PASSWORD=.*|DUMMY_SERVICE_PASSWORD=$DUMMY_SERVICE_PASSWORD|" .env && rm .env.bak
+          ./setup.sh
+
+      - name: Run E2E tests
+        run: |
+          set -a
+          source .env
+          set +a
+          cd sequra
+          npx playwright test ${{ matrix.suite }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: test-results-${{ matrix.suite }}
+          path: /tmp/test-results
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: ./teardown.sh

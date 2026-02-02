@@ -2,10 +2,6 @@
 BASEDIR="$(dirname $(realpath $0))/.."
 cd "${BASEDIR}"
 
-# Install only production dependencies
-bin/composer install --no-dev --quiet --no-interaction
-bin/npm run build --no-progress --silent --no-update-notifier
-
 cd "${BASEDIR}" || exit
 set -o allexport
 source .env
@@ -15,32 +11,5 @@ if [ -z "$PUBLIC_URL" ]; then
 	PUBLIC_URL="$WP_URL"
 fi
 
-wait_for() {
-	local retry=60
-	local timeout=1
-	local start=$(date +%s)
-
-	while [ $(($(date +%s) - $start)) -lt $retry ]; do
-		if "$@" > /dev/null 2>&1; then
-			return 0
-		fi
-		sleep $timeout
-	done
-	return 1
-}
-echo "🚀 Waiting for ngrok tunnel to be ready..."
-result=$(wait_for curl -H "ngrok-skip-browser-warning: 1" -s -o /dev/null --head --fail "${PUBLIC_URL}")
-if [ "$result" == "1" ]; then
-	echo "❌ WordPress is not available at: ${PUBLIC_URL}"
-	exit 1
-fi
-echo "✅ WordPress is available at: ${PUBLIC_URL}"
-
-# Check if --headed is passed
-if [[ "$@" == *"--headed"* || "$@" == *"--ui"* ]]; then
-    cd sequra && npx playwright test $@
-else
-    docker run \
-    --env-file "${BASEDIR}"/.env \
-    -it --rm -v "${BASEDIR}"/sequra:/app -w /app mcr.microsoft.com/playwright:v1.57.0 bash -c "npx playwright test $@"
-fi
+cd sequra
+npx playwright test $@

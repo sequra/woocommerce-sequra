@@ -9,6 +9,7 @@ This repository contains the plugin seQura Payment Gateway for WooCommerce.
   - [Starting the environment](#starting-the-environment)
   - [Stopping the environment](#stopping-the-environment)
 - [Utilities](#utilities)
+- [Building Docker images](#building-docker-images)
 - [Debugging](#debugging)
 - [Using the profiler](#using-the-profiler)
 - [seQura Helper plugin](#sequra-helper-plugin)
@@ -54,9 +55,6 @@ The repository includes a docker-compose file to easily test the module. You can
 ```bash
 ./setup.sh
 ```
-> [!IMPORTANT]
-> Make sure you have the line `127.0.0.1	localhost.sequrapi.com` added in your hosts file.
-
 > [!NOTE]
 > Once the setup is complete, the WordPress root URL, wp-admin URL, and user credentials (including the password) will be displayed in your terminal.
 
@@ -90,7 +88,7 @@ This repo contains a group of utility scripts under `bin/` directory. The goal i
 | `./bin/phpcbf` | Automatically correct coding standard violations on the project files |
 | `./bin/phpstan` | Run PHPStan on the project files |
 | `bin/php-syntax-check --php=<PHP-VERSION>` | Check if syntax used is compatible with the PHP version |
-| `./bin/cp_sources` | Copy WordPress Core and WooCommerce code to `.devcontainer/` |
+| `./bin/cp_sources` | Copy WordPress Core and WooCommerce code to `docker/` |
 | `./bin/publish_to_wordpress.sh` | Handles the plugin publishing to WordPress.org |
 | `./bin/make_zip` | Make a ZIP of `sequra` or a glue-plugin that is ready to be use for manual installations. The script allows the following arguments: `--branch=<GIT-BRANCH-NAME>` and `--project=<sequra>`. The resulting file will be generated into `zip/` directory.|
 | `./bin/playwright` | Run E2E in `sequra/tests-e2e` directory tests using Playwright using a Docker container |
@@ -104,6 +102,28 @@ If you require a composer dependency from a GitHub repository, you need to creat
     }
 }
 ```
+
+## Building Docker images
+
+The `docker-compose.yml` file uses a customized WordPress Docker image available at GitHub Packages Registry. Since the image is private, you need to authenticate to pull it. To do so, you need to create a GitHub Personal Access Token and store it in the `.env` file under the `GITHUB_TOKEN` variable. Despite this requirements, the `setup.sh` script will handle the login process for you, and also it will build the image locally if it doesn't exist in the registry.
+
+Tools for building and pushing the Docker image are available in the `docker/` directory. You can easily build and push the image by running the following commands:
+
+```bash
+docker/build-image.sh
+```
+The behavior of the script can be customized by setting the following arguments:
+
+| Argument | Description |
+| -------- | ------------------------------------------------------------------ |
+| `--push` | Push the image to the GitHub Packages Registry. Authentication is required. |
+| `--wp=<VERSION>` | The WordPress version to use. |
+
+If arguments are not provided, the script will build the image using the values defined in the `.env` file.
+
+> [!NOTE]  
+> For pushing the image, you need a token with the `read:packages` and `write:packages` scopes. The token must be stored in the `.env` file under the `GITHUB_TOKEN` variable or as a global environment variable.
+
 ## Debugging
 
 Debugging using XDebug is possible but you need to enable it first because is turned off by default in sake of performance. Use the following command to activate it:
@@ -148,7 +168,7 @@ XDebug includes a profiler that can be used to analyze the performance of the co
 ```bash
 docker compose exec web toggle-xdebug --mode=profile
 ```
-Each time a page loads in the browser, one ore more files will be generated at `/tmp/xdebug` directory inside the container. This path is mapped to the `.devcontainer/xdebug` directory in the host machine. You can use a tool like [QCacheGrind](https://sourceforge.net/projects/qcachegrind/) to analyze the generated files.
+Each time a page loads in the browser, one ore more files will be generated at `/tmp/xdebug` directory inside the container. This path is mapped to the `docker/xdebug` directory in the host machine. You can use a tool like [QCacheGrind](https://sourceforge.net/projects/qcachegrind/) to analyze the generated files.
 
 To install QCacheGrind in macOS you can use [Homebrew](https://brew.sh/):
 
@@ -367,7 +387,7 @@ The `chromium` browser is used for standard Playwright runs, while `chromium-hea
 
 ### Usage
 
-You can use the provided utility `bin/playwright` to run E2E tests defined in `tests-e2e` directory. This utility will run tests in a headless mode inside of a Docker container of the official image provided by the Playwright team.
+You can use the provided utility `bin/playwright` to run E2E tests defined in `tests-e2e` directory. This utility will run tests in a headless mode.
 
 Also, you can pass additional arguments to the utility to configure test execution. Some examples of arguments you can append to the command above:
 
@@ -378,9 +398,6 @@ Also, you can pass additional arguments to the utility to configure test executi
 | `./tests-e2e/example.spec.js` | Execute specific test file. Supports multiple file paths space separated. Also supports file name without extension and path like this: `example` |
 
 More info at: https://playwright.dev/docs/intro
-
-> [!IMPORTANT]
-> In order for some tests to succeed, you must expose your Magento container to the internet, so that the callbacks made by SeQura can work. Make sure that you run the setup script passing the `--ngrok` argument.
 
 > [!IMPORTANT]
 > Make sure you wrote values for `DUMMY_PASSWORD`, `DUMMY_SERVICE_PASSWORD` and `DUMMY_ASSETS_KEY` in the `.env` file before launching e2e tests.
@@ -416,11 +433,3 @@ The following command can be used to extract the strings from the plugin to the 
 docker compose exec -u www-data web wp loco extract sequra
 ```
 This guarantees that the `.pot` file is always up to date with the plugin strings and should be run on every release branch before merging it to the main branch.
-
-## Hidden pages
-
-### Order status settings
-
-Append the anchor `#settings-order_status` to the settings page to access the hidden configuration page, like this:
-
-http://localhost.sequrapi.com:8000/wp-admin/options-general.php?page=sequra#settings-order_status

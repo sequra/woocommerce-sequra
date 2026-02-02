@@ -48,13 +48,15 @@ test.describe('Configuration', () => {
       { webhook: dummy_config, args: [{ name: 'widgets', value: '1' }] }
     ]);
 
+    const response = await helper.executeWebhook({ webhook: 'get_ip', returnResponse: true });
+    const publicIP = response.data.ip_address;
+
     const badIPAddressesMatrix = [
       ['a.b.c.d'],
       ['a.b.c.d', '1.1.1.256'],
       ['a.b.c.d', '1.1.1.256', 'lorem ipsum']
     ]
 
-    const publicIP = await dataProvider.publicIP();
     const notAllowedIPAddressesMatrix = [
       ['8.8.8.8']
     ]
@@ -94,12 +96,10 @@ test.describe('Configuration', () => {
 
     // Test with valid IP addresses
     for (const ipAddresses of notAllowedIPAddressesMatrix) {
-      console.log('Fill not allowed IP addresses:', ipAddresses);
       await fillAndAssert(ipAddresses, false, categoryPage);
     }
 
     for (const ipAddresses of allowedIPAddressesMatrix) {
-      console.log('Fill allowed IP addresses:', ipAddresses);
       await fillAndAssert(ipAddresses, true, categoryPage);
     }
   });

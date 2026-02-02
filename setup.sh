@@ -6,6 +6,7 @@ fi
 install=0
 ngrok=0
 cloudflared=0
+BASEDIR="$(dirname $(realpath $0))"
 
 # Parse arguments:
 # --install: Installation of dependencies
@@ -32,8 +33,9 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# Reset PUBLIC_URL inside .env
-sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=|" .env
+# Extract WP_URL from .env and set PUBLIC_URL to that value
+WP_URL=$(grep '^WP_URL=' .env | cut -d'=' -f2)
+sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=$WP_URL|" .env
 rm .env.bak
 
 set -o allexport
@@ -119,7 +121,31 @@ else
     echo "Skipping installation of dependencies."   
 fi
 
-docker compose up -d --build || exit 1
+IMAGE_EXISTS=$(docker images -q ghcr.io/sequra/woocommerce-sequra:$WP_TAG)
+if [ -z "$IMAGE_EXISTS" ]; then
+    if [ -n "$GITHUB_TOKEN" ]; then
+        # Log in to GitHub Container Registry
+        echo "🔐 Logging in to the GitHub Container Registry..."
+        echo "$GITHUB_TOKEN" | docker login ghcr.io -u sequra --password-stdin || (echo "❌ Cannot log in to GitHub Container Registry" && exit 1)
+        echo "🔍 Checking if image ghcr.io/sequra/woocommerce-sequra:$WP_TAG exists in the GitHub Container Registry..."
+
+        if docker pull ghcr.io/sequra/woocommerce-sequra:$WP_TAG > /dev/null 2>&1; then
+            echo "🐳 Image ghcr.io/sequra/woocommerce-sequra:$WP_TAG pulled from the registry."
+            IMAGE_EXISTS=1
+        else
+            echo "⚠️ Image ghcr.io/sequra/woocommerce-sequra:$WP_TAG not found in the GitHub Container Registry."
+        fi
+    else
+        echo "⚠️ GITHUB_TOKEN is not set. Skipping check for existing image in the GitHub Container Registry."
+    fi
+    
+    if [ -z "$IMAGE_EXISTS" ]; then
+        echo "🐳 Image ghcr.io/sequra/woocommerce-sequra:$WP_TAG will be built now..."
+        $BASEDIR/docker/build-image.sh --wp=$WP_TAG || (echo "❌ Docker image build failed" && exit 1)
+    fi
+fi
+
+docker compose up -d || exit 1
 
 echo "🚀 Waiting for installation to complete..."
 
@@ -138,9 +164,11 @@ while [ $(($(date +%s) - $start)) -lt $retry ]; do
     elif docker compose exec web ls /var/www/html/.post-install-failed > /dev/null 2>&1; then
         seconds=$(($(date +%s) - $start))
         echo "❌ Installation failed after ${seconds} seconds."
+        $BASEDIR/teardown.sh
         exit 1
     fi
     sleep $timeout
 done
 echo "❌ Timeout after ${retry} seconds"
+$BASEDIR/teardown.sh
 exit 1
