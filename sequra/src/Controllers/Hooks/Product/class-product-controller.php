@@ -321,8 +321,9 @@ class Product_Controller extends Controller implements Interface_Product_Control
 				'max_amount'   => $widget['maxAmount'] ?? null,
 				
 			);
-			// Call the shortcode function directly to avoid escaping issues with quotes in CSS selectors
-			echo $this->do_widget_shortcode( $atts );
+			// Call the shortcode function directly to avoid escaping issues with quotes in CSS selectors.
+			//phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $this->do_widget_shortcode( $atts ); 
 		}
 	}
 
