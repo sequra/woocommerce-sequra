@@ -30,11 +30,11 @@ if ( ! isset(
 ) ) {
 	return;
 }
-$price                    = wp_strip_all_tags( strval( $args['price'] ) );
-$is_price_numeric         = preg_match( '/^[0-9]+(?:[.,][0-9]+)*$/', $price );
+$price                    = strval( $args['price'] );
+$is_price_numeric         = preg_match( '/^[0-9]+(?:[.,][0-9]+)?$/', $price );
 $in_place_widget_id       = str_replace( '.', '', uniqid( 'sequra-widget-', true ) );
 $in_place_widget_selector = '#' . $in_place_widget_id;
-$dest                     = empty( $args['dest'] ) ? $in_place_widget_selector : wp_strip_all_tags( $args['dest'] );
+$dest                     = empty( $args['dest'] ) ? $in_place_widget_selector : strval( $args['dest'] );
 
 //phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 if ( $is_price_numeric || empty( $args['dest'] ) ) : ?>
@@ -42,16 +42,16 @@ if ( $is_price_numeric || empty( $args['dest'] ) ) : ?>
 <?php endif; ?>
 <script type='text/javascript'>
 	SequraWidgetFacade.widgets && SequraWidgetFacade.widgets.push({
-		product: "<?php echo esc_js( $args['product'] ); ?>",
-		dest: "<?php echo esc_js( $dest ); ?>",
-		theme: "<?php echo esc_js( $args['theme'] ); ?>",
-		reverse: "<?php echo esc_js( $args['reverse'] ); ?>",
-		campaign: "<?php echo esc_js( $args['campaign'] ); ?>",
-		priceSel: "<?php echo $is_price_numeric ? esc_js( $in_place_widget_selector ) : esc_js( $price ); ?>",
-		variationPriceSel: "<?php echo $is_price_numeric ? 'null' : esc_js( wp_strip_all_tags( $args['alt_price'] ) ); ?>",
-		isVariableSel: "<?php echo $is_price_numeric ? 'null' : esc_js( wp_strip_all_tags( $args['is_alt_price'] ) ); ?>",
-		registrationAmount: "<?php echo esc_js( $args['reg_amount'] ); ?>",
-		minAmount: <?php echo esc_js( $args['min_amount'] ?? '0' ); ?>,
-		maxAmount: <?php echo esc_js( $args['max_amount'] ?? 'null' ); ?>
+		product: <?php echo wp_json_encode( $args['product'] ); ?>,
+		dest: <?php echo wp_json_encode( $dest ); ?>,
+		theme: <?php echo wp_json_encode( $args['theme'] ); ?>,
+		reverse: <?php echo wp_json_encode( $args['reverse'] ); ?>,
+		campaign: <?php echo wp_json_encode( $args['campaign'] ); ?>,
+		priceSel: <?php echo wp_json_encode( $is_price_numeric ? $in_place_widget_selector : $price ); ?>,
+		variationPriceSel: <?php echo $is_price_numeric ? 'null' : wp_json_encode( $args['alt_price'] ); ?>,
+		isVariableSel: <?php echo $is_price_numeric ? 'null' : wp_json_encode( $args['is_alt_price'] ); ?>,
+		registrationAmount: <?php echo wp_json_encode( $args['reg_amount'] ); ?>,
+		minAmount: <?php echo $args['min_amount'] ? wp_json_encode( $args['min_amount'] ) : '0'; ?>,
+		maxAmount: <?php echo $args['max_amount'] ? wp_json_encode( $args['max_amount'] ) : 'null'; ?>
 	});
 </script>
