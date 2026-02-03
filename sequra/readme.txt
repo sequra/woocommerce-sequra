@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.9.0
-Stable tag: 4.1.3
+Stable tag: 4.1.4
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.1.4	=
+* Fixed: Escape special characters in CSS selectors for widget rendering
+
 = 4.1.3	=
 * Fixed: Country resolution issues during solicitation process.
 * Fixed: Error displayed on the admin page when a category is named "0".
