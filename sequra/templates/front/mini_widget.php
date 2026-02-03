@@ -33,13 +33,13 @@ if ( ! isset(
 ?>
 <script type='text/javascript'>
 	SequraWidgetFacade.miniWidgets && SequraWidgetFacade.miniWidgets.push({
-		product: "<?php echo esc_js( $args['product'] ); ?>",
-		dest: "<?php echo wp_strip_all_tags( $args['dest'] ); ?>",
-		priceSel: "<?php echo wp_strip_all_tags( $args['price'] ); ?>",
-		campaign: "<?php echo esc_js( $args['campaign'] ); ?>",
-		message: "<?php echo esc_js( $args['message'] ); ?>",
-		messageBelowLimit: "<?php echo esc_js( $args['message_below_limit'] ); ?>",
-		minAmount: <?php echo esc_js( $args['min_amount'] ); ?>,
-		maxAmount: <?php echo esc_js( $args['max_amount'] ?? 'null' ); ?>
+		product: <?php echo wp_json_encode( $args['product'] ); ?>,
+		dest: <?php echo wp_json_encode( $args['dest'] ); ?>,
+		priceSel: <?php echo wp_json_encode( $args['price'] ); ?>,
+		campaign: <?php echo wp_json_encode( $args['campaign'] ); ?>,
+		message: <?php echo wp_json_encode( $args['message'] ); ?>,
+		messageBelowLimit: <?php echo wp_json_encode( $args['message_below_limit'] ); ?>,
+		minAmount: <?php echo wp_json_encode( $args['min_amount'] ); ?>,
+		maxAmount: <?php echo $args['max_amount'] ? wp_json_encode( $args['max_amount'] ) : 'null'; ?>
 	});
 </script>

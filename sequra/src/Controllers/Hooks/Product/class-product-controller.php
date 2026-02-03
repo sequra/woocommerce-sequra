@@ -108,6 +108,11 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			}
 		}
 
+		// Decode HTML entities in attributes if any.
+		foreach ( $atts as $key => $value ) {
+			$atts[ $key ] = html_entity_decode( $value, ENT_QUOTES );
+		}
+
 		$product_id = intval( $atts['product_id'] ?? 0 );
 		$product    = $atts['product'];
 		$campaign   = isset( $atts['campaign'] ) && '' !== $atts['campaign'] ? $atts['campaign'] : '';
@@ -323,6 +328,11 @@ class Product_Controller extends Controller implements Interface_Product_Control
 			);
 			$atts_str = '';
 			foreach ( $atts as $key => $value ) {
+				if ( \is_string( $value ) ) {
+					// Escape special characters to avoid breaking the shortcode.
+					$value = \str_replace( array( '[', ']', "'" ), array( '&#91;', '&#93;', '&#39;' ), $value );
+				}
+
 				$atts_str .= " $key='$value'";
 			}
 			echo \do_shortcode( "[sequra_widget $atts_str]" );
