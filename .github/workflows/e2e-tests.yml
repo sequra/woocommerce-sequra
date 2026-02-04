@@ -106,7 +106,7 @@ jobs:
     if: github.event.pull_request.draft == false
 
     concurrency:
-      group: e2e-cloudflared-tests
+      group: e2e-cloudflared-tests-${{ matrix.suite }}
       cancel-in-progress: false
 
     strategy:
