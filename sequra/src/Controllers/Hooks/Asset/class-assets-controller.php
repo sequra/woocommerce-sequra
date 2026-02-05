@@ -210,6 +210,7 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 				'isShowCheckoutAsHostedPageFieldVisible' => false, // Not used in this implementation.
 				'configurableSelectorsForMiniWidgets'    => true,
 				'isServiceSellingAllowed'                => true,
+				'isAltPriceSelectorVisible'              => true,
 			),
 			'translations'      => array(
 				'default' => $this->load_translation(),
