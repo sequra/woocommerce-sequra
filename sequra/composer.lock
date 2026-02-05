@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c5ba00ee72b0e9009188baa6ed104ae6",
+    "content-hash": "a5d850d26b8725c6be654b340dd15285",
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "v3.0.3",
+            "version": "dev-feature/LIS-91-Enable-configuration-via-webhook",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "520cb1edfdcb57499d95165431a9014126b1768f"
+                "reference": "cb0db54ed44420c0661136afcd9f4d6a057be39d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/520cb1edfdcb57499d95165431a9014126b1768f",
-                "reference": "520cb1edfdcb57499d95165431a9014126b1768f",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/cb0db54ed44420c0661136afcd9f4d6a057be39d",
+                "reference": "cb0db54ed44420c0661136afcd9f4d6a057be39d",
                 "shasum": ""
             },
             "require": {
@@ -45,9 +45,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v3.0.3"
+                "source": "https://github.com/sequra/integration-core/tree/feature/LIS-91-Enable-configuration-via-webhook"
             },
-            "time": "2025-12-04T16:23:38+00:00"
+            "time": "2026-02-03T10:23:37+00:00"
         }
     ],
     "packages-dev": [
@@ -3024,7 +3024,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "sequra/integration-core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {},
