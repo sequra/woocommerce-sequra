@@ -46,7 +46,7 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->order_service = $order_service;
-		$this->cart_service = $cart_service;
+		$this->cart_service  = $cart_service;
 
 		\add_action( 'admin_notices', array( $this, 'display_notices' ) );
 	}
