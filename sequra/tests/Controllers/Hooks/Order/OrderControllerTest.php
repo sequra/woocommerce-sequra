@@ -11,6 +11,7 @@ namespace SeQura\WC\Tests\Controllers\Hooks\Process;
 use Exception;
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Hooks\Order\Order_Controller;
+use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use SeQura\WC\Tests\Fixtures\Store;
@@ -21,6 +22,8 @@ class OrderControllerTest extends WP_UnitTestCase {
 	private $controller;
 	/** @var \SeQura\WC\Services\Order\Interface_Order_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $order_service;
+	/** @var \SeQura\WC\Services\Cart\Interface_Cart_Service&\PHPUnit\Framework\MockObject\MockObject */
+	private $cart_service;
 	/** @var \SeQura\WC\Services\Log\Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject */
 	private $logger;
 	private $store;
@@ -30,11 +33,13 @@ class OrderControllerTest extends WP_UnitTestCase {
 		$this->hook_migrate_orders_to_use_indexes = 'migrate_orders_to_use_indexes_test_hook';
 		$this->logger                             = $this->createMock( Interface_Logger_Service::class );
 		$this->order_service                      = $this->createMock( Interface_Order_Service::class );
+		$this->cart_service                       = $this->createMock( Interface_Cart_Service::class );
 		
 		$this->controller = new Order_Controller( 
 			$this->logger, 
 			'path/to/templates', 
-			$this->order_service
+			$this->order_service,
+			$this->cart_service
 		);
 		$this->store      = new Store();
 		$this->store->set_up();
