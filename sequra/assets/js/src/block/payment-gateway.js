@@ -213,11 +213,9 @@ registerPaymentMethod({
                     return { canMake, detail };
                 })
                 .catch((err) => {
-                    if (err.name === 'AbortError') {
-                        // Silently ignore aborted requests; a newer one is in flight.
-                        return;
+                    if (err.name !== 'AbortError') {
+                        onResolved(false, { content: '' });
                     }
-                    onResolved(false, { content: '' });
                     return { canMake: false, detail: { content: '' } };
                 })
                 .finally(() => {
