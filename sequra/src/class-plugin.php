@@ -145,6 +145,9 @@ class Plugin {
 
 		// WooCommerce Compat.
 		\add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
+
+		// Cart identifier generation.
+		\add_action( 'woocommerce_init', array( $order_controller, 'ensure_cart_info_exists' ) );
 	}
 
 	/**
