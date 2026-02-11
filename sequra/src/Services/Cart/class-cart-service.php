@@ -155,6 +155,10 @@ class Cart_Service implements Interface_Cart_Service {
 	 */
 	public function get_cart_info_from_session( $initialize_if_not_exists = true ): ?Cart_Info {
 		$_session = WC()->session;
+		if( ! $_session ) {
+			$this->logger->log_debug( 'WC Session is not available', __FUNCTION__, __CLASS__ );
+			return null;
+		}
 		$raw_data = $_session->get( self::SESSION_CART_INFO, null );
 		if ( $raw_data ) {
 			return Cart_Info::from_array( $raw_data );
