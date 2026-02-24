@@ -66,4 +66,11 @@ interface Interface_Order_Controller {
 	 * @param string $hook Hook name that triggered the action.
 	 */
 	public function migrate_orders_to_use_indexes( $hook );
+
+	/**
+	 * Create the Cart Info object for the current session if it doesn't exist.
+	 * 
+	 * @return void
+	 */
+	public function ensure_cart_info_exists();
 }

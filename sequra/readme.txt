@@ -101,7 +101,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 Contributors:
 == Changelog ==
 = 4.1.4	=
-* Fixed: Escape special characters in CSS selectors for widget rendering
+* Fixed: Escape special characters in CSS selectors for widget rendering.
+* Fixed: Debounced payment method availability checks to reduce server load, eliminate duplicate API entries, and improve checkout performance.
 
 = 4.1.3	=
 * Fixed: Country resolution issues during solicitation process.

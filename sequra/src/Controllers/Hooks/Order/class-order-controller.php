@@ -10,6 +10,7 @@ namespace SeQura\WC\Controllers\Hooks\Order;
 
 use SeQura\Core\Infrastructure\Logger\LogContextData;
 use SeQura\WC\Controllers\Controller;
+use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\WC\Services\Order\Interface_Order_Service;
 use Throwable;
@@ -28,15 +29,24 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 	private $order_service;
 
 	/**
+	 * Cart service
+	 *
+	 * @var Interface_Cart_Service
+	 */
+	private $cart_service;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( 
 		Interface_Logger_Service $logger, 
 		string $templates_path,
-		Interface_Order_Service $order_service
+		Interface_Order_Service $order_service,
+		Interface_Cart_Service $cart_service
 	) {
 		parent::__construct( $logger, $templates_path );
 		$this->order_service = $order_service;
+		$this->cart_service  = $cart_service;
 
 		\add_action( 'admin_notices', array( $this, 'display_notices' ) );
 	}
@@ -184,5 +194,14 @@ class Order_Controller extends Controller implements Interface_Order_Controller 
 		}
 
 		$this->order_service->migrate_data();
+	}
+
+	/**
+	 * Create the Cart Info object for the current session if it doesn't exist.
+	 * 
+	 * @return void
+	 */
+	public function ensure_cart_info_exists() {
+		$this->cart_service->get_cart_info_from_session();
 	}
 }
