@@ -139,6 +139,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'sequra_cleanup_orders', array( $this->order_controller, 'cleanup_orders' ) ) );
 		$this->assertEquals( 10, has_action( $this->hook_add_order_indexes, array( $this->order_controller, 'migrate_orders_to_use_indexes' ) ) );
 		$this->assertEquals( 10, has_action( 'before_woocommerce_init', array( $this->plugin, 'declare_woocommerce_compatibility' ) ) );
+		$this->assertEquals( 10, has_action( 'woocommerce_init', array( $this->order_controller, 'ensure_cart_info_exists' ) ) );
 	}
 
 	public function testActivate_notMeetPhpRequirements_deactivateAndDie() {

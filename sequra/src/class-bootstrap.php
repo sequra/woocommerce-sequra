@@ -1006,7 +1006,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Order_Controller::class ] = new Order_Controller(
 						Reg::getService( Interface_Logger_Service::class ),
 						self::get_constants()->get_plugin_templates_path(),
-						Reg::getService( Interface_Order_Service::class )
+						Reg::getService( Interface_Order_Service::class ),
+						Reg::getService( Interface_Cart_Service::class )
 					);
 				}
 				return self::$cache[ Interface_Order_Controller::class ];
