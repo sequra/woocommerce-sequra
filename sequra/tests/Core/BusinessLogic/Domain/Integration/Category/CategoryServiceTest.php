@@ -48,12 +48,12 @@ class CategoryServiceTest extends WP_UnitTestCase {
 	 * Helper: create a product category.
 	 *
 	 * @param string $name   Category name.
-	 * @param int    $parent Parent term ID (0 = none).
+	 * @param int    $parent_cat Parent term ID (0 = none).
 	 *
 	 * @return int
 	 */
-	private function create_category( string $name, int $parent = 0 ): int {
-		$args = array( 'parent' => $parent );
+	private function create_category( string $name, int $parent_cat = 0 ): int {
+		$args = array( 'parent' => $parent_cat );
 		$term = wp_insert_term( $name, 'product_cat', $args );
 		$this->assertIsArray( $term );
 		return (int) $term['term_id'];
@@ -91,8 +91,8 @@ class CategoryServiceTest extends WP_UnitTestCase {
 
 	public function testGetCategories_withPaginationAndSearch_combinesBoth(): void {
 		// Create additional matching categories for pagination.
-		$extra_id_1   = $this->create_category( 'Cat Apple Extra1' );
-		$extra_id_2   = $this->create_category( 'Cat Apple Extra2' );
+		$extra_id_1       = $this->create_category( 'Cat Apple Extra1' );
+		$extra_id_2       = $this->create_category( 'Cat Apple Extra2' );
 		$this->term_ids[] = $extra_id_1;
 		$this->term_ids[] = $extra_id_2;
 
@@ -103,8 +103,8 @@ class CategoryServiceTest extends WP_UnitTestCase {
 	}
 
 	public function testGetCategories_nestedCategory_returnsFullPath(): void {
-		$parent_id      = $this->create_category( 'Parent Category' );
-		$child_id       = $this->create_category( 'Child Category', $parent_id );
+		$parent_id        = $this->create_category( 'Parent Category' );
+		$child_id         = $this->create_category( 'Child Category', $parent_id );
 		$this->term_ids[] = $parent_id;
 		$this->term_ids[] = $child_id;
 
@@ -119,7 +119,7 @@ class CategoryServiceTest extends WP_UnitTestCase {
 	public function testGetCategories_sortedByName(): void {
 		$categories = $this->service->getCategories();
 
-		$names = array_map( fn( $c ) => $c->getName(), $categories );
+		$names  = array_map( fn( $c ) => $c->getName(), $categories );
 		$sorted = $names;
 		usort( $sorted, 'strcasecmp' );
 
@@ -145,8 +145,8 @@ class CategoryServiceTest extends WP_UnitTestCase {
 	}
 
 	public function testGetCategoriesByIds_nestedCategory_returnsFullPath(): void {
-		$parent_id      = $this->create_category( 'Root Cat' );
-		$child_id       = $this->create_category( 'Nested Cat', $parent_id );
+		$parent_id        = $this->create_category( 'Root Cat' );
+		$child_id         = $this->create_category( 'Nested Cat', $parent_id );
 		$this->term_ids[] = $parent_id;
 		$this->term_ids[] = $child_id;
 
