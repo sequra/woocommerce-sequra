@@ -23,7 +23,7 @@ use WP_REST_Response;
  */
 class Store_Integration_REST_Controller extends REST_Controller {
 
-	protected const PARAM_SIGNATURE    = 'signature';
+	protected const PARAM_SIGNATURE = 'signature';
 
 	/**
 	 * Store integration service
@@ -58,7 +58,7 @@ class Store_Integration_REST_Controller extends REST_Controller {
 		$this->store_integration_service = $store_integration_service;
 		$this->namespace                 = $rest_namespace;
 		$this->rest_base                 = $this->store_integration_service->get_rest_base();
-		$this->store_context              = $store_context;
+		$this->store_context             = $store_context;
 	}
 
 	/**
@@ -69,7 +69,7 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	public function register_routes() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
 		$args = array( 
-			self::PARAM_STORE_ID => $this->get_arg_string(),
+			self::PARAM_STORE_ID  => $this->get_arg_string(),
 			self::PARAM_SIGNATURE => $this->get_arg_string(),
 		);
 		$this->register_post( $this->store_integration_service->get_endpoint(), 'handle_post', $args, 'check_permissions' );
@@ -92,10 +92,10 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function handle_post( WP_REST_Request $request ) {
-		$signature = $request->get_param('signature');
-		$payload = $request->get_json_params();
-		$response = ConfigurationWebhookAPI::configurationHandler($this->store_context->getStoreId())
-		->handleRequest($signature, $payload);
+		$signature = $request->get_param( 'signature' );
+		$payload   = $request->get_json_params();
+		$response  = ConfigurationWebhookAPI::configurationHandler( $this->store_context->getStoreId() )
+		->handleRequest( $signature, $payload );
 		return $this->build_response( $response );
 	}
 }
