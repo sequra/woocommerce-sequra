@@ -150,6 +150,8 @@ use SeQura\WC\Services\Order\Builder\Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Service\Interface_Settings_Service;
 use SeQura\WC\Services\Service\Settings_Service;
 use SeQura\Core\BusinessLogic\DataAccess\StoreIntegration\Entities\StoreIntegration;
+use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -875,6 +877,17 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Order_Delivery_Method_Builder::class ] = new Order_Delivery_Method_Builder();
 				}
 				return self::$cache[ Interface_Order_Delivery_Method_Builder::class ];
+			}
+		);
+		Reg::registerService(
+			StoreInfoServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ StoreInfoServiceInterface::class ] ) ) {
+					self::$cache[ StoreInfoServiceInterface::class ] = new Store_Info_Service(
+						Reg::getService( Interface_Platform_Provider::class )
+					);
+				}
+				return self::$cache[ StoreInfoServiceInterface::class ];
 			}
 		);
 	}
