@@ -33,12 +33,12 @@ class Category_Service implements CategoryServiceInterface {
 			'hide_empty' => false,
 		);
 
-		// Apply search filter if provided
+		// Apply search filter if provided.
 		if ( ! empty( $search ) ) {
 			$args['search'] = $search;
 		}
 
-		// Apply pagination if both page and limit are provided
+		// Apply pagination if both page and limit are provided.
 		if ( null !== $page && null !== $limit && $page > 0 && $limit > 0 ) {
 			$args['number'] = $limit;
 			$args['offset'] = ( $page - 1 ) * $limit;
@@ -118,10 +118,10 @@ class Category_Service implements CategoryServiceInterface {
 	private function get_category_name( $term ): string {
 		static $cache = array();
 
-		// If term is an ID, fetch the term object
+		// If term is an ID, fetch the term object.
 		if ( \is_int( $term ) ) {
 			$term_id = $term;
-			// Return cached result if available
+			// Return cached result if available.
 			if ( isset( $cache[ $term_id ] ) ) {
 				return $cache[ $term_id ];
 			}
@@ -130,17 +130,15 @@ class Category_Service implements CategoryServiceInterface {
 			if ( \is_wp_error( $term ) || null === $term ) {
 				return '';
 			}
-		} else {
-			// Return cached result if available
-			if ( isset( $cache[ $term->term_id ] ) ) {
-				return $cache[ $term->term_id ];
-			}
+		} elseif ( isset( $cache[ $term->term_id ] ) ) {
+			// Return cached result if available.
+			return $cache[ $term->term_id ];
 		}
 
 		$category_name = $term->name;
 
 		if ( ! empty( $term->parent ) ) {
-			// Fetch parent term only if needed
+			// Fetch parent term only if needed.
 			$parent_term = \get_term( $term->parent, 'product_cat' );
 			if ( ! \is_wp_error( $parent_term ) && null !== $parent_term ) {
 				$parent_name = $this->get_category_name( $parent_term );
@@ -150,7 +148,7 @@ class Category_Service implements CategoryServiceInterface {
 			}
 		}
 
-		// Cache the result
+		// Cache the result.
 		$cache[ $term->term_id ] = $category_name;
 
 		return $category_name;
