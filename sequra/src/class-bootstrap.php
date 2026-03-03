@@ -149,6 +149,7 @@ use SeQura\WC\Services\Order\Builder\Order_Customer_Builder;
 use SeQura\WC\Services\Order\Builder\Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Service\Interface_Settings_Service;
 use SeQura\WC\Services\Service\Settings_Service;
+use SeQura\Core\BusinessLogic\DataAccess\StoreIntegration\Entities\StoreIntegration;
 
 /**
  * Implementation for the core bootstrap class.
@@ -911,6 +912,7 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( PaymentMethod::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( StoreIntegration::class, Entity_Repository::class );
 	}
 
 	/**
@@ -1088,7 +1090,8 @@ class Bootstrap extends BootstrapComponent {
 						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class ),
 						Reg::getService( RegexProvider::class ),
-						Reg::getService( StoreIntegrationServiceInterface::class )
+						Reg::getService( StoreIntegrationServiceInterface::class ),
+						Reg::getService( StoreContext::class )
 					);
 				}
 				return self::$cache[ Store_Integration_REST_Controller::class ];
