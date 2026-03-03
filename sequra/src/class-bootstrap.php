@@ -154,6 +154,8 @@ use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInter
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
 use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Integration\Log\LogServiceInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Log\Log_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -890,6 +892,18 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ StoreInfoServiceInterface::class ];
+			}
+		);
+		Reg::registerService(
+			LogServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ LogServiceInterface::class ] ) ) {
+					self::$cache[ LogServiceInterface::class ] = new Log_Service(
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( StoreContext::class )
+					);
+				}
+				return self::$cache[ LogServiceInterface::class ];
 			}
 		);
 	}
