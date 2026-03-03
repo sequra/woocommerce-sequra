@@ -9,10 +9,11 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use Exception;
-use SeQura\Core\BusinessLogic\AdminAPI\Response\ErrorResponse;
+use SeQura\Core\BusinessLogic\ConfigurationWebhookAPI\ConfigurationWebhookAPI;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreIntegration\Interface_Store_Integration_Service;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,12 +23,21 @@ use WP_REST_Response;
  */
 class Store_Integration_REST_Controller extends REST_Controller {
 
+	protected const PARAM_SIGNATURE    = 'signature';
+
 	/**
 	 * Store integration service
 	 *
 	 * @var Interface_Store_Integration_Service
 	 */
 	private $store_integration_service;
+
+	/**
+	 * Store context
+	 *
+	 * @var StoreContext
+	 */
+	private $store_context;
 	
 	/**
 	 * Constructor.
@@ -41,12 +51,14 @@ class Store_Integration_REST_Controller extends REST_Controller {
 		$rest_namespace, 
 		Interface_Logger_Service $logger,
 		RegexProvider $regex,
-		Interface_Store_Integration_Service $store_integration_service
+		Interface_Store_Integration_Service $store_integration_service,
+		StoreContext $store_context
 	) {
 		parent::__construct( $logger, $regex );
 		$this->store_integration_service = $store_integration_service;
 		$this->namespace                 = $rest_namespace;
 		$this->rest_base                 = $this->store_integration_service->get_rest_base();
+		$this->store_context              = $store_context;
 	}
 
 	/**
@@ -56,14 +68,18 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	 */
 	public function register_routes() {
 		$this->logger->log_debug( 'Hook executed', __FUNCTION__, __CLASS__ );
-		$this->register_post( $this->store_integration_service->get_endpoint(), 'handle_post', array(), 'check_permissions' );
+		$args = array( 
+			self::PARAM_STORE_ID => $this->get_arg_string(),
+			self::PARAM_SIGNATURE => $this->get_arg_string(),
+		);
+		$this->register_post( $this->store_integration_service->get_endpoint(), 'handle_post', $args, 'check_permissions' );
 	}
 
 	/**
 	 * Check the request data to see if the it has permission to proceed.
 	 */
 	public function check_permissions(): bool {
-		// TODO: implement permission checks.
+		// The signature is checked in the Integration Core, no need to check it here.
 		return true;
 	}
 
@@ -76,7 +92,10 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function handle_post( WP_REST_Request $request ) {
-		// todo: implement POST handling.
-		return $this->build_response( new ErrorResponse( new Exception( 'Not implemented' ) ) );
+		$signature = $request->get_param('signature');
+		$payload = $request->get_json_params();
+		$response = ConfigurationWebhookAPI::configurationHandler($this->store_context->getStoreId())
+		->handleRequest($signature, $payload);
+		return $this->build_response( $response );
 	}
 }
