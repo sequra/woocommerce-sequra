@@ -129,6 +129,7 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Product\Produ
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Mini_Widget_Messages_Provider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
 use SeQura\WC\Repositories\Migrations\Migration_Install_400;
+use SeQura\WC\Repositories\Migrations\Migration_Install_420;
 use SeQura\WC\Services\Order\Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Platform\Interface_Platform_Provider;
@@ -598,7 +599,11 @@ class Bootstrap extends BootstrapComponent {
 							new Migration_Install_400(
 								$wpdb,
 								$encryptor,
-								$store_context,
+								$store_context
+							),
+							new Migration_Install_420(
+								$wpdb,
+								Reg::getService( AdvancedSettingsService::class )
 							),
 						)
 					);
