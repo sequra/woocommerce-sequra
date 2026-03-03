@@ -152,6 +152,8 @@ use SeQura\WC\Services\Service\Settings_Service;
 use SeQura\Core\BusinessLogic\DataAccess\StoreIntegration\Entities\StoreIntegration;
 use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
+use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
+use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
 
 /**
  * Implementation for the core bootstrap class.
@@ -926,6 +928,7 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( StoreIntegration::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( AdvancedSettings::class, Entity_Repository::class );
 	}
 
 	/**
@@ -1089,7 +1092,8 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Log_REST_Controller::class ] = new Log_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( RegexProvider::class )
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( AdvancedSettingsService::class )
 					);
 				}
 				return self::$cache[ Log_REST_Controller::class ];
