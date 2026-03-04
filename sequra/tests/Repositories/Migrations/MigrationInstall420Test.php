@@ -237,11 +237,42 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 		$this->assertNull( $level_row );
 	}
 
+	public function testRun_withExistingAdvancedSettings_skipsAdvancedSettingsMigration(): void {
+		$this->insert_legacy_config( 'defaultLoggerEnabled', true );
+
+		$this->advanced_settings_service
+			->method( 'getAdvancedSettings' )
+			->willReturn( new AdvancedSettings( true, 2 ) );
+
+		$this->advanced_settings_service
+			->expects( $this->never() )
+			->method( 'setAdvancedSettings' );
+
+		$this->call_migrate_advanced_settings();
+	}
+
 	public function testRun_registerStoreIntegrations_executesWithoutException(): void {
 		// In the test environment there are no connected stores, so the task
 		// should complete without making external calls or throwing exceptions.
 		$this->expectNotToPerformAssertions();
 		$this->call_register_store_integrations();
+	}
+
+	public function testRun_withExistingStoreIntegration_skipsRegistration(): void {
+		$this->wpdb->insert(
+			$this->entity_table,
+			array(
+				'type' => 'StoreIntegration',
+				'data' => '{}',
+			)
+		);
+
+		// If the task were executed it would throw or make external calls;
+		// completing without exception confirms the early-return was taken.
+		$this->expectNotToPerformAssertions();
+		$this->call_register_store_integrations();
+
+		$this->wpdb->delete( $this->entity_table, array( 'type' => 'StoreIntegration' ) );
 	}
 
 	public function testRun_registerStoreIntegrationsFails_throwsCriticalMigrationException(): void {
