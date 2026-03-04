@@ -57,6 +57,11 @@ class Migration_Install_420 extends Migration {
 	 * @throws Critical_Migration_Exception
 	 */
 	private function register_store_integrations(): void {
+		// Skip migration if store integration exists in the database.
+		if ( $this->db->get_var( "SELECT COUNT(*) FROM {$this->entity_table} WHERE `type` = 'StoreIntegration'" ) > 0 ) {
+			return;
+		}
+
 		try {
 			( new StoreIntegrationMigrateTask() )->execute();
 		} catch ( Throwable $e ) {
@@ -71,6 +76,11 @@ class Migration_Install_420 extends Migration {
 	 * @throws Throwable
 	 */
 	private function migrate_advanced_settings(): void {
+		// Skip migration if the new Advanced settings are already set.
+		if ( $this->advanced_settings_service->getAdvancedSettings() ) {
+			return;
+		}
+	
 		// @phpstan-ignore-next-line
 		$query              = $this->db->prepare( 'SELECT `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'Configuration', 'defaultLoggerEnabled' );
 		$logger_enabled_row = $this->db->get_row( $query, ARRAY_A );
