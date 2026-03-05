@@ -10,7 +10,6 @@ namespace SeQura\WC\Repositories\Migrations;
 
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Models\AdvancedSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
-use SeQura\Core\BusinessLogic\Domain\Migration\Tasks\StoreIntegrationMigrateTask;
 use Throwable;
 
 /**
@@ -52,25 +51,6 @@ class Migration_Install_420 extends Migration {
 	}
 
 	/**
-	 * Register store integrations
-	 *
-	 * @throws Critical_Migration_Exception
-	 */
-	private function register_store_integrations(): void {
-		// Skip migration if store integration exists in the database.
-		if ( $this->db->get_var( "SELECT COUNT(*) FROM {$this->entity_table} WHERE `type` = 'StoreIntegration'" ) > 0 ) {
-			return;
-		}
-
-		try {
-			( new StoreIntegrationMigrateTask() )->execute();
-		} catch ( Throwable $e ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Critical_Migration_Exception( 'Store Integration Migration Failed', 0, $e ); 
-		}
-	}
-
-	/**
 	 * Migrate Advanced settings to the new format
 	 *
 	 * @throws Throwable
@@ -97,40 +77,40 @@ class Migration_Install_420 extends Migration {
 		if ( null !== $logger_enabled_row && isset( $logger_enabled_row['data'] ) && is_string( $logger_enabled_row['data'] ) ) {
 			$data       = json_decode( $logger_enabled_row['data'], true );
 			$is_enabled = is_array( $data ) && ! empty( $data['value'] );
+
+			$this->db->delete(
+				$this->entity_table,
+				array(
+					'type'    => 'Configuration',
+					'index_1' => 'defaultLoggerEnabled',
+				)
+			);
 		}
 
 		$level = 3;
 		if ( null !== $log_level_row && isset( $log_level_row['data'] ) && is_string( $log_level_row['data'] ) ) {
 			$data  = json_decode( $log_level_row['data'], true );
 			$level = is_array( $data ) && isset( $data['value'] ) ? (int) $data['value'] : 3;
+
+			$this->db->delete(
+				$this->entity_table,
+				array(
+					'type'    => 'Configuration',
+					'index_1' => 'minLogLevel',
+				)
+			);
 		}
 
 		$settings = new AdvancedSettings( $is_enabled, $level );
 		$this->advanced_settings_service->setAdvancedSettings( $settings );
-
-		$this->db->delete(
-			$this->entity_table,
-			array(
-				'type'    => 'Configuration',
-				'index_1' => 'defaultLoggerEnabled',
-			)
-		);
-		$this->db->delete(
-			$this->entity_table,
-			array(
-				'type'    => 'Configuration',
-				'index_1' => 'minLogLevel',
-			)
-		);
 	}
 
 	/**
 	 * Run the migration.
 	 *
-	 * @throws Throwable|Critical_Migration_Exception
+	 * @throws Throwable
 	 */
 	public function run(): void {
-		$this->register_store_integrations();
 		$this->migrate_advanced_settings();
 	}
 }

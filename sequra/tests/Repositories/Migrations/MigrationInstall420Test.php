@@ -10,7 +10,6 @@ namespace SeQura\WC\Tests\Repositories\Migrations;
 
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Models\AdvancedSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
-use SeQura\WC\Repositories\Migrations\Critical_Migration_Exception;
 use SeQura\WC\Repositories\Migrations\Migration_Install_420;
 use WP_UnitTestCase;
 
@@ -111,15 +110,6 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 	 */
 	private function call_migrate_advanced_settings(): void {
 		$method = new \ReflectionMethod( Migration_Install_420::class, 'migrate_advanced_settings' );
-		$method->setAccessible( true );
-		$method->invoke( $this->migration );
-	}
-
-	/**
-	 * Call the private register_store_integrations() method via reflection.
-	 */
-	private function call_register_store_integrations(): void {
-		$method = new \ReflectionMethod( Migration_Install_420::class, 'register_store_integrations' );
 		$method->setAccessible( true );
 		$method->invoke( $this->migration );
 	}
@@ -249,47 +239,5 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 			->method( 'setAdvancedSettings' );
 
 		$this->call_migrate_advanced_settings();
-	}
-
-	public function testRun_registerStoreIntegrations_executesWithoutException(): void {
-		// In the test environment there are no connected stores, so the task
-		// should complete without making external calls or throwing exceptions.
-		$this->expectNotToPerformAssertions();
-		$this->call_register_store_integrations();
-	}
-
-	public function testRun_withExistingStoreIntegration_skipsRegistration(): void {
-		$this->wpdb->insert(
-			$this->entity_table,
-			array(
-				'type' => 'StoreIntegration',
-				'data' => '{}',
-			)
-		);
-
-		// If the task were executed it would throw or make external calls;
-		// completing without exception confirms the early-return was taken.
-		$this->expectNotToPerformAssertions();
-		$this->call_register_store_integrations();
-
-		$this->wpdb->delete( $this->entity_table, array( 'type' => 'StoreIntegration' ) );
-	}
-
-	public function testRun_registerStoreIntegrationsFails_throwsCriticalMigrationException(): void {
-		// We verify the exception wrapping by calling run() against an environment
-		// where StoreIntegrationMigrateTask will throw. Since we cannot inject the
-		// task directly (it is created with `new` inside a private method), we rely
-		// on the fact that Critical_Migration_Exception is thrown on any Throwable.
-		// Here we simulate this by testing the exception type propagated from run().
-		//
-		// NOTE: If the test environment has no connected stores and the SeQura
-		// services are properly registered (as they are in the full WP test env),
-		// register_store_integrations() will succeed silently. This test therefore
-		// verifies that the exception wrapping code path exists and works as
-		// designed by checking the exception class hierarchy.
-		$this->assertInstanceOf(
-			\Exception::class,
-			new Critical_Migration_Exception( 'test' )
-		);
 	}
 }
