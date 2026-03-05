@@ -29,16 +29,37 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	 * Returns WooCommerce status for completed orders.
 	 */
 	public function get_shop_status_completed( bool $unprefixed = false ): array {
-		$order_status_settings = $this->get_order_status_settings_cached();
-		$find_status_callback  = function ( OrderStatusMapping $mapping ) {
-			return $mapping->getSequraStatus() === OrderStates::STATE_APPROVED;
-		};
-		$mapping               = array_find( $order_status_settings, $find_status_callback );
+		$mapping = $this->find_mapping_by_sequra_status(
+			OrderStates::STATE_APPROVED,
+			$this->get_order_status_settings_cached(),
+			$this->getDefaultStatusMappings()
+		);
+
 		if ( null === $mapping ) {
-			// Guard: use the default value if not set in repository.
-			$mapping = array_find( $this->getDefaultStatusMappings(), $find_status_callback );
+			return array();
 		}
+
 		return array( $unprefixed ? $this->unprefixed_shop_status( $mapping->getShopStatus() ) : $mapping->getShopStatus() );
+	}
+
+	/**
+	 * Finds first mapping for a given SeQura status across one or more mapping collections.
+	 *
+	 * @param string $sequra_status
+	 * @param OrderStatusMapping[] ...$status_mappings_sources
+	 *
+	 * @return OrderStatusMapping|null
+	 */
+	private function find_mapping_by_sequra_status( string $sequra_status, array ...$status_mappings_sources ): ?OrderStatusMapping {
+		foreach ( $status_mappings_sources as $status_mappings ) {
+			foreach ( $status_mappings as $status_mapping ) {
+				if ( $status_mapping->getSequraStatus() === $sequra_status ) {
+					return $status_mapping;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
