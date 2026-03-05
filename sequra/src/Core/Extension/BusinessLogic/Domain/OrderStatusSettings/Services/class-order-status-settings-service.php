@@ -92,6 +92,7 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 			new OrderStatusMapping( OrderStates::STATE_APPROVED, $this->get_shop_status_approved() ),
 			new OrderStatusMapping( OrderStates::STATE_NEEDS_REVIEW, $this->get_shop_status_needs_review() ),
 			new OrderStatusMapping( OrderStates::STATE_CANCELLED, $this->get_shop_status_cancelled() ),
+			new OrderStatusMapping( OrderStates::STATE_SHIPPED, $this->get_shop_status_completed()[0] ),
 		);
 	}
 }
