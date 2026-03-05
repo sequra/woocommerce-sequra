@@ -54,6 +54,8 @@ class Store_Integration_Service implements Interface_Store_Integration_Service {
 			Capability::widget(),
 			Capability::storeInfo(),
 			Capability::advanced(),
+			Capability::listingSelectors(),
+			Capability::altProductPrice(),
 		);
 	}
 }
