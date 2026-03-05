@@ -19,45 +19,49 @@ use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Services\OrderStatusSet
 class Order_Status_Settings_Service extends OrderStatusSettingsService {
 
 	/**
-	 * Returns WooCommerce status for approved orders.
+	 * Cached order status mappings for current request lifecycle.
+	 *
+	 * @var OrderStatusMapping[]|null
 	 */
-	protected function get_shop_status_approved(): string {
-		return 'wc-processing';
-	}
-
-	/**
-	 * Returns WooCommerce status for orders that need review.
-	 */
-	protected function get_shop_status_needs_review(): string {
-		return 'wc-on-hold';
-	}
-
-	/**
-	 * Returns WooCommerce status for cancelled orders.
-	 */
-	protected function get_shop_status_cancelled( bool $unprefixed = false ): string {
-		$status = 'wc-cancelled';
-		return $unprefixed ? $this->unprefixed_shop_status( $status ) : $status;
-	}
+	private $cached_order_status_settings;
 
 	/**
 	 * Returns WooCommerce status for completed orders.
 	 */
 	public function get_shop_status_completed( bool $unprefixed = false ): array {
+		$order_status_settings = $this->get_order_status_settings_cached();
+		$find_status_callback  = function ( OrderStatusMapping $mapping ) {
+			return $mapping->getSequraStatus() === OrderStates::STATE_APPROVED;
+		};
+		$mapping               = array_find( $order_status_settings, $find_status_callback );
+		if ( null === $mapping ) {
+			// Guard: use the default value if not set in repository.
+			$mapping = array_find( $this->getDefaultStatusMappings(), $find_status_callback );
+		}
+		return array( $unprefixed ? $this->unprefixed_shop_status( $mapping->getShopStatus() ) : $mapping->getShopStatus() );
+	}
 
-		$status = (array) \apply_filters_deprecated( 'woocommerce_sequracheckout_sent_statuses', array( array( 'wc-completed' ) ), '3.0.0', 'sequra_shop_status_completed' );
-		/**
-		 * Filter the WooCommerce status for completed.
-		 *
-		 * @since 3.0.0
-		 */
-		$status = \apply_filters( 'sequra_shop_status_completed', $status );
-
-		if ( $unprefixed ) {
-			$status = array_map( array( $this, 'unprefixed_shop_status' ), $status );
+	/**
+	 * Retrieves order status settings from cache or repository/default mappings.
+	 *
+	 * @return OrderStatusMapping[]
+	 */
+	private function get_order_status_settings_cached(): array {
+		if ( ! $this->cached_order_status_settings ) {
+			$this->cached_order_status_settings = parent::getOrderStatusSettings();
 		}
 
-		return $status;
+		return $this->cached_order_status_settings;
+	}
+
+	/**
+	 * Saves order status settings and refreshes cache.
+	 *
+	 * @param OrderStatusMapping[] $orderStatusMappings
+	 */
+	public function saveOrderStatusSettings( array $orderStatusMappings ): void {
+		parent::saveOrderStatusSettings( $orderStatusMappings );
+		$this->cached_order_status_settings = $orderStatusMappings;
 	}
 
 	/**
@@ -89,10 +93,10 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	 */
 	protected function getDefaultStatusMappings(): array {
 		return array(
-			new OrderStatusMapping( OrderStates::STATE_APPROVED, $this->get_shop_status_approved() ),
-			new OrderStatusMapping( OrderStates::STATE_NEEDS_REVIEW, $this->get_shop_status_needs_review() ),
-			new OrderStatusMapping( OrderStates::STATE_CANCELLED, $this->get_shop_status_cancelled() ),
-			new OrderStatusMapping( OrderStates::STATE_SHIPPED, $this->get_shop_status_completed()[0] ),
+			new OrderStatusMapping( OrderStates::STATE_APPROVED, 'wc-processing' ),
+			new OrderStatusMapping( OrderStates::STATE_NEEDS_REVIEW, 'wc-on-hold' ),
+			new OrderStatusMapping( OrderStates::STATE_CANCELLED, 'wc-cancelled' ),
+			new OrderStatusMapping( OrderStates::STATE_SHIPPED, 'wc-completed' ),
 		);
 	}
 }
