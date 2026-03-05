@@ -41,7 +41,7 @@ class StoreIntegrationServiceTest extends WP_UnitTestCase {
 
 	public function testGetSupportedCapabilities_returnsExpectedCapabilities(): void {
 		$capabilities = $this->service->getSupportedCapabilities();
-		$this->assertCount( 5, $capabilities );
+		$this->assertCount( 7, $capabilities );
 	}
 
 	public function testGetSupportedCapabilities_returnsCapabilityInstances(): void {
