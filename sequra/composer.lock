@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "100031b3650d6ba3db07bf6705b21f40249978d8"
+                "reference": "88373cb0f97d93a2a6dc2faecf0a02a812b80223"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/100031b3650d6ba3db07bf6705b21f40249978d8",
-                "reference": "100031b3650d6ba3db07bf6705b21f40249978d8",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/88373cb0f97d93a2a6dc2faecf0a02a812b80223",
+                "reference": "88373cb0f97d93a2a6dc2faecf0a02a812b80223",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                 "issues": "https://github.com/sequra/integration-core/issues",
                 "source": "https://github.com/sequra/integration-core/tree/feature/LIS-91-Enable-configuration-via-webhook"
             },
-            "time": "2026-03-05T22:21:53+00:00"
+            "time": "2026-03-06T17:43:11+00:00"
         }
     ],
     "packages-dev": [
