@@ -120,7 +120,7 @@ class Task {
 				'type'    => 'Configuration',
 				'index_1' => 'version',
 				'index_2' => '',
-				'data'    => '{"class_name":"SeQura\\Core\\Infrastructure\\Configuration\\ConfigEntity","id":' . $id . ',"name":"version","value":"4.0.0","context":""}',
+				'data'    => '{"class_name":"SeQura\\Core\\Infrastructure\\Configuration\\ConfigEntity","id":' . $id . ',"name":"version","value":"4.2.0","context":""}',
 			)
 		);
 	}
