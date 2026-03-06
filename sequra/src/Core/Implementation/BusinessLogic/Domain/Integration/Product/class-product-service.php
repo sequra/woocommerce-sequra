@@ -16,6 +16,22 @@ use SeQura\Core\BusinessLogic\Domain\Product\Model\ShopProduct;
 class Product_Service implements ProductServiceInterface {
 
 	/**
+	 * WordPress database access object.
+	 *
+	 * @var \wpdb
+	 */
+	private $wpdb;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param \wpdb $wpdb WordPress database access object.
+	 */
+	public function __construct( \wpdb $wpdb ) {
+		$this->wpdb = $wpdb;
+	}
+
+	/**
 	 * Returns products SKU based on product ID.
 	 * Returns null if product is not supported on integration level.
 	 *
@@ -62,7 +78,7 @@ class Product_Service implements ProductServiceInterface {
 	 * @return ShopProduct[]
 	 */
 	public function getShopProducts( int $page, int $limit, string $search ): array {
-		$args = array(
+		$base_args = array(
 			'status'  => 'publish',
 			'limit'   => $limit,
 			'offset'  => ( $page - 1 ) * $limit,
@@ -70,14 +86,38 @@ class Product_Service implements ProductServiceInterface {
 			'order'   => 'ASC',
 			'return'  => 'objects',
 		);
-
-		if ( ! empty( $search ) ) {
-			$args['s'] = $search;
-		}
-
-		$products = wc_get_products( $args );
+		$search    = trim( $search );
+		$products  = '' === $search
+			? wc_get_products( $base_args )
+			: $this->search_products( $base_args, $search );
 
 		return array_map( array( $this, 'map_to_shop_product' ), $products );
+	}
+
+	/**
+	 * Searches products by name or SKU in a single query.
+	 *
+	 * @param array  $base_args Base query arguments.
+	 * @param string $search    Search term.
+	 *
+	 * @return \WC_Product[]
+	 */
+	private function search_products( array $base_args, string $search ): array {
+		$callback = function ( $clauses ) use ( $search ) {
+			$like               = '%' . $this->wpdb->esc_like( $search ) . '%';
+			$clauses['where'] .= $this->wpdb->prepare(
+				" AND ({$this->wpdb->posts}.post_title LIKE %s OR {$this->wpdb->posts}.ID IN (SELECT post_id FROM {$this->wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE %s))",
+				$like,
+				$like
+			);
+			return $clauses;
+		};
+
+		add_filter( 'posts_clauses', $callback, 10, 2 );
+		$products = wc_get_products( $base_args );
+		remove_filter( 'posts_clauses', $callback, 10 );
+
+		return $products;
 	}
 
 	/**

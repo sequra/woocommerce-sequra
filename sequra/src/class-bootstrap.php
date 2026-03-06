@@ -764,7 +764,7 @@ class Bootstrap extends BootstrapComponent {
 			ProductServiceInterface::class,
 			static function () {
 				if ( ! isset( self::$cache[ ProductServiceInterface::class ] ) ) {
-					self::$cache[ ProductServiceInterface::class ] = new Core_Product_Service();
+					self::$cache[ ProductServiceInterface::class ] = new Core_Product_Service( Reg::getService( \wpdb::class ) );
 				}
 				return self::$cache[ ProductServiceInterface::class ];
 			}
