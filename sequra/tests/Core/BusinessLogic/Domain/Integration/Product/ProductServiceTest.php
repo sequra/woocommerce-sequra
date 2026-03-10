@@ -28,7 +28,8 @@ class ProductServiceTest extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
-		$this->service     = new Product_Service();
+		global $wpdb;
+		$this->service     = new Product_Service( $wpdb );
 		$this->product_ids = array();
 
 		// Create 5 test products.
