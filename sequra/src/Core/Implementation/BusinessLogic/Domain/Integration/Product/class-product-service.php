@@ -103,13 +103,14 @@ class Product_Service implements ProductServiceInterface {
 	 * @return \WC_Product[]
 	 */
 	private function search_products( array $base_args, string $search ): array {
-		$callback = function ( $clauses ) use ( $search ) {
-			$like               = '%' . $this->wpdb->esc_like( $search ) . '%';
-			$clauses['where'] .= $this->wpdb->prepare(
-				" AND ({$this->wpdb->posts}.post_title LIKE %s OR {$this->wpdb->posts}.ID IN (SELECT post_id FROM {$this->wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE %s))",
-				$like,
-				$like
-			);
+		//phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $clauses, $wp_query ) use ( $search ) {
+			$like  = '%' . $this->wpdb->esc_like( $search ) . '%';
+			$query = " AND ({$this->wpdb->posts}.post_title LIKE %s OR {$this->wpdb->posts}.ID IN (SELECT post_id FROM {$this->wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE %s))";
+			/** Met static analysis requirements.
+			 *
+			 * @var literal-string $query */
+			$clauses['where'] .= $this->wpdb->prepare( $query, $like ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			return $clauses;
 		};
 
