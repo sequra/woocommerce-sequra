@@ -110,7 +110,7 @@ class Product_Service implements ProductServiceInterface {
 			/** Met static analysis requirements.
 			 *
 			 * @var literal-string $query */
-			$clauses['where'] .= $this->wpdb->prepare( $query, $like ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$clauses['where'] .= $this->wpdb->prepare( $query, $like, $like ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			return $clauses;
 		};
 
