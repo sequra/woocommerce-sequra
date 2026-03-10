@@ -52,6 +52,6 @@
     },
     "prefer-stable": true,
     "require": {
-        "sequra/integration-core": "dev-feature/LIS-91-Enable-configuration-via-webhook"
+        "sequra/integration-core": "v4.1.0"
     }
 }
