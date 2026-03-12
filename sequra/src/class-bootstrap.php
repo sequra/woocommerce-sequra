@@ -603,7 +603,8 @@ class Bootstrap extends BootstrapComponent {
 							),
 							new Migration_Install_420(
 								$wpdb,
-								Reg::getService( AdvancedSettingsService::class )
+								Reg::getService( AdvancedSettingsService::class ),
+								Reg::getService( Order_Status_Settings_Service::class )
 							),
 						)
 					);

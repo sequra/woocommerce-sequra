@@ -10,6 +10,9 @@ namespace SeQura\WC\Tests\Repositories\Migrations;
 
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Models\AdvancedSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
+use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Models\OrderStatusMapping;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Repositories\Migrations\Migration_Install_420;
 use WP_UnitTestCase;
 
@@ -39,6 +42,13 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 	private $advanced_settings_service;
 
 	/**
+	 * Order status settings service mock.
+	 *
+	 * @var Order_Status_Settings_Service&\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $order_status_settings_service;
+
+	/**
 	 * Entity table name.
 	 *
 	 * @var string
@@ -54,9 +64,25 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 			->disableOriginalConstructor()
 			->getMock();
 
+		$this->order_status_settings_service = $this->getMockBuilder( Order_Status_Settings_Service::class )
+			->disableOriginalConstructor()
+			->getMock();
+
+		$this->order_status_settings_service
+			->method( 'getOrderStatusSettings' )
+			->willReturn(
+				array(
+					new OrderStatusMapping( OrderStates::STATE_APPROVED, 'wc-processing' ),
+					new OrderStatusMapping( OrderStates::STATE_NEEDS_REVIEW, 'wc-on-hold' ),
+					new OrderStatusMapping( OrderStates::STATE_CANCELLED, 'wc-cancelled' ),
+					new OrderStatusMapping( OrderStates::STATE_SHIPPED, 'wc-completed' ),
+				)
+			);
+
 		$this->migration = new Migration_Install_420(
 			$this->wpdb,
-			$this->advanced_settings_service
+			$this->advanced_settings_service,
+			$this->order_status_settings_service
 		);
 
 		$this->clear_legacy_config_rows();
@@ -64,6 +90,8 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		$this->clear_legacy_config_rows();
+		remove_all_filters( 'sequra_shop_status_completed' );
+		remove_all_filters( 'woocommerce_sequracheckout_sent_statuses' );
 		parent::tear_down();
 	}
 
@@ -105,15 +133,6 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * Call the private migrate_advanced_settings() method via reflection.
-	 */
-	private function call_migrate_advanced_settings(): void {
-		$method = new \ReflectionMethod( Migration_Install_420::class, 'migrate_advanced_settings' );
-		$method->setAccessible( true );
-		$method->invoke( $this->migration );
-	}
-
 	public function testGetVersion_returns420(): void {
 		$this->assertSame( '4.2.0', $this->migration->get_version() );
 	}
@@ -133,7 +152,7 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 				)
 			);
 
-		$this->call_migrate_advanced_settings();
+		$this->migration->migrate_advanced_settings();
 	}
 
 	public function testRun_withNoLegacyConfig_skipsAdvancedSettingsMigration(): void {
@@ -142,7 +161,7 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 			->expects( $this->never() )
 			->method( 'setAdvancedSettings' );
 
-		$this->call_migrate_advanced_settings();
+		$this->migration->migrate_advanced_settings();
 	}
 
 	public function testRun_withLoggerEnabledTrue_setsIsEnabledTrue(): void {
@@ -157,7 +176,7 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 				}
 			);
 
-		$this->call_migrate_advanced_settings();
+		$this->migration->migrate_advanced_settings();
 
 		$this->assertNotNull( $captured );
 		$this->assertTrue( $captured->isEnabled() );
@@ -175,7 +194,7 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 				}
 			);
 
-		$this->call_migrate_advanced_settings();
+		$this->migration->migrate_advanced_settings();
 
 		$this->assertNotNull( $captured );
 		$this->assertFalse( $captured->isEnabled() );
@@ -194,7 +213,7 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 				}
 			);
 
-		$this->call_migrate_advanced_settings();
+		$this->migration->migrate_advanced_settings();
 
 		$this->assertNotNull( $captured );
 		$this->assertSame( 5, $captured->getLevel() );
@@ -205,7 +224,7 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 		$this->insert_legacy_config( 'minLogLevel', 3 );
 		$this->advanced_settings_service->method( 'setAdvancedSettings' );
 
-		$this->call_migrate_advanced_settings();
+		$this->migration->migrate_advanced_settings();
 
 		// Assert legacy rows are gone.
 		$enabled_row = $this->wpdb->get_row(
@@ -238,6 +257,156 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 			->expects( $this->never() )
 			->method( 'setAdvancedSettings' );
 
-		$this->call_migrate_advanced_settings();
+		$this->migration->migrate_advanced_settings();
+	}
+
+	public function testMigrateShippedStatus_withNoFilter_doesNotSave(): void {
+		$this->order_status_settings_service
+			->expects( $this->never() )
+			->method( 'saveOrderStatusSettings' );
+
+		$this->migration->migrate_shipped_status_from_filter();
+	}
+
+	public function testMigrateShippedStatus_withDefaultFilterValue_doesNotSave(): void {
+		add_filter(
+			'sequra_shop_status_completed',
+			static function () {
+				return array( 'wc-completed' );
+			}
+		);
+
+		$this->order_status_settings_service
+			->expects( $this->never() )
+			->method( 'saveOrderStatusSettings' );
+
+		$this->migration->migrate_shipped_status_from_filter();
+	}
+
+	public function testMigrateShippedStatus_withCustomFilterValue_savesFirstValue(): void {
+		add_filter(
+			'sequra_shop_status_completed',
+			static function () {
+				return array( 'wc-custom-status', 'wc-another-status' );
+			}
+		);
+
+		$captured = null;
+		$this->order_status_settings_service
+			->expects( $this->once() )
+			->method( 'saveOrderStatusSettings' )
+			->willReturnCallback(
+				function ( array $mappings ) use ( &$captured ) {
+					$captured = $mappings;
+				}
+			);
+
+		$this->migration->migrate_shipped_status_from_filter();
+
+		$this->assertNotNull( $captured );
+		$shipped_mapping = null;
+		foreach ( $captured as $mapping ) {
+			if ( $mapping->getSequraStatus() === OrderStates::STATE_SHIPPED ) {
+				$shipped_mapping = $mapping;
+				break;
+			}
+		}
+		$this->assertNotNull( $shipped_mapping );
+		$this->assertSame( 'wc-custom-status', $shipped_mapping->getShopStatus() );
+	}
+
+	public function testMigrateShippedStatus_withCustomFilterValue_preservesOtherMappings(): void {
+		add_filter(
+			'sequra_shop_status_completed',
+			static function () {
+				return array( 'wc-custom-status' );
+			}
+		);
+
+		$captured = null;
+		$this->order_status_settings_service
+			->method( 'saveOrderStatusSettings' )
+			->willReturnCallback(
+				function ( array $mappings ) use ( &$captured ) {
+					$captured = $mappings;
+				}
+			);
+
+		$this->migration->migrate_shipped_status_from_filter();
+
+		$this->assertNotNull( $captured );
+		$this->assertCount( 4, $captured );
+
+		$statuses = array();
+		foreach ( $captured as $mapping ) {
+			$statuses[ $mapping->getSequraStatus() ] = $mapping->getShopStatus();
+		}
+
+		$this->assertSame( 'wc-processing', $statuses[ OrderStates::STATE_APPROVED ] );
+		$this->assertSame( 'wc-on-hold', $statuses[ OrderStates::STATE_NEEDS_REVIEW ] );
+		$this->assertSame( 'wc-cancelled', $statuses[ OrderStates::STATE_CANCELLED ] );
+		$this->assertSame( 'wc-custom-status', $statuses[ OrderStates::STATE_SHIPPED ] );
+	}
+
+	public function testMigrateShippedStatus_withEmptyArrayFilter_doesNotSave(): void {
+		add_filter(
+			'sequra_shop_status_completed',
+			static function () {
+				return array();
+			}
+		);
+
+		$this->order_status_settings_service
+			->expects( $this->never() )
+			->method( 'saveOrderStatusSettings' );
+
+		$this->migration->migrate_shipped_status_from_filter();
+	}
+
+	public function testMigrateShippedStatus_withWhitespaceOnlyStatus_doesNotSave(): void {
+		add_filter(
+			'sequra_shop_status_completed',
+			static function () {
+				return array( '   ' );
+			}
+		);
+
+		$this->order_status_settings_service
+			->expects( $this->never() )
+			->method( 'saveOrderStatusSettings' );
+
+		$this->migration->migrate_shipped_status_from_filter();
+	}
+
+	public function testMigrateShippedStatus_withLegacyFilter_savesFirstValue(): void {
+		add_filter(
+			'woocommerce_sequracheckout_sent_statuses',
+			static function () {
+				return array( 'wc-legacy-status' );
+			}
+		);
+
+		$captured = null;
+		$this->order_status_settings_service
+			->expects( $this->once() )
+			->method( 'saveOrderStatusSettings' )
+			->willReturnCallback(
+				function ( array $mappings ) use ( &$captured ) {
+					$captured = $mappings;
+				}
+			);
+
+		$this->migration->migrate_shipped_status_from_filter();
+
+		$this->assertNotNull( $captured );
+		$shipped_mapping = null;
+		foreach ( $captured as $mapping ) {
+			if ( $mapping->getSequraStatus() === OrderStates::STATE_SHIPPED ) {
+				$shipped_mapping = $mapping;
+				break;
+			}
+		}
+		$this->assertNotNull( $shipped_mapping );
+		$this->assertSame( 'wc-legacy-status', $shipped_mapping->getShopStatus() );
 	}
 }
