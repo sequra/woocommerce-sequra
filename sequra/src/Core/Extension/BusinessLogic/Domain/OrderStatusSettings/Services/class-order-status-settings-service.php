@@ -30,7 +30,7 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	 */
 	public function get_shop_status_completed( bool $unprefixed = false ): array {
 		$mapping = $this->find_mapping_by_sequra_status(
-			OrderStates::STATE_APPROVED,
+			OrderStates::STATE_SHIPPED,
 			$this->get_order_status_settings_cached(),
 			$this->getDefaultStatusMappings()
 		);
