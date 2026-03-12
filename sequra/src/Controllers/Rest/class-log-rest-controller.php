@@ -140,7 +140,7 @@ class Log_REST_Controller extends REST_Controller {
 				(bool) $request->get_param( self::PARAM_IS_ENABLED ),
 				(int) $request->get_param( self::PARAM_LOG_LEVEL )
 			);
-			$this->advanced_settings_service->setAdvancedSettings( $advanced_settings );    
+			$this->advanced_settings_service->setAdvancedSettings( $advanced_settings );
 			$response = new AdvancedSettingsResponse( $advanced_settings );
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );

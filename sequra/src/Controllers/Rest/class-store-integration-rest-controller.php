@@ -8,7 +8,6 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
-use Exception;
 use SeQura\Core\BusinessLogic\ConfigurationWebhookAPI\ConfigurationWebhookAPI;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
@@ -46,6 +45,7 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	 * @param Interface_Logger_Service $logger         The logger service.
 	 * @param RegexProvider $regex The regex provider.
 	 * @param Interface_Store_Integration_Service $store_integration_service The store integration service.
+	 * @param StoreContext $store_context The store context.
 	 */
 	public function __construct( 
 		$rest_namespace, 
@@ -76,7 +76,7 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check the request data to see if the it has permission to proceed.
+	 * Check the request data to see if it has permission to proceed.
 	 */
 	public function check_permissions(): bool {
 		// The signature is checked in the Integration Core, no need to check it here.
