@@ -8,6 +8,10 @@
 
 namespace SeQura\WC\Controllers\Rest;
 
+use SeQura\Core\BusinessLogic\ConfigurationWebhookAPI\Responses\AdvancedSettings\AdvancedSettingsResponse;
+use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Models\AdvancedSettings;
+use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
+use SeQura\Core\Infrastructure\Logger\Logger;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use WP_Error;
@@ -23,20 +27,30 @@ class Log_REST_Controller extends REST_Controller {
 	private const PARAM_LOG_LEVEL  = 'level';
 
 	/**
+	 * Advanced settings service
+	 *
+	 * @var AdvancedSettingsService
+	 */
+	private $advanced_settings_service;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string            $rest_namespace The namespace.
 	 * @param Interface_Logger_Service $logger         The logger service.
 	 * @param RegexProvider $regex The regex provider.
+	 * @param AdvancedSettingsService $advanced_settings_service The advanced settings service.
 	 */
 	public function __construct( 
 		$rest_namespace, 
 		Interface_Logger_Service $logger,
-		RegexProvider $regex
+		RegexProvider $regex,
+		AdvancedSettingsService $advanced_settings_service
 	) {
 		parent::__construct( $logger, $regex );
-		$this->namespace = $rest_namespace;
-		$this->rest_base = '/log';
+		$this->namespace                 = $rest_namespace;
+		$this->rest_base                 = '/log';
+		$this->advanced_settings_service = $advanced_settings_service;
 	}
 
 	/**
@@ -108,13 +122,8 @@ class Log_REST_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_configuration() {
-		$response = null;
-		try {
-			$response = $this->get_config_response();
-		} catch ( \Throwable $e ) {
-			$response = new WP_Error( 'error', $e->getMessage() );
-		}
-		return \rest_ensure_response( $response );
+		$advanced_settings = $this->advanced_settings_service->getAdvancedSettings() ?? new AdvancedSettings( false, Logger::DEBUG );
+		return $this->build_response( new AdvancedSettingsResponse( $advanced_settings ) );
 	}
 
 	/**
@@ -127,24 +136,15 @@ class Log_REST_Controller extends REST_Controller {
 	public function save_configuration( WP_REST_Request $request ) {
 		$response = null;
 		try {
-			$this->logger->enable( $request->get_param( self::PARAM_IS_ENABLED ) );
-			$this->logger->set_min_log_level( $request->get_param( self::PARAM_LOG_LEVEL ) );
-			$response = $this->get_config_response();
+			$advanced_settings = new AdvancedSettings(
+				(bool) $request->get_param( self::PARAM_IS_ENABLED ),
+				(int) $request->get_param( self::PARAM_LOG_LEVEL )
+			);
+			$this->advanced_settings_service->setAdvancedSettings( $advanced_settings );
+			$response = new AdvancedSettingsResponse( $advanced_settings );
 		} catch ( \Throwable $e ) {
 			$response = new WP_Error( 'error', $e->getMessage() );
 		}
 		return \rest_ensure_response( $response );
-	}
-
-	/**
-	 * Make the logger configuration response.
-	 *
-	 * @return array<string, mixed>
-	 */
-	private function get_config_response(): array {
-		return array(
-			self::PARAM_IS_ENABLED => $this->logger->is_enabled(),
-			self::PARAM_LOG_LEVEL  => $this->logger->get_min_log_level(),
-		);
 	}
 }

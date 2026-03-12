@@ -129,6 +129,7 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Product\Produ
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Mini_Widget_Messages_Provider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
 use SeQura\WC\Repositories\Migrations\Migration_Install_400;
+use SeQura\WC\Repositories\Migrations\Migration_Install_420;
 use SeQura\WC\Services\Order\Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Platform\Interface_Platform_Provider;
@@ -136,8 +137,11 @@ use SeQura\WC\Services\Platform\Platform_Provider;
 use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use SeQura\WC\Services\Widgets\Widgets_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
+use SeQura\Core\BusinessLogic\Domain\Integration\StoreIntegration\StoreIntegrationServiceInterface;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
+use SeQura\WC\Controllers\Rest\Store_Integration_REST_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreIntegration\Store_Integration_Service;
 use SeQura\WC\Services\Order\Builder\Interface_Order_Address_Builder;
 use SeQura\WC\Services\Order\Builder\Order_Address_Builder;
 use SeQura\WC\Services\Order\Builder\Interface_Order_Customer_Builder;
@@ -146,6 +150,13 @@ use SeQura\WC\Services\Order\Builder\Order_Customer_Builder;
 use SeQura\WC\Services\Order\Builder\Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Service\Interface_Settings_Service;
 use SeQura\WC\Services\Service\Settings_Service;
+use SeQura\Core\BusinessLogic\DataAccess\StoreIntegration\Entities\StoreIntegration;
+use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
+use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
+use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Integration\Log\LogServiceInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Log\Log_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -181,6 +192,7 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Onboarding_REST_Controller::class ),
 					Reg::getService( Payment_REST_Controller::class ),
 					Reg::getService( Log_REST_Controller::class ),
+					Reg::getService( Store_Integration_REST_Controller::class ),
 					Reg::getService( Interface_Product_Controller::class ),
 					Reg::getService( Interface_Async_Process_Controller::class ),
 					Reg::getService( Interface_Order_Controller::class )
@@ -503,6 +515,16 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ DefaultLoggerAdapter::CLASS_NAME ];
 			}
 		);
+		
+		Reg::registerService(
+			StoreIntegrationServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ StoreIntegrationServiceInterface::class ] ) ) {
+					self::$cache[ StoreIntegrationServiceInterface::class ] = new Store_Integration_Service();
+				}
+				return self::$cache[ StoreIntegrationServiceInterface::class ];
+			}
+		);
 
 		// Plugin services.
 		Reg::registerService(
@@ -577,7 +599,12 @@ class Bootstrap extends BootstrapComponent {
 							new Migration_Install_400(
 								$wpdb,
 								$encryptor,
-								$store_context,
+								$store_context
+							),
+							new Migration_Install_420(
+								$wpdb,
+								Reg::getService( AdvancedSettingsService::class ),
+								Reg::getService( Order_Status_Settings_Service::class )
 							),
 						)
 					);
@@ -738,7 +765,7 @@ class Bootstrap extends BootstrapComponent {
 			ProductServiceInterface::class,
 			static function () {
 				if ( ! isset( self::$cache[ ProductServiceInterface::class ] ) ) {
-					self::$cache[ ProductServiceInterface::class ] = new Core_Product_Service();
+					self::$cache[ ProductServiceInterface::class ] = new Core_Product_Service( Reg::getService( \wpdb::class ) );
 				}
 				return self::$cache[ ProductServiceInterface::class ];
 			}
@@ -862,6 +889,29 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ Interface_Order_Delivery_Method_Builder::class ];
 			}
 		);
+		Reg::registerService(
+			StoreInfoServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ StoreInfoServiceInterface::class ] ) ) {
+					self::$cache[ StoreInfoServiceInterface::class ] = new Store_Info_Service(
+						Reg::getService( Interface_Platform_Provider::class )
+					);
+				}
+				return self::$cache[ StoreInfoServiceInterface::class ];
+			}
+		);
+		Reg::registerService(
+			LogServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ LogServiceInterface::class ] ) ) {
+					self::$cache[ LogServiceInterface::class ] = new Log_Service(
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( StoreContext::class )
+					);
+				}
+				return self::$cache[ LogServiceInterface::class ];
+			}
+		);
 	}
 
 	/**
@@ -897,6 +947,8 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( PaymentMethod::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( StoreIntegration::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( AdvancedSettings::class, Entity_Repository::class );
 	}
 
 	/**
@@ -1060,10 +1112,26 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Log_REST_Controller::class ] = new Log_REST_Controller(
 						self::get_constants()->get_plugin_rest_namespace(),
 						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( RegexProvider::class )
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( AdvancedSettingsService::class )
 					);
 				}
 				return self::$cache[ Log_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Store_Integration_REST_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Store_Integration_REST_Controller::class ] ) ) {
+					self::$cache[ Store_Integration_REST_Controller::class ] = new Store_Integration_REST_Controller(
+						self::get_constants()->get_plugin_rest_namespace(),
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( StoreIntegrationServiceInterface::class ),
+						Reg::getService( StoreContext::class )
+					);
+				}
+				return self::$cache[ Store_Integration_REST_Controller::class ];
 			}
 		);
 	}

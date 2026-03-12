@@ -49,6 +49,6 @@
         "playwright-fixture-for-plugins": "github:sequra/playwright-fixture-for-plugins#1.3.0"
     },
     "dependencies": {
-        "sequra-core-admin-fe": "github:sequra/integration-core-ui#2.1.0"
+        "sequra-core-admin-fe": "github:sequra/integration-core-ui#2.2.0"
     }
 }

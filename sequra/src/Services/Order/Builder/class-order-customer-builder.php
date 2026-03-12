@@ -95,44 +95,44 @@ class Order_Customer_Builder implements Interface_Order_Customer_Builder {
 	 * @return PreviousOrder[]
 	 */
 	private function get_previous_orders( int $customer_id ): array {
-		$previous_orders = array();
+		if ( $customer_id <= 0 ) {
+			return array();
+		}
 
 		$order_statuses = $this->order_status_service->getOrderStatusSettings();
 
 		if ( ! $order_statuses ) {
-			return $previous_orders;
+			return array();
 		}
 
-		$statuses = $this->order_status_service->get_shop_status_completed();
+		$statuses = array();
 		foreach ( $order_statuses as $order_status ) {
-			if ( $order_status->getSequraStatus() === OrderStates::STATE_APPROVED ) {
-				// Use the default status if the shop status is not set.
-				$statuses[] = empty( $order_status->getShopStatus() ) ? 'wc-processing' : $order_status->getShopStatus();
+			if ( \in_array( $order_status->getSequraStatus(), array( OrderStates::STATE_APPROVED, OrderStates::STATE_SHIPPED ), true ) ) {
+				$statuses[] = $order_status->getShopStatus();
 			}
 		}
 
-		$orders = array();
-		if ( $customer_id ) {
-			/**
-			 * Get previous orders
-			 *
-			 * @var WC_Order[] $previous_orders
-			 */
-			$orders = \wc_get_orders(
-				array(
-					'limit'    => -1,
-					'customer' => $customer_id,
-					'status'   => $statuses,
-				) 
-			);
+		if ( ! $statuses ) {
+			return array();
 		}
-
-		if ( is_array( $orders ) ) {
-			foreach ( $orders as $order ) {
-				$previous_orders[] = $this->get_previous_order( $order );
-			}
+		/**
+		 * Get previous orders
+		 *
+		 * @var WC_Order[] $orders */
+		$orders = \wc_get_orders(
+			array(
+				'limit'    => -1,
+				'customer' => $customer_id,
+				'status'   => $statuses,
+			) 
+		);
+		if ( ! \is_array( $orders ) ) {
+			return array();
 		}
-		
+		$previous_orders = array();
+		foreach ( $orders as $order ) {
+			$previous_orders[] = $this->get_previous_order( $order );
+		}
 		return $previous_orders;
 	}
 

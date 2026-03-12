@@ -380,17 +380,7 @@ class Onboarding_REST_Controller extends REST_Controller {
 		->widgetConfiguration( strval( $request->get_param( self::PARAM_STORE_ID ) ) )
 		->getWidgetSettings();
 
-		$arr = $response->toArray();
-		if ( ! $response->isSuccessful() ) {
-			return $this->build_response_from_array( $arr, false );
-		}
-		$widget_configuration = '';
-		if ( isset( $arr['widgetConfiguration'] ) ) {
-			$widget_configuration = $arr['widgetConfiguration'];
-			unset( $arr['widgetConfiguration'] );
-		}
-		$arr[ self::PARAM_WIDGET_STYLES ] = $widget_configuration;
-		return $this->build_response_from_array( $arr, true );
+		return $this->build_response( $response );
 	}
 
 	/**
