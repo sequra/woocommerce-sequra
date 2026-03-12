@@ -105,6 +105,7 @@ Contributors:
 * Fixed: Escape special characters in CSS selectors for widget rendering.
 * Fixed: Debounced payment method availability checks to reduce server load, eliminate duplicate API entries, and improve checkout performance.
 * Changed: Tested up to WooCommerce 10.5.3 and WordPress 6.9.1
+* Fixed: Country change during checkout causing wrong solicitation payload.
 
 = 4.1.3	=
 * Fixed: Country resolution issues during solicitation process.
