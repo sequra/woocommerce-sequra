@@ -104,7 +104,7 @@ Contributors:
 * Added: Support for configuration management via webhook.
 * Fixed: Escape special characters in CSS selectors for widget rendering.
 * Fixed: Debounced payment method availability checks to reduce server load, eliminate duplicate API entries, and improve checkout performance.
-* Changed: Tested up to WooCommerce 10.5.3 and WordPress 6.9.1
+* Changed: Tested up to WooCommerce 10.6.0 and WordPress 6.9.4
 * Fixed: Country change during checkout causing wrong solicitation payload.
 
 = 4.1.3	=
