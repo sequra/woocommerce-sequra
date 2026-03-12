@@ -452,14 +452,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get merchantId from the current cart or order
 	 */
 	private function get_merchant_id(): ?string {
-		// Try to get the merchantId using the current cartId.
-		$cart_id      = $this->get_cart_ref_from_order_or_cart();
-		$sequra_order = $this->get_sequra_order_by_cart_id( $cart_id );
-		if ( $sequra_order ) {
-			// If SeQuraOrder found, return the merchantId.
-			return (string) $sequra_order->getMerchant()->getId();
-		}
-		// Fallback: try to get the merchantId using the country.
+		// Try to get the merchantId using the current country (live data).
 		try {
 			$country = $this->get_country();
 			if ( $country ) {
@@ -467,6 +460,12 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			}
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+		// Fallback: try to get the merchantId from the stored SeQuraOrder.
+		$cart_id      = $this->get_cart_ref_from_order_or_cart();
+		$sequra_order = $this->get_sequra_order_by_cart_id( $cart_id );
+		if ( $sequra_order ) {
+			return (string) $sequra_order->getMerchant()->getId();
 		}
 		return null;
 	}
@@ -490,6 +489,15 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	 * Get country code from cart ID or current order/session
 	 */
 	private function get_country( ?string $cart_id = null ): ?string {
+		// Priority 1: live data from the current order/cart/session (always fresh).
+		try {
+			return $this->get_country_from_order_or_cart();
+		} catch ( Throwable $e ) {
+			$this->logger->log_debug( 'Country not available from order/cart, falling back to stored order', __FUNCTION__, __CLASS__ );
+		}
+
+		// Priority 2: stored SeQuraOrder — fallback when live data is unavailable
+		// (e.g. "no address" checkout where address fields are removed).
 		if ( $cart_id ) {
 			$sequra_order = $this->get_sequra_order_by_cart_id( $cart_id );
 			if ( $sequra_order ) {
@@ -502,12 +510,6 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 					return $country;
 				}
 			}
-		}
-
-		try {
-			return $this->get_country_from_order_or_cart();
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 		}
 
 		/**
