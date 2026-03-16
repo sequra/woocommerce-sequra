@@ -161,6 +161,27 @@ class CacheRepositoryTest extends WP_UnitTestCase {
 		$this->assertSame( 2, $result );
 	}
 
+	// --- flush() ---
+
+	public function testFlush_clearsStaticCacheAndWpObjectCache() {
+		$this->cache->set( 'key1', 'value1', 'group_a' );
+		$this->cache->set( 'key2', 'value2', 'group_b' );
+
+		$this->cache->flush();
+
+		// Static cache should be empty.
+		$this->assertSame( array(), Cache_Repository::$static_cache );
+
+		// WP object cache should also be cleared.
+		$wp_found = false;
+		wp_cache_get( 'key1', 'group_a', false, $wp_found );
+		$this->assertFalse( $wp_found );
+
+		$wp_found = false;
+		wp_cache_get( 'key2', 'group_b', false, $wp_found );
+		$this->assertFalse( $wp_found );
+	}
+
 	// --- Helpers ---
 
 	/**
