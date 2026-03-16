@@ -167,11 +167,11 @@ class Migration_Install_420 extends Migration {
 	}
 
 	/**
-	 * Run the migration.
+	 * Execute the migration logic.
 	 *
 	 * @throws Throwable
 	 */
-	public function run(): void {
+	protected function execute(): void {
 		$this->migrate_advanced_settings();
 		$this->migrate_shipped_status_from_filter();
 	}

@@ -61,11 +61,11 @@ class Migration_Install_320 extends Migration {
 	}
 
 	/**
-	 * Run the migration.
+	 * Execute the migration logic.
 	 *
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
-	public function run(): void {
+	protected function execute(): void {
 		// Schedule indexing of the sequra_order table.
 		$args = array( $this->hook_name );
 		if ( ! \wp_next_scheduled( $this->hook_name, $args ) ) {

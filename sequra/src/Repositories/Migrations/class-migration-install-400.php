@@ -84,11 +84,11 @@ class Migration_Install_400 extends Migration {
 	}
 
 	/**
-	 * Run the migration.
+	 * Execute the migration logic.
 	 *
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
-	public function run(): void {
+	protected function execute(): void {
 		$this->migrate_general_settings();
 		$this->migrate_widget_settings();
 		$this->fetch_deployments();

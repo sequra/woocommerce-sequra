@@ -79,11 +79,11 @@ class Migration_Install_300 extends Migration {
 	}
 
 	/**
-	 * Run the migration.
+	 * Execute the migration logic.
 	 *
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
-	public function run(): void {
+	protected function execute(): void {
 		$this->add_new_tables_to_database();
 		$woocommerce_sequra_settings = (array) \get_option( 'woocommerce_sequra_settings', array() );
 		if ( ! empty( $woocommerce_sequra_settings ) ) {
