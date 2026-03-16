@@ -19,6 +19,7 @@ use SeQura\Helper\Task\Remove_Db_Tables_Task;
 use SeQura\Helper\Task\Remove_Log_Task;
 use SeQura\Helper\Task\Set_Theme_Task;
 use SeQura\Helper\Task\Task;
+use SeQura\Helper\Task\Toggle_Cache_Task;
 use SeQura\Helper\Task\Verify_Order_Has_Merchant_Id_Task;
 
 /**
@@ -55,6 +56,10 @@ class Plugin {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'remove_checkout_fields_classic' ) );
 			add_filter( 'woocommerce_get_country_locale', array( $this, 'remove_checkout_fields_blocks' ) );
 			add_filter( 'sequra_merchant_options_addresses_may_be_missing', '__return_true' );
+		}
+
+		if ( Toggle_Cache_Task::is_cache_disabled() ) {
+			add_filter( 'sequra_cache_enabled', '__return_false' );
 		}
 	}
 
@@ -152,6 +157,7 @@ class Plugin {
 			'remove_db_tables'             => Remove_Db_Tables_Task::class,
 			'verify_order_has_merchant_id' => Verify_Order_Has_Merchant_Id_Task::class,
 			'remove_address_fields'        => Remove_Address_Fields_Task::class,
+			'toggle_cache'                 => Toggle_Cache_Task::class,
 			'get_ip'                       => Get_IP_Task::class,
 		);
 
