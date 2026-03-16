@@ -37,14 +37,17 @@ class SeQura_Order_Repository extends Repository {
 	 * This performs a cleanup of the repository data.
 	 */
 	public function delete_old_and_invalid() {
-		$this->db->query(
-			"DELETE FROM {$this->get_table_name()} 
-		WHERE (`index_3` IS NULL OR `index_3` = '') 
+		$result = $this->db->query(
+			"DELETE FROM {$this->get_table_name()}
+		WHERE (`index_3` IS NULL OR `index_3` = '')
 		AND (
 			JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.unshipped_cart')) = '{}'
 			OR STR_TO_DATE(LEFT(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.unshipped_cart.updated_at')), 19), '%Y-%m-%dT%H:%i:%s') <= CURDATE() - INTERVAL 1 DAY
 		)"
 		);
+		if ( ! empty( $result ) ) {
+			$this->bump_data_version();
+		}
 	}
 
 	/**
