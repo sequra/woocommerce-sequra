@@ -236,7 +236,6 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 		if ( $entity->getId() ) {
 			$this->update( $entity );
-			$this->bump_data_version();
 
 			return $entity->getId();
 		}
@@ -282,10 +281,15 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			}
 			// Delete the row from the legacy table.
 			$this->db->delete( $this->get_legacy_table_name(), $where );
+			$this->bump_data_version();
 			return true;
 		}
 		// Only one record should be updated.
-		return 1 === $this->db->update( $this->get_table_name(), $item, $where );
+		$updated = 1 === $this->db->update( $this->get_table_name(), $item, $where );
+		if ( $updated ) {
+			$this->bump_data_version();
+		}
+		return $updated;
 	}
 
 	/**
