@@ -883,6 +883,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		$dropped = false !== $this->db->query( "DROP TABLE IF EXISTS `{$this->get_legacy_table_name()}`;" );
 		if ( $dropped ) {
 			$this->invalidate_table_exists_cache( $this->get_legacy_table_name() );
+			$this->bump_data_version();
 		}
 		return $dropped;
 	}
