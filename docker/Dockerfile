@@ -31,7 +31,7 @@ COPY ./run-tests.sh /usr/local/bin/run-tests.sh
 COPY ./toggle-xdebug.sh /usr/local/bin/toggle-xdebug
 RUN chmod +x /usr/local/bin/sequra-entrypoint.sh /usr/local/bin/setup-tests.sh /usr/local/bin/run-tests.sh /usr/local/bin/toggle-xdebug
 
-RUN pecl install xdebug && docker-php-ext-enable xdebug \
+RUN pecl install xdebug redis && docker-php-ext-enable xdebug redis \
     && toggle-xdebug --mode=off \
     && echo "memory_limit = 256M" > /usr/local/etc/php/conf.d/docker-php-woocommerce.ini \
     && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/docker-php-woocommerce.ini \

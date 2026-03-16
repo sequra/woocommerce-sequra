@@ -102,6 +102,12 @@ if [ ! -f /var/www/html/.post-install-complete ]; then
     
     wp plugin activate --allow-root _sequra
     wp plugin activate --allow-root sequra-helper
+
+    # Enable Redis object cache drop-in if the plugin is active
+    if wp plugin is-active --allow-root redis-cache 2>/dev/null; then
+        wp redis enable --allow-root --force 2>/dev/null || true
+        echo "✅ Redis object cache enabled"
+    fi
     
     wp option set woocommerce_sequra_settings --format=json '{"enabled":"yes","title":"Flexible payment with seQura","description":"Please, select the payment method you want to use"}' --allow-root
 

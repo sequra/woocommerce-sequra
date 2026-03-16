@@ -6,6 +6,7 @@ fi
 install=0
 ngrok=0
 cloudflared=0
+redis=0
 BASEDIR="$(dirname $(realpath $0))"
 
 # Parse arguments:
@@ -14,6 +15,7 @@ BASEDIR="$(dirname $(realpath $0))"
 # --ngrok-token=YOUR_NGROK_TOKEN: Override the ngrok token in .env
 # --cloudflared: Use cloudflared to expose the site
 # --cloudflared-token=YOUR_CLOUDFLARED_TOKEN: Override the cloudflared token in .env
+# --redis: Enable Redis persistent object cache
 while [[ "$#" -gt 0 ]]; do
     if [ "$1" == "--install" ]; then
         install=1
@@ -21,6 +23,8 @@ while [[ "$#" -gt 0 ]]; do
         ngrok=1
     elif [ "$1" == "--cloudflared" ]; then
         cloudflared=1
+    elif [ "$1" == "--redis" ]; then
+        redis=1
     elif [[ "$1" == --ngrok-token=* ]]; then
         ngrok_token="${1#*=}"
         sed -i.bak "s|NGROK_AUTHTOKEN=.*|NGROK_AUTHTOKEN=$ngrok_token|" .env
@@ -37,6 +41,16 @@ done
 WP_URL=$(grep '^WP_URL=' .env | cut -d'=' -f2)
 sed -i.bak "s|PUBLIC_URL=.*|PUBLIC_URL=$WP_URL|" .env
 rm .env.bak
+
+if [ $redis -eq 1 ]; then
+    # Inject Redis constants into WORDPRESS_CONFIG_EXTRA
+    sed -i.bak "s|WORDPRESS_CONFIG_EXTRA=\"\(.*\)\"|WORDPRESS_CONFIG_EXTRA=\"\1define('WP_REDIS_HOST', getenv('REDIS_HOST') ?: 'redis');define('WP_REDIS_PORT', (int)(getenv('REDIS_PORT') ?: 6379));\"|" .env
+    rm .env.bak
+    # Append redis-cache plugin to WP_PLUGINS
+    current_plugins=$(grep '^WP_PLUGINS=' .env | cut -d'=' -f2- | sed 's/^"//;s/"$//')
+    sed -i.bak "s|^WP_PLUGINS=.*|WP_PLUGINS=\"${current_plugins},redis-cache\"|" .env
+    rm .env.bak
+fi
 
 set -o allexport
 source .env
@@ -145,7 +159,12 @@ if [ -z "$IMAGE_EXISTS" ]; then
     fi
 fi
 
-docker compose up -d || exit 1
+COMPOSE_FILES="-f docker-compose.yml"
+if [ $redis -eq 1 ]; then
+    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.redis.yml"
+fi
+
+docker compose $COMPOSE_FILES up -d || exit 1
 
 echo "🚀 Waiting for installation to complete..."
 
