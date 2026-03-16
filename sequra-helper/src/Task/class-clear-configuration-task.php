@@ -21,5 +21,6 @@ class Clear_Configuration_Task extends Task {
 	 */
 	public function execute( array $args = array() ): void {
 		$this->recreate_entity_table_in_database();
+		$this->flush_sequra_cache();
 	}
 }

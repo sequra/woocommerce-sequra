@@ -27,5 +27,6 @@ class Remove_Db_Tables_Task extends Task {
 				$this->get_sequra_queue_table_name(),
 			)
 		);
+		$this->flush_sequra_cache();
 	}
 }
