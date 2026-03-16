@@ -10,6 +10,7 @@ namespace SeQura\WC\Repositories\Migrations;
 
 use Exception;
 use Throwable;
+use SeQura\WC\Repositories\Interface_Cache_Repository;
 use SeQura\WC\Repositories\Repository;
 
 /**
@@ -43,11 +44,12 @@ class Migration_Install_320 extends Migration {
 	 */
 	public function __construct( 
 		\wpdb $wpdb,
+		Interface_Cache_Repository $cache,
 		string $hook_name,
 		Repository $entity_repository,
 		Repository $queue_repository
 	) {
-		parent::__construct( $wpdb );
+		parent::__construct( $wpdb, $cache );
 		$this->hook_name         = $hook_name;
 		$this->entity_repository = $entity_repository;
 		$this->queue_repository  = $queue_repository;

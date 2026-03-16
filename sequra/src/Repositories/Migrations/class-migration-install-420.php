@@ -13,6 +13,7 @@ use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsS
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Models\OrderStatusMapping;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
+use SeQura\WC\Repositories\Interface_Cache_Repository;
 use Throwable;
 
 /**
@@ -55,8 +56,8 @@ class Migration_Install_420 extends Migration {
 	 * @param AdvancedSettingsService       $advanced_settings_service     Advanced settings service.
 	 * @param Order_Status_Settings_Service $order_status_settings_service Order status settings service.
 	 */
-	public function __construct( \wpdb $wpdb, AdvancedSettingsService $advanced_settings_service, Order_Status_Settings_Service $order_status_settings_service ) {
-		parent::__construct( $wpdb );
+	public function __construct( \wpdb $wpdb, Interface_Cache_Repository $cache, AdvancedSettingsService $advanced_settings_service, Order_Status_Settings_Service $order_status_settings_service ) {
+		parent::__construct( $wpdb, $cache );
 		$this->entity_table                  = $this->db->prefix . 'sequra_entity';
 		$this->advanced_settings_service     = $advanced_settings_service;
 		$this->order_status_settings_service = $order_status_settings_service;

@@ -59,4 +59,9 @@ interface Interface_Cache_Repository {
 	 * @return int New value after increment.
 	 */
 	public function increment( $key, $group, $ttl = 0 ): int;
+
+	/**
+	 * Flush all cached data from both the static in-memory array and the WordPress object cache.
+	 */
+	public function flush(): void;
 }

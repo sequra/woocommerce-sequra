@@ -63,6 +63,7 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 
 		$this->migration = new Migration_Install_400(
 			$this->wpdb,
+			new Cache_Repository(),
 			$this->encryptor,
 			$store_context
 		);

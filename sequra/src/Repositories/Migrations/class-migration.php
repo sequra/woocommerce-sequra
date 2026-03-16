@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Repositories\Migrations;
 
+use SeQura\WC\Repositories\Interface_Cache_Repository;
 use SeQura\WC\Repositories\Repository;
 
 /**
@@ -23,12 +24,21 @@ abstract class Migration {
 	protected $db;
 
 	/**
+	 * Cache repository.
+	 *
+	 * @var Interface_Cache_Repository
+	 */
+	protected $cache;
+
+	/**
 	 * Constructor
 	 *
-	 * @param \wpdb $wpdb Database instance.
+	 * @param \wpdb                    $wpdb  Database instance.
+	 * @param Interface_Cache_Repository $cache Cache repository.
 	 */
-	public function __construct( \wpdb $wpdb ) {
-		$this->db = $wpdb;
+	public function __construct( \wpdb $wpdb, Interface_Cache_Repository $cache ) {
+		$this->db    = $wpdb;
+		$this->cache = $cache;
 	}
 
 	/**
@@ -54,6 +64,8 @@ abstract class Migration {
 		} finally {
 			\remove_filter( 'sequra_cache_enabled', array( $this, 'sequra_cache_enabled_callback' ), 999 );
 			Repository::$cache_enabled = null;
+			// Flush caches so the plugin reads fresh data after the migration.
+			$this->cache->flush();
 		}
 	}
 

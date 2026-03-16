@@ -8,6 +8,7 @@
 
 namespace SeQura\WC\Tests\Repositories\Migrations;
 
+use SeQura\WC\Repositories\Cache_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Dto\Table_Index;
 use SeQura\WC\Repositories\Entity_Repository;
@@ -32,6 +33,7 @@ class MigrationInstall320Test extends WP_UnitTestCase {
 
 		$this->migration = new Migration_Install_320(
 			$_wpdb, 
+			new Cache_Repository(),
 			$this->hook_name, 
 			$this->entity_repository, 
 			$this->queue_repository
