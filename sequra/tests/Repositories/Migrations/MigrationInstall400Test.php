@@ -20,7 +20,9 @@ use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
 use SeQura\Core\Infrastructure\ORM\RepositoryRegistry;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Repositories\Cache_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_400;
+use SeQura\WC\Repositories\Repository;
 use WP_UnitTestCase;
 
 // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
@@ -64,7 +66,23 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 			$this->encryptor,
 			$store_context
 		);
+		$this->reset_caches();
 		$this->truncate_tables();
+	}
+
+	public function tear_down() {
+		$this->reset_caches();
+		parent::tear_down();
+	}
+
+	/**
+	 * Resets the repository caches so that truncate_tables() (which bypasses
+	 * the Repository write path) does not leave stale cached results.
+	 */
+	private function reset_caches(): void {
+		wp_cache_flush();
+		Cache_Repository::$static_cache = array();
+		Repository::$cache_enabled      = null;
 	}
 
 	/**
