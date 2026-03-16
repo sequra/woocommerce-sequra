@@ -81,7 +81,9 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Serv
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Default_Logger_Adapter;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Shop_Logger_Adapter;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
+use SeQura\WC\Repositories\Cache_Repository;
 use SeQura\WC\Repositories\Entity_Repository;
+use SeQura\WC\Repositories\Interface_Cache_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Repositories\Queue_Item_Repository;
@@ -927,6 +929,16 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ \wpdb::class ] = $wpdb;
 				}
 				return self::$cache[ \wpdb::class ];
+			}
+		);
+
+		Reg::registerService(
+			Interface_Cache_Repository::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Cache_Repository::class ] ) ) {
+					self::$cache[ Interface_Cache_Repository::class ] = new Cache_Repository();
+				}
+				return self::$cache[ Interface_Cache_Repository::class ];
 			}
 		);
 
