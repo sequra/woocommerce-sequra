@@ -44,4 +44,19 @@ interface Interface_Cache_Repository {
 	 * @param string $group Cache group.
 	 */
 	public function delete( $key, $group ): bool;
+
+	/**
+	 * Atomically increment a numeric value in the cache.
+	 *
+	 * Uses wp_cache_incr() which is atomic on Redis/Memcached backends,
+	 * eliminating the read-then-write race of get()+set().
+	 * If the key does not exist it is initialised to 1 with the given TTL.
+	 *
+	 * @param string $key   Cache key.
+	 * @param string $group Cache group.
+	 * @param int    $ttl   TTL used only when the key is first created. 0 = no expiration.
+	 *
+	 * @return int New value after increment.
+	 */
+	public function increment( $key, $group, $ttl = 0 ): int;
 }

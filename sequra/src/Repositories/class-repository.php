@@ -705,9 +705,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 	/**
 	 * Bump the data version for this entity class, invalidating all cached reads.
+	 * Uses an atomic increment to avoid a read-then-write race on concurrent requests.
 	 */
 	protected function bump_data_version(): void {
-		$this->cache->set( $this->get_data_version_key(), $this->get_data_version() + 1, self::DATA_CACHE_GROUP, self::CACHE_TTL );
+		$this->cache->increment( $this->get_data_version_key(), self::DATA_CACHE_GROUP, self::CACHE_TTL );
 	}
 
 	/**

@@ -81,4 +81,27 @@ class Cache_Repository implements Interface_Cache_Repository {
 		unset( self::$static_cache[ $group ][ $key ] );
 		return \wp_cache_delete( $key, $group );
 	}
+
+	/**
+	 * Atomically increment a numeric value in the cache.
+	 *
+	 * @param string $key   Cache key.
+	 * @param string $group Cache group.
+	 * @param int    $ttl   TTL used only when the key is first created.
+	 *
+	 * @return int New value after increment.
+	 */
+	public function increment( $key, $group, $ttl = 0 ): int {
+		// wp_cache_incr() is atomic on Redis/Memcached; it returns false if the key does not exist.
+		$new_value = \wp_cache_incr( $key, 1, $group );
+		if ( false === $new_value ) {
+			// Key did not exist; initialise to 1 with the requested TTL.
+			//phpcs:ignore WordPressVIPMinimum.Performance.LowExpiryCacheTime.CacheTimeUndetermined
+			\wp_cache_set( $key, 1, $group, $ttl );
+			$new_value = 1;
+		}
+		// Keep static cache in sync so subsequent get() calls in this request see the new value.
+		self::$static_cache[ $group ][ $key ] = $new_value;
+		return (int) $new_value;
+	}
 }
