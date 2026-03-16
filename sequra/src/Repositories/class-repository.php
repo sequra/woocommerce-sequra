@@ -40,11 +40,33 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	private static $cache_enabled = null;
 
 	/**
+	 * Cache group for table existence checks.
+	 */
+	private const TABLE_EXISTS_CACHE_GROUP = 'sequra_table_exists';
+
+	/**
+	 * Cache group for data query results and version counters.
+	 */
+	private const DATA_CACHE_GROUP = 'sequra_data';
+
+	/**
+	 * TTL for cache entries in seconds.
+	 */
+	private const CACHE_TTL = 300;
+
+	/**
 	 * Database session object.
 	 *
 	 * @var \wpdb
 	 */
 	protected $db;
+
+	/**
+	 * Cache repository.
+	 *
+	 * @var Interface_Cache_Repository
+	 */
+	protected $cache;
 
 	/**
 	 * Returns unprefixed table name.
@@ -77,7 +99,8 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( ! $db instanceof \wpdb ) {
 			throw new \RuntimeException( 'Database service not found.' );
 		}
-		$this->db = $db;
+		$this->db    = $db;
+		$this->cache = ServiceRegister::getService( Interface_Cache_Repository::class );
 	}
 
 	/**
@@ -138,12 +161,24 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		 */
 		$entity = new $this->entity_class();
 		$type   = $entity->getConfig()->getType();
-		
+
 		$query = "SELECT * FROM {$this->get_table_name()} WHERE type = '$type' ";
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
-		
+
+		// Only cache bounded queries (with LIMIT) to avoid exceeding the 1 MB cache entry size limit.
+		// Unbounded selects (e.g. deleteAllOrders) can return arbitrarily large result sets.
+		$is_cacheable = self::is_cache_enabled() && null !== $filter && $filter->getLimit() > 0;
+
+		if ( $is_cacheable ) {
+			$found  = false;
+			$cached = $this->cache->get( $this->build_data_cache_key( $query ), self::DATA_CACHE_GROUP, $found );
+			if ( $found ) {
+				return $this->translateToEntities( $cached );
+			}
+		}
+
 		$raw_results = array();
 		if ( $this->table_exists() ) {
 			$raw_results = $this->db->get_results( $query, ARRAY_A );
@@ -153,12 +188,16 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		}
 		if ( $this->table_exists( true ) ) {
 			// If the legacy table exists the data may be there.
-			$query              = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
-			$legacy_raw_results = $this->db->get_results( $query, ARRAY_A );
+			$legacy_query       = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
+			$legacy_raw_results = $this->db->get_results( $legacy_query, ARRAY_A );
 			if ( ! is_array( $legacy_raw_results ) ) {
 				$legacy_raw_results = array();
 			}
 			$raw_results = array_merge( $raw_results, $legacy_raw_results );
+		}
+
+		if ( $is_cacheable ) {
+			$this->cache->set( $this->build_data_cache_key( $query ), $raw_results, self::DATA_CACHE_GROUP, self::CACHE_TTL );
 		}
 
 		return $this->translateToEntities( $raw_results );
@@ -197,11 +236,15 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 
 		if ( $entity->getId() ) {
 			$this->update( $entity );
+			$this->bump_data_version();
 
 			return $entity->getId();
 		}
 
-		return $this->save_entity_to_storage( $entity );
+		$id = $this->save_entity_to_storage( $entity );
+		$this->bump_data_version();
+
+		return $id;
 	}
 
 	/**
@@ -264,6 +307,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			$result  = $this->db->delete( $this->get_legacy_table_name(), $where );
 			$deleted = $deleted || ! empty( $result );
 		}
+		if ( $deleted ) {
+			$this->bump_data_version();
+		}
 		return $deleted;
 	}
 
@@ -288,6 +334,19 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( $filter ) {
 			$query .= $this->apply_query_filter( $filter, IndexHelper::mapFieldsToIndexes( $entity ) );
 		}
+
+		// count() always returns a single integer — safe to cache regardless of result set size.
+		$is_cacheable = self::is_cache_enabled();
+		$cache_key    = $this->build_data_cache_key( 'count:' . $query );
+
+		if ( $is_cacheable ) {
+			$found  = false;
+			$cached = $this->cache->get( $cache_key, self::DATA_CACHE_GROUP, $found );
+			if ( $found && is_numeric( $cached ) ) {
+				return (int) $cached;
+			}
+		}
+
 		$count = 0;
 		if ( $this->table_exists() ) {
 			$result = $this->db->get_results( $query, ARRAY_A );
@@ -295,10 +354,15 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		}
 		if ( $this->table_exists( true ) ) {
 			// If the legacy table exists, count the data there too.
-			$query  = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
-			$result = $this->db->get_results( $query, ARRAY_A );
-			$count += empty( $result[0]['total'] ) || ! is_numeric( $result[0]['total'] ) ? 0 : (int) $result[0]['total'];
+			$legacy_query = str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $query );
+			$result       = $this->db->get_results( $legacy_query, ARRAY_A );
+			$count       += empty( $result[0]['total'] ) || ! is_numeric( $result[0]['total'] ) ? 0 : (int) $result[0]['total'];
 		}
+
+		if ( $is_cacheable ) {
+			$this->cache->set( $cache_key, $count, self::DATA_CACHE_GROUP, self::CACHE_TTL );
+		}
+
 		return $count;
 	}
 
@@ -310,7 +374,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return string Escaped value.
 	 */
 	protected function escape( $value ) {
-		return addslashes( strval( $value ) );
+		return addslashes( \strval( $value ) );
 	}
 
 	/**
@@ -370,7 +434,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 				$values         = $condition->getValue();
 				$escaped_values = array();
 				foreach ( $values as $value ) {
-					$escaped_values[] = is_string( $value ) ? $this->escape_value( $value ) : $value;
+					$escaped_values[] = \is_string( $value ) ? $this->escape_value( $value ) : $value;
 				}
 
 				$value = '(' . implode( ', ', $escaped_values ) . ')';
@@ -448,7 +512,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			if ( ! isset( $item['data'] ) || ! isset( $item['id'] ) ) {
 				continue;
 			}
-			$data = (array) json_decode( strval( $item['data'] ), true );
+			$data = (array) json_decode( \strval( $item['data'] ), true );
 			/**
 			 * Entity object.
 			 *
@@ -530,7 +594,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @return void
 	 */
 	protected function validate_index_column( $column, array $index_map ) {
-		if ( 'id' !== $column && ! array_key_exists( $column, $index_map ) ) {
+		if ( 'id' !== $column && ! \array_key_exists( $column, $index_map ) ) {
 			throw new QueryFilterInvalidParamException( esc_html__( 'Column is not id or index.', 'sequra' ) );
 		}
 	}
@@ -558,6 +622,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			$result  = $this->db->query( str_replace( $this->get_table_name(), $this->get_legacy_table_name(), $sql ) );
 			$deleted = $deleted || ! empty( $result );
 		}
+		if ( $deleted ) {
+			$this->bump_data_version();
+		}
 		return $deleted;
 	}
 
@@ -577,7 +644,64 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 */
 	public function table_exists( $legacy = false ): bool {
 		$table_name = \sanitize_text_field( ! $legacy ? $this->get_table_name() : $this->get_legacy_table_name() );
-		return $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
+
+		if ( self::is_cache_enabled() ) {
+			$found  = false;
+			$cached = $this->cache->get( $table_name, self::TABLE_EXISTS_CACHE_GROUP, $found );
+			if ( $found ) {
+				return (bool) $cached;
+			}
+		}
+
+		$result = $this->db->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
+
+		if ( self::is_cache_enabled() ) {
+			$this->cache->set( $table_name, $result, self::TABLE_EXISTS_CACHE_GROUP, self::CACHE_TTL );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Invalidate the table existence cache for a specific table.
+	 *
+	 * @param string $table_name The table name to invalidate.
+	 */
+	private function invalidate_table_exists_cache( $table_name ): void {
+		$this->cache->delete( $table_name, self::TABLE_EXISTS_CACHE_GROUP );
+	}
+
+	/**
+	 * Build a versioned cache key for a data query.
+	 * The version is bumped on every write, making previous keys stale.
+	 *
+	 * @param string $query The SQL query string used as the cache discriminator.
+	 */
+	private function build_data_cache_key( $query ): string {
+		return $this->entity_class . ':' . md5( $query ) . ':v' . $this->get_data_version();
+	}
+
+	/**
+	 * Get the current data version for this entity class.
+	 */
+	private function get_data_version(): int {
+		$found   = false;
+		$version = $this->cache->get( $this->get_data_version_key(), self::DATA_CACHE_GROUP, $found );
+		return $found && is_numeric( $version ) ? (int) $version : 0;
+	}
+
+	/**
+	 * Get the cache key that stores the data version for this entity class.
+	 */
+	private function get_data_version_key(): string {
+		return 'version:' . $this->entity_class;
+	}
+
+	/**
+	 * Bump the data version for this entity class, invalidating all cached reads.
+	 */
+	protected function bump_data_version(): void {
+		$this->cache->set( $this->get_data_version_key(), $this->get_data_version() + 1, self::DATA_CACHE_GROUP, self::CACHE_TTL );
 	}
 
 	/**
@@ -627,7 +751,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			return;
 		}
 		$raw_results = $this->db->get_results( "SELECT * FROM {$this->get_legacy_table_name()} LIMIT 1;", ARRAY_A );
-		if ( ! is_array( $raw_results ) ) {
+		if ( ! \is_array( $raw_results ) ) {
 			return;
 		}
 
@@ -645,6 +769,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( false !== $result ) {
 			// Delete the row from the legacy table.
 			$this->db->delete( $this->get_legacy_table_name(), array( 'id' => $entity->getId() ) );
+			$this->bump_data_version();
 		}
 	}
 
@@ -706,9 +831,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			$indexes = ', ' . $indexes;
 		}
 
-		$sql = sprintf( $this->get_create_table_sql(), $indexes );
+		$sql = \sprintf( $this->get_create_table_sql(), $indexes );
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$result = \dbDelta( $sql );
+		$this->invalidate_table_exists_cache( $this->get_table_name() );
 		if ( ! $this->table_exists() ) {
 			throw new Exception( \esc_html( "SQL: $sql\nResult: " . implode( '. ', $result ) ) );
 		}
@@ -724,8 +850,10 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 		if ( ! $this->table_exists( true ) && false === $this->db->query( "RENAME TABLE {$this->get_table_name()} TO {$this->get_legacy_table_name()};" ) ) {
 			throw new Exception( \esc_html( "Could not rename table {$this->get_table_name()} to {$this->get_legacy_table_name()}" ) );
 		}
+		$this->invalidate_table_exists_cache( $this->get_table_name() );
+		$this->invalidate_table_exists_cache( $this->get_legacy_table_name() );
 
-		if ( ! $this->table_exists() ) { 
+		if ( ! $this->table_exists() ) {
 			// Create the table if not exists.
 			$this->create_table();
 			
@@ -752,7 +880,11 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			// Legacy table is not empty, do not remove it.
 			return false;
 		}
-		return false !== $this->db->query( "DROP TABLE IF EXISTS `{$this->get_legacy_table_name()}`;" );
+		$dropped = false !== $this->db->query( "DROP TABLE IF EXISTS `{$this->get_legacy_table_name()}`;" );
+		if ( $dropped ) {
+			$this->invalidate_table_exists_cache( $this->get_legacy_table_name() );
+		}
+		return $dropped;
 	}
 
 	/**
