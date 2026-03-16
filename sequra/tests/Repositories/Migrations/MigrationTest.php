@@ -10,40 +10,10 @@ namespace SeQura\WC\Tests\Repositories\Migrations;
 
 use Exception;
 use SeQura\WC\Repositories\Cache_Repository;
-use SeQura\WC\Repositories\Migrations\Migration;
 use SeQura\WC\Repositories\Repository;
 use WP_UnitTestCase;
 
-/**
- * Concrete migration stub used by tests.
- */
-class Stub_Migration extends Migration {
-
-	/**
-	 * Whether execute() should throw an exception.
-	 *
-	 * @var bool
-	 */
-	public $should_throw = false;
-
-	/**
-	 * Whether execute() was called.
-	 *
-	 * @var bool
-	 */
-	public $executed = false;
-
-	public function get_version(): string {
-		return '99.0.0';
-	}
-
-	protected function execute(): void {
-		$this->executed = true;
-		if ( $this->should_throw ) {
-			throw new Exception( 'Migration failed' );
-		}
-	}
-}
+require_once __DIR__ . '/Stub_Migration.php';
 
 // phpcs:disable WordPress.WP.AlternativeFunctions.wp_cache
 
@@ -61,26 +31,26 @@ class MigrationTest extends WP_UnitTestCase {
 
 	public function set_up() {
 		parent::set_up();
-		$this->cache     = new Cache_Repository();
-		$this->migration = new Stub_Migration( $GLOBALS['wpdb'], $this->cache );
-		Repository::$cache_enabled = null;
+		$this->cache                    = new Cache_Repository();
+		$this->migration                = new Stub_Migration( $GLOBALS['wpdb'], $this->cache );
+		Repository::$cache_enabled      = null;
 		Cache_Repository::$static_cache = array();
 		wp_cache_flush();
 	}
 
 	public function tear_down() {
-		Repository::$cache_enabled = null;
+		Repository::$cache_enabled      = null;
 		Cache_Repository::$static_cache = array();
 		parent::tear_down();
 	}
 
 	public function testRun_disablesCacheDuringExecution() {
-		// Before run(), cache should be enabled by default.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks
 		$this->assertTrue( (bool) apply_filters( 'sequra_cache_enabled', true ) );
 
 		$this->migration->run();
 
-		// After run(), the filter should be removed and cache re-enabled.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks
 		$this->assertTrue( (bool) apply_filters( 'sequra_cache_enabled', true ) );
 		$this->assertTrue( $this->migration->executed );
 	}
@@ -117,7 +87,7 @@ class MigrationTest extends WP_UnitTestCase {
 		wp_cache_get( 'key', 'test_group', false, $found );
 		$this->assertFalse( $found );
 
-		// Filter must be removed even on exception.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks
 		$this->assertTrue( (bool) apply_filters( 'sequra_cache_enabled', true ) );
 	}
 
