@@ -106,6 +106,7 @@ Contributors:
 * Fixed: Debounced payment method availability checks to reduce server load, eliminate duplicate API entries, and improve checkout performance.
 * Changed: Tested up to WooCommerce 10.6.0 and WordPress 6.9.4
 * Fixed: Country change during checkout causing wrong solicitation payload.
+* Fixed: Excessive database queries and connection errors.
 
 = 4.1.3	=
 * Fixed: Country resolution issues during solicitation process.
