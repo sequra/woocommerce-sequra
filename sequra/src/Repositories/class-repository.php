@@ -33,6 +33,13 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	protected $entity_class;
 
 	/**
+	 * Whether caching is enabled. Evaluated once per request via the 'sequra_cache_enabled' filter.
+	 *
+	 * @var bool|null
+	 */
+	private static $cache_enabled = null;
+
+	/**
 	 * Database session object.
 	 *
 	 * @var \wpdb
@@ -71,6 +78,27 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			throw new \RuntimeException( 'Database service not found.' );
 		}
 		$this->db = $db;
+	}
+
+	/**
+	 * Check if caching is enabled.
+	 * Result is evaluated once per request and cached statically.
+	 *
+	 * Disable all repository caching by adding to functions.php or an mu-plugin:
+	 * add_filter( 'sequra_cache_enabled', '__return_false' );
+	 */
+	private static function is_cache_enabled(): bool {
+		if ( null === self::$cache_enabled ) {
+			/**
+			 * Whether repository caching is enabled.
+			 * Set to false to disable all repository caching and fall back to direct database queries.
+			 *
+			 * @since 4.2.0
+			 * @param bool $enabled Whether caching is enabled. Default true.
+			 */
+			self::$cache_enabled = (bool) \apply_filters( 'sequra_cache_enabled', true );
+		}
+		return self::$cache_enabled;
 	}
 
 	/**
