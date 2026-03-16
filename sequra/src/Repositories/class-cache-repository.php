@@ -22,9 +22,12 @@ class Cache_Repository implements Interface_Cache_Repository {
 	/**
 	 * Per-request in-memory cache, keyed by group then by key.
 	 *
+	 * Public to allow test suites to reset the static state between tests
+	 * without requiring Reflection.
+	 *
 	 * @var array<string, array<string, mixed>>
 	 */
-	private static $static_cache = array();
+	public static $static_cache = array();
 
 	/**
 	 * Get a value from the cache.

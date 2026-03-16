@@ -35,9 +35,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Whether caching is enabled. Evaluated once per request via the 'sequra_cache_enabled' filter.
 	 *
+	 * Public to allow test suites to reset the static state between tests
+	 * without requiring Reflection.
+	 *
 	 * @var bool|null
 	 */
-	private static $cache_enabled = null;
+	public static $cache_enabled = null;
 
 	/**
 	 * Cache group for table existence checks.
