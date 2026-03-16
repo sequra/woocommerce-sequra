@@ -672,7 +672,9 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * @param string $table_name The table name to invalidate.
 	 */
 	private function invalidate_table_exists_cache( $table_name ): void {
-		$this->cache->delete( $table_name, self::TABLE_EXISTS_CACHE_GROUP );
+		if ( self::is_cache_enabled() ) {
+			$this->cache->delete( $table_name, self::TABLE_EXISTS_CACHE_GROUP );
+		}
 	}
 
 	/**
