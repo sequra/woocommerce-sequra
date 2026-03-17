@@ -126,6 +126,23 @@ class Task {
 	}
 
 	/**
+	 * Flush the seQura repository cache so the plugin reads fresh data.
+	 *
+	 * Clears the WordPress object cache and, when the main seQura plugin is
+	 * active, also resets its in-memory static cache and the cache-enabled flag.
+	 */
+	protected function flush_sequra_cache(): void {
+		\wp_cache_flush();
+
+		if ( class_exists( '\SeQura\WC\Repositories\Cache_Repository' ) ) {
+			\SeQura\WC\Repositories\Cache_Repository::$static_cache = array();
+		}
+		if ( class_exists( '\SeQura\WC\Repositories\Repository' ) ) {
+			\SeQura\WC\Repositories\Repository::$cache_enabled = null;
+		}
+	}
+
+	/**
 	 * Response with an error message
 	 * 
 	 * @param string $message The error message.

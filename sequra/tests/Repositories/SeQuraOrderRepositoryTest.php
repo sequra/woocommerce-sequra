@@ -13,6 +13,8 @@ use SeQura\Core\Infrastructure\ORM\Entity;
 use SeQura\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
 use SeQura\Core\Infrastructure\ORM\Utility\IndexHelper;
 use SeQura\Core\Infrastructure\ServiceRegister;
+use SeQura\WC\Repositories\Cache_Repository;
+use SeQura\WC\Repositories\Repository;
 use SeQura\WC\Repositories\SeQura_Order_Repository;
 use SeQura\WC\Tests\Fixtures\SeQuraOrderTable;
 use WP_UnitTestCase;
@@ -21,15 +23,16 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 
 	private $repository;
 	private $order_table;
-	
+
 	public function set_up() {
 		ServiceRegister::registerService(
-			\wpdb::class, 
+			\wpdb::class,
 			function () {
 				global $wpdb;
 				return $wpdb;
 			}
 		);
+		$this->reset_caches();
 		$this->order_table = new SeQuraOrderTable();
 		$this->order_table->fill_with_sample_data();
 		$this->repository = new SeQura_Order_Repository();
@@ -39,6 +42,17 @@ class SeQuraOrderRepositoryTest extends WP_UnitTestCase {
 	public function tear_down() {
 		$this->order_table->remove_table( true ); // Remove legacy table if exists.
 		$this->order_table->reset();
+		$this->reset_caches();
+	}
+
+	/**
+	 * Resets all cache layers between tests so that stale WP object cache entries
+	 * (not cleaned up when parent::set_up() is absent) do not leak between tests.
+	 */
+	private function reset_caches(): void {
+		wp_cache_flush();
+		Cache_Repository::$static_cache = array();
+		Repository::$cache_enabled      = null;
 	}
 
 	public function testDeleteOldAndInvalid_happyPath_RightDataIsDeleted() {

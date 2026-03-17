@@ -13,6 +13,7 @@ use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsS
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\Core\BusinessLogic\Domain\OrderStatusSettings\Models\OrderStatusMapping;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
+use SeQura\WC\Repositories\Cache_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_420;
 use WP_UnitTestCase;
 
@@ -81,6 +82,7 @@ class MigrationInstall420Test extends WP_UnitTestCase {
 
 		$this->migration = new Migration_Install_420(
 			$this->wpdb,
+			new Cache_Repository(),
 			$this->advanced_settings_service,
 			$this->order_status_settings_service
 		);

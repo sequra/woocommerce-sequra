@@ -22,6 +22,7 @@ use SeQura\Core\Infrastructure\Configuration\ConfigEntity;
 use SeQura\Core\Infrastructure\ORM\RepositoryRegistry;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\Core\Infrastructure\TaskExecution\QueueItem;
+use SeQura\WC\Repositories\Cache_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Repository;
 use WP_UnitTestCase;
@@ -119,6 +120,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 
 		$this->migration = new Migration_Install_300(
 			$this->wpdb,
+			new Cache_Repository(),
 			$order_repository,
 			$entity_repository,
 			$queue_item_repository,

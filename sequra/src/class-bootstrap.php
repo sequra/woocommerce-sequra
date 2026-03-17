@@ -81,7 +81,9 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Webhook\Services\Shop_Order_Serv
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Default_Logger_Adapter;
 use SeQura\WC\Core\Implementation\Infrastructure\Logger\Interfaces\Shop_Logger_Adapter;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\OrderReport\Order_Report_Service;
+use SeQura\WC\Repositories\Cache_Repository;
 use SeQura\WC\Repositories\Entity_Repository;
+use SeQura\WC\Repositories\Interface_Cache_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_300;
 use SeQura\WC\Repositories\Migrations\Migration_Install_320;
 use SeQura\WC\Repositories\Queue_Item_Repository;
@@ -578,6 +580,13 @@ class Bootstrap extends BootstrapComponent {
 					 */
 					$store_context = Reg::getService( StoreContext::class );
 
+					/**
+					 * Cache repository.
+					 *
+					 * @var Interface_Cache_Repository $cache_repository
+					 */
+					$cache_repository = Reg::getService( Interface_Cache_Repository::class );
+
 					self::$cache[ Interface_Migration_Manager::class ] = new Migration_Manager(
 						self::get_constants()->get_plugin_basename(),
 						$configuration,
@@ -585,6 +594,7 @@ class Bootstrap extends BootstrapComponent {
 						array(
 							new Migration_Install_300(
 								$wpdb,
+								$cache_repository,
 								$order_repository,
 								$entity_repository,
 								$queue_item_repository,
@@ -592,17 +602,20 @@ class Bootstrap extends BootstrapComponent {
 							),
 							new Migration_Install_320(
 								$wpdb,
+								$cache_repository,
 								self::get_constants()->get_hook_add_order_indexes(),
 								$entity_repository,
 								$queue_item_repository
 							),
 							new Migration_Install_400(
 								$wpdb,
+								$cache_repository,
 								$encryptor,
 								$store_context
 							),
 							new Migration_Install_420(
 								$wpdb,
+								$cache_repository,
 								Reg::getService( AdvancedSettingsService::class ),
 								Reg::getService( Order_Status_Settings_Service::class )
 							),
@@ -927,6 +940,16 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ \wpdb::class ] = $wpdb;
 				}
 				return self::$cache[ \wpdb::class ];
+			}
+		);
+
+		Reg::registerService(
+			Interface_Cache_Repository::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Cache_Repository::class ] ) ) {
+					self::$cache[ Interface_Cache_Repository::class ] = new Cache_Repository();
+				}
+				return self::$cache[ Interface_Cache_Repository::class ];
 			}
 		);
 

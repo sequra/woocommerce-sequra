@@ -518,5 +518,6 @@ abstract class Configure_Sequra_Entities_Task extends Task {
 			$this->recreate_entity_table_in_database();
 			$this->set_merchant_configuration( $widgets, $version );
 		}
+		$this->flush_sequra_cache();
 	}
 }

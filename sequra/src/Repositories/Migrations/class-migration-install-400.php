@@ -22,6 +22,7 @@ use SeQura\Core\BusinessLogic\DataAccess\PromotionalWidgets\Entities\WidgetSetti
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\PromotionalWidgets\Services\WidgetSettingsService;
 use SeQura\Core\BusinessLogic\Utility\EncryptorInterface;
+use SeQura\WC\Repositories\Interface_Cache_Repository;
 use Throwable;
 
 /**
@@ -74,21 +75,22 @@ class Migration_Install_400 extends Migration {
 	 */
 	public function __construct( 
 		\wpdb $wpdb,
+		Interface_Cache_Repository $cache,
 		EncryptorInterface $encryptor,
 		StoreContext $store_context
 	) {
-		parent::__construct( $wpdb );
+		parent::__construct( $wpdb, $cache );
 		$this->entity_table  = $this->db->prefix . 'sequra_entity';
 		$this->encryptor     = $encryptor;
 		$this->store_context = $store_context;
 	}
 
 	/**
-	 * Run the migration.
+	 * Execute the migration logic.
 	 *
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
-	public function run(): void {
+	protected function execute(): void {
 		$this->migrate_general_settings();
 		$this->migrate_widget_settings();
 		$this->fetch_deployments();

@@ -5,7 +5,7 @@ set -o allexport
 source .env
 set +o allexport
 
-docker compose down --volumes --remove-orphans
+docker compose -f docker-compose.yml -f docker-compose.redis.yml down --volumes --remove-orphans
 
 if docker ps -a --format '{{.Names}}' | grep -q "^${NGROK_CONTAINER_NAME}$"; then
   docker rm -f $NGROK_CONTAINER_NAME > /dev/null 2>&1

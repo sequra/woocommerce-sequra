@@ -16,6 +16,7 @@ use SeQura\Core\BusinessLogic\AdminAPI\CountryConfiguration\Requests\CountryConf
 use SeQura\Core\BusinessLogic\AdminAPI\GeneralSettings\Requests\GeneralSettingsRequest;
 use SeQura\Core\BusinessLogic\AdminAPI\PromotionalWidgets\Requests\WidgetSettingsRequest;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use SeQura\WC\Repositories\Interface_Cache_Repository;
 use SeQura\WC\Repositories\Repository;
 use Throwable;
 
@@ -66,12 +67,13 @@ class Migration_Install_300 extends Migration {
 	 */
 	public function __construct( 
 		\wpdb $wpdb,
+		Interface_Cache_Repository $cache,
 		Repository $order_repository,
 		Repository $entity_repository,
 		Repository $queue_repository,
 		StoreContext $store_context
 	) {
-		parent::__construct( $wpdb );
+		parent::__construct( $wpdb, $cache );
 		$this->order_repository  = $order_repository;
 		$this->entity_repository = $entity_repository;
 		$this->queue_repository  = $queue_repository;
@@ -79,11 +81,11 @@ class Migration_Install_300 extends Migration {
 	}
 
 	/**
-	 * Run the migration.
+	 * Execute the migration logic.
 	 *
 	 * @throws Throwable|Critical_Migration_Exception
 	 */
-	public function run(): void {
+	protected function execute(): void {
 		$this->add_new_tables_to_database();
 		$woocommerce_sequra_settings = (array) \get_option( 'woocommerce_sequra_settings', array() );
 		if ( ! empty( $woocommerce_sequra_settings ) ) {
