@@ -164,8 +164,8 @@ class CacheRepositoryTest extends WP_UnitTestCase {
 	// --- flush() ---
 
 	public function testFlush_clearsStaticCacheAndWpObjectCache() {
-		$this->cache->set( 'key1', 'value1', 'group_a' );
-		$this->cache->set( 'key2', 'value2', 'group_b' );
+		$this->cache->set( 'key1', 'value1', \SeQura\WC\Repositories\Repository::TABLE_EXISTS_CACHE_GROUP );
+		$this->cache->set( 'key2', 'value2', \SeQura\WC\Repositories\Repository::DATA_CACHE_GROUP );
 
 		$this->cache->flush();
 
@@ -174,11 +174,11 @@ class CacheRepositoryTest extends WP_UnitTestCase {
 
 		// WP object cache should also be cleared.
 		$wp_found = false;
-		wp_cache_get( 'key1', 'group_a', false, $wp_found );
+		wp_cache_get( 'key1', \SeQura\WC\Repositories\Repository::TABLE_EXISTS_CACHE_GROUP, false, $wp_found );
 		$this->assertFalse( $wp_found );
 
 		$wp_found = false;
-		wp_cache_get( 'key2', 'group_b', false, $wp_found );
+		wp_cache_get( 'key2', \SeQura\WC\Repositories\Repository::DATA_CACHE_GROUP, false, $wp_found );
 		$this->assertFalse( $wp_found );
 	}
 

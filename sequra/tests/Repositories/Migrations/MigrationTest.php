@@ -57,14 +57,14 @@ class MigrationTest extends WP_UnitTestCase {
 
 	public function testRun_flushesCacheAfterExecution() {
 		// Seed caches with data that should be flushed.
-		$this->cache->set( 'key', 'stale_value', 'test_group' );
+		$this->cache->set( 'key', 'stale_value', Repository::DATA_CACHE_GROUP );
 
 		$this->migration->run();
 
 		// Both static and WP object caches should be empty.
 		$this->assertSame( array(), Cache_Repository::$static_cache );
 		$found = false;
-		wp_cache_get( 'key', 'test_group', false, $found );
+		wp_cache_get( 'key', Repository::DATA_CACHE_GROUP, false, $found );
 		$this->assertFalse( $found );
 	}
 
@@ -72,7 +72,7 @@ class MigrationTest extends WP_UnitTestCase {
 		$this->migration->should_throw = true;
 
 		// Seed caches.
-		$this->cache->set( 'key', 'stale_value', 'test_group' );
+		$this->cache->set( 'key', 'stale_value', Repository::DATA_CACHE_GROUP );
 
 		try {
 			$this->migration->run();
@@ -84,7 +84,7 @@ class MigrationTest extends WP_UnitTestCase {
 		// Cache must still be flushed (finally block).
 		$this->assertSame( array(), Cache_Repository::$static_cache );
 		$found = false;
-		wp_cache_get( 'key', 'test_group', false, $found );
+		wp_cache_get( 'key', Repository::DATA_CACHE_GROUP, false, $found );
 		$this->assertFalse( $found );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks
