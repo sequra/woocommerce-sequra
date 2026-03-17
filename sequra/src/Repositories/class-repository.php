@@ -178,7 +178,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			$found  = false;
 			$cached = $this->cache->get( $this->build_data_cache_key( $query ), self::DATA_CACHE_GROUP, $found );
 			if ( $found ) {
-				return $this->translateToEntities( $cached );
+				return $cached;
 			}
 		}
 
@@ -199,11 +199,13 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 			$raw_results = array_merge( $raw_results, $legacy_raw_results );
 		}
 
+		$entities = $this->translateToEntities( $raw_results );
+
 		if ( $is_cacheable ) {
-			$this->cache->set( $this->build_data_cache_key( $query ), $raw_results, self::DATA_CACHE_GROUP, self::CACHE_TTL );
+			$this->cache->set( $this->build_data_cache_key( $query ), $entities, self::DATA_CACHE_GROUP, self::CACHE_TTL );
 		}
 
-		return $this->translateToEntities( $raw_results );
+		return $entities;
 	}
 
 	/**
