@@ -45,12 +45,12 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	/**
 	 * Cache group for table existence checks.
 	 */
-	private const TABLE_EXISTS_CACHE_GROUP = 'sequra_table_exists';
+	public const TABLE_EXISTS_CACHE_GROUP = 'sequra_table_exists';
 
 	/**
 	 * Cache group for data query results and version counters.
 	 */
-	private const DATA_CACHE_GROUP = 'sequra_data';
+	public const DATA_CACHE_GROUP = 'sequra_data';
 
 	/**
 	 * TTL for cache entries in seconds.
@@ -703,7 +703,7 @@ abstract class Repository implements RepositoryInterface, Interface_Deletable_Re
 	 * Get the cache key that stores the data version for this entity class.
 	 */
 	private function get_data_version_key(): string {
-		return 'version:' . $this->entity_class;
+		return 'version:' . $this->entity_class . ':' . $this->get_table_name();
 	}
 
 	/**

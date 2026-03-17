@@ -110,9 +110,18 @@ class Cache_Repository implements Interface_Cache_Repository {
 
 	/**
 	 * Flush all cached data from both the static in-memory array and the WordPress object cache.
+	 *
+	 * Uses wp_cache_flush_group() per seQura group when available (WP 6.1+) to avoid flushing
+	 * the entire object cache — which would evict entries for other sites in a multisite network.
+	 * Falls back to wp_cache_flush() on older WordPress versions.
 	 */
 	public function flush(): void {
 		self::$static_cache = array();
-		\wp_cache_flush();
+		if ( \function_exists( 'wp_cache_flush_group' ) ) {
+			\wp_cache_flush_group( Repository::TABLE_EXISTS_CACHE_GROUP );
+			\wp_cache_flush_group( Repository::DATA_CACHE_GROUP );
+		} else {
+			\wp_cache_flush();
+		}
 	}
 }
