@@ -157,6 +157,67 @@ class RepositoryCachingTest extends WP_UnitTestCase {
 		$this->assertEquals( 0, $count_after );
 	}
 
+	// --- table_exists() caching ---
+
+	public function testTableExists_populatesStaticAndWpCache() {
+		// First call should populate both cache layers.
+		$this->assertTrue( $this->repository->table_exists() );
+
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'sequra_order';
+
+		// Static cache should contain the result.
+		$this->assertArrayHasKey( Repository::TABLE_EXISTS_CACHE_GROUP, Cache_Repository::$static_cache );
+		$this->assertArrayHasKey( $table_name, Cache_Repository::$static_cache[ Repository::TABLE_EXISTS_CACHE_GROUP ] );
+		$this->assertTrue( Cache_Repository::$static_cache[ Repository::TABLE_EXISTS_CACHE_GROUP ][ $table_name ] );
+
+		// WP object cache should also contain the result.
+		$wp_found = false;
+		$wp_value = wp_cache_get( $table_name, Repository::TABLE_EXISTS_CACHE_GROUP, false, $wp_found );
+		$this->assertTrue( $wp_found );
+		$this->assertTrue( $wp_value );
+	}
+
+	public function testTableExists_servedFromStaticCacheOnSecondCall() {
+		// First call populates the cache.
+		$this->assertTrue( $this->repository->table_exists() );
+
+		// Delete from WP object cache — the static cache should still serve the result.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'sequra_order';
+		wp_cache_delete( $table_name, Repository::TABLE_EXISTS_CACHE_GROUP );
+
+		// Second call must still return true (from static cache).
+		$this->assertTrue( $this->repository->table_exists() );
+	}
+
+	public function testTableExists_cacheDisabled_doesNotPopulateCache() {
+		add_filter( 'sequra_cache_enabled', '__return_false' );
+		$this->reset_cache_enabled_flag();
+
+		try {
+			$this->assertTrue( $this->repository->table_exists() );
+
+			// Static cache should NOT contain the result when caching is disabled.
+			global $wpdb;
+			$table_name = $wpdb->prefix . 'sequra_order';
+			$has_entry  = isset( Cache_Repository::$static_cache[ Repository::TABLE_EXISTS_CACHE_GROUP ][ $table_name ] );
+			$this->assertFalse( $has_entry );
+		} finally {
+			remove_filter( 'sequra_cache_enabled', '__return_false' );
+			$this->reset_cache_enabled_flag();
+		}
+	}
+
+	public function testTableExists_legacyTable_returnsFalseForNonExistentTable() {
+		// Legacy table does not exist — should return false and cache it.
+		$this->assertFalse( $this->repository->table_exists( true ) );
+
+		global $wpdb;
+		$legacy_table_name = $wpdb->prefix . 'sequra_order_legacy';
+		$this->assertFalse( Cache_Repository::$static_cache[ Repository::TABLE_EXISTS_CACHE_GROUP ][ $legacy_table_name ] );
+	}
+
 	// --- Cache disabled filter ---
 
 	public function testSelect_cacheDisabled_doesNotCacheResults() {
