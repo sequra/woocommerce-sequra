@@ -98,10 +98,17 @@ class Cache_Repository implements Interface_Cache_Repository {
 		// wp_cache_incr() is atomic on Redis/Memcached; it returns false if the key does not exist.
 		$new_value = \wp_cache_incr( $key, 1, $group );
 		if ( false === $new_value ) {
-			// Key did not exist; initialise to 1 with the requested TTL.
+			// Key did not exist; use add() (a no-op if another request created it concurrently)
+			// then retry the atomic incr() to avoid two requests both writing 1.
 			//phpcs:ignore WordPressVIPMinimum.Performance.LowExpiryCacheTime.CacheTimeUndetermined
-			\wp_cache_set( $key, 1, $group, $ttl );
-			$new_value = 1;
+			\wp_cache_add( $key, 0, $group, $ttl );
+			$new_value = \wp_cache_incr( $key, 1, $group );
+			if ( false === $new_value ) {
+				// Fallback for backends where incr after add still fails (e.g. default WP array cache without the key).
+				//phpcs:ignore WordPressVIPMinimum.Performance.LowExpiryCacheTime.CacheTimeUndetermined
+				\wp_cache_set( $key, 1, $group, $ttl );
+				$new_value = 1;
+			}
 		}
 		// Keep static cache in sync so subsequent get() calls in this request see the new value.
 		self::$static_cache[ $group ][ $key ] = $new_value;
