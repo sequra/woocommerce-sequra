@@ -157,6 +157,84 @@ class RepositoryCachingTest extends WP_UnitTestCase {
 		$this->assertEquals( 0, $count_after );
 	}
 
+	// --- table_exists() caching ---
+
+	public function testTableExists_secondCallReturnsCachedResult() {
+		// First call populates the cache.
+		$this->assertTrue( $this->repository->table_exists() );
+
+		// Drop the table behind the repository's back.
+		global $wpdb;
+		$wpdb->query( "DROP TABLE {$wpdb->prefix}sequra_order" );
+
+		// Second call must return the stale cached true.
+		$this->assertTrue( $this->repository->table_exists() );
+	}
+
+	public function testTableExists_cacheDisabled_doesNotCache() {
+		add_filter( 'sequra_cache_enabled', '__return_false' );
+		$this->reset_cache_enabled_flag();
+
+		try {
+			$this->assertTrue( $this->repository->table_exists() );
+
+			global $wpdb;
+			$wpdb->query( "DROP TABLE {$wpdb->prefix}sequra_order" );
+
+			// With caching disabled the second call must hit the DB.
+			$this->assertFalse( $this->repository->table_exists() );
+		} finally {
+			remove_filter( 'sequra_cache_enabled', '__return_false' );
+			$this->reset_cache_enabled_flag();
+			// Recreate for tear_down cleanup.
+			$this->order_table->fill_with_sample_data();
+		}
+	}
+
+	// --- table_exists() invalidation ---
+
+	public function testCreateTable_invalidatesTableExistsCache() {
+		// Prime table_exists cache for the main table, then drop it.
+		$this->assertTrue( $this->repository->table_exists() );
+		global $wpdb;
+		$wpdb->query( "DROP TABLE {$wpdb->prefix}sequra_order" );
+
+		// create_table() must invalidate the cache so table_exists() re-queries the DB.
+		$this->repository->create_table();
+		$this->assertTrue( $this->repository->table_exists() );
+	}
+
+	public function testPrepareTablesForMigration_invalidatesTableExistsCache() {
+		// Prime cache: main table exists, legacy does not.
+		$this->assertTrue( $this->repository->table_exists() );
+		$this->assertFalse( $this->repository->table_exists( true ) );
+
+		// prepare_tables_for_migration() renames main → legacy and creates a new main.
+		$this->repository->prepare_tables_for_migration();
+
+		// Both must reflect the new state (cache was invalidated).
+		$this->assertTrue( $this->repository->table_exists() );
+		$this->assertTrue( $this->repository->table_exists( true ) );
+	}
+
+	public function testMaybeRemoveLegacyTable_invalidatesTableExistsCache() {
+		// Setup: migrate all rows so the legacy table is empty.
+		$total_rows = count( $this->order_table->get_all( false ) );
+		$this->repository->prepare_tables_for_migration();
+		for ( $i = 0; $i < $total_rows; $i++ ) {
+			$this->repository->migrate_next_row();
+		}
+
+		// Prime cache: legacy table exists.
+		$this->assertTrue( $this->repository->table_exists( true ) );
+
+		// Remove the now-empty legacy table.
+		$this->assertTrue( $this->repository->maybe_remove_legacy_table() );
+
+		// Cache must be invalidated — legacy table no longer exists.
+		$this->assertFalse( $this->repository->table_exists( true ) );
+	}
+
 	// --- Cache disabled filter ---
 
 	public function testSelect_cacheDisabled_doesNotCacheResults() {
