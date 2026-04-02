@@ -62,6 +62,9 @@
 		<exclude name="WordPressVIPMinimum.JS.HTMLExecutingFunctions"/>
 	</rule>
 	<rule ref="WooCommerce-Core" />
+	<rule ref="Universal.Operators.DisallowShortTernary.Found">
+		<exclude name="Universal.Operators.DisallowShortTernary.Found"/>
+	</rule>
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
