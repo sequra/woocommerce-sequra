@@ -13,6 +13,7 @@ if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\Abstra
 }
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+use SeQura\WC\Dto\Payment_Method_Data;
 
 /**
  * Provide compatibility with Gutenberg blocks for the payment gateway
@@ -118,16 +119,26 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 
 		/**
 		 * Filter to allow the solicitation of the payment method block.
-		 * 
+		 *
 		 * @since 3.0.6
 		 */
 		$is_solicitation_allowed = (bool) \apply_filters( 'sequra_block_integration_is_solicitation_allowed', (bool) \is_checkout() );
+
+		/**
+		 * Filter to delegate payment method selection to the seQura checkout form.
+		 * When truthy, `product=tbs` is passed to the seQura form URL.
+		 *
+		 * @since 4.3.0
+		 */
+		$is_delegated_selection = (bool) \apply_filters( 'sequra_delegate_payment_method_selection', false, null );
+
 		\wp_localize_script(
 			self::SCRIPT_HANDLER,
 			'SeQuraBlockIntegration',
 			array(
 				'isSolicitationAllowed' => $is_solicitation_allowed,
-			) 
+				'isDelegatedSelection'  => $is_delegated_selection,
+			)
 		);
 
 		return array( self::SCRIPT_HANDLER );
@@ -202,11 +213,26 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	 * Provide all the necessary data to use on the front-end as an associative array.
 	 */
 	public function get_payment_method_data(): array {
-		return array(
+		$data = array(
 			'blockContentUrl'        => \admin_url( 'admin-ajax.php' ),
 			'blockContentAjaxAction' => self::PAYMENT_METHOD_CONTENT_ACTION,
 			'title'                  => $this->gateway->get_title(),
 			'description'            => '',
 		);
+
+		/**
+		 * Filter to delegate payment method selection to the seQura checkout form.
+		 *
+		 * @since 4.3.0
+		 */
+		if ( (bool) \apply_filters( 'sequra_delegate_payment_method_selection', false, null ) ) {
+			$dto          = new Payment_Method_Data();
+			$dto->product = 'tbs';
+			$dto->title   = $this->gateway->get_title();
+
+			$data['delegatedPaymentMethodData'] = $dto->encode();
+		}
+
+		return $data;
 	}
 }
