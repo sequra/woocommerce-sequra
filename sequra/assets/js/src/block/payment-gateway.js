@@ -44,6 +44,7 @@ const Content = (props) => {
     useEffect(() => {
         const unsubscribe = onPaymentSetup(async () => {
             const checkedInput = document.querySelector('[name="sequra_payment_method_data"]:checked')
+                || document.querySelector('[name="sequra_payment_method_data"][type="hidden"]');
             const data = checkedInput ? checkedInput.value : null;
 
             if (!data) {
@@ -116,6 +117,7 @@ registerPaymentMethod({
     // A callback to determine whether the payment method should be shown in the checkout.
     canMakePayment: ({ shippingAddress, billingAddress, cart }) => {
         const isSolicitationAllowed = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isSolicitationAllowed;
+        const isDelegatedSelection = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isDelegatedSelection;
 
         const initCache = () => {
             if ('undefined' === typeof SeQuraBlockIntegration.cache) {
@@ -142,6 +144,14 @@ registerPaymentMethod({
                 if (latestResolve) {
                     latestResolve(canMakePayment);
                 }
+            }
+
+            // Delegated mode: skip AJAX, resolve immediately with hidden-input HTML.
+            if (isDelegatedSelection()) {
+                latestResolve = resolve;
+                const hiddenInputHtml = `<input type="hidden" name="sequra_payment_method_data" value="${settings.delegatedPaymentMethodData}">`;
+                onResolved(true, { content: hiddenInputHtml });
+                return;
             }
 
             if (!isSolicitationAllowed()) {
