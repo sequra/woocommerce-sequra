@@ -9,9 +9,12 @@
 namespace SeQura\WC\Tests\Services\Payment;
 
 use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use WP_UnitTestCase;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
+use SeQura\WC\Dto\Cart_Info;
+use SeQura\WC\Dto\Payment_Method_Data;
 use SeQura\WC\Services\Cart\Interface_Cart_Service;
 use SeQura\WC\Services\Constants\Interface_Constants;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
@@ -28,6 +31,10 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 	private $logger;
 	private $store;
 	private $settings_url;
+	/** @var Interface_Payment_Method_Service&MockObject */
+	private $payment_method_service;
+	/** @var Interface_Cart_Service&MockObject */
+	private $cart_service;
 
 	public function set_up(): void {        
 		$constants = $this->createMock( Interface_Constants::class );
@@ -43,12 +50,13 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 			} 
 		);
 		
-		$cart_service = $this->createMock( Interface_Cart_Service::class );
+		$cart_service       = $this->createMock( Interface_Cart_Service::class );
+		$this->cart_service = $cart_service;
 		ServiceRegister::registerService(
 			Interface_Cart_Service::class,
 			function () use ( $cart_service ) {
 				return $cart_service;
-			} 
+			}
 		);
 
 		$order_service       = $this->createMock( Interface_Order_Service::class );
@@ -60,12 +68,13 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 			} 
 		);
 
-		$payment_method_service = $this->createMock( Interface_Payment_Method_Service::class );
+		$payment_method_service       = $this->createMock( Interface_Payment_Method_Service::class );
+		$this->payment_method_service = $payment_method_service;
 		ServiceRegister::registerService(
 			Interface_Payment_Method_Service::class,
 			function () use ( $payment_method_service ) {
 				return $payment_method_service;
-			} 
+			}
 		);
 		
 		$logger       = $this->createMock( Interface_Logger_Service::class );
@@ -221,5 +230,72 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 			array( 10 ),
 			array( 100 ),
 		);
+	}
+
+	public function testPaymentFields_delegated_rendersHiddenInput(): void {
+		$this->payment_method_service
+			->method( 'is_delegated_payment_selection' )
+			->willReturn( true );
+
+		ob_start();
+		$this->payment_gateway->payment_fields();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'type="hidden"', $output );
+		$this->assertStringContainsString( 'name="sequra_payment_method_data"', $output );
+
+		// Decode the value and verify it encodes product=tbs.
+		preg_match( '/value="([^"]+)"/', $output, $matches );
+		$this->assertNotEmpty( $matches[1] );
+		$dto = Payment_Method_Data::decode( $matches[1] );
+		$this->assertInstanceOf( Payment_Method_Data::class, $dto );
+		$this->assertSame( 'tbs', $dto->product );
+	}
+
+	public function testValidateFields_delegated_returnsTrueWithoutValidation(): void {
+		$this->payment_method_service
+			->method( 'is_delegated_payment_selection' )
+			->willReturn( true );
+
+		$this->payment_method_service
+			->expects( $this->never() )
+			->method( 'is_payment_method_data_valid' );
+
+		$this->assertTrue( $this->payment_gateway->validate_fields() );
+	}
+
+	public function testProcessPayment_delegated_usesTbsDtoAndSkipsValidation(): void {
+		$this->store->set_up();
+		$order = $this->store->get_orders()[0];
+
+		$this->payment_method_service
+			->method( 'is_delegated_payment_selection' )
+			->willReturn( true );
+
+		$this->payment_method_service
+			->expects( $this->never() )
+			->method( 'is_payment_method_data_valid' );
+
+		$cart_info = new Cart_Info( 'test-ref' );
+		$this->order_service
+			->method( 'get_cart_info' )
+			->willReturn( $cart_info );
+
+		$this->order_service
+			->expects( $this->once() )
+			->method( 'set_order_metadata' )
+			->with(
+				$order,
+				$this->callback(
+					function ( $dto ) {
+						return $dto instanceof Payment_Method_Data && 'tbs' === $dto->product;
+					}
+				),
+				$cart_info
+			)
+			->willReturn( true );
+
+		$result = $this->payment_gateway->process_payment( $order->get_id() );
+		$this->assertSame( 'success', $result['result'] );
 	}
 }
