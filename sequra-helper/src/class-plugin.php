@@ -20,6 +20,7 @@ use SeQura\Helper\Task\Remove_Log_Task;
 use SeQura\Helper\Task\Set_Theme_Task;
 use SeQura\Helper\Task\Task;
 use SeQura\Helper\Task\Toggle_Cache_Task;
+use SeQura\Helper\Task\Toggle_Delegated_Selection_Task;
 use SeQura\Helper\Task\Verify_Order_Has_Merchant_Id_Task;
 
 /**
@@ -60,6 +61,10 @@ class Plugin {
 
 		if ( Toggle_Cache_Task::is_cache_disabled() ) {
 			add_filter( 'sequra_cache_enabled', '__return_false' );
+		}
+
+		if ( Toggle_Delegated_Selection_Task::is_delegated_selection_enabled() ) {
+			add_filter( 'sequra_delegate_payment_method_selection', '__return_true' );
 		}
 	}
 
@@ -158,6 +163,7 @@ class Plugin {
 			'verify_order_has_merchant_id' => Verify_Order_Has_Merchant_Id_Task::class,
 			'remove_address_fields'        => Remove_Address_Fields_Task::class,
 			'toggle_cache'                 => Toggle_Cache_Task::class,
+			'toggle_delegated_selection'   => Toggle_Delegated_Selection_Task::class,
 			'get_ip'                       => Get_IP_Task::class,
 		);
 
