@@ -120,14 +120,18 @@ export default class CheckoutPage extends BaseCheckoutPage {
 
     /**
     * Select the payment method and place the order
-    * @param {Object} options 
-    * @param {string} options.product seQura product (i1, pp3, etc)
+    * @param {Object} options
+    * @param {string} options.product seQura product (i1, pp3, tbs, etc)
     * @param {string} options.dateOfBirth Date of birth
     * @param {string} options.nin National identification number
     * @param {string[]} options.otp Digits of the OTP
     */
     async placeOrder(options) {
-        await this.selectPaymentMethod(options);
+        // In delegated-selection mode (product='tbs') there are no per-method radio
+        // buttons, so skip method selection and go straight to submit.
+        if (options.product !== 'tbs') {
+            await this.selectPaymentMethod(options);
+        }
 
         await this.locators.submitCheckout().click();
         // Wait for seQura identification iframe to load (may take longer in CI environments).
@@ -143,9 +147,41 @@ export default class CheckoutPage extends BaseCheckoutPage {
             case 'sp1':
                 await this.fillSp1CheckoutForm(options);
                 break;
+            case 'tbs':
+                await this.fillTbsCheckoutForm(options);
+                break;
             default:
                 throw new Error(`Unknown product ${options.product}`);
         }
+    }
+
+    /**
+     * Fill the seQura checkout form when delegated-selection mode is active
+     * (product='tbs'). The seQura-hosted form handles payment method selection
+     * internally; in the dummy environment it subsequently renders an i1-style
+     * personal-info + OTP form inside the #sq-identification-tbs iframe.
+     *
+     * @param {Object} options Same shape as fillI1CheckoutForm options
+     */
+    async fillTbsCheckoutForm(options) {
+        const { iframe, iframeLocator, firstName, lastName, phone, dateOfBirth, nin,
+            acceptPrivacyPolicy, acceptServiceDuration, iframeBtn } = this.checkoutForm.locators;
+
+        await iframeLocator('tbs').waitFor({ state: 'attached', timeout: 10000 });
+        const frame = iframe('tbs');
+
+        if (options.firstName) { await firstName(frame).fill(options.firstName); }
+        if (options.lastName)  { await lastName(frame).fill(options.lastName); }
+        if (options.phone)     { await phone(frame).fill(options.phone); }
+        if (options.dateOfBirth) { await dateOfBirth(frame).fill(options.dateOfBirth); }
+        if (options.nin)       { await nin(frame).fill(options.nin); }
+
+        await acceptPrivacyPolicy(frame).click();
+        if (await acceptServiceDuration(frame).count() > 0) {
+            await acceptServiceDuration(frame).click();
+        }
+        await iframeBtn(frame).click();
+        await this.fillOtp(frame, options);
     }
 
     /**
