@@ -223,7 +223,16 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * Declare fields for the payment method in the checkout page
 	 */
 	public function payment_fields() {
-		$order           = $this->try_to_get_order_from_context();
+		$order = $this->try_to_get_order_from_context();
+
+		if ( $this->payment_method_service->is_delegated_payment_selection( $order ) ) {
+			$dto          = new Payment_Method_Data();
+			$dto->product = 'tbs';
+			$dto->title   = $this->get_title();
+			echo '<input type="hidden" name="' . esc_attr( self::POST_SQ_PAYMENT_METHOD_DATA ) . '" value="' . esc_attr( $dto->encode() ) . '">';
+			return;
+		}
+
 		$payment_methods = $this->payment_method_service->get_payment_methods( $order );
 		if ( empty( $payment_methods ) ) {
 			$this->logger->log_debug( 'No payment methods available', __FUNCTION__, __CLASS__ );
@@ -245,6 +254,9 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function validate_fields() {
+		if ( $this->payment_method_service->is_delegated_payment_selection() ) {
+			return true;
+		}
 		if ( ! $this->payment_method_service->is_payment_method_data_valid( $this->get_posted_data() ) ) {
 			// translators: %1$s: <strong>, %2$s: </strong>.
 			$message = __( 'Please select a valid %1$sseQura payment method%2$s', 'sequra' );
@@ -261,10 +273,19 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	 * 
 	 * @return array
 	 */
-	public function process_payment( $order_id ) {  
-		$order              = \wc_get_order( $order_id );
-		$payment_method_dto = $this->get_posted_data();
-		$cart_info_dto      = null;
+	public function process_payment( $order_id ) {
+		$order        = \wc_get_order( $order_id );
+		$is_delegated = $order instanceof WC_Order && $this->payment_method_service->is_delegated_payment_selection( $order );
+
+		if ( $is_delegated ) {
+			$payment_method_dto          = new Payment_Method_Data();
+			$payment_method_dto->product = 'tbs';
+			$payment_method_dto->title   = $this->get_title();
+		} else {
+			$payment_method_dto = $this->get_posted_data();
+		}
+
+		$cart_info_dto = null;
 		if ( $order instanceof WC_Order ) {
 			// Try to recover cart info from the order if it is already set.
 			$this->logger->log_debug( 'Trying to recover cart info from the order', __FUNCTION__, __CLASS__, array( new LogContextData( 'order_id', $order_id ) ) );
@@ -279,7 +300,7 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 		$result = null;
 
 		if ( ! $order instanceof WC_Order
-		|| ! $this->payment_method_service->is_payment_method_data_valid( $payment_method_dto )
+		|| ( ! $is_delegated && ! $this->payment_method_service->is_payment_method_data_valid( $payment_method_dto ) )
 		|| ! $this->order_service->set_order_metadata( $order, $payment_method_dto, $cart_info_dto )
 		) {
 			$result = array(
