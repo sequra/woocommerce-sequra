@@ -97,7 +97,17 @@ const Content = (props) => {
     return <div dangerouslySetInnerHTML={{ __html: decodeEntities(content) }} />
 }
 
-const Label = () => {
+const isDelegatedSelection = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isDelegatedSelection;
+
+const Label = (props) => {
+    if (isDelegatedSelection()) {
+        const PaymentMethodLabel = props.components && props.components.PaymentMethodLabel;
+        const logo = <img src="https://live.sequracdn.com/assets/images/internal/brand/SeQura_logo.svg" alt="seQura" />;
+        if (PaymentMethodLabel) {
+            return <PaymentMethodLabel text={label} logo={logo} />;
+        }
+        return <span style={{ width: '100%' }}>{label}{logo}</span>;
+    }
     return (
         <span style={{ width: '100%' }}>
             {label}
@@ -117,7 +127,6 @@ registerPaymentMethod({
     // A callback to determine whether the payment method should be shown in the checkout.
     canMakePayment: ({ shippingAddress, billingAddress, cart }) => {
         const isSolicitationAllowed = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isSolicitationAllowed;
-        const isDelegatedSelection = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isDelegatedSelection;
 
         const initCache = () => {
             if ('undefined' === typeof SeQuraBlockIntegration.cache) {
