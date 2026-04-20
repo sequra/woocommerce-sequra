@@ -232,6 +232,24 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 		);
 	}
 
+	public function testGetIcon_notDelegated_returnsParentDefault(): void {
+		$this->payment_method_service
+			->method( 'is_delegated_payment_selection' )
+			->willReturn( false );
+
+		$this->assertSame( '', $this->payment_gateway->get_icon() );
+	}
+
+	public function testGetIcon_delegated_returnsImgWithCdnUrl(): void {
+		$this->payment_method_service
+			->method( 'is_delegated_payment_selection' )
+			->willReturn( true );
+
+		$icon = $this->payment_gateway->get_icon();
+		$this->assertStringContainsString( 'live.sequracdn.com/assets/images/internal/brand/SeQura_logo.svg', $icon );
+		$this->assertStringContainsString( '<img', $icon );
+	}
+
 	public function testPaymentFields_delegated_rendersHiddenInput(): void {
 		$this->payment_method_service
 			->method( 'is_delegated_payment_selection' )
