@@ -26,7 +26,6 @@ docker/xdebug
 .actrc
 .claude/
 CLAUDE.md
-.sdd/specs/.cache/
 .sdd/
 .claude/commands/
 .claude/skills/
