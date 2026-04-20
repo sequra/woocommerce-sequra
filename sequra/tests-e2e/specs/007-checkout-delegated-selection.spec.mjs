@@ -62,6 +62,9 @@ test.describe('Delegated payment selection checkout', () => {
         // No per-method radio buttons in delegated mode — only the gateway itself.
         await expect(checkoutPage.page.locator('.sequra-payment-method__input')).toHaveCount(0, { timeout: 10000 });
 
+        // SeQura brand logo must be visible in the payment option label.
+        await expect(checkoutPage.page.locator('img[src*="SeQura_logo.svg"]').first()).toBeVisible({ timeout: 10000 });
+
         // Capture any request to the seQura API containing product=tbs before submit.
         const tbsRequestPromise = checkoutPage.page.waitForRequest(
             req => req.url().includes('product=tbs'),
@@ -89,6 +92,9 @@ test.describe('Delegated payment selection checkout', () => {
         // No per-method radio buttons in delegated mode — hidden input present instead.
         await expect(checkoutPage.page.locator('.sequra-payment-method__input')).toHaveCount(0, { timeout: 10000 });
         await expect(checkoutPage.page.locator('[name="sequra_payment_method_data"][type="hidden"]')).toHaveCount(1, { timeout: 5000 });
+
+        // SeQura brand logo must be visible next to the payment method title.
+        await expect(checkoutPage.page.locator('img[src*="SeQura_logo.svg"]').first()).toBeVisible({ timeout: 10000 });
 
         // Capture any request to the seQura API containing product=tbs before submit.
         const tbsRequestPromise = checkoutPage.page.waitForRequest(
