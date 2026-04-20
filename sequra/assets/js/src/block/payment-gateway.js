@@ -99,20 +99,20 @@ const Content = (props) => {
 
 const isDelegatedSelection = () => 'undefined' !== typeof SeQuraBlockIntegration && SeQuraBlockIntegration.isDelegatedSelection;
 
-const Label = (props) => {
+const Label = () => {
     if (isDelegatedSelection()) {
-        const PaymentMethodLabel = props.components && props.components.PaymentMethodLabel;
-        const logo = <img src="https://live.sequracdn.com/assets/images/internal/brand/SeQura_logo.svg" alt="seQura" />;
-        if (PaymentMethodLabel) {
-            return <PaymentMethodLabel text={label} logo={logo} />;
-        }
-        return <span style={{ width: '100%' }}>{label}{logo}</span>;
+        return (
+            <span style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5em' }}>
+                <span>{label}</span>
+                <img src="https://live.sequracdn.com/assets/images/internal/brand/SeQura_logo.svg" alt="seQura" style={{ height: '20px', width: 'auto' }} />
+            </span>
+        );
     }
     return (
         <span style={{ width: '100%' }}>
             {label}
         </span>
-    )
+    );
 }
 
 registerPaymentMethod({
