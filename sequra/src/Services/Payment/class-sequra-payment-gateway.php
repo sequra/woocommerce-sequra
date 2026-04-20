@@ -230,6 +230,11 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 			return parent::get_icon();
 		}
 		$icon_html = '<img src="https://live.sequracdn.com/assets/images/internal/brand/SeQura_logo.svg" alt="' . esc_attr__( 'seQura', 'sequra' ) . '" />';
+		/**
+		 * Filter the payment gateway icon HTML.
+		 *
+		 * @since 2.0.0
+		 */
 		return \apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
 
