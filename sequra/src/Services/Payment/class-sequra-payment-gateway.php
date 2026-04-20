@@ -220,6 +220,20 @@ class Sequra_Payment_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Return the payment gateway icon HTML, shown to the right of the title in the payment list.
+	 * Only shown in delegated-selection mode; the seQura logo substitutes the per-method icons.
+	 *
+	 * @return string
+	 */
+	public function get_icon() {
+		if ( ! $this->payment_method_service->is_delegated_payment_selection() ) {
+			return parent::get_icon();
+		}
+		$icon_html = '<img src="https://live.sequracdn.com/assets/images/internal/brand/SeQura_logo.svg" alt="' . esc_attr__( 'seQura', 'sequra' ) . '" />';
+		return \apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
+	}
+
+	/**
 	 * Declare fields for the payment method in the checkout page
 	 */
 	public function payment_fields() {
