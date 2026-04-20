@@ -240,13 +240,13 @@ class SequraPaymentGatewayTest extends WP_UnitTestCase {
 		$this->assertSame( '', $this->payment_gateway->get_icon() );
 	}
 
-	public function testGetIcon_delegated_returnsImgWithCdnUrl(): void {
+	public function testGetIcon_delegated_returnsImgWithInlineSvg(): void {
 		$this->payment_method_service
 			->method( 'is_delegated_payment_selection' )
 			->willReturn( true );
 
 		$icon = $this->payment_gateway->get_icon();
-		$this->assertStringContainsString( 'live.sequracdn.com/assets/images/internal/brand/SeQura_logo.svg', $icon );
+		$this->assertStringContainsString( 'data:image/svg+xml;base64,', $icon );
 		$this->assertStringContainsString( '<img', $icon );
 	}
 
