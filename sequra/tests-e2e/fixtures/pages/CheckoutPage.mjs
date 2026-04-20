@@ -30,7 +30,9 @@ export default class CheckoutPage extends BaseCheckoutPage {
             // continueButton: () => this.page.locator('.action.continue'),
             submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"]),#place_order'),
             orderRowStatus: orderNumber => this.page.locator(`#post-${orderNumber} .column-order_status, #order-${orderNumber} .column-order_status`),
-            orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong')
+            orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong'),
+            sqPaymentMethodInput: () => this.page.locator('.sequra-payment-method__input'),
+            sqLogoInPaymentOption: () => this.page.locator('img[alt="seQura"][src*="data:image/svg+xml;base64"]').first()
         };
     }
 
@@ -164,24 +166,18 @@ export default class CheckoutPage extends BaseCheckoutPage {
      * @param {Object} options Same shape as fillI1CheckoutForm options
      */
     async fillTbsCheckoutForm(options) {
-        const { iframe, iframeLocator, firstName, lastName, phone, dateOfBirth, nin,
-            acceptPrivacyPolicy, acceptServiceDuration, iframeBtn } = this.checkoutForm.locators;
-
+        const {iframeLocator, iframeBtn, acceptServiceDuration, acceptPrivacyPolicy} = this.checkoutForm.locators;
         await iframeLocator('tbs').waitFor({ state: 'attached', timeout: 10000 });
-        const frame = iframe('tbs');
-
-        if (options.firstName) { await firstName(frame).fill(options.firstName); }
-        if (options.lastName)  { await lastName(frame).fill(options.lastName); }
-        if (options.phone)     { await phone(frame).fill(options.phone); }
-        if (options.dateOfBirth) { await dateOfBirth(frame).fill(options.dateOfBirth); }
-        if (options.nin)       { await nin(frame).fill(options.nin); }
-
-        await acceptPrivacyPolicy(frame).click();
-        if (await acceptServiceDuration(frame).count() > 0) {
-            await acceptServiceDuration(frame).click();
+        const iframe = this.checkoutForm.locators.iframe('tbs');
+        await iframe.locator('[data-testid="payment-option-i1"]').click()
+        await iframeBtn(iframe).click(); // Click to proceed with the selected payment plan
+        await this.checkoutForm.fillPersonalInfo(iframe, options);
+        await acceptPrivacyPolicy(iframe).click();
+        if (await acceptServiceDuration(iframe).count() > 0) {
+            await acceptServiceDuration(iframe).click();
         }
-        await iframeBtn(frame).click();
-        await this.fillOtp(frame, options);
+        await iframeBtn(iframe).click();
+        await this.checkoutForm.fillOtp(iframe, options);
     }
 
     /**
@@ -299,5 +295,32 @@ export default class CheckoutPage extends BaseCheckoutPage {
         if (!(await paymentMethodInput({ ...options, checked: true }).count())) {
             throw new Error(`Could not select the payment method for product ${options.product} after ${timeout}ms`);
         }
+    }
+
+    /**
+    * Expect no per-product radio buttons 
+    * @returns {Promise<void>}
+    */
+    async expectNoInputPerSqProduct() {
+        await this.page.waitForTimeout(50000);
+        await this.expect(this.locators.sqPaymentMethodInput()).toHaveCount(0, { timeout: 1000 });
+    }
+
+    /**
+    * Expect no per-product radio buttons 
+    * @returns {Promise<void>}
+    */
+    async expectNoInputPerSqProduct() {
+        // await expect(checkoutPage.page.locator('img[alt="seQura"][src*="data:image/svg+xml;base64"]').first()).toBeVisible({ timeout: 10000 });
+        await this.page.waitForTimeout(3000);
+        await this.expect(this.locators.sqPaymentMethodInput()).toHaveCount(0, { timeout: 1000 });
+    }
+
+    /**
+    * Expect visible seQura logo
+    * @returns {Promise<void>}
+    */
+    async expectVisibleSqLogoInPaymentOption() {
+        await this.expect(this.locators.sqLogoInPaymentOption()).toBeVisible({ timeout: 5000 });
     }
 }
