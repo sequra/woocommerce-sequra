@@ -117,49 +117,6 @@ test.describe('Product checkout', () => {
     ]);
   }
 
-  test('Blocks checkout shows seQura payment methods when delegated selection is off', async ({ helper, dataProvider, productPage, checkoutPage }) => {
-    await setupBlocksCheckout(helper, dataProvider, { delegated: false });
-    const shopper = dataProvider.shopper('spain');
-
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-    await checkoutPage.goto();
-    await checkoutPage.fillForm({ isShipping: true, ...shopper });
-
-    // Individual seQura payment-method radio buttons must be visible.
-    await checkoutPage.expectAnyPaymentMethod({ available: true, timeout: 20000 });
-  });
-
-  test('Blocks checkout completes with product=tbs when delegated selection is enabled', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
-    await setupBlocksCheckout(helper, dataProvider, { delegated: true });
-    const shopper = dataProvider.shopper('approve');
-
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-    await checkoutPage.goto();
-    await checkoutPage.fillForm({ isShipping: true, ...shopper });
-
-    await checkoutPage.expectNoInputPerSqProduct();
-    await checkoutPage.expectVisibleSqLogoInPaymentOption();
-    await checkoutPage.placeOrder({ ...shopper, product: 'tbs' });
-    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
-    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
-  });
-
-  test('Classic checkout completes with product=tbs when delegated selection is enabled', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
-    await setupClassicCheckout(helper, dataProvider, { delegated: true });
-    const shopper = dataProvider.shopper('approve');
-
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-    await checkoutPage.goto();
-    await checkoutPage.fillForm({ isShipping: false, ...shopper });
-
-    // No per-method radio buttons in delegated mode — hidden input present instead.
-    await checkoutPage.expectNoInputPerSqProduct();
-    await checkoutPage.expectVisibleSqLogoInPaymentOption();
-    await checkoutPage.placeOrder({ ...shopper, product: 'tbs' });
-    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
-    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
-  });
-
   test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
@@ -208,5 +165,49 @@ test.describe('Product checkout', () => {
     // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
     await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Cancelled' });
+  });
+
+  // These should be the last tests to run, as they change the checkout in a way that might affect other tests if they run beforehand. If they become flaky, consider moving them to a separate file.
+  test('Blocks checkout shows seQura payment methods when delegated selection is off', async ({ helper, dataProvider, productPage, checkoutPage }) => {
+    await setupBlocksCheckout(helper, dataProvider, { delegated: false });
+    const shopper = dataProvider.shopper('spain');
+
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({ isShipping: true, ...shopper });
+
+    // Individual seQura payment-method radio buttons must be visible.
+    await checkoutPage.expectAnyPaymentMethod({ available: true, timeout: 20000 });
+  });
+
+  test('Blocks checkout completes with product=tbs when delegated selection is enabled', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
+    await setupBlocksCheckout(helper, dataProvider, { delegated: true });
+    const shopper = dataProvider.shopper('approve');
+
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({ isShipping: true, ...shopper });
+
+    await checkoutPage.expectNoInputPerSqProduct();
+    await checkoutPage.expectVisibleSqLogoInPaymentOption();
+    await checkoutPage.placeOrder({ ...shopper, product: 'tbs' });
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
+    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
+  });
+
+  test('Classic checkout completes with product=tbs when delegated selection is enabled', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
+    await setupClassicCheckout(helper, dataProvider, { delegated: true });
+    const shopper = dataProvider.shopper('approve');
+
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({ isShipping: false, ...shopper });
+
+    // No per-method radio buttons in delegated mode — hidden input present instead.
+    await checkoutPage.expectNoInputPerSqProduct();
+    await checkoutPage.expectVisibleSqLogoInPaymentOption();
+    await checkoutPage.placeOrder({ ...shopper, product: 'tbs' });
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
+    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
   });
 });
