@@ -25,25 +25,18 @@ use Throwable;
 class Migration_Install_430 extends Migration {
 
 	/**
-	 * Connection service.
-	 *
-	 * @var ConnectionService
-	 */
-	private $connection_service;
-
-	/**
-	 * Store integration service.
-	 *
-	 * @var StoreIntegrationService
-	 */
-	private $store_integration_service;
-
-	/**
 	 * Logger service.
 	 *
 	 * @var Interface_Logger_Service
 	 */
 	private $logger;
+
+	/**
+	 * Store Service
+	 *
+	 * @var StoreService
+	 */
+	private $store_service;
 
 	/**
 	 * Get the plugin version when the changes were made.
@@ -57,21 +50,17 @@ class Migration_Install_430 extends Migration {
 	 *
 	 * @param \wpdb                    $wpdb                      Database instance.
 	 * @param Interface_Cache_Repository $cache                   Cache repository.
-	 * @param ConnectionService        $connection_service        Connection service.
-	 * @param StoreIntegrationService  $store_integration_service Store integration service.
 	 * @param Interface_Logger_Service $logger                    Logger service.
 	 */
 	public function __construct(
 		\wpdb $wpdb,
 		Interface_Cache_Repository $cache,
-		ConnectionService $connection_service,
-		StoreIntegrationService $store_integration_service,
+		StoreService $store_service,
 		Interface_Logger_Service $logger
 	) {
 		parent::__construct( $wpdb, $cache );
-		$this->connection_service        = $connection_service;
-		$this->store_integration_service = $store_integration_service;
-		$this->logger                    = $logger;
+		$this->store_service = $store_service;
+		$this->logger        = $logger;
 	}
 
 	/**
@@ -80,41 +69,28 @@ class Migration_Install_430 extends Migration {
 	 * @throws Exception When one or more store integration registrations failed (triggers retry).
 	 */
 	protected function execute(): void {
-		/**
-		 * Store service.
-		 *
-		 * @var StoreService $store_service
-		 */
-		$store_service    = ServiceRegister::getService( StoreService::class );
-		$connected_stores = $store_service->getConnectedStores();
+		$store_ids = $this->store_service->getConnectedStores();
 
-		if ( empty( $connected_stores ) ) {
+		if ( empty( $store_ids ) ) {
 			return;
 		}
 
 		$has_failures = false;
 
-		foreach ( $connected_stores as $store_id ) {
+		foreach ( $store_ids as $store_id ) {
 			StoreContext::doWithStore(
 				$store_id,
 				function () use ( &$has_failures ) {
-					/**
-					 * Store integration repository.
-					 *
-					 * @var StoreIntegrationRepositoryInterface $store_integration_repository
-					 */
-					$store_integration_repository = ServiceRegister::getService( StoreIntegrationRepositoryInterface::class );
-					$connections                  = $this->connection_service->getAllConnectionData();
-
-					foreach ( $connections as $connection_data ) {
+					foreach ( $this->get_connection_service()->getAllConnectionData() as $connection_data ) {
 						try {
-							if ( null !== $store_integration_repository->getStoreIntegration() ) {
+							if ( null !== $this->get_store_integration_repository()->getStoreIntegration() ) {
+								// Store integration already exists for this store, skipping.   
 								continue;
 							}
 
-							$this->store_integration_service->createStoreIntegration( $connection_data );
+							$this->get_store_integration_service()->createStoreIntegration( $connection_data );
 						} catch ( Throwable $e ) {
-							$this->logger->log_error( $e->getMessage(), __FUNCTION__, __CLASS__ );
+							$this->logger->log_throwable( $e );
 							$has_failures = true;
 						}
 					}
@@ -125,5 +101,44 @@ class Migration_Install_430 extends Migration {
 		if ( $has_failures ) {
 			throw new Exception( 'One or more store integration registrations failed. Migration will retry on next plugin execution.' );
 		}
+	}
+
+	/**
+	 * Get store integration repository instance.
+	 */
+	private function get_store_integration_repository(): StoreIntegrationRepositoryInterface {
+		/**
+		 * Store integration repository.
+		 *
+		 * @var StoreIntegrationRepositoryInterface $repo
+		 */
+		$repo = ServiceRegister::getService( StoreIntegrationRepositoryInterface::class );
+		return $repo;
+	}
+
+	/**
+	 * Get connection service instance.
+	 */
+	private function get_connection_service(): ConnectionService {
+		/**
+		 * Connection service.
+		 *
+		 * @var ConnectionService $service
+		 */
+		$service = ServiceRegister::getService( ConnectionService::class );
+		return $service;
+	}
+
+	/**
+	 * Get store integration service instance.
+	 */
+	private function get_store_integration_service(): StoreIntegrationService {
+		/**
+		 * Store integration service.
+		 *
+		 * @var StoreIntegrationService $service
+		 */
+		$service = ServiceRegister::getService( StoreIntegrationService::class );
+		return $service;
 	}
 }

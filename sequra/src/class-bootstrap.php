@@ -141,7 +141,7 @@ use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use SeQura\WC\Services\Widgets\Widgets_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
 use SeQura\Core\BusinessLogic\Domain\Integration\StoreIntegration\StoreIntegrationServiceInterface;
-use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Services\StoreIntegrationService;
+use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\WC\Controllers\Rest\Store_Integration_REST_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
@@ -624,8 +624,7 @@ class Bootstrap extends BootstrapComponent {
 							new Migration_Install_430(
 								$wpdb,
 								$cache_repository,
-								Reg::getService( ConnectionService::class ),
-								Reg::getService( StoreIntegrationService::class ),
+								Reg::getService( StoreService::class ),
 								Reg::getService( Interface_Logger_Service::class )
 							),
 						)
