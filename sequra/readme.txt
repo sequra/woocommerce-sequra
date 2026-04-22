@@ -103,6 +103,7 @@ Contributors:
 = 4.3.0	=
 * Fixed: Empty site name causing settings page to fail with HTTP 500. Fall back to site URL when WordPress blog name is not configured.
 * Added: New filter to allow seQura payment option selection to happen on the checkout form instead of on the WooCommerce checkout page.
+* Fixed: Existing connected stores are now automatically registered for store integrations during update, preventing configuration issues after upgrading.
 
 
 = 4.2.0	=
