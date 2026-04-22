@@ -8,8 +8,13 @@
 
 namespace SeQura\WC\Repositories\Migrations;
 
+use Exception;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use SeQura\Core\BusinessLogic\Domain\StoreIntegration\RepositoryContracts\StoreIntegrationRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Services\StoreIntegrationService;
+use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
+use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Repositories\Interface_Cache_Repository;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use Throwable;
@@ -72,21 +77,53 @@ class Migration_Install_430 extends Migration {
 	/**
 	 * Execute the migration logic.
 	 *
-	 * @throws Throwable
+	 * @throws Exception When one or more store integration registrations failed (triggers retry).
 	 */
 	protected function execute(): void {
-		$connections = $this->connection_service->getAllConnectionData();
+		/**
+		 * Store service.
+		 *
+		 * @var StoreService $store_service
+		 */
+		$store_service    = ServiceRegister::getService( StoreService::class );
+		$connected_stores = $store_service->getConnectedStores();
 
-		if ( empty( $connections ) ) {
+		if ( empty( $connected_stores ) ) {
 			return;
 		}
 
-		foreach ( $connections as $connection_data ) {
-			try {
-				$this->store_integration_service->createStoreIntegration( $connection_data );
-			} catch ( Throwable $e ) {
-				$this->logger->log_error( $e->getMessage(), __FUNCTION__, __CLASS__ );
-			}
+		$has_failures = false;
+
+		foreach ( $connected_stores as $store_id ) {
+			StoreContext::doWithStore(
+				$store_id,
+				function () use ( &$has_failures ) {
+					/**
+					 * Store integration repository.
+					 *
+					 * @var StoreIntegrationRepositoryInterface $store_integration_repository
+					 */
+					$store_integration_repository = ServiceRegister::getService( StoreIntegrationRepositoryInterface::class );
+					$connections                  = $this->connection_service->getAllConnectionData();
+
+					foreach ( $connections as $connection_data ) {
+						try {
+							if ( null !== $store_integration_repository->getStoreIntegration() ) {
+								continue;
+							}
+
+							$this->store_integration_service->createStoreIntegration( $connection_data );
+						} catch ( Throwable $e ) {
+							$this->logger->log_error( $e->getMessage(), __FUNCTION__, __CLASS__ );
+							$has_failures = true;
+						}
+					}
+				}
+			);
+		}
+
+		if ( $has_failures ) {
+			throw new Exception( 'One or more store integration registrations failed. Migration will retry on next plugin execution.' );
 		}
 	}
 }
