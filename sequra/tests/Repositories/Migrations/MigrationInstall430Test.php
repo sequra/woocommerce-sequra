@@ -84,13 +84,20 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 		$this->store_service                = $this->createMock( StoreService::class );
 		$this->logger                       = $this->createMock( Interface_Logger_Service::class );
 
-		$store_service                = $this->store_service;
+		$connection_service           = $this->connection_service;
+		$store_integration_service    = $this->store_integration_service;
 		$store_integration_repository = $this->store_integration_repository;
 
 		ServiceRegister::registerService(
-			StoreService::class,
-			static function () use ( $store_service ) {
-				return $store_service;
+			ConnectionService::class,
+			static function () use ( $connection_service ) {
+				return $connection_service;
+			}
+		);
+		ServiceRegister::registerService(
+			StoreIntegrationService::class,
+			static function () use ( $store_integration_service ) {
+				return $store_integration_service;
 			}
 		);
 		ServiceRegister::registerService(
@@ -103,8 +110,7 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 		$this->migration = new Migration_Install_430(
 			$this->wpdb,
 			new Cache_Repository(),
-			$this->connection_service,
-			$this->store_integration_service,
+			$this->store_service,
 			$this->logger
 		);
 	}
