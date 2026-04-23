@@ -302,16 +302,6 @@ export default class CheckoutPage extends BaseCheckoutPage {
     * @returns {Promise<void>}
     */
     async expectNoInputPerSqProduct() {
-        await this.page.waitForTimeout(50000);
-        await this.expect(this.locators.sqPaymentMethodInput()).toHaveCount(0, { timeout: 1000 });
-    }
-
-    /**
-    * Expect no per-product radio buttons 
-    * @returns {Promise<void>}
-    */
-    async expectNoInputPerSqProduct() {
-        // await expect(checkoutPage.page.locator('img[alt="seQura"][src*="data:image/svg+xml;base64"]').first()).toBeVisible({ timeout: 10000 });
         await this.page.waitForTimeout(3000);
         await this.expect(this.locators.sqPaymentMethodInput()).toHaveCount(0, { timeout: 1000 });
     }
