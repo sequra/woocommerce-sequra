@@ -5,13 +5,14 @@ test.describe('Product checkout', () => {
 
   test('All available seQura products appear in the checkout', async ({ helper, dataProvider, productPage, checkoutPage }) => {
     // Setup
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     const shopper = dataProvider.shopper();
     const paymentMethods = dataProvider.checkoutPaymentMethods();
     await helper.executeWebhooksSequentially([
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
 
     // Execution
@@ -39,13 +40,14 @@ test.describe('Product checkout', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper();
 
@@ -63,13 +65,14 @@ test.describe('Product checkout', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper('france');
 
@@ -83,17 +86,52 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
   });
 
-  test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
-    // Setup
+  /**
+    * Helper: set up blocks checkout environment with delegated selection toggled on or off.
+    */
+  async function setupBlocksCheckout(helper, dataProvider, { delegated }) {
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: delegated ? '1' : '0' }] },
+    ]);
+  }
+
+  /**
+   * Helper: set up classic checkout environment with delegated selection toggled on or off.
+   */
+  async function setupClassicCheckout(helper, dataProvider, { delegated }) {
+    const uiVersion = DataProvider.UI_CLASSIC;
+    const theme = dataProvider.themeForUiVersion(uiVersion);
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
+    await helper.executeWebhooksSequentially([
+      { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
+      { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: clear_config },
+      { webhook: dummy_config },
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: delegated ? '1' : '0' }] },
+    ]);
+  }
+
+  test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
+    // Setup
+    const uiVersion = DataProvider.UI_BLOCKS;
+    const theme = dataProvider.themeForUiVersion(uiVersion);
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
+    await helper.executeWebhooksSequentially([
+      { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
+      { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: clear_config },
+      { webhook: dummy_config },
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper('approve');
 
@@ -112,13 +150,14 @@ test.describe('Product checkout', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper('cancel');
 
@@ -131,5 +170,37 @@ test.describe('Product checkout', () => {
     // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
     await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Cancelled' });
+  });
+
+  // These should be the last tests to run, as they change the checkout in a way that might affect other tests if they run beforehand. If they become flaky, consider moving them to a separate file.
+  test('Blocks checkout completes with product=tbs when delegated selection is enabled', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
+    await setupBlocksCheckout(helper, dataProvider, { delegated: true });
+    const shopper = dataProvider.shopper('approve');
+
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({ isShipping: true, ...shopper });
+
+    await checkoutPage.expectNoInputPerSqProduct();
+    await checkoutPage.expectVisibleSqLogoInPaymentOption();
+    await checkoutPage.placeOrder({ ...shopper, product: 'tbs' });
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
+    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
+  });
+
+  test('Classic checkout completes with product=tbs when delegated selection is enabled', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
+    await setupClassicCheckout(helper, dataProvider, { delegated: true });
+    const shopper = dataProvider.shopper('approve');
+
+    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
+    await checkoutPage.goto();
+    await checkoutPage.fillForm({ isShipping: false, ...shopper });
+
+    // No per-method radio buttons in delegated mode — hidden input present instead.
+    await checkoutPage.expectNoInputPerSqProduct();
+    await checkoutPage.expectVisibleSqLogoInPaymentOption();
+    await checkoutPage.placeOrder({ ...shopper, product: 'tbs' });
+    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
+    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
   });
 });

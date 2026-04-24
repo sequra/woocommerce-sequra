@@ -8,13 +8,14 @@ test.describe('Service checkout', () => {
     // We use UI_CLASSIC because UI_BLOCKS has issues with missing address fields in Gutenberg checkout.
     const uiVersion = DataProvider.UI_CLASSIC;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_services_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '1' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '1' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper();
 
@@ -33,13 +34,14 @@ test.describe('Service checkout', () => {
     // We use UI_CLASSIC because UI_BLOCKS has issues with missing address fields in Gutenberg checkout.
     const uiVersion = DataProvider.UI_CLASSIC;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_services_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_services_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '1' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '1' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper();
 

@@ -24,3 +24,8 @@ auth.json
 zip/
 docker/xdebug
 .actrc
+.claude/
+CLAUDE.md
+.sdd/
+.claude/commands/
+.claude/skills/

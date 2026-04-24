@@ -44,4 +44,17 @@ interface Interface_Payment_Method_Service {
 	 * Check if the current page is the checkout page
 	 */
 	public function is_checkout(): bool;
+
+	/**
+	 * Check if payment method selection is delegated to the seQura checkout form.
+	 *
+	 * When truthy, the seQura form URL will include `product=tbs` and shoppers are
+	 * redirected to the seQura-hosted selection form instead of selecting on the
+	 * merchant's checkout page.
+	 *
+	 * Controlled by the `sequra_delegate_payment_method_selection` WordPress filter:
+	 *   add_filter( 'sequra_delegate_payment_method_selection', '__return_true' );
+	 * The filter receives `(bool $enabled, ?\WC_Order $order)`.
+	 */
+	public function is_delegated_payment_selection( ?WC_Order $order = null ): bool;
 }

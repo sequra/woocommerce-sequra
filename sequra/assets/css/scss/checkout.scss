@@ -116,4 +116,32 @@
     .payment_box.payment_method_sequra {
         box-shadow: none;
     }
+
+    // Delegated-selection mode: the plugin emits a hidden input in payment_box.
+    // Un-hide the native radio + label (which carries the title and get_icon's logo)
+    // and constrain the icon size — WC CSS's default 52px max-height may not apply
+    // in all themes.
+    > .wc_payment_method.payment_method_sequra:has(input[name="sequra_payment_method_data"][type="hidden"]) {
+        display: flex;
+        flex-wrap: wrap;
+
+        #payment_method_sequra,
+        [for="payment_method_sequra"] {
+            display: revert !important;
+        }
+        [for="payment_method_sequra"] {
+            flex: 1;
+            margin-bottom: 0!important;
+        }
+        [for="payment_method_sequra"] img {
+            float: right;
+            height: 40px !important;
+            width: auto !important;
+            max-width: none !important;
+        }
+        .payment_box {
+            flex-basis: 100%;
+            margin: 0!important;
+        }
+    }
 }

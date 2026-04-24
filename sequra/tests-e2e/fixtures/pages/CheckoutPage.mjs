@@ -30,7 +30,9 @@ export default class CheckoutPage extends BaseCheckoutPage {
             // continueButton: () => this.page.locator('.action.continue'),
             submitCheckout: () => this.page.locator('.wc-block-components-checkout-place-order-button:not([style="pointer-events: none;"]),#place_order'),
             orderRowStatus: orderNumber => this.page.locator(`#post-${orderNumber} .column-order_status, #order-${orderNumber} .column-order_status`),
-            orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong')
+            orderNumber: () => this.page.locator('.wc-block-order-confirmation-summary-list-item:first-child .wc-block-order-confirmation-summary-list-item__value,.order_details .order > strong'),
+            sqPaymentMethodInput: () => this.page.locator('.sequra-payment-method__input'),
+            sqLogoInPaymentOption: () => this.page.locator('img[alt="seQura"][src*="data:image/svg+xml;base64"]').first()
         };
     }
 
@@ -120,14 +122,18 @@ export default class CheckoutPage extends BaseCheckoutPage {
 
     /**
     * Select the payment method and place the order
-    * @param {Object} options 
-    * @param {string} options.product seQura product (i1, pp3, etc)
+    * @param {Object} options
+    * @param {string} options.product seQura product (i1, pp3, tbs, etc)
     * @param {string} options.dateOfBirth Date of birth
     * @param {string} options.nin National identification number
     * @param {string[]} options.otp Digits of the OTP
     */
     async placeOrder(options) {
-        await this.selectPaymentMethod(options);
+        // In delegated-selection mode (product='tbs') there are no per-method radio
+        // buttons, so skip method selection and go straight to submit.
+        if (options.product !== 'tbs') {
+            await this.selectPaymentMethod(options);
+        }
 
         await this.locators.submitCheckout().click();
         // Wait for seQura identification iframe to load (may take longer in CI environments).
@@ -143,9 +149,35 @@ export default class CheckoutPage extends BaseCheckoutPage {
             case 'sp1':
                 await this.fillSp1CheckoutForm(options);
                 break;
+            case 'tbs':
+                await this.fillTbsCheckoutForm(options);
+                break;
             default:
                 throw new Error(`Unknown product ${options.product}`);
         }
+    }
+
+    /**
+     * Fill the seQura checkout form when delegated-selection mode is active
+     * (product='tbs'). The seQura-hosted form handles payment method selection
+     * internally; in the dummy environment it subsequently renders an i1-style
+     * personal-info + OTP form inside the #sq-identification-tbs iframe.
+     *
+     * @param {Object} options Same shape as fillI1CheckoutForm options
+     */
+    async fillTbsCheckoutForm(options) {
+        const {iframeLocator, iframeBtn, acceptServiceDuration, acceptPrivacyPolicy} = this.checkoutForm.locators;
+        await iframeLocator('tbs').waitFor({ state: 'attached', timeout: 10000 });
+        const iframe = this.checkoutForm.locators.iframe('tbs');
+        await iframe.locator('[data-testid="payment-option-i1"]').click()
+        await iframeBtn(iframe).click(); // Click to proceed with the selected payment plan
+        await this.checkoutForm.fillPersonalInfo(iframe, options);
+        await acceptPrivacyPolicy(iframe).click();
+        if (await acceptServiceDuration(iframe).count() > 0) {
+            await acceptServiceDuration(iframe).click();
+        }
+        await iframeBtn(iframe).click();
+        await this.checkoutForm.fillOtp(iframe, options);
     }
 
     /**
@@ -263,5 +295,22 @@ export default class CheckoutPage extends BaseCheckoutPage {
         if (!(await paymentMethodInput({ ...options, checked: true }).count())) {
             throw new Error(`Could not select the payment method for product ${options.product} after ${timeout}ms`);
         }
+    }
+
+    /**
+    * Expect no per-product radio buttons 
+    * @returns {Promise<void>}
+    */
+    async expectNoInputPerSqProduct() {
+        await this.page.waitForTimeout(3000);
+        await this.expect(this.locators.sqPaymentMethodInput()).toHaveCount(0, { timeout: 1000 });
+    }
+
+    /**
+    * Expect visible seQura logo
+    * @returns {Promise<void>}
+    */
+    async expectVisibleSqLogoInPaymentOption() {
+        await this.expect(this.locators.sqLogoInPaymentOption()).toBeVisible({ timeout: 5000 });
     }
 }

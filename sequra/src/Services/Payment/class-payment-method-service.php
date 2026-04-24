@@ -222,6 +222,23 @@ class Payment_Method_Service implements Interface_Payment_Method_Service {
 	}
 
 	/**
+	 * Check if payment method selection is delegated to the seQura checkout form.
+	 */
+	public function is_delegated_payment_selection( ?WC_Order $order = null ): bool {
+		/**
+		 * Filter to delegate payment method selection to the seQura checkout form.
+		 * When truthy, `product=tbs` is passed to the seQura form URL and payment
+		 * option selection is handled within the seQura-hosted form.
+		 *
+		 * @param bool          $enabled Whether delegated selection is enabled. Default false.
+		 * @param \WC_Order|null $order   The current WooCommerce order, or null if not yet created.
+		 *
+		 * @since 4.3.0
+		 */
+		return (bool) \apply_filters( 'sequra_delegate_payment_method_selection', false, $order );
+	}
+
+	/**
 	 * Check if the current page is the checkout page
 	 */
 	public function is_checkout(): bool {
