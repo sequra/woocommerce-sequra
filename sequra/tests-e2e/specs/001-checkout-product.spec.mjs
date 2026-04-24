@@ -5,13 +5,14 @@ test.describe('Product checkout', () => {
 
   test('All available seQura products appear in the checkout', async ({ helper, dataProvider, productPage, checkoutPage }) => {
     // Setup
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     const shopper = dataProvider.shopper();
     const paymentMethods = dataProvider.checkoutPaymentMethods();
     await helper.executeWebhooksSequentially([
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
 
     // Execution
@@ -39,13 +40,14 @@ test.describe('Product checkout', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper();
 
@@ -63,13 +65,14 @@ test.describe('Product checkout', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper('france');
 
@@ -121,13 +124,14 @@ test.describe('Product checkout', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper('approve');
 
@@ -146,13 +150,14 @@ test.describe('Product checkout', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: clear_config },
       { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] }
+      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
     ]);
     const shopper = dataProvider.shopper('cancel');
 

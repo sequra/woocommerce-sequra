@@ -39,11 +39,12 @@ test.describe('Configuration', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, cart_version, set_theme } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, cart_version, set_theme, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: cart_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] },
       { webhook: clear_config },
       { webhook: dummy_config, args: [{ name: 'widgets', value: '1' }] }
     ]);
@@ -109,11 +110,12 @@ test.describe('Configuration', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, cart_version, set_theme } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, cart_version, set_theme, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: cart_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] },
       { webhook: clear_config },
       { webhook: dummy_config, args: [{ name: 'widgets', value: '1' }] }
     ]);
@@ -164,11 +166,12 @@ test.describe('Configuration', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, cart_version, set_theme } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, cart_version, set_theme, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: cart_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] },
       { webhook: clear_config },
       { webhook: dummy_config, args: [{ name: 'widgets', value: '1' }] }
     ]);
@@ -217,11 +220,12 @@ test.describe('Configuration', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, cart_version, set_theme } = helper.webhooks;
+    const { clear_config, dummy_config, checkout_version, cart_version, set_theme, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
       { webhook: cart_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] },
       { webhook: clear_config },
       { webhook: dummy_config }
     ]);
@@ -251,10 +255,11 @@ test.describe('Configuration', () => {
     // Setup
     const uiVersion = DataProvider.UI_BLOCKS;
     const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, dummy_services_config, checkout_version, set_theme } = helper.webhooks;
+    const { clear_config, dummy_config, dummy_services_config, checkout_version, set_theme, toggle_delegated_selection } = helper.webhooks;
     await helper.executeWebhooksSequentially([
       { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
       { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
+      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] },
       { webhook: clear_config },
       { webhook: dummy_config }
     ]);
