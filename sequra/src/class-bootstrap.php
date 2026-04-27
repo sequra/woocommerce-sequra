@@ -623,8 +623,7 @@ class Bootstrap extends BootstrapComponent {
 							new Migration_Install_430(
 								$wpdb,
 								$cache_repository,
-								Reg::getService( StoreService::class ),
-								Reg::getService( Interface_Logger_Service::class )
+								Reg::getService( StoreService::class )
 							),
 						)
 					);
