@@ -132,6 +132,7 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWi
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWidgets\Widget_Configurator;
 use SeQura\WC\Repositories\Migrations\Migration_Install_400;
 use SeQura\WC\Repositories\Migrations\Migration_Install_420;
+use SeQura\WC\Repositories\Migrations\Migration_Install_430;
 use SeQura\WC\Services\Order\Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Platform\Interface_Platform_Provider;
@@ -140,6 +141,7 @@ use SeQura\WC\Services\Widgets\Interface_Widgets_Service;
 use SeQura\WC\Services\Widgets\Widgets_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
 use SeQura\Core\BusinessLogic\Domain\Integration\StoreIntegration\StoreIntegrationServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\WC\Controllers\Rest\Store_Integration_REST_Controller;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Integration\Store\Store_Id_Provider;
@@ -618,6 +620,12 @@ class Bootstrap extends BootstrapComponent {
 								$cache_repository,
 								Reg::getService( AdvancedSettingsService::class ),
 								Reg::getService( Order_Status_Settings_Service::class )
+							),
+							new Migration_Install_430(
+								$wpdb,
+								$cache_repository,
+								Reg::getService( StoreService::class ),
+								Reg::getService( Interface_Logger_Service::class )
 							),
 						)
 					);
