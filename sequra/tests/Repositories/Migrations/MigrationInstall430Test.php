@@ -233,7 +233,7 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 
 		try {
 			$this->migration->run();
-		} catch ( Exception $e ) {
+		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Expected.
 		}
 

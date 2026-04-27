@@ -120,7 +120,7 @@ class Migration_Install_430 extends Migration {
 			$this->get_store_integrations_proxy()->deleteStoreIntegration(
 				new DeleteStoreIntegrationRequest( $connection_data, $old_webhook_url )
 			);
-		} catch ( Throwable $e ) {
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Best-effort: old integration may already be gone on the seQura side.
 		}
 	}
@@ -150,18 +150,21 @@ class Migration_Install_430 extends Migration {
 	 */
 	private function get_old_webhook_url( string $store_id ): ?string {
 		// @phpstan-ignore-next-line
-		$query = $this->db->prepare(
-			'SELECT `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1',
-			'StoreIntegration',
-			$store_id
-		);
-		$row   = $this->db->get_row( $query, ARRAY_A );
+		$row = $this->db->get_row( $this->db->prepare( 'SELECT `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'StoreIntegration', $store_id ), ARRAY_A );
 
 		if ( ! isset( $row['data'] ) || ! \is_string( $row['data'] ) ) {
 			return null;
 		}
 
+		/**
+		 * Decoded entity data.
+		 *
+		 * @var array{storeIntegration?: array{webhookUrl?: string}}|null $data
+		 */
 		$data = json_decode( $row['data'], true );
+		if ( ! is_array( $data ) ) {
+			return null;
+		}
 
 		$url = $data['storeIntegration']['webhookUrl'] ?? null;
 		return \is_string( $url ) && '' !== $url ? $url : null;
