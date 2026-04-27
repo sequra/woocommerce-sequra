@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3d212c39140ff720a364e12bab252fb7",
+    "content-hash": "6420cea73e96c08d22b7494ffa837244",
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "v4.1.0",
+            "version": "dev-refactor/PAR-772-StoreIntegration-Signature-Redesign",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "9b98daf23741c8d1f4c0652f9709d286ac2039cf"
+                "reference": "bb7729e2b01b3b9060c2a44443d768fb1a7bc966"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/9b98daf23741c8d1f4c0652f9709d286ac2039cf",
-                "reference": "9b98daf23741c8d1f4c0652f9709d286ac2039cf",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/bb7729e2b01b3b9060c2a44443d768fb1a7bc966",
+                "reference": "bb7729e2b01b3b9060c2a44443d768fb1a7bc966",
                 "shasum": ""
             },
             "require": {
@@ -45,9 +45,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v4.1.0"
+                "source": "https://github.com/sequra/integration-core/tree/refactor/PAR-772-StoreIntegration-Signature-Redesign"
             },
-            "time": "2026-03-10T08:45:58+00:00"
+            "time": "2026-04-27T15:24:17+00:00"
         }
     ],
     "packages-dev": [
@@ -3023,8 +3023,10 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
-    "stability-flags": {},
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "sequra/integration-core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {},
