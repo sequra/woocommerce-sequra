@@ -12,15 +12,16 @@ use Exception;
 use RuntimeException;
 use SeQura\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
-use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Models\StoreIntegration;
-use SeQura\Core\BusinessLogic\Domain\StoreIntegration\RepositoryContracts\StoreIntegrationRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Models\DeleteStoreIntegrationRequest;
+use SeQura\Core\BusinessLogic\Domain\StoreIntegration\ProxyContracts\StoreIntegrationsProxyInterface;
 use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Services\StoreIntegrationService;
 use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Repositories\Cache_Repository;
 use SeQura\WC\Repositories\Migrations\Migration_Install_430;
-use SeQura\WC\Services\Log\Interface_Logger_Service;
 use WP_UnitTestCase;
+
+// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 class MigrationInstall430Test extends WP_UnitTestCase {
 
@@ -39,6 +40,13 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 	private $wpdb;
 
 	/**
+	 * Entity table name.
+	 *
+	 * @var string
+	 */
+	private $entity_table;
+
+	/**
 	 * Connection service mock.
 	 *
 	 * @var ConnectionService&\PHPUnit\Framework\MockObject\MockObject
@@ -53,11 +61,11 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 	private $store_integration_service;
 
 	/**
-	 * Store integration repository mock.
+	 * Store integrations proxy mock.
 	 *
-	 * @var StoreIntegrationRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject
+	 * @var StoreIntegrationsProxyInterface&\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private $store_integration_repository;
+	private $store_integrations_proxy;
 
 	/**
 	 * Store service mock.
@@ -66,27 +74,20 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 	 */
 	private $store_service;
 
-	/**
-	 * Logger service mock.
-	 *
-	 * @var Interface_Logger_Service&\PHPUnit\Framework\MockObject\MockObject
-	 */
-	private $logger;
-
 	public function set_up(): void {
 		parent::set_up();
 		global $wpdb;
-		$this->wpdb = $wpdb;
+		$this->wpdb         = $wpdb;
+		$this->entity_table = $wpdb->prefix . 'sequra_entity';
 
-		$this->connection_service           = $this->createMock( ConnectionService::class );
-		$this->store_integration_service    = $this->createMock( StoreIntegrationService::class );
-		$this->store_integration_repository = $this->createMock( StoreIntegrationRepositoryInterface::class );
-		$this->store_service                = $this->createMock( StoreService::class );
-		$this->logger                       = $this->createMock( Interface_Logger_Service::class );
+		$this->connection_service        = $this->createMock( ConnectionService::class );
+		$this->store_integration_service = $this->createMock( StoreIntegrationService::class );
+		$this->store_integrations_proxy  = $this->createMock( StoreIntegrationsProxyInterface::class );
+		$this->store_service             = $this->createMock( StoreService::class );
 
-		$connection_service           = $this->connection_service;
-		$store_integration_service    = $this->store_integration_service;
-		$store_integration_repository = $this->store_integration_repository;
+		$connection_service        = $this->connection_service;
+		$store_integration_service = $this->store_integration_service;
+		$store_integrations_proxy  = $this->store_integrations_proxy;
 
 		ServiceRegister::registerService(
 			ConnectionService::class,
@@ -101,17 +102,16 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 			}
 		);
 		ServiceRegister::registerService(
-			StoreIntegrationRepositoryInterface::class,
-			static function () use ( $store_integration_repository ) {
-				return $store_integration_repository;
+			StoreIntegrationsProxyInterface::class,
+			static function () use ( $store_integrations_proxy ) {
+				return $store_integrations_proxy;
 			}
 		);
 
 		$this->migration = new Migration_Install_430(
 			$this->wpdb,
 			new Cache_Repository(),
-			$this->store_service,
-			$this->logger
+			$this->store_service
 		);
 	}
 
@@ -127,24 +127,11 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 		$this->migration->run();
 	}
 
-	public function testRun_withExistingStoreIntegration_skipsCreateStoreIntegration(): void {
+	public function testRun_callsCreateStoreIntegrationForEachConnection(): void {
 		$connection_data = $this->createMock( ConnectionData::class );
 
 		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1' ) );
 		$this->connection_service->method( 'getAllConnectionData' )->willReturn( array( $connection_data ) );
-		$this->store_integration_repository->method( 'getStoreIntegration' )
-			->willReturn( $this->createMock( StoreIntegration::class ) );
-		$this->store_integration_service->expects( $this->never() )->method( 'createStoreIntegration' );
-
-		$this->migration->run();
-	}
-
-	public function testRun_withNoStoreIntegration_callsCreateStoreIntegrationWithConnectionData(): void {
-		$connection_data = $this->createMock( ConnectionData::class );
-
-		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1' ) );
-		$this->connection_service->method( 'getAllConnectionData' )->willReturn( array( $connection_data ) );
-		$this->store_integration_repository->method( 'getStoreIntegration' )->willReturn( null );
 		$this->store_integration_service->expects( $this->once() )
 			->method( 'createStoreIntegration' )
 			->with( $connection_data );
@@ -159,7 +146,6 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1' ) );
 		$this->connection_service->method( 'getAllConnectionData' )
 			->willReturn( array( $connection_data_1, $connection_data_2 ) );
-		$this->store_integration_repository->method( 'getStoreIntegration' )->willReturn( null );
 		$this->store_integration_service->expects( $this->exactly( 2 ) )
 			->method( 'createStoreIntegration' )
 			->willReturnCallback(
@@ -179,11 +165,108 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 
 		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1', 'store2' ) );
 		$this->connection_service->method( 'getAllConnectionData' )->willReturn( array( $connection_data ) );
-		$this->store_integration_repository->method( 'getStoreIntegration' )->willReturn( null );
 		$this->store_integration_service->expects( $this->exactly( 2 ) )
 			->method( 'createStoreIntegration' );
 
 		$this->migration->run();
 		$this->assertTrue( true );
+	}
+
+	public function testRun_withOldStoreIntegrationInDb_callsDeleteStoreIntegrationWithOldUrl(): void {
+		$old_webhook_url = 'https://example.com/webhook?storeId=store1&signature=old_random_sig';
+		$this->insert_store_integration_entity( 'store1', $old_webhook_url );
+
+		$connection_data = $this->createMock( ConnectionData::class );
+		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1' ) );
+		$this->connection_service->method( 'getAllConnectionData' )->willReturn( array( $connection_data ) );
+
+		$this->store_integrations_proxy->expects( $this->once() )
+			->method( 'deleteStoreIntegration' )
+			->with(
+				$this->callback(
+					function ( DeleteStoreIntegrationRequest $request ) use ( $old_webhook_url ) {
+						return $request->getWebhookUrl() === $old_webhook_url;
+					}
+				)
+			);
+
+		$this->migration->run();
+	}
+
+	public function testRun_withNoOldStoreIntegrationInDb_doesNotCallDeleteStoreIntegration(): void {
+		$connection_data = $this->createMock( ConnectionData::class );
+		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1' ) );
+		$this->connection_service->method( 'getAllConnectionData' )->willReturn( array( $connection_data ) );
+
+		$this->store_integrations_proxy->expects( $this->never() )->method( 'deleteStoreIntegration' );
+
+		$this->migration->run();
+	}
+
+	public function testRun_withSuccessfulRegistration_deletesOldStoreIntegrationEntityFromDb(): void {
+		$this->insert_store_integration_entity( 'store1', 'https://example.com/webhook?storeId=store1&signature=old' );
+
+		$connection_data = $this->createMock( ConnectionData::class );
+		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1' ) );
+		$this->connection_service->method( 'getAllConnectionData' )->willReturn( array( $connection_data ) );
+
+		$this->migration->run();
+
+		$count = $this->wpdb->get_var(
+			$this->wpdb->prepare(
+				"SELECT COUNT(*) FROM {$this->entity_table} WHERE type = %s AND index_1 = %s",
+				'StoreIntegration',
+				'store1'
+			)
+		);
+		$this->assertSame( '0', $count );
+	}
+
+	public function testRun_withFailingRegistration_doesNotDeleteOldDbRow(): void {
+		$this->insert_store_integration_entity( 'store1', 'https://example.com/webhook?storeId=store1&signature=old' );
+
+		$connection_data = $this->createMock( ConnectionData::class );
+		$this->store_service->method( 'getConnectedStores' )->willReturn( array( 'store1' ) );
+		$this->connection_service->method( 'getAllConnectionData' )->willReturn( array( $connection_data ) );
+		$this->store_integration_service->method( 'createStoreIntegration' )
+			->willThrowException( new RuntimeException( 'API error' ) );
+
+		try {
+			$this->migration->run();
+		} catch ( Exception $e ) {
+			// Expected.
+		}
+
+		$count = $this->wpdb->get_var(
+			$this->wpdb->prepare(
+				"SELECT COUNT(*) FROM {$this->entity_table} WHERE type = %s AND index_1 = %s",
+				'StoreIntegration',
+				'store1'
+			)
+		);
+		$this->assertSame( '1', $count );
+	}
+
+	/**
+	 * Insert a StoreIntegration entity row into the DB.
+	 *
+	 * @param string $store_id    Store identifier (index_1).
+	 * @param string $webhook_url Old webhook URL stored in the entity data.
+	 */
+	private function insert_store_integration_entity( string $store_id, string $webhook_url ): void {
+		$this->wpdb->insert(
+			$this->entity_table,
+			array(
+				'type'    => 'StoreIntegration',
+				'index_1' => $store_id,
+				'data'    => wp_json_encode(
+					array(
+						'storeIntegration' => array(
+							'webhookUrl' => $webhook_url,
+						),
+					)
+				),
+			)
+		);
 	}
 }
