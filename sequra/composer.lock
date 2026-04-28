@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6420cea73e96c08d22b7494ffa837244",
+    "content-hash": "1a79c4ba7bcd0f2d0c9954451c920cba",
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "dev-refactor/PAR-772-StoreIntegration-Signature-Redesign",
+            "version": "v5.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "156491cacf443ec64778394b85b72583c8b6d8fe"
+                "reference": "d173aa2642541dee5f1de3d99878363f6cb91438"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/156491cacf443ec64778394b85b72583c8b6d8fe",
-                "reference": "156491cacf443ec64778394b85b72583c8b6d8fe",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/d173aa2642541dee5f1de3d99878363f6cb91438",
+                "reference": "d173aa2642541dee5f1de3d99878363f6cb91438",
                 "shasum": ""
             },
             "require": {
@@ -45,9 +45,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/refactor/PAR-772-StoreIntegration-Signature-Redesign"
+                "source": "https://github.com/sequra/integration-core/tree/v5.0.0"
             },
-            "time": "2026-04-28T09:14:34+00:00"
+            "time": "2026-04-28T09:32:58+00:00"
         }
     ],
     "packages-dev": [
@@ -3023,10 +3023,8 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
-    "stability-flags": {
-        "sequra/integration-core": 20
-    },
+    "minimum-stability": "stable",
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {},

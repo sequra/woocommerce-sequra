@@ -51,8 +51,7 @@
         "php-stubs/woocommerce-stubs": "^8.8"
     },
     "prefer-stable": true,
-    "minimum-stability": "dev",
     "require": {
-        "sequra/integration-core": "dev-refactor/PAR-772-StoreIntegration-Signature-Redesign"
+        "sequra/integration-core": "~5.0.0"
     }
 }
