@@ -137,7 +137,7 @@ export default class CheckoutPage extends BaseCheckoutPage {
 
         await this.locators.submitCheckout().click();
         // Wait for seQura identification iframe to load (may take longer in CI environments).
-        await this.page.locator(`#sq-identification-${options.product}`).waitFor({ state: 'attached', timeout: 30000 });
+        await this.page.locator(`#sq-identification-${options.product}`).waitFor({ state: 'attached', timeout: 60000 });
         // Fill checkout form.
         switch (options.product) {
             case 'i1':
