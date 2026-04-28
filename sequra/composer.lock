@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "bb7729e2b01b3b9060c2a44443d768fb1a7bc966"
+                "reference": "156491cacf443ec64778394b85b72583c8b6d8fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/bb7729e2b01b3b9060c2a44443d768fb1a7bc966",
-                "reference": "bb7729e2b01b3b9060c2a44443d768fb1a7bc966",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/156491cacf443ec64778394b85b72583c8b6d8fe",
+                "reference": "156491cacf443ec64778394b85b72583c8b6d8fe",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                 "issues": "https://github.com/sequra/integration-core/issues",
                 "source": "https://github.com/sequra/integration-core/tree/refactor/PAR-772-StoreIntegration-Signature-Redesign"
             },
-            "time": "2026-04-27T15:24:17+00:00"
+            "time": "2026-04-28T09:14:34+00:00"
         }
     ],
     "packages-dev": [
