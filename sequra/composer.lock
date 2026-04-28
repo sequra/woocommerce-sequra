@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3d212c39140ff720a364e12bab252fb7",
+    "content-hash": "1a79c4ba7bcd0f2d0c9954451c920cba",
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "v4.1.0",
+            "version": "v5.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "9b98daf23741c8d1f4c0652f9709d286ac2039cf"
+                "reference": "d173aa2642541dee5f1de3d99878363f6cb91438"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/9b98daf23741c8d1f4c0652f9709d286ac2039cf",
-                "reference": "9b98daf23741c8d1f4c0652f9709d286ac2039cf",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/d173aa2642541dee5f1de3d99878363f6cb91438",
+                "reference": "d173aa2642541dee5f1de3d99878363f6cb91438",
                 "shasum": ""
             },
             "require": {
@@ -45,9 +45,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v4.1.0"
+                "source": "https://github.com/sequra/integration-core/tree/v5.0.0"
             },
-            "time": "2026-03-10T08:45:58+00:00"
+            "time": "2026-04-28T09:32:58+00:00"
         }
     ],
     "packages-dev": [

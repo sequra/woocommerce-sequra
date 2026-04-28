@@ -11,12 +11,12 @@ namespace SeQura\WC\Repositories\Migrations;
 use Exception;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
-use SeQura\Core\BusinessLogic\Domain\StoreIntegration\RepositoryContracts\StoreIntegrationRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Models\DeleteStoreIntegrationRequest;
+use SeQura\Core\BusinessLogic\Domain\StoreIntegration\ProxyContracts\StoreIntegrationsProxyInterface;
 use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Services\StoreIntegrationService;
 use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Repositories\Interface_Cache_Repository;
-use SeQura\WC\Services\Log\Interface_Logger_Service;
 use Throwable;
 
 /**
@@ -25,18 +25,18 @@ use Throwable;
 class Migration_Install_430 extends Migration {
 
 	/**
-	 * Logger service.
-	 *
-	 * @var Interface_Logger_Service
-	 */
-	private $logger;
-
-	/**
 	 * Store Service
 	 *
 	 * @var StoreService
 	 */
 	private $store_service;
+
+	/**
+	 * Entity table.
+	 *
+	 * @var string
+	 */
+	private $entity_table;
 
 	/**
 	 * Get the plugin version when the changes were made.
@@ -48,19 +48,18 @@ class Migration_Install_430 extends Migration {
 	/**
 	 * Constructor
 	 *
-	 * @param \wpdb                    $wpdb                      Database instance.
-	 * @param Interface_Cache_Repository $cache                   Cache repository.
-	 * @param Interface_Logger_Service $logger                    Logger service.
+	 * @param \wpdb                      $wpdb          Database instance.
+	 * @param Interface_Cache_Repository $cache         Cache repository.
+	 * @param StoreService               $store_service Store service.
 	 */
 	public function __construct(
 		\wpdb $wpdb,
 		Interface_Cache_Repository $cache,
-		StoreService $store_service,
-		Interface_Logger_Service $logger
+		StoreService $store_service
 	) {
 		parent::__construct( $wpdb, $cache );
 		$this->store_service = $store_service;
-		$this->logger        = $logger;
+		$this->entity_table  = $this->db->prefix . 'sequra_entity';
 	}
 
 	/**
@@ -80,19 +79,25 @@ class Migration_Install_430 extends Migration {
 		foreach ( $store_ids as $store_id ) {
 			StoreContext::doWithStore(
 				$store_id,
-				function () use ( &$has_failures ) {
-					foreach ( $this->get_connection_service()->getAllConnectionData() as $connection_data ) {
-						try {
-							if ( null !== $this->get_store_integration_repository()->getStoreIntegration() ) {
-								// Store integration already exists for this store, skipping.   
-								continue;
-							}
+				function () use ( $store_id, &$has_failures ) {
+					$old_webhook_url = $this->get_old_webhook_url( $store_id );
+					$store_failed    = false;
 
+					foreach ( $this->get_connection_service()->getAllConnectionData() as $connection_data ) {
+						if ( null !== $old_webhook_url ) {
+							$this->deregister_old_store_integration( $connection_data, $old_webhook_url );
+						}
+
+						try {
 							$this->get_store_integration_service()->createStoreIntegration( $connection_data );
 						} catch ( Throwable $e ) {
-							$this->logger->log_throwable( $e );
 							$has_failures = true;
+							$store_failed = true;
 						}
+					}
+
+					if ( ! $store_failed ) {
+						$this->delete_old_store_integration_entity( $store_id );
 					}
 				}
 			);
@@ -104,16 +109,65 @@ class Migration_Install_430 extends Migration {
 	}
 
 	/**
-	 * Get store integration repository instance.
+	 * Attempt to deregister the old store integration from the seQura API.
+	 * Non-fatal: exceptions are silently swallowed.
+	 *
+	 * @param \SeQura\Core\BusinessLogic\Domain\Connection\Models\ConnectionData $connection_data
+	 * @param string $old_webhook_url
 	 */
-	private function get_store_integration_repository(): StoreIntegrationRepositoryInterface {
+	private function deregister_old_store_integration( $connection_data, string $old_webhook_url ): void {
+		try {
+			$this->get_store_integrations_proxy()->deleteStoreIntegration(
+				new DeleteStoreIntegrationRequest( $connection_data, $old_webhook_url )
+			);
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Best-effort: old integration may already be gone on the seQura side.
+		}
+	}
+
+	/**
+	 * Remove the old StoreIntegration entity row from the DB.
+	 * Non-fatal: missing rows (0 affected) are silently ignored.
+	 *
+	 * @param string $store_id
+	 */
+	private function delete_old_store_integration_entity( string $store_id ): void {
+		$this->db->delete(
+			$this->entity_table,
+			array(
+				'type'    => 'StoreIntegration',
+				'index_1' => $store_id,
+			)
+		);
+	}
+
+	/**
+	 * Read the old webhook URL from the StoreIntegration entity row in the DB.
+	 * Returns null if no row exists or if the URL cannot be extracted.
+	 *
+	 * @param string $store_id Store identifier.
+	 * @return string|null
+	 */
+	private function get_old_webhook_url( string $store_id ): ?string {
+		// @phpstan-ignore-next-line
+		$row = $this->db->get_row( $this->db->prepare( 'SELECT `data` FROM ' . $this->entity_table . ' WHERE `type` = %s AND `index_1` = %s LIMIT 1', 'StoreIntegration', $store_id ), ARRAY_A );
+
+		if ( ! isset( $row['data'] ) || ! \is_string( $row['data'] ) ) {
+			return null;
+		}
+
 		/**
-		 * Store integration repository.
+		 * Decoded entity data.
 		 *
-		 * @var StoreIntegrationRepositoryInterface $repo
+		 * @var array{storeIntegration?: array{webhookUrl?: string}}|null $data
 		 */
-		$repo = ServiceRegister::getService( StoreIntegrationRepositoryInterface::class );
-		return $repo;
+		$data = json_decode( $row['data'], true );
+		if ( ! is_array( $data ) ) {
+			return null;
+		}
+
+		$url = $data['storeIntegration']['webhookUrl'] ?? null;
+		return \is_string( $url ) && '' !== $url ? $url : null;
 	}
 
 	/**
@@ -140,5 +194,18 @@ class Migration_Install_430 extends Migration {
 		 */
 		$service = ServiceRegister::getService( StoreIntegrationService::class );
 		return $service;
+	}
+
+	/**
+	 * Get store integrations proxy instance.
+	 */
+	private function get_store_integrations_proxy(): StoreIntegrationsProxyInterface {
+		/**
+		 * Store integrations proxy.
+		 *
+		 * @var StoreIntegrationsProxyInterface $proxy
+		 */
+		$proxy = ServiceRegister::getService( StoreIntegrationsProxyInterface::class );
+		return $proxy;
 	}
 }

@@ -154,7 +154,6 @@ use SeQura\WC\Services\Order\Builder\Order_Customer_Builder;
 use SeQura\WC\Services\Order\Builder\Order_Delivery_Method_Builder;
 use SeQura\WC\Services\Service\Interface_Settings_Service;
 use SeQura\WC\Services\Service\Settings_Service;
-use SeQura\Core\BusinessLogic\DataAccess\StoreIntegration\Entities\StoreIntegration;
 use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
 use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
@@ -624,8 +623,7 @@ class Bootstrap extends BootstrapComponent {
 							new Migration_Install_430(
 								$wpdb,
 								$cache_repository,
-								Reg::getService( StoreService::class ),
-								Reg::getService( Interface_Logger_Service::class )
+								Reg::getService( StoreService::class )
 							),
 						)
 					);
@@ -978,7 +976,6 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( PaymentMethod::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
-		RepositoryRegistry::registerRepository( StoreIntegration::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( AdvancedSettings::class, Entity_Repository::class );
 	}
 
