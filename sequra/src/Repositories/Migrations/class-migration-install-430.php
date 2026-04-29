@@ -75,14 +75,11 @@ class Migration_Install_430 extends Migration {
 			return;
 		}
 
-		$has_failures = false;
-
 		foreach ( $store_ids as $store_id ) {
 			StoreContext::doWithStore(
 				$store_id,
-				function () use ( $store_id, &$has_failures ) {
+				function () use ( $store_id ) {
 					$old_webhook_url = $this->get_old_webhook_url( $store_id );
-					$store_failed    = false;
 
 					foreach ( $this->get_connection_service()->getAllConnectionData() as $connection_data ) {
 						if ( null !== $old_webhook_url ) {
@@ -93,20 +90,12 @@ class Migration_Install_430 extends Migration {
 							$this->get_store_integration_service()->createStoreIntegration( $connection_data );
 						} catch ( Throwable $e ) {
 							$this->try_log( $e );
-							$has_failures = true;
-							$store_failed = true;
 						}
 					}
 
-					if ( ! $store_failed ) {
-						$this->delete_old_store_integration_entity( $store_id );
-					}
+					$this->delete_old_store_integration_entity( $store_id );
 				}
 			);
-		}
-
-		if ( $has_failures ) {
-			throw new Exception( 'One or more store integration registrations failed. Migration will retry on next plugin execution.' );
 		}
 	}
 
