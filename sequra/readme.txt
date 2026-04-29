@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 6.9.4
-Stable tag: 4.3.0
+Stable tag: 4.3.1
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.3.1	=
+* Fixed: Prevent infinite attempts to register the store integration.
+
 = 4.3.0	=
 * Fixed: Empty site name causing settings page to fail with HTTP 500. Fall back to site URL when WordPress blog name is not configured.
 * Added: New filter to allow seQura payment option selection to happen on the checkout form instead of on the WooCommerce checkout page.
