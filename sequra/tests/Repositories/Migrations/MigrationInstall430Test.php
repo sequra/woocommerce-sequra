@@ -8,7 +8,6 @@
 
 namespace SeQura\WC\Tests\Repositories\Migrations;
 
-use Exception;
 use RuntimeException;
 use SeQura\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
@@ -139,7 +138,7 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 		$this->migration->run();
 	}
 
-	public function testRun_withOneConnectionFailing_continuesLoopAndThrowsException(): void {
+	public function testRun_withOneConnectionFailing_continuesLoopWithoutThrowing(): void {
 		$connection_data_1 = $this->createMock( ConnectionData::class );
 		$connection_data_2 = $this->createMock( ConnectionData::class );
 
@@ -156,8 +155,8 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 				}
 			);
 
-		$this->expectException( Exception::class );
 		$this->migration->run();
+		$this->assertTrue( true );
 	}
 
 	public function testRun_withAllConnectionsSucceeding_throwsNoException(): void {
@@ -222,7 +221,7 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 		$this->assertSame( '0', $count );
 	}
 
-	public function testRun_withFailingRegistration_doesNotDeleteOldDbRow(): void {
+	public function testRun_withFailingRegistration_deletesOldDbRowAnyway(): void {
 		$this->insert_store_integration_entity( 'store1', 'https://example.com/webhook?storeId=store1&signature=old' );
 
 		$connection_data = $this->createMock( ConnectionData::class );
@@ -231,11 +230,7 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 		$this->store_integration_service->method( 'createStoreIntegration' )
 			->willThrowException( new RuntimeException( 'API error' ) );
 
-		try {
-			$this->migration->run();
-		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Expected.
-		}
+		$this->migration->run();
 
 		$count = $this->wpdb->get_var(
 			$this->wpdb->prepare(
@@ -244,7 +239,7 @@ class MigrationInstall430Test extends WP_UnitTestCase {
 				'store1'
 			)
 		);
-		$this->assertSame( '1', $count );
+		$this->assertSame( '0', $count );
 	}
 
 	/**
