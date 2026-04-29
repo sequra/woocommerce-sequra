@@ -9,7 +9,10 @@
 namespace SeQura\WC\Repositories\Migrations;
 
 use Exception;
+use SeQura\Core\BusinessLogic\Domain\Connection\RepositoryContracts\ConnectionDataRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\Connection\RepositoryContracts\CredentialsRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use SeQura\Core\BusinessLogic\Domain\PaymentMethod\RepositoryContracts\PaymentMethodRepositoryInterface;
 use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use SeQura\Core\BusinessLogic\Domain\StoreIntegration\Models\DeleteStoreIntegrationRequest;
 use SeQura\Core\BusinessLogic\Domain\StoreIntegration\ProxyContracts\StoreIntegrationsProxyInterface;
@@ -90,6 +93,9 @@ class Migration_Install_430 extends Migration {
 							$this->get_store_integration_service()->createStoreIntegration( $connection_data );
 						} catch ( Throwable $e ) {
 							$this->try_log( $e );
+							if ( 401 === $e->getCode() ) {
+								$this->remove_stale_deployment_data( $connection_data );
+							}
 						}
 					}
 
@@ -186,6 +192,64 @@ class Migration_Install_430 extends Migration {
 		 */
 		$service = ServiceRegister::getService( StoreIntegrationService::class );
 		return $service;
+	}
+
+	/**
+	 * Remove the connection data, credentials and payment methods from the database for a given deployment.
+	 *
+	 * @param \SeQura\Core\BusinessLogic\Domain\Connection\Models\ConnectionData $connection_data
+	 */
+	private function remove_stale_deployment_data( $connection_data ): void {
+		try {
+			$deployment_id = $connection_data->getDeployment();
+			$merchant_ids  = $this->get_credentials_repository()->deleteCredentialsByDeploymentId( $deployment_id );
+			foreach ( $merchant_ids as $merchant_id ) {
+				$this->get_payment_method_repository()->deletePaymentMethods( $merchant_id );
+			}
+				
+			$this->get_connection_data_repository()->deleteConnectionDataByDeploymentId( $deployment_id );
+		} catch ( Throwable $e ) {
+			$this->try_log( $e );
+		}
+	}
+
+	/**
+	 * Get connection data repository instance.
+	 */
+	private function get_connection_data_repository(): ConnectionDataRepositoryInterface {
+		/**
+		 * Connection data repository.
+		 *
+		 * @var ConnectionDataRepositoryInterface $repository
+		 */
+		$repository = ServiceRegister::getService( ConnectionDataRepositoryInterface::class );
+		return $repository;
+	}
+
+	/**
+	 * Get credentials repository instance.
+	 */
+	private function get_credentials_repository(): CredentialsRepositoryInterface {
+		/**
+		 * Credentials repository.
+		 *
+		 * @var CredentialsRepositoryInterface $repository
+		 */
+		$repository = ServiceRegister::getService( CredentialsRepositoryInterface::class );
+		return $repository;
+	}
+
+	/**
+	 * Get payment method repository instance.
+	 */
+	private function get_payment_method_repository(): PaymentMethodRepositoryInterface {
+		/**
+		 * Payment method repository.
+		 *
+		 * @var PaymentMethodRepositoryInterface $repository
+		 */
+		$repository = ServiceRegister::getService( PaymentMethodRepositoryInterface::class );
+		return $repository;
 	}
 
 	/**
