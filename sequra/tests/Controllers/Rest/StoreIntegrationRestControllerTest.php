@@ -97,16 +97,22 @@ class StoreIntegrationRestControllerTest extends WP_UnitTestCase {
 		$this->assertSame( 'sequra/v1', $namespace );
 	}
 
-	public function testHandlePost_nullPayload_coercesToEmptyArrayAndMapsTopicMissingTo400(): void {
+	/**
+	 * @dataProvider topicMissingPayloadProvider
+	 *
+	 * @param mixed   $json_params          Value get_json_params() should return.
+	 * @param mixed[] $expected_handler_arg Payload the handler should be invoked with after coercion.
+	 */
+	public function testHandlePost_topicMissingResponse_mapsToHttp400( $json_params, array $expected_handler_arg ): void {
 		$webhook_controller = $this->register_webhook_controller_mock();
 		$webhook_controller->expects( $this->once() )
 			->method( 'handleRequest' )
-			->with( 'sig', array() )
+			->with( 'sig', $expected_handler_arg )
 			->willReturn( new TopicMissingErrorResponse() );
 
 		$this->store_context->method( 'getStoreId' )->willReturn( '1' );
 
-		$request = $this->build_request( null, 'sig' );
+		$request = $this->build_request( $json_params, 'sig' );
 
 		$result = $this->controller->handle_post( $request );
 
@@ -114,38 +120,15 @@ class StoreIntegrationRestControllerTest extends WP_UnitTestCase {
 		$this->assertSame( array( 'status' => 400 ), $result->get_error_data() );
 	}
 
-	public function testHandlePost_nonArrayJsonPayload_coercesToEmptyArrayAndMapsTopicMissingTo400(): void {
-		$webhook_controller = $this->register_webhook_controller_mock();
-		$webhook_controller->expects( $this->once() )
-			->method( 'handleRequest' )
-			->with( 'sig', array() )
-			->willReturn( new TopicMissingErrorResponse() );
-
-		$this->store_context->method( 'getStoreId' )->willReturn( '1' );
-
-		$request = $this->build_request( 42, 'sig' );
-
-		$result = $this->controller->handle_post( $request );
-
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( array( 'status' => 400 ), $result->get_error_data() );
-	}
-
-	public function testHandlePost_payloadWithoutTopic_returnsTopicMissingMappedTo400(): void {
-		$webhook_controller = $this->register_webhook_controller_mock();
-		$webhook_controller->expects( $this->once() )
-			->method( 'handleRequest' )
-			->with( 'sig', array( 'foo' => 'bar' ) )
-			->willReturn( new TopicMissingErrorResponse() );
-
-		$this->store_context->method( 'getStoreId' )->willReturn( '1' );
-
-		$request = $this->build_request( array( 'foo' => 'bar' ), 'sig' );
-
-		$result = $this->controller->handle_post( $request );
-
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( array( 'status' => 400 ), $result->get_error_data() );
+	/**
+	 * @return mixed[][]
+	 */
+	public function topicMissingPayloadProvider(): array {
+		return array(
+			'null payload coerces to empty array'        => array( null, array() ),
+			'non-array payload coerces to empty array'   => array( 42, array() ),
+			'array payload without topic passes through' => array( array( 'foo' => 'bar' ), array( 'foo' => 'bar' ) ),
+		);
 	}
 
 	public function testHandlePost_validPayload_returnsSuccessResponse(): void {
@@ -178,7 +161,7 @@ class StoreIntegrationRestControllerTest extends WP_UnitTestCase {
 		$result = $this->controller->handle_post( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertNotSame( array( 'status' => 400 ), $result->get_error_data() );
+		$this->assertNull( $result->get_error_data() );
 	}
 
 	/**

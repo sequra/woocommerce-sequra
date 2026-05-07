@@ -9,6 +9,7 @@
 namespace SeQura\WC\Controllers\Rest;
 
 use SeQura\Core\BusinessLogic\ConfigurationWebhookAPI\ConfigurationWebhookAPI;
+use SeQura\Core\BusinessLogic\ConfigurationWebhookAPI\Responses\TopicMissingErrorResponse;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use SeQura\Core\Infrastructure\Utility\RegexProvider;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreIntegration\Interface_Store_Integration_Service;
@@ -94,18 +95,15 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	public function handle_post( WP_REST_Request $request ) {
 		$signature = $request->get_param( 'signature' );
 		$payload   = $request->get_json_params();
-		if ( ! is_array( $payload ) ) {
+		if ( ! \is_array( $payload ) ) {
 			$payload = array();
 		}
 		$response    = ConfigurationWebhookAPI::configurationHandler( $this->store_context->getStoreId() )
 		->handleRequest( $signature, $payload );
 		$wp_response = $this->build_response( $response );
 
-		if ( $wp_response instanceof WP_Error ) {
-			$response_array = $response->toArray();
-			if ( isset( $response_array['errorCode'] ) && 'TOPIC_MISSING' === $response_array['errorCode'] ) {
-				$wp_response->add_data( array( 'status' => 400 ) );
-			}
+		if ( $wp_response instanceof WP_Error && $response instanceof TopicMissingErrorResponse ) {
+			$wp_response->add_data( array( 'status' => 400 ) );
 		}
 
 		return $wp_response;
