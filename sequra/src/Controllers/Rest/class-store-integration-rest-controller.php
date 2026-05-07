@@ -85,7 +85,7 @@ class Store_Integration_REST_Controller extends REST_Controller {
 
 	/**
 	 * Handle POST request.
-	 * 
+	 *
 	 * @throws \Exception
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -94,8 +94,20 @@ class Store_Integration_REST_Controller extends REST_Controller {
 	public function handle_post( WP_REST_Request $request ) {
 		$signature = $request->get_param( 'signature' );
 		$payload   = $request->get_json_params();
-		$response  = ConfigurationWebhookAPI::configurationHandler( $this->store_context->getStoreId() )
+		if ( ! is_array( $payload ) ) {
+			$payload = array();
+		}
+		$response    = ConfigurationWebhookAPI::configurationHandler( $this->store_context->getStoreId() )
 		->handleRequest( $signature, $payload );
-		return $this->build_response( $response );
+		$wp_response = $this->build_response( $response );
+
+		if ( $wp_response instanceof WP_Error ) {
+			$response_array = $response->toArray();
+			if ( isset( $response_array['errorCode'] ) && 'TOPIC_MISSING' === $response_array['errorCode'] ) {
+				$wp_response->add_data( array( 'status' => 400 ) );
+			}
+		}
+
+		return $wp_response;
 	}
 }
