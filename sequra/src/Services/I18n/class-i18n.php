@@ -29,16 +29,21 @@ class I18n implements Interface_I18n {
 	 * Get locale.
 	 */
 	public function get_locale( string $separator = '-' ): string {
-		/**
-		 * Filters the current language using WPML.
-		 *
-		 * @since 3.0.0
-		 */
-		$locale = \apply_filters( 'wpml_current_language', null );
+		// Polylang: use 'locale' (e.g. pt_PT) instead of 'slug' (e.g. pt-pt).
+		// Must run before the wpml_current_language filter because Polylang
+		// registers that filter returning pll_current_language() without args,
+		// which defaults to slug and produces an incorrect BCP 47 value.
+		if ( function_exists( 'pll_current_language' ) ) {
+			$locale = \pll_current_language( 'locale' );
+		}
 
-		if ( empty( $locale ) && function_exists( 'pll_current_language' ) ) {
-			// Get the language using Polylang function.
-			$locale = \pll_current_language( 'slug' );
+		if ( empty( $locale ) ) {
+			/**
+			 * Filters the current language using WPML.
+			 *
+			 * @since 3.0.0
+			 */
+			$locale = \apply_filters( 'wpml_current_language', null );
 		}
 		if ( empty( $locale ) && function_exists( 'qtrans_getLanguage' ) ) {
 			// Get the language using qTranslate function.
