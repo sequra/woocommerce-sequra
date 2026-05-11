@@ -29,10 +29,7 @@ class I18n implements Interface_I18n {
 	 * Get locale.
 	 */
 	public function get_locale( string $separator = '-' ): string {
-		// Polylang: use 'locale' (e.g. pt_PT) instead of 'slug' (e.g. pt-pt).
-		// Must run before the wpml_current_language filter because Polylang
-		// registers that filter returning pll_current_language() without args,
-		// which defaults to slug and produces an incorrect BCP 47 value.
+		
 		if ( function_exists( 'pll_current_language' ) ) {
 			$locale = \pll_current_language( 'locale' );
 		}
