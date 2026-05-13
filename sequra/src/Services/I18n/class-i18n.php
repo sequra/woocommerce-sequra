@@ -29,7 +29,7 @@ class I18n implements Interface_I18n {
 	 * Get locale.
 	 */
 	public function get_locale( string $separator = '-' ): string {
-		
+		$locale = null;
 		if ( function_exists( 'pll_current_language' ) ) {
 			$locale = \pll_current_language( 'locale' );
 		}
