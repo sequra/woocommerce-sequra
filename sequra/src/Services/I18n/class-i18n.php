@@ -30,7 +30,7 @@ class I18n implements Interface_I18n {
 	 */
 	public function get_locale( string $separator = '-' ): string {
 		$locale = null;
-		if ( empty( $locale ) && function_exists( 'qtrans_getLanguage' ) ) {
+		if ( function_exists( 'qtrans_getLanguage' ) ) {
 			// Get the language using qTranslate function.
 			$locale = \qtrans_getLanguage();
 		}
