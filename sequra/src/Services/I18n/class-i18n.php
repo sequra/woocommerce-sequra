@@ -34,6 +34,9 @@ class I18n implements Interface_I18n {
 			// Get the language using qTranslate function.
 			$locale = \qtrans_getLanguage();
 		}
+		if ( empty( $locale ) && function_exists( 'pll_current_language' ) ) {
+			$locale = \pll_current_language( 'locale' );
+		}
 
 		if ( empty( $locale ) ) {
 			/**
@@ -42,10 +45,6 @@ class I18n implements Interface_I18n {
 			 * @since 3.0.0
 			 */
 			$locale = \apply_filters( 'wpml_current_language', null );
-		}
-
-		if ( empty( $locale ) && function_exists( 'pll_current_language' ) ) {
-			$locale = \pll_current_language( 'locale' );
 		}
 
 		if ( empty( $locale ) ) {
