@@ -41,6 +41,7 @@ class I18n implements Interface_I18n
 			// Get the language using qTranslate function.
 			$locale = \qtrans_getLanguage();
 		}
+
 		if (empty($locale)) {
 			/**
 			 * Filters the current language using WPML.
@@ -49,6 +50,7 @@ class I18n implements Interface_I18n
 			 */
 			$locale = \apply_filters('wpml_current_language', null);
 		}
+		
 		if (empty($locale)) {
 			// Falling back to the default locale.
 			$locale = \get_user_locale();
