@@ -2,8 +2,8 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 6.9.4
-Stable tag: 4.3.1
+Tested up to: 7.0.0
+Stable tag: 4.3.2
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.3.2	=
+* Fixed: Locale detection now correctly prioritizes active multilingual plugins (Polylang, qTranslate, WPML) before falling back to the site or user locale.
+* Fixed: Empty or malformed store integration webhook request bodies now return a 400 response instead of a 500 error.
+* Fixed: Stale connection data is automatically removed when the seQura API returns a 401 unauthorized response, preventing repeated authentication failures.
+* Changed: Update integration-core library to version v5.1.1.
+* Changed: Tested up to WordPress 7.0.0 and WooCommerce 10.7.0.
+
 = 4.3.1	=
 * Fixed: Prevent infinite attempts to register the store integration.
 

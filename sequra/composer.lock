@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a79c4ba7bcd0f2d0c9954451c920cba",
+    "content-hash": "d5f26e4d0b68c13bcd43e49bbb429c25",
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "v5.0.0",
+            "version": "v5.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "d173aa2642541dee5f1de3d99878363f6cb91438"
+                "reference": "3c4faa500b6428366de9cb16d8b4ead1ecbbcb7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/d173aa2642541dee5f1de3d99878363f6cb91438",
-                "reference": "d173aa2642541dee5f1de3d99878363f6cb91438",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/3c4faa500b6428366de9cb16d8b4ead1ecbbcb7a",
+                "reference": "3c4faa500b6428366de9cb16d8b4ead1ecbbcb7a",
                 "shasum": ""
             },
             "require": {
@@ -27,9 +27,10 @@
                 "php": ">=7.2"
             },
             "require-dev": {
-                "phpcompatibility/php-compatibility": "*",
+                "phpcompatibility/php-compatibility": "^9.3",
                 "phpstan/phpstan": "^1.12 || ^2.1",
-                "phpunit/phpunit": "8.5.14"
+                "phpunit/phpunit": "8.5.14",
+                "slevomat/coding-standard": "^7.0"
             },
             "type": "library",
             "autoload": {
@@ -45,9 +46,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v5.0.0"
+                "source": "https://github.com/sequra/integration-core/tree/v5.1.1"
             },
-            "time": "2026-04-28T09:32:58+00:00"
+            "time": "2026-05-15T11:33:33+00:00"
         }
     ],
     "packages-dev": [
