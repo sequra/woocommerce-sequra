@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "v5.1.1",
+            "version": "v5.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "3c4faa500b6428366de9cb16d8b4ead1ecbbcb7a"
+                "reference": "9f271088c8cc79db9f01c5517577f53731b48d31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/3c4faa500b6428366de9cb16d8b4ead1ecbbcb7a",
-                "reference": "3c4faa500b6428366de9cb16d8b4ead1ecbbcb7a",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/9f271088c8cc79db9f01c5517577f53731b48d31",
+                "reference": "9f271088c8cc79db9f01c5517577f53731b48d31",
                 "shasum": ""
             },
             "require": {
@@ -46,9 +46,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v5.1.1"
+                "source": "https://github.com/sequra/integration-core/tree/v5.1.2"
             },
-            "time": "2026-05-15T11:33:33+00:00"
+            "time": "2026-05-18T17:20:22+00:00"
         }
     ],
     "packages-dev": [
