@@ -110,14 +110,20 @@
         },
 
         /**
-         * Watch for changes in the WooCommerce payment methods 
+         * Watch for changes in the WooCommerce payment methods
          * and uncheck SeQura options if another payment method is selected.
+         * Elements already bound are skipped, so calling this on every
+         * updated_checkout doesn't stack duplicate listeners.
          */
-        addPaymentMethodChangeListener: function (paymentMethods, sqProductOptions) {
+        addPaymentMethodChangeListener: function (paymentMethods) {
             paymentMethods.forEach(paymentMethod => {
+                if (paymentMethod.dataset.sequraChangeListener) {
+                    return;
+                }
+                paymentMethod.dataset.sequraChangeListener = '1';
                 paymentMethod.addEventListener('change', e => {
                     if (e.target.id !== this.SQ_PAYMENT_METHOD_ID && e.target.checked) {
-                        this.uncheckSqOptions(sqProductOptions);
+                        this.uncheckSqOptions(document.querySelectorAll('.sequra-payment-method__input'));
                     }
                 });
             });
@@ -150,20 +156,28 @@
          * Watch for changes in the SeQura product options selection
          * to save the selected payment method in the context and
          * trigger proper events.
+         * Elements already bound are skipped, so calling this on every
+         * updated_checkout doesn't stack duplicate listeners.
          */
-        addSqProductOptionChangeListener: function (sqProductOptions, paymentMethods) {
-            sqProductOptions.forEach(sqProductOption => sqProductOption.addEventListener('change', e => {
-                if (!e.target.checked) {
-                    return
+        addSqProductOptionChangeListener: function (sqProductOptions) {
+            sqProductOptions.forEach(sqProductOption => {
+                if (sqProductOption.dataset.sequraChangeListener) {
+                    return;
                 }
+                sqProductOption.dataset.sequraChangeListener = '1';
+                sqProductOption.addEventListener('change', e => {
+                    if (!e.target.checked) {
+                        return
+                    }
 
-                this.saveCheckedPaymentOpt(sqProductOption.id);
-                this.updateCheckedPaymentMethods(paymentMethods, true);
+                    this.saveCheckedPaymentOpt(sqProductOption.id);
+                    this.updateCheckedPaymentMethods(document.querySelectorAll('[name="payment_method"]'), true);
 
-                if (this.isJQueryActive()) {
-                    jQuery(document.body).trigger('payment_method_selected');
-                }
-            }));
+                    if (this.isJQueryActive()) {
+                        jQuery(document.body).trigger('payment_method_selected');
+                    }
+                });
+            });
         },
 
         bindEvents: function () {
@@ -173,8 +187,8 @@
 
             this.removeInputRadioClass(sqPaymentMethodInput);
             this.maybeSelectSeQura(sqPaymentMethodInput, sqProductOptions, paymentMethods);
-            this.addPaymentMethodChangeListener(paymentMethods, sqProductOptions);
-            this.addSqProductOptionChangeListener(sqProductOptions, paymentMethods);
+            this.addPaymentMethodChangeListener(paymentMethods);
+            this.addSqProductOptionChangeListener(sqProductOptions);
 
             if ('undefined' !== typeof Sequra && 'function' === typeof Sequra.refreshComponents && 'function' === typeof Sequra.onLoad) {
                 Sequra.onLoad(() => Sequra.refreshComponents());
