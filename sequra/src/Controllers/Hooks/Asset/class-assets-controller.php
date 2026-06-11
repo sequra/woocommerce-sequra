@@ -319,21 +319,35 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 
 		/**
 		 * Set the delay for the updated checkout event listener in milliseconds
-		 * 
+		 *
 		 * @since 3.2.0
 		 * @param int $updated_checkout_listener_delay
 		 * @return int
 		 */
 		$updated_checkout_listener_delay = (int) apply_filters( 'sequra_updated_checkout_listener_delay', 0 );
 
+		/**
+		 * Disable re-selecting seQura after the updated_checkout event. When enabled,
+		 * if the re-rendered checkout fragment arrives with another payment method
+		 * checked, that selection is respected instead of re-selecting seQura. Use it
+		 * on sites where a third party re-renders the payment list and both scripts
+		 * end up fighting over the selection.
+		 *
+		 * @since 4.3.3
+		 * @param bool $is_updated_checkout_reselection_disabled
+		 * @return bool
+		 */
+		$is_updated_checkout_reselection_disabled = (bool) apply_filters( 'sequra_is_updated_checkout_reselection_disabled', false );
+
 		\wp_localize_script(
 			self::HANDLE_CHECKOUT,
 			'SeQuraCheckout',
 			array(
-				'isBlockCheckout'                  => $is_block,
-				'isUpdatedCheckoutListenerDelayed' => $is_updated_checkout_listener_delayed,
-				'updatedCheckoutListenerDelay'     => $updated_checkout_listener_delay,
-			) 
+				'isBlockCheckout'                      => $is_block,
+				'isUpdatedCheckoutListenerDelayed'     => $is_updated_checkout_listener_delayed,
+				'updatedCheckoutListenerDelay'         => $updated_checkout_listener_delay,
+				'isUpdatedCheckoutReselectionDisabled' => $is_updated_checkout_reselection_disabled,
+			)
 		);
 		\wp_enqueue_script( self::HANDLE_CHECKOUT );
 	}

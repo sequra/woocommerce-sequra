@@ -12,14 +12,25 @@
 
             if (this.isJQueryActive()) {
                 jQuery(document.body).on('updated_checkout', e => {
+                    const stealSelection = !this.isUpdatedCheckoutReselectionDisabled();
                     if(!this.isUpdatedCheckoutListenerDelayed()) {
-                        this.bindEvents();
+                        this.bindEvents(stealSelection);
                         return;
                     }
-                    
-                    setTimeout(() => this.bindEvents(), this.getUpdatedCheckoutListenerDelay());
+
+                    setTimeout(() => this.bindEvents(stealSelection), this.getUpdatedCheckoutListenerDelay());
                 });
             }
+        },
+
+        /**
+         * Verifies if re-selecting SeQura after updated_checkout is disabled.
+         * Defaults to false (current behavior) if not defined.
+         *
+         * @returns {boolean}
+         */
+        isUpdatedCheckoutReselectionDisabled: function () {
+            return 'undefined' === typeof SeQuraCheckout || 'undefined' === typeof SeQuraCheckout.isUpdatedCheckoutReselectionDisabled ? false : !!SeQuraCheckout.isUpdatedCheckoutReselectionDisabled;
         },
 
         /**
@@ -91,11 +102,17 @@
 
         /**
          * Select SeQura payment method and option based on the current context.
+         * When stealSelection is false and another payment method is checked,
+         * the rendered selection is respected instead of re-selecting SeQura.
          */
-        maybeSelectSeQura: function (sqPaymentMethodInput, sqProductOptions, paymentMethods) {
+        maybeSelectSeQura: function (sqPaymentMethodInput, sqProductOptions, paymentMethods, stealSelection = true) {
             const isChecked = sqPaymentMethodInput && sqPaymentMethodInput.checked;
             const optionChecked = this.getCheckedPaymentOpt();
             if (!isChecked && !optionChecked) {
+                return;
+            }
+
+            if (!stealSelection && !isChecked) {
                 return;
             }
 
@@ -180,13 +197,13 @@
             });
         },
 
-        bindEvents: function () {
+        bindEvents: function (stealSelection = true) {
             const sqProductOptions = document.querySelectorAll('.sequra-payment-method__input');
             const paymentMethods = document.querySelectorAll('[name="payment_method"]');
             const sqPaymentMethodInput = document.getElementById(this.SQ_PAYMENT_METHOD_ID);
 
             this.removeInputRadioClass(sqPaymentMethodInput);
-            this.maybeSelectSeQura(sqPaymentMethodInput, sqProductOptions, paymentMethods);
+            this.maybeSelectSeQura(sqPaymentMethodInput, sqProductOptions, paymentMethods, stealSelection);
             this.addPaymentMethodChangeListener(paymentMethods);
             this.addSqProductOptionChangeListener(sqProductOptions);
 
