@@ -306,6 +306,23 @@ jobs:
           path: /tmp/test-results
           retention-days: 7
 
+      - name: Collect diagnostics
+        if: failure()
+        run: |
+          mkdir -p /tmp/diagnostics
+          docker compose logs --no-color web > /tmp/diagnostics/web.log 2>&1 || true
+          docker compose logs --no-color db > /tmp/diagnostics/db.log 2>&1 || true
+          docker compose exec -T -u www-data web wp db export - > /tmp/diagnostics/db-dump.sql || true
+
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: diagnostics-${{ matrix.suite }}
+          path: /tmp/diagnostics
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Cleanup
         if: always()
         run: ./teardown.sh
