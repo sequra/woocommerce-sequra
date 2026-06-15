@@ -19,9 +19,7 @@ use WC_Order;
  */
 class Affiliate_Service implements Interface_Affiliate_Service {
 
-	// Cookies and direct HTTP are intentional here: affiliate attribution requires a first-party
-	// cookie (the __sequra_afm contract) and the postbacks target external endpoints (TUNE/Simba),
-	// which are not part of the seQura API proxy.
+	// Cookie + direct HTTP are required by the affiliate contract and target external endpoints (TUNE/Simba), not the seQura API proxy.
 	// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie
 	// phpcs:disable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE
 	// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
@@ -108,7 +106,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			return;
 		}
 		if ( '' !== (string) $order->get_meta( self::META_TRANSACTION_ID ) ) {
-			return; // Already attributed.
+			return;
 		}
 		$transaction_id = $this->get_transaction_id_from_cookie();
 		if ( '' === $transaction_id ) {
@@ -134,7 +132,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			return;
 		}
 		if ( self::STATUS_SENT === (string) $order->get_meta( self::META_POSTBACK_STATUS ) ) {
-			return; // Already reported.
+			return;
 		}
 		if ( ! $order->is_paid() ) {
 			return;
@@ -189,7 +187,6 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( '' === $transaction_id ) {
 			return;
 		}
-		// Only reject a conversion that was actually reported.
 		if ( self::STATUS_SENT !== (string) $order->get_meta( self::META_POSTBACK_STATUS ) ) {
 			return;
 		}
