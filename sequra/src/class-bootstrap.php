@@ -70,6 +70,13 @@ use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
+use SeQura\WC\Controllers\Rest\Affiliate_Settings_REST_Controller;
+use SeQura\WC\Controllers\Hooks\Affiliate\Interface_Affiliate_Controller;
+use SeQura\WC\Controllers\Hooks\Affiliate\Affiliate_Controller;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Settings_Service;
+use SeQura\WC\Services\Affiliate\Affiliate_Settings_Service;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
+use SeQura\WC\Services\Affiliate\Affiliate_Service;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Category\Category_Service;
@@ -198,7 +205,9 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Store_Integration_REST_Controller::class ),
 					Reg::getService( Interface_Product_Controller::class ),
 					Reg::getService( Interface_Async_Process_Controller::class ),
-					Reg::getService( Interface_Order_Controller::class )
+					Reg::getService( Interface_Order_Controller::class ),
+					Reg::getService( Affiliate_Settings_REST_Controller::class ),
+					Reg::getService( Interface_Affiliate_Controller::class )
 				);
 			}
 		);
@@ -319,6 +328,43 @@ class Bootstrap extends BootstrapComponent {
 				return Reg::getService( Order_Status_Settings_Service::class );
 			}
 		);
+		// Affiliate.
+		Reg::registerService(
+			Interface_Affiliate_Settings_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Settings_Service::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Settings_Service::class ] = new Affiliate_Settings_Service(
+						Reg::getService( StoreContext::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Settings_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Affiliate_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Service::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Service::class ] = new Affiliate_Service(
+						Reg::getService( Interface_Affiliate_Settings_Service::class ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Affiliate_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Controller::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Controller::class ] = new Affiliate_Controller(
+						Reg::getService( Interface_Affiliate_Service::class ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Controller::class ];
+			}
+		);
+
 		// Extend Configuration.
 		Reg::registerService(
 			Configuration::class,
@@ -1131,6 +1177,21 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ General_Settings_REST_Controller::class ];
+			}
+		);
+		Reg::registerService(
+			Affiliate_Settings_REST_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Affiliate_Settings_REST_Controller::class ] ) ) {
+					self::$cache[ Affiliate_Settings_REST_Controller::class ] = new Affiliate_Settings_REST_Controller(
+						self::get_constants()->get_plugin_rest_namespace(),
+						Reg::getService( Interface_Logger_Service::class ),
+						Reg::getService( RegexProvider::class ),
+						Reg::getService( StoreContext::class ),
+						Reg::getService( Interface_Affiliate_Settings_Service::class )
+					);
+				}
+				return self::$cache[ Affiliate_Settings_REST_Controller::class ];
 			}
 		);
 		Reg::registerService(
