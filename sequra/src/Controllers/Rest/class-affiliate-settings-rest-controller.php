@@ -76,7 +76,7 @@ class Affiliate_Settings_REST_Controller extends REST_Controller {
 				self::PARAM_SECURITY_TOKEN => $this->get_arg_string( true, null, array( $this, 'validate_security_token' ) ),
 			)
 		);
-		$store_id = $this->url_param_pattern( self::PARAM_STORE_ID );
+		$store_id      = $this->url_param_pattern( self::PARAM_STORE_ID );
 
 		$this->register_get( "affiliate/{$store_id}", 'get_affiliate', $store_id_args );
 		$this->register_post( "affiliate/{$store_id}", 'save_affiliate', $save_args );
