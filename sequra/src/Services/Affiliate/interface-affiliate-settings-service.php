@@ -17,7 +17,7 @@ interface Interface_Affiliate_Settings_Service {
 	 * Get the affiliate settings for a store.
 	 *
 	 * @param string|null $store_id Store ID. Current store when null.
-	 * @return array<string, mixed> With keys enabled (bool), offer_id (string), security_token (string).
+	 * @return array{enabled: bool, offer_id: string, security_token: string}
 	 */
 	public function get_settings( $store_id = null ): array;
 

@@ -19,6 +19,13 @@ use WC_Order;
  */
 class Affiliate_Service implements Interface_Affiliate_Service {
 
+	// Cookies and direct HTTP are intentional here: affiliate attribution requires a first-party
+	// cookie (the __sequra_afm contract) and the postbacks target external endpoints (TUNE/Simba),
+	// which are not part of the seQura API proxy.
+	// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie
+	// phpcs:disable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE
+	// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+
 	public const COOKIE_NAME = '__sequra_afm';
 
 	private const QUERY_PARAM              = 'transaction_id';
@@ -199,9 +206,9 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	/**
 	 * Build the TUNE conversion postback URL.
 	 *
-	 * @param WC_Order             $order          The order.
-	 * @param string               $transaction_id The transaction id.
-	 * @param array<string, mixed> $settings       The affiliate settings.
+	 * @param WC_Order $order          The order.
+	 * @param string   $transaction_id The transaction id.
+	 * @param array{enabled: bool, offer_id: string, security_token: string} $settings The affiliate settings.
 	 */
 	private function build_postback_url( WC_Order $order, $transaction_id, array $settings ): string {
 		return \add_query_arg(
@@ -244,11 +251,11 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	/**
 	 * POST the cancellation payload to the Simba webhook. Returns true on a 2xx response.
 	 *
-	 * @param string               $transaction_id The transaction id.
-	 * @param array<string, mixed> $settings       The affiliate settings.
+	 * @param string $transaction_id The transaction id.
+	 * @param array{enabled: bool, offer_id: string, security_token: string} $settings The affiliate settings.
 	 */
 	private function send_cancellation_webhook( $transaction_id, array $settings ): bool {
-		$body = \wp_json_encode(
+		$body = (string) \wp_json_encode(
 			array(
 				'transaction_id' => $transaction_id,
 				'offer_id'       => (string) $settings['offer_id'],
@@ -354,4 +361,8 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		}
 		return 1 === preg_match( '/^[a-zA-Z0-9_\-.]+$/', $transaction_id );
 	}
+
+	// phpcs:enable WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie
+	// phpcs:enable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE
+	// phpcs:enable WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 }

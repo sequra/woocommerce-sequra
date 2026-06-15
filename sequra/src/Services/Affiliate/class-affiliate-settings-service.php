@@ -41,7 +41,7 @@ class Affiliate_Settings_Service implements Interface_Affiliate_Settings_Service
 	 * Get the affiliate settings for a store.
 	 *
 	 * @param string|null $store_id Store ID. Current store when null.
-	 * @return array<string, mixed>
+	 * @return array{enabled: bool, offer_id: string, security_token: string}
 	 */
 	public function get_settings( $store_id = null ): array {
 		$store_id = $this->resolve_store_id( $store_id );
