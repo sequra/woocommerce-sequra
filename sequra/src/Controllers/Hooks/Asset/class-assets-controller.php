@@ -182,6 +182,8 @@ class Assets_Controller extends Controller implements Interface_Assets_Controlle
 					'getShopOrderStatusesUrl'           => \get_rest_url( null, 'sequra/v1/settings/order-status/list/{storeId}' ),
 					'getOrderStatusMappingSettingsUrl'  => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
 					'saveOrderStatusMappingSettingsUrl' => \get_rest_url( null, 'sequra/v1/settings/order-status/{storeId}' ),
+					'getAffiliateSettingsUrl'           => \get_rest_url( null, 'sequra/v1/settings/affiliate/{storeId}' ),
+					'saveAffiliateSettingsUrl'          => \get_rest_url( null, 'sequra/v1/settings/affiliate/{storeId}' ),
 				)
 			),
 			'payment'    => $payment_page_config,
