@@ -13,9 +13,7 @@ use SeQura\Core\BusinessLogic\Domain\Multistore\StoreContext;
 /**
  * Persist the affiliate feature configuration as a per-store WordPress option.
  *
- * Note: PR #1 stores the three manual values (enabled, offer id, security token) in
- * wp_options to keep the change self-contained and testable. It can be migrated to a
- * wp_sequra_entity entity later without changing this service's public contract.
+ * Stored in wp_options (not a wp_sequra_entity entity) to keep PR #1 self-contained; the contract is migration-safe.
  */
 class Affiliate_Settings_Service implements Interface_Affiliate_Settings_Service {
 
