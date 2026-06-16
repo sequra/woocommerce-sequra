@@ -102,10 +102,5 @@ E2E requires the store to be reachable from the internet (seQura performs checko
 bin/playwright                      # headless run of sequra/tests-e2e specs (sources .env, runs `npx playwright test`)
 bin/playwright --ui                 # UI mode
 bin/playwright path/to/spec.spec.js # a single spec; any extra args pass through to `playwright test`
-```
+``
 
-## Specs and ticket workflow
-
-Design specs for in-flight work live in `.sdd/specs/` keyed by JIRA ticket (e.g. `PAR-740.md`, `PAR-773.md`, `PAR-781.md`); `.sdd/specs/tmp/` holds investigation notes (e.g. the TIJ-4222 order-pay loop diagnosis). Read the relevant spec before implementing a ticketed change. Branch names encode the ticket (e.g. `chore/PAR-805-...`), and PRs follow `.github/PULL_REQUEST_TEMPLATE.md`.
-
-The plugin version lives in **two** places that must stay in sync when releasing: the header in `sequra/sequra.php` and the changelog/stable tag in `sequra/readme.txt`.
