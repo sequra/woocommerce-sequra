@@ -44,7 +44,6 @@ class PluginTest extends WP_UnitTestCase {
 	private $product_controller;
 	private $async_process_controller;
 	private $order_controller;
-	private $rest_affiliate_settings_controller;
 	private $affiliate_controller;
 	private $hook_add_order_indexes;
 
@@ -79,7 +78,6 @@ class PluginTest extends WP_UnitTestCase {
 		$this->product_controller                 = $this->createMock( Interface_Product_Controller::class );
 		$this->async_process_controller           = $this->createMock( Interface_Async_Process_Controller::class );
 		$this->order_controller                   = $this->createMock( Interface_Order_Controller::class );
-		$this->rest_affiliate_settings_controller = $this->createMock( REST_Controller::class );
 		$this->affiliate_controller               = $this->createMock( Interface_Affiliate_Controller::class );
 	}
 
@@ -107,7 +105,6 @@ class PluginTest extends WP_UnitTestCase {
 			$this->product_controller,
 			$this->async_process_controller,
 			$this->order_controller,
-			$this->rest_affiliate_settings_controller,
 			$this->affiliate_controller
 		);
 	}
