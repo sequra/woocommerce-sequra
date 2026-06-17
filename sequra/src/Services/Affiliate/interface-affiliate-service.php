@@ -50,8 +50,6 @@ interface Interface_Affiliate_Service {
 
 	/**
 	 * Remove the attribution cookie (e.g. on the order-received page).
-	 *
-	 * @param int $order_id The order ID.
 	 */
-	public function clear_cookie_for_order( $order_id ): void;
+	public function clear_cookie(): void;
 }

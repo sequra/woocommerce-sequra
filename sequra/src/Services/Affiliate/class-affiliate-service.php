@@ -151,6 +151,8 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			return;
 		}
 		$settings = $this->config->get_settings();
+		// Amount uses the order subtotal to match the standalone plugin; whether the reporting
+		// basis should be the order total instead is pending product confirmation (QRD-7898).
 		$success  = $this->postback_client->send_conversion(
 			(string) $settings['offer_id'],
 			(string) $settings['security_token'],
@@ -217,11 +219,9 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	}
 
 	/**
-	 * Remove the attribution cookie.
-	 *
-	 * @param int $order_id The order ID.
+	 * Remove the attribution cookie (e.g. on the order-received page).
 	 */
-	public function clear_cookie_for_order( $order_id ): void {
+	public function clear_cookie(): void {
 		if ( '' !== $this->get_transaction_id_from_cookie() ) {
 			$this->delete_cookie();
 		}

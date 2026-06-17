@@ -115,8 +115,7 @@ class Affiliate_Controller implements Interface_Affiliate_Controller {
 			if ( ! function_exists( 'is_order_received_page' ) || ! \is_order_received_page() ) {
 				return;
 			}
-			$order_received = \get_query_var( 'order-received' );
-			$this->affiliate_service->clear_cookie_for_order( \absint( is_scalar( $order_received ) ? $order_received : 0 ) );
+			$this->affiliate_service->clear_cookie();
 		} catch ( Throwable $e ) {
 			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
 		}
