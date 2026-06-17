@@ -27,16 +27,19 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 
 	public const COOKIE_NAME = '__sequra_afm';
 
-	private const QUERY_PARAM          = 'transaction_id';
-	private const COOKIE_TTL           = 2592000; // 30 days in seconds.
-	private const META_TRANSACTION_ID  = '_sq_affiliate_transaction_id';
-	private const META_POSTBACK_STATUS = '_sq_affiliate_postback_status';
-	private const STATUS_PENDING       = 'pending';
-	private const STATUS_SENT          = 'sent';
-	private const STATUS_FAILED        = 'failed';
-	private const STATUS_REJECTED      = 'rejected';
-	private const KIND_CONVERSION      = 'conversion';
-	private const KIND_CANCELLATION    = 'cancellation';
+	private const QUERY_PARAM            = 'transaction_id';
+	private const COOKIE_TTL             = 2592000; // 30 days in seconds.
+	private const META_TRANSACTION_ID    = '_sq_affiliate_transaction_id';
+	private const META_POSTBACK_STATUS   = '_sq_affiliate_postback_status';
+	private const META_POSTBACK_ATTEMPTS = '_sq_affiliate_postback_attempts';
+	private const STATUS_PENDING         = 'pending';
+	private const STATUS_SENT            = 'sent';
+	private const STATUS_FAILED          = 'failed';
+	private const STATUS_REJECTED        = 'rejected';
+	private const KIND_CONVERSION        = 'conversion';
+	private const KIND_CANCELLATION      = 'cancellation';
+	private const MAX_DISPATCH_ATTEMPTS  = 3;
+	private const RETRY_BACKOFF          = 300; // Base seconds between retries, scaled by attempt count.
 
 	/**
 	 * Affiliate configuration provider.
@@ -150,6 +153,12 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( self::STATUS_SENT === (string) $order->get_meta( self::META_POSTBACK_STATUS ) ) {
 			return;
 		}
+		// Cron events are not ordered: if the order was cancelled before this dispatch ran (the
+		// cancellation cron may have fired first), bail so we do not report a conversion for an
+		// order that is no longer in the paid/approved state.
+		if ( OrderStates::STATE_APPROVED !== $this->order_status_settings->map_status_from_shop_to_sequra( $order->get_status() ) ) {
+			return;
+		}
 		$settings = $this->config->get_settings();
 		// Amount is the order subtotal: cashback is calculated on the product price, excluding
 		// tax (VAT) and shipping, not the order total (confirmed with the business side).
@@ -160,14 +169,39 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			(float) $order->get_subtotal(),
 			(int) $order->get_id()
 		);
-		$order->update_meta_data( self::META_POSTBACK_STATUS, $success ? self::STATUS_SENT : self::STATUS_FAILED );
-		$order->save();
-		if ( $success ) {
-			$this->delete_cookie();
-			$this->logger->log_info( 'Affiliate conversion postback sent', __FUNCTION__, __CLASS__ );
-		} else {
-			$this->logger->log_error( 'Affiliate conversion postback failed', __FUNCTION__, __CLASS__ );
+		if ( ! $success ) {
+			// A transient failure must not silently drop the conversion (and the shopper's
+			// cashback): retry with a backoff up to a cap, then give up and mark it failed.
+			$this->retry_or_fail( $order, self::KIND_CONVERSION, 'Affiliate conversion postback' );
+			return;
 		}
+		$order->update_meta_data( self::META_POSTBACK_STATUS, self::STATUS_SENT );
+		$order->delete_meta_data( self::META_POSTBACK_ATTEMPTS );
+		$order->save();
+		// The attribution cookie is cleared on the order-received page (clear_cookie_on_received,
+		// hooked on template_redirect); there is no shopper response to attach a Set-Cookie to here.
+		$this->logger->log_info( 'Affiliate conversion postback sent', __FUNCTION__, __CLASS__ );
+	}
+
+	/**
+	 * Re-schedule a failed postback with a backoff, or mark it failed once the attempt cap is reached.
+	 *
+	 * @param WC_Order $order   The order.
+	 * @param string   $kind    The postback kind (conversion or cancellation).
+	 * @param string   $context Human-readable label for the log entry.
+	 */
+	private function retry_or_fail( WC_Order $order, string $kind, string $context ): void {
+		$attempts = (int) $order->get_meta( self::META_POSTBACK_ATTEMPTS ) + 1;
+		if ( $attempts < self::MAX_DISPATCH_ATTEMPTS ) {
+			$order->update_meta_data( self::META_POSTBACK_ATTEMPTS, $attempts );
+			$order->save();
+			$this->enqueue_dispatch( $order, $kind, self::RETRY_BACKOFF * $attempts );
+			$this->logger->log_error( $context . ' failed; retry scheduled', __FUNCTION__, __CLASS__ );
+			return;
+		}
+		$order->update_meta_data( self::META_POSTBACK_STATUS, self::STATUS_FAILED );
+		$order->save();
+		$this->logger->log_error( $context . ' failed; giving up after max attempts', __FUNCTION__, __CLASS__ );
 	}
 
 	/**
@@ -210,11 +244,12 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	 *
 	 * @param WC_Order $order The order.
 	 * @param string   $kind  The postback kind (conversion or cancellation).
+	 * @param int      $delay Seconds to wait before the event becomes eligible (used for retry backoff).
 	 */
-	private function enqueue_dispatch( WC_Order $order, string $kind ): void {
+	private function enqueue_dispatch( WC_Order $order, string $kind, int $delay = 0 ): void {
 		$args = array( $order->get_id(), $kind );
 		if ( ! \wp_next_scheduled( self::DISPATCH_HOOK, $args ) ) {
-			\wp_schedule_single_event( time(), self::DISPATCH_HOOK, $args );
+			\wp_schedule_single_event( time() + $delay, self::DISPATCH_HOOK, $args );
 		}
 	}
 
