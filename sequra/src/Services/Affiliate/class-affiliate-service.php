@@ -151,8 +151,8 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			return;
 		}
 		$settings = $this->config->get_settings();
-		// Amount uses the order subtotal to match the standalone plugin; whether the reporting
-		// basis should be the order total instead is pending product confirmation (QRD-7898).
+		// Amount is the order subtotal: cashback is calculated on the product price, excluding
+		// tax (VAT) and shipping, not the order total (confirmed with the business side).
 		$success = $this->postback_client->send_conversion(
 			(string) $settings['offer_id'],
 			(string) $settings['security_token'],
