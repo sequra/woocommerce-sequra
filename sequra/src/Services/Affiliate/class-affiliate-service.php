@@ -41,11 +41,11 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	private const USER_AGENT               = 'WooCommerce-SeQura-Affiliate';
 
 	/**
-	 * Settings service.
+	 * Affiliate configuration provider.
 	 *
-	 * @var Interface_Affiliate_Settings_Service
+	 * @var Interface_Affiliate_Config_Provider
 	 */
-	private $settings;
+	private $config;
 
 	/**
 	 * Logger service.
@@ -57,12 +57,12 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	/**
 	 * Constructor.
 	 *
-	 * @param Interface_Affiliate_Settings_Service $settings Settings service.
-	 * @param Interface_Logger_Service             $logger   Logger service.
+	 * @param Interface_Affiliate_Config_Provider $config Affiliate configuration provider.
+	 * @param Interface_Logger_Service            $logger Logger service.
 	 */
-	public function __construct( Interface_Affiliate_Settings_Service $settings, Interface_Logger_Service $logger ) {
-		$this->settings = $settings;
-		$this->logger   = $logger;
+	public function __construct( Interface_Affiliate_Config_Provider $config, Interface_Logger_Service $logger ) {
+		$this->config = $config;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -137,7 +137,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( ! $order->is_paid() ) {
 			return;
 		}
-		$settings = $this->settings->get_settings();
+		$settings = $this->config->get_settings();
 		$success  = $this->send_get_with_retries( $this->build_postback_url( $order, $transaction_id, $settings ) );
 		$order->update_meta_data( self::META_POSTBACK_STATUS, $success ? self::STATUS_SENT : self::STATUS_FAILED );
 		$order->save();
@@ -190,7 +190,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( self::STATUS_SENT !== (string) $order->get_meta( self::META_POSTBACK_STATUS ) ) {
 			return;
 		}
-		$settings = $this->settings->get_settings();
+		$settings = $this->config->get_settings();
 		if ( $this->send_cancellation_webhook( $transaction_id, $settings ) ) {
 			$order->update_meta_data( self::META_POSTBACK_STATUS, self::STATUS_REJECTED );
 			$order->save();
@@ -320,7 +320,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( $this->standalone_plugin_active() ) {
 			return false; // Avoid duplicate postbacks while the standalone plugin is present.
 		}
-		return $this->settings->is_enabled();
+		return $this->config->is_enabled();
 	}
 
 	/**
