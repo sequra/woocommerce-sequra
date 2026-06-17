@@ -91,6 +91,23 @@ class Affiliate_Controller implements Interface_Affiliate_Controller {
 	}
 
 	/**
+	 * Execute a scheduled affiliate postback (WP-cron callback).
+	 *
+	 * @param int    $order_id The order ID.
+	 * @param string $kind     The postback kind (conversion or cancellation).
+	 */
+	public function dispatch( $order_id, $kind ): void {
+		try {
+			$order = \wc_get_order( $order_id );
+			if ( $order instanceof WC_Order ) {
+				$this->affiliate_service->dispatch( $order, (string) $kind );
+			}
+		} catch ( Throwable $e ) {
+			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
+		}
+	}
+
+	/**
 	 * Clear the attribution cookie on the order-received page before output starts.
 	 */
 	public function clear_cookie_on_received(): void {

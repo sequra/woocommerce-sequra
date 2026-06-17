@@ -38,6 +38,8 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	private const STATUS_SENT              = 'sent';
 	private const STATUS_FAILED            = 'failed';
 	private const STATUS_REJECTED          = 'rejected';
+	private const KIND_CONVERSION          = 'conversion';
+	private const KIND_CANCELLATION        = 'cancellation';
 	private const MAX_RETRIES              = 3;
 	private const HTTP_TIMEOUT             = 30;
 	private const USER_AGENT               = 'WooCommerce-SeQura-Affiliate';
@@ -134,7 +136,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	 *
 	 * @param WC_Order $order The order.
 	 */
-	public function maybe_send_conversion( WC_Order $order ): void {
+	private function maybe_send_conversion( WC_Order $order ): void {
 		if ( ! $this->is_active() ) {
 			return;
 		}
@@ -169,9 +171,39 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		}
 		$sequra_state = $this->order_status_settings->map_status_from_shop_to_sequra( (string) $new_status );
 		if ( OrderStates::STATE_APPROVED === $sequra_state ) {
-			$this->maybe_send_conversion( $order );
+			$this->enqueue_dispatch( $order, self::KIND_CONVERSION );
 		} elseif ( OrderStates::STATE_CANCELLED === $sequra_state ) {
+			$this->enqueue_dispatch( $order, self::KIND_CANCELLATION );
+		}
+	}
+
+	/**
+	 * Execute a scheduled affiliate postback (WP-cron callback target).
+	 *
+	 * @param WC_Order $order The order.
+	 * @param string   $kind  The postback kind (conversion or cancellation).
+	 */
+	public function dispatch( WC_Order $order, string $kind ): void {
+		if ( ! $this->is_active() ) {
+			return;
+		}
+		if ( self::KIND_CONVERSION === $kind ) {
+			$this->maybe_send_conversion( $order );
+		} elseif ( self::KIND_CANCELLATION === $kind ) {
 			$this->maybe_send_cancellation( $order );
+		}
+	}
+
+	/**
+	 * Schedule an affiliate postback off the request thread (deduplicated by order + kind).
+	 *
+	 * @param WC_Order $order The order.
+	 * @param string   $kind  The postback kind (conversion or cancellation).
+	 */
+	private function enqueue_dispatch( WC_Order $order, string $kind ): void {
+		$args = array( $order->get_id(), $kind );
+		if ( ! \wp_next_scheduled( self::DISPATCH_HOOK, $args ) ) {
+			\wp_schedule_single_event( time(), self::DISPATCH_HOOK, $args );
 		}
 	}
 

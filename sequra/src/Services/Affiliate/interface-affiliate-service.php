@@ -16,6 +16,11 @@ use WC_Order;
 interface Interface_Affiliate_Service {
 
 	/**
+	 * WP-cron hook used to dispatch affiliate postbacks off the request thread.
+	 */
+	public const DISPATCH_HOOK = 'sequra_affiliate_dispatch';
+
+	/**
 	 * Capture the affiliate transaction id from the current request and store it in a cookie.
 	 */
 	public function capture_click(): void;
@@ -28,11 +33,12 @@ interface Interface_Affiliate_Service {
 	public function attribute_order( WC_Order $order ): void;
 
 	/**
-	 * Send the conversion postback to TUNE when the order is paid (deduplicated).
+	 * Execute a scheduled affiliate postback (WP-cron callback target).
 	 *
 	 * @param WC_Order $order The order.
+	 * @param string   $kind  The postback kind (conversion or cancellation).
 	 */
-	public function maybe_send_conversion( WC_Order $order ): void;
+	public function dispatch( WC_Order $order, string $kind ): void;
 
 	/**
 	 * React to an order status change: send conversion when paid, rejection when cancelled/refunded.
