@@ -16,14 +16,13 @@
       "Bash(git show:*)",
       "Bash(git branch:*)",
       "Bash(git --version)",
-      "Bash(git check-attr *)",
       "Skill(sq-git:commit)",
       "Skill(sq-git:open-pr)",
       "Skill(sq-git:sync-branch)"
     ],
     "deny": [
       "Read(.env)",
-      "Read(.env.*)",
+      "Read(.env.local)",
       "Read(**/*.pem)",
       "Read(**/*.key)"
     ],

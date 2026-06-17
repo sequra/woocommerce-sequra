@@ -27,6 +27,11 @@
 # the PHPUnit suite (which needs the web container, so it can't run here).
 # Scoped phpstan here trades some accuracy for speed — phpstan sees only the
 # staged files, so the full pre-push run remains the authority.
+#
+# CAVEAT (partial staging): checks run on the working-tree files, not the staged
+# index blobs, and phpcbf's fixes are re-staged with `git add`. So if you
+# `git add -p` a file and leave other hunks unstaged, those unstaged hunks get
+# swept into the commit. Stage whole files, or `git stash -k` first, to avoid it.
 
 set -euo pipefail
 
