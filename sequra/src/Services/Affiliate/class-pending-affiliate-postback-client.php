@@ -37,6 +37,8 @@ class Pending_Affiliate_Postback_Client implements Interface_Affiliate_Postback_
 	}
 
 	/**
+	 * Conversion postback is not dispatched yet: server-side routing is pending.
+	 *
 	 * @inheritDoc
 	 */
 	public function send_conversion( string $offer_id, string $security_token, string $transaction_id, float $amount, int $order_id ): bool {
@@ -45,6 +47,8 @@ class Pending_Affiliate_Postback_Client implements Interface_Affiliate_Postback_
 	}
 
 	/**
+	 * Cancellation postback is not dispatched yet: server-side routing is pending.
+	 *
 	 * @inheritDoc
 	 */
 	public function send_cancellation( string $offer_id, string $security_token, string $transaction_id ): bool {
