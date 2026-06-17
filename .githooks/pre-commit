@@ -1,0 +1,111 @@
+#!/bin/bash
+#
+# seQura WooCommerce pre-commit quality gate (operates on staged .php files).
+#
+# Shipped in the repo and enabled by ./setup.sh via:
+#     git config core.hooksPath .githooks
+# Bypass once with:
+#     git commit --no-verify
+#
+# Checks, in order, on the staged .php files:
+#   1. PHP 7.3 syntax (the language floor — sequra/composer.json requires
+#      php 7.3.0, and sequra.php / readme.txt declare "Requires PHP: 7.3").
+#   2. phpcbf then phpcs (WordPress standard, each plugin's .phpcs.xml.dist),
+#      scoped to the staged files; phpcbf's fixes are re-staged so they land in
+#      the commit.
+#   3. PHPStan (level 9), scoped to the staged files PHPStan actually analyses
+#      (src/, templates/, and the plugin entry file — see phpstan.neon `paths:`)
+#      for fast per-commit feedback.
+#
+# All steps run in THROWAWAY Docker images — php:7.3-cli-alpine for the syntax
+# lint, php:8.4-cli-alpine for phpcs/phpcbf/phpstan (the same image the bin/
+# wrappers use) — so this hook does NOT need the dev containers running, only
+# each plugin's vendor/ populated (./setup.sh --install).
+#
+# The heavier gates run in the pre-push hook (.githooks/pre-push), matching CI:
+# the 7.3-8.4 syntax sweep, the FULL phpcs + FULL phpstan over both plugins, and
+# the PHPUnit suite (which needs the web container, so it can't run here).
+# Scoped phpstan here trades some accuracy for speed — phpstan sees only the
+# staged files, so the full pre-push run remains the authority.
+#
+# CAVEAT (partial staging): checks run on the working-tree files, not the staged
+# index blobs, and phpcbf's fixes are re-staged with `git add`. So if you
+# `git add -p` a file and leave other hunks unstaged, those unstaged hunks get
+# swept into the commit. Stage whole files, or `git stash -k` first, to avoid it.
+
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+# Staged PHP files (added/copied/modified), NUL-delimited to tolerate spaces.
+STAGED_PHP=()
+while IFS= read -r -d '' f; do
+    STAGED_PHP+=("$f")
+done < <(git diff --cached --name-only --diff-filter=ACM -z -- '*.php')
+
+if [ ${#STAGED_PHP[@]} -eq 0 ]; then
+    echo "No staged PHP files — skipping PHP checks."
+    exit 0
+fi
+
+UIDGID="$(id -u):$(id -g)"
+
+echo "▶ PHP 7.3 syntax check on ${#STAGED_PHP[@]} staged file(s)..."
+docker run --rm -v "$PWD":/app -w /app -u "$UIDGID" php:7.3-cli-alpine \
+    sh -c 'rc=0; for f in "$@"; do php -l -n "$f" >/dev/null || rc=1; done; exit $rc' _ "${STAGED_PHP[@]}"
+
+# phpcbf (auto-fix) → phpcs (the authority) → scoped phpstan, per plugin, on the
+# staged files. Each plugin carries its own vendored toolchain, .phpcs.xml.dist
+# and phpstan.neon, so files are mounted/checked from within their plugin root
+# with relative paths.
+run_checks_for_plugin() {
+    local plugin="$1"
+    shift
+    local rel=("$@")
+    [ ${#rel[@]} -eq 0 ] && return 0
+
+    if [ ! -x "$plugin/vendor/bin/phpcs" ] || [ ! -x "$plugin/vendor/bin/phpstan" ]; then
+        echo "✗ $plugin/vendor is not installed — run ./setup.sh --install"
+        echo "  (or bypass this hook once with: git commit --no-verify)"
+        exit 1
+    fi
+
+    echo "▶ PHP Code Beautifier (phpcbf) — $plugin..."
+    # phpcbf exits non-zero when it fixes things; phpcs below is the authority.
+    docker run --rm -v "$PWD/$plugin":/app -w /app -u "$UIDGID" php:8.4-cli-alpine \
+        php vendor/bin/phpcbf --standard=.phpcs.xml.dist "${rel[@]}" || true
+
+    echo "▶ PHP_CodeSniffer (phpcs) — $plugin..."
+    docker run --rm -v "$PWD/$plugin":/app -w /app -u "$UIDGID" php:8.4-cli-alpine \
+        php vendor/bin/phpcs --standard=.phpcs.xml.dist "${rel[@]}"
+
+    # Scoped PHPStan: only the staged files inside the analysed paths (src/,
+    # templates/, the plugin entry file). Passing explicit paths overrides the
+    # neon `paths:` while keeping its level/ignoreErrors.
+    local analyzable=()
+    for f in "${rel[@]}"; do
+        case "$f" in
+            src/*|templates/*|"$plugin".php) analyzable+=("$f") ;;
+        esac
+    done
+    if [ ${#analyzable[@]} -gt 0 ]; then
+        echo "▶ PHPStan (scoped, ${#analyzable[@]} file(s)) — $plugin..."
+        docker run --rm -v "$PWD/$plugin":/app -w /app -u "$UIDGID" php:8.4-cli-alpine \
+            php vendor/bin/phpstan analyse -c phpstan.neon --no-progress --memory-limit=1G "${analyzable[@]}"
+    fi
+}
+
+for plugin in sequra sequra-helper; do
+    rel=()
+    for f in "${STAGED_PHP[@]}"; do
+        case "$f" in
+            "$plugin"/*) rel+=("${f#"$plugin"/}") ;;
+        esac
+    done
+    run_checks_for_plugin "$plugin" ${rel[@]+"${rel[@]}"}
+done
+
+# Re-stage whatever phpcbf fixed so the fixes are committed.
+git add -- "${STAGED_PHP[@]}"
+
+echo "✓ Pre-commit checks passed."
