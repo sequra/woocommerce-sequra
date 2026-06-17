@@ -8,6 +8,8 @@
 
 namespace SeQura\WC\Services\Affiliate;
 
+use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
+use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use WC_Order;
 
@@ -48,6 +50,13 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	private $config;
 
 	/**
+	 * Order status settings service (shop to seQura status mapping).
+	 *
+	 * @var Order_Status_Settings_Service
+	 */
+	private $order_status_settings;
+
+	/**
 	 * Logger service.
 	 *
 	 * @var Interface_Logger_Service
@@ -57,12 +66,14 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	/**
 	 * Constructor.
 	 *
-	 * @param Interface_Affiliate_Config_Provider $config Affiliate configuration provider.
-	 * @param Interface_Logger_Service            $logger Logger service.
+	 * @param Interface_Affiliate_Config_Provider $config                Affiliate configuration provider.
+	 * @param Order_Status_Settings_Service       $order_status_settings Order status mapping service.
+	 * @param Interface_Logger_Service            $logger                Logger service.
 	 */
-	public function __construct( Interface_Affiliate_Config_Provider $config, Interface_Logger_Service $logger ) {
-		$this->config = $config;
-		$this->logger = $logger;
+	public function __construct( Interface_Affiliate_Config_Provider $config, Order_Status_Settings_Service $order_status_settings, Interface_Logger_Service $logger ) {
+		$this->config                = $config;
+		$this->order_status_settings = $order_status_settings;
+		$this->logger                = $logger;
 	}
 
 	/**
@@ -134,9 +145,6 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( self::STATUS_SENT === (string) $order->get_meta( self::META_POSTBACK_STATUS ) ) {
 			return;
 		}
-		if ( ! $order->is_paid() ) {
-			return;
-		}
 		$settings = $this->config->get_settings();
 		$success  = $this->send_get_with_retries( $this->build_postback_url( $order, $transaction_id, $settings ) );
 		$order->update_meta_data( self::META_POSTBACK_STATUS, $success ? self::STATUS_SENT : self::STATUS_FAILED );
@@ -159,11 +167,12 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( ! $this->is_active() ) {
 			return;
 		}
-		if ( $this->is_cancellation_status( (string) $new_status ) ) {
+		$sequra_state = $this->order_status_settings->map_status_from_shop_to_sequra( (string) $new_status );
+		if ( OrderStates::STATE_APPROVED === $sequra_state ) {
+			$this->maybe_send_conversion( $order );
+		} elseif ( OrderStates::STATE_CANCELLED === $sequra_state ) {
 			$this->maybe_send_cancellation( $order );
-			return;
 		}
-		$this->maybe_send_conversion( $order );
 	}
 
 	/**
@@ -328,19 +337,6 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	 */
 	private function standalone_plugin_active(): bool {
 		return class_exists( 'SeQura_Affiliate_Marketing' );
-	}
-
-	/**
-	 * Whether a status represents a cancellation/refund.
-	 *
-	 * @param string $status The status (without the wc- prefix).
-	 */
-	private function is_cancellation_status( $status ): bool {
-		$status = strtolower( (string) $status );
-		if ( in_array( $status, array( 'cancelled', 'canceled', 'refunded', 'failed' ), true ) ) {
-			return true;
-		}
-		return false !== strpos( $status, 'cancel' ) || false !== strpos( $status, 'refund' );
 	}
 
 	/**
