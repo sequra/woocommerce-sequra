@@ -70,11 +70,8 @@ use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
-use SeQura\WC\Controllers\Rest\Affiliate_Settings_REST_Controller;
 use SeQura\WC\Controllers\Hooks\Affiliate\Interface_Affiliate_Controller;
 use SeQura\WC\Controllers\Hooks\Affiliate\Affiliate_Controller;
-use SeQura\WC\Services\Affiliate\Interface_Affiliate_Settings_Service;
-use SeQura\WC\Services\Affiliate\Affiliate_Settings_Service;
 use SeQura\WC\Services\Affiliate\Interface_Affiliate_Config_Provider;
 use SeQura\WC\Services\Affiliate\Pushed_Affiliate_Config_Provider;
 use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
@@ -208,7 +205,6 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Interface_Product_Controller::class ),
 					Reg::getService( Interface_Async_Process_Controller::class ),
 					Reg::getService( Interface_Order_Controller::class ),
-					Reg::getService( Affiliate_Settings_REST_Controller::class ),
 					Reg::getService( Interface_Affiliate_Controller::class )
 				);
 			}
@@ -338,17 +334,6 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Affiliate_Config_Provider::class ] = new Pushed_Affiliate_Config_Provider();
 				}
 				return self::$cache[ Interface_Affiliate_Config_Provider::class ];
-			}
-		);
-		Reg::registerService(
-			Interface_Affiliate_Settings_Service::class,
-			static function () {
-				if ( ! isset( self::$cache[ Interface_Affiliate_Settings_Service::class ] ) ) {
-					self::$cache[ Interface_Affiliate_Settings_Service::class ] = new Affiliate_Settings_Service(
-						Reg::getService( StoreContext::class )
-					);
-				}
-				return self::$cache[ Interface_Affiliate_Settings_Service::class ];
 			}
 		);
 		Reg::registerService(
@@ -1188,21 +1173,6 @@ class Bootstrap extends BootstrapComponent {
 					);
 				}
 				return self::$cache[ General_Settings_REST_Controller::class ];
-			}
-		);
-		Reg::registerService(
-			Affiliate_Settings_REST_Controller::class,
-			static function () {
-				if ( ! isset( self::$cache[ Affiliate_Settings_REST_Controller::class ] ) ) {
-					self::$cache[ Affiliate_Settings_REST_Controller::class ] = new Affiliate_Settings_REST_Controller(
-						self::get_constants()->get_plugin_rest_namespace(),
-						Reg::getService( Interface_Logger_Service::class ),
-						Reg::getService( RegexProvider::class ),
-						Reg::getService( StoreContext::class ),
-						Reg::getService( Interface_Affiliate_Settings_Service::class )
-					);
-				}
-				return self::$cache[ Affiliate_Settings_REST_Controller::class ];
 			}
 		);
 		Reg::registerService(

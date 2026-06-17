@@ -87,7 +87,6 @@ class Plugin {
 		Interface_Product_Controller $product_controller,
 		Interface_Async_Process_Controller $async_process_controller,
 		Interface_Order_Controller $order_controller,
-		REST_Controller $rest_affiliate_settings_controller,
 		Interface_Affiliate_Controller $affiliate_controller
 	) {
 		$this->data              = $constants->get_plugin_data();
@@ -149,7 +148,6 @@ class Plugin {
 		\add_action( $constants->get_hook_add_order_indexes(), array( $order_controller, 'migrate_orders_to_use_indexes' ) );
 
 		// Affiliate.
-		\add_action( 'rest_api_init', array( $rest_affiliate_settings_controller, 'register_routes' ) );
 		\add_action( 'wp', array( $affiliate_controller, 'handle_affiliate_click' ) );
 		\add_action( 'template_redirect', array( $affiliate_controller, 'clear_cookie_on_received' ), 5 );
 		\add_action( 'woocommerce_new_order', array( $affiliate_controller, 'handle_new_order' ), 10, 2 );
