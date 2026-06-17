@@ -27,16 +27,16 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 
 	public const COOKIE_NAME = '__sequra_afm';
 
-	private const QUERY_PARAM              = 'transaction_id';
-	private const COOKIE_TTL               = 2592000; // 30 days in seconds.
-	private const META_TRANSACTION_ID      = '_sq_affiliate_transaction_id';
-	private const META_POSTBACK_STATUS     = '_sq_affiliate_postback_status';
-	private const STATUS_PENDING           = 'pending';
-	private const STATUS_SENT              = 'sent';
-	private const STATUS_FAILED            = 'failed';
-	private const STATUS_REJECTED          = 'rejected';
-	private const KIND_CONVERSION          = 'conversion';
-	private const KIND_CANCELLATION        = 'cancellation';
+	private const QUERY_PARAM          = 'transaction_id';
+	private const COOKIE_TTL           = 2592000; // 30 days in seconds.
+	private const META_TRANSACTION_ID  = '_sq_affiliate_transaction_id';
+	private const META_POSTBACK_STATUS = '_sq_affiliate_postback_status';
+	private const STATUS_PENDING       = 'pending';
+	private const STATUS_SENT          = 'sent';
+	private const STATUS_FAILED        = 'failed';
+	private const STATUS_REJECTED      = 'rejected';
+	private const KIND_CONVERSION      = 'conversion';
+	private const KIND_CANCELLATION    = 'cancellation';
 
 	/**
 	 * Affiliate configuration provider.
@@ -153,7 +153,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		$settings = $this->config->get_settings();
 		// Amount uses the order subtotal to match the standalone plugin; whether the reporting
 		// basis should be the order total instead is pending product confirmation (QRD-7898).
-		$success  = $this->postback_client->send_conversion(
+		$success = $this->postback_client->send_conversion(
 			(string) $settings['offer_id'],
 			(string) $settings['security_token'],
 			$transaction_id,
