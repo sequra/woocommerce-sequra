@@ -37,13 +37,6 @@ interface Interface_Affiliate_Controller {
 	public function handle_order_status_changed( $order_id, $old_status, $new_status, $order = null ): void;
 
 	/**
-	 * Attempt the conversion postback on the thank-you page (fallback for immediate-paid orders).
-	 *
-	 * @param int $order_id The order ID.
-	 */
-	public function handle_thankyou( $order_id ): void;
-
-	/**
 	 * Clear the attribution cookie on the order-received page before output starts.
 	 */
 	public function clear_cookie_on_received(): void;

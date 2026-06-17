@@ -91,23 +91,6 @@ class Affiliate_Controller implements Interface_Affiliate_Controller {
 	}
 
 	/**
-	 * Attempt the conversion postback on the thank-you page (fallback for immediate-paid orders).
-	 *
-	 * @param int $order_id The order ID.
-	 */
-	public function handle_thankyou( $order_id ): void {
-		try {
-			$order = \wc_get_order( $order_id );
-			if ( $order instanceof WC_Order ) {
-				$this->affiliate_service->attribute_order( $order );
-				$this->affiliate_service->maybe_send_conversion( $order );
-			}
-		} catch ( Throwable $e ) {
-			$this->logger->log_throwable( $e, __FUNCTION__, __CLASS__ );
-		}
-	}
-
-	/**
 	 * Clear the attribution cookie on the order-received page before output starts.
 	 */
 	public function clear_cookie_on_received(): void {

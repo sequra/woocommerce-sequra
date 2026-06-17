@@ -152,7 +152,6 @@ class Plugin {
 		\add_action( 'template_redirect', array( $affiliate_controller, 'clear_cookie_on_received' ), 5 );
 		\add_action( 'woocommerce_new_order', array( $affiliate_controller, 'handle_new_order' ), 10, 2 );
 		\add_action( 'woocommerce_order_status_changed', array( $affiliate_controller, 'handle_order_status_changed' ), 10, 4 );
-		\add_action( 'woocommerce_thankyou', array( $affiliate_controller, 'handle_thankyou' ) );
 
 		// WooCommerce Compat.
 		\add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
