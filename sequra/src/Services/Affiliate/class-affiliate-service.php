@@ -16,22 +16,19 @@ use WC_Order;
 /**
  * Affiliate click attribution and conversion/cancellation postbacks.
  *
- * The outbound contracts (TUNE postback and Simba cancellation webhook) and the cookie
- * must not change: see QRD-7898. The cancellation webhook URL is hardcoded in this PR.
+ * Outbound postbacks are delegated to an Interface_Affiliate_Postback_Client; the plugin
+ * does not call third-party endpoints directly (see QRD-7898).
  */
 class Affiliate_Service implements Interface_Affiliate_Service {
 
-	// Cookie + direct HTTP are required by the affiliate contract and target external endpoints (TUNE/Simba), not the seQura API proxy.
+	// The attribution cookie is required by the affiliate contract and is not the seQura API proxy.
 	// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie
 	// phpcs:disable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE
-	// phpcs:disable WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 
 	public const COOKIE_NAME = '__sequra_afm';
 
 	private const QUERY_PARAM              = 'transaction_id';
 	private const COOKIE_TTL               = 2592000; // 30 days in seconds.
-	private const TUNE_POSTBACK_URL        = 'https://sequra.go2cloud.org/aff_lsr';
-	private const CANCELLATION_WEBHOOK_URL = 'https://simba.sequra.com/affiliate_network/webhooks/conversion_status';
 	private const META_TRANSACTION_ID      = '_sq_affiliate_transaction_id';
 	private const META_POSTBACK_STATUS     = '_sq_affiliate_postback_status';
 	private const STATUS_PENDING           = 'pending';
@@ -40,9 +37,6 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	private const STATUS_REJECTED          = 'rejected';
 	private const KIND_CONVERSION          = 'conversion';
 	private const KIND_CANCELLATION        = 'cancellation';
-	private const MAX_RETRIES              = 3;
-	private const HTTP_TIMEOUT             = 30;
-	private const USER_AGENT               = 'WooCommerce-SeQura-Affiliate';
 
 	/**
 	 * Affiliate configuration provider.
@@ -59,6 +53,13 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	private $order_status_settings;
 
 	/**
+	 * Outbound postback client.
+	 *
+	 * @var Interface_Affiliate_Postback_Client
+	 */
+	private $postback_client;
+
+	/**
 	 * Logger service.
 	 *
 	 * @var Interface_Logger_Service
@@ -70,11 +71,13 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	 *
 	 * @param Interface_Affiliate_Config_Provider $config                Affiliate configuration provider.
 	 * @param Order_Status_Settings_Service       $order_status_settings Order status mapping service.
+	 * @param Interface_Affiliate_Postback_Client $postback_client       Outbound postback client.
 	 * @param Interface_Logger_Service            $logger                Logger service.
 	 */
-	public function __construct( Interface_Affiliate_Config_Provider $config, Order_Status_Settings_Service $order_status_settings, Interface_Logger_Service $logger ) {
+	public function __construct( Interface_Affiliate_Config_Provider $config, Order_Status_Settings_Service $order_status_settings, Interface_Affiliate_Postback_Client $postback_client, Interface_Logger_Service $logger ) {
 		$this->config                = $config;
 		$this->order_status_settings = $order_status_settings;
+		$this->postback_client       = $postback_client;
 		$this->logger                = $logger;
 	}
 
@@ -148,7 +151,13 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			return;
 		}
 		$settings = $this->config->get_settings();
-		$success  = $this->send_get_with_retries( $this->build_postback_url( $order, $transaction_id, $settings ) );
+		$success  = $this->postback_client->send_conversion(
+			(string) $settings['offer_id'],
+			(string) $settings['security_token'],
+			$transaction_id,
+			(float) $order->get_subtotal(),
+			(int) $order->get_id()
+		);
 		$order->update_meta_data( self::META_POSTBACK_STATUS, $success ? self::STATUS_SENT : self::STATUS_FAILED );
 		$order->save();
 		if ( $success ) {
@@ -232,94 +241,13 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			return;
 		}
 		$settings = $this->config->get_settings();
-		if ( $this->send_cancellation_webhook( $transaction_id, $settings ) ) {
+		if ( $this->postback_client->send_cancellation( (string) $settings['offer_id'], (string) $settings['security_token'], $transaction_id ) ) {
 			$order->update_meta_data( self::META_POSTBACK_STATUS, self::STATUS_REJECTED );
 			$order->save();
 			$this->logger->log_info( 'Affiliate cancellation reported', __FUNCTION__, __CLASS__ );
 		} else {
 			$this->logger->log_error( 'Affiliate cancellation webhook failed', __FUNCTION__, __CLASS__ );
 		}
-	}
-
-	/**
-	 * Build the TUNE conversion postback URL.
-	 *
-	 * @param WC_Order $order          The order.
-	 * @param string   $transaction_id The transaction id.
-	 * @param array{enabled: bool, offer_id: string, security_token: string} $settings The affiliate settings.
-	 */
-	private function build_postback_url( WC_Order $order, $transaction_id, array $settings ): string {
-		return \add_query_arg(
-			array(
-				'offer_id'       => rawurlencode( (string) $settings['offer_id'] ),
-				'amount'         => rawurlencode( number_format( (float) $order->get_subtotal(), 2, '.', '' ) ),
-				'transaction_id' => rawurlencode( $transaction_id ),
-				'security_token' => rawurlencode( (string) $settings['security_token'] ),
-				'adv_sub'        => rawurlencode( (string) $order->get_id() ),
-			),
-			self::TUNE_POSTBACK_URL
-		);
-	}
-
-	/**
-	 * Perform a GET request with retries. Returns true on a 2xx response.
-	 *
-	 * @param string $url The URL.
-	 */
-	private function send_get_with_retries( $url ): bool {
-		for ( $attempt = 1; $attempt <= self::MAX_RETRIES; $attempt++ ) {
-			$response = \wp_remote_get(
-				$url,
-				array(
-					'timeout'    => self::HTTP_TIMEOUT,
-					'user-agent' => self::USER_AGENT,
-					'sslverify'  => true,
-				)
-			);
-			if ( ! \is_wp_error( $response ) ) {
-				$code = (int) \wp_remote_retrieve_response_code( $response );
-				if ( $code >= 200 && $code < 300 ) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * POST the cancellation payload to the Simba webhook. Returns true on a 2xx response.
-	 *
-	 * @param string $transaction_id The transaction id.
-	 * @param array{enabled: bool, offer_id: string, security_token: string} $settings The affiliate settings.
-	 */
-	private function send_cancellation_webhook( $transaction_id, array $settings ): bool {
-		$body = (string) \wp_json_encode(
-			array(
-				'transaction_id' => $transaction_id,
-				'offer_id'       => (string) $settings['offer_id'],
-				'status'         => 'cancelled',
-				'security_token' => (string) $settings['security_token'],
-			)
-		);
-		for ( $attempt = 1; $attempt <= self::MAX_RETRIES; $attempt++ ) {
-			$response = \wp_remote_post(
-				self::CANCELLATION_WEBHOOK_URL,
-				array(
-					'timeout'    => self::HTTP_TIMEOUT,
-					'user-agent' => self::USER_AGENT,
-					'headers'    => array( 'Content-Type' => 'application/json' ),
-					'body'       => $body,
-					'sslverify'  => true,
-				)
-			);
-			if ( ! \is_wp_error( $response ) ) {
-				$code = (int) \wp_remote_retrieve_response_code( $response );
-				if ( $code >= 200 && $code < 300 ) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -389,5 +317,4 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 
 	// phpcs:enable WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie
 	// phpcs:enable WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE
-	// phpcs:enable WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 }
