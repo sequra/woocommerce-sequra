@@ -37,6 +37,14 @@ interface Interface_Affiliate_Controller {
 	public function handle_order_status_changed( $order_id, $old_status, $new_status, $order = null ): void;
 
 	/**
+	 * Execute a scheduled affiliate postback (WP-cron callback).
+	 *
+	 * @param int    $order_id The order ID.
+	 * @param string $kind     The postback kind (conversion or cancellation).
+	 */
+	public function dispatch( $order_id, $kind ): void;
+
+	/**
 	 * Clear the attribution cookie on the order-received page before output starts.
 	 */
 	public function clear_cookie_on_received(): void;

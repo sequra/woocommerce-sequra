@@ -12,6 +12,7 @@ use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Order\Interface_Order_Controller;
 use SeQura\WC\Controllers\Hooks\Affiliate\Interface_Affiliate_Controller;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
@@ -152,6 +153,7 @@ class Plugin {
 		\add_action( 'template_redirect', array( $affiliate_controller, 'clear_cookie_on_received' ), 5 );
 		\add_action( 'woocommerce_new_order', array( $affiliate_controller, 'handle_new_order' ), 10, 2 );
 		\add_action( 'woocommerce_order_status_changed', array( $affiliate_controller, 'handle_order_status_changed' ), 10, 4 );
+		\add_action( Interface_Affiliate_Service::DISPATCH_HOOK, array( $affiliate_controller, 'dispatch' ), 10, 2 );
 
 		// WooCommerce Compat.
 		\add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
@@ -186,6 +188,7 @@ class Plugin {
 	public function deactivate(): void {
 		\wp_clear_scheduled_hook( self::HOOK_DELIVERY_REPORT );
 		\wp_clear_scheduled_hook( self::HOOK_CLEANUP_ORDERS );
+		\wp_clear_scheduled_hook( Interface_Affiliate_Service::DISPATCH_HOOK );
 	}
 
 	/**
