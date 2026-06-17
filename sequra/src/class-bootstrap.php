@@ -74,6 +74,8 @@ use SeQura\WC\Controllers\Hooks\Affiliate\Interface_Affiliate_Controller;
 use SeQura\WC\Controllers\Hooks\Affiliate\Affiliate_Controller;
 use SeQura\WC\Services\Affiliate\Interface_Affiliate_Config_Provider;
 use SeQura\WC\Services\Affiliate\Pushed_Affiliate_Config_Provider;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Postback_Client;
+use SeQura\WC\Services\Affiliate\Pending_Affiliate_Postback_Client;
 use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
 use SeQura\WC\Services\Affiliate\Affiliate_Service;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
@@ -337,12 +339,24 @@ class Bootstrap extends BootstrapComponent {
 			}
 		);
 		Reg::registerService(
+			Interface_Affiliate_Postback_Client::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Postback_Client::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Postback_Client::class ] = new Pending_Affiliate_Postback_Client(
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Postback_Client::class ];
+			}
+		);
+		Reg::registerService(
 			Interface_Affiliate_Service::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Affiliate_Service::class ] ) ) {
 					self::$cache[ Interface_Affiliate_Service::class ] = new Affiliate_Service(
 						Reg::getService( Interface_Affiliate_Config_Provider::class ),
 						Reg::getService( Order_Status_Settings_Service::class ),
+						Reg::getService( Interface_Affiliate_Postback_Client::class ),
 						Reg::getService( Interface_Logger_Service::class )
 					);
 				}
