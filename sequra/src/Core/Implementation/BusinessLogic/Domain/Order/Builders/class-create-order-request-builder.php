@@ -515,6 +515,13 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		// Last resort: derive the country from the locale, uppercased to match the
 		// case-sensitive credentials/country config. The sequra_shopper_country filter
 		// already had its chance during the order/cart resolution above.
-		return strtoupper( strval( $this->i18n->get_lang() ) );
+		$country = strtoupper( strval( $this->i18n->get_lang() ) );
+		$this->logger->log_debug(
+			'Country not found in order/cart or stored order; falling back to locale',
+			__FUNCTION__,
+			__CLASS__,
+			array( new LogContextData( 'country', $country ) )
+		);
+		return $country;
 	}
 }
