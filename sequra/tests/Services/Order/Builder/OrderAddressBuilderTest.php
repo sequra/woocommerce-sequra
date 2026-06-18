@@ -40,4 +40,20 @@ class OrderAddressBuilderTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'PT', $address->getCountryCode() );
 	}
+
+	public function testBuild_emptyCountry_usesFallbackCountry(): void {
+		$this->shopper_service->method( 'get_country' )->willReturn( '' );
+
+		$address = $this->builder->build( null, true, 'IT' );
+
+		$this->assertSame( 'IT', $address->getCountryCode() );
+	}
+
+	public function testBuild_resolvedCountry_ignoresFallback(): void {
+		$this->shopper_service->method( 'get_country' )->willReturn( 'PT' );
+
+		$address = $this->builder->build( null, true, 'IT' );
+
+		$this->assertSame( 'PT', $address->getCountryCode() );
+	}
 }

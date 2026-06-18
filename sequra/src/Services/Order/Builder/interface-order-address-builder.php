@@ -18,6 +18,8 @@ interface Interface_Order_Address_Builder {
 
 	/**
 	 * Get address
+	 *
+	 * @param ?string $fallback_country Country used when the address itself resolves none.
 	 */
-	public function build( ?WC_Order $order, bool $is_delivery ): Address;
+	public function build( ?WC_Order $order, bool $is_delivery, ?string $fallback_country = null ): Address;
 }

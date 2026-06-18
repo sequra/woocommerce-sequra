@@ -374,7 +374,11 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 */
 		return \apply_filters(
 			'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options',
-			$this->address_builder->build( $this->current_order_provider->get(), $is_delivery )
+			$this->address_builder->build(
+				$this->current_order_provider->get(),
+				$is_delivery,
+				$this->get_country( $this->get_cart_ref_from_order_or_cart() )
+			)
 		);
 	}
 
