@@ -488,7 +488,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	/**
 	 * Get country code from cart ID or current order/session
 	 */
-	private function get_country( ?string $cart_id = null ): ?string {
+	public function get_country( ?string $cart_id = null ): ?string {
 		// Priority 1: live data from the current order/cart/session (always fresh).
 		try {
 			return $this->get_country_from_order_or_cart();
