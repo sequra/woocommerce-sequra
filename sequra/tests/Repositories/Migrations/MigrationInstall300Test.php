@@ -257,7 +257,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 					'allowed_countries' => array( 'ES' ),
 					'currency'          => 'EUR',
 					'assets_key'        => getenv( 'DUMMY_ASSETS_KEY' ),
-					'contract_options'  => array( 'allow_first_instalment_delay', 'with_registration' ),
+					'contract_options'  => array( 'allow_authorize_and_capture', 'allow_first_instalment_delay', 'with_registration' ),
 					'extra_information' => array(
 						'type'         => 'regular',
 						'phone_number' => '',
