@@ -102,8 +102,8 @@ Contributors:
 == Changelog ==
 = 4.3.3	=
 * Fixed: During guest checkout the shopper country now falls back from the shipping address to the billing address, so seQura no longer disappears when only a billing country is set.
-* Changed: When the shopper country cannot be determined, seQura is no longer shown with a guessed country and stays hidden until an address country is available, preventing wrong-country solicitations.
-* Changed: The sequra_shopper_country filter is now applied consistently to the country used for checkout availability and the solicitation, and the resolved country is normalized to uppercase (ISO-3166-1 alpha-2) so case differences no longer affect payment method availability or merchant selection.
+* Fixed: The shopper country is normalized to uppercase (ISO-3166-1 alpha-2), so case differences no longer prevent payment methods from showing or the correct merchant from being selected.
+* Changed: The order request no longer defaults a missing delivery or invoice country to Spain, and the sequra_shopper_country filter is now applied consistently to the resolved shopper country used for availability and the solicitation.
 = 4.3.2	=
 * Fixed: Locale detection now correctly prioritizes active multilingual plugins (Polylang, qTranslate, WPML) before falling back to the site or user locale.
 * Fixed: Empty or malformed store integration webhook request bodies now return a 400 response instead of a 500 error.

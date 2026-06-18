@@ -512,8 +512,9 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			}
 		}
 
-		// No silent fallback: an unresolved country must hide seQura via availability gating
-		// rather than guessing a country (locale or store base) and sending a wrong solicitation.
-		return null;
+		// Last resort: derive the country from the locale, uppercased to match the
+		// case-sensitive credentials/country config. The sequra_shopper_country filter
+		// already had its chance during the order/cart resolution above.
+		return strtoupper( strval( $this->i18n->get_lang() ) );
 	}
 }
