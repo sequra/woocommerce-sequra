@@ -313,8 +313,16 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 * Get client country code. If the order is null, attempt to retrieve data from the session.
 	 */
 	public function get_country( ?WC_Order $order, $is_delivery = true ): string {
-		$prefix = $is_delivery ? 'shipping' : 'billing';
-		return $this->get_customer_field( $order, "get_{$prefix}_country", 'get_billing_country', "{$prefix}_country", 'billing_country' );
+		$prefix  = $is_delivery ? 'shipping' : 'billing';
+		$country = $this->get_customer_field( $order, "get_{$prefix}_country", 'get_billing_country', "{$prefix}_country", 'billing_country' );
+		/**
+		 * Allow changing the country of the shopper.
+		 *
+		 * @since 3.0.7
+		 * @param string|null $country The country code.
+		 * @return string The country code. Must be in ISO-3166-1 alpha-2 format.
+		 */
+		return strval( \apply_filters( 'sequra_shopper_country', $country ) );
 	}
 
 	/**
