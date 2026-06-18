@@ -44,7 +44,7 @@ class Order_Address_Builder implements Interface_Order_Address_Builder {
 			$this->shopper_service->get_address_2( $order, $is_delivery ),
 			$this->shopper_service->get_postcode( $order, $is_delivery ),
 			$this->shopper_service->get_city( $order, $is_delivery ),
-			$country ? $country : 'ES',
+			$country,
 			$this->shopper_service->get_first_name( $order, $is_delivery ),
 			$this->shopper_service->get_last_name( $order, $is_delivery ),
 			null, // phone.

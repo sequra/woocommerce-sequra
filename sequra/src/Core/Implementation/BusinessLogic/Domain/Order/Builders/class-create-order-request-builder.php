@@ -512,6 +512,8 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			}
 		}
 
-		return strval( $this->i18n->get_lang() );
+		// No silent fallback: an unresolved country must hide seQura via availability gating
+		// rather than guessing a country (locale or store base) and sending a wrong solicitation.
+		return null;
 	}
 }
