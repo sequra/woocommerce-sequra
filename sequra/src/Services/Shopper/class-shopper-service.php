@@ -314,7 +314,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 */
 	public function get_country( ?WC_Order $order, $is_delivery = true ): string {
 		$prefix = $is_delivery ? 'shipping' : 'billing';
-		return $this->get_customer_field( $order, "get_{$prefix}_country", 'get_billing_country', "{$prefix}_country", 'country' );
+		return $this->get_customer_field( $order, "get_{$prefix}_country", 'get_billing_country', "{$prefix}_country", 'billing_country' );
 	}
 
 	/**
