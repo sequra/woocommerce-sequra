@@ -83,6 +83,20 @@ class ShopperServiceTest extends WP_UnitTestCase {
 		$this->assertSame( 'PT', $this->shopper_service->get_country( $order ) );
 	}
 
+	public function testGetCountry_filterValueIsUppercased(): void {
+		$order = new WC_Order();
+		$order->set_shipping_country( 'ES' );
+
+		add_filter(
+			'sequra_shopper_country',
+			function () {
+				return 'pt';
+			}
+		);
+
+		$this->assertSame( 'PT', $this->shopper_service->get_country( $order ) );
+	}
+
 	public function testGetCountry_filterAppliesWhenNoCountryResolved(): void {
 		$order = new WC_Order();
 

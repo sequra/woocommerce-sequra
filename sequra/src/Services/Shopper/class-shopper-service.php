@@ -322,7 +322,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 		 * @param string|null $country The country code.
 		 * @return string The country code. Must be in ISO-3166-1 alpha-2 format.
 		 */
-		return strval( \apply_filters( 'sequra_shopper_country', $country ) );
+		return strtoupper( strval( \apply_filters( 'sequra_shopper_country', $country ) ) );
 	}
 
 	/**
