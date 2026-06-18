@@ -109,4 +109,21 @@ class ShopperServiceTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'FR', $this->shopper_service->get_country( $order ) );
 	}
+
+	public function testGetCity_sessionShippingEmpty_fallsBackToBilling(): void {
+		$customer = new WC_Customer();
+		$customer->set_billing_city( 'Madrid' );
+		WC()->customer = $customer;
+
+		$this->assertSame( 'Madrid', $this->shopper_service->get_city( null ) );
+	}
+
+	public function testGetState_sessionShippingEmpty_fallsBackToBilling(): void {
+		$customer = new WC_Customer();
+		$customer->set_billing_country( 'US' );
+		$customer->set_billing_state( 'CA' );
+		WC()->customer = $customer;
+
+		$this->assertSame( 'California', $this->shopper_service->get_state( null ) );
+	}
 }
