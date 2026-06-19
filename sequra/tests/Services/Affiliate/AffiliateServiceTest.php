@@ -54,16 +54,18 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 	/**
 	 * Build a mocked order with the given affiliate meta.
 	 *
-	 * @param string $transaction_id  Attributed transaction id.
-	 * @param string $postback_status Current postback status meta.
-	 * @param string $wc_status       Current WooCommerce order status (without the wc- prefix).
-	 * @param int    $attempts        Current postback attempt count meta.
+	 * @param string $transaction_id        Attributed transaction id.
+	 * @param string $postback_status       Current postback status meta.
+	 * @param string $wc_status             Current WooCommerce order status (without the wc- prefix).
+	 * @param int    $attempts              Current conversion postback attempt count meta.
+	 * @param int    $cancellation_attempts Current cancellation postback attempt count meta.
 	 */
-	private function make_order( string $transaction_id, string $postback_status, string $wc_status = 'completed', int $attempts = 0 ): WC_Order {
+	private function make_order( string $transaction_id, string $postback_status, string $wc_status = 'completed', int $attempts = 0, int $cancellation_attempts = 0 ): WC_Order {
 		$meta  = array(
-			'_sq_affiliate_transaction_id'    => $transaction_id,
-			'_sq_affiliate_postback_status'   => $postback_status,
-			'_sq_affiliate_postback_attempts' => $attempts,
+			'_sq_affiliate_transaction_id'        => $transaction_id,
+			'_sq_affiliate_postback_status'       => $postback_status,
+			'_sq_affiliate_postback_attempts'     => $attempts,
+			'_sq_affiliate_cancellation_attempts' => $cancellation_attempts,
 		);
 		$order = $this->createMock( WC_Order::class );
 		$order->method( 'get_meta' )->willReturnCallback(
@@ -99,6 +101,21 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$this->postback_client->expects( $this->never() )->method( 'send_conversion' );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'pending', 'cancelled' ), 'conversion' );
+	}
+
+	public function testDispatchConversionSentWhenOrderAdvancedBeyondApproved(): void {
+		// The order legitimately moved past "paid" (e.g. shipped/completed) before the conversion
+		// cron ran, so its status no longer maps to STATE_APPROVED — but it is not cancelled, so the
+		// conversion (and the shopper's cashback) must still be reported, not silently dropped.
+		$this->order_status_settings->method( 'map_status_from_shop_to_sequra' )
+			->willReturn( '' );
+
+		$this->postback_client->expects( $this->once() )
+			->method( 'send_conversion' )
+			->with( '4', 'tok123', 'ABC123', 99.99, 85 )
+			->willReturn( true );
+
+		$this->service->dispatch( $this->make_order( 'ABC123', 'pending', 'completed' ), 'conversion' );
 	}
 
 	public function testDispatchConversionReschedulesOnTransientFailure(): void {
@@ -155,6 +172,36 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 			->willReturn( true );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'sent' ), 'cancellation' );
+	}
+
+	public function testDispatchCancellationReschedulesOnTransientFailure(): void {
+		// Parity with the conversion path: a transient cancellation failure must not be terminal,
+		// otherwise the reversal is lost and the shopper keeps cashback on a cancelled order.
+		$this->postback_client->method( 'send_cancellation' )->willReturn( false );
+
+		$this->service->dispatch( $this->make_order( 'ABC123', 'sent' ), 'cancellation' );
+
+		$this->assertNotFalse(
+			wp_next_scheduled( Interface_Affiliate_Service::DISPATCH_HOOK, array( 85, 'cancellation' ) )
+		);
+	}
+
+	public function testDispatchCancellationGivesUpAfterMaxAttempts(): void {
+		$this->postback_client->method( 'send_cancellation' )->willReturn( false );
+
+		// Two prior cancellation attempts: this dispatch reaches the cap, so it must settle on the
+		// distinct cancellation-failed terminal status (not the conversion's "failed") and stop
+		// re-scheduling.
+		$order = $this->make_order( 'ABC123', 'sent', 'cancelled', 0, 2 );
+		$order->expects( $this->once() )
+			->method( 'update_meta_data' )
+			->with( '_sq_affiliate_postback_status', 'cancellation_failed' );
+
+		$this->service->dispatch( $order, 'cancellation' );
+
+		$this->assertFalse(
+			wp_next_scheduled( Interface_Affiliate_Service::DISPATCH_HOOK, array( 85, 'cancellation' ) )
+		);
 	}
 
 	public function testHandleStatusChangeEnqueuesConversionWhenApproved(): void {
