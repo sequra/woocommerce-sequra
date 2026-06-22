@@ -266,6 +266,11 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 					'signature_secret'  => $actual_array['credentials']['payload']['signature_secret'], // Let's keep this secret.
 					'confirmation_path' => 'default',
 					'realm'             => 'sequra',
+					'affiliate'         => array(
+						'enabled'        => false,
+						'offer_id'       => null,
+						'security_token' => null,
+					),
 				),
 				'deployment' => 'sequra',
 			),
