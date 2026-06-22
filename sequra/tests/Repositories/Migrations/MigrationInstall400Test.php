@@ -231,6 +231,11 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 						'signature_secret'  => $actual_entity['credentials']['payload']['signature_secret'], // Let's keep this secret.
 						'confirmation_path' => $actual_entity['credentials']['payload']['confirmation_path'],
 						'realm'             => $actual_entity['credentials']['payload']['realm'],
+						'affiliate'         => array(
+							'enabled'        => false,
+							'offer_id'       => null,
+							'security_token' => null,
+						),
 					),
 					'deployment' => $actual_entity['credentials']['deployment'],
 				),

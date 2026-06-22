@@ -35,16 +35,21 @@ class Order_Address_Builder implements Interface_Order_Address_Builder {
 
 	/**
 	 * Get address
+	 *
+	 * @param ?string $fallback_country Country used when the address itself resolves none (e.g. address-less service flows), so the solicitation still carries a country.
 	 */
-	public function build( ?WC_Order $order, bool $is_delivery ): Address {
+	public function build( ?WC_Order $order, bool $is_delivery, ?string $fallback_country = null ): Address {
 		$country = $this->shopper_service->get_country( $order, $is_delivery );
+		if ( ! $country ) {
+			$country = (string) $fallback_country;
+		}
 		return new Address(
 			$this->shopper_service->get_company( $order, $is_delivery ),
 			$this->shopper_service->get_address_1( $order, $is_delivery ),
 			$this->shopper_service->get_address_2( $order, $is_delivery ),
 			$this->shopper_service->get_postcode( $order, $is_delivery ),
 			$this->shopper_service->get_city( $order, $is_delivery ),
-			$country ? $country : 'ES',
+			$country,
 			$this->shopper_service->get_first_name( $order, $is_delivery ),
 			$this->shopper_service->get_last_name( $order, $is_delivery ),
 			null, // phone.

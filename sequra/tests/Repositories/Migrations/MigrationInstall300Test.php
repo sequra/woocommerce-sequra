@@ -257,7 +257,7 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 					'allowed_countries' => array( 'ES' ),
 					'currency'          => 'EUR',
 					'assets_key'        => getenv( 'DUMMY_ASSETS_KEY' ),
-					'contract_options'  => array( 'allow_first_instalment_delay', 'with_registration' ),
+					'contract_options'  => array( 'allow_authorize_and_capture', 'allow_first_instalment_delay', 'with_registration' ),
 					'extra_information' => array(
 						'type'         => 'regular',
 						'phone_number' => '',
@@ -266,6 +266,11 @@ class MigrationInstall300Test extends WP_UnitTestCase {
 					'signature_secret'  => $actual_array['credentials']['payload']['signature_secret'], // Let's keep this secret.
 					'confirmation_path' => 'default',
 					'realm'             => 'sequra',
+					'affiliate'         => array(
+						'enabled'        => false,
+						'offer_id'       => null,
+						'security_token' => null,
+					),
 				),
 				'deployment' => 'sequra',
 			),

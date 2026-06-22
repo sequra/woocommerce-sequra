@@ -302,7 +302,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 */
 	public function get_city( ?WC_Order $order, $is_delivery = true ): string {
 		$prefix = $is_delivery ? 'shipping' : 'billing';
-		$city   = $this->get_customer_field( $order, "get_{$prefix}_city", 'get_billing_city', "{$prefix}_city", 'city' );
+		$city   = $this->get_customer_field( $order, "get_{$prefix}_city", 'get_billing_city', "{$prefix}_city", 'billing_city' );
 		if ( ! $city ) {
 			$city = $this->get_customer_field( $order, 'get_city', 'get_city', 'city', 'city' );
 		}
@@ -313,8 +313,16 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 * Get client country code. If the order is null, attempt to retrieve data from the session.
 	 */
 	public function get_country( ?WC_Order $order, $is_delivery = true ): string {
-		$prefix = $is_delivery ? 'shipping' : 'billing';
-		return $this->get_customer_field( $order, "get_{$prefix}_country", 'get_billing_country', "{$prefix}_country", 'country' );
+		$prefix  = $is_delivery ? 'shipping' : 'billing';
+		$country = $this->get_customer_field( $order, "get_{$prefix}_country", 'get_billing_country', "{$prefix}_country", 'billing_country' );
+		/**
+		 * Allow changing the country of the shopper.
+		 *
+		 * @since 3.0.7
+		 * @param string|null $country The country code.
+		 * @return string The country code. Must be in ISO-3166-1 alpha-2 format.
+		 */
+		return strtoupper( strval( \apply_filters( 'sequra_shopper_country', $country ) ) );
 	}
 
 	/**
@@ -322,11 +330,11 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 */
 	public function get_state( ?WC_Order $order, $is_delivery = true ): string {
 		$prefix     = $is_delivery ? 'shipping' : 'billing';
-		$state_code = $this->get_customer_field( $order, "get_{$prefix}_state", 'get_billing_state', "{$prefix}_state", 'state' );
+		$state_code = $this->get_customer_field( $order, "get_{$prefix}_state", 'get_billing_state', "{$prefix}_state", 'billing_state' );
 		if ( ! $state_code ) {
 			return '';
 		}
-		$states = WC()->countries->get_states( $this->get_country( $order ) );
+		$states = WC()->countries->get_states( $this->get_country( $order, $is_delivery ) );
 		if ( ! $states || ! isset( $states[ $state_code ] ) ) {
 			return '';
 		}

@@ -64,12 +64,11 @@ class I18n implements Interface_I18n {
 	}
 
 	/**
-	 * TODO: Make Unit Test for this
 	 * Get the current country. ISO-3166-1 alpha-2 code.
-	 * Looks for the country in the following order:
-	 * 1. The country set in WooCommerce checkout billing address.
-	 * 2. The country set in user profile.
-	 * 3. The country by current locale.
+	 * Resolution order: shipping country, billing country, user-profile billing country, current locale.
+	 *
+	 * Widget-surface country resolver and the single point that applies the sequra_shopper_country
+	 * filter for promotional widgets; the checkout/solicitation path applies it in the shopper service.
 	 */
 	public function get_current_country(): string {
 		$country = null;

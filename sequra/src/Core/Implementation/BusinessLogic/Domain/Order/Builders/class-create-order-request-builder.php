@@ -374,7 +374,11 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 		 */
 		return \apply_filters(
 			'sequra_create_order_request_' . ( $is_delivery ? 'delivery_address' : 'invoice_address' ) . '_options',
-			$this->address_builder->build( $this->current_order_provider->get(), $is_delivery )
+			$this->address_builder->build(
+				$this->current_order_provider->get(),
+				$is_delivery,
+				$this->get_country( $this->get_cart_ref_from_order_or_cart() )
+			)
 		);
 	}
 
@@ -488,7 +492,7 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 	/**
 	 * Get country code from cart ID or current order/session
 	 */
-	private function get_country( ?string $cart_id = null ): ?string {
+	public function get_country( ?string $cart_id = null ): ?string {
 		// Priority 1: live data from the current order/cart/session (always fresh).
 		try {
 			return $this->get_country_from_order_or_cart();
@@ -512,13 +516,16 @@ class Create_Order_Request_Builder implements Interface_Create_Order_Request_Bui
 			}
 		}
 
-		/**
-		 * Allow changing the country of the shopper.
-		 *
-		 * @since 3.0.7
-		 * @param string|null $country The country code.
-		 * @return string The country code. Must be in ISO-3166-1 alpha-2 format.
-		 */
-		return strval( apply_filters( 'sequra_shopper_country', $this->i18n->get_lang() ) );
+		// Last resort: derive the country from the locale, uppercased to match the
+		// case-sensitive credentials/country config. The sequra_shopper_country filter
+		// already had its chance during the order/cart resolution above.
+		$country = strtoupper( strval( $this->i18n->get_lang() ) );
+		$this->logger->log_debug(
+			'Country not found in order/cart or stored order; falling back to locale',
+			__FUNCTION__,
+			__CLASS__,
+			array( new LogContextData( 'country', $country ) )
+		);
+		return $country;
 	}
 }
