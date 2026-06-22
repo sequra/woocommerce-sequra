@@ -126,4 +126,16 @@ class ShopperServiceTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'California', $this->shopper_service->get_state( null ) );
 	}
+
+	public function testGetState_invoiceAddress_validatesStateAgainstBillingCountry(): void {
+		$order = new WC_Order();
+		$order->set_shipping_country( 'PT' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'CA' );
+
+		// With is_delivery = false the billing state must be validated against the
+		// billing country (US), not the shipping country (PT). Otherwise a valid
+		// billing state is silently dropped to '' when billing and shipping differ.
+		$this->assertSame( 'California', $this->shopper_service->get_state( $order, false ) );
+	}
 }

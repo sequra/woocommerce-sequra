@@ -334,7 +334,7 @@ class Shopper_Service implements Interface_Shopper_Service {
 		if ( ! $state_code ) {
 			return '';
 		}
-		$states = WC()->countries->get_states( $this->get_country( $order ) );
+		$states = WC()->countries->get_states( $this->get_country( $order, $is_delivery ) );
 		if ( ! $states || ! isset( $states[ $state_code ] ) ) {
 			return '';
 		}
