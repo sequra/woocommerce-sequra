@@ -166,6 +166,7 @@ use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInter
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
 use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Affiliate\Services\AffiliateSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Log\LogServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Log\Log_Service;
 use SeQura\Core\BusinessLogic\DataAccess\Affiliate\Entities\AffiliateSettings;
@@ -340,7 +341,9 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Affiliate_Config_Provider::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Affiliate_Config_Provider::class ] ) ) {
-					self::$cache[ Interface_Affiliate_Config_Provider::class ] = new Pushed_Affiliate_Config_Provider();
+					self::$cache[ Interface_Affiliate_Config_Provider::class ] = new Pushed_Affiliate_Config_Provider(
+						Reg::getService( AffiliateSettingsService::class )
+					);
 				}
 				return self::$cache[ Interface_Affiliate_Config_Provider::class ];
 			}
