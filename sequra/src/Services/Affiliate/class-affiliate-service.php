@@ -93,10 +93,11 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( ! $this->is_active() ) {
 			return;
 		}
-		if ( ! isset( $_GET[ self::QUERY_PARAM ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$param = $this->get_query_param();
+		if ( ! isset( $_GET[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
-		$transaction_id = \sanitize_text_field( \wp_unslash( $_GET[ self::QUERY_PARAM ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$transaction_id = \sanitize_text_field( \wp_unslash( $_GET[ $param ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $this->is_valid_transaction_id( $transaction_id ) ) {
 			return;
 		}
@@ -115,6 +116,24 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 			);
 		}
 		$_COOKIE[ self::COOKIE_NAME ] = $transaction_id;
+	}
+
+	/**
+	 * The query-string parameter the affiliate click is read from.
+	 *
+	 * Centralized and filterable so the attribution param can be renamed (e.g. to avoid
+	 * mirroring third-party tracking nomenclature) without shipping a plugin release.
+	 *
+	 * @return string
+	 */
+	private function get_query_param(): string {
+		/**
+		 * Filters the query-string parameter the affiliate click is read from.
+		 *
+		 * @since 4.3.3
+		 * @param string $param Default attribution query parameter (`transaction_id`).
+		 */
+		return (string) \apply_filters( 'sequra_affiliate_transaction_param', self::QUERY_PARAM );
 	}
 
 	/**
