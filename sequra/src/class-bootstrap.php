@@ -141,6 +141,7 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWi
 use SeQura\WC\Repositories\Migrations\Migration_Install_400;
 use SeQura\WC\Repositories\Migrations\Migration_Install_420;
 use SeQura\WC\Repositories\Migrations\Migration_Install_430;
+use SeQura\WC\Repositories\Migrations\Migration_Install_433;
 use SeQura\WC\Services\Order\Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Platform\Interface_Platform_Provider;
@@ -682,6 +683,11 @@ class Bootstrap extends BootstrapComponent {
 								Reg::getService( Order_Status_Settings_Service::class )
 							),
 							new Migration_Install_430(
+								$wpdb,
+								$cache_repository,
+								Reg::getService( StoreService::class )
+							),
+							new Migration_Install_433(
 								$wpdb,
 								$cache_repository,
 								Reg::getService( StoreService::class )
