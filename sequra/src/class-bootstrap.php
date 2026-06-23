@@ -165,7 +165,9 @@ use SeQura\WC\Services\Service\Settings_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
 use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
+use SeQura\Core\BusinessLogic\DataAccess\Affiliate\Entities\AffiliateSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Affiliate\Services\AffiliateSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Log\LogServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Log\Log_Service;
 
@@ -333,7 +335,9 @@ class Bootstrap extends BootstrapComponent {
 			Interface_Affiliate_Config_Provider::class,
 			static function () {
 				if ( ! isset( self::$cache[ Interface_Affiliate_Config_Provider::class ] ) ) {
-					self::$cache[ Interface_Affiliate_Config_Provider::class ] = new Pushed_Affiliate_Config_Provider();
+					self::$cache[ Interface_Affiliate_Config_Provider::class ] = new Pushed_Affiliate_Config_Provider(
+						Reg::getService( AffiliateSettingsService::class )
+					);
 				}
 				return self::$cache[ Interface_Affiliate_Config_Provider::class ];
 			}
@@ -1034,6 +1038,7 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( AdvancedSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( AffiliateSettings::class, Entity_Repository::class );
 	}
 
 	/**
