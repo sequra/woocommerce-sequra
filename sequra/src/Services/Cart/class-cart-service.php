@@ -492,7 +492,7 @@ class Cart_Service implements Interface_Cart_Service {
 			 * @var object $fee
 			 */
 			foreach ( $cart->get_fees() as $fee ) {
-				$total_with_tax = (float) ( $fee->total ?? 0 );
+				$total_with_tax = (float) ( $fee->total ?? 0 ) + (float) ( $fee->tax ?? 0 );
 				if ( $total_with_tax >= 0 ) {
 					// Fees with positive total are handling items.
 					continue;
@@ -534,7 +534,7 @@ class Cart_Service implements Interface_Cart_Service {
 					continue;
 				}
 
-				$total_with_tax = (float) ( $fee->get_total() ?? 0 );
+				$total_with_tax = (float) ( $fee->get_total() ?? 0 ) + (float) ( $fee->get_total_tax() ?? 0 );
 				if ( $total_with_tax >= 0 ) {
 					// Fees with positive total are handling items.
 					continue;
