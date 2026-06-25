@@ -70,6 +70,14 @@ use SeQura\WC\Controllers\Rest\General_Settings_REST_Controller;
 use SeQura\WC\Controllers\Rest\Log_REST_Controller;
 use SeQura\WC\Controllers\Rest\Onboarding_REST_Controller;
 use SeQura\WC\Controllers\Rest\Payment_REST_Controller;
+use SeQura\WC\Controllers\Hooks\Affiliate\Interface_Affiliate_Controller;
+use SeQura\WC\Controllers\Hooks\Affiliate\Affiliate_Controller;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Config_Provider;
+use SeQura\WC\Services\Affiliate\Pushed_Affiliate_Config_Provider;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Postback_Client;
+use SeQura\WC\Services\Affiliate\Pending_Affiliate_Postback_Client;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
+use SeQura\WC\Services\Affiliate\Affiliate_Service;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Category\Category_Service;
@@ -133,6 +141,7 @@ use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\PromotionalWi
 use SeQura\WC\Repositories\Migrations\Migration_Install_400;
 use SeQura\WC\Repositories\Migrations\Migration_Install_420;
 use SeQura\WC\Repositories\Migrations\Migration_Install_430;
+use SeQura\WC\Repositories\Migrations\Migration_Install_433;
 use SeQura\WC\Services\Order\Current_Order_Provider;
 use SeQura\WC\Services\Order\Interface_Current_Order_Provider;
 use SeQura\WC\Services\Platform\Interface_Platform_Provider;
@@ -157,7 +166,9 @@ use SeQura\WC\Services\Service\Settings_Service;
 use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
 use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
+use SeQura\Core\BusinessLogic\DataAccess\Affiliate\Entities\AffiliateSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
+use SeQura\Core\BusinessLogic\Domain\Affiliate\Services\AffiliateSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Log\LogServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Log\Log_Service;
 
@@ -198,7 +209,8 @@ class Bootstrap extends BootstrapComponent {
 					Reg::getService( Store_Integration_REST_Controller::class ),
 					Reg::getService( Interface_Product_Controller::class ),
 					Reg::getService( Interface_Async_Process_Controller::class ),
-					Reg::getService( Interface_Order_Controller::class )
+					Reg::getService( Interface_Order_Controller::class ),
+					Reg::getService( Interface_Affiliate_Controller::class )
 				);
 			}
 		);
@@ -319,6 +331,56 @@ class Bootstrap extends BootstrapComponent {
 				return Reg::getService( Order_Status_Settings_Service::class );
 			}
 		);
+		// Affiliate.
+		Reg::registerService(
+			Interface_Affiliate_Config_Provider::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Config_Provider::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Config_Provider::class ] = new Pushed_Affiliate_Config_Provider(
+						Reg::getService( AffiliateSettingsService::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Config_Provider::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Affiliate_Postback_Client::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Postback_Client::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Postback_Client::class ] = new Pending_Affiliate_Postback_Client(
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Postback_Client::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Affiliate_Service::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Service::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Service::class ] = new Affiliate_Service(
+						Reg::getService( Interface_Affiliate_Config_Provider::class ),
+						Reg::getService( Order_Status_Settings_Service::class ),
+						Reg::getService( Interface_Affiliate_Postback_Client::class ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Service::class ];
+			}
+		);
+		Reg::registerService(
+			Interface_Affiliate_Controller::class,
+			static function () {
+				if ( ! isset( self::$cache[ Interface_Affiliate_Controller::class ] ) ) {
+					self::$cache[ Interface_Affiliate_Controller::class ] = new Affiliate_Controller(
+						Reg::getService( Interface_Affiliate_Service::class ),
+						Reg::getService( Interface_Logger_Service::class )
+					);
+				}
+				return self::$cache[ Interface_Affiliate_Controller::class ];
+			}
+		);
+
 		// Extend Configuration.
 		Reg::registerService(
 			Configuration::class,
@@ -621,6 +683,11 @@ class Bootstrap extends BootstrapComponent {
 								Reg::getService( Order_Status_Settings_Service::class )
 							),
 							new Migration_Install_430(
+								$wpdb,
+								$cache_repository,
+								Reg::getService( StoreService::class )
+							),
+							new Migration_Install_433(
 								$wpdb,
 								$cache_repository,
 								Reg::getService( StoreService::class )
@@ -977,6 +1044,7 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( AdvancedSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( AffiliateSettings::class, Entity_Repository::class );
 	}
 
 	/**

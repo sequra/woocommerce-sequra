@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d5f26e4d0b68c13bcd43e49bbb429c25",
+    "content-hash": "a054d6f01fcf0b58cfce1724f47cf7ef",
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "v5.1.2",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "9f271088c8cc79db9f01c5517577f53731b48d31"
+                "reference": "5a7f04ece01ae01a6519c93fc97f7ba6e2167845"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/9f271088c8cc79db9f01c5517577f53731b48d31",
-                "reference": "9f271088c8cc79db9f01c5517577f53731b48d31",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/5a7f04ece01ae01a6519c93fc97f7ba6e2167845",
+                "reference": "5a7f04ece01ae01a6519c93fc97f7ba6e2167845",
                 "shasum": ""
             },
             "require": {
@@ -32,6 +32,7 @@
                 "phpunit/phpunit": "8.5.14",
                 "slevomat/coding-standard": "^7.0"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -46,9 +47,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v5.1.2"
+                "source": "https://github.com/sequra/integration-core/tree/master"
             },
-            "time": "2026-05-18T17:20:22+00:00"
+            "time": "2026-06-23T06:40:59+00:00"
         }
     ],
     "packages-dev": [
@@ -3023,9 +3024,18 @@
             "time": "2025-08-10T04:54:36+00:00"
         }
     ],
-    "aliases": [],
-    "minimum-stability": "stable",
-    "stability-flags": {},
+    "aliases": [
+        {
+            "package": "sequra/integration-core",
+            "version": "9999999-dev",
+            "alias": "5.5.x-dev",
+            "alias_normalized": "5.5.9999999.9999999-dev"
+        }
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "sequra/integration-core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {},
@@ -3033,5 +3043,5 @@
     "platform-overrides": {
         "php": "7.3.0"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
