@@ -106,6 +106,8 @@ Contributors:
 * Fixed: The shopper country is normalized to uppercase (ISO-3166-1 alpha-2), so case differences no longer prevent payment methods from showing or the correct merchant from being selected.
 * Fixed: Taxes on checkout fees are now included in the amount sent to seQura, so the order total matches when a fee is taxable.
 * Changed: The order request no longer defaults a missing delivery or invoice country to Spain, and the sequra_shopper_country filter is now applied consistently to the resolved shopper country used for availability and the solicitation.
+* Changed: Tested up to WooCommerce 10.9.1
+
 = 4.3.2	=
 * Fixed: Locale detection now correctly prioritizes active multilingual plugins (Polylang, qTranslate, WPML) before falling back to the site or user locale.
 * Fixed: Empty or malformed store integration webhook request bodies now return a 400 response instead of a 500 error.
