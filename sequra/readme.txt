@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 7.0.0
-Stable tag: 4.3.3
+Stable tag: 4.3.4
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.3.4	=
+* Added: Compatibility with PHP 8.5.
+
 = 4.3.3	=
 * Fixed: During guest checkout the shopper country now falls back from the shipping address to the billing address, so seQura no longer disappears when only a billing country is set.
 * Fixed: During guest checkout the shopper state and city now fall back from the shipping address to the billing address (matching the country), so the solicitation receives complete address data.
