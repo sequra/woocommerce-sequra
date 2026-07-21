@@ -35,13 +35,6 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$this->logger                = $this->createMock( Interface_Logger_Service::class );
 
 		$this->config->method( 'is_enabled' )->willReturn( true );
-		$this->config->method( 'get_settings' )->willReturn(
-			array(
-				'enabled'        => true,
-				'offer_id'       => '4',
-				'security_token' => 'tok123',
-			)
-		);
 
 		$this->service = new Affiliate_Service(
 			$this->config,
@@ -76,6 +69,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$order->method( 'get_id' )->willReturn( 85 );
 		$order->method( 'get_status' )->willReturn( $wc_status );
 		$order->method( 'get_subtotal' )->willReturn( 99.99 );
+		$order->method( 'get_billing_country' )->willReturn( 'ES' );
 
 		return $order;
 	}
@@ -86,7 +80,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 
 		$this->postback_client->expects( $this->once() )
 			->method( 'send_conversion' )
-			->with( '4', 'tok123', 'ABC123', 99.99, 85 )
+			->with( 'ES', 'ABC123', 99.99, '85' )
 			->willReturn( true );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'pending' ), 'conversion' );
@@ -112,7 +106,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 
 		$this->postback_client->expects( $this->once() )
 			->method( 'send_conversion' )
-			->with( '4', 'tok123', 'ABC123', 99.99, 85 )
+			->with( 'ES', 'ABC123', 99.99, '85' )
 			->willReturn( true );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'pending', 'completed' ), 'conversion' );
@@ -168,7 +162,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 	public function testDispatchCancellationSendsWhenAlreadyConverted(): void {
 		$this->postback_client->expects( $this->once() )
 			->method( 'send_cancellation' )
-			->with( '4', 'tok123', 'ABC123' )
+			->with( 'ES', 'ABC123' )
 			->willReturn( true );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'sent' ), 'cancellation' );
