@@ -11,6 +11,7 @@ namespace SeQura\WC\Services\Affiliate;
 use SeQura\Core\BusinessLogic\Domain\Order\OrderStates;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
+use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Order;
 
 /**
@@ -28,7 +29,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	public const COOKIE_NAME = '__sequra_afm';
 
 	private const QUERY_PARAM                = 'transaction_id';
-	private const COOKIE_TTL                 = 2592000; // 30 days in seconds.
+	private const COOKIE_TTL                 = 604800; // 7 days in seconds.
 	private const META_TRANSACTION_ID        = '_sq_affiliate_transaction_id';
 	private const META_POSTBACK_STATUS       = '_sq_affiliate_postback_status';
 	private const META_POSTBACK_ATTEMPTS     = '_sq_affiliate_postback_attempts';
@@ -58,6 +59,13 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	private $order_status_settings;
 
 	/**
+	 * Shopper service (canonical country resolution).
+	 *
+	 * @var Interface_Shopper_Service
+	 */
+	private $shopper;
+
+	/**
 	 * Outbound postback client.
 	 *
 	 * @var Interface_Affiliate_Postback_Client
@@ -76,12 +84,14 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 	 *
 	 * @param Interface_Affiliate_Config_Provider $config                Affiliate configuration provider.
 	 * @param Order_Status_Settings_Service       $order_status_settings Order status mapping service.
+	 * @param Interface_Shopper_Service           $shopper               Shopper service (country resolution).
 	 * @param Interface_Affiliate_Postback_Client $postback_client       Outbound postback client.
 	 * @param Interface_Logger_Service            $logger                Logger service.
 	 */
-	public function __construct( Interface_Affiliate_Config_Provider $config, Order_Status_Settings_Service $order_status_settings, Interface_Affiliate_Postback_Client $postback_client, Interface_Logger_Service $logger ) {
+	public function __construct( Interface_Affiliate_Config_Provider $config, Order_Status_Settings_Service $order_status_settings, Interface_Shopper_Service $shopper, Interface_Affiliate_Postback_Client $postback_client, Interface_Logger_Service $logger ) {
 		$this->config                = $config;
 		$this->order_status_settings = $order_status_settings;
+		$this->shopper               = $shopper;
 		$this->postback_client       = $postback_client;
 		$this->logger                = $logger;
 	}
@@ -181,20 +191,33 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( OrderStates::STATE_CANCELLED === $this->order_status_settings->map_status_from_shop_to_sequra( $order->get_status() ) ) {
 			return;
 		}
-		// Amount is the order subtotal: cashback is calculated on the product price, excluding tax
-		// (VAT) and shipping, not the order total (confirmed with the business side). The core sources
-		// the affiliate credentials from the stored settings; the plugin passes only order data — the
-		// billing country resolves the merchant/deployment, the order id travels as the adv_sub.
-		$success = $this->postback_client->send_conversion(
-			(string) $order->get_billing_country(),
+		// The core sources the affiliate credentials from the stored settings; the plugin passes only
+		// order data. Country goes through the canonical shopper resolver (shipping/billing/session +
+		// the sequra_shopper_country filter) so it matches the rest of the plugin and merchant overrides
+		// apply. adv_sub reuses the same filtered order reference seQura stored, so a merchant ref
+		// customisation cannot make the two diverge. Amount is the order subtotal: cashback is on the
+		// product price, excluding tax (VAT) and shipping, not the order total (confirmed by business).
+		/**
+		 * Filter the order_ref_1.
+		 *
+		 * @since 2.0.0
+		 */
+		$order_reference = (string) \apply_filters( 'woocommerce_sequra_get_order_ref_1', $order->get_id(), $order );
+		$result          = $this->postback_client->send_conversion(
+			$this->shopper->get_country( $order, false ),
 			$transaction_id,
 			(float) $order->get_subtotal(),
-			(string) $order->get_id()
+			$order_reference
 		);
-		if ( ! $success ) {
-			// A transient failure must not silently drop the conversion (and the shopper's
-			// cashback): retry with a backoff up to a cap, then give up and mark it failed.
+		if ( Interface_Affiliate_Postback_Client::RESULT_FAILED === $result ) {
+			// A transient failure must not silently drop the conversion (and the shopper's cashback):
+			// retry with a backoff up to a cap, then give up and mark it failed.
 			$this->retry_or_fail( $order, self::KIND_CONVERSION, 'Affiliate conversion postback', self::META_POSTBACK_ATTEMPTS, self::STATUS_FAILED );
+			return;
+		}
+		if ( Interface_Affiliate_Postback_Client::RESULT_SENT !== $result ) {
+			// Nothing dispatched and not an error (affiliate disabled, or no merchant for the country):
+			// leave the status untouched and do not retry.
 			return;
 		}
 		$order->update_meta_data( self::META_POSTBACK_STATUS, self::STATUS_SENT );
@@ -304,17 +327,19 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( self::STATUS_SENT !== (string) $order->get_meta( self::META_POSTBACK_STATUS ) ) {
 			return;
 		}
-		if ( $this->postback_client->send_cancellation( (string) $order->get_billing_country(), $transaction_id ) ) {
+		$result = $this->postback_client->send_cancellation( $this->shopper->get_country( $order, false ), $transaction_id );
+		if ( Interface_Affiliate_Postback_Client::RESULT_SENT === $result ) {
 			$order->update_meta_data( self::META_POSTBACK_STATUS, self::STATUS_REJECTED );
 			$order->delete_meta_data( self::META_CANCELLATION_ATTEMPTS );
 			$order->save();
 			$this->logger->log_info( 'Affiliate cancellation reported', __FUNCTION__, __CLASS__ );
-		} else {
+		} elseif ( Interface_Affiliate_Postback_Client::RESULT_FAILED === $result ) {
 			// A transient failure must not silently drop the reversal (which would leave cashback on
 			// a cancelled order): retry with a backoff up to a cap, then settle on a distinct terminal
 			// status so it neither looks like a failed conversion nor reopens the STATUS_SENT gate.
 			$this->retry_or_fail( $order, self::KIND_CANCELLATION, 'Affiliate cancellation postback', self::META_CANCELLATION_ATTEMPTS, self::STATUS_CANCELLATION_FAILED );
 		}
+		// RESULT_SKIPPED: nothing dispatched, not an error (disabled / no merchant); leave as-is.
 	}
 
 	/**

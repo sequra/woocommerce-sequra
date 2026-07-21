@@ -17,6 +17,7 @@ use SeQura\Core\BusinessLogic\Domain\Connection\Models\Credentials;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\CredentialsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Store\StoreIdProvider;
 use SeQura\WC\Services\Affiliate\Core_Affiliate_Postback_Client;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Postback_Client;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
 use WP_UnitTestCase;
 
@@ -75,7 +76,7 @@ class CoreAffiliatePostbackClientTest extends WP_UnitTestCase {
 		return $credentials;
 	}
 
-	public function testSendConversionResolvesMerchantByCountryAndReportsIt(): void {
+	public function testSendConversionResolvesMerchantByCountryAndReportsSent(): void {
 		$this->credentials_service->method( 'getCredentialsByCountryCode' )
 			->with( 'ES' )
 			->willReturn( $this->credentials_with_merchant( 'merchant_es' ) );
@@ -94,39 +95,49 @@ class CoreAffiliatePostbackClientTest extends WP_UnitTestCase {
 			)
 			->willReturn( new AffiliatePostbackResponse( true ) );
 
-		$this->assertTrue( $this->client->send_conversion( 'ES', 'TX1', 12.5, '85' ) );
+		$this->assertSame(
+			Interface_Affiliate_Postback_Client::RESULT_SENT,
+			$this->client->send_conversion( 'ES', 'TX1', 12.5, '85' )
+		);
 	}
 
-	public function testSendConversionFallsBackToAnyMerchantWhenCountryHasNoCredentials(): void {
+	public function testSendConversionSkipsWhenCountryHasNoCredentials(): void {
 		$this->credentials_service->method( 'getCredentialsByCountryCode' )->willReturn( null );
-		$this->credentials_service->method( 'getCredentials' )
-			->willReturn( array( $this->credentials_with_merchant( 'merchant_fallback' ) ) );
-
-		$this->affiliate_controller->expects( $this->once() )
-			->method( 'reportConversion' )
-			->with(
-				$this->callback(
-					static function ( SendConversionRequest $request ): bool {
-						return 'merchant_fallback' === $request->getMerchantId();
-					}
-				)
-			)
-			->willReturn( new AffiliatePostbackResponse( true ) );
-
-		$this->assertTrue( $this->client->send_conversion( 'ES', 'TX1', 12.5, '85' ) );
-	}
-
-	public function testSendConversionReturnsFalseWhenStoreHasNoCredentials(): void {
-		$this->credentials_service->method( 'getCredentialsByCountryCode' )->willReturn( null );
-		$this->credentials_service->method( 'getCredentials' )->willReturn( array() );
 
 		$this->affiliate_controller->expects( $this->never() )->method( 'reportConversion' );
 		$this->logger->expects( $this->once() )->method( 'log_error' );
 
-		$this->assertFalse( $this->client->send_conversion( 'ES', 'TX1', 12.5, '85' ) );
+		$this->assertSame(
+			Interface_Affiliate_Postback_Client::RESULT_SKIPPED,
+			$this->client->send_conversion( 'ES', 'TX1', 12.5, '85' )
+		);
 	}
 
-	public function testSendConversionReturnsFalseAndLogsOnControllerError(): void {
+	public function testSendConversionSkipsWhenCountryIsEmpty(): void {
+		$this->credentials_service->expects( $this->never() )->method( 'getCredentialsByCountryCode' );
+		$this->affiliate_controller->expects( $this->never() )->method( 'reportConversion' );
+
+		$this->assertSame(
+			Interface_Affiliate_Postback_Client::RESULT_SKIPPED,
+			$this->client->send_conversion( '', 'TX1', 12.5, '85' )
+		);
+	}
+
+	public function testSendConversionSkipsWhenStoreIsDisabled(): void {
+		// A disabled store returns a successful-but-not-dispatched response: nothing went out, so the
+		// caller must not mark it sent (isDispatched(), not isSuccessful()).
+		$this->credentials_service->method( 'getCredentialsByCountryCode' )
+			->willReturn( $this->credentials_with_merchant( 'merchant_es' ) );
+		$this->affiliate_controller->method( 'reportConversion' )
+			->willReturn( new AffiliatePostbackResponse( false ) );
+
+		$this->assertSame(
+			Interface_Affiliate_Postback_Client::RESULT_SKIPPED,
+			$this->client->send_conversion( 'ES', 'TX1', 12.5, '85' )
+		);
+	}
+
+	public function testSendConversionFailsAndLogsOnControllerError(): void {
 		$this->credentials_service->method( 'getCredentialsByCountryCode' )
 			->willReturn( $this->credentials_with_merchant( 'merchant_es' ) );
 		$this->affiliate_controller->method( 'reportConversion' )
@@ -134,10 +145,13 @@ class CoreAffiliatePostbackClientTest extends WP_UnitTestCase {
 
 		$this->logger->expects( $this->once() )->method( 'log_throwable' );
 
-		$this->assertFalse( $this->client->send_conversion( 'ES', 'TX1', 12.5, '85' ) );
+		$this->assertSame(
+			Interface_Affiliate_Postback_Client::RESULT_FAILED,
+			$this->client->send_conversion( 'ES', 'TX1', 12.5, '85' )
+		);
 	}
 
-	public function testSendCancellationResolvesMerchantAndReportsIt(): void {
+	public function testSendCancellationResolvesMerchantAndReportsSent(): void {
 		$this->credentials_service->method( 'getCredentialsByCountryCode' )
 			->with( 'ES' )
 			->willReturn( $this->credentials_with_merchant( 'merchant_es' ) );
@@ -154,6 +168,9 @@ class CoreAffiliatePostbackClientTest extends WP_UnitTestCase {
 			)
 			->willReturn( new AffiliatePostbackResponse( true ) );
 
-		$this->assertTrue( $this->client->send_cancellation( 'ES', 'TX1' ) );
+		$this->assertSame(
+			Interface_Affiliate_Postback_Client::RESULT_SENT,
+			$this->client->send_cancellation( 'ES', 'TX1' )
+		);
 	}
 }

@@ -365,6 +365,7 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ Interface_Affiliate_Service::class ] = new Affiliate_Service(
 						Reg::getService( Interface_Affiliate_Config_Provider::class ),
 						Reg::getService( Order_Status_Settings_Service::class ),
+						Reg::getService( Interface_Shopper_Service::class ),
 						Reg::getService( Interface_Affiliate_Postback_Client::class ),
 						Reg::getService( Interface_Logger_Service::class )
 					);
