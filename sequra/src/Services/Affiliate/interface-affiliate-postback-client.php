@@ -11,29 +11,36 @@ namespace SeQura\WC\Services\Affiliate;
 /**
  * Sends the affiliate conversion/cancellation postbacks.
  *
- * The plugin does not call third-party endpoints directly: the concrete client routes
- * the calls server-side (integration-core resolves the endpoint from the deployment and
- * timon proxies them). See QRD-7898.
+ * The plugin does not call third-party endpoints directly and never echoes the affiliate
+ * credentials: the concrete client hands the order data to integration-core, which sources the
+ * offer/token from the stored settings, resolves the endpoint from the merchant deployment and
+ * emits the postback (routed server-side by timon's ALB ingress to Simba, and on to TUNE). See
+ * QRD-7898.
  */
 interface Interface_Affiliate_Postback_Client {
 
 	/**
-	 * Send the affiliate conversion postback. Returns true on success.
+	 * Send the affiliate conversion postback.
 	 *
-	 * @param string $offer_id       The offer ID.
-	 * @param string $security_token The security token.
-	 * @param string $transaction_id The affiliate transaction ID.
-	 * @param float  $amount         The conversion amount.
-	 * @param int    $order_id       The order ID.
+	 * Returns true when the core handled the call without error (dispatched, or intentionally
+	 * skipped because affiliate marketing is disabled for the store) and false on a transient
+	 * failure the caller should retry.
+	 *
+	 * @param string $country         Order billing country, used to resolve the merchant/deployment.
+	 * @param string $transaction_id  The affiliate transaction ID.
+	 * @param float  $amount          The conversion amount.
+	 * @param string $order_reference Shop order reference (sent to the affiliate network as adv_sub).
 	 */
-	public function send_conversion( string $offer_id, string $security_token, string $transaction_id, float $amount, int $order_id ): bool;
+	public function send_conversion( string $country, string $transaction_id, float $amount, string $order_reference ): bool;
 
 	/**
-	 * Send the affiliate cancellation/rejection. Returns true on success.
+	 * Send the affiliate cancellation/rejection.
 	 *
-	 * @param string $offer_id       The offer ID.
-	 * @param string $security_token The security token.
+	 * Returns true when the core handled the call without error and false on a transient failure
+	 * the caller should retry.
+	 *
+	 * @param string $country        Order billing country, used to resolve the merchant/deployment.
 	 * @param string $transaction_id The affiliate transaction ID.
 	 */
-	public function send_cancellation( string $offer_id, string $security_token, string $transaction_id ): bool;
+	public function send_cancellation( string $country, string $transaction_id ): bool;
 }

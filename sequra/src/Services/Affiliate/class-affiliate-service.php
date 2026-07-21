@@ -181,15 +181,15 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( OrderStates::STATE_CANCELLED === $this->order_status_settings->map_status_from_shop_to_sequra( $order->get_status() ) ) {
 			return;
 		}
-		$settings = $this->config->get_settings();
-		// Amount is the order subtotal: cashback is calculated on the product price, excluding
-		// tax (VAT) and shipping, not the order total (confirmed with the business side).
+		// Amount is the order subtotal: cashback is calculated on the product price, excluding tax
+		// (VAT) and shipping, not the order total (confirmed with the business side). The core sources
+		// the affiliate credentials from the stored settings; the plugin passes only order data — the
+		// billing country resolves the merchant/deployment, the order id travels as the adv_sub.
 		$success = $this->postback_client->send_conversion(
-			(string) $settings['offer_id'],
-			(string) $settings['security_token'],
+			(string) $order->get_billing_country(),
 			$transaction_id,
 			(float) $order->get_subtotal(),
-			(int) $order->get_id()
+			(string) $order->get_id()
 		);
 		if ( ! $success ) {
 			// A transient failure must not silently drop the conversion (and the shopper's
@@ -304,8 +304,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		if ( self::STATUS_SENT !== (string) $order->get_meta( self::META_POSTBACK_STATUS ) ) {
 			return;
 		}
-		$settings = $this->config->get_settings();
-		if ( $this->postback_client->send_cancellation( (string) $settings['offer_id'], (string) $settings['security_token'], $transaction_id ) ) {
+		if ( $this->postback_client->send_cancellation( (string) $order->get_billing_country(), $transaction_id ) ) {
 			$order->update_meta_data( self::META_POSTBACK_STATUS, self::STATUS_REJECTED );
 			$order->delete_meta_data( self::META_CANCELLATION_ATTEMPTS );
 			$order->save();
