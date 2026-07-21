@@ -15,6 +15,7 @@ use SeQura\WC\Services\Affiliate\Interface_Affiliate_Config_Provider;
 use SeQura\WC\Services\Affiliate\Interface_Affiliate_Postback_Client;
 use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
 use SeQura\WC\Services\Log\Interface_Logger_Service;
+use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Order;
 use WP_UnitTestCase;
 
@@ -22,6 +23,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 
 	private $config;
 	private $order_status_settings;
+	private $shopper;
 	private $postback_client;
 	private $logger;
 	private $service;
@@ -31,14 +33,17 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 
 		$this->config                = $this->createMock( Interface_Affiliate_Config_Provider::class );
 		$this->order_status_settings = $this->createMock( Order_Status_Settings_Service::class );
+		$this->shopper               = $this->createMock( Interface_Shopper_Service::class );
 		$this->postback_client       = $this->createMock( Interface_Affiliate_Postback_Client::class );
 		$this->logger                = $this->createMock( Interface_Logger_Service::class );
 
 		$this->config->method( 'is_enabled' )->willReturn( true );
+		$this->shopper->method( 'get_country' )->willReturn( 'ES' );
 
 		$this->service = new Affiliate_Service(
 			$this->config,
 			$this->order_status_settings,
+			$this->shopper,
 			$this->postback_client,
 			$this->logger
 		);
@@ -69,7 +74,6 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$order->method( 'get_id' )->willReturn( 85 );
 		$order->method( 'get_status' )->willReturn( $wc_status );
 		$order->method( 'get_subtotal' )->willReturn( 99.99 );
-		$order->method( 'get_billing_country' )->willReturn( 'ES' );
 
 		return $order;
 	}
@@ -81,7 +85,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$this->postback_client->expects( $this->once() )
 			->method( 'send_conversion' )
 			->with( 'ES', 'ABC123', 99.99, '85' )
-			->willReturn( true );
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_SENT );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'pending' ), 'conversion' );
 	}
@@ -107,7 +111,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$this->postback_client->expects( $this->once() )
 			->method( 'send_conversion' )
 			->with( 'ES', 'ABC123', 99.99, '85' )
-			->willReturn( true );
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_SENT );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'pending', 'completed' ), 'conversion' );
 	}
@@ -115,7 +119,8 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 	public function testDispatchConversionReschedulesOnTransientFailure(): void {
 		$this->order_status_settings->method( 'map_status_from_shop_to_sequra' )
 			->willReturn( OrderStates::STATE_APPROVED );
-		$this->postback_client->method( 'send_conversion' )->willReturn( false );
+		$this->postback_client->method( 'send_conversion' )
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_FAILED );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'pending' ), 'conversion' );
 
@@ -124,10 +129,27 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		);
 	}
 
+	public function testDispatchConversionSkippedResultLeavesStatusAndDoesNotRetry(): void {
+		// A RESULT_SKIPPED (affiliate disabled, or no merchant for the country) is not an error:
+		// nothing was dispatched, so it must not be marked sent and must not be re-enqueued.
+		$this->order_status_settings->method( 'map_status_from_shop_to_sequra' )
+			->willReturn( OrderStates::STATE_APPROVED );
+		$this->postback_client->expects( $this->once() )
+			->method( 'send_conversion' )
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_SKIPPED );
+
+		$this->service->dispatch( $this->make_order( 'ABC123', 'pending' ), 'conversion' );
+
+		$this->assertFalse(
+			wp_next_scheduled( Interface_Affiliate_Service::DISPATCH_HOOK, array( 85, 'conversion' ) )
+		);
+	}
+
 	public function testDispatchConversionGivesUpAfterMaxAttempts(): void {
 		$this->order_status_settings->method( 'map_status_from_shop_to_sequra' )
 			->willReturn( OrderStates::STATE_APPROVED );
-		$this->postback_client->method( 'send_conversion' )->willReturn( false );
+		$this->postback_client->method( 'send_conversion' )
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_FAILED );
 
 		// Two prior attempts: this dispatch reaches the cap, so it must mark the postback failed
 		// and stop re-scheduling.
@@ -146,7 +168,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 	public function testDispatchDoesNothingWhenDisabled(): void {
 		$config = $this->createMock( Interface_Affiliate_Config_Provider::class );
 		$config->method( 'is_enabled' )->willReturn( false );
-		$service = new Affiliate_Service( $config, $this->order_status_settings, $this->postback_client, $this->logger );
+		$service = new Affiliate_Service( $config, $this->order_status_settings, $this->shopper, $this->postback_client, $this->logger );
 
 		$this->postback_client->expects( $this->never() )->method( 'send_conversion' );
 
@@ -163,7 +185,7 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$this->postback_client->expects( $this->once() )
 			->method( 'send_cancellation' )
 			->with( 'ES', 'ABC123' )
-			->willReturn( true );
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_SENT );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'sent' ), 'cancellation' );
 	}
@@ -171,7 +193,8 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 	public function testDispatchCancellationReschedulesOnTransientFailure(): void {
 		// Parity with the conversion path: a transient cancellation failure must not be terminal,
 		// otherwise the reversal is lost and the shopper keeps cashback on a cancelled order.
-		$this->postback_client->method( 'send_cancellation' )->willReturn( false );
+		$this->postback_client->method( 'send_cancellation' )
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_FAILED );
 
 		$this->service->dispatch( $this->make_order( 'ABC123', 'sent' ), 'cancellation' );
 
@@ -181,7 +204,8 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 	}
 
 	public function testDispatchCancellationGivesUpAfterMaxAttempts(): void {
-		$this->postback_client->method( 'send_cancellation' )->willReturn( false );
+		$this->postback_client->method( 'send_cancellation' )
+			->willReturn( Interface_Affiliate_Postback_Client::RESULT_FAILED );
 
 		// Two prior cancellation attempts: this dispatch reaches the cap, so it must settle on the
 		// distinct cancellation-failed terminal status (not the conversion's "failed") and stop
