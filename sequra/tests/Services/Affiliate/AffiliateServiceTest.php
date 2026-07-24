@@ -19,6 +19,9 @@ use SeQura\WC\Services\Shopper\Interface_Shopper_Service;
 use WC_Order;
 use WP_UnitTestCase;
 
+// Test-only override of class_exists() in the affiliate service namespace (coexistence guard).
+require_once __DIR__ . '/affiliate-service-fn-overrides.php';
+
 class AffiliateServiceTest extends WP_UnitTestCase {
 
 	private $config;
@@ -47,6 +50,11 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 			$this->postback_client,
 			$this->logger
 		);
+	}
+
+	public function tear_down(): void {
+		unset( $GLOBALS['sq_test_standalone_affiliate_active'] );
+		parent::tear_down();
 	}
 
 	/**
@@ -173,6 +181,19 @@ class AffiliateServiceTest extends WP_UnitTestCase {
 		$this->postback_client->expects( $this->never() )->method( 'send_conversion' );
 
 		$service->dispatch( $this->make_order( 'ABC123', 'pending' ), 'conversion' );
+	}
+
+	public function testDispatchDoesNothingWhenStandalonePluginIsActive(): void {
+		// The standalone affiliate plugin being present must disable this integration to avoid
+		// double postbacks to TUNE, even when the config reports the feature enabled.
+		$GLOBALS['sq_test_standalone_affiliate_active'] = true;
+
+		$this->order_status_settings->method( 'map_status_from_shop_to_sequra' )
+			->willReturn( OrderStates::STATE_APPROVED );
+
+		$this->postback_client->expects( $this->never() )->method( 'send_conversion' );
+
+		$this->service->dispatch( $this->make_order( 'ABC123', 'pending' ), 'conversion' );
 	}
 
 	public function testDispatchConversionSkippedWhenAlreadySent(): void {
