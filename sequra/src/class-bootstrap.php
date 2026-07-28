@@ -22,7 +22,9 @@ use SeQura\Core\BusinessLogic\DataAccess\PaymentMethod\Entities\PaymentMethod;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\CredentialsService;
 use SeQura\Core\BusinessLogic\Domain\CountryConfiguration\RepositoryContracts\CountryConfigurationRepositoryInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\Banner\BannerServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Category\CategoryServiceInterface;
+use SeQura\Core\BusinessLogic\Domain\Integration\ExpressCheckout\ExpressCheckoutIntegrationInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectServiceInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Order\MerchantDataProviderInterface;
 use SeQura\Core\BusinessLogic\Domain\Integration\Order\OrderCreationInterface;
@@ -81,7 +83,9 @@ use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
 use SeQura\WC\Services\Affiliate\Affiliate_Service;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\Order\Builders\Interface_Create_Order_Request_Builder;
 use SeQura\WC\Core\Extension\BusinessLogic\Domain\OrderStatusSettings\Services\Order_Status_Settings_Service;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Banner\Banner_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Category\Category_Service;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\ExpressCheckout\Express_Checkout_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Disconnect\Disconnect_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\ShopOrderStatuses\Shop_Order_Status_Service;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Order\Builders\Create_Order_Request_Builder;
@@ -168,6 +172,8 @@ use SeQura\Core\BusinessLogic\Domain\Integration\StoreInfo\StoreInfoServiceInter
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\StoreInfo\Store_Info_Service;
 use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSettings;
 use SeQura\Core\BusinessLogic\DataAccess\Affiliate\Entities\AffiliateSettings;
+use SeQura\Core\BusinessLogic\DataAccess\BannerSettings\Entities\BannerSettings;
+use SeQura\Core\BusinessLogic\DataAccess\ExpressCheckout\Entities\ExpressCheckoutSettings;
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Affiliate\Services\AffiliateSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Log\LogServiceInterface;
@@ -553,6 +559,24 @@ class Bootstrap extends BootstrapComponent {
 					self::$cache[ CategoryServiceInterface::class ] = new Category_Service();
 				}
 				return self::$cache[ CategoryServiceInterface::class ];
+			}
+		);
+		Reg::registerService(
+			BannerServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ BannerServiceInterface::class ] ) ) {
+					self::$cache[ BannerServiceInterface::class ] = new Banner_Service();
+				}
+				return self::$cache[ BannerServiceInterface::class ];
+			}
+		);
+		Reg::registerService(
+			ExpressCheckoutIntegrationInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ ExpressCheckoutIntegrationInterface::class ] ) ) {
+					self::$cache[ ExpressCheckoutIntegrationInterface::class ] = new Express_Checkout_Service();
+				}
+				return self::$cache[ ExpressCheckoutIntegrationInterface::class ];
 			}
 		);
 		Reg::registerService(
@@ -1050,6 +1074,8 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( AdvancedSettings::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( AffiliateSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( BannerSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( ExpressCheckoutSettings::class, Entity_Repository::class );
 	}
 
 	/**
