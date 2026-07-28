@@ -68,7 +68,7 @@ npm run dev     # development: same, webpack dev mode with progress, non-minifie
 These wrap dockerized `php:8.4-cli-alpine` and run against **both** `sequra/` and `sequra-helper/`:
 
 ```bash
-bin/php-syntax-check --php=7.3   # syntax-lint across the supported PHP matrix (7.3–8.4)
+bin/php-syntax-check --php=7.3   # syntax-lint across the supported PHP matrix (7.3–8.5)
 bin/phpcs                        # PHPCS, standard .phpcs.xml.dist (WP coding standards)
 bin/phpcbf                       # auto-fix PHPCS violations
 bin/phpstan                      # PHPStan, config phpstan.neon, level set per project
