@@ -44,8 +44,13 @@ class Shopper_Service implements Interface_Shopper_Service {
 		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 			return \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
 		} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			return \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
-		} elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+			$forwarded_for = \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+			$client_ip     = trim( explode( ',', $forwarded_for )[0] );
+			if ( false !== filter_var( $client_ip, FILTER_VALIDATE_IP ) ) {
+				return $client_ip;
+			}
+		}
+		if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
 			return \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
 		// phpcs:enable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
