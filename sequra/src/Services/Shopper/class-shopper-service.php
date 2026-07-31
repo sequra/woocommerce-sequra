@@ -40,6 +40,8 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 * Get customer IP
 	 */
 	public function get_ip(): string {
+		// Every header before REMOTE_ADDR is shopper-supplied unless a proxy overwrites it, so this
+		// order assumes the origin is only reachable through the CDN that sets the winning header.
 		foreach ( array( 'HTTP_CF_CONNECTING_IP', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ) as $header ) {
 			$ip = $this->first_valid_ip( $header );
 			if ( '' !== $ip ) {
@@ -51,6 +53,8 @@ class Shopper_Service implements Interface_Shopper_Service {
 
 	/**
 	 * Get the first valid IP from a $_SERVER header, or an empty string.
+	 *
+	 * @param string $header The $_SERVER key to read, e.g. 'HTTP_X_FORWARDED_FOR'.
 	 */
 	private function first_valid_ip( string $header ): string {
 		// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__

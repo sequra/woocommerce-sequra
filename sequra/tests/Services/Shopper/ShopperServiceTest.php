@@ -31,6 +31,9 @@ class ShopperServiceTest extends WP_UnitTestCase {
 		WC()->customer = $this->original_customer;
 		// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders
 		unset( $_SERVER['HTTP_CF_CONNECTING_IP'], $_SERVER['HTTP_CLIENT_IP'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
+		// WP_UnitTestCase only resets $_SERVER for core test runs, so REMOTE_ADDR would otherwise
+		// keep the value written by the last get_ip() test for the rest of the suite.
+		$this->reset__SERVER();
 	}
 
 	public function testGetCountry_orderWithShippingCountry_returnsShipping(): void {
