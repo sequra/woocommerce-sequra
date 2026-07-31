@@ -40,16 +40,28 @@ class Shopper_Service implements Interface_Shopper_Service {
 	 * Get customer IP
 	 */
 	public function get_ip(): string {
-		// phpcs:disable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
-		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			return \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
-		} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			return \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
-		} elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			return \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		// Every header before REMOTE_ADDR is shopper-supplied unless a proxy overwrites it, so this
+		// order assumes the origin is only reachable through the CDN that sets the winning header.
+		foreach ( array( 'HTTP_CF_CONNECTING_IP', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ) as $header ) {
+			$ip = $this->first_valid_ip( $header );
+			if ( '' !== $ip ) {
+				return $ip;
+			}
 		}
-		// phpcs:enable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
 		return '';
+	}
+
+	/**
+	 * Get the first valid IP from a $_SERVER header, or an empty string.
+	 *
+	 * @param string $header The $_SERVER key to read, e.g. 'HTTP_X_FORWARDED_FOR'.
+	 */
+	private function first_valid_ip( string $header ): string {
+		// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
+		$value = empty( $_SERVER[ $header ] ) ? '' : \sanitize_text_field( \wp_unslash( $_SERVER[ $header ] ) );
+		// Proxies and CDNs send a chain of addresses ("client, proxy1, proxy2"), so only the leftmost entry is the original requester.
+		$ip = trim( explode( ',', $value )[0] );
+		return false === filter_var( $ip, FILTER_VALIDATE_IP ) ? '' : $ip;
 	}
 
 	/**
