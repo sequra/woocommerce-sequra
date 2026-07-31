@@ -205,7 +205,12 @@ class Sequra_Payment_Gateway_Block_Support extends AbstractPaymentMethodType {
 	private function update_customer_data( $value, string $method ): void {
 		$customer = WC()->customer;
 		if ( method_exists( $customer, $method ) ) {
-			$customer->$method( $value );
+			try {
+				$customer->$method( $value );
+			} catch ( \WC_Data_Exception $e ) {
+				// Ignore values WooCommerce rejects, e.g. an incomplete email while the shopper is still typing.
+				return;
+			}
 		}
 	}
 
