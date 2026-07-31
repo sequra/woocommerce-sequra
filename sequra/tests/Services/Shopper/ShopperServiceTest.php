@@ -29,6 +29,8 @@ class ShopperServiceTest extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'sequra_shopper_country' );
 		WC()->customer = $this->original_customer;
+		// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders
+		unset( $_SERVER['HTTP_CF_CONNECTING_IP'], $_SERVER['HTTP_CLIENT_IP'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
 	}
 
 	public function testGetCountry_orderWithShippingCountry_returnsShipping(): void {
@@ -138,4 +140,68 @@ class ShopperServiceTest extends WP_UnitTestCase {
 		// billing state is silently dropped to '' when billing and shipping differ.
 		$this->assertSame( 'California', $this->shopper_service->get_state( $order, false ) );
 	}
+
+	// phpcs:disable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
+
+	public function testGetIp_cfConnectingIp_takesPrecedenceOverForwardedFor(): void {
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '203.0.113.7';
+		$_SERVER['HTTP_CLIENT_IP']        = '';
+		$_SERVER['HTTP_X_FORWARDED_FOR']  = '198.51.100.9, 203.0.113.7';
+		$_SERVER['REMOTE_ADDR']           = '172.16.0.1';
+
+		// Cloudflare appends the real client IP to an existing X-Forwarded-For rather than
+		// replacing it, so the leftmost XFF entry can be shopper-supplied. CF-Connecting-IP
+		// is the header Cloudflare always overwrites, so it has to take precedence.
+		$this->assertSame( '203.0.113.7', $this->shopper_service->get_ip() );
+	}
+
+	public function testGetIp_forwardedForList_returnsFirstEntry(): void {
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '';
+		$_SERVER['HTTP_CLIENT_IP']        = '';
+		$_SERVER['HTTP_X_FORWARDED_FOR']  = '203.0.113.7, 172.16.0.1';
+		$_SERVER['REMOTE_ADDR']           = '172.16.0.1';
+
+		$this->assertSame( '203.0.113.7', $this->shopper_service->get_ip() );
+	}
+
+	public function testGetIp_forwardedForInvalid_fallsBackToRemoteAddr(): void {
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '';
+		$_SERVER['HTTP_CLIENT_IP']        = '';
+		$_SERVER['HTTP_X_FORWARDED_FOR']  = 'unknown';
+		$_SERVER['REMOTE_ADDR']           = '172.16.0.1';
+
+		$this->assertSame( '172.16.0.1', $this->shopper_service->get_ip() );
+	}
+
+	public function testGetIp_clientIpList_returnsFirstEntry(): void {
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '';
+		$_SERVER['HTTP_CLIENT_IP']        = '203.0.113.7, 172.16.0.1';
+		$_SERVER['REMOTE_ADDR']           = '172.16.0.1';
+
+		// Client-IP carries the same proxy chain format as X-Forwarded-For, and used to be
+		// returned raw. That is how the allow-list bug survived on stores that send it.
+		$this->assertSame( '203.0.113.7', $this->shopper_service->get_ip() );
+	}
+
+	public function testGetIp_clientIpInvalid_fallsThroughToForwardedFor(): void {
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '';
+		$_SERVER['HTTP_CLIENT_IP']        = 'unknown';
+		$_SERVER['HTTP_X_FORWARDED_FOR']  = '203.0.113.7, 172.16.0.1';
+		$_SERVER['REMOTE_ADDR']           = '172.16.0.1';
+
+		$this->assertSame( '203.0.113.7', $this->shopper_service->get_ip() );
+	}
+
+	public function testGetIp_noProxyHeaders_returnsRemoteAddr(): void {
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '';
+		$_SERVER['HTTP_CLIENT_IP']        = '';
+		$_SERVER['HTTP_X_FORWARDED_FOR']  = '';
+		$_SERVER['REMOTE_ADDR']           = '88.12.34.56';
+
+		// A store with no proxy or CDN in front must keep resolving to REMOTE_ADDR exactly
+		// as before, so this change cannot affect direct visitors.
+		$this->assertSame( '88.12.34.56', $this->shopper_service->get_ip() );
+	}
+
+	// phpcs:enable WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
 }
