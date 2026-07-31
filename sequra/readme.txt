@@ -103,6 +103,7 @@ Contributors:
 = 4.3.4	=
 * Added: Compatibility with PHP 8.5.
 * Fixed: The block checkout no longer fails while the shopper is still typing their email, so seQura stops disappearing from the payment method list.
+* Fixed: The allowed IP addresses filter now reads the visitor IP correctly on stores behind Cloudflare or another proxy, so seQura is shown to the IPs on the list instead of being hidden from everyone.
 
 = 4.3.3	=
 * Fixed: During guest checkout the shopper country now falls back from the shipping address to the billing address, so seQura no longer disappears when only a billing country is set.
