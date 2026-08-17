@@ -80,21 +80,28 @@ class StoreIntegrationRestControllerTest extends WP_UnitTestCase {
 	}
 
 	public function testConstructor_setsRestBaseFromService(): void {
-		$reflection = new \ReflectionProperty( Store_Integration_REST_Controller::class, 'rest_base' );
-		$reflection->setAccessible( true );
-
-		$rest_base = $reflection->getValue( $this->controller );
-
-		$this->assertSame( '/webhook', $rest_base );
+		$this->assertSame( '/webhook', $this->read_controller_property( 'rest_base' ) );
 	}
 
 	public function testConstructor_setsNamespace(): void {
-		$reflection = new \ReflectionProperty( Store_Integration_REST_Controller::class, 'namespace' );
-		$reflection->setAccessible( true );
+		$this->assertSame( 'sequra/v1', $this->read_controller_property( 'namespace' ) );
+	}
 
-		$namespace = $reflection->getValue( $this->controller );
+	/**
+	 * Read a property the controller inherits as protected from WP_REST_Controller.
+	 *
+	 * @param string $property Property name.
+	 *
+	 * @return mixed
+	 */
+	private function read_controller_property( string $property ) {
+		$reflection = new \ReflectionProperty( Store_Integration_REST_Controller::class, $property );
+		// Unlocking is only needed up to PHP 8.0; from 8.1 it is a no-op, and deprecated since 8.5.
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
 
-		$this->assertSame( 'sequra/v1', $namespace );
+		return $reflection->getValue( $this->controller );
 	}
 
 	/**
