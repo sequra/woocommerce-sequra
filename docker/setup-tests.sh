@@ -1,8 +1,17 @@
 #!/bin/bash
 export XDEBUG_MODE=off
-VERSION='latest'
-if [ -n "$1" ]; then
-    VERSION=$1
+# Default to the WordPress this container runs, so the suite tests the version under test
+# instead of whatever release happens to be latest.
+VERSION="${1:-$(wp core version --allow-root 2>/dev/null)}"
+VERSION="${VERSION:-latest}"
+
+# install-wp-tests.sh reuses any core it finds, which would silently keep testing the
+# previous version after WP_TAG changes.
+if [ "$VERSION" != 'latest' ] && [ -f /tmp/wordpress/wp-includes/version.php ]; then
+    INSTALLED=$(sed -n "s/^\$wp_version = '\([^']*\)'.*/\1/p" /tmp/wordpress/wp-includes/version.php)
+    if [ "$INSTALLED" != "$VERSION" ]; then
+        rm -rf /tmp/wordpress /tmp/wordpress-tests-lib
+    fi
 fi
 
 rm -rf \

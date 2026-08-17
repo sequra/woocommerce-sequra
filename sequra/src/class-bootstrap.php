@@ -160,6 +160,13 @@ use SeQura\Core\BusinessLogic\DataAccess\AdvancedSettings\Entities\AdvancedSetti
 use SeQura\Core\BusinessLogic\Domain\AdvancedSettings\Services\AdvancedSettingsService;
 use SeQura\Core\BusinessLogic\Domain\Integration\Log\LogServiceInterface;
 use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Log\Log_Service;
+use SeQura\Core\BusinessLogic\DataAccess\Affiliate\Entities\AffiliateSettings;
+use SeQura\Core\BusinessLogic\DataAccess\BannerSettings\Entities\BannerSettings;
+use SeQura\Core\BusinessLogic\DataAccess\ExpressCheckout\Entities\ExpressCheckoutSettings;
+use SeQura\Core\BusinessLogic\Domain\Integration\Banner\BannerServiceInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\Banner\Banner_Service;
+use SeQura\Core\BusinessLogic\Domain\Integration\ExpressCheckout\ExpressCheckoutIntegrationInterface;
+use SeQura\WC\Core\Implementation\BusinessLogic\Domain\Integration\ExpressCheckout\Express_Checkout_Integration_Service;
 
 /**
  * Implementation for the core bootstrap class.
@@ -931,6 +938,24 @@ class Bootstrap extends BootstrapComponent {
 				return self::$cache[ LogServiceInterface::class ];
 			}
 		);
+		Reg::registerService(
+			BannerServiceInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ BannerServiceInterface::class ] ) ) {
+					self::$cache[ BannerServiceInterface::class ] = new Banner_Service();
+				}
+				return self::$cache[ BannerServiceInterface::class ];
+			}
+		);
+		Reg::registerService(
+			ExpressCheckoutIntegrationInterface::class,
+			static function () {
+				if ( ! isset( self::$cache[ ExpressCheckoutIntegrationInterface::class ] ) ) {
+					self::$cache[ ExpressCheckoutIntegrationInterface::class ] = new Express_Checkout_Integration_Service();
+				}
+				return self::$cache[ ExpressCheckoutIntegrationInterface::class ];
+			}
+		);
 	}
 
 	/**
@@ -977,6 +1002,9 @@ class Bootstrap extends BootstrapComponent {
 		RepositoryRegistry::registerRepository( Credentials::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( Deployment::class, Entity_Repository::class );
 		RepositoryRegistry::registerRepository( AdvancedSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( AffiliateSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( BannerSettings::class, Entity_Repository::class );
+		RepositoryRegistry::registerRepository( ExpressCheckoutSettings::class, Entity_Repository::class );
 	}
 
 	/**

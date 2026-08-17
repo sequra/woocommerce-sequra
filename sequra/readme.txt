@@ -2,7 +2,7 @@
 Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
-Tested up to: 7.0.0
+Tested up to: 7.1.0
 Stable tag: 4.3.4
 Requires PHP: 7.3
 License: GPL-3.0+
@@ -104,6 +104,9 @@ Contributors:
 * Added: Compatibility with PHP 8.5.
 * Fixed: The block checkout no longer fails while the shopper is still typing their email, so seQura stops disappearing from the payment method list.
 * Fixed: The allowed IP addresses filter now reads the visitor IP correctly on stores behind Cloudflare or another proxy, so seQura is shown to the IPs on the list instead of being hidden from everyone.
+* Fixed: The block checkout script now declares its WooCommerce dependencies, so the seQura payment method keeps working when another plugin reorders or combines scripts.
+* Changed: Update integration-core library to version v5.6.0.
+* Changed: Tested up to WordPress 7.1.0 and WooCommerce 11.0.1.
 
 = 4.3.3	=
 * Fixed: During guest checkout the shopper country now falls back from the shipping address to the billing address, so seQura no longer disappears when only a billing country is set.

@@ -56,6 +56,11 @@ Everything runs in Docker; you rarely run PHP/Node directly on the host.
 
 Configuration is read from `.env` (copied from `.env.sample` on first run) — duplicate and rename `.env.sample` to customize WordPress/WooCommerce/PHP/MariaDB versions before running `setup.sh`.
 
+Two staleness traps when changing `WP_TAG` or `WC_VERSION`:
+
+- `setup.sh` only copies `.env.sample` to `.env` when `.env` is absent, so an existing `.env` keeps the old pins. Edit `.env` too.
+- `setup.sh` skips the registry pull whenever a local image with that tag exists, so it will happily reuse a stale image after a new one has been pushed. Force it with `docker compose pull web && docker compose up -d web`. The `docker/*.sh` helpers are baked into the image, so a change to any of them needs a rebuild (`docker/build-image.sh --wp=$WP_TAG`) before it takes effect — editing the repo copy alone does nothing.
+
 ### Building front-end assets (run inside `sequra/`)
 
 ```bash
@@ -74,6 +79,13 @@ bin/phpcbf                       # auto-fix PHPCS violations
 bin/phpstan                      # PHPStan, config phpstan.neon, level set per project
 ```
 
+Composer and npm are wrapped the same way — always use these rather than invoking either tool directly or reaching into the container:
+
+```bash
+bin/composer <args>              # runs composer in a container, for BOTH projects in turn
+bin/npm <args>                   # same, for the npm side
+```
+
 Run `bin/phpcs` and `bin/phpstan` before considering a PHP change done — CI (`.github/workflows/php-qa.yml`) gates on both.
 
 ### Unit & integration tests
@@ -84,6 +96,8 @@ Tests run **inside the `web` container** (the plugin is mounted at `/var/www/htm
 docker compose exec web /usr/local/bin/setup-tests.sh    # one-time: generate WP test scaffolding
 docker compose exec web /usr/local/bin/run-tests.sh      # run the full PHPUnit suite (--testdox)
 ```
+
+`setup-tests.sh` defaults to the WordPress version the container runs, so the suite exercises whatever `WP_TAG` pins rather than the latest release; pass a version as `$1` to override. PHPUnit boots its own copy of core under `/tmp/wordpress`, which lives in the container's ephemeral filesystem — recreating the container means re-running `setup-tests.sh`.
 
 Run a single test or file (PHPUnit `--filter` / path):
 

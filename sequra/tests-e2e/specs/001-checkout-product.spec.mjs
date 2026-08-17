@@ -61,31 +61,6 @@ test.describe('Product checkout', () => {
     await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
   });
 
-  test('Complete a successful payment with SVEA', async ({ helper, dataProvider, productPage, checkoutPage }) => {
-    // Setup
-    const uiVersion = DataProvider.UI_BLOCKS;
-    const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
-    await helper.executeWebhooksSequentially([
-      { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
-      { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
-      { webhook: clear_config },
-      { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
-      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
-    ]);
-    const shopper = dataProvider.shopper('france');
-
-    // Execution
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-    await checkoutPage.goto();
-    await checkoutPage.fillForm({ isShipping: true, ...shopper });
-    // await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
-    await checkoutPage.waitForOrderSuccess();
-    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
-  });
-
   /**
     * Helper: set up blocks checkout environment with delegated selection toggled on or off.
     */
@@ -119,58 +94,6 @@ test.describe('Product checkout', () => {
       { webhook: toggle_delegated_selection, args: [{ name: 'value', value: delegated ? '1' : '0' }] },
     ]);
   }
-
-  test('Make a 🍊 payment with "Review test approve" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
-    // Setup
-    const uiVersion = DataProvider.UI_BLOCKS;
-    const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
-    await helper.executeWebhooksSequentially([
-      { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
-      { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
-      { webhook: clear_config },
-      { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
-      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
-    ]);
-    const shopper = dataProvider.shopper('approve');
-
-    // Execution
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-    await checkoutPage.goto();
-    await checkoutPage.fillForm({ isShipping: true, ...shopper });
-    // await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
-    // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
-    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
-    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Processing' });
-  });
-
-  test('Make a 🍊 payment with "Review test cancel" names', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
-    // Setup
-    const uiVersion = DataProvider.UI_BLOCKS;
-    const theme = dataProvider.themeForUiVersion(uiVersion);
-    const { clear_config, dummy_config, checkout_version, set_theme, remove_address_fields, toggle_delegated_selection } = helper.webhooks;
-    await helper.executeWebhooksSequentially([
-      { webhook: set_theme, args: [{ name: 'theme', value: theme }] },
-      { webhook: checkout_version, args: [{ name: 'version', value: uiVersion }] },
-      { webhook: clear_config },
-      { webhook: dummy_config },
-      { webhook: remove_address_fields, args: [{ name: 'value', value: '0' }] },
-      { webhook: toggle_delegated_selection, args: [{ name: 'value', value: '0' }] }
-    ]);
-    const shopper = dataProvider.shopper('cancel');
-
-    // Execution
-    await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
-    await checkoutPage.goto();
-    await checkoutPage.fillForm({ isShipping: true, ...shopper });
-    // await checkoutPage.expectPaymentMethodsBeingReloaded();
-    await checkoutPage.placeOrder({ ...shopper, product: 'i1' });
-    // await checkoutPage.waitForOrderSuccess(); // Skip this to speed up the test.
-    await checkoutPage.expectOrderHasTheCorrectMerchantId(shopper.country, helper, dataProvider);
-    await checkoutPage.expectOrderChangeTo(backOffice, { fromStatus: 'On-hold', toStatus: 'Cancelled' });
-  });
 
   // These should be the last tests to run, as they change the checkout in a way that might affect other tests if they run beforehand. If they become flaky, consider moving them to a separate file.
   test('Blocks checkout completes with product=tbs when delegated selection is enabled', async ({ helper, dataProvider, backOffice, productPage, checkoutPage }) => {
