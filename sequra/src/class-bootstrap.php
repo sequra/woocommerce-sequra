@@ -941,13 +941,19 @@ class Bootstrap extends BootstrapComponent {
 		Reg::registerService(
 			BannerServiceInterface::class,
 			static function () {
-				return new Banner_Service();
+				if ( ! isset( self::$cache[ BannerServiceInterface::class ] ) ) {
+					self::$cache[ BannerServiceInterface::class ] = new Banner_Service();
+				}
+				return self::$cache[ BannerServiceInterface::class ];
 			}
 		);
 		Reg::registerService(
 			ExpressCheckoutIntegrationInterface::class,
 			static function () {
-				return new Express_Checkout_Integration_Service();
+				if ( ! isset( self::$cache[ ExpressCheckoutIntegrationInterface::class ] ) ) {
+					self::$cache[ ExpressCheckoutIntegrationInterface::class ] = new Express_Checkout_Integration_Service();
+				}
+				return self::$cache[ ExpressCheckoutIntegrationInterface::class ];
 			}
 		);
 	}
