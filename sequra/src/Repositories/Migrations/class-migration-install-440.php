@@ -1,6 +1,6 @@
 <?php
 /**
- * Post install migration for version 4.3.3 of the plugin.
+ * Post install migration for version 4.4.0 of the plugin.
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Repositories
@@ -17,7 +17,7 @@ use SeQura\WC\Services\Log\Interface_Logger_Service;
 use Throwable;
 
 /**
- * Post install migration for version 4.3.3 of the plugin.
+ * Post install migration for version 4.4.0 of the plugin.
  *
  * Backfills the affiliate settings for stores that are already connected and won't
  * reconnect. It re-validates each stored connection, which makes the core re-fetch the
@@ -26,7 +26,7 @@ use Throwable;
  * affiliate block, or a transient credentials/HTTP failure, is logged and skipped without
  * aborting the backfill for the remaining stores.
  */
-class Migration_Install_433 extends Migration {
+class Migration_Install_440 extends Migration {
 
 	/**
 	 * Store service.
@@ -39,7 +39,7 @@ class Migration_Install_433 extends Migration {
 	 * Get the plugin version when the changes were made.
 	 */
 	public function get_version(): string {
-		return '4.3.3';
+		return '4.4.0';
 	}
 
 	/**

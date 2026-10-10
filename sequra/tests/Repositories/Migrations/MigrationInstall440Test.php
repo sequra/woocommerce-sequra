@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the Migration_Install_433 class.
+ * Tests for the Migration_Install_440 class.
  *
  * @package    SeQura/WC
  * @subpackage SeQura/WC/Tests
@@ -12,17 +12,19 @@ use RuntimeException;
 use SeQura\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use SeQura\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use SeQura\Core\BusinessLogic\Domain\Stores\Services\StoreService;
+use SeQura\Core\Infrastructure\Configuration\ConfigurationManager;
 use SeQura\Core\Infrastructure\ServiceRegister;
 use SeQura\WC\Repositories\Cache_Repository;
-use SeQura\WC\Repositories\Migrations\Migration_Install_433;
+use SeQura\WC\Repositories\Migrations\Migration_Install_440;
+use SeQura\WC\Services\Migration\Migration_Manager;
 use WP_UnitTestCase;
 
-class MigrationInstall433Test extends WP_UnitTestCase {
+class MigrationInstall440Test extends WP_UnitTestCase {
 
 	/**
 	 * Migration instance.
 	 *
-	 * @var Migration_Install_433
+	 * @var Migration_Install_440
 	 */
 	private $migration;
 
@@ -63,15 +65,37 @@ class MigrationInstall433Test extends WP_UnitTestCase {
 			}
 		);
 
-		$this->migration = new Migration_Install_433(
+		$this->migration = new Migration_Install_440(
 			$this->wpdb,
 			new Cache_Repository(),
 			$this->store_service
 		);
 	}
 
-	public function testGetVersion_returns433(): void {
-		$this->assertSame( '4.3.3', $this->migration->get_version() );
+	public function testGetVersion_returns440(): void {
+		$this->assertSame( '4.4.0', $this->migration->get_version() );
+	}
+
+	public function dataProvider_MigrationManager() {
+		return array(
+			array( '4.3.3', 1 ),
+			array( '4.3.4', 1 ),
+			array( '4.4.0', 0 ),
+		);
+	}
+
+	/**
+	 * @dataProvider dataProvider_MigrationManager
+	 */
+	public function testMigrationManager_runsMigrationOnlyForStoresBelow440( string $db_version, int $expected_runs ): void {
+		$configuration_manager = $this->createMock( ConfigurationManager::class );
+		$configuration_manager->method( 'getConfigValue' )->with( 'version', '' )->willReturn( $db_version );
+		$this->store_service->expects( $this->exactly( $expected_runs ) )
+			->method( 'getConnectedStores' )
+			->willReturn( array() );
+
+		$manager = new Migration_Manager( 'sequra/sequra.php', $configuration_manager, '4.4.0', array( $this->migration ) );
+		$manager->run_install_migrations();
 	}
 
 	public function testRun_withNoConnectedStores_doesNotValidateAnyConnection(): void {
