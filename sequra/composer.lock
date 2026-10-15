@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "445a50bd202177a901ada74547bad5df",
+    "content-hash": "bed2516e5ac7e58dd271acd239b3dba0",
     "packages": [
         {
             "name": "sequra/integration-core",
-            "version": "v5.6.0",
+            "version": "5.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sequra/integration-core.git",
-                "reference": "396c9fb7fab98b4ef95308d17f940ff2ab9f7007"
+                "reference": "8fe0d10c98f83a040c5a389f79ce4edc6a2f4a4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sequra/integration-core/zipball/396c9fb7fab98b4ef95308d17f940ff2ab9f7007",
-                "reference": "396c9fb7fab98b4ef95308d17f940ff2ab9f7007",
+                "url": "https://api.github.com/repos/sequra/integration-core/zipball/8fe0d10c98f83a040c5a389f79ce4edc6a2f4a4a",
+                "reference": "8fe0d10c98f83a040c5a389f79ce4edc6a2f4a4a",
                 "shasum": ""
             },
             "require": {
@@ -46,9 +46,9 @@
             "description": "Core SeQura integration library",
             "support": {
                 "issues": "https://github.com/sequra/integration-core/issues",
-                "source": "https://github.com/sequra/integration-core/tree/v5.6.0"
+                "source": "https://github.com/sequra/integration-core/tree/5.8.1"
             },
-            "time": "2026-07-16T08:08:02+00:00"
+            "time": "2026-10-15T23:12:54+00:00"
         }
     ],
     "packages-dev": [
@@ -3033,5 +3033,5 @@
     "platform-overrides": {
         "php": "7.3.0"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
