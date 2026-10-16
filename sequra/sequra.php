@@ -8,7 +8,7 @@
  * Plugin Name:       seQura
  * Plugin URI:        https://sequra.es/
  * Description:       seQura payment gateway for WooCommerce
- * Version:           4.3.4
+ * Version:           4.3.5
  * Author:            "seQura Tech" <wordpress@sequra.com>
  * Author URI:        https://sequra.com/
  * License:           GPL-3.0+
@@ -17,9 +17,9 @@
  * Domain Path:       /languages
  * Requires PHP:      7.3
  * Requires at least: 5.9
- * Tested up to:      7.1.0
+ * Tested up to:      7.1.3
  * WC requires at least: 4.7.0
- * WC tested up to: 11.0.1
+ * WC tested up to: 11.2.1
  * Requires Plugins:  woocommerce
  */
 
