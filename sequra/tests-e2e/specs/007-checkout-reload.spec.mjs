@@ -16,15 +16,27 @@ test.describe('Checkout reload', () => {
     ]);
     const shopper = dataProvider.shopper('approve');
 
+    // Once seQura confirms the order it sends the shopper to the return webhook, which
+    // redirects to order-received. Cancelling that navigation (ERR_ABORTED keeps the
+    // current page) pins the browser to the payment page, so the reload below always
+    // re-renders /order-pay/ instead of the confirmation page.
+    const returnWebhook = /[?&]wc-api=woocommerce_sequra_return(&|$)/;
+    await page.route(returnWebhook, route => route.abort('aborted'));
+
     await productPage.addToCart({ slug: 'sunglasses', quantity: 1 });
     await checkoutPage.goto();
     await checkoutPage.fillForm({ isShipping: true, ...shopper });
     await checkoutPage.placeOrder({ ...shopper, product: 'pp3' });
-    const orderNumber = page.url().match(/\/order-(?:pay|received)\/(\d+)\//)[1];
+    // Reload as soon as the form closes, before the confirmation lands: that is when the
+    // reload used to re-solicit the order and orphan the paid one.
     await expect(page.frameLocator('#sq-identification-pp3').locator('#mufasa-iframe')).toHaveCount(0, { timeout: 60000 });
+    await expect(page).toHaveURL(/\/order-pay\/\d+\//);
+    const orderNumber = page.url().match(/\/order-pay\/(\d+)\//)[1];
 
     await page.reload();
     await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/order-pay\/\d+\//);
+    await page.unroute(returnWebhook);
 
     await backOffice.gotoOrderListing();
     await checkoutPage.waitForOrderStatus({ orderNumber, status: 'Processing', waitFor: 180 });
