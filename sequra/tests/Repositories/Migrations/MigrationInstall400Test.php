@@ -279,10 +279,10 @@ class MigrationInstall400Test extends WP_UnitTestCase {
 		// Check PaymentMethod.
 		$payment_method_repo = RepositoryRegistry::getRepository( PaymentMethod::class );
 		$entities            = $payment_method_repo->select();
-		$this->assertCount( 6, $entities );
+		$this->assertCount( 7, $entities );
 		$actual_array   = array();
 		$expected_array = array();
-		$products       = array( 'i1', 'sp1', 'pp3' );
+		$products       = array( 'i1', 'sp1', 'pp3', 'fp1' );
 		foreach ( $entities as $entity ) {
 			$actual_entity = $entity->toArray();
 			

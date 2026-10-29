@@ -11,12 +11,14 @@ namespace SeQura\WC\Tests;
 use SeQura\WC\Controllers\Hooks\Asset\Interface_Assets_Controller;
 use SeQura\WC\Controllers\Hooks\I18n\Interface_I18n_Controller;
 use SeQura\WC\Controllers\Hooks\Order\Interface_Order_Controller;
+use SeQura\WC\Controllers\Hooks\Affiliate\Interface_Affiliate_Controller;
 use SeQura\WC\Controllers\Hooks\Payment\Interface_Payment_Controller;
 use SeQura\WC\Controllers\Hooks\Process\Interface_Async_Process_Controller;
 use SeQura\WC\Controllers\Hooks\Product\Interface_Product_Controller;
 use SeQura\WC\Controllers\Hooks\Settings\Interface_Settings_Controller;
 use SeQura\WC\Plugin;
 use SeQura\WC\Controllers\Rest\REST_Controller;
+use SeQura\WC\Services\Affiliate\Interface_Affiliate_Service;
 use SeQura\WC\Services\Constants\Interface_Constants;
 use SeQura\WC\Services\Migration\Interface_Migration_Manager;
 use WP_UnitTestCase;
@@ -43,6 +45,7 @@ class PluginTest extends WP_UnitTestCase {
 	private $product_controller;
 	private $async_process_controller;
 	private $order_controller;
+	private $affiliate_controller;
 	private $hook_add_order_indexes;
 
 	public function set_up() {
@@ -76,6 +79,7 @@ class PluginTest extends WP_UnitTestCase {
 		$this->product_controller                = $this->createMock( Interface_Product_Controller::class );
 		$this->async_process_controller          = $this->createMock( Interface_Async_Process_Controller::class );
 		$this->order_controller                  = $this->createMock( Interface_Order_Controller::class );
+		$this->affiliate_controller              = $this->createMock( Interface_Affiliate_Controller::class );
 	}
 
 	private function setup_plugin_instance() {
@@ -101,7 +105,8 @@ class PluginTest extends WP_UnitTestCase {
 			$this->rest_store_integration_controller,
 			$this->product_controller,
 			$this->async_process_controller,
-			$this->order_controller
+			$this->order_controller,
+			$this->affiliate_controller
 		);
 	}
 
@@ -142,6 +147,13 @@ class PluginTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'woocommerce_admin_order_data_after_order_details', array( $this->order_controller, 'show_link_to_sequra_back_office' ) ) );
 		$this->assertEquals( 10, has_action( 'sequra_cleanup_orders', array( $this->order_controller, 'cleanup_orders' ) ) );
 		$this->assertEquals( 10, has_action( $this->hook_add_order_indexes, array( $this->order_controller, 'migrate_orders_to_use_indexes' ) ) );
+
+		$this->assertEquals( 10, has_action( 'wp', array( $this->affiliate_controller, 'handle_affiliate_click' ) ) );
+		$this->assertEquals( 5, has_action( 'template_redirect', array( $this->affiliate_controller, 'clear_cookie_on_received' ) ) );
+		$this->assertEquals( 10, has_action( 'woocommerce_new_order', array( $this->affiliate_controller, 'handle_new_order' ) ) );
+		$this->assertEquals( 10, has_action( 'woocommerce_order_status_changed', array( $this->affiliate_controller, 'handle_order_status_changed' ) ) );
+		$this->assertEquals( 10, has_action( Interface_Affiliate_Service::DISPATCH_HOOK, array( $this->affiliate_controller, 'dispatch' ) ) );
+
 		$this->assertEquals( 10, has_action( 'before_woocommerce_init', array( $this->plugin, 'declare_woocommerce_compatibility' ) ) );
 		$this->assertEquals( 10, has_action( 'woocommerce_init', array( $this->order_controller, 'ensure_cart_info_exists' ) ) );
 	}
