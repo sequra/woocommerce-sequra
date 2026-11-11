@@ -98,8 +98,12 @@ class Order_Status_Settings_Service extends OrderStatusSettingsService {
 	public function map_status_from_shop_to_sequra( string $shop_status ): ?string {
 		$status_mappings = $this->getOrderStatusSettings();
 		if ( is_array( $status_mappings ) ) {
+			// The hook value ($order->get_status(), woocommerce_order_status_changed) is unprefixed,
+			// while the stored mappings keep the wc- prefix; normalize both sides so the comparison
+			// matches regardless of which form the caller passes.
+			$needle = $this->unprefixed_shop_status( $shop_status );
 			foreach ( $status_mappings as $status_mapping ) {
-				if ( $status_mapping->getShopStatus() === $shop_status ) {
+				if ( $this->unprefixed_shop_status( $status_mapping->getShopStatus() ) === $needle ) {
 					return $status_mapping->getSequraStatus();
 				}
 			}
