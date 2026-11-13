@@ -140,7 +140,7 @@ class Affiliate_Service implements Interface_Affiliate_Service {
 		/**
 		 * Filters the query-string parameter the affiliate click is read from.
 		 *
-		 * @since 4.3.3
+		 * @since 4.4.0
 		 * @param string $param Default attribution query parameter (`transaction_id`).
 		 */
 		return (string) \apply_filters( 'sequra_affiliate_transaction_param', self::QUERY_PARAM );
