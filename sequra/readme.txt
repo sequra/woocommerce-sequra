@@ -3,7 +3,7 @@ Contributors: sequradev
 Tags: woocommerce, payment gateway, BNPL, installments, buy now pay later
 Requires at least: 5.9
 Tested up to: 7.1.3
-Stable tag: 4.3.5
+Stable tag: 4.4.0
 Requires PHP: 7.3
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -100,6 +100,10 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 Contributors:
 == Changelog ==
+= 4.4.0	=
+* Added: Affiliate marketing tracking that reports conversions and cancellations for orders placed from an affiliate link. seQura configures it automatically and it is disabled by default.
+* Added: The sequra_affiliate_transaction_param filter, allowing customization of the query parameter that carries the affiliate transaction ID (transaction_id by default).
+
 = 4.3.5	=
 * Changed: Update integration-core library to version v5.8.1.
 * Changed: Tested up to WordPress 7.1.3 and WooCommerce 11.2.1.
