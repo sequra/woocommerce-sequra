@@ -102,6 +102,7 @@ Contributors:
 == Changelog ==
 = 4.4.0	=
 * Added: Affiliate marketing tracking that reports conversions and cancellations for orders placed from an affiliate link. seQura configures it automatically and it is disabled by default.
+* Added: Stores that are already connected receive their affiliate marketing configuration from seQura during the update, without reconnecting.
 * Added: The sequra_affiliate_transaction_param filter, allowing customization of the query parameter that carries the affiliate transaction ID (transaction_id by default).
 
 = 4.3.5	=
